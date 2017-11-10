@@ -1506,7 +1506,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                         movedParentArray.append(key)
                                                                                         // look for configs missing their parent
                                                                                     } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.index(of: key) == nil) {
-                                                                                        self.writeToHistory(stringOfText: "Orphaned config: \(self.configObjectsDict[key]?["parent"] ?? "name not found")\n")
+                                                                                        self.writeToHistory(stringOfText: "Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
+                                                                                        self.writeToHistory(stringOfText: "Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
                                                                                         orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
                                                                                         movedParentArray.append(key)
                                                                                         self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
