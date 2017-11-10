@@ -6,10 +6,14 @@
 	<integer>20</integer>
 	<key>wipe_data</key>
 	<false/>
+	<key>source_server_array</key>
+	<array/>
 	<key>source_jp_server</key>
 	<string></string>
 	<key>source_user</key>
 	<string></string>
+	<key>dest_server_array</key>
+	<array/>
 	<key>dest_jp_server</key>
 	<string></string>
 	<key>dest_user</key>

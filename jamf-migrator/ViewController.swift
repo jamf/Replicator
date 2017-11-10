@@ -38,6 +38,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var allNone_button: NSButton!
     @IBOutlet weak var advcompsearch_button: NSButton!
     @IBOutlet weak var computers_button: NSButton!
+    @IBOutlet weak var configurations_button: NSButton!
     @IBOutlet weak var directory_bindings_button: NSButton!
     @IBOutlet weak var dock_items_button: NSButton!
     @IBOutlet weak var fileshares_button: NSButton!
@@ -76,6 +77,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var jamfUserAccounts_button: NSButton!
     @IBOutlet weak var jamfGroupAccounts_button: NSButton!
     
+    @IBOutlet weak var sourceServerList_button: NSPopUpButton!
+    @IBOutlet weak var destServerList_button: NSPopUpButton!
+    
     @IBOutlet weak var go_button: NSButton!
     @IBOutlet weak var stop_button: NSButton!
     
@@ -100,6 +104,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // macOS button labels
     @IBOutlet weak var advcompsearch_label_field: NSTextField!
     @IBOutlet weak var computers_label_field: NSTextField!
+    @IBOutlet weak var configurations_label_field: NSTextField!
     @IBOutlet weak var directory_bindings_field: NSTextField!
     @IBOutlet weak var dock_items_field: NSTextField!
     @IBOutlet weak var file_shares_label_field: NSTextField!
@@ -148,7 +153,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var dest_user_field: NSTextField!
     @IBOutlet weak var dest_pwd_field: NSSecureTextField!
     
-    // selective migration - start
+    // GET and POST fields
+    @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
+    @IBOutlet weak var objects_completed_field: NSTextField!
+    @IBOutlet weak var objects_found_field: NSTextField!
+    
+    @IBOutlet weak var get_name_field: NSTextField!
+    @IBOutlet weak var get_completed_field: NSTextField!
+    @IBOutlet weak var get_found_field: NSTextField!
+    
+    // selective migration items - start
     // source / destination tables
     @IBOutlet weak var srcSrvTableView: NSTableView!
     
@@ -161,7 +175,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // destination TextFieldCells
     @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
     @IBOutlet weak var dest_TableColumn: NSTableColumn!
-    // selective migration - end
+    // selective migration items - end
     
     var isDir: ObjCBool = false
     
@@ -176,6 +190,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var historyFile: String = ""
     let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
     var historyFileW: FileHandle?  = FileHandle(forUpdatingAtPath: "")
+    
+    var sourceServerArray = [String]()
+    var destServerArray = [String]()
     
     // credentials
     var sourceCreds = ""
@@ -196,7 +213,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var sourceURL = ""
     var destURL = ""
     
-    var endpointDefDict = ["computergroups":"computer_groups","directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches"]
+    var endpointDefDict = ["computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches"]
     var xmlName = ""
     var destEPs = [String:Int]()
     var currentEPs = [String:Int]()
@@ -209,17 +226,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var redText:NSColor = NSColor.red
     var changeColor:Bool = true
     
-    // GET and POST fields
-    @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
-    @IBOutlet weak var objects_completed_field: NSTextField!
-    @IBOutlet weak var objects_found_field: NSTextField!
-    
-    @IBOutlet weak var get_name_field: NSTextField!
-    @IBOutlet weak var get_completed_field: NSTextField!
-    @IBOutlet weak var get_found_field: NSTextField!
-    
     // This order must match the drop down for selective migration
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceconfigurationprofiles", "mobiledevicegroups",  "mobiledeviceextensionattributes", "mobiledevices"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "userextensionattributes", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "users", "usergroups"]
     var AllEndpointsArray = [String]()
@@ -248,6 +256,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // define list of items to migrate
     var objectsToMigrate: [String] = []
     
+    // dictionaries to map id of object on source server to id of same object on destination server
+//    var computerconfigs_id_map = [String:Dictionary<String,Int>]()
+    var bindings_id_map = [String:Dictionary<String,Int>]()
+    var packages_id_map = [String:Dictionary<String,Int>]()
+    var printers_id_map = [String:Dictionary<String,Int>]()
+    var scripts_id_map = [String:Dictionary<String,Int>]()
+    var configObjectsDict = [String:Dictionary<String,String>]()
+    var orphanIds = [String]()
+    var idDict = [String:Dictionary<String,Int>]()
+    
     var wipe_data: Bool = false
     
     let fm = FileManager()
@@ -258,6 +276,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var theModeQ = DispatchQueue(label: "com.jamf.addRemove")
     var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
     var destEPQ = DispatchQueue(label: "com.jamf.destEPs")
+    var idMapQ = DispatchQueue(label: "com.jamf.idMap")
     
     var migrateOrWipe: String = ""
     var httpStatusCode: Int = 0
@@ -279,6 +298,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.allNone_button.state = (
                 self.advcompsearch_button.state == 1
                     && self.computers_button.state == 1
+                    && self.configurations_button.state == 1
                     && self.directory_bindings_button.state == 1
                     && self.dock_items_button.state == 1
                     && self.fileshares_button.state == 1
@@ -323,6 +343,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if deviceType() == "macOS" {
             self.advcompsearch_button.state = self.allNone_button.state
             self.computers_button.state = self.allNone_button.state
+            self.configurations_button.state = self.allNone_button.state
             self.directory_bindings_button.state = self.allNone_button.state
             self.dock_items_button.state = self.allNone_button.state
             self.fileshares_button.state = self.allNone_button.state
@@ -515,12 +536,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     NSLog("Source server authentication failure.")
                     return
                 } else {
+                    self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                     self.authCheck(f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
                         (result: Bool) in
                         if !result {
                             NSLog("Destination server authentication failure.")
                             return
                         } else {
+                            self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                             // verify source server URL - start
                             let sourceURL = URL(string: self.source_jp_server_field.stringValue)
                             let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
@@ -630,7 +653,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.alert_dialog(header: "Error", message: "An unknown error (\(self.httpStatusCode)) occured trying to query the server:\n\(f_sourceURL)")
                             }
                             //                        401 - wrong username and/or password
-                            //                        409 - unable to create object; already exists or data missing or xml error
+                            //                        409 - unable to create object; data missing or xml error
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
                             completion(validCredentials)
@@ -721,6 +744,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 if printers_button.state == 1 {
                     objectsToMigrate += ["printers"]
+                }
+                
+                if configurations_button.state == 1 {
+                    objectsToMigrate += ["computerconfigurations"]
                 }
                 
                 if policies_button.state == 1 {
@@ -852,7 +879,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if self.debug { self.writeToHistory(stringOfText: "[- debug -] getEndpoints result: \(result)\n") }
                 }
             } else {
-                // selective migration
+                // **************************************** selective migration - start ****************************************
                 var selectedEndpoint = ""
                 switch self.objectsToMigrate[0] {
                 case "jamfusers":
@@ -908,6 +935,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }   // for j in  - end
                 }
             }   //for i in - else - end
+            // **************************************** selective migration - end ****************************************
         }   // loop through process of migrating or removing - end
         
     }   // func startMigrating - end
@@ -922,6 +950,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // macOS items
         case "advancedcomputersearches":
             endpointParent = "advanced_computer_searches"
+        case "computerconfigurations":
+            endpointParent = "computer_configurations"
         case "computerextensionattributes":
             endpointParent = "computer_extension_attributes"
         case "directorybindings":
@@ -1411,6 +1441,177 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }
                                     }// if endpointCount - end
                                 }   // end if let buildings, departments...
+                              
+                            case "computerconfigurations":
+                                if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
+                                    let endpointCount: Int = endpointInfo.count
+                                    if self.debug { self.writeToHistory(stringOfText: "[- debug -] Initial count for \(endpoint) found: \(endpointCount)\n") }
+                                    
+                                    if self.debug { self.writeToHistory(stringOfText: "[- debug -] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+                                    
+                                    if endpointCount > 0 {
+                                        if self.debug { self.writeToHistory(stringOfText: "[- debug -] Create Id Mappings - start.\n") }
+                                        
+                                        self.nameIdDict(server: self.source_jp_server, endPoint: "computerconfigurations", id: "sourceId") {
+                                            (result: [String:Dictionary<String,Int>]) in
+                                            self.idDict.removeAll()
+                                            
+                                            self.nameIdDict(server: self.source_jp_server, endPoint: "packages", id: "sourceId") {
+                                                (result: [String:Dictionary<String,Int>]) in
+                                            
+                                                self.nameIdDict(server: self.dest_jp_server, endPoint: "packages", id: "destId") {
+                                                    (result: [String:Dictionary<String,Int>]) in
+                                                    self.packages_id_map = result
+                                                    if self.debug { self.writeToHistory(stringOfText: "[- debug -] packages id map:\n\(self.packages_id_map)\n") }
+                                                    self.idDict.removeAll()
+                                                    
+                                                    self.nameIdDict(server: self.source_jp_server, endPoint: "scripts", id: "sourceId") {
+                                                        (result: [String:Dictionary<String,Int>]) in
+                                                        
+                                                        self.nameIdDict(server: self.dest_jp_server, endPoint: "scripts", id: "destId") {
+                                                            (result: [String:Dictionary<String,Int>]) in
+                                                            self.scripts_id_map = result
+                                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] scripts id map:\n\(self.scripts_id_map)\n") }
+                                                            self.idDict.removeAll()
+                                                            
+                                                            self.nameIdDict(server: self.source_jp_server, endPoint: "printers", id: "sourceId") {
+                                                                (result: [String:Dictionary<String,Int>]) in
+                                                                
+                                                                self.nameIdDict(server: self.dest_jp_server, endPoint: "printers", id: "destId") {
+                                                                    (result: [String:Dictionary<String,Int>]) in
+                                                                    self.printers_id_map = result
+                                                                    if self.debug { self.writeToHistory(stringOfText: "[- debug -] printers id map:\n\(self.printers_id_map)\n")}
+                                                                    self.idDict.removeAll()
+                                                                    
+                                                                    self.nameIdDict(server: self.source_jp_server, endPoint: "directorybindings", id: "sourceId") {
+                                                                        (result: [String:Dictionary<String,Int>]) in
+                                                                        
+                                                                        self.nameIdDict(server: self.dest_jp_server, endPoint: "directorybindings", id: "destId") {
+                                                                            (result: [String:Dictionary<String,Int>]) in
+                                                                            self.bindings_id_map = result
+                                                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] bindings id map:\n\(self.bindings_id_map)\n")}
+                                                                            self.idDict.removeAll()
+
+                                                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] Create Id Mappings - end.\n") }
+                                                                            
+                                                                            print("config:\n \(self.configObjectsDict)\t count: \(self.configObjectsDict.count)\n")
+                                                                            var orderedConfArray = [String]()
+                                                                            var movedParentArray = [String]()
+                                                                            self.orphanIds.removeAll()
+                                                                            //                                        var remainingConfigsArray = [String]()
+                                                                            
+                                                                            while self.configObjectsDict.count != movedParentArray.count {
+                                                                                for (key, _) in self.configObjectsDict {
+                                                                                    if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.index(of: key) == nil)) || ((movedParentArray.index(of: key) == nil) && (movedParentArray.index(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
+                                                                                        orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
+                                                                                        movedParentArray.append(key)
+                                                                                        // look for configs missing their parent
+                                                                                    } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.index(of: key) == nil) {
+                                                                                        self.writeToHistory(stringOfText: "Orphaned config: \(self.configObjectsDict[key]?["parent"] ?? "name not found")\n")
+                                                                                        orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
+                                                                                        movedParentArray.append(key)
+                                                                                        self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
+                                                                                    }
+                                                                                    print("moved parent array:\n\(movedParentArray)")
+                                                                                }
+                                                                            }
+                                                                            if self.wipe_data {
+                                                                                orderedConfArray.reverse()
+                                                                            }
+//                                                                            print("parent array: \(orderedConfArray)")
+                                                                            
+                                                                            self.existingEndpoints(destEndpoint: "\(endpoint)")  {
+                                                                                (result: String) in
+                                                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] Returned from existing \(endpoint): \(result)\n") }
+                                                                                
+                                                                                var tmp_availableObjsToMigDict = [Int:String]()
+                                                                                
+                                                                                for i in (0..<endpointCount) {
+//                                                                                    if i == 0 { self.availableObjsToMigDict.removeAll() }
+                                                                                    
+                                                                                    let record = endpointInfo[i] as! [String : AnyObject]
+                                                                                    
+                                                                                    tmp_availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                                                    
+                                                                                }   // for i in (0..<endpointCount) end
+                                                                                
+                                                                                self.availableObjsToMigDict.removeAll()
+                                                                                for orderedId in orderedConfArray {
+                                                                                    
+                                                                                    self.availableObjsToMigDict[Int(orderedId)!] = tmp_availableObjsToMigDict[Int(orderedId)!]
+                                                                                    
+                                                                                    if self.debug { self.writeToHistory(stringOfText: "[- debug -] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                                                }   // for i in (0..<endpointCount) end
+                                                                                
+                                                                                
+                                                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+                                                                                
+                                                                                var counter = 1
+                                                                                if self.goSender == "goButton" {
+//                                                                                  for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                                    for orderedId in orderedConfArray {
+                                                                                        let l_xmlID = Int(orderedId)
+                                                                                        let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
+                                                                                        if !self.wipe_data  {
+                                                                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
+                                                                                            if self.currentEPs[l_xmlName!] != nil {
+                                                                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] \(String(describing: l_xmlName)) already exists\n") }
+                                                                                                //self.currentEndpointID = self.currentEPs[l_xmlName]!
+                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!)
+                                                                                            } else {
+                                                                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] \(String(describing: l_xmlName)) - create\n") }
+                                                                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
+                                                                                            }
+                                                                                        } else {
+                                                                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
+                                                                                            self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID!, endpointName: l_xmlName!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
+                                                                                        }   // if !self.wipe_data else - end
+                                                                                        counter+=1
+                                                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                                } else {
+                                                                                    // populate source server under the selective tab
+                                                                                    // for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                                    for orderedId in orderedConfArray {
+                                                                                        let l_xmlID = Int(orderedId)
+                                                                                        let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
+                                                                                        DispatchQueue.main.async {
+                                                                                            //print("adding \(l_xmlName) to array")
+                                                                                            self.availableIDsToMigDict[l_xmlName!] = l_xmlID
+                                                                                            self.sourceDataArray.append(l_xmlName!)
+                                                                                            
+                                                                                            self.srcSrvTableView.reloadData()
+                                                                                            
+                                                                                        }   // DispatchQueue.main.async - end
+                                                                                        counter+=1
+                                                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                                    DispatchQueue.main.async {
+                                                                                        //self.sourceDataArray.sort()
+                                                                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
+                                                                                        
+                                                                                        self.srcSrvTableView.reloadData()
+                                                                                    }
+                                                                                }   // if self.goSender else - end
+                                                                            }   // self.existingEndpoints - end
+                                            
+                                                                        }   // self.nameIdDict(server: self.dest_jp_server - bindings end
+                                                                    }   // self.nameIdDict(server: self.source_jp_server - bindings end
+                                                                }   // self.nameIdDict(server: self.dest_jp_server - printers end
+                                                            }   // self.nameIdDict(server: self.source_jp_server - printers end
+                                                        }   // self.nameIdDict(server: self.dest_jp_server - scripts end
+                                                    }   // self.nameIdDict(server: self.source_jp_server - scripts end
+                                                }   // self.nameIdDict(server: self.dest_jp_server - packages end
+                                            }   // self.nameIdDict(server: self.source_jp_server - packages end
+                                        }   // self.nameIdDict(server: self.source_jp_server - computerconfigurations end
+                            
+                                    } else {
+                                        if endpoint == self.objectsToMigrate.last {
+                                            self.rmDELETE()
+                                            self.goButtonEnabled(button_status: true)
+                                            completion("Got endpoint - \(endpoint)")
+                                        }
+                                    }   // if endpointCount > 0 - end
+                            }   // end if computerconfigurations
                                 
                             default:
                                 break
@@ -1479,13 +1680,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //                    PostXML = regexID.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
                         
                         //PostXML = PostXML.replacingOccurrences(of: "(?:\\r|\\n)+", with: "", options: .regularExpression)
-                        for xmlTag in ["id"] {
-                            PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                        if endpoint != "computerconfigurations" {
+                            for xmlTag in ["id"] {
+                                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                            }
+                        } else {
+                            let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
+                            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
                         }
-                        //                   print("\n\nRemoved id tag: \(XMLString)")
                         
                         switch endpoint {
-                        case "buildings", "departments", "sites", "categories", "directorybindings", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches":
+                        case "buildings", "departments", "sites", "categories", "directorybindings", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches":
                             if self.debug { self.writeToHistory(stringOfText: "[- debug -] processing \(endpoint) - verbose\n") }
                             //print("\nXML: \(PostXML)")
                             
@@ -1524,6 +1729,46 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                             case "smartusergroups", "staticusergroups":
                                 for xmlTag in ["full_name", "phone_number", "email_address"] {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                                }
+                                
+                            case "computerconfigurations":
+                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] cleaning up computerconfigurations - verbose\n") }
+                                // remove password from XML, since it doesn't work on the new server
+                                let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=(.*?)</password_sha256>", options:.caseInsensitive)
+                                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+                                
+                                for (item,itemIds) in self.packages_id_map {
+                                    let sourceId = itemIds["sourceId"]
+                                    let destId = itemIds["destId"]
+                                    let regexComp = try! NSRegularExpression(pattern: "<package><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
+                                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<package><id>\(destId ?? 0)</id><name>\(item)</name>")
+                                }
+                                for (item,itemIds) in self.scripts_id_map {
+                                    let sourceId = itemIds["sourceId"]
+                                    let destId = itemIds["destId"]
+                                    let regexComp = try! NSRegularExpression(pattern: "<script><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
+                                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<script><id>\(destId ?? 0)</id><name>\(item)</name>")
+                                }
+                                for (item,itemIds) in self.printers_id_map {
+                                    let sourceId = itemIds["sourceId"]
+                                    let destId = itemIds["destId"]
+                                    let regexComp = try! NSRegularExpression(pattern: "<printer><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
+                                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<printer><id>\(destId ?? 0)</id><name>\(item)</name>")
+                                }
+                                for (item,itemIds) in self.bindings_id_map {
+                                    let sourceId = itemIds["sourceId"]
+                                    let destId = itemIds["destId"]
+                                    let regexComp = try! NSRegularExpression(pattern: "<directory_bindings><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
+                                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<directory_bindings><id>\(destId ?? 0)</id><name>\(item)</name>")
+                                }
+                                if self.orphanIds.index(of: "\(endpointID)") != nil {
+                                    let regexComp = try! NSRegularExpression(pattern: "<type>Smart<type>", options:.caseInsensitive)
+                                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<type>Standard<type>")
+                                    let regexComp2 = try! NSRegularExpression(pattern: "<parent>(.*?)</parent>", options:.caseInsensitive)
+                                    PostXML = regexComp2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+                                }
+                                for xmlTag in ["script_contents", "script_contents_encoded", "ppd_contents"] {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                                 }
                                 
@@ -1764,7 +2009,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var DestURL = ""
         let destinationEpId = destEpId
         //if self.debug { self.writeToHistory(stringOfText: "[- debug -] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
-        theOpQ.maxConcurrentOperationCount = 1
+        theCreateQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
@@ -1889,14 +2134,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 if self.debug { self.writeToHistory(stringOfText: "[- debug -] POST or PUT Operation: \(request.httpMethod)\n") }
                 
-                if self.debug { self.writeToHistory(stringOfText: "[- debug -] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]))!") }
+                if self.debug { self.writeToHistory(stringOfText: "[- debug -] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]))!\n") }
                 semaphore.signal()
                 if error != nil {
                 }
             })
             task.resume()
             semaphore.wait()
-        }   // theOpQ.addOperation - end
+        }   // theCreateQ.addOperation - end
     }
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
@@ -1914,10 +2159,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             localEndPointType = endpointType
         }
-        //        var localEndPointType = endpointType
-        //        if endpointType == "smartcomputergroups" || endpointType == "staticcomputergroups" {
-        //            localEndPointType = "computergroups"
-        //        }
+
         if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
             
             theOpQ.addOperation {
@@ -2007,7 +2249,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         semaphore.signal()
                     }
-                })  // let task = session.dataTask -end
+                })  // let task = session.dataTask - end
                 task.resume()
                 semaphore.wait()
             }   // theOpQ.addOperation - end
@@ -2031,6 +2273,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "computer_extension_attributes"
         case "computergroups":
             endpointParent = "computer_groups"
+        case "computerconfigurations":
+            endpointParent = "computer_configurations"
         case "distributionpoints":
             endpointParent = "distribution_points"
         case "directorybindings":
@@ -2091,7 +2335,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
                 if let httpResponse = response as? HTTPURLResponse {
-                    //print("httpResponse: \(String(describing: response))")
+                    print("httpResponse: \(String(describing: response))")
                     do {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                         if let destEndpointJSON = json as? [String: Any] {
@@ -2130,7 +2374,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
                                     print("users: \(String(describing: usersGroups["users"]))")
                                     print("groups: \(String(describing: usersGroups["groups"]))")
-                                    destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as? Any):(destEndpointDict = usersGroups["groups"] as? Any)
+                                    destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                 } else {
                                     destEndpointDict = destEndpointJSON["\(endpointParent)"]
                                 }
@@ -2152,7 +2396,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if self.debug { self.writeToHistory(stringOfText: "[- debug -] adding \(destXmlName) (id: \(destXmlID))  to currentEP array.\n") }
                                             self.currentEPs[destXmlName] = destXmlID
                                         }   // for i in (0..<destEndpointCount) - end
-                                    }   // if destEndpointCount > 0 - end
+                                    } else {   // if destEndpointCount > 0 - end
+                                        self.currentEPs.removeAll()
+                                    }
                                 }   // if let destEndpointInfo - end
                             }   // switch - end
                         } else {
@@ -2181,8 +2427,151 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("GET")
             task.resume()
             //semaphore.wait()
+        }   // destEPQ - end
+    }
+    
+    
+    func nameIdDict(server: String, endPoint: String, id: String, completion: @escaping (_ result: [String:Dictionary<String,Int>]) -> Void) {
+        URLCache.shared.removeAllCachedResponses()
+        var serverUrl = "\(server)/JSSResource/\(endPoint)"
+        serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        
+        var serverCreds = ""
+        let serverConf = URLSessionConfiguration.default
+        if id == "sourceId" {
+            serverCreds = self.sourceBase64Creds
+        } else {
+            serverCreds = self.destBase64Creds
+        }
+        
+        let semaphore = DispatchSemaphore(value: 1)
+        idMapQ.async {
+        
+            let serverEncodedURL = NSURL(string: serverUrl)
+            let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
+            
+            serverRequest.httpMethod = "GET"
+            serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(serverCreds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
+            let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
+                (data, response, error) -> Void in
+                if let httpResponse = response as? HTTPURLResponse {
+                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                    if let endpointJSON = json as? [String: Any] {
+                        
+                        if let endpointInfo = endpointJSON[self.endpointDefDict[endPoint]!] as? [Any] {
+                            let endpointCount: Int = endpointInfo.count
+                            
+                            if endpointCount > 0 {
+                                for i in (0..<endpointCount) {
+                                    let record = endpointInfo[i] as! [String : AnyObject]
+                                    let recordId = record["id"] as? Int
+                                    if endPoint == "computerconfigurations" {
+                                        self.configInfo(server: "\(server)", endPoint: "computerconfigurations", recordId: recordId!) {
+                                            (result: Dictionary<String,Dictionary<String,String>>) in
+                                            //                                            print("ordered config IDs: \(result)")
+                                        }
+                                        
+                                    } else {
+                                        let recordName = record["name"] as! String
+                                        if self.idDict[recordName]?.count == nil {
+                                            self.idDict[recordName] = ["sourceId":0, "destId":0]
+                                        }
+                                        self.idDict[recordName]?[id] = recordId
+                                    }
+
+                                }   // for i in (0..<endpointCount) end
+                            }   //if endpointCount > 0 - end
+                        }   // if let endpointInfo = endpointJSON - end
+                    }   // if let serverEndpointJSON - end
+                    
+                    if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
+                        completion(self.idDict)
+                    } else {
+                        // something went wrong
+                        print("status code: \(httpResponse.statusCode)")
+                        completion([:])
+                        
+                    }   // if httpResponse/else - end
+                }   // if let httpResponse - end
+                semaphore.signal()
+                if error != nil {
+                }
+            })  // let task = destSession - end
+            task.resume()
+            //semaphore.wait()
+        }   // idMapQ - end
+    }   // func nameIdDict - end
+    
+    func configInfo(server: String, endPoint: String, recordId: Int, completion: @escaping (_ result: Dictionary<String,Dictionary<String,String>>) -> Void) {
+        URLCache.shared.removeAllCachedResponses()
+        
+        var serverUrl = "\(server)/JSSResource/\(endPoint)/id/\(recordId)"
+        serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        idMapQ.async {
+            
+            let serverEncodedURL = NSURL(string: serverUrl)
+            let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
+            
+            serverRequest.httpMethod = "GET"
+            let serverConf = URLSessionConfiguration.default
+            serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
+            let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
+                (data, response, error) -> Void in
+                if let httpResponse = response as? HTTPURLResponse {
+                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                    if let endpointJSON = json as? [String: Any] {
+                        
+                        let endpointInfo = endpointJSON["computer_configuration"] as! [String:Any]
+                        let record = endpointInfo["general"] as! [String:Any]
+                        let configName = record["name"] as? String
+                        self.configObjectsDict[configName!] = [:]
+                        self.configObjectsDict[configName!]?["id"] = "\(recordId)"
+                        self.configObjectsDict[configName!]?["type"] = record["type"] as? String
+                        if self.configObjectsDict[configName!]?["type"] == "Smart" {
+                            self.configObjectsDict[configName!]?["parent"] = record["parent"] as? String
+                        } else {
+                            self.configObjectsDict[configName!]?["parent"] = ""
+                        }
+                    }   // if let endpointInfo = endpointJSON - end
+                    
+                    if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
+                        //                        print(httpResponse.statusCode)
+                        //                            print("\nconfig \(recordId): \(self.configObjectsDict)\n")
+                        completion(self.configObjectsDict)
+                    } else {
+                        // something went wrong
+                        print("status code: \(httpResponse.statusCode)")
+                        completion([:])
+                        
+                    }   // if httpResponse/else - end
+                }   // if let httpResponse - end
+                semaphore.signal()
+                if error != nil {
+                }
+            })  // let task = destSession - end
+            //print("GET")
+            task.resume()
+            //semaphore.wait()
         }   // theOpQ - end
     }
+    
+//    func sortedEndpointArray(allEndpoints: [Any], arrayCount: Int, completion: @escaping (_ result: [Int:String]) -> Void) {
+//        for i in (0..<arrayCount) {
+//            if i == 0 { self.availableObjsToMigDict.removeAll() }
+//            
+//            let record = allEndpoints[i] as! [String : AnyObject]
+//            
+//            self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+//            
+////            if self.debug { self.writeToHistory(stringOfText: "[- debug -] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+//        }   // for i in (0..<endpointCount) end
+//    
+//    }
     
     //==================================== Utility functions ====================================
     
@@ -2246,7 +2635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             })  // let task = session - end
             task.resume()
         }   // authQ - end
-    }   // func authCheck - end
+    }   // func checkURL2 - end
     
     func clearProcessingFields() {
         DispatchQueue.main.async {
@@ -2401,6 +2790,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             advcompsearch_label_field.textColor = theColor
         case "computers":
             computers_label_field.textColor = theColor
+        case "computerconfigurations":
+            configurations_label_field.textColor = theColor
         case "directorybindings":
             directory_bindings_field.textColor = theColor
         case "distributionpoints":
@@ -2483,8 +2874,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    
-    
     func rmXmlData(theXML: String, theTag: String) -> String {
         
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>", options:.caseInsensitive)
@@ -2505,13 +2894,57 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func SaveSettings() {
+    func saveSettings() {
         plistData["source_jp_server"] = source_jp_server_field.stringValue as AnyObject?
         plistData["source_user"] = source_user_field.stringValue as AnyObject?
         plistData["dest_jp_server"] = dest_jp_server_field.stringValue as AnyObject?
         plistData["dest_user"] = dest_user_field.stringValue as AnyObject?
         plistData["maxHistory"] = maxHistory as AnyObject?
         (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
+    }
+    
+    func updateServerArray(url: String, serverList: String, theArray: [String]) {
+        print("update server list: \(serverList)")
+        var local_serverArray = theArray
+        let positionInList = local_serverArray.index(of: url)
+        if positionInList == nil {
+                local_serverArray.insert(url, at: 0)
+        } else if positionInList! > 0 {
+            local_serverArray.remove(at: positionInList!)
+            local_serverArray.insert(url, at: 0)
+        }
+        while local_serverArray.count > 10 {
+            local_serverArray.removeLast()
+        }
+        plistData[serverList] = local_serverArray as AnyObject?
+        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
+        switch serverList {
+        case "source_server_array":
+            self.sourceServerList_button.removeAllItems()
+            for theServer in local_serverArray {
+                self.sourceServerList_button.addItems(withTitles: [theServer])
+            }
+            self.sourceServerArray = local_serverArray
+        case "dest_server_array":
+            self.destServerList_button.removeAllItems()
+            for theServer in local_serverArray {
+                self.destServerList_button.addItems(withTitles: [theServer])
+            }
+            self.destServerArray = local_serverArray
+        default: break
+        }
+        
+    }
+    
+    @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
+//        print("sender: \(sender.tag)")
+        switch sender.tag {
+        case 0:
+            self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
+        case 1:
+            self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
+        default: break
+        }
     }
     
     func writeToHistory(stringOfText: String) {
@@ -2605,6 +3038,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if plistData["maxHistory"] != nil {
             maxHistory = plistData["maxHistory"] as! Int
         }
+        if plistData["source_server_array"] != nil {
+            sourceServerArray = plistData["source_server_array"] as! [String]
+            for theServer in sourceServerArray {
+                self.sourceServerList_button.addItems(withTitles: [theServer])
+            }
+        }
+        if plistData["dest_server_array"] != nil {
+            destServerArray = plistData["dest_server_array"] as! [String]
+            for theServer in destServerArray {
+                self.destServerList_button.addItems(withTitles: [theServer])
+            }
+        }
         // read environment settings - end
         
         source_jp_server_field.becomeFirstResponder()
@@ -2646,6 +3091,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         allNone_button.state = 1
         advcompsearch_button.state = 1
         computers_button.state = 1
+        configurations_button.state = 1
         directory_bindings_button.state = 1
         dock_items_button.state = 1
         netboot_button.state = 1
@@ -2757,7 +3203,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-        SaveSettings()
+        saveSettings()
         historyCleanup()
     }
     
