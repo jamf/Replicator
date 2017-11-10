@@ -31,6 +31,10 @@ A more detailed review of migration successes/failures can be found in the log, 
 
 
 ## History
+**jamf-migrator v2.2.5**<p>
+* Added migration of computer configuratons.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be migrated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
+* Added ability to select frequently used source/destination servers from the user interface.  Up to 10 server are selectable by using the up/down arrows to the right of the URL text box.
+
 **jamf-migrator v2.1.5**<p>
 * Added migration of dock items.
 * Added stop button to stop the migration in progess.
