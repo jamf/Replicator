@@ -1494,7 +1494,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                                                             if self.debug { self.writeToHistory(stringOfText: "[- debug -] Create Id Mappings - end.\n") }
                                                                             
-                                                                            print("config:\n \(self.configObjectsDict)\t count: \(self.configObjectsDict.count)\n")
                                                                             var orderedConfArray = [String]()
                                                                             var movedParentArray = [String]()
                                                                             self.orphanIds.removeAll()
@@ -1512,7 +1511,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                         movedParentArray.append(key)
                                                                                         self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
                                                                                     }
-                                                                                    print("moved parent array:\n\(movedParentArray)")
                                                                                 }
                                                                             }
                                                                             if self.wipe_data {
@@ -2904,7 +2902,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
-        print("update server list: \(serverList)")
         var local_serverArray = theArray
         let positionInList = local_serverArray.index(of: url)
         if positionInList == nil {
