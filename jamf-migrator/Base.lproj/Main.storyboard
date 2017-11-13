@@ -723,11 +723,11 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <popUpButton fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="Kb9-jI-pZI">
-                                <rect key="frame" x="537" y="369" width="350" height="26"/>
+                                <rect key="frame" x="537" y="370" width="350" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="bevel" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" imageScaling="proportionallyDown" inset="2" id="6Qj-M4-y7I">
-                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" imageScaling="proportionallyDown" inset="2" id="6Qj-M4-y7I">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
                                     <menu key="menu" id="QXS-l4-TID"/>
                                 </popUpButtonCell>
                                 <connections>
@@ -735,10 +735,10 @@
                                 </connections>
                             </popUpButton>
                             <popUpButton fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XlU-vN-bbJ">
-                                <rect key="frame" x="99" y="369" width="352" height="26"/>
+                                <rect key="frame" x="99" y="370" width="350" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="bevel" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" imageScaling="proportionallyDown" inset="2" id="T4b-a1-PDH">
-                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" imageScaling="proportionallyDown" inset="2" id="T4b-a1-PDH">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="o2W-CR-ENk"/>
                                 </popUpButtonCell>
@@ -1038,11 +1038,11 @@
                                 <tabViewItems>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
                                         <view key="view" ambiguous="YES" id="fn5-oe-BJC">
-                                            <rect key="frame" x="10" y="7" width="250" height="0.0"/>
+                                            <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tabView fixedFrame="YES" drawsBackground="NO" allowsTruncatedLabels="NO" type="noTabsNoBorder" translatesAutoresizingMaskIntoConstraints="NO" id="xIe-Jb-eyh">
-                                                    <rect key="frame" x="-4" y="-191" width="702" height="191"/>
+                                                    <rect key="frame" x="-4" y="-5" width="702" height="191"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                     <tabViewItems>
