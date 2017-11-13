@@ -18,6 +18,7 @@
 		B53AF7F41F5CCF1000A2739C /* 4.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7F11F5CCF1000A2739C /* 4.png */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
+		B5A458251FB93EF50068F390 /* dependencies.html in Resources */ = {isa = PBXBuildFile; fileRef = B5A458241FB93EF50068F390 /* dependencies.html */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
 		B5C042481EB11CF400C6E872 /* 0.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423C1EB11CF400C6E872 /* 0.png */; };
 		B5C042491EB11CF400C6E872 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423D1EB11CF400C6E872 /* 1.png */; };
@@ -46,6 +47,7 @@
 		B53AF7F11F5CCF1000A2739C /* 4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 4.png; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
+		B5A458241FB93EF50068F390 /* dependencies.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = dependencies.html; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		B5C0423C1EB11CF400C6E872 /* 0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 0.png; sourceTree = "<group>"; };
 		B5C0423D1EB11CF400C6E872 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 			children = (
 				B5E179F01F1FDAFA00A20AAA /* images */,
 				B5E179F11F1FDAFA00A20AAA /* index.html */,
+				B5A458241FB93EF50068F390 /* dependencies.html */,
 			);
 			name = help;
 			sourceTree = "<group>";
@@ -194,6 +197,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5A458251FB93EF50068F390 /* dependencies.html in Resources */,
 				B5E179F21F1FDAFA00A20AAA /* images in Resources */,
 				B508D5D71FA1A1780069ED0B /* stop.png in Resources */,
 				B5C0424D1EB11CF400C6E872 /* 5.png in Resources */,
