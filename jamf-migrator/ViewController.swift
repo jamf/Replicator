@@ -1067,9 +1067,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 let record = endpointInfo[i] as! [String : AnyObject]
                                                 
                                                 if endpoint != "mobiledeviceapplications" {
-                                                    self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                    if record["name"] != nil {
+                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                    } else {
+                                                        self.availableObjsToMigDict[record["id"] as! Int] = ""
+                                                    }
                                                 } else {
-                                                    self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
+                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
                                                 }
                                                 
                                                 if self.debug { self.writeToHistory(stringOfText: "[- debug -] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
