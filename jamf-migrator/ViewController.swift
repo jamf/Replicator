@@ -2388,12 +2388,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             let destXmlID: Int = (destRecord["id"] as! Int)
                                             
                                             if destEndpoint != "mobiledeviceapplications" {
-                                                destXmlName = destRecord["name"] as! String
+                                                if destRecord["name"] != nil {
+                                                    destXmlName = destRecord["name"] as! String
+                                                } else {
+                                                    destXmlName = ""
+                                                }
                                             } else {
                                                 destXmlName = destRecord["bundle_id"] as! String
                                             }
-                                            if self.debug { self.writeToHistory(stringOfText: "[- debug -] adding \(destXmlName) (id: \(destXmlID))  to currentEP array.\n") }
-                                            self.currentEPs[destXmlName] = destXmlID
+                                            if destXmlName != "" {
+                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] adding \(destXmlName) (id: \(destXmlID))  to currentEP array.\n") }
+                                                self.currentEPs[destXmlName] = destXmlID
+                                            } else {
+                                                if self.debug { self.writeToHistory(stringOfText: "[- debug -] skipping computer id: \(destXmlID), could not determine its name.\n") }
+                                            }
                                         }   // for i in (0..<destEndpointCount) - end
                                     } else {   // if destEndpointCount > 0 - end
                                         self.currentEPs.removeAll()
