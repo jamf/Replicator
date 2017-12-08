@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  jamf-migrator
 //
-//  Created by ladmin on 12/9/16.
+//  Created by lnh on 12/9/16.
 //  Copyright © 2016 jamf. All rights reserved.
 //
 
@@ -1916,7 +1916,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         case "policies":
                             if self.debug { self.writeToHistory(stringOfText: "[- debug -] processing policies - verbose\n") }
                             // remove individual objects that are scoped to the policy from XML
-                            for xmlTag in ["self_service_icon", "computers", "allow_users_to_defer", "allow_deferral_until_utc"] {
+                            for xmlTag in ["self_service_icon", "computers"] {
                                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                             }
                             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
