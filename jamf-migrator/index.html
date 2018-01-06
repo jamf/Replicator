@@ -1,10 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Migrator Help</title>
-<meta name="generator" content="hello">
 <style>
+.nav_ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+.nav_li {
+    float: left;
+}
+/*li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}*/
+.nav_li_a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}    
+li a:hover:not(.active) {
+    background-color: #111;
+}
+.active {
+    background-color: #828585;
+}
+    
 body
 {
    background-color: #D6DBDB;
@@ -17,31 +48,28 @@ body
    margin: 0;
    padding: 0;
 }
-a
+.body_a
 {
    color: #0000FF;
    text-decoration: underline;
 }
-a:visited
+.body_a:visited
 {
    color: #800080;
 }
-a:active
+.body_a:active
 {
    color: #FF0000;
 }
-a:hover
+.body_a:hover
 {
    color: #0000FF;
    text-decoration: underline;
 }
-#wb_Heading1
-{
-   background-color: #FFFFFF;
-   background-image: none;
-   border: 0px #000000 solid;
-   padding: 0px 0px 0px 0px;
+.body_a:hover:not(.active) {
+    background-color: #D6DBDB;
 }
+    
 #Heading1
 {
    color: #000000;
@@ -51,78 +79,27 @@ a:hover
    margin: 0;
    text-align: center;
 }
-#wb_Text1
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px #C0C0C0 solid;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
 #main_body div
 {
     text-align: left;
     padding: 10px 20px 10px 20px;
-}
-#wb_Text1 div
-{
-   text-align: left;
-}
-#wb_Text2
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px #C0C0C0 solid;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
-#wb_Text2 div
-{
-   text-align: left;
 }
 #app_image
 {
     border: 0px #000000 solid;
     padding: 10px 0px 10px 0px;
     margin: auto;
-}
-#Image2
-{
-   border: 0px #000000 solid;
-   padding: 0px 0px 0px 0px;
-   left: 0;
-   top: 0;
-   width: 100%;
-   height: 100%;
-}
-#wb_Text3
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px #C0C0C0 solid;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
-#wb_Text3 div
-{
-   text-align: left;
-}
-#Image3
-{
-   border: 0px #000000 solid;
-   padding: 0px 0px 0px 0px;
-   left: 0;
-   top: 0;
-   width: 100%;
-   height: 100%;
-}
+}  
+    #body_ul {margin-left:17px;}
+    #body_li {}
+  
 </style>
 </head>
 <body>
-<div id="Heading1" style="position:relative;text-align: center;">
+<div style="padding:20px;margin-top:30px;background-color:#D6DBDB;height:1500px;">
+    <a name="home"></a>
+<div><br><br><br><br></div>
+    <div style="position:relative;text-align: center;">
 <h1 id="Heading1">Jamf Migrator</h1></div>
 <div id="app_image" style="position:relative;margin: auto;width:800px;height:401px;">
 <img src="images/migrator2.png" alt=""></div>
@@ -131,11 +108,11 @@ a:hover
 <div>Migrate items from one Jamf server to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.</div>
 <div><br></div>
 <div>Feedback in the GUI gives a simplistic overview of the success of a transfer:</div>
-<ul style="margin-left:17px;">
-   <li>Green - everything transferred.</li>
-   <li>Yellow - some items transferred.</li>
-   <li>Red - nothing transferred.</li>
-   <li>White - nothing to transfer.</li>
+<ul>
+   <li id="body_li">Green - everything transferred.</li>
+   <li id="body_li">Yellow - some items transferred.</li>
+   <li id="body_li">Red - nothing transferred.</li>
+   <li id="body_li">White - nothing to transfer.</li>
 </ul>
 </div>
 </div>
@@ -157,11 +134,26 @@ a:hover
 <img src="images/migrator3.png" alt=""></div>
 <div id="main_body" style="position:relative;">
 <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
-<div>Note: Policies are listed along with the their jss ID.&nbsp; You'll see something like: policy name (jssID)</div>
+<div>Note: Policies are listed along with the their ID.&nbsp; You'll see something like: policy name (ID)</div>
 <div><br></div>
+    
+    
+<div><strong>Migration Summary:</strong>
+<ul style="margin-left:17px; list-style-type: none;">
+   <li>To get details on how many items were created/updated or failed to migrate type &#8984;S, or select Show Summary under the File menu.</li>
+    <div id="app_image" style="position:relative;width:480px;height:282px">
+<img src="images/summary1.png" alt=""></div>
+   <li>Additional information about each count can be obtained by clicking on the number.  For example, if we want to see a list of the 28 failed scripts, click on the 28.</li>
+    <div id="app_image" style="position:relative;width:480px;height:282px">
+<img src="images/summary2.png" alt=""></div>
+   <li><br></li>
+   <li><br></li>
+</ul>
+</div>
+    
 <div><strong>Important:</strong>
 <ul style="margin-left:17px; list-style-type: none;">
-   <li>There are many dependencies (<a href="dependencies.html">view here</a>) between items, if they are not met, transfers fail.&nbsp; For example, if a policy is site specific the site must be migrated before the policy; if a script is assigned to a category the category must be migrated first....&nbsp; If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.</li>
+   <li>There are many dependencies (<a class="body_a" href="#dependencies">view here</a>) between items, if they are not met, transfers fail.&nbsp; For example, if a policy is site specific the site must be migrated before the policy; if a script is assigned to a category the category must be migrated first....&nbsp; If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.</li>
    <li><br></li>
    <li>As a result it is best to start migrating items under the 'General' tab first.&nbsp; Items under macOS and iOS typically have some dependency on categories, network segments, sites...</li>
    <li><br></li>
@@ -170,7 +162,7 @@ a:hover
 </div>
 <div><strong>Logging:</strong>
 <ul style="margin-left:17px;">
-   <li>Basic log information is written to the following folder: ~/Library/Application Support/jamf-migrator/history/.  The log directory can easily be accessed by typing the command+L keys.</li>
+   <li>Basic log information is written to the following folder: ~/Library/Logs/jamf-migrator/.  The log directory can easily be accessed by typing &#8984;L or select Show Logs under View in the menu bar.</li>
    <li>More detailed logging can be captured by launching the application through Terminal using the '-debug' switch.&nbsp; If the application is located in /Applications:</li>
 </div>
 <ul style="margin-left:28px; list-style-type: none;">
@@ -197,5 +189,131 @@ a:hover
         <div>Dependencies play a role in deletions/removals as they do with migrations.&nbsp; For example, a site can not be deleted if it contains, say, users and users can't be deleted if they are associated with a device.&nbsp; </div>
     </div>
 </div>
+    <a name="migration_order"></a>    
+    <div>
+        <br><hr><br>
+    <h1 id="Heading1">Migration Order</h1></div>
+    <div id="main_body" style="position:relative;">
+    <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
+        <div>It's best to start on the General tab, then move to either macOS or iOS.  Within each tab migrate from top to bottom, using the lists below.  Note, if you select multiple/all items then will migrate in the proper order.</div>
+    </div>
+</div>
+    <div id="main_body" style="position:relative;">
+<div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
+	<div><strong>General:</strong>
+	<ul style="margin-left:0px;">
+		<li>Sites</li>
+		<li>User Extension Attributes</li>
+		<li>Users</li>
+		<li>Buildings</li>
+		<li>Departments</li>
+		<li>Categories</li>
+		<li>LDAP Servers</li>
+		<li>Jamf Users</li>
+		<li>Jamf Groups</li>
+		<li>Network Segments</li>
+		<li>Advanced User Searches</li>
+		<li>User Groups</li>
+		</ul>
+		</div>
+	<div><strong>macOS:</strong>
+	<ul style="margin-left:0px;">
+		<li>File Shares (AFP/SMB)</li>
+		<li>Directory Bindings</li>
+		<li>Dock Items</li>
+		<li>Computers</li>
+		<li>Software Update Servers (SUS)</li>
+		<li>Netboot Servers</li>
+		<li>Extension Attributes</li>
+		<li>Advanced Searches</li>
+		<li>Scripts</li>
+		<li>Groups</li>
+		<li>Configuration Profiles</li>
+		<li>Packages</li>
+		<li>Printers</li>
+		<li>Configurations</li>
+		<li>Policies</li>
+	</ul>
+	</div>
+	<div><strong>iOS:</strong>
+	<ul style="margin-left:0px;">
+		<li>Extension Attributes</li>
+		<li>Devices</li>
+		<li>Groups</li>
+		<li>Advanced iOS Searches</li>
+		<li>Configuration Profiles</li>
+	</ul>
+	</div>
+</div>
+</div>
+    
+    <a name="dependencies"></a>
+    <div>
+        <br><hr><br>
+    <h1 id="Heading1">Dependencies</h1></div>
+<div id="main_body" style="position:relative;">
+<div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
+<div><strong>General:</strong>
+<ul style="margin-left:0px;">
+    <li><span style="text-decoration: underline;">Buildings</span>: None</li>
+    <li><span style="text-decoration: underline;">Departments</span>: None</li>
+    <li><span style="text-decoration: underline;">Categories</span>: None</li>
+    <li><span style="text-decoration: underline;">Sites</span>: None</li>
+    <li><span style="text-decoration: underline;">Jamf Users</span>: LDAP Servers, Jamf Groups, Sites</li>
+    <li><span style="text-decoration: underline;">Jamf Groups</span>: LDAP Servers, Sites</li>
+    <li><span style="text-decoration: underline;">Network Segments</span>: File Shares, Netboot Servers, Buildings, Departments</li>
+    <li><span style="text-decoration: underline;">LDAP Servers</span>: None</li>
+    <li><span style="text-decoration: underline;">User Extension Attributes</span>: None</li>
+    <li><span style="text-decoration: underline;">Users</span>: User Extension Attributes, Photo (cleared)</li>
+    <li><span style="text-decoration: underline;">Advanced User Searches</span>: User Extension Attributes</li>
+    <li><span style="text-decoration: underline;">Smart User Groups</span>: Sites, User Extension Attributes, Users (cleared)</li>
+    <li><span style="text-decoration: underline;">Static User Groups</span>: Sites, Users</li>
+    </ul>
+    </div>
+<div><strong>macOS:</strong>
+<ul style="margin-left:0px;">
+<li><span style='text-decoration: underline;'>Computers</span>: Users, File Shares, Netboot Servers, Software Update Servers, Sites, location attributes (cleared), peripherals, Extension Attributes, Computer Group Membership (cleared), iphones (cleared), configuration profiles (cleared)</li>
+<li><span style='text-decoration: underline;'>Computer Configurations</span>: Scripts, Printers, Packages, Bindings, parent configuration (if a smart config)</li>
+<li><span style='text-decoration: underline;'>Configuration Profiles</span>: Sites, Categories, Computers, Buildings, Departments, Computer Groups, Jamf Users, Users, User Groups, Network Segments, iBeacons</li>
+<li><span style='text-decoration: underline;'>Policies</span>: Categories, Network Segments, iBeacons, Distribution Points, Software Update Servers, Netboot Servers, Sites, Buildings, Departments, Users, User Groups, Computers, Computer Groups, Self Service Icon (cleared), Packages, Scripts, Printers, Dock Items, Directory Bindings</li>
+<li><span style='text-decoration: underline;'>Advanced Computer Searches</span>: Extension Attributes, Sites, Computers (cleared)</li>
+<li><span style='text-decoration: underline;'>Scripts</span>: Categories</li>
+<li><span style='text-decoration: underline;'>Smart Computer Groups</span>: Sites, Extension Attributes, Computers (cleared)</li>
+<li><span style='text-decoration: underline;'>Static Computer Groups</span>: Sites, Computers</li>
+<li><span style='text-decoration: underline;'>Directory Bindings</span>: None</li>
+<li><span style='text-decoration: underline;'>Extension Attributes</span>: None</li>
+<li><span style='text-decoration: underline;'>Packages</span>: Categories</li>
+<li><span style='text-decoration: underline;'>Printers</span>: Categories</li>
+<li><span style='text-decoration: underline;'>Dock Items</span>: None</li>
+<li><span style='text-decoration: underline;'>Netboot Servers</span>: None</li>
+<li><span style='text-decoration: underline;'>Software Update Servers (SUS)</span>: None</li>
+<li><span style='text-decoration: underline;'>File Shares (AFP/SMB)</span>: Failover Distribution Point</li>
+</ul>
+    </div>
+<div><strong>iOS:</strong>
+<ul style="margin-left:0px;">
+<li><span style='text-decoration: underline;'>iOS Devices</span>: Sites, Username, Department, Building, Extension Attributes, Mobile Device Groups (cleared), Configuration Profiles (cleared)</li>
+<li><span style='text-decoration: underline;'>Configuration Profiles</span>: Sites, Categories, Scope is cleared which includes: mobile devices, buildings, departments, jss users, jss user groups, network segments, ibeacons</li>
+<li><span style='text-decoration: underline;'>Advanced iOS Searches</span>: Sites, Extension Attributes, Mobile Devices (cleared)</li>
+<li><span style='text-decoration: underline;'>Extension Attributes</span>: None</li>
+<li><span style='text-decoration: underline;'>Smart Groups</span>: Sites, Extension Attributes, Mobile Devices (cleared)</li>
+<li><span style='text-decoration: underline;'>Static Groups</span>: Sites, Mobile Devices</li>
+</ul>
+</div>
+<div>Some attributes are cleared during migration either because the attribute is not accesible through the API, photos of users for example, or the attribute is repopulated during a recon, like smart goup membership.</div>
+
+</div>
+</div>
+<div>     
+    <hr>
+</div> 
+</div>
+
+<ul class="nav_ul">
+  <li class="nav_li"><a class="nav_li_a" href="#home">Home</a></li>
+  <li class="nav_li"><a class="nav_li_a" href="#migration_order">Migration Order</a></li>
+  <li class="nav_li"><a class="nav_li_a" href="#dependencies">Dependencies</a></li>
+</ul>
 </body>
 </html>
+

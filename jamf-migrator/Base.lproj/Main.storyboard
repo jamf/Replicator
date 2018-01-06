@@ -85,24 +85,14 @@
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
+                                        <menuItem title="Show Summary" keyEquivalent="s" id="cVQ-FM-eQy">
+                                            <connections>
+                                                <action selector="showSummaryWindow:" target="Ady-hI-5gd" id="WT5-Cw-fwe"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
-                                            <connections>
-                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Revert to Saved" keyEquivalent="r" id="KaW-ft-85H">
-                                            <connections>
-                                                <action selector="revertDocumentToSaved:" target="Ady-hI-5gd" id="iJ3-Pv-kwq"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
@@ -585,9 +575,9 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Show History Folder" keyEquivalent="l" id="oAZ-Op-53a">
+                                        <menuItem title="Show Log Folder" keyEquivalent="l" id="oAZ-Op-53a">
                                             <connections>
-                                                <action selector="showHistoryFolder:" target="Ady-hI-5gd" id="gqp-QV-7hJ"/>
+                                                <action selector="showLogFolder:" target="Ady-hI-5gd" id="oT1-wc-wbP"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -639,7 +629,7 @@
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="jamf_migrator" customModuleProvider="target"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="0.0"/>
+            <point key="canvasLocation" x="351" y="-41"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -675,7 +665,62 @@
                 </windowController>
                 <customObject id="JVp-if-13Y" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="664" y="257"/>
+            <point key="canvasLocation" x="642" y="690"/>
+        </scene>
+        <!--Window Controller-->
+        <scene sceneID="e6I-b9-s6U">
+            <objects>
+                <windowController storyboardIdentifier="Summary Window Controller" id="UDh-wr-lId" sceneMemberID="viewController">
+                    <window key="window" title="Summary" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="qfs-AC-LGi">
+                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="1734" y="133" width="480" height="270"/>
+                        <rect key="screenRect" x="1440" y="-180" width="1920" height="1057"/>
+                    </window>
+                    <connections>
+                        <segue destination="hPh-eN-AVY" kind="relationship" relationship="window.shadowedContentViewController" id="Wxb-6g-wkH"/>
+                    </connections>
+                </windowController>
+                <customObject id="sVV-sh-oSZ" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-169" y="1173"/>
+        </scene>
+        <!--Summary-->
+        <scene sceneID="ZID-aS-lwe">
+            <objects>
+                <viewController title="Summary" id="hPh-eN-AVY" customClass="SummaryViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="4c1-IQ-bRf">
+                        <rect key="frame" x="0.0" y="0.0" width="527" height="288"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <wkWebView wantsLayer="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Af-mt-qgZ">
+                                <rect key="frame" x="-1" y="32" width="529" height="256"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZMA-Kh-Ry9">
+                                <rect key="frame" x="454" y="-1" width="75" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lg0-KK-qqv">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="dismissSummaryWindow:" target="hPh-eN-AVY" id="Lue-Bz-1rq"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="summary_WebView" destination="3Af-mt-qgZ" id="83N-6c-2fT"/>
+                    </connections>
+                </viewController>
+                <customObject id="s6H-jt-CBo" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="457.5" y="1251"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="nc1-VJ-iYF">
@@ -1388,6 +1433,26 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="zpm-63-oln"/>
                                                                         </connections>
                                                                     </button>
+                                                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TwK-8j-8nD" userLabel="Patch Policies fld">
+                                                                        <rect key="frame" x="40" y="45" width="106" height="17"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Patch Policies" id="GJT-As-0Ty">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
+                                                                        <rect key="frame" x="20" y="43" width="113" height="20"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="oQh-Ig-MX4">
+                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                            <font key="font" size="14" name="Helvetica"/>
+                                                                        </buttonCell>
+                                                                        <connections>
+                                                                            <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="4MV-FO-JOm"/>
+                                                                        </connections>
+                                                                    </button>
                                                                 </subviews>
                                                             </view>
                                                         </tabViewItem>
@@ -1602,7 +1667,7 @@
                                         <accessibility description="iOS" identifier="iOS"/>
                                     </tabViewItem>
                                     <tabViewItem label="General" identifier="" id="88A-Nu-WEM">
-                                        <view key="view" ambiguous="YES" id="CPy-PU-zBW">
+                                        <view key="view" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1891,7 +1956,7 @@
                                         <accessibility description="general" identifier="general"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" id="TA8-Ho-89h">
+                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2031,7 +2096,9 @@
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                         <menuItem title="Computers" id="ry3-B0-mRx" userLabel="Computers"/>
-                                                                        <menuItem title="Configuration Profiles" enabled="NO" id="Hhd-E2-H4G" userLabel="Config. Profiles"/>
+                                                                        <menuItem title="Configuration Profiles" id="Hhd-E2-H4G" userLabel="Config. Profiles">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Configurations" id="Cs2-Fx-YL9">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
@@ -2070,7 +2137,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="395" height="166"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="395" height="166"/>
@@ -2213,6 +2280,8 @@
                         <outlet property="osxconfigurationprofiles_label_field" destination="uAi-xC-0ej" id="1RJ-4N-Mgy"/>
                         <outlet property="packages_button" destination="RJ3-X5-ZGl" id="awj-77-J3n"/>
                         <outlet property="packages_label_field" destination="tvH-Q3-0zQ" id="kDo-VN-6gf"/>
+                        <outlet property="patch_policies_button" destination="9Ob-ze-NEc" id="tv4-EN-bFy"/>
+                        <outlet property="patch_policies_field" destination="TwK-8j-8nD" id="5tD-Ua-k0r"/>
                         <outlet property="policies_button" destination="iW5-vh-2hL" id="BfU-3B-nDW"/>
                         <outlet property="policies_label_field" destination="V21-1X-tzz" id="rTj-9V-7al"/>
                         <outlet property="printers_button" destination="cMq-R0-wLL" id="Qv5-ZV-gaz"/>
@@ -2251,7 +2320,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="104" y="702.5"/>
+            <point key="canvasLocation" x="-119" y="748"/>
         </scene>
     </scenes>
     <resources>
