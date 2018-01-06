@@ -648,7 +648,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             case 401:
                                 self.alert_dialog(header: "Authentication Failure", message: "Please verify username and password for:\n\(f_sourceURL)")
                             case 503:
-                                self.alert_dialog(header: "Service Unavailable", message: "Take a deep breath and try again later, error: \(self.httpStatusCode):\n\(f_sourceURL)")
+                                self.alert_dialog(header: "Service Unavailable", message: "Verify you can manually log into the API:\n\(f_sourceURL)/api \nError: \(self.httpStatusCode).")
                             default:
                                 self.alert_dialog(header: "Error", message: "An unknown error (\(self.httpStatusCode)) occured trying to query the server:\n\(f_sourceURL)")
                             }
@@ -2905,6 +2905,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    // extract the value between xml tags - start
+    func tagValue(xmlString:String, xmlTag:String) -> String {
+        var rawValue = ""
+        if let start = xmlString.range(of: "<\(xmlTag)>"),
+            let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
+            rawValue.append(xmlString[start.upperBound..<end.lowerBound])
+        } else {
+            print("invalid input")
+        }
+        return rawValue
+    }
+    //  extract the value between xml tags - end
+    
     func saveSettings() {
         plistData["source_jp_server"] = source_jp_server_field.stringValue as AnyObject?
         plistData["source_user"] = source_user_field.stringValue as AnyObject?
@@ -2947,7 +2960,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
-//        print("sender: \(sender.tag)")
         switch sender.tag {
         case 0:
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
