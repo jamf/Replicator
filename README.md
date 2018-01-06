@@ -25,6 +25,15 @@ A more detailed review of migration successes/failures can be found in the log, 
 * Buildings - the API only allows the name to be migrated.
 * If enpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.
 
+**Migration Summary:**<p>
+* To get details on how many items were created/updated or failed to migrate type ⌘S, or select Show Summary under the File menu.
+  
+  ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/summary1.png "Summary")
+  
+* Additional information about each count can be obtained by clicking on the number. For example, if we want to see a list of the 28 failed scripts, click on the 28.
+  
+  ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/summary2.png "Summary Details")
+  
 **Important:**<p>
 * There are many dependancies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
 * The selective migration still needs some work.  App is easily crashed by dragging objects other than those from the source server to the destination server.
