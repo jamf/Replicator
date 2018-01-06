@@ -36,7 +36,7 @@ A more detailed review of migration successes/failures can be found in the log, 
   
 **Important:**<p>
 * There are many dependancies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
-* The selective migration still needs some work.  App is easily crashed by dragging objects other than those from the source server to the destination server.
+* Summary window doesn't seem to be the most responsive.  May need to click the window or give the cursor some extra motion before the detailed summary appears.
 
 
 ## History
