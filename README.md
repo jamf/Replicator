@@ -49,8 +49,8 @@ Information about successes/failures can be found in the log, located in
 * Move history files to ~/Library/Logs/jamf-migrator and change extension to log. Refer to them as log files now.
 * Added summary to provide count of items created, updated, and failed (command+s) after a migration run.
 * Patch Extension Attributes are no longer migrated.
-* Log file naming has been corrected, for future logging. Current logs named incorrectly need to be manually deleted or renamed. Issue #13
-* Added recommended migration and dependencies to help. Issue #12
+* Log file naming has been corrected, for future logging. Current logs named incorrectly need to be manually deleted or renamed. Issue#13
+* Added recommended migration and dependencies to help. Issue#12
 * Migration of icons used in self service for newly created policies. Updating an existing policy will not update the existing icon on the destination server.
 
 **jamf-migrator v2.2.5**<p>
