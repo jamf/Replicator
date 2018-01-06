@@ -31,6 +31,17 @@ A more detailed review of migration successes/failures can be found in the log, 
 
 
 ## History
+**jamf-migrator v2.6.0**<p>
+* Deferrals no longer stripped from policies.
+* Only log xml from failed items when in debug mode.
+* More informative logging, give reason of failure along with http status code.
+* Move history files to ~/Library/Logs/jamf-migrator and change extension to log. Refer to them as log files now.
+* Added summary to provide count of items created, updated, and failed (command+s) after a migration run.
+* Patch Extension Attributes are no longer migrated.
+* Log file naming has been corrected, for future logging. Current logs named incorrectly need to be manually deleted or renamed. Issue #13
+* Added recommended migration and dependencies to help. Issue #12
+* Migration of icons used in self service for newly created policies. Updating an existing policy will not update the existing icon on the destination server.
+
 **jamf-migrator v2.2.5**<p>
 * Added migration of computer configuratons.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be migrated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
 * Added ability to select frequently used source/destination servers from the user interface.  Up to 10 server are selectable by using the up/down arrows to the right of the URL text box.
@@ -39,33 +50,27 @@ A more detailed review of migration successes/failures can be found in the log, 
 * Added migration of dock items.
 * Added stop button to stop the migration in progess.
   
-  
 **jamf-migrator v2.1.4**<p>
 * Added migration of directory bindings.
-  
   
 **jamf-migrator v2.1.3**<p>
 * Fixed smart group migration failures when done selectively.
 * Fixed advanced computer search duplication if migrated more then once, they should update now if changed.
 * Fixed authentication verification when Jamf Server utilizes SSO (thanks @ftiff).
 
-
 **jamf-migrator v2.1.0**<p>
 * Added the ability to migrate Jamf server accounts (users and groups).  Newly created accounts on the destination server will be created without a password (can't migrate passwords).  The account being used to authenticate to the destination server is not migrated if it also exists on the source server.  The migration of accounts depends on the existence of related sites and LDAP servers in order to be successful.
-  
-  
+   
 **jamf-migrator v2.0.0**<p>
 * Change to the user interface.  Grouped similar categories together.
 * Added iOS items.
 * Selective migration now allows the selection of multiple items, using control and/or shift key.
 * Added selective removal of items within a category.
 
-
 **jamf-migrator v1.2.1**<p>
 * fixed issue where app would hang if last/only item migrated had no endpoints.
 * credentials no longer needed for source server when removing data.
 * UI button improvememts for select all/none (thanks @jdhovaland).
-
 
 **jamf-migrator v1.2.0**<p>
 * Fixed the issue migrating computers with the xprotect tag having no value.
