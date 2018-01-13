@@ -803,6 +803,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     objectsToMigrate += ["userextensionattributes"]
                 }
                 
+                if ldapservers_button.state == 1 {
+                    objectsToMigrate += ["ldapservers"]
+                }
+                
                 if users_button.state == 1 {
                     objectsToMigrate += ["users"]
                 }
@@ -817,10 +821,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 if categories_button.state == 1 {
                     objectsToMigrate += ["categories"]
-                }
-                
-                if ldapservers_button.state == 1 {
-                    objectsToMigrate += ["ldapservers"]
                 }
                 
                 if jamfUserAccounts_button.state == 1 {
