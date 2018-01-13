@@ -284,7 +284,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var authQ = DispatchQueue(label: "com.jamf.auth")
     var theModeQ = DispatchQueue(label: "com.jamf.addRemove")
     var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
-    var destEPQ = DispatchQueue(label: "com.jamf.destEPs")
+    var destEPQ = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
     var idMapQ = DispatchQueue(label: "com.jamf.idMap")
     
     var migrateOrWipe: String = ""
@@ -858,21 +858,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         if wipe_data {
+            objectsToMigrate.reverse()
             if objectsToMigrate.count > 0 {
                 // set server and credentials used for wipe
                 sourceBase64Creds = destBase64Creds
                 self.source_jp_server = dest_jp_server
-                // move sites to the end of the array
-                var siteIndex = objectsToMigrate.index(of: "users")
-                if siteIndex != nil {
-                    let siteTmp = objectsToMigrate.remove(at: siteIndex!)
-                    objectsToMigrate.insert(siteTmp, at: objectsToMigrate.count)
-                }
-                siteIndex = objectsToMigrate.index(of: "sites")
-                if siteIndex != nil {
-                    let siteTmp = objectsToMigrate.remove(at: siteIndex!)
-                    objectsToMigrate.insert(siteTmp, at: objectsToMigrate.count)
-                }
+                // move users and sites to the end of the array
+//              trying reverse() for removal order
+//                var siteIndex = objectsToMigrate.index(of: "users")
+//                if siteIndex != nil {
+//                    let siteTmp = objectsToMigrate.remove(at: siteIndex!)
+//                    objectsToMigrate.insert(siteTmp, at: objectsToMigrate.count)
+//                }
+//                siteIndex = objectsToMigrate.index(of: "sites")
+//                if siteIndex != nil {
+//                    let siteTmp = objectsToMigrate.remove(at: siteIndex!)
+//                    objectsToMigrate.insert(siteTmp, at: objectsToMigrate.count)
+//                }
                 
             } else {
                 //go_button.isEnabled = true
@@ -887,11 +889,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if self.debug { self.writeToLog(stringOfText: "[- debug -] migrating/removing \(objectsToMigrate.count) sections\n") }
         // loop through process of migrating or removing - start
-        for i in (0..<objectsToMigrate.count) {
-            if self.debug { self.writeToLog(stringOfText: "[- debug -] Starting to process \(objectsToMigrate[i])\n") }
+//        for i in (0..<objectsToMigrate.count) {
+//            if self.debug { self.writeToLog(stringOfText: "[- debug -] Starting to process \(objectsToMigrate[i])\n") }
+//            if (goSender == "goButton" && migrationMode == "bulk") || (goSender == "selectToMigrateButton") {
+//                if self.debug { self.writeToLog(stringOfText: "[- debug -] getting endpoint: \(objectsToMigrate[i])\n") }
+//                self.getEndpoints(endpoint: objectsToMigrate[i])  {
+        for currentNode in objectsToMigrate {
+            if self.debug { self.writeToLog(stringOfText: "[- debug -] Starting to process \(currentNode)\n") }
             if (goSender == "goButton" && migrationMode == "bulk") || (goSender == "selectToMigrateButton") {
-                if self.debug { self.writeToLog(stringOfText: "[- debug -] getting endpoint: \(objectsToMigrate[i])\n") }
-                self.getEndpoints(endpoint: objectsToMigrate[i])  {
+                if self.debug { self.writeToLog(stringOfText: "[- debug -] getting endpoint: \(currentNode)\n") }
+                self.getEndpoints(endpoint: currentNode)  {
                     (result: String) in
                     if self.debug { self.writeToLog(stringOfText: "[- debug -] getEndpoints result: \(result)\n") }
                 }
@@ -1043,7 +1050,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             progressCountArray["\(endpoint)"] = 0
         }
         
-        theOpQ.maxConcurrentOperationCount = 2
+        theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         
         theOpQ.addOperation {
@@ -1397,67 +1404,68 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                     if endpointCount > 0 {
                                         
-                                        //                                        self.existingEndpoints(destEndpoint: "accounts")  {
-                                        //                                            (result: String) in
-                                        //                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] Returned from existing \(node): \(result)\n") }
+//                                        self.existingEndpoints(destEndpoint: "accounts")  {
+                                        self.existingEndpoints(destEndpoint: endpoint)  {
+                                            (result: String) in
+                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] Returned from existing \(node): \(result)\n") }
                                         
-                                        for i in (0..<endpointCount) {
-                                            if i == 0 { self.availableObjsToMigDict.removeAll() }
+                                            for i in (0..<endpointCount) {
+                                                if i == 0 { self.availableObjsToMigDict.removeAll() }
+                                                
+                                                let record = endpointInfo[i] as! [String : AnyObject]
+                                                if !(endpoint == "jamfusers" && record["name"] as! String? == self.dest_user) {
+                                                    self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                }
+                                                
+                                                if self.debug { self.writeToLog(stringOfText: "[- debug -] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                            }   // for i in (0..<endpointCount) end
+                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
                                             
-                                            let record = endpointInfo[i] as! [String : AnyObject]
-                                            if !(endpoint == "jamfusers" && record["name"] as! String? == self.dest_user) {
-                                                self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                            }
-                                            
-                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
-                                        }   // for i in (0..<endpointCount) end
-                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
-                                        
-                                        var counter = 1
-                                        if self.goSender == "goButton" {
-                                            for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                if !self.wipe_data  {
-                                                    if self.debug { self.writeToLog(stringOfText: "[- debug -] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
-                                                    
-                                                    if self.currentEPs[l_xmlName] != nil {
-                                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
-                                                        //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                            var counter = 1
+                                            if self.goSender == "goButton" {
+                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                    if !self.wipe_data  {
+                                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
+                                                        
+                                                        if self.currentEPs[l_xmlName] != nil {
+                                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
+                                                            //self.currentEndpointID = self.currentEPs[l_xmlName]!
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                                        } else {
+                                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
+                                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
+                                                        }
                                                     } else {
-                                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
-                                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
-                                                    }
-                                                } else {
-                                                    if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
-                                                        if self.debug { self.writeToLog(stringOfText: "[- debug -] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                        self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)                                                        }
-                                                    
-                                                    
-                                                }   // if !self.wipe_data else - end
-                                                counter+=1
-                                            }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                        } else {
-                                            // populate source server under the selective tab
-                                            for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                        if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
+                                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                            self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
+                                                        }
+                                                        
+                                                    }   // if !self.wipe_data else - end
+                                                    counter+=1
+                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                            } else {
+                                                // populate source server under the selective tab
+                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                    DispatchQueue.main.async {
+                                                        //print("adding \(l_xmlName) to array")
+                                                        self.availableIDsToMigDict[l_xmlName] = l_xmlID
+                                                        self.sourceDataArray.append(l_xmlName)
+                                                        
+                                                        self.srcSrvTableView.reloadData()
+                                                        
+                                                    }   // DispatchQueue.main.async - end
+                                                    counter+=1
+                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                 DispatchQueue.main.async {
-                                                    //print("adding \(l_xmlName) to array")
-                                                    self.availableIDsToMigDict[l_xmlName] = l_xmlID
-                                                    self.sourceDataArray.append(l_xmlName)
+                                                    //self.sourceDataArray.sort()
+                                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
                                                     
                                                     self.srcSrvTableView.reloadData()
-                                                    
-                                                }   // DispatchQueue.main.async - end
-                                                counter+=1
-                                            }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                            DispatchQueue.main.async {
-                                                //self.sourceDataArray.sort()
-                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                
-                                                self.srcSrvTableView.reloadData()
-                                            }
-                                        }   // if self.goSender else - end
-                                        //                                        }   // self.existingEndpoints - end
+                                                }
+                                            }   // if self.goSender else - end
+                                        }   // self.existingEndpoints - end
                                     } else {
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
@@ -2243,7 +2251,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         // this is where we delete the endpoint
-        theOpQ.maxConcurrentOperationCount = 3
+        theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
         switch endpointType {
@@ -2359,7 +2367,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var destXmlName = ""
         var existingEndpointNode = ""
         (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
-        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
+//        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
         var destEndpointDict:(Any)? = nil
         var endpointParent = ""
         switch destEndpoint {
@@ -2418,14 +2426,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "\(destEndpoint)"
         }
         
-        //theOpQ.maxConcurrentOperationCount = 1
+//        theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 1)
         destEPQ.async {
-            //        theOpQ.addOperation {
+//        theOpQ.addOperation {
             //print("Entered destEPQ")
             var destURL = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
             destURL = destURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-            print("existing endpoints URL: \(destURL)")
+//            print("existing endpoints URL: \(destURL)")
             
             let destEncodedURL = NSURL(string: destURL)
             let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -2470,11 +2478,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }   //if let destEndpointInfo = destEndpointJSON - end
                                 
                             default:
-                                if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" {
+                                if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
                                     let accountsDict = destEndpointJSON as Dictionary<String, Any>
                                     let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
-                                    print("users: \(String(describing: usersGroups["users"]))")
-                                    print("groups: \(String(describing: usersGroups["groups"]))")
+//                                    print("users: \(String(describing: usersGroups["users"]))")
+//                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                     destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                 } else {
                                     destEndpointDict = destEndpointJSON["\(endpointParent)"]
