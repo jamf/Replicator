@@ -42,7 +42,7 @@ Information about successes/failures can be found in the log, located in
 
 
 ## History
-**v2.6.1**<p>
+**v2.6.2**<p>
 * Resolve issue #14, items not migrating in the proper order.
 
 **v2.6.0**<p>
