@@ -42,6 +42,9 @@ Information about successes/failures can be found in the log, located in
 
 
 ## History
+**v2.6.3**<p>
+* Corrected an issued with self service icons not migrating if the icon name contained a space.
+
 **v2.6.2**<p>
 * Resolve issue #14, items not migrating in the proper order.
 
