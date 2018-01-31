@@ -517,7 +517,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // server is reachable - start
         checkURL2(serverURL: self.source_jp_server)  {
             (result: Bool) in
-            print("checkURL2 returned result: \(result)")
+//            print("checkURL2 returned result: \(result)")
             if !result {
                 self.alert_dialog(header: "Attention:", message: "Unable to contact the source server:\n\(self.source_jp_server)")
                 self.goButtonEnabled(button_status: true)
@@ -526,7 +526,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         checkURL2(serverURL: self.dest_jp_server)  {
             (result: Bool) in
-            print("checkURL2 returned result: \(result)")
+//            print("checkURL2 returned result: \(result)")
             if !result {
                 self.alert_dialog(header: "Attention:", message: "Unable to contact the destination server:\n\(self.dest_jp_server)")
                 self.goButtonEnabled(button_status: true)
@@ -1067,7 +1067,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("httpResponse: \(httpResponse.statusCode)")
+//                    print("httpResponse: \(httpResponse.statusCode)")
                     
                     do {
                         if self.debug { self.writeToLog(stringOfText: "[- debug -] Getting all endpoints from: \(myURL)\n") }
@@ -1262,14 +1262,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
-                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartusergroups"
                                                     }
                                                     if (self.staticUserGrps_button.state == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
-                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "staticusergroups"
                                                     }
                                                 default: break
@@ -2187,7 +2187,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 DestURL = "\(self.dest_jp_server_field.stringValue)/JSSResource/fileuploads/policies/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
                                 DestURL = DestURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
-                                let curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o /tmp/\(ssIconName)")
+                                let curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] result of icon GET: \(curlResult).") }
 //                                print("result of icon GET: "+curlResult)
                                 let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(DestURL) -F \"name=@/tmp/\(ssIconName)\"  -X POST")
@@ -2717,7 +2717,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     func checkURL2(serverURL: String, completion: @escaping (Bool) -> Void) {
-        print("enter checkURL2")
+//        print("enter checkURL2")
         var available:Bool = false
         if self.debug { self.writeToLog(stringOfText: "[- debug -] --- checking availability of server: \(serverURL)\n") }
         
@@ -2749,9 +2749,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     //                    print("response: \(response)")
                     if let responseData = String(data: data!, encoding: .utf8) {
-                        print("data: \(responseData)")
+                        if self.debug { self.writeToLog(stringOfText: "checkURL2 data: \(responseData)") }
                     } else {
-                        print("data: none")
+                        if self.debug { self.writeToLog(stringOfText: "checkURL2 data: none") }
                     }
                     available = true
                     
