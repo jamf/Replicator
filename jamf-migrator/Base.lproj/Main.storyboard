@@ -1082,7 +1082,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
-                                        <view key="view" id="fn5-oe-BJC">
+                                        <view key="view" ambiguous="YES" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1434,7 +1434,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TwK-8j-8nD" userLabel="Patch Policies fld">
-                                                                        <rect key="frame" x="40" y="45" width="106" height="17"/>
+                                                                        <rect key="frame" x="547" y="44" width="106" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Patch Policies" id="GJT-As-0Ty">
                                                                             <font key="font" metaFont="system"/>
@@ -1443,7 +1443,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
-                                                                        <rect key="frame" x="20" y="43" width="113" height="20"/>
+                                                                        <rect key="frame" x="527" y="42" width="113" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="oQh-Ig-MX4">
                                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1451,6 +1451,26 @@
                                                                         </buttonCell>
                                                                         <connections>
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="4MV-FO-JOm"/>
+                                                                        </connections>
+                                                                    </button>
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2tr-YW-IQ0" userLabel="Restricted Software fld">
+                                                                        <rect key="frame" x="39" y="46" width="141" height="17"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Restricted Software" id="U0T-5A-2wL" userLabel="Restricted Software">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TsB-ot-L5w" userLabel="Restricted Software btn">
+                                                                        <rect key="frame" x="19" y="44" width="145" height="20"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="U3f-Mu-WaN">
+                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                            <font key="font" size="14" name="Helvetica"/>
+                                                                        </buttonCell>
+                                                                        <connections>
+                                                                            <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="L2r-3S-lEI"/>
                                                                         </connections>
                                                                     </button>
                                                                 </subviews>
@@ -1956,7 +1976,7 @@
                                         <accessibility description="general" identifier="general"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
+                                        <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2114,6 +2134,9 @@
                                                                         <menuItem title="Packages" id="gPQ-gf-J3z"/>
                                                                         <menuItem title="Policies" id="jwH-Jm-D0E"/>
                                                                         <menuItem title="Printers" id="DYb-Mc-wvX"/>
+                                                                        <menuItem title="Restricted Software" id="RF3-Oc-qto">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Scripts" id="7Kf-1g-czF"/>
                                                                         <menuItem title="SUS" id="290-Hs-6PA"/>
                                                                     </items>
@@ -2286,6 +2309,8 @@
                         <outlet property="policies_label_field" destination="V21-1X-tzz" id="rTj-9V-7al"/>
                         <outlet property="printers_button" destination="cMq-R0-wLL" id="Qv5-ZV-gaz"/>
                         <outlet property="printers_label_field" destination="VB2-eO-067" id="xMU-HY-HXq"/>
+                        <outlet property="restrictedsoftware_button" destination="TsB-ot-L5w" id="Dbb-g5-xYa"/>
+                        <outlet property="restrictedsoftware_label_field" destination="2tr-YW-IQ0" id="kE8-m5-Dpw"/>
                         <outlet property="scripts_button" destination="tIV-9V-gpi" id="dT1-Rm-sdD"/>
                         <outlet property="scripts_label_field" destination="kMV-ND-9Kx" id="273-mW-H5M"/>
                         <outlet property="sectionToMigrate_button" destination="tpb-Lh-nzm" id="kLi-3f-CgI"/>
@@ -2320,7 +2345,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-119" y="748"/>
+            <point key="canvasLocation" x="-119" y="747.5"/>
         </scene>
     </scenes>
     <resources>

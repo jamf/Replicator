@@ -32,6 +32,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    // keychain access
+    let Creds = Credentials()
+    
     
     // Buttons
     // macOS tab
@@ -54,6 +57,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var packages_button: NSButton!
     @IBOutlet weak var printers_button: NSButton!
     @IBOutlet weak var policies_button: NSButton!
+    @IBOutlet weak var restrictedsoftware_button: NSButton!
     // iOS tab
     @IBOutlet weak var allNone_iOS_button: NSButton!
     @IBOutlet weak var mobiledevices_button: NSButton!
@@ -124,6 +128,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var policies_label_field: NSTextField!
     @IBOutlet weak var jamfUserAccounts_field: NSTextField!
     @IBOutlet weak var jamfGroupAccounts_field: NSTextField!
+    @IBOutlet weak var restrictedsoftware_label_field: NSTextField!
     // iOS button labels
     @IBOutlet weak var smart_ios_groups_label_field: NSTextField!
     @IBOutlet weak var static_ios_groups_label_field: NSTextField!
@@ -221,7 +226,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var sourceURL = ""
     var destURL = ""
     
-    var endpointDefDict = ["computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches"]
+    var endpointDefDict = ["computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     var xmlName = ""
     var destEPs = [String:Int]()
     var currentEPs = [String:Int]()
@@ -235,7 +240,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var changeColor:Bool = true
     
     // This order must match the drop down for selective migration
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceconfigurationprofiles", "mobiledevicegroups",  "mobiledeviceextensionattributes", "mobiledevices"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "userextensionattributes", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "users", "usergroups"]
     var AllEndpointsArray = [String]()
@@ -322,6 +327,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.scripts_button.state == 1
                     && self.packages_button.state == 1
                     && self.printers_button.state == 1
+                    && self.restrictedsoftware_button.state == 1
                     && self.policies_button.state == 1) ? 1 : 0;
         } else if deviceType() == "iOS" {
             self.allNone_iOS_button.state = (
@@ -369,6 +375,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.scripts_button.state = self.allNone_button.state
             self.packages_button.state = self.allNone_button.state
             self.printers_button.state = self.allNone_button.state
+            self.restrictedsoftware_button.state = self.allNone_button.state
             self.policies_button.state = self.allNone_button.state
         } else if deviceType() == "iOS" {
             self.advancedmobiledevicesearches_button.state = self.allNone_iOS_button.state
@@ -645,6 +652,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
+                            
+                            // save credentials to login keychain - start
+                            if f_sourceURL == self.source_jp_server {
+                                self.Creds.save("migrator - "+f_sourceURL, account: self.source_user, data: self.source_pass)
+                            } else {
+                                self.Creds.save("migrator - "+f_sourceURL, account: self.dest_user, data: self.dest_pass)
+                            }
+                            // save credentials to login keychain - end
+
                             validCredentials = true
                             completion(validCredentials)
                         } else {
@@ -712,6 +728,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 if directory_bindings_button.state == 1 {
                     objectsToMigrate += ["directorybindings"]
+                }
+                
+                if restrictedsoftware_button.state == 1 {
+                    objectsToMigrate += ["restrictedsoftware"]
                 }
                 
                 if dock_items_button.state == 1 {
@@ -945,9 +965,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
                                     if self.debug { self.writeToLog(stringOfText: "[- debug -] \(selectedObject) already exists\n") }
                                     //self.currentEndpointID = self.currentEPs[xmlName]!
-                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!)
+                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
                                 } else {
-                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0)
+                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
                                 }
                             }
                         } else {
@@ -994,6 +1014,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "patch_management_software_titles"
         case "patchpolicies":
             endpointParent = "patch_policies"
+        case "restrictedsoftware":
+            endpointParent = "restricted_software"
         case "softwareupdateservers":
             endpointParent = "software_update_servers"
         // iOS items
@@ -1076,7 +1098,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] endpointJSON: \(endpointJSON))") }
                             
                             switch endpoint {
-                            case "advancedcomputersearches", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches":
+                            case "advancedcomputersearches", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                 if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                     let endpointCount: Int = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[- debug -] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -1116,11 +1138,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         if self.currentEPs[l_xmlName] != nil {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                     } else {
                                                         if self.debug { self.writeToLog(stringOfText: "[- debug -] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -1283,11 +1305,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             //need to call existingEndpoints here to keep proper order?
                                                             if self.currentEPs[l_xmlName] != nil {
                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
-                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                             } else {
                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
-                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0)
+                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                             }
                                                             
 //                                                            if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
@@ -1359,11 +1381,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         if self.currentEPs[l_xmlName] != nil {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                         //self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0)
                                                     } else {
@@ -1430,11 +1452,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         if self.currentEPs[l_xmlName] != nil {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(l_xmlName) - create\n") }
                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                     } else {
                                                         if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
@@ -1589,11 +1611,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                             if self.currentEPs[l_xmlName!] != nil {
                                                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] \(String(describing: l_xmlName)) already exists\n") }
                                                                                                 //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!)
+                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!, destEpName: l_xmlName!)
                                                                                             } else {
                                                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] \(String(describing: l_xmlName)) - create\n") }
                                                                                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0)
+                                                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName!)
                                                                                             }
                                                                                         } else {
                                                                                             if self.debug { self.writeToLog(stringOfText: "[- debug -] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
@@ -1666,8 +1688,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // theOpQ - end
         completion("Got endpoint - \(endpoint)")
     }
-    
-    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int) {
+    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+//    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int) {
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[- debug -] endpoint passed to endPointByID: \(endpoint)\n") }
         theOpQ.maxConcurrentOperationCount = 1
@@ -1723,7 +1745,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         
                         switch endpoint {
-                        case "buildings", "departments", "sites", "categories", "directorybindings", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches":
+                        case "buildings", "departments", "sites", "categories", "directorybindings", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] processing \(endpoint) - verbose\n") }
                             //print("\nXML: \(PostXML)")
                             
@@ -1739,10 +1761,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                                 }
                                 
-                            case "mobiledeviceconfigurationprofiles":
-                                for xmlTag in ["scope"] {
-                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-                                }
+//                            case "mobiledeviceconfigurationprofiles":
+//                                for xmlTag in ["scope"] {
+//                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+//                                }
                                 
                             case "mobiledeviceapplications":
                                 for xmlTag in ["scope"] {
@@ -1926,6 +1948,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
                             self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            
                         case "computergroups", "smartcomputergroups", "staticcomputergroups":
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] processing \(endpoint) - verbose\n") }
                             // remove computers that are a member of a smart group
@@ -1973,6 +1996,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                             }
                             
+                            // Self Service description fix, migrating from 9 to 10.2+
+//                            if self.tagValue(xmlString: PostXML, xmlTag: "use_for_self_service") == "true" {
+//                                if self.tagValue(xmlString: PostXML, xmlTag: "self_service_display_name") == "" {
+//                                    let SsText = "<use_for_self_service>true</use_for_self_service>"
+//                                    let SsDesc = "<self_service_display_name>\(destEpName)</self_service_display_name>"
+//                                    let regexSsDesc = try! NSRegularExpression(pattern: SsText, options:.caseInsensitive)
+//                                    PostXML = regexSsDesc.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: SsText+"\n"+SsDesc)
+//                                }
+//                            }
                             
                             // remove individual objects that are scoped to the policy from XML
                             for xmlTag in ["self_service_icon", "computers"] {
@@ -2394,6 +2426,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "patch_management_software_titles"
         case "patchpolicies":
             endpointParent = "patch_policies"
+        case "restrictedsoftware":
+            endpointParent = "restricted_software"
         case "softwareupdateservers":
             endpointParent = "software_update_servers"
         // iOS items
@@ -2963,6 +2997,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             printers_label_field.textColor = theColor
         case "policies":
             policies_label_field.textColor = theColor
+        case "restrictedsoftware":
+            restrictedsoftware_label_field.textColor = theColor
         // iOS tab
         case "advancedmobiledevicesearches":
             advancedmobiledevicesearches_label_field.textColor = theColor
@@ -3356,6 +3392,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // read environment settings - end
         
+        // check for stored passwords - start
+        if (source_jp_server != "") && (source_user != "") {
+            let storedSourcePassword = Creds.retrieve("migrator - "+source_jp_server, account: source_user)
+            source_pwd_field.stringValue = storedSourcePassword!
+        }
+        if (dest_jp_server != "") && (dest_user != "") {
+            let storedDestPassword = Creds.retrieve("migrator - "+dest_jp_server, account: dest_user)
+            dest_pwd_field.stringValue = storedDestPassword!
+        }
+        // check for stored passwords - start
+
         source_jp_server_field.becomeFirstResponder()
         
     }
@@ -3383,8 +3430,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         static_comp_grps_button.state = 1
         scripts_button.state = 1
         packages_button.state = 1
-        printers_button.state = 1
         policies_button.state = 1
+        printers_button.state = 1
+        restrictedsoftware_button.state = 1
         // iOS tab
         allNone_iOS_button.state = 1
         advancedmobiledevicesearches_button.state = 1
