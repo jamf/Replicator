@@ -31,9 +31,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             helpWindow.close()
         }
     }
-    
+        
     // keychain access
     let Creds = Credentials()
+    var validCreds       = true     // used to deterine if keychain has valid credentials
+    var storedSourceUser = ""       // source user account stored in the keychain
+    var storedDestUser   = ""       // destination user account stored in the keychain
     
     
     // Buttons
@@ -653,13 +656,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
                             
-                            // save credentials to login keychain - start
-                            if f_sourceURL == self.source_jp_server {
-                                self.Creds.save("migrator - "+f_sourceURL, account: self.source_user, data: self.source_pass)
-                            } else {
-                                self.Creds.save("migrator - "+f_sourceURL, account: self.dest_user, data: self.dest_pass)
+                            if (!self.validCreds) || (self.source_user != self.storedSourceUser) || (self.dest_user != self.storedDestUser) {
+                                // save credentials to login keychain - start
+                                let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
+                                if f_sourceURL == self.source_jp_server {
+                                    let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+                                    self.Creds.save("migrator - "+credKey, account: self.source_user, data: self.source_pass)
+                                    self.storedSourceUser = self.source_user
+                                } else {
+                                    let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+                                    self.Creds.save("migrator - "+credKey, account: self.dest_user, data: self.dest_pass)
+                                    self.storedDestUser = self.dest_user
+                                }
+                                // save credentials to login keychain - end
                             }
-                            // save credentials to login keychain - end
 
                             validCredentials = true
                             completion(validCredentials)
@@ -684,6 +694,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //                        409 - unable to create object; data missing or xml error
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
+                            self.validCreds = false
                             completion(validCredentials)
                         }   // if httpResponse/else - end
                     }   // if let httpResponse - end
@@ -1843,6 +1854,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             } else {
                                 // Currently patch EAs are not migrated - handle those here
+                                if self.counters[endpoint]?["fail"] != endpointCount-1 {
+                                    self.labelColor(endpoint: endpoint, theColor: self.yellowText)
+                                } else {
+                                    // every EA failed, and a patch EA was the last on the list
+                                    self.labelColor(endpoint: endpoint, theColor: self.redText)
+                                }
                                 // update global counters
                                 let patchEaName = self.getName(endpoint: endpoint, objectXML: PostXML)
                                 self.counters[endpoint]?["fail"] = (self.counters[endpoint]?["fail"])!+1
@@ -2170,9 +2187,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.debug { self.writeToLog(stringOfText: "\n\n[- debug -] No data was returned from post/put.\n") }
                     }
                     
-                    //print(httpResponse.statusCode)
-                    //print(httpResponse)
-                    //print("POST XML-\(endpointCurrent): endpointType: \(endpointType)  endpointNumber: \(endpointCurrent)")
                     DispatchQueue.main.async {
                         self.migrationStatus(endpoint: endpointType, count: endpointCount)
                         
@@ -2202,9 +2216,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //                            if endpointCount == endpointCurrent && self.changeColor {
                             self.labelColor(endpoint: endpointType, theColor: self.greenText)
                         }
-                        //                        print("\n\n---------- Success ----------")
-                        //                        print("\(endPointXML)")
-                        //                        print("---------- Success ----------")
                         
                         // update global counters
                         self.counters[endpointType]?["\(action)"] = (self.counters[endpointType]?["\(action)"])!+1
@@ -2225,8 +2236,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(DestURL) -F \"name=@/tmp/\(ssIconName)\"  -X POST")
                                 if self.debug { self.writeToLog(stringOfText: "[- debug -] result of icon POST: \(curlResult2).") }
 //                                print("result of icon POST: "+curlResult2)
-                                self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm /tmp/\(ssIconName)")
-
+                                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
+                                    if self.debug { self.writeToLog(stringOfText: "[- debug -] unable to delete /tmp/\(ssIconName).") }
+                                }
                             }
                         }
                         
@@ -2235,6 +2247,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                         //                        self.changeColor = false
                         self.writeToLog(stringOfText: "\n\n**** [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed\n")
+                        
+                        print("\n\n**** [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed\n")
                         
                         // Write xml for degugging - start
                         if self.debug { self.writeToLog(stringOfText: "\(endPointXML)\n")}
@@ -3276,6 +3290,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func writeToLog(stringOfText: String) {
         logFileW = FileHandle(forUpdatingAtPath: (logPath! + logFile))
+        
         self.logFileW?.seekToEndOfFile()
         let historyText = (stringOfText as NSString).data(using: String.Encoding.utf8.rawValue)
         self.logFileW?.write(historyText!)
@@ -3393,21 +3408,41 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read environment settings - end
         
         // check for stored passwords - start
+        let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
         if (source_jp_server != "") && (source_user != "") {
-            let storedSourcePassword = Creds.retrieve("migrator - "+source_jp_server, account: source_user)
-            source_pwd_field.stringValue = storedSourcePassword!
+            let credKey = regexKey.stringByReplacingMatches(in: source_jp_server, options: [], range: NSRange(0..<source_jp_server.utf16.count), withTemplate: "")
+            let storedSourcePassword = Creds.retrieve("migrator - "+credKey, account: source_user)
+            if storedSourcePassword != nil {
+                source_pwd_field.stringValue = storedSourcePassword!
+                self.storedSourceUser = source_user
+            } else {
+                source_pwd_field.stringValue = ""
+                source_pwd_field.becomeFirstResponder()
+            }
         }
         if (dest_jp_server != "") && (dest_user != "") {
-            let storedDestPassword = Creds.retrieve("migrator - "+dest_jp_server, account: dest_user)
-            dest_pwd_field.stringValue = storedDestPassword!
+            let credKey = regexKey.stringByReplacingMatches(in: dest_jp_server, options: [], range: NSRange(0..<dest_jp_server.utf16.count), withTemplate: "")
+            let storedDestPassword = Creds.retrieve("migrator - "+credKey, account: dest_user)
+            if storedDestPassword != nil {
+                dest_pwd_field.stringValue = storedDestPassword!
+                self.storedDestUser = dest_user
+            } else {
+                dest_pwd_field.stringValue = ""
+                if source_pwd_field.stringValue != "" {
+                    dest_pwd_field.becomeFirstResponder()
+                }
+            }
+        }
+        if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
+            self.validCreds = false
         }
         // check for stored passwords - start
 
-        source_jp_server_field.becomeFirstResponder()
         
     }
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
@@ -3500,13 +3535,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         
         logFile = getCurrentTime() + "_migration.log"
-//        print("migration log: \(logFile)")
+
         isDir = false
         if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {
             fm.createFile(atPath: logPath! + logFile, contents: nil, attributes: nil)
         }
-//        logFileW = FileHandle(forUpdatingAtPath: (logPath! + logFile))
-//        print("logFile: " + logPath! + logFile)
+
         sleep(1)
         if debug { writeToLog(stringOfText: "----- Debug Mode -----\n") }
         
@@ -3548,7 +3582,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-        saveSettings()
+        if self.validCreds {
+            saveSettings()
+        }
         logCleanup()
     }
     

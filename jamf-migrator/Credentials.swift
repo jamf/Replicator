@@ -1,5 +1,5 @@
 //
-//  credentials.swift
+//  Credentials.swift
 //  based on: https://gist.github.com/jeffrafter/6dc43c3341e12cf4e359092dc8c56f33
 //  jamf-migrator
 //
@@ -11,15 +11,17 @@ import Security
 import Foundation
 
 class Credentials {
+    
     func save(_ service: String, account: String, data: String) {
         var item: SecKeychainItem? = nil
-        
+                
+        // see if account exists
         var status = SecKeychainFindGenericPassword(
             nil,
             UInt32(service.utf8.count),
             service,
             UInt32(account.utf8.count),
-            account,
+            nil,
             nil,
             nil,
             &item)
@@ -29,19 +31,23 @@ class Credentials {
             return
         }
         
+        // if account exists, delete it then create with current password
         if item != nil {
-            status = SecKeychainItemModifyContent(item!, nil, UInt32(data.utf8.count), data)
-        } else {
-            status = SecKeychainAddGenericPassword(
-                nil,
-                UInt32(service.utf8.count),
-                service,
-                UInt32(account.utf8.count),
-                account,
-                UInt32(data.utf8.count),
-                data,
-                nil)
+            status = SecKeychainItemDelete(item!)
+            
+            if status != noErr {
+                print("Error deleting existing keychain item: \(String(describing: SecCopyErrorMessageString(status, nil)))")
+            }
         }
+        status = SecKeychainAddGenericPassword(
+            nil,
+            UInt32(service.utf8.count),
+            service,
+            UInt32(account.utf8.count),
+            account,
+            UInt32(data.utf8.count),
+            data,
+            nil)
         
         if status != noErr {
             print("Error setting keychain item: \(String(describing: SecCopyErrorMessageString(status, nil)))")
