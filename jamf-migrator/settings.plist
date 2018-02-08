@@ -18,5 +18,7 @@
 	<string></string>
 	<key>dest_user</key>
 	<string></string>
+	<key>storeCredentials</key>
+	<integer>0</integer>
 </dict>
 </plist>

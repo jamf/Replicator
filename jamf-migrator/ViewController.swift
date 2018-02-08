@@ -37,7 +37,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
-    
+    @IBOutlet weak var storeCredentials_button: NSButton!
+    var storeCredentials = 0
+    @IBAction func storeCredentials(_ sender: Any) {
+        storeCredentials = storeCredentials_button.state
+    }
     
     // Buttons
     // macOS tab
@@ -260,7 +264,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
-    var theImage:[NSImage] = [NSImage(named: "0.png")!, NSImage(named: "1.png")!, NSImage(named: "2.png")!, NSImage(named: "3.png")!, NSImage(named: "4.png")!, NSImage(named: "5.png")!, NSImage(named: "6.png")!, NSImage(named: "7.png")!, NSImage(named: "8.png")!, NSImage(named: "9.png")!, NSImage(named: "10.png")!, NSImage(named: "11.png")!]
+    var theImage:[NSImage] = [NSImage(named: "0.png")!, NSImage(named: "1.png")!, NSImage(named: "2.png")!]
     var showSpinner = false
     
     // group counters
@@ -659,14 +663,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if (!self.validCreds) || (self.source_user != self.storedSourceUser) || (self.dest_user != self.storedDestUser) {
                                 // save credentials to login keychain - start
                                 let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-                                if f_sourceURL == self.source_jp_server {
-                                    let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                    self.Creds.save("migrator - "+credKey, account: self.source_user, data: self.source_pass)
-                                    self.storedSourceUser = self.source_user
+                                if f_sourceURL == self.source_jp_server && !self.wipe_data {
+                                    if self.storeCredentials_button.state == 1 {
+                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+                                        self.Creds.save("migrator - "+credKey, account: self.source_user, data: self.source_pass)
+                                        self.storedSourceUser = self.source_user
+                                    }
                                 } else {
-                                    let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                    self.Creds.save("migrator - "+credKey, account: self.dest_user, data: self.dest_pass)
-                                    self.storedDestUser = self.dest_user
+                                    if self.storeCredentials_button.state == 1 {
+                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+                                        self.Creds.save("migrator - "+credKey, account: self.dest_user, data: self.dest_pass)
+                                        self.storedDestUser = self.dest_user
+                                    }
                                 }
                                 // save credentials to login keychain - end
                             }
@@ -2247,9 +2255,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                         //                        self.changeColor = false
                         self.writeToLog(stringOfText: "\n\n**** [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed\n")
-                        
-                        print("\n\n**** [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed\n")
-                        
+                                                
                         // Write xml for degugging - start
                         if self.debug { self.writeToLog(stringOfText: "\(endPointXML)\n")}
                         self.writeToLog(stringOfText: "HTTP status code: \(httpResponse.statusCode)\n")
@@ -2853,11 +2859,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     DispatchQueue.main.async {
                         self.mySpinner_ImageView.image = self.theImage[theImageNo]
                         theImageNo += 1
-                        if theImageNo > 11 {
+                        if theImageNo > 2 {
+//                            if theImageNo > 11 {
                             theImageNo = 0
                         }
                     }
-                    usleep(100000)  // sleep 0.1 seconds
+                    usleep(300000)  // sleep 0.3 seconds
+//                    usleep(100000)  // sleep 0.1 seconds
                 }
             }
             self.mySpinner_ImageView.isHidden = button_status
@@ -3109,11 +3117,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 DispatchQueue.main.async {
                     self.mySpinner_ImageView.image = self.theImage[theImageNo]
                     theImageNo += 1
-                    if theImageNo > 11 {
+                    if theImageNo > 2 {
+//                        if theImageNo > 11 {
                         theImageNo = 0
                     }
                 }
-                usleep(100000)  // sleep 0.1 seconds
+                usleep(300000)  // sleep 0.3 seconds
+//                usleep(100000)  // sleep 0.1 seconds
             }
         }
     }
@@ -3139,10 +3149,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func saveSettings() {
         plistData["source_jp_server"] = source_jp_server_field.stringValue as AnyObject?
-        plistData["source_user"] = source_user_field.stringValue as AnyObject?
+//        plistData["source_user"] = source_user_field.stringValue as AnyObject?
+        plistData["source_user"] = storedSourceUser as AnyObject?
         plistData["dest_jp_server"] = dest_jp_server_field.stringValue as AnyObject?
         plistData["dest_user"] = dest_user_field.stringValue as AnyObject?
         plistData["maxHistory"] = maxHistory as AnyObject?
+        plistData["storeCredentials"] = storeCredentials_button.state as AnyObject?
         (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
     }
     
@@ -3170,55 +3182,58 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         return(status)
     }
-    func selfServiceIconGet(newPolicyId: String, ssIconName: String, ssIconUri: String) {
-        theCreateQ.maxConcurrentOperationCount = 1
-        let semaphore = DispatchSemaphore(value: 0)
-
-//        var responseData = ""
-
-        theCreateQ.addOperation {
-            if self.debug { self.writeToLog(stringOfText: "[- debug -] Getting icon \(ssIconName) from \(ssIconUri)\n") }
-
-            let encodedURL = NSURL(string: ssIconUri)
-            let request = NSMutableURLRequest(url: encodedURL! as URL)
-            request.httpMethod = "GET"
-
-            let configuration = URLSessionConfiguration.default
-//            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-//            request.httpBody = encodedXML!
-            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-            let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                if let httpResponse = response as? HTTPURLResponse {
-                    
-                    if let _ = String(data: data!, encoding: .unicode) {
-                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            self.writeToLog(stringOfText: "icon get succeeded: \(ssIconName)\n")
-                            self.selfServiceIconPost(newPolicyId: newPolicyId, ssIconName: ssIconName, ssIcon: data!)
-                            
-                        } else {
-                            self.writeToLog(stringOfText: "icon get failed: \(ssIconName)\n")
-                        }
-//                        responseData = String(data: data!, encoding: .unicode)!
-                        //                        if self.debug { self.writeToLog(stringOfText: "\n\n[- debug -] full response from create:\n\(responseData)") }
-//                        print("create data response: \(responseData)")
-                    } else {
-                        if self.debug { self.writeToLog(stringOfText: "\n\n[- debug -] No data was returned from icon GET.\n") }
-                    }
-                }
-                
-                semaphore.signal()
-                if error != nil {
-                }
-            })
-            task.resume()
-            semaphore.wait()
-            
-        }   // theCreateQ.addOperation - end
-    }
-    func selfServiceIconPost(newPolicyId: String, ssIconName: String, ssIcon: Data) {
     
-    }
+    
+    
+//    func selfServiceIconGet(newPolicyId: String, ssIconName: String, ssIconUri: String) {
+//        theCreateQ.maxConcurrentOperationCount = 1
+//        let semaphore = DispatchSemaphore(value: 0)
+//
+////        var responseData = ""
+//
+//        theCreateQ.addOperation {
+//            if self.debug { self.writeToLog(stringOfText: "[- debug -] Getting icon \(ssIconName) from \(ssIconUri)\n") }
+//
+//            let encodedURL = NSURL(string: ssIconUri)
+//            let request = NSMutableURLRequest(url: encodedURL! as URL)
+//            request.httpMethod = "GET"
+//
+//            let configuration = URLSessionConfiguration.default
+////            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+////            request.httpBody = encodedXML!
+//            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+//            let task = session.dataTask(with: request as URLRequest, completionHandler: {
+//                (data, response, error) -> Void in
+//                if let httpResponse = response as? HTTPURLResponse {
+//                    
+//                    if let _ = String(data: data!, encoding: .unicode) {
+//                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
+//                            self.writeToLog(stringOfText: "icon get succeeded: \(ssIconName)\n")
+//                            self.selfServiceIconPost(newPolicyId: newPolicyId, ssIconName: ssIconName, ssIcon: data!)
+//                            
+//                        } else {
+//                            self.writeToLog(stringOfText: "icon get failed: \(ssIconName)\n")
+//                        }
+////                        responseData = String(data: data!, encoding: .unicode)!
+//                        //                        if self.debug { self.writeToLog(stringOfText: "\n\n[- debug -] full response from create:\n\(responseData)") }
+////                        print("create data response: \(responseData)")
+//                    } else {
+//                        if self.debug { self.writeToLog(stringOfText: "\n\n[- debug -] No data was returned from icon GET.\n") }
+//                    }
+//                }
+//                
+//                semaphore.signal()
+//                if error != nil {
+//                }
+//            })
+//            task.resume()
+//            semaphore.wait()
+//            
+//        }   // theCreateQ.addOperation - end
+//    }
+//    func selfServiceIconPost(newPolicyId: String, ssIconName: String, ssIcon: Data) {
+//    
+//    }
     // functions used to get existing self service icons to new server - end
     
     // extract the value between xml tags - start
@@ -3381,6 +3396,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if plistData["source_user"] != nil {
             source_user = plistData["source_user"] as! String
             source_user_field.stringValue = source_user
+            storedSourceUser = source_user
         }
         if plistData["dest_jp_server"] != nil {
             dest_jp_server = plistData["dest_jp_server"] as! String
@@ -3404,6 +3420,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for theServer in destServerArray {
                 self.destServerList_button.addItems(withTitles: [theServer])
             }
+        }
+        if plistData["storeCredentials"] != nil {
+            storeCredentials = plistData["storeCredentials"] as! Int
+            storeCredentials_button.state = storeCredentials
         }
         // read environment settings - end
         
@@ -3582,9 +3602,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-        if self.validCreds {
-            saveSettings()
-        }
+        saveSettings()
         logCleanup()
     }
     

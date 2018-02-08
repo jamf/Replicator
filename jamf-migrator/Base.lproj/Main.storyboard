@@ -977,6 +977,28 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fkz-qQ-OTe">
+                                <rect key="frame" x="762" y="9" width="66" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="go" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="9Bo-Y0-jY6">
+                                    <behavior key="behavior" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="GoWithSender:" target="XfG-lQ-9wD" id="Tmk-q4-dvJ"/>
+                                </connections>
+                            </button>
+                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lc3-4c-kgf">
+                                <rect key="frame" x="682" y="9" width="66" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="quit" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="w9e-aB-n7b">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="QuitNowWithSender:" target="XfG-lQ-9wD" id="UX0-gX-CPZ"/>
+                                </connections>
+                            </button>
                             <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pb3-n5-8xc">
                                 <rect key="frame" x="177" y="360" width="48" height="48"/>
                                 <autoresizingMask key="autoresizingMask"/>
@@ -2160,26 +2182,24 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fkz-qQ-OTe">
-                                <rect key="frame" x="762" y="9" width="66" height="31"/>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yFB-7I-Sb2">
+                                <rect key="frame" x="401" y="350" width="46" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="go" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="9Bo-Y0-jY6">
-                                    <behavior key="behavior" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Save" id="aNS-wo-a63">
+                                    <font key="font" size="12" name="ArialMT"/>
+                                    <color key="textColor" red="0.9999235272" green="1" blue="0.99988299609999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lsc-CO-2iT" userLabel="Save Password checkbox">
+                                <rect key="frame" x="384" y="349" width="53" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="R8b-G6-Yv6">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="GoWithSender:" target="XfG-lQ-9wD" id="Tmk-q4-dvJ"/>
-                                </connections>
-                            </button>
-                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lc3-4c-kgf">
-                                <rect key="frame" x="682" y="9" width="66" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="quit" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="w9e-aB-n7b">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="QuitNowWithSender:" target="XfG-lQ-9wD" id="UX0-gX-CPZ"/>
+                                    <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -2290,6 +2310,7 @@
                         <outlet property="static_ios_groups_button" destination="qhC-l8-gex" id="SQg-Cx-Adn"/>
                         <outlet property="static_ios_groups_label_field" destination="Uo3-PW-fQz" id="yVT-a4-w1N"/>
                         <outlet property="stop_button" destination="NrN-I8-3SR" id="E9u-6R-3rj"/>
+                        <outlet property="storeCredentials_button" destination="lsc-CO-2iT" id="uhK-Zf-c16"/>
                         <outlet property="sus_button" destination="0Oq-z3-hPc" id="tAC-fB-AAZ"/>
                         <outlet property="sus_label_field" destination="TGh-dy-khY" id="l8I-32-bex"/>
                         <outlet property="userEA_button" destination="5QD-Ga-H9N" id="Ib7-Aj-kw9"/>
