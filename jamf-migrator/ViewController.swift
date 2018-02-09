@@ -641,7 +641,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if !(f_sourceURL == self.source_jp_server && wipe_data) {
             authQ.sync {
-                var myURL = "\(f_sourceURL)/JSSResource/accounts"
+                var myURL = "\(f_sourceURL)/JSSResource/buildings"
                 myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                 if self.debug { self.writeToLog(stringOfText: "[- debug -] checking: \(myURL)\n") }
                 
@@ -660,20 +660,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             if self.debug { self.writeToLog(stringOfText: "[- debug -] \(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
                             
-                            if (!self.validCreds) || (self.source_user != self.storedSourceUser) || (self.dest_user != self.storedDestUser) {
+                            if (!self.validCreds) || (self.source_user_field.stringValue != self.storedSourceUser) || (self.dest_user_field.stringValue != self.storedDestUser) {
                                 // save credentials to login keychain - start
                                 let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
                                 if f_sourceURL == self.source_jp_server && !self.wipe_data {
                                     if self.storeCredentials_button.state == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds.save("migrator - "+credKey, account: self.source_user, data: self.source_pass)
-                                        self.storedSourceUser = self.source_user
+                                        self.Creds.save("migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+                                        self.storedSourceUser = self.source_user_field.stringValue
                                     }
                                 } else {
                                     if self.storeCredentials_button.state == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds.save("migrator - "+credKey, account: self.dest_user, data: self.dest_pass)
-                                        self.storedDestUser = self.dest_user
+                                        self.Creds.save("migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+                                        self.storedDestUser = self.dest_user_field.stringValue
                                     }
                                 }
                                 // save credentials to login keychain - end
