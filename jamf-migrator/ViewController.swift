@@ -520,12 +520,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // set credentials / servers - start
         self.source_jp_server = source_jp_server_field.stringValue
-        self.source_user = source_user_field.stringValue.addingPercentEncoding(withAllowedCharacters: safeCharSet)!
-        self.source_pass = source_pwd_field.stringValue.addingPercentEncoding(withAllowedCharacters: safeCharSet)!
+        self.source_user = source_user_field.stringValue
+        self.source_pass = source_pwd_field.stringValue
         
         self.dest_jp_server = dest_jp_server_field.stringValue
-        self.dest_user = dest_user_field.stringValue.addingPercentEncoding(withAllowedCharacters: safeCharSet)!
-        self.dest_pass = dest_pwd_field.stringValue.addingPercentEncoding(withAllowedCharacters: safeCharSet)!
+        self.dest_user = dest_user_field.stringValue
+        self.dest_pass = dest_pwd_field.stringValue
         // set credentials / servers - end
         
         // server is reachable - start
@@ -549,13 +549,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // server is reachable - end
             
             self.sourceCreds = "\(self.source_user):\(self.source_pass)"
-            let sourceUtf8Creds = self.sourceCreds.data(using: String.Encoding.utf8)
-            self.sourceBase64Creds = (sourceUtf8Creds?.base64EncodedString())!
+            self.sourceBase64Creds = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
             
             self.destCreds = "\(self.dest_user):\(self.dest_pass)"
-            let destUtf8Creds = self.destCreds.data(using: String.Encoding.utf8)
-            self.destBase64Creds = (destUtf8Creds?.base64EncodedString())!
+            self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+
             // set credentials - end
+            
             
             // check authentication - start
             self.authCheck(f_sourceURL: self.source_jp_server, f_credentials: self.sourceBase64Creds)  {
@@ -1797,7 +1797,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(self.dest_jp_server)")
                                 
                             case "mobiledevices":
-                                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
+                                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                                 }
                                 
@@ -3364,7 +3364,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist", isDirectory: &isDir)) {
             do {
                 try fm.copyItem(atPath: def_plist, toPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
-                //migrator.makeKeyAndOrderFront(self)
             }
             catch let error as NSError {
                 if self.debug { self.writeToLog(stringOfText: "Failed creating default settings.plist! Something went wrong: \(error)") }
