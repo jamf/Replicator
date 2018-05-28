@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G1212" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="12121"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14109"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="14109"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -640,6 +640,9 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <connections>
+                            <outlet property="delegate" destination="B8D-0N-5wS" id="hN9-05-bNu"/>
+                        </connections>
                     </window>
                     <connections>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
@@ -658,6 +661,9 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="245" y="301" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <connections>
+                            <outlet property="delegate" destination="md9-xU-Yaj" id="Gym-qe-h94"/>
+                        </connections>
                     </window>
                     <connections>
                         <segue destination="M0I-3w-TrH" kind="relationship" relationship="window.shadowedContentViewController" id="gjG-ad-txH"/>
@@ -676,6 +682,9 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="1734" y="133" width="480" height="270"/>
                         <rect key="screenRect" x="1440" y="-180" width="1920" height="1057"/>
+                        <connections>
+                            <outlet property="delegate" destination="UDh-wr-lId" id="2hT-ko-cqJ"/>
+                        </connections>
                     </window>
                     <connections>
                         <segue destination="hPh-eN-AVY" kind="relationship" relationship="window.shadowedContentViewController" id="Wxb-6g-wkH"/>
@@ -1011,11 +1020,11 @@
                                 <tabViewItems>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
                                         <view key="view" id="fn5-oe-BJC">
-                                            <rect key="frame" x="10" y="7" width="696" height="186"/>
+                                            <rect key="frame" x="10" y="7" width="250" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tabView fixedFrame="YES" drawsBackground="NO" allowsTruncatedLabels="NO" type="noTabsNoBorder" translatesAutoresizingMaskIntoConstraints="NO" id="xIe-Jb-eyh">
-                                                    <rect key="frame" x="-4" y="-5" width="702" height="191"/>
+                                                    <rect key="frame" x="-4" y="-191" width="702" height="191"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                     <tabViewItems>
@@ -1615,11 +1624,11 @@
                                         <accessibility description="iOS" identifier="iOS"/>
                                     </tabViewItem>
                                     <tabViewItem label="General" identifier="" id="88A-Nu-WEM">
-                                        <view key="view" id="CPy-PU-zBW">
+                                        <view key="view" ambiguous="YES" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Sh-gj-yTi">
+                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Sh-gj-yTi">
                                                     <rect key="frame" x="491" y="105" width="129" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Static User Groups" id="CrH-g7-vAg">
@@ -1628,7 +1637,7 @@
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v6Z-fi-xq1">
+                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v6Z-fi-xq1">
                                                     <rect key="frame" x="490" y="127" width="135" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Smart User Groups" id="g6q-oz-EHG">
@@ -1904,7 +1913,7 @@
                                         <accessibility description="general" identifier="general"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
+                                        <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="7" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1966,7 +1975,7 @@
                                                                 <action selector="sectionToMigrate:" target="XfG-lQ-9wD" id="fWP-IL-j44"/>
                                                             </connections>
                                                         </popUpButton>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2D8-OH-JBP">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2D8-OH-JBP">
                                                             <rect key="frame" x="49" y="55" width="52" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="General" id="w82-8X-axr">
@@ -1975,7 +1984,7 @@
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="osE-m4-tRQ">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="osE-m4-tRQ">
                                                             <rect key="frame" x="46" y="112" width="67" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS / tvOS" id="uMo-rK-X7M">
@@ -1984,7 +1993,7 @@
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gbc-Kd-A3X">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gbc-Kd-A3X">
                                                             <rect key="frame" x="218" y="173" width="205" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select object(s) to take action on" id="3et-gS-4zI">
@@ -2074,7 +2083,7 @@
                                                                 <action selector="sectionToMigrate:" target="XfG-lQ-9wD" id="hip-D6-Szr"/>
                                                             </connections>
                                                         </popUpButton>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qgQ-DV-Jc8">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qgQ-DV-Jc8">
                                                             <rect key="frame" x="47" y="172" width="48" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS" id="Bhi-pK-ygK">
@@ -2088,7 +2097,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="395" height="166"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="395" height="166"/>
@@ -2119,7 +2128,7 @@
                                                                 </subviews>
                                                             </clipView>
                                                             <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="gEQ-tu-8t7">
-                                                                <rect key="frame" x="1" y="-14" width="0.0" height="15"/>
+                                                                <rect key="frame" x="1" y="-15" width="0.0" height="16"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </scroller>
                                                             <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="lbA-xB-Awp">
@@ -2215,7 +2224,7 @@
                         <outlet property="allNone_button" destination="vJA-rz-FWc" id="eCb-jb-Ayy"/>
                         <outlet property="allNone_general_button" destination="QJL-w2-5jw" id="hxI-ni-Hyc"/>
                         <outlet property="allNone_iOS_button" destination="14Q-PR-ssk" id="4hq-CS-pwp"/>
-                        <outlet property="building_button" destination="zSQ-Vt-PWI" id="8Ea-7b-yb8"/>
+                        <outlet property="building_button" destination="zSQ-Vt-PWI" id="foY-Pp-fCh"/>
                         <outlet property="building_label_field" destination="W9z-MB-k3t" id="5d6-hk-TwF"/>
                         <outlet property="bulk_iOS_tabViewItem" destination="hjR-Z4-r7D" id="XMy-JF-seW"/>
                         <outlet property="bulk_tabViewItem" destination="HJu-4l-pJU" id="ssW-uV-SbK"/>
