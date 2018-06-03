@@ -17,6 +17,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
+    
+    
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
@@ -30,6 +32,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             helpWindow.close()
         }
+    }
+    
+    // Show Preferences Window
+    @IBAction func showPrefsWindow(_ sender: AnyObject) {
+        let storyboard = NSStoryboard(name: "Main", bundle: nil)
+        let prefsWindowController = storyboard.instantiateController(withIdentifier: "Prefs View Controller") as! NSWindowController
+        prefsWindowController.showWindow(self)
+//        if let prefsWindow = prefsWindowController.window {
+//            //            let prefsViewController = prefsWindow.contentViewController as! prefsViewController
+//
+//            let application = NSApplication.shared()
+////            application.runModal(for: prefsWindow)
+//
+////            prefsWindow.close()
+//        }
     }
         
     // keychain access
@@ -204,7 +221,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var didRun = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
     let plistPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
     var format = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-    var plistData:[String:AnyObject] = [:]  //our server/username data
+    var plistData:[String:Any] = [:]   //our server/username data
+
     var maxHistory: Int = 20
     var historyFile: String = ""
     var logFile: String = ""
@@ -213,24 +231,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var historyFileW: FileHandle?  = FileHandle(forUpdatingAtPath: "")
     var logFileW: FileHandle?  = FileHandle(forUpdatingAtPath: "")
     
-    var sourceServerArray = [String]()
-    var destServerArray = [String]()
+    // scope preferences
+    var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
+    var scopeMcpCopy:           Bool = true    // mobileconfigurationprofiles copy scope
+    var policyMcpDisable:       Bool = false   // mobileconfigurationprofiles disable on copy
+    var scopePoliciesCopy:      Bool = true    // policies copy scope
+    var policyPoliciesDisable:  Bool = false   // policies disable on copy
+    var scopeOcpCopy:           Bool = true    // osxconfigurationprofiles copy scope
+    var policyOcpDisable:       Bool = false   // osxconfigurationprofiles disable on copy
+    var scopeRswCopy:           Bool = true    // restrictedsoftware copy scope
+    
+    var sourceServerArray   = [String]()
+    var destServerArray     = [String]()
     
     // credentials
     var sourceCreds = ""
-    var destCreds = ""
+    var destCreds   = ""
     var jamfAdminId = 1
     
     // settings variables
-    let safeCharSet = CharacterSet.alphanumerics
-    var source_jp_server: String = ""
-    var source_user: String = ""
-    var source_pass: String = ""
-    var dest_jp_server: String = ""
-    var dest_user: String = ""
-    var dest_pass: String = ""
-    var sourceBase64Creds: String = ""
-    var destBase64Creds: String = ""
+    let safeCharSet                 = CharacterSet.alphanumerics
+    var source_jp_server: String    = ""
+    var source_user: String         = ""
+    var source_pass: String         = ""
+    var dest_jp_server: String      = ""
+    var dest_user: String           = ""
+    var dest_pass: String           = ""
+    var sourceBase64Creds: String   = ""
+    var destBase64Creds: String     = ""
     
     var sourceURL = ""
 //    var destURL = ""
@@ -459,6 +487,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func Go(sender: AnyObject) {
+        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
+        plistData = readSettings()
+        scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        print("go (after readSettings) scopeOptions:  \(String(describing: scopeOptions))\n")
         didRun = true
         if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
         // check for file that allow deleting data from destination server - start
@@ -949,13 +981,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
             }
             
+            // get scope copy / policy disable options
+            self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
+            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
+            self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            self.policyMcpDisable = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["disable"]!
+            self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
+            self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
+            self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            self.policyOcpDisable = self.scopeOptions["osxconfigurationprofiles"]!["disable"]!
+            self.scopeRswCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
+            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))\n")
+            
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             // loop through process of migrating or removing - start
-    //        for i in (0..<objectsToMigrate.count) {
-    //            if self.debug { self.writeToLog(stringOfText: "Starting to process \(objectsToMigrate[i])\n") }
-    //            if (goSender == "goButton" && migrationMode == "bulk") || (goSender == "selectToMigrateButton") {
-    //                if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(objectsToMigrate[i])\n") }
-    //                self.getEndpoints(endpoint: objectsToMigrate[i])  {
             for currentNode in self.objectsToMigrate {
                 
                 if self.debug { self.writeToLog(stringOfText: "Starting to process \(currentNode)\n") }
@@ -1788,6 +1827,39 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
                         }
                         
+                        // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
+                        switch endpoint {
+                            case "mobiledeviceconfigurationprofiles":
+                                if !self.scopeMcpCopy {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                }
+                                if !self.policyMcpDisable {
+                                    PostXML = self.disable(theXML: PostXML)
+                                }
+                            case "policies":
+                                if !self.scopePoliciesCopy {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                }
+                                if !self.policyPoliciesDisable {
+                                    PostXML = self.disable(theXML: PostXML)
+                                }
+                            case "osxconfigurationprofiles":
+                                if !self.scopeOcpCopy {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                }
+                                if !self.policyOcpDisable {
+                                    PostXML = self.disable(theXML: PostXML)
+                                }
+                           case "restrictedsoftware":
+                                if !self.scopeRswCopy {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                }
+                            default:
+                                break
+                        }
+                        // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
+                        
+                        
                         switch endpoint {
                         case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                             if self.debug { self.writeToLog(stringOfText: "processing \(endpoint) - verbose\n") }
@@ -2061,6 +2133,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             for xmlTag in ["self_service_icon", "computers"] {
                                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                             }
+                            
+                            
                             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
                             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
                             //print("\nXML: \(PostXML)")
@@ -2107,15 +2181,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 accountType = endpoint
                             }
                             
-                            if self.debug { self.writeToLog(stringOfText: "processing ldapservers\(endpoint) - verbose\n") }
+                            if self.debug { self.writeToLog(stringOfText: "processing jamf users/groups - verbose\n") }
                             // remove password from XML, since it doesn't work on the new server
                             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.32\">(.*?)</password_sha256>", options:.caseInsensitive)
                             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
                             //print("\nXML: \(PostXML)")
                             if action == "create" {
-                                // newly created accounts are disabled
-                                let regexComp1 = try! NSRegularExpression(pattern: "<enabled>Enabled</enabled>", options:.caseInsensitive)
-                                PostXML = regexComp1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<enabled>Disabled</enabled>")
+                                // newly created local accounts are disabled
+                                if PostXML.range(of: "<directory_user>false</directory_user>") != nil {
+                                    let regexComp1 = try! NSRegularExpression(pattern: "<enabled>Enabled</enabled>", options:.caseInsensitive)
+                                    PostXML = regexComp1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<enabled>Disabled</enabled>")
+                                }
                             } else {
                                 // don't change enabled status of existing accounts on destination server.
                                 for xmlTag in ["enabled"] {
@@ -2896,6 +2972,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     // which platform mode tab are we on - end
     
+    func disable(theXML: String) -> String {
+        let regexDisable = try? NSRegularExpression(pattern: "<enabled>true</enabled>", options:.caseInsensitive)
+        let newXML = (regexDisable?.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "<enabled>false</enabled>"))!
+  
+        return newXML
+    }
+    
     func goButtonEnabled(button_status: Bool) {
         DispatchQueue.main.async {
             self.theSpinnerQ.async {
@@ -3192,15 +3275,46 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return newXML
     }
     
+    func readSettings() -> [String:Any] {
+        // read environment settings - start
+//        var plistData = [String:Any]()
+//        let plistXML = FileManager.default.contents(atPath: plistPath!)!
+        do {
+//            plistData = try PropertyListSerialization.propertyList(from: plistXML,
+//                                                                   options: .mutableContainersAndLeaves,
+//                                                                   format: &format)
+//                as! [String:Any]
+            try plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
+        }
+        catch{
+            if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
+        }
+
+        print("readSettings - plistData: \(String(describing: plistData["scope"]))\n")
+        return(plistData)
+        // read environment settings - end
+    }
+    
     func saveSettings() {
-        plistData["source_jp_server"] = source_jp_server_field.stringValue as AnyObject?
+        plistData["source_jp_server"] = source_jp_server_field.stringValue as Any?
 //        plistData["source_user"] = source_user_field.stringValue as AnyObject?
-        plistData["source_user"] = storedSourceUser as AnyObject?
-        plistData["dest_jp_server"] = dest_jp_server_field.stringValue as AnyObject?
-        plistData["dest_user"] = dest_user_field.stringValue as AnyObject?
-        plistData["maxHistory"] = maxHistory as AnyObject?
-        plistData["storeCredentials"] = storeCredentials_button.state as AnyObject?
-        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
+        plistData["source_user"] = storedSourceUser as Any?
+        plistData["dest_jp_server"] = dest_jp_server_field.stringValue as Any?
+        plistData["dest_user"] = dest_user_field.stringValue as Any?
+        plistData["maxHistory"] = maxHistory as Any?
+        plistData["storeCredentials"] = storeCredentials_button.state as Any?
+        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+        print("saveSettings plistData: \(String(describing: plistData))\n")
+//        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
+    }
+    func savePrefs(prefs: [String:Any]) {
+//        DispatchQueue.main.async {
+            self.plistData["scope"] = prefs
+            self.scopeOptions = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+            NSDictionary(dictionary: prefs).write(toFile: self.plistPath!, atomically: true)
+//            self.plistData = self.readSettings()
+            print("savePrefs plistData: \(String(describing: self.plistData))\n")
+//        }
     }
     
     // functions used to get existing self service icons to new server - start
@@ -3320,8 +3434,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         while local_serverArray.count > 10 {
             local_serverArray.removeLast()
         }
-        plistData[serverList] = local_serverArray as AnyObject?
-        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
+        plistData[serverList] = local_serverArray as Any?
+        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         switch serverList {
         case "source_server_array":
             self.sourceServerList_button.removeAllItems()
@@ -3427,17 +3541,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.rmDELETE()
         // check for file that allows deleting data from destination server, delete if found - end
         
-        // read environment settings - start
-        let plistXML = FileManager.default.contents(atPath: plistPath!)!
-        do{
-            plistData = try PropertyListSerialization.propertyList(from: plistXML,
-                                                                   options: .mutableContainersAndLeaves,
-                                                                   format: &format)
-                as! [String:AnyObject]
-        }
-        catch{
-            if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
-        }
+//        // read environment settings - start
+        plistData = readSettings()
+//        let plistXML = FileManager.default.contents(atPath: plistPath!)!
+//        do{
+//            plistData = try PropertyListSerialization.propertyList(from: plistXML,
+//                                                                   options: .mutableContainersAndLeaves,
+//                                                                   format: &format)
+//                as! [String:AnyObject]
+//        }
+//        catch{
+//            if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
+//        }
         if plistData["source_jp_server"] != nil {
             source_jp_server = plistData["source_jp_server"] as! String
             source_jp_server_field.stringValue = source_jp_server
@@ -3474,8 +3589,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             storeCredentials = plistData["storeCredentials"] as! Int
             storeCredentials_button.state = storeCredentials
         }
+        // settings introduced with v2.8.0
+        if plistData["scope"] != nil {
+            scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+            scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
+            scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            policyMcpDisable = scopeOptions["mobiledeviceconfigurationprofiles"]!["disable"]!
+            policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
+            policyOcpDisable = scopeOptions["osxconfigurationprofiles"]!["disable"]!
+            scopeRswCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+        } else {
+            // initilize new settings
+            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true,"enable":true],
+                                  "policies":["copy":true,"enable":true],
+                                  "osxconfigurationprofiles":["copy":true,"enable":true],
+                                  "restrictedsoftware":["copy":true,"enable":true]] as Any
+            saveSettings()
+        }
         // read environment settings - end
-        
+
         // check for stored passwords - start
         let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
         if (source_jp_server != "") && (source_user != "") {
@@ -3571,7 +3704,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var numberOfArgs = 0
         
         debug = true
-        print("viewDidLoad buttonState: \(building_button.state)")
         
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
         if numberOfArgs >= 0 {
@@ -3579,7 +3711,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for i in stride(from: 1, through: numberOfArgs+1, by: 1) {
                 //print("i: \(i)\t argument: \(CommandLine.arguments[i])")
                 switch CommandLine.arguments[i]{
-                case "-s":
+                case "-saveXML":
                     // Add code to save xml to file
                     print("not yet implemented")
                 case "-debug":

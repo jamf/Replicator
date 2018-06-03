@@ -16,6 +16,7 @@
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
+		B58D87FE20C22293003F8D4C /* PrefsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58D87FD20C22293003F8D4C /* PrefsViewController.swift */; };
 		B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D0C39202B97BA006203CE /* Credentials.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
@@ -37,6 +38,7 @@
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
+		B58D87FD20C22293003F8D4C /* PrefsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsViewController.swift; sourceTree = "<group>"; };
 		B59D0C39202B97BA006203CE /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 			children = (
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
+				B58D87FD20C22293003F8D4C /* PrefsViewController.swift */,
 				B59D0C39202B97BA006203CE /* Credentials.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
@@ -195,6 +198,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
+				B58D87FE20C22293003F8D4C /* PrefsViewController.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
@@ -257,7 +261,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -301,7 +305,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";

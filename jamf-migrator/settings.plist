@@ -20,5 +20,36 @@
 	<string></string>
 	<key>storeCredentials</key>
 	<integer>0</integer>
+	<key>scope</key>
+	<dict>
+		<key>mobiledeviceconfigurationprofiles</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+			<key>disable</key>
+			<true/>
+		</dict>
+		<key>osxconfigurationprofiles</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+			<key>disable</key>
+			<true/>
+		</dict>
+		<key>policies</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+			<key>disable</key>
+			<true/>
+		</dict>
+		<key>restrictedsoftware</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+			<key>disable</key>
+			<true/>
+		</dict>
+	</dict>
 </dict>
 </plist>
