@@ -679,9 +679,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if self.debug { self.writeToLog(stringOfText: "--- checking authentication to: \(f_sourceURL)\n") }
         
         if !(f_sourceURL == self.source_jp_server && wipe_data) {
+            var myURL = "\(f_sourceURL)/JSSResource/buildings"
+            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
-                var myURL = "\(f_sourceURL)/JSSResource/buildings"
-                myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                 if self.debug { self.writeToLog(stringOfText: "checking: \(myURL)\n") }
                 
                 let encodedURL = NSURL(string: myURL)
@@ -1164,13 +1164,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             progressCountArray["\(endpoint)"] = 0
         }
         
+        (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
+        var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
+        myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        
         theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         
         theOpQ.addOperation {
-            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
-            var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
-            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             
             let encodedURL = NSURL(string: myURL)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -1801,12 +1802,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             localEndPointType = endpoint
         }
         if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
+            var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
+            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
+            myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
+            myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
+            
             theOpQ.addOperation {
-                var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
-                myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 if self.debug { self.writeToLog(stringOfText: "fetching XML from: \(myURL)\n") }
                 let encodedURL = NSURL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -2613,14 +2615,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "\(destEndpoint)"
         }
         
+        existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
+        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+//      print("existing endpoints URL: \(existingDestUrl)")
+        
 //        theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 1)
         destEPQ.async {
 //        theOpQ.addOperation {
             //print("Entered destEPQ")
-            existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
-            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//            print("existing endpoints URL: \(existingDestUrl)")
             
             let destEncodedURL = NSURL(string: existingDestUrl)
             let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -2813,7 +2816,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var serverUrl = "\(server)/JSSResource/\(endPoint)/id/\(recordId)"
         serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 
-        
         let semaphore = DispatchSemaphore(value: 0)
         idMapQ.async {
             
