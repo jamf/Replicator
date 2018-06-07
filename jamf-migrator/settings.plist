@@ -27,28 +27,28 @@
 			<key>copy</key>
 			<true/>
 			<key>disable</key>
-			<true/>
+			<false/>
 		</dict>
 		<key>osxconfigurationprofiles</key>
 		<dict>
 			<key>copy</key>
 			<true/>
 			<key>disable</key>
-			<true/>
+			<false/>
 		</dict>
 		<key>policies</key>
 		<dict>
 			<key>copy</key>
 			<true/>
 			<key>disable</key>
-			<true/>
+			<false/>
 		</dict>
 		<key>restrictedsoftware</key>
 		<dict>
 			<key>copy</key>
 			<true/>
 			<key>disable</key>
-			<true/>
+			<false/>
 		</dict>
 	</dict>
 </dict>

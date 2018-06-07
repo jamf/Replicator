@@ -239,7 +239,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var policyPoliciesDisable:  Bool = false   // policies disable on copy
     var scopeOcpCopy:           Bool = true    // osxconfigurationprofiles copy scope
     var policyOcpDisable:       Bool = false   // osxconfigurationprofiles disable on copy
-    var scopeRswCopy:           Bool = true    // restrictedsoftware copy scope
+    var scopeRsCopy:           Bool = true    // restrictedsoftware copy scope
     
     var sourceServerArray   = [String]()
     var destServerArray     = [String]()
@@ -291,6 +291,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var failedCount: Int = 0
     var postCount: Int = 1
     var counters = Dictionary<String, Dictionary<String,Int>>()     // summary counters of created, updated, and failed objects
+    var tmp_counter = Dictionary<String, Dictionary<String,Int>>() // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
 
     
@@ -795,10 +796,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.objectsToMigrate += ["directorybindings"]
                             }
                             
-                            if self.restrictedsoftware_button.state == 1 {
-                                self.objectsToMigrate += ["restrictedsoftware"]
-                            }
-                            
                             if self.dock_items_button.state == 1 {
                                 self.objectsToMigrate += ["dockitems"]
                             }
@@ -819,16 +816,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.objectsToMigrate += ["computerextensionattributes"]
                             }
                             
-                            if self.advcompsearch_button.state == 1 {
-                                self.objectsToMigrate += ["advancedcomputersearches"]
-                            }
-                            
                             if self.scripts_button.state == 1 {
                                 self.objectsToMigrate += ["scripts"]
                             }
                             
+                            if self.printers_button.state == 1 {
+                                self.objectsToMigrate += ["printers"]
+                            }
+                            
                             if self.smart_comp_grps_button.state == 1 || self.static_comp_grps_button.state == 1 {
                                 self.objectsToMigrate += ["computergroups"]
+                            }
+                            
+                            if self.restrictedsoftware_button.state == 1 {
+                                self.objectsToMigrate += ["restrictedsoftware"]
                             }
                             
                             if self.osxconfigurationprofiles_button.state == 1 {
@@ -844,8 +845,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.objectsToMigrate += ["patchpolicies"]
                             }
                             
-                            if self.printers_button.state == 1 {
-                                self.objectsToMigrate += ["printers"]
+                            if self.advcompsearch_button.state == 1 {
+                                self.objectsToMigrate += ["advancedcomputersearches"]
                             }
                             
                             if self.configurations_button.state == 1 {
@@ -897,7 +898,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             
                             if self.building_button.state == 1 {
-                                print("building is checked.")
                                 self.objectsToMigrate += ["buildings"]
                             }
                             
@@ -975,23 +975,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //go_button.isEnabled = false
             self.goButtonEnabled(button_status: false)
             
-            // initialize counters
-            for currentNode in self.objectsToMigrate {
-                self.counters[currentNode] = ["create":0, "update":0, "fail":0]
-                self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
-            }
+//            // initialize counters - changed 20180603 (disabled) setting in func CreateEndpoints
+//            // need to add code to handle computergroups, mobiledevicegroups, and usergroups
+//            for currentNode in self.objectsToMigrate {
+//                self.counters[currentNode] = ["create":0, "update":0, "fail":0]
+//                self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
+//            }
             
             // get scope copy / policy disable options
             self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
             print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
-            self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-            self.policyMcpDisable = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["disable"]!
-            self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
-            self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
-            self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
-            self.policyOcpDisable = self.scopeOptions["osxconfigurationprofiles"]!["disable"]!
-            self.scopeRswCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
-            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))\n")
+            
+            if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            }
+            if self.scopeOptions["policies"]!["copy"] != nil {
+                self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
+            }
+            if self.scopeOptions["policies"]!["disable"] != nil {
+                self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
+            }
+            if self.scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            }
+            if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
+            }
             
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             // loop through process of migrating or removing - start
@@ -1833,25 +1842,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if !self.scopeMcpCopy {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
                                 }
-                                if !self.policyMcpDisable {
-                                    PostXML = self.disable(theXML: PostXML)
-                                }
                             case "policies":
                                 if !self.scopePoliciesCopy {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
                                 }
-                                if !self.policyPoliciesDisable {
+                                if self.policyPoliciesDisable {
                                     PostXML = self.disable(theXML: PostXML)
                                 }
                             case "osxconfigurationprofiles":
                                 if !self.scopeOcpCopy {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
                                 }
-                                if !self.policyOcpDisable {
-                                    PostXML = self.disable(theXML: PostXML)
-                                }
                            case "restrictedsoftware":
-                                if !self.scopeRswCopy {
+                                if !self.scopeRsCopy {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
                                 }
                             default:
@@ -1967,8 +1970,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                                 // update global counters
                                 let patchEaName = self.getName(endpoint: endpoint, objectXML: PostXML)
-                                let tmp_counter = (self.counters[endpoint]?["fail"])!
-                                self.counters[endpoint]?["fail"] = tmp_counter + 1
+//                                if self.counters[endpoint]?["fail"] == nil {
+//                                    self.counters[endpoint]?["fail"] = 0
+//                                }
+                                let localTmp = (self.counters[endpoint]?["fail"])!
+                                self.counters[endpoint]?["fail"] = localTmp + 1
                                 if var summaryArray = self.summaryDict[endpoint]?["fail"] {
                                     summaryArray.append(patchEaName)
                                     self.summaryDict[endpoint]?["fail"] = summaryArray
@@ -2272,8 +2278,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if endpointCurrent == 1 {
                 self.postCount = 1
                 // initial counters
-//                self.counters[endpointType] = ["create":0, "update":0, "fail":0]
-//                self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                // changed 20180603 (re-enabled)
+                self.counters[endpointType] = ["create":0, "update":0, "fail":0]
+                self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
             } else {
                 self.postCount += 1
                 print("createDestUrl: \(createDestUrl)\n")
@@ -2334,8 +2341,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         
                         // update global counters
-                        let tmp_counter = (self.counters[endpointType]?["\(action)"])!
-                        self.counters[endpointType]?["\(action)"] = tmp_counter + 1
+//                        if self.counters[endpointType]?["\(action)"] == nil {
+//                            self.counters[endpointType]?["\(action)"] = 0
+//                        }
+                        let localTmp = (self.counters[endpointType]?["\(action)"])!
+//                        print("localTmp: \(localTmp)")
+                        self.counters[endpointType]?["\(action)"] = localTmp + 1
                         
                         if var summaryArray = self.summaryDict[endpointType]?["\(action)"] {
                             summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
@@ -2393,7 +2404,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //                        409 - unable to create object; already exists or data missing or xml error
                         
                         // update global counters
-                        self.counters[endpointType]?["fail"] = (self.counters[endpointType]?["fail"])!+1
+//                        if self.counters[endpointType]?["fail"] == nil {
+//                            self.counters[endpointType]?["fail"] = 0
+//                        }
+                        let localTmp = (self.counters[endpointType]?["fail"])!
+                        self.counters[endpointType]?["fail"] = localTmp + 1
                         if var summaryArray = self.summaryDict[endpointType]?["fail"] {
                             summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
                             self.summaryDict[endpointType]?["fail"] = summaryArray
@@ -2434,15 +2449,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
             
+            removeDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
+            if self.debug { self.writeToLog(stringOfText: "\n[- debug -] raw removal URL: \(removeDestUrl)\n") }
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
+            
             theOpQ.addOperation {
-                DispatchQueue.main.async {
-                    removeDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-                }
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
-                
+
                 if self.debug { self.writeToLog(stringOfText: "removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
                 if self.debug { self.writeToLog(stringOfText: "\n[- debug -] removal URL: \(removeDestUrl)\n") }
                 
@@ -2897,10 +2912,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //    var myURL = "\(serverURL)"
             //    if self.debug { self.writeToLog(stringOfText: "checking: \(myURL)\n") }
             if self.debug { self.writeToLog(stringOfText: "checking: \(serverURL)\n") }
-            
-            //                    let encodedURL = NSURL(string: myURL)
-            //                    let request = NSMutableURLRequest(url: encodedURL! as URL)
-            //                    request.httpMethod = "HEAD"
+
             guard let encodedURL = URL(string: serverURL) else {
                 if self.debug { self.writeToLog(stringOfText: "--- Cannot cast to URL: \(serverURL)\n") }
                 completion(false)
@@ -3261,6 +3273,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
+                // re-enable source server, username, and password fields (to finish later)
+//                source_jp_server_field.isEnabled = true
+//                sourceServerList_button.isEnabled = true
             }
             catch let error as NSError {
                 if self.debug { self.writeToLog(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
@@ -3304,7 +3319,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         plistData["maxHistory"] = maxHistory as Any?
         plistData["storeCredentials"] = storeCredentials_button.state as Any?
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-        print("saveSettings plistData: \(String(describing: plistData))\n")
+        print("saveSettings scopeOptions: \(String(describing: plistData["scope"]))\n")
 //        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
     }
     func savePrefs(prefs: [String:Any]) {
@@ -3313,7 +3328,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.scopeOptions = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
             NSDictionary(dictionary: prefs).write(toFile: self.plistPath!, atomically: true)
 //            self.plistData = self.readSettings()
-            print("savePrefs plistData: \(String(describing: self.plistData))\n")
+            print("savePrefs scopeOptions: \(String(describing: self.plistData["scope"]))\n")
 //        }
     }
     
@@ -3503,11 +3518,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidAppear() {
         
+        // set tab order
+        source_jp_server_field.nextKeyView  = source_user_field
+        source_user_field.nextKeyView       = source_pwd_field
+        source_pwd_field.nextKeyView        = dest_jp_server_field
+        dest_jp_server_field.nextKeyView    = dest_user_field
+        dest_user_field.nextKeyView         = dest_pwd_field
+        
         // v1 colors
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
         //[NSColor colorWithCalibratedRed:0x5C/255.0 green:0x78/255.0 blue:0x94/255.0 alpha:0xFF/255.0]/* 5C7894FF */
+        
+//        [NSColor colorWithCalibratedRed:0xE8/255.0 green:0xEE/255.0 blue:0xEE/255.0 alpha:0xFF/255.0]/* E8EEEEFF */
+        let bkgndAlpha:CGFloat = 0.95
+        get_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        object_name_field.backgroundColor     = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        get_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        get_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        objects_found_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        
         let def_plist = Bundle.main.path(forResource: "settings", ofType: "plist")!
         var isDir: ObjCBool = true
         
@@ -3592,19 +3624,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // settings introduced with v2.8.0
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-            scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
-            scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
-            policyMcpDisable = scopeOptions["mobiledeviceconfigurationprofiles"]!["disable"]!
-            policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
-            policyOcpDisable = scopeOptions["osxconfigurationprofiles"]!["disable"]!
-            scopeRswCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+            if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            }
+            if scopeOptions["policies"]!["copy"] != nil {
+                scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
+            }
+            if scopeOptions["policies"]!["disable"] != nil {
+                policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
+            }
+            if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            }
+            if scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+            }
         } else {
             // initilize new settings
-            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true,"enable":true],
-                                  "policies":["copy":true,"enable":true],
-                                  "osxconfigurationprofiles":["copy":true,"enable":true],
-                                  "restrictedsoftware":["copy":true,"enable":true]] as Any
+            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
+                                  "policies":["copy":true,"disable":false],
+                                  "osxconfigurationprofiles":["copy":true],
+                                  "restrictedsoftware":["copy":true]] as Any
             saveSettings()
         }
         // read environment settings - end
@@ -3757,7 +3797,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             while true {
                 if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+                    
                     DispatchQueue.main.async {
+                        // disaable source server, username and password fields (to finish)
+//                        self.source_jp_server_field.isEnabled = false
+//                        self.sourceServerList_button.isEnabled = false
                         if isRed == false {
                             self.migrateOrRemove_label_field.stringValue = "--- Removing ---"
                             self.migrateOrRemove_label_field.textColor = self.redText
