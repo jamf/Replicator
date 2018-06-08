@@ -15,10 +15,10 @@ class HelpViewController: NSViewController {
     @IBOutlet weak var help_WebView: WKWebView!
     
     
-    @IBAction func dismissHelpWindow(_ sender: NSButton) {
-        let application = NSApplication.shared()
-        application.stopModal()
-    }
+//    @IBAction func dismissHelpWindow(_ sender: NSButton) {
+//        let application = NSApplication.shared()
+//        application.stopModal()
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

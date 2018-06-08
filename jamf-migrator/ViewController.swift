@@ -23,15 +23,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func showHelpWindow(_ sender: AnyObject) {
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
+        helpWindowController.showWindow(self)
         
-        if let helpWindow = helpWindowController.window {
-            //            let helpViewController = helpWindow.contentViewController as! HelpViewController
-            
-            let application = NSApplication.shared()
-            application.runModal(for: helpWindow)
-            
-            helpWindow.close()
-        }
+//        if let helpWindow = helpWindowController.window {
+//            //            let helpViewController = helpWindow.contentViewController as! HelpViewController
+//            
+//            let application = NSApplication.shared()
+//            application.runModal(for: helpWindow)
+//            
+//            helpWindow.close()
+//        }
     }
     
     // Show Preferences Window
@@ -39,14 +40,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let prefsWindowController = storyboard.instantiateController(withIdentifier: "Prefs View Controller") as! NSWindowController
         prefsWindowController.showWindow(self)
-//        if let prefsWindow = prefsWindowController.window {
-//            //            let prefsViewController = prefsWindow.contentViewController as! prefsViewController
-//
-//            let application = NSApplication.shared()
-////            application.runModal(for: prefsWindow)
-//
-////            prefsWindow.close()
-//        }
     }
         
     // keychain access
@@ -3745,7 +3738,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read commandline args
         var numberOfArgs = 0
         
-        debug = true
+//        debug = true
         
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
         if numberOfArgs >= 0 {
@@ -3802,8 +3795,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     DispatchQueue.main.async {
                         // disaable source server, username and password fields (to finish)
-//                        self.source_jp_server_field.isEnabled = false
-//                        self.sourceServerList_button.isEnabled = false
+                        if self.source_jp_server_field.isEnabled {
+                            self.source_jp_server_field.textColor   = NSColor.white
+                            self.source_jp_server_field.isEnabled   = false
+                            self.sourceServerList_button.isEnabled  = false
+                            self.source_user_field.isEnabled        = false
+                            self.source_pwd_field.isEnabled         = false
+                        }
+
                         if isRed == false {
                             self.migrateOrRemove_label_field.stringValue = "--- Removing ---"
                             self.migrateOrRemove_label_field.textColor = self.redText
@@ -3815,6 +3814,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 } else {
                     DispatchQueue.main.async {
+                        if !self.source_jp_server_field.isEnabled {
+                            self.source_jp_server_field.textColor   = NSColor.black
+                            self.source_jp_server_field.isEnabled   = true
+                            self.sourceServerList_button.isEnabled  = true
+                            self.source_user_field.isEnabled        = true
+                            self.source_pwd_field.isEnabled         = true
+                        }
+
                         self.migrateOrRemove_label_field.stringValue = "Migrate"
                         self.migrateOrRemove_label_field.textColor = self.whiteText
                         isRed = false

@@ -638,8 +638,8 @@
         <!--Window Controller-->
         <scene sceneID="Nn8-vW-tgi">
             <objects>
-                <windowController id="okF-eF-roi" sceneMemberID="viewController">
-                    <window key="window" identifier="Prefs View Controller" title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="cGB-2c-zKA">
+                <windowController storyboardIdentifier="Prefs View Controller" id="okF-eF-roi" sceneMemberID="viewController">
+                    <window key="window" title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="cGB-2c-zKA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
                         <rect key="contentRect" x="1440" y="427" width="480" height="270"/>
                         <rect key="screenRect" x="1440" y="-180" width="1920" height="1057"/>
@@ -659,7 +659,7 @@
         <scene sceneID="rPC-05-eQK">
             <objects>
                 <viewController title="Preferences" id="do0-NK-HtC" customClass="PrefsViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="BNA-nk-ZGb">
+                    <view key="view" identifier="Prefs View Controller" id="BNA-nk-ZGb">
                         <rect key="frame" x="0.0" y="0.0" width="340" height="137"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -812,7 +812,7 @@
             <objects>
                 <windowController storyboardIdentifier="Help View Controller" id="md9-xU-Yaj" sceneMemberID="viewController">
                     <window key="window" title="Help" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="Lg4-MW-haW">
-                        <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="245" y="301" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
@@ -895,7 +895,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <wkWebView wantsLayer="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="elp-sI-55S">
-                                <rect key="frame" x="-1" y="31" width="1027" height="431"/>
+                                <rect key="frame" x="-1" y="-1" width="1027" height="463"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
@@ -905,13 +905,10 @@
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6c8-6L-1RG">
                                 <rect key="frame" x="950" y="-3" width="75" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES"/>
-                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wAH-wV-kT1">
+                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wAH-wV-kT1">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
-                                <connections>
-                                    <action selector="dismissHelpWindow:" target="M0I-3w-TrH" id="ENW-3d-7KC"/>
-                                </connections>
                             </button>
                         </subviews>
                     </view>
@@ -921,7 +918,7 @@
                 </viewController>
                 <customObject id="gNt-pe-cP1" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1530" y="673"/>
+            <point key="canvasLocation" x="1529.5" y="672.5"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -1174,12 +1171,12 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
-                                        <view key="view" id="fn5-oe-BJC">
-                                            <rect key="frame" x="10" y="33" width="696" height="184"/>
+                                        <view key="view" ambiguous="YES" id="fn5-oe-BJC">
+                                            <rect key="frame" x="10" y="33" width="696" height="178"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tabView fixedFrame="YES" drawsBackground="NO" allowsTruncatedLabels="NO" type="noTabsNoBorder" translatesAutoresizingMaskIntoConstraints="NO" id="xIe-Jb-eyh">
-                                                    <rect key="frame" x="-4" y="-7" width="702" height="191"/>
+                                                    <rect key="frame" x="-4" y="-13" width="702" height="191"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                     <tabViewItems>
@@ -2068,7 +2065,7 @@
                                         <accessibility description="general" identifier="general"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
+                                        <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="696" height="184"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2252,7 +2249,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="395" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="395" height="161"/>
@@ -2364,6 +2361,30 @@
                                 </buttonCell>
                                 <connections>
                                     <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>
+                                </connections>
+                            </button>
+                            <button toolTip="Preferences" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10j-hs-1Jt">
+                                <rect key="frame" x="13" y="9" width="30" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="prefs" imagePosition="only" alignment="center" state="on" imageScaling="proportionallyUpOrDown" inset="2" id="pGE-pM-qC0">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent">,</string>
+                                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="showPrefsWindow:" target="XfG-lQ-9wD" id="7mJ-ki-Ahy"/>
+                                </connections>
+                            </button>
+                            <button toolTip="Help" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M64-Jm-oGn">
+                                <rect key="frame" x="51" y="9" width="30" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="help" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="TF1-Jq-lqv">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="showHelpWindow:" target="XfG-lQ-9wD" id="35O-8e-MX9"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -2491,6 +2512,8 @@
     <resources>
         <image name="0" width="72" height="72"/>
         <image name="go" width="87" height="39"/>
+        <image name="help" width="30" height="30"/>
+        <image name="prefs" width="48" height="47"/>
         <image name="quit" width="86" height="39"/>
         <image name="stop" width="74" height="32"/>
     </resources>
