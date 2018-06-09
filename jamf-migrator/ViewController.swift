@@ -226,13 +226,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // scope preferences
     var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
-    var scopeMcpCopy:           Bool = true    // mobileconfigurationprofiles copy scope
-    var policyMcpDisable:       Bool = false   // mobileconfigurationprofiles disable on copy
-    var scopePoliciesCopy:      Bool = true    // policies copy scope
-    var policyPoliciesDisable:  Bool = false   // policies disable on copy
-    var scopeOcpCopy:           Bool = true    // osxconfigurationprofiles copy scope
-    var policyOcpDisable:       Bool = false   // osxconfigurationprofiles disable on copy
-    var scopeRsCopy:           Bool = true    // restrictedsoftware copy scope
+    var scopeMcpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
+    //    var policyMcpDisable:       Bool = false  // mobileconfigurationprofiles disable on copy
+    var scopePoliciesCopy:      Bool = true   // policies copy scope
+    var policyPoliciesDisable:  Bool = false  // policies disable on copy
+    var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
+    //    var policyOcpDisable:       Bool = false  // osxconfigurationprofiles disable on copy
+    var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
+    var scopeScgCopy:           Bool = true // static computer groups copy scope
+    var scopeSigCopy:           Bool = true // static iOS device groups copy scope
+    var scopeUsersCopy:         Bool = true // static user groups copy scope
     
     var sourceServerArray   = [String]()
     var destServerArray     = [String]()
@@ -979,6 +982,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
             print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
             
+            // get preference settings - start
             if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
                 self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
             }
@@ -994,6 +998,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
                 self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
             }
+            if self.scopeOptions["scg"]!["copy"] != nil {
+                self.scopeScgCopy = self.scopeOptions["scg"]!["copy"]!
+            }
+            if self.scopeOptions["sig"]!["copy"] != nil {
+                self.scopeSigCopy = self.scopeOptions["sig"]!["copy"]!
+            }
+            if self.scopeOptions["users"]!["copy"] != nil {
+                self.scopeUsersCopy = self.scopeOptions["users"]!["copy"]!
+            }
+            // get preference settings - start
             
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             // loop through process of migrating or removing - start
@@ -1852,6 +1866,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if !self.scopeRsCopy {
                                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
                                 }
+//                            case "staticcomputergroups":  // handled below in computers case
+//                            case "staticiosgroups":   // handled below in mobiledevicegroups case
+//                                if !self.scopeSigCopy {
+//                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+//                            }
+                            case "staticusergroups":
+                                if !self.scopeUsersCopy {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "users")
+                            }
                             default:
                                 break
                         }
@@ -1871,9 +1894,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                                 
                             case "advancedmobiledevicesearches", "mobiledevicegroups", "smartiosgroups", "staticiosgroups":
-                                for xmlTag in ["mobile_devices"] {
-                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+//                                 !self.scopeSigCopy
+                                if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeSigCopy) {
+                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
                                 }
+//                                for xmlTag in ["mobile_devices"] {
+//                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+//                                }
                                 
 //                            case "mobiledeviceconfigurationprofiles":
 //                                for xmlTag in ["scope"] {
@@ -2076,14 +2103,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         case "computergroups", "smartcomputergroups", "staticcomputergroups":
                             if self.debug { self.writeToLog(stringOfText: "processing \(endpoint) - verbose\n") }
                             // remove computers that are a member of a smart group
-                            if PostXML.range(of:"<is_smart>true</is_smart>") != nil {
-                                let regexComp = try! NSRegularExpression(pattern: "<computers>(.*?)</computers>", options:.caseInsensitive)
-                                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+                            if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeScgCopy) {
+                                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers")
                             }
-                            //                        if endpoint == "smartcomputergroups" {
-                            //                            let regexComp = try! NSRegularExpression(pattern: "<computers>(.*?)</computers>", options:.caseInsensitive)
-                            //                            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-                            //                        }
+//                            if PostXML.range(of:"<is_smart>true</is_smart>") != nil {
+//                                let regexComp = try! NSRegularExpression(pattern: "<computers>(.*?)</computers>", options:.caseInsensitive)
+//                                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+//                            }
                             //print("\n\(endpoint) XML: \(PostXML)\n")
                             
                             if self.getEndpointInProgress != endpoint {
@@ -2897,7 +2923,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //return true
     }   // func alert_dialog - end
     
-    
+    func checkForUpdate() {
+        
+    }
     func checkURL2(serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
         var available:Bool = false
@@ -3634,12 +3662,36 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if scopeOptions["restrictedsoftware"]!["copy"] != nil {
                 scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
             }
+            if scopeOptions["scg"] != nil {
+                if scopeOptions["scg"]!["copy"] != nil {
+                    scopeScgCopy = scopeOptions["scg"]!["copy"]!
+                }
+                if scopeOptions["sig"]!["copy"] != nil {
+                    scopeSigCopy = scopeOptions["sig"]!["copy"]!
+                }
+                if scopeOptions["users"]!["copy"] != nil {
+                    scopeUsersCopy = scopeOptions["users"]!["copy"]!
+                }
+            } else {
+                plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
+                                      "policies":["copy":true,"disable":false],
+                                      "osxconfigurationprofiles":["copy":true],
+                                      "restrictedsoftware":["copy":true],
+                                      "scg":["copy":true],
+                                      "sig":["copy":true],
+                                      "users":["copy":true]] as Any
+                saveSettings()
+            }
+            
         } else {
             // initilize new settings
             plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
                                   "policies":["copy":true,"disable":false],
                                   "osxconfigurationprofiles":["copy":true],
-                                  "restrictedsoftware":["copy":true]] as Any
+                                  "restrictedsoftware":["copy":true],
+                                  "scg":["copy":true],
+                                  "sig":["copy":true],
+                                  "users":["copy":true]] as Any
             saveSettings()
         }
         // read environment settings - end
