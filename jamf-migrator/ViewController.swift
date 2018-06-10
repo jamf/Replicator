@@ -17,9 +17,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
-    
-    
-    // Help Window
+        // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
@@ -41,6 +39,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let prefsWindowController = storyboard.instantiateController(withIdentifier: "Prefs View Controller") as! NSWindowController
         prefsWindowController.showWindow(self)
     }
+
         
     // keychain access
     let Creds = Credentials()
@@ -2923,9 +2922,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //return true
     }   // func alert_dialog - end
     
-    func checkForUpdate() {
-        
-    }
     func checkURL2(serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
         var available:Bool = false
@@ -3328,7 +3324,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
         }
 
-        print("readSettings - plistData: \(String(describing: plistData["scope"]))\n")
+//        print("readSettings - plistData: \(String(describing: plistData["scope"]))\n")
         return(plistData)
         // read environment settings - end
     }
@@ -3540,6 +3536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //// selective migration functions - end
     
     override func viewDidAppear() {
+
         
         // set tab order
         source_jp_server_field.nextKeyView  = source_user_field
