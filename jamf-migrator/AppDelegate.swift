@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
         dialog.informativeText = message
-        dialog.alertStyle = NSAlertStyle.informational
+        dialog.alertStyle = NSAlert.Style.informational
         if updateAvail {
             dialog.addButton(withTitle: "View")
             dialog.addButton(withTitle: "Ignore")
@@ -40,11 +40,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             dialog.addButton(withTitle: "OK")
         }
         
-        let clicked:NSModalResponse = dialog.runModal()
+        let clicked:NSApplication.ModalResponse = dialog.runModal()
 
-        if clicked == 1000 && updateAvail {
+        if clicked.rawValue == 1000 && updateAvail {
             if let url = URL(string: "https://github.com/jamfprofessionalservices/JamfMigrator/releases") {
-                    NSWorkspace.shared().open(url)
+                    NSWorkspace.shared.open(url)
             }
         }
 

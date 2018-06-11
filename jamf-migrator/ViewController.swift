@@ -6,6 +6,7 @@
 //  Copyright © 2016 jamf. All rights reserved.
 //
 
+import AppKit
 import Cocoa
 import Foundation
 
@@ -19,8 +20,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
         // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: "Main", bundle: nil)
-        let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
+        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
+        let helpWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Help View Controller")) as! NSWindowController
         helpWindowController.showWindow(self)
         
 //        if let helpWindow = helpWindowController.window {
@@ -35,8 +36,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Show Preferences Window
     @IBAction func showPrefsWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: "Main", bundle: nil)
-        let prefsWindowController = storyboard.instantiateController(withIdentifier: "Prefs View Controller") as! NSWindowController
+        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
+        let prefsWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Prefs View Controller")) as! NSWindowController
         prefsWindowController.showWindow(self)
     }
 
@@ -49,7 +50,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var storeCredentials_button: NSButton!
     var storeCredentials = 0
     @IBAction func storeCredentials(_ sender: Any) {
-        storeCredentials = storeCredentials_button.state
+        storeCredentials = storeCredentials_button.state.rawValue
     }
     
     // Buttons
@@ -291,7 +292,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
-    var theImage:[NSImage] = [NSImage(named: "0.png")!, NSImage(named: "1.png")!, NSImage(named: "2.png")!]
+    var theImage:[NSImage] = [NSImage(named: NSImage.Name(rawValue: "0.png"))!, NSImage(named: NSImage.Name(rawValue: "1.png"))!, NSImage(named: NSImage.Name(rawValue: "2.png"))!]
     var showSpinner = false
     
     // group counters
@@ -335,7 +336,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func showLogFolder(_ sender: Any) {
         isDir = true
         if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
-            NSWorkspace.shared().openFile(logPath!)
+            NSWorkspace.shared.openFile(logPath!)
         } else {
             alert_dialog(header: "Alert", message: "There are currently no log files to display.")
         }
@@ -344,50 +345,50 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func toggleAllNone(_ sender: NSButton) {
         //        platform = deviceType()
         if deviceType() == "macOS" {
-            self.allNone_button.state = (
-                self.advcompsearch_button.state == 1
-                    && self.computers_button.state == 1
-                    && self.configurations_button.state == 1
-                    && self.directory_bindings_button.state == 1
-                    && self.dock_items_button.state == 1
-                    && self.fileshares_button.state == 1
-                    && self.sus_button.state == 1
-                    && self.netboot_button.state == 1
-                    && self.osxconfigurationprofiles_button.state == 1
-//                    && self.patch_mgmt_button.state == 1
-                    && self.patch_policies_button.state == 1
-                    && self.smart_comp_grps_button.state == 1
-                    && self.static_comp_grps_button.state == 1
-                    && self.ext_attribs_button.state == 1
-                    && self.scripts_button.state == 1
-                    && self.packages_button.state == 1
-                    && self.printers_button.state == 1
-                    && self.restrictedsoftware_button.state == 1
-                    && self.policies_button.state == 1) ? 1 : 0;
+            self.allNone_button.state = NSControl.StateValue(rawValue: (
+                self.advcompsearch_button.state.rawValue == 1
+                    && self.computers_button.state.rawValue == 1
+                    && self.configurations_button.state.rawValue == 1
+                    && self.directory_bindings_button.state.rawValue == 1
+                    && self.dock_items_button.state.rawValue == 1
+                    && self.fileshares_button.state.rawValue == 1
+                    && self.sus_button.state.rawValue == 1
+                    && self.netboot_button.state.rawValue == 1
+                    && self.osxconfigurationprofiles_button.state.rawValue == 1
+                    //                    && self.patch_mgmt_button.state == 1
+                    && self.patch_policies_button.state.rawValue == 1
+                    && self.smart_comp_grps_button.state.rawValue == 1
+                    && self.static_comp_grps_button.state.rawValue == 1
+                    && self.ext_attribs_button.state.rawValue == 1
+                    && self.scripts_button.state.rawValue == 1
+                    && self.packages_button.state.rawValue == 1
+                    && self.printers_button.state.rawValue == 1
+                    && self.restrictedsoftware_button.state.rawValue == 1
+                    && self.policies_button.state.rawValue == 1) ? 1 : 0);
         } else if deviceType() == "iOS" {
-            self.allNone_iOS_button.state = (
-                self.mobiledeviceconfigurationprofiles_button.state == 1
-                    && self.mobiledevices_button.state == 1
-                    && self.smart_ios_groups_button.state == 1
-                    && self.static_ios_groups_button.state == 1
-                    && self.mobiledeviceextensionattributes_button.state == 1
-                    && self.advancedmobiledevicesearches_button.state == 1) ? 1 : 0;
+            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: (
+                self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1
+                    && self.mobiledevices_button.state.rawValue == 1
+                    && self.smart_ios_groups_button.state.rawValue == 1
+                    && self.static_ios_groups_button.state.rawValue == 1
+                    && self.mobiledeviceextensionattributes_button.state.rawValue == 1
+                    && self.advancedmobiledevicesearches_button.state.rawValue == 1) ? 1 : 0);
         } else {
             // general
-            self.allNone_general_button.state = (
-                self.building_button.state == 1
-                    && self.categories_button.state == 1
-                    && self.dept_button.state == 1
-                    && self.advusersearch_button.state == 1
-                    && self.userEA_button.state == 1
-                    && self.ldapservers_button.state == 1
-                    && self.sites_button.state == 1
-                    && self.networks_button.state == 1
-                    && self.jamfUserAccounts_button.state == 1
-                    && self.jamfGroupAccounts_button.state == 1
-                    && self.smartUserGrps_button.state == 1
-                    && self.staticUserGrps_button.state == 1
-                    && self.users_button.state == 1) ? 1 : 0;
+            self.allNone_general_button.state = NSControl.StateValue(rawValue: (
+                self.building_button.state.rawValue == 1
+                    && self.categories_button.state.rawValue == 1
+                    && self.dept_button.state.rawValue == 1
+                    && self.advusersearch_button.state.rawValue == 1
+                    && self.userEA_button.state.rawValue == 1
+                    && self.ldapservers_button.state.rawValue == 1
+                    && self.sites_button.state.rawValue == 1
+                    && self.networks_button.state.rawValue == 1
+                    && self.jamfUserAccounts_button.state.rawValue == 1
+                    && self.jamfGroupAccounts_button.state.rawValue == 1
+                    && self.smartUserGrps_button.state.rawValue == 1
+                    && self.staticUserGrps_button.state.rawValue == 1
+                    && self.users_button.state.rawValue == 1) ? 1 : 0);
         }
     }
     
@@ -438,8 +439,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
         
-        let whichTab = sender.identifier!
-        if debug { writeToLog(stringOfText: "func sectionToMigrate active tab: \(whichTab).\n") }
+        let whichTab = sender.identifier!.rawValue
+        
+        if debug { writeToLog(stringOfText: "func sectionToMigrate active tab: \(String(describing: whichTab)).\n") }
         var itemIndex = 0
         switch whichTab {
         case "macOS":
@@ -477,7 +479,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             objectsToMigrate.append(AllEndpointsArray[itemIndex-1])
-            if self.debug { self.writeToLog(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? "")\n") }
+            if self.debug { self.writeToLog(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
             Go(sender: self)
         }
     }
@@ -664,7 +666,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allows deleting data from destination server, delete if found - end
         //self.go_button.isEnabled = true
         self.goButtonEnabled(button_status: true)
-        NSApplication.shared().terminate(self)
+        NSApplication.shared.terminate(self)
     }
     
     //================================= migration functions =================================//
@@ -698,13 +700,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // save credentials to login keychain - start
                                 let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
                                 if f_sourceURL == self.source_jp_server && !self.wipe_data {
-                                    if self.storeCredentials_button.state == 1 {
+                                    if self.storeCredentials_button.state.rawValue == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
                                         self.Creds.save("migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
                                         self.storedSourceUser = self.source_user_field.stringValue
                                     }
                                 } else {
-                                    if self.storeCredentials_button.state == 1 {
+                                    if self.storeCredentials_button.state.rawValue == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
                                         self.Creds.save("migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
                                         self.storedDestUser = self.dest_user_field.stringValue
@@ -783,144 +785,144 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         // macOS
                         switch self.deviceType() {
                         case "macOS":
-                            if self.fileshares_button.state == 1 {
+                            if self.fileshares_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["distributionpoints"]
                             }
                             
-                            if self.directory_bindings_button.state == 1 {
+                            if self.directory_bindings_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["directorybindings"]
                             }
                             
-                            if self.dock_items_button.state == 1 {
+                            if self.dock_items_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["dockitems"]
                             }
                             
-                            if self.computers_button.state == 1 {
+                            if self.computers_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["computers"]
                             }
                             
-                            if self.sus_button.state == 1 {
+                            if self.sus_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["softwareupdateservers"]
                             }
                             
-                            if self.netboot_button.state == 1 {
+                            if self.netboot_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["netbootservers"]
                             }
                             
-                            if self.ext_attribs_button.state == 1 {
+                            if self.ext_attribs_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["computerextensionattributes"]
                             }
                             
-                            if self.scripts_button.state == 1 {
+                            if self.scripts_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["scripts"]
                             }
                             
-                            if self.printers_button.state == 1 {
+                            if self.printers_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["printers"]
                             }
                             
-                            if self.smart_comp_grps_button.state == 1 || self.static_comp_grps_button.state == 1 {
+                            if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["computergroups"]
                             }
                             
-                            if self.restrictedsoftware_button.state == 1 {
+                            if self.restrictedsoftware_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["restrictedsoftware"]
                             }
                             
-                            if self.osxconfigurationprofiles_button.state == 1 {
+                            if self.osxconfigurationprofiles_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["osxconfigurationprofiles"]
                             }
                             
-                            if self.packages_button.state == 1 {
+                            if self.packages_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["packages"]
                             }
                             
-                            if self.patch_policies_button.state == 1 {
+                            if self.patch_policies_button.state.rawValue == 1 {
                                 //                    self.objectsToMigrate += ["patches"]
                                 self.objectsToMigrate += ["patchpolicies"]
                             }
                             
-                            if self.advcompsearch_button.state == 1 {
+                            if self.advcompsearch_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["advancedcomputersearches"]
                             }
                             
-                            if self.configurations_button.state == 1 {
+                            if self.configurations_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["computerconfigurations"]
                             }
                             
-                            if self.policies_button.state == 1 {
+                            if self.policies_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["policies"]
                             }
                         case "iOS":
-                            if self.mobiledeviceextensionattributes_button.state == 1 {
+                            if self.mobiledeviceextensionattributes_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["mobiledeviceextensionattributes"]
                             }
                             
-                            if self.mobiledevices_button.state == 1 {
+                            if self.mobiledevices_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["mobiledevices"]
                             }
                             
-                            if self.smart_ios_groups_button.state == 1 || self.static_ios_groups_button.state == 1 {
+                            if self.smart_ios_groups_button.state.rawValue == 1 || self.static_ios_groups_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["mobiledevicegroups"]
                             }
                             
-                            if self.advancedmobiledevicesearches_button.state == 1 {
+                            if self.advancedmobiledevicesearches_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["advancedmobiledevicesearches"]
                             }
                             
-                            if self.mobiledevicecApps_button.state == 1 {
+                            if self.mobiledevicecApps_button.state.rawValue == 1 {
                                 //                    self.objectsToMigrate += ["mobiledeviceapplications"]
                             }
                             
-                            if self.mobiledeviceconfigurationprofiles_button.state == 1 {
+                            if self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["mobiledeviceconfigurationprofiles"]
                             }
                         case "general":
-                            if self.sites_button.state == 1 {
+                            if self.sites_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["sites"]
                             }
                             
-                            if self.userEA_button.state == 1 {
+                            if self.userEA_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["userextensionattributes"]
                             }
                             
-                            if self.ldapservers_button.state == 1 {
+                            if self.ldapservers_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["ldapservers"]
                             }
                             
-                            if self.users_button.state == 1 {
+                            if self.users_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["users"]
                             }
                             
-                            if self.building_button.state == 1 {
+                            if self.building_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["buildings"]
                             }
                             
-                            if self.dept_button.state == 1 {
+                            if self.dept_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["departments"]
                             }
                             
-                            if self.categories_button.state == 1 {
+                            if self.categories_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["categories"]
                             }
                             
-                            if self.jamfUserAccounts_button.state == 1 {
+                            if self.jamfUserAccounts_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["jamfusers"]
                             }
                             
-                            if self.jamfGroupAccounts_button.state == 1 {
+                            if self.jamfGroupAccounts_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["jamfgroups"]
                             }
                             
-                            if self.networks_button.state == 1 {
+                            if self.networks_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["networksegments"]
                             }
                             
-                            if self.advusersearch_button.state == 1 {
+                            if self.advusersearch_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["advancedusersearches"]
                             }
                             
-                            if self.smartUserGrps_button.state == 1 || self.staticUserGrps_button.state == 1 {
+                            if self.smartUserGrps_button.state.rawValue == 1 || self.staticUserGrps_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["usergroups"]
                             }
                         default: break
@@ -1314,24 +1316,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             // split devicegroups into smart and static - end
                                             switch endpoint {
                                             case "computergroups":
-                                                if self.smart_comp_grps_button.state == 0 {
+                                                if self.smart_comp_grps_button.state.rawValue == 0 {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.static_comp_grps_button.state == 0 {
+                                                if self.static_comp_grps_button.state.rawValue == 0 {
                                                     excludeCount += staticGroupDict.count
                                                 }
                                             case "mobiledevicegroups":
-                                                if self.smart_ios_groups_button.state == 0 {
+                                                if self.smart_ios_groups_button.state.rawValue == 0 {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.static_ios_groups_button.state == 0 {
+                                                if self.static_ios_groups_button.state.rawValue == 0 {
                                                     excludeCount += staticGroupDict.count
                                                 }
                                             case "usergroups":
-                                                if self.smartUserGrps_button.state == 0 {
+                                                if self.smartUserGrps_button.state.rawValue == 0 {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.staticUserGrps_button.state == 0 {
+                                                if self.staticUserGrps_button.state.rawValue == 0 {
                                                     excludeCount += staticGroupDict.count
                                                 }
                                                 
@@ -1349,14 +1351,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 var localEndpoint = endpoint
                                                 switch endpoint {
                                                 case "computergroups":
-                                                    if (self.smart_comp_grps_button.state == 1) && (g == 0) {
+                                                    if (self.smart_comp_grps_button.state.rawValue == 1) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
                                                         print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartcomputergroups"
                                                     }
-                                                    if (self.static_comp_grps_button.state == 1) && (g == 1) {
+                                                    if (self.static_comp_grps_button.state.rawValue == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -1364,14 +1366,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         localEndpoint = "staticcomputergroups"
                                                     }
                                                 case "mobiledevicegroups":
-                                                    if (self.smart_ios_groups_button.state == 1) && (g == 0) {
+                                                    if (self.smart_ios_groups_button.state.rawValue == 1) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
                                                         print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartiosgroups"
                                                     }
-                                                    if (self.static_ios_groups_button.state == 1) && (g == 1) {
+                                                    if (self.static_ios_groups_button.state.rawValue == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -1379,14 +1381,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         localEndpoint = "staticiosgroups"
                                                     }
                                                 case "usergroups":
-                                                    if (self.smartUserGrps_button.state == 1) && (g == 0) {
+                                                    if (self.smartUserGrps_button.state.rawValue == 1) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartusergroups"
                                                     }
-                                                    if (self.staticUserGrps_button.state == 1) && (g == 1) {
+                                                    if (self.staticUserGrps_button.state.rawValue == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -2073,18 +2075,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             let regexSUS = try! NSRegularExpression(pattern: "<swu_server>(.*?)</swu_server>", options:.caseInsensitive)
                             PostXML = regexDistro1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_server/>")
                             // if not migrating file shares remove then from network segments xml - start
-                            if self.fileshares_button.state == 0 {
+                            if self.fileshares_button.state.rawValue == 0 {
                                 PostXML = regexDistro2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point/>")
                                 PostXML = regexDistro3.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
                             }
                             // if not migrating file shares remove then from network segments xml - end
                             // if not migrating netboot server remove then from network segments xml - start
-                            if self.netboot_button.state == 0 {
+                            if self.netboot_button.state.rawValue == 0 {
                                 PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
                             }
                             // if not migrating netboot server remove then from network segments xml - end
                             // if not migrating software update server remove then from network segments xml - start
-                            if self.sus_button.state == 0 {
+                            if self.sus_button.state.rawValue == 0 {
                                 PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
                             }
                             // if not migrating software update server remove then from network segments xml - end
@@ -2916,7 +2918,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
         dialog.informativeText = message
-        dialog.alertStyle = NSAlertStyle.warning
+        dialog.alertStyle = NSAlert.Style.warning
         dialog.addButton(withTitle: "OK")
         dialog.runModal()
         //return true
@@ -3434,7 +3436,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var rawValue = ""
         if let start = xmlString.range(of: "<\(xmlTag)>"),
             let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(xmlString[start.upperBound..<end.lowerBound])
+            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
         } else {
             if self.debug { self.writeToLog(stringOfText: "invalid input for tagValue function or tag not found.\n") }
             if self.debug { self.writeToLog(stringOfText: "\ttag: \(xmlTag)\n") }
@@ -3448,7 +3450,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var rawValue = ""
         if let start = xmlString.range(of: startTag),
             let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(xmlString[start.upperBound..<end.lowerBound])
+            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
         } else {
             if self.debug { self.writeToLog(stringOfText: "invalid input for tagValue2 function.\n") }
         }
@@ -3639,7 +3641,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         if plistData["storeCredentials"] != nil {
             storeCredentials = plistData["storeCredentials"] as! Int
-            storeCredentials_button.state = storeCredentials
+            storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
         }
         // settings introduced with v2.8.0
         if plistData["scope"] != nil {
@@ -3734,50 +3736,50 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // Do any additional setup after loading the view.
         // Sellect all items to be migrated
         // macOS tab
-        allNone_button.state = 1
-        advcompsearch_button.state = 1
-        computers_button.state = 1
-        configurations_button.state = 1
-        directory_bindings_button.state = 1
-        dock_items_button.state = 1
-        netboot_button.state = 1
-        osxconfigurationprofiles_button.state = 1
+        allNone_button.state = NSControl.StateValue(rawValue: 1)
+        advcompsearch_button.state = NSControl.StateValue(rawValue: 1)
+        computers_button.state = NSControl.StateValue(rawValue: 1)
+        configurations_button.state = NSControl.StateValue(rawValue: 1)
+        directory_bindings_button.state = NSControl.StateValue(rawValue: 1)
+        dock_items_button.state = NSControl.StateValue(rawValue: 1)
+        netboot_button.state = NSControl.StateValue(rawValue: 1)
+        osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 1)
 //        patch_mgmt_button.state = 1
-        patch_policies_button.state = 1
-        sus_button.state = 1
-        fileshares_button.state = 1
-        ext_attribs_button.state = 1
-        smart_comp_grps_button.state = 1
-        static_comp_grps_button.state = 1
-        scripts_button.state = 1
-        packages_button.state = 1
-        policies_button.state = 1
-        printers_button.state = 1
-        restrictedsoftware_button.state = 1
+        patch_policies_button.state = NSControl.StateValue(rawValue: 1)
+        sus_button.state = NSControl.StateValue(rawValue: 1)
+        fileshares_button.state = NSControl.StateValue(rawValue: 1)
+        ext_attribs_button.state = NSControl.StateValue(rawValue: 1)
+        smart_comp_grps_button.state = NSControl.StateValue(rawValue: 1)
+        static_comp_grps_button.state = NSControl.StateValue(rawValue: 1)
+        scripts_button.state = NSControl.StateValue(rawValue: 1)
+        packages_button.state = NSControl.StateValue(rawValue: 1)
+        policies_button.state = NSControl.StateValue(rawValue: 1)
+        printers_button.state = NSControl.StateValue(rawValue: 1)
+        restrictedsoftware_button.state = NSControl.StateValue(rawValue: 1)
         // iOS tab
-        allNone_iOS_button.state = 1
-        advancedmobiledevicesearches_button.state = 1
-        mobiledevicecApps_button.state = 0
-        mobiledevices_button.state = 1
-        smart_ios_groups_button.state = 1
-        static_ios_groups_button.state = 1
-        mobiledeviceconfigurationprofiles_button.state = 1
-        mobiledeviceextensionattributes_button.state = 1
+        allNone_iOS_button.state = NSControl.StateValue(rawValue: 1)
+        advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 1)
+        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+        mobiledevices_button.state = NSControl.StateValue(rawValue: 1)
+        smart_ios_groups_button.state = NSControl.StateValue(rawValue: 1)
+        static_ios_groups_button.state = NSControl.StateValue(rawValue: 1)
+        mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 1)
+        mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 1)
         // general tab
-        allNone_general_button.state = 1
-        advusersearch_button.state = 1
-        building_button.state = 1
-        categories_button.state = 1
-        dept_button.state = 1
-        userEA_button.state = 1
-        sites_button.state = 1
-        ldapservers_button.state = 1
-        networks_button.state = 1
-        users_button.state = 1
-        jamfUserAccounts_button.state = 1
-        jamfGroupAccounts_button.state = 1
-        smartUserGrps_button.state = 1
-        staticUserGrps_button.state = 1
+        allNone_general_button.state = NSControl.StateValue(rawValue: 1)
+        advusersearch_button.state = NSControl.StateValue(rawValue: 1)
+        building_button.state = NSControl.StateValue(rawValue: 1)
+        categories_button.state = NSControl.StateValue(rawValue: 1)
+        dept_button.state = NSControl.StateValue(rawValue: 1)
+        userEA_button.state = NSControl.StateValue(rawValue: 1)
+        sites_button.state = NSControl.StateValue(rawValue: 1)
+        ldapservers_button.state = NSControl.StateValue(rawValue: 1)
+        networks_button.state = NSControl.StateValue(rawValue: 1)
+        users_button.state = NSControl.StateValue(rawValue: 1)
+        jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 1)
+        jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 1)
+        smartUserGrps_button.state = NSControl.StateValue(rawValue: 1)
+        staticUserGrps_button.state = NSControl.StateValue(rawValue: 1)
         
         source_jp_server_field.becomeFirstResponder()
         go_button.isEnabled = true
@@ -3880,7 +3882,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
         
-        NSApplication.shared().activate(ignoringOtherApps: true)
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }   //override func viewDidLoad() - end
     
     override var representedObject: Any? {
@@ -3897,15 +3899,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Summary Window - start
     @IBAction func showSummaryWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: "Main", bundle: nil)
-        let summaryWindowController = storyboard.instantiateController(withIdentifier: "Summary Window Controller") as! NSWindowController
+        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
+        let summaryWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Summary Window Controller")) as! NSWindowController
         if let summaryWindow = summaryWindowController.window {
             let summaryViewController = summaryWindow.contentViewController as! SummaryViewController
             
             URLCache.shared.removeAllCachedResponses()
             summaryViewController.summary_WebView.loadHTMLString(summaryXml(theSummary: counters, theSummaryDetail: summaryDict), baseURL: nil)
             
-            let application = NSApplication.shared()
+            let application = NSApplication.shared
             application.runModal(for: summaryWindow)
             summaryWindow.close()
         }
