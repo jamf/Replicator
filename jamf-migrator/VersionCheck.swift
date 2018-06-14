@@ -97,11 +97,11 @@ class VersionCheck: NSObject, URLSessionDelegate {
     }
     
     func versionDetails(theVersion: String) -> (Int, Int, Int, Bool, Int) {
-        var major = 0
-        var minor = 0
-        var patch = 0
+        var major   = 0
+        var minor   = 0
+        var patch   = 0
         var betaVer = 0
-        var isBeta = false
+        var isBeta  = false
         
         let versionArray = theVersion.split(separator: ".")
         major = Int(versionArray[0])!
@@ -118,5 +118,4 @@ class VersionCheck: NSObject, URLSessionDelegate {
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
-    
 }
