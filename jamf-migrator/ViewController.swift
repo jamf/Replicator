@@ -608,6 +608,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                             // verify source server URL - start
                             let sourceURL = URL(string: self.source_jp_server_field.stringValue)
+                            URLCache.shared.removeAllCachedResponses()
                             let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
                                 if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil {
                                     //print(HTTPURLResponse.statusCode)
@@ -615,6 +616,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     // verify destination server URL - start
                                     DispatchQueue.main.async {
                                         let destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                        URLCache.shared.removeAllCachedResponses()
                                         let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
                                             if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil {
                                                 // print("Destination server response: \(response)")
@@ -687,6 +689,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 request.httpMethod = "GET"
                 let configuration = URLSessionConfiguration.default
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(f_credentials)", "Content-Type" : "application/json", "Accept" : "application/json"]
+                URLCache.shared.removeAllCachedResponses()
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
@@ -1835,19 +1838,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //                    print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
                         var PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                         // strip out <id> tag from XML
-                        //                    let regexID = try! NSRegularExpression(pattern: "<id>+[0-9]+</id>", options:.caseInsensitive)
-                        //                    PostXML = regexID.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-                        
-                        //PostXML = PostXML.replacingOccurrences(of: "(?:\\r|\\n)+", with: "", options: .regularExpression)
-
                         if endpoint != "computerconfigurations" {
                             for xmlTag in ["id"] {
                                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                             }
                         } else {
+                            // parent computerconfigurations reference child configurations by id not name
                             let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
                             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
                         }
+                        
+                        // save source XML - start
+                        
+                        // save source XML - end
                         
                         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
                         switch endpoint {
@@ -2241,6 +2244,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         default:
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
                         }   // switch - end
+                        
+                        // save trimmed XML - start
+                        
+                        // save trimmed XML - end
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             //print("\(httpResponse.statusCode)\t\t\(httpResponse.allHeaderFields)")
