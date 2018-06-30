@@ -209,6 +209,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // command line switches
     var debug = false
+    var saveRawXml = false
+    var saveTrimmedXml = false
+    var saveOnly = false
     
     // plist and log variables
     var didRun = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
@@ -1795,6 +1798,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // theOpQ - end
         completion("Got endpoint - \(endpoint)")
     }
+    
     func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
 //    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int) {
         URLCache.shared.removeAllCachedResponses()
@@ -1837,6 +1841,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //                    print("EA data:")
                         //                    print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
                         var PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                        
+                        // save source XML - start
+                        if self.saveRawXml {
+                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID)
+                        }
+                        // save source XML - end
+                        
                         // strip out <id> tag from XML
                         if endpoint != "computerconfigurations" {
                             for xmlTag in ["id"] {
@@ -1847,11 +1858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
                             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
                         }
-                        
-                        // save source XML - start
-                        
-                        // save source XML - end
-                        
+
                         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
                         switch endpoint {
                             case "mobiledeviceconfigurationprofiles":
@@ -1988,7 +1995,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             //                        }
                             if self.tagValue(xmlString: PostXML, xmlTag: "description") != "Extension Attribute provided by JAMF Nation patch service" {
-                                self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                                self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             } else {
                                 // Currently patch EAs are not migrated - handle those here
                                 if self.counters[endpoint]?["fail"] != endpointCount-1 {
@@ -2031,7 +2038,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "advancedcomputersearches":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
@@ -2048,7 +2055,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                             
                         case "computers":
@@ -2069,7 +2076,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "networksegments":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing network segments - verbose\n") }
@@ -2105,7 +2112,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "computergroups", "smartcomputergroups", "staticcomputergroups":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
@@ -2125,7 +2132,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "packages":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
@@ -2140,7 +2147,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "policies":
                             var iconName = ""
@@ -2180,7 +2187,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
                             // create the policy
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri)
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri)
                             
                             // create the self service icon if present
 //                            self.uploadSelfServiceIcon(iconName: iconName, iconUri: iconUri, )
@@ -2202,7 +2209,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
                             var accountType = ""
@@ -2239,15 +2246,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: accountType, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                            self.CreateEndpoints(endpointType: accountType, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         default:
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
                         }   // switch - end
-                        
-                        // save trimmed XML - start
-                        
-                        // save trimmed XML - end
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             //print("\(httpResponse.statusCode)\t\t\(httpResponse.allHeaderFields)")
@@ -2266,7 +2269,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, ssIconName: String, ssIconUri: String) {
+    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String) {
         // this is where we create the new endpoint
         if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
 //        var createDestUrl = createDestUrlBase
@@ -2303,6 +2306,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                self.createDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(destinationEpId)"
 
 //            }
+            
+            // save trimmed XML - start
+            if self.saveTrimmedXml {
+                let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
+                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId)
+            }
+            // save trimmed XML - end
+
+            if self.saveOnly {
+                if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
+                    //self.go_button.isEnabled = true
+                    self.rmDELETE()
+                    self.goButtonEnabled(button_status: true)
+                    print("Done")
+                }
+                return
+            }
             
             if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Action: \(action)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
             if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
@@ -3833,9 +3853,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for i in stride(from: 1, through: numberOfArgs+1, by: 1) {
                 //print("i: \(i)\t argument: \(CommandLine.arguments[i])")
                 switch CommandLine.arguments[i]{
-                case "-saveXML":
-                    // Add code to save xml to file
-                    print("not yet implemented")
+                case "-saveRawXml":
+                    saveRawXml = true
+                case "-saveTrimmedXml":
+                    saveTrimmedXml = true
+                case "-saveOnly":
+                    saveOnly = true
                 case "-debug":
                     debug = true
                 case "-NSDocumentRevisionsDebugMode","YES":
