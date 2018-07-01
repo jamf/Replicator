@@ -208,10 +208,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var isDir: ObjCBool = false
     
     // command line switches
-    var debug = false
-    var saveRawXml = false
-    var saveTrimmedXml = false
-    var saveOnly = false
+    var debug           = false
+    var saveOnly        = false
+    var saveRawXml      = false
+    var saveTrimmedXml  = false
     
     // plist and log variables
     var didRun = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
@@ -239,6 +239,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var scopeScgCopy:           Bool = true // static computer groups copy scope
     var scopeSigCopy:           Bool = true // static iOS device groups copy scope
     var scopeUsersCopy:         Bool = true // static user groups copy scope
+    
+    // xml prefs
+    var xmlPrefOptions:        Dictionary<String,Bool> = [:]
     
     var sourceServerArray   = [String]()
     var destServerArray     = [String]()
@@ -489,9 +492,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func Go(sender: AnyObject) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
-        plistData = readSettings()
-        scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-//        print("go (after readSettings) scopeOptions:  \(String(describing: scopeOptions))\n")
+        plistData       = readSettings()
+        scopeOptions    = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
+        saveOnly        = xmlPrefOptions["saveOnly"]!
+        saveRawXml      = xmlPrefOptions["saveRawXml"]!
+        saveTrimmedXml  = xmlPrefOptions["saveTrimmedXml"]!
+
         didRun = true
         if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
         // check for file that allow deleting data from destination server - start
@@ -1800,6 +1807,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        
+        
+        saveRawXml  = xmlPrefOptions["saveRawXml"]!
 //    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int) {
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
@@ -1844,7 +1854,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         // save source XML - start
                         if self.saveRawXml {
-                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID)
+                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
+                            if self.debug {
+                                return
+                            }
                         }
                         // save source XML - end
                         
@@ -2270,6 +2283,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String) {
+        
         // this is where we create the new endpoint
         if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
 //        var createDestUrl = createDestUrlBase
@@ -2310,10 +2324,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // save trimmed XML - start
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
-                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId)
+                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
             }
             // save trimmed XML - end
-
+            
             if self.saveOnly {
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
@@ -2508,6 +2522,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
+            
+            if saveRawXml {
+                endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
+            }
+            if saveOnly {
+                return
+            }
             
             theOpQ.addOperation {
 
@@ -3367,42 +3388,44 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func readSettings() -> [String:Any] {
         // read environment settings - start
-//        var plistData = [String:Any]()
-//        let plistXML = FileManager.default.contents(atPath: plistPath!)!
         do {
-//            plistData = try PropertyListSerialization.propertyList(from: plistXML,
-//                                                                   options: .mutableContainersAndLeaves,
-//                                                                   format: &format)
-//                as! [String:Any]
             try plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
         }
         catch{
             if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
         }
 
-//        print("readSettings - plistData: \(String(describing: plistData["scope"]))\n")
+//        print("readSettings - plistData: \(String(describing: plistData["xml"]))\n")
         return(plistData)
         // read environment settings - end
     }
     
     func saveSettings() {
-        plistData["source_jp_server"] = source_jp_server_field.stringValue as Any?
-        plistData["source_user"] = storedSourceUser as Any?
-        plistData["dest_jp_server"] = dest_jp_server_field.stringValue as Any?
-        plistData["dest_user"] = dest_user_field.stringValue as Any?
-        plistData["maxHistory"] = maxHistory as Any?
-        plistData["storeCredentials"] = storeCredentials_button.state as Any?
+        plistData                       = readSettings()
+        plistData["source_jp_server"]   = source_jp_server_field.stringValue as Any?
+        plistData["source_user"]        = storedSourceUser as Any?
+        plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
+        plistData["dest_user"]          = dest_user_field.stringValue as Any?
+        plistData["maxHistory"]         = maxHistory as Any?
+        plistData["storeCredentials"]   = storeCredentials_button.state as Any?
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-//        print("saveSettings scopeOptions: \(String(describing: plistData["scope"]))\n")
+        
+//        print("saveSettings xml: \(String(describing: plistData["xml"]))\n")
 //        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
     }
     func savePrefs(prefs: [String:Any]) {
 //        DispatchQueue.main.async {
-            self.plistData["scope"] = prefs
-            self.scopeOptions = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            NSDictionary(dictionary: prefs).write(toFile: self.plistPath!, atomically: true)
+        plistData          = readSettings()
+        plistData["scope"] = prefs["scope"]
+        plistData["xml"]   = prefs["xml"]
+        scopeOptions       = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        xmlPrefOptions     = prefs["xml"] as! Dictionary<String,Bool>
+        saveOnly           = xmlPrefOptions["saveOnly"]!
+        saveRawXml         = xmlPrefOptions["saveRawXml"]!
+        saveTrimmedXml     = xmlPrefOptions["saveTrimmedXml"]!
+        NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
 //            self.plistData = self.readSettings()
-//            print("savePrefs scopeOptions: \(String(describing: self.plistData["scope"]))\n")
+//            print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
 //        }
     }
     
@@ -3594,8 +3617,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //// selective migration functions - end
     
     override func viewDidAppear() {
-
-        
         // set tab order
         source_jp_server_field.nextKeyView  = source_user_field
         source_user_field.nextKeyView       = source_pwd_field
@@ -3651,18 +3672,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.rmDELETE()
         // check for file that allows deleting data from destination server, delete if found - end
         
-//        // read environment settings - start
+        // read environment settings - start
         plistData = readSettings()
-//        let plistXML = FileManager.default.contents(atPath: plistPath!)!
-//        do{
-//            plistData = try PropertyListSerialization.propertyList(from: plistXML,
-//                                                                   options: .mutableContainersAndLeaves,
-//                                                                   format: &format)
-//                as! [String:AnyObject]
-//        }
-//        catch{
-//            if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
-//        }
+
         if plistData["source_jp_server"] != nil {
             source_jp_server = plistData["source_jp_server"] as! String
             source_jp_server_field.stringValue = source_jp_server
@@ -3700,6 +3712,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
         }
         // settings introduced with v2.8.0
+        // read scope settings - start
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
             if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
@@ -3749,6 +3762,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                   "users":["copy":true]] as Any
             saveSettings()
         }
+        // read scope settings - end
+        // read xml settings - start
+        if plistData["xml"] != nil {
+            xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
+            saveRawXml      = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
+            saveTrimmedXml  = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
+            saveOnly        = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
+        } else {
+            // set default values
+            plistData["xml"] = ["saveRawXml":false,
+                                "saveTrimmedXml":false,
+                                "saveOnly":false] as Any
+            saveSettings()
+        }
+        // read xml settings - end
         // read environment settings - end
 
         // check for stored passwords - start
@@ -3781,14 +3809,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.validCreds = false
         }
         // check for stored passwords - start
-
         
-    }
+        // read commandline args
+        var numberOfArgs = 0
+        
+        //        debug = true
+        
+        numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
+        if numberOfArgs >= 0 {
+            //            print("all arguments: \(CommandLine.arguments)")
+            for i in stride(from: 1, through: numberOfArgs+1, by: 1) {
+                //print("i: \(i)\t argument: \(CommandLine.arguments[i])")
+                switch CommandLine.arguments[i]{
+                case "-saveRawXml":
+                    saveRawXml = true
+                case "-saveTrimmedXml":
+                    saveTrimmedXml = true
+                case "-saveOnly":
+                    saveOnly = true
+                case "-debug":
+                    debug = true
+                case "-NSDocumentRevisionsDebugMode","YES":
+                    continue
+                default:
+                    print("unknown switch passed: \(CommandLine.arguments[i])")
+                }
+            }
+        }
+    }   //viewDidAppear - end
     
     override func viewDidLoad() {
-        
         super.viewDidLoad()
-        
+
         // Do any additional setup after loading the view.
         // Sellect all items to be migrated
         // macOS tab
@@ -3841,33 +3893,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         go_button.isEnabled = true
         
         // for selective migration - end
-        
-        // read commandline args
-        var numberOfArgs = 0
-        
-//        debug = true
-        
-        numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
-        if numberOfArgs >= 0 {
-//            print("all arguments: \(CommandLine.arguments)")
-            for i in stride(from: 1, through: numberOfArgs+1, by: 1) {
-                //print("i: \(i)\t argument: \(CommandLine.arguments[i])")
-                switch CommandLine.arguments[i]{
-                case "-saveRawXml":
-                    saveRawXml = true
-                case "-saveTrimmedXml":
-                    saveTrimmedXml = true
-                case "-saveOnly":
-                    saveOnly = true
-                case "-debug":
-                    debug = true
-                case "-NSDocumentRevisionsDebugMode","YES":
-                    continue
-                default:
-                    print("unknown switch passed: \(CommandLine.arguments[i])")
-                }
-            }
-        }
         
         // create log directory if missing - start
         if !fm.fileExists(atPath: logPath!) {

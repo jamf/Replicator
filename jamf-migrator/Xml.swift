@@ -11,22 +11,24 @@ import Foundation
 class Xml {
     let vc = ViewController()
     let fm = FileManager()
-    let xmlFolder = NSHomeDirectory() + "/Documents/Jamf Migrator/xml"
+    let baseXmlFolder = NSHomeDirectory() + "/Documents/Jamf Migrator"
+//    var saveXmlFolder = ""
     
-    func save(node: String, xml: String, name: String, id: Int) {
+    func save(node: String, xml: String, name: String, id: Int, format: String) {
         // Create folder to store xml files if needed - start
-        if !(fm.fileExists(atPath: xmlFolder)) {
+        let saveXmlFolder = baseXmlFolder+"/"+format
+        if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
-                try fm.createDirectory(atPath: xmlFolder, withIntermediateDirectories: true, attributes: nil)
+                try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if vc.debug { vc.writeToLog(stringOfText: "Problem creating \(xmlFolder) folder: Error \(error)") }
+                if vc.debug { vc.writeToLog(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)") }
                 return
             }
         }
         // Create folder to store xml files if needed - end
         
         // Create endpoint type to store xml files if needed - start
-        let endpointPath = xmlFolder+"/"+node
+        let endpointPath = saveXmlFolder+"/"+node
         if !(fm.fileExists(atPath: endpointPath)) {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)

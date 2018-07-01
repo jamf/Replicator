@@ -4,14 +4,14 @@
 <dict>
 	<key>checkForUpdate</key>
 	<true/>
-	<key>maxHistory</key>
-	<integer>20</integer>
-	<key>wipe_data</key>
-	<false/>
 	<key>dest_server_array</key>
 	<array/>
 	<key>source_server_array</key>
 	<array/>
+	<key>maxHistory</key>
+	<integer>20</integer>
+	<key>wipe_data</key>
+	<false/>
 	<key>source_jp_server</key>
 	<string></string>
 	<key>source_user</key>
@@ -28,15 +28,11 @@
 		<dict>
 			<key>copy</key>
 			<true/>
-			<key>disable</key>
-			<false/>
 		</dict>
 		<key>osxconfigurationprofiles</key>
 		<dict>
 			<key>copy</key>
 			<true/>
-			<key>disable</key>
-			<false/>
 		</dict>
 		<key>policies</key>
 		<dict>
@@ -49,9 +45,16 @@
 		<dict>
 			<key>copy</key>
 			<true/>
-			<key>disable</key>
-			<false/>
 		</dict>
+	</dict>
+	<key>xml</key>
+	<dict>
+		<key>saveOnly</key>
+		<false/>
+		<key>saveRawXml</key>
+		<false/>
+		<key>saveTrimmedXml</key>
+		<false/>
 	</dict>
 </dict>
 </plist>
