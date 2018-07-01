@@ -22,9 +22,11 @@ Information about successes/failures can be found in the log, located in
 
 **Migration Options:**<p>
 * You can remove the scope as some items are transfered as well as disable policies that are migrated.
+ 
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copy_migrator_prefs.png)
  
  * XML can be exported if desired
+ 
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/export_migrator_prefs.png)
  
 
