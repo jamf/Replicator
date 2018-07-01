@@ -42,6 +42,9 @@ Information about successes/failures can be found in the log, located in
 
 
 ## History
+**v2.7.2**<p>
+* Corrected encoding issue (#17) of special characters that caused authentication failures.
+
 **v2.6.3**<p>
 * Corrected an issued with self service icons not migrating if the icon name contained a space.
 
