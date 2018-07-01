@@ -18,7 +18,7 @@ Information about successes/failures can be found in the log, located in
 
 **Note:** the app can also be used to clear out a Jamf server.  Typing the following after launching the app will set it into removal mode.  Items from the destination server are deleted once Go is clicked.
 
-```touch ~/Library/Application\ Support/jamf-migrator/DELETE```
+```touch ~/Library/Application\ Support/jamf-migrator/delete```
 
 **Migration Options:**<p>
 * You can remove the scope as some items are transfered as well as disable policies that are migrated.
