@@ -1808,27 +1808,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
         
-        
-        saveRawXml  = xmlPrefOptions["saveRawXml"]!
+        saveRawXml        = xmlPrefOptions["saveRawXml"]!
+        var knownEndpoint = true
 //    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int) {
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
-        //
-        //        endpoint == "jamfusers" ? (subnode == "userid"):(subnode == "groupid")
         
         var localEndPointType = ""
+        var theEndpoint       = endpoint
+        
         switch endpoint {
+//      adjust the lookup endpoint
         case "smartcomputergroups", "staticcomputergroups":
             localEndPointType = "computergroups"
         case "smartiosgroups", "staticiosgroups":
             localEndPointType = "mobiledevicegroups"
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
+//      adjust the where the data is sent
+        case "accounts/userid":
+            theEndpoint = "jamfusers"
+        case "accounts/groupid":
+            theEndpoint = "jamfgroups"
         default:
             localEndPointType = endpoint
         }
+
         if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
             var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
             myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -1848,8 +1855,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     (data, response, error) -> Void in
                     
                     if let httpResponse = response as? HTTPURLResponse {
-                        //                    print("EA data:")
-                        //                    print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
                         var PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                         
                         // save source XML - start
@@ -2007,9 +2012,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
                             //                        }
-                            if self.tagValue(xmlString: PostXML, xmlTag: "description") != "Extension Attribute provided by JAMF Nation patch service" {
-                                self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
-                            } else {
+                            if self.tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
+                                knownEndpoint = false
                                 // Currently patch EAs are not migrated - handle those here
                                 if self.counters[endpoint]?["fail"] != endpointCount-1 {
                                     self.labelColor(endpoint: endpoint, theColor: self.yellowText)
@@ -2051,7 +2055,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "advancedcomputersearches":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
@@ -2068,7 +2072,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                             
                         case "computers":
@@ -2089,7 +2093,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "networksegments":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing network segments - verbose\n") }
@@ -2125,7 +2129,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "computergroups", "smartcomputergroups", "staticcomputergroups":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
@@ -2145,7 +2149,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "packages":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
@@ -2160,7 +2164,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "policies":
                             var iconName = ""
@@ -2200,7 +2204,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
                             // create the policy
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri)
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri)
                             
                             // create the self service icon if present
 //                            self.uploadSelfServiceIcon(iconName: iconName, iconUri: iconUri, )
@@ -2222,19 +2226,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: endpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
-                            var accountType = ""
-                            switch endpoint {
-                            case "accounts/userid":
-                                accountType = "jamfusers"
-                            case "accounts/groupid":
-                                accountType = "jamfgroups"
-                            default:
-                                accountType = endpoint
-                            }
-                            
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing jamf users/groups - verbose\n") }
                             // remove password from XML, since it doesn't work on the new server
                             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.32\">(.*?)</password_sha256>", options:.caseInsensitive)
@@ -2259,11 +2253,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            self.CreateEndpoints(endpointType: accountType, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+//                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                             
                         default:
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
+                            knownEndpoint = false
                         }   // switch - end
+                        
+                        self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             //print("\(httpResponse.statusCode)\t\t\(httpResponse.allHeaderFields)")
