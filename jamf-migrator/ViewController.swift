@@ -986,12 +986,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //go_button.isEnabled = false
             self.goButtonEnabled(button_status: false)
             
-//            // initialize counters - changed 20180603 (disabled) setting in func CreateEndpoints
-//            // need to add code to handle computergroups, mobiledevicegroups, and usergroups
-//            for currentNode in self.objectsToMigrate {
-//                self.counters[currentNode] = ["create":0, "update":0, "fail":0]
-//                self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
-//            }
+           // need to add code to handle computergroups, mobiledevicegroups, and usergroups (done?)
+            for currentNode in self.objectsToMigrate {
+                self.counters[currentNode] = ["create":0, "update":0, "fail":0]
+                self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
+            }
             
             // get scope copy / policy disable options
             self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
@@ -1912,7 +1911,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
                         
-                        
                         switch endpoint {
                         case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
@@ -2011,7 +2009,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             self.get_completed_field.stringValue = "\(endpointCurrent)"
                             
-                            //                        }
                             if self.tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
                                 knownEndpoint = false
                                 // Currently patch EAs are not migrated - handle those here
@@ -2260,7 +2257,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             knownEndpoint = false
                         }   // switch - end
                         
-                        self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                        if knownEndpoint {
+                            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconUri: "")
+                        }
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             //print("\(httpResponse.statusCode)\t\t\(httpResponse.allHeaderFields)")
@@ -2313,10 +2312,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
         
         theCreateQ.addOperation {
-//            DispatchQueue.main.async {
-//                self.createDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(destinationEpId)"
 
-//            }
+            
+            print("theCreateQ - endpoint: \(localEndPointType)")
+            print("theCreateQ - action: \(action)")
+            print("theCreateQ - counters: \(self.counters)\n")
             
             // save trimmed XML - start
             if self.saveTrimmedXml {
@@ -2340,10 +2340,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             if endpointCurrent == 1 {
                 self.postCount = 1
-                // initial counters
-                // changed 20180603 (re-enabled)
-                self.counters[endpointType] = ["create":0, "update":0, "fail":0]
-                self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
             } else {
                 self.postCount += 1
 //                print("createDestUrl: \(createDestUrl)\n")
@@ -2407,6 +2403,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        if self.counters[endpointType]?["\(action)"] == nil {
 //                            self.counters[endpointType]?["\(action)"] = 0
 //                        }
+                        
+                        // ? remove creation of counters dict defined earlier ?
+                        if self.counters[endpointType] == nil {
+                            self.counters[endpointType] = ["create":0, "update":0, "fail":0]
+                            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                        }
+                        
                         let localTmp = (self.counters[endpointType]?["\(action)"])!
 //                        print("localTmp: \(localTmp)")
                         self.counters[endpointType]?["\(action)"] = localTmp + 1
@@ -3385,13 +3388,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func readSettings() -> [String:Any] {
         // read environment settings - start
-        do {
-            try plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
+        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
+        if plistData.count == 0 {
+            if self.debug { self.writeToLog(stringOfText: "Error reading plist") }
         }
-        catch{
-            if self.debug { self.writeToLog(stringOfText: "Error reading plist: \(error), format: \(format)") }
-        }
-
 //        print("readSettings - plistData: \(String(describing: plistData["xml"]))\n")
         return(plistData)
         // read environment settings - end
@@ -3452,7 +3452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     
-    
+    // using curl to deal with self service icons
 //    func selfServiceIconGet(newPolicyId: String, ssIconName: String, ssIconUri: String) {
 //        theCreateQ.maxConcurrentOperationCount = 1
 //        let semaphore = DispatchSemaphore(value: 0)
