@@ -18,7 +18,17 @@ Information about successes/failures can be found in the log, located in
 
 **Note:** the app can also be used to clear out a Jamf server.  Typing the following after launching the app will set it into removal mode.  Items from the destination server are deleted once Go is clicked.
 
-```touch ~/Library/Application\ Support/jamf-migrator/DELETE```
+```touch ~/Library/Application\ Support/jamf-migrator/delete```
+
+**Migration Options:**<p>
+* You can remove the scope as some items are transfered as well as disable policies that are migrated.
+ 
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copy_migrator_prefs.png)
+ 
+ * XML can be exported if desired.
+ 
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/export_migrator_prefs.png)
+ 
 
 **Limitations/requirements to be aware of:**
 * Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP - credentials must be reset on the destination server.
@@ -42,6 +52,22 @@ Information about successes/failures can be found in the log, located in
 
 
 ## History
+**v2.8.0**<p>
+* Moved text manipulation to main thread, fixing issues where the endpoint URL was incorrect.
+* **Changed tab order** - tabs through server to username to password.
+* Updated migration order to address issue #18.
+* Removed forced debug mode accidentally left in the previous beta.
+* Lightly grayed out GET/POST related fields to indicate they are not for user input.
+* Added button for quick access to preferences and help.
+* Help window can now be displayed while running migrations.
+* Changes to the GUI, moved tabs to top of section and added arrows to selective migration subjects.
+* Added removing the scope from static computer groups/mobile device groups/user groups, addressing issue #19.
+* Grayed out source server when doing removals to make it more clear from which server items get removed.
+* Updated Help.
+* Added 'check for updates...' under jamf-migrator in the menu bar.
+* Added additional logging, in debug mode. Minor code adjustments.
+* Added ability to export xml. Added cache clearing to authentication / server availability check in an effort to resolve 503 errors when the api is actually available.
+
 **v2.7.2**<p>
 * Corrected encoding issue (#17) of special characters that caused authentication failures.
 
