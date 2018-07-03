@@ -49,5 +49,10 @@ class Xml {
         }
         // Save endpoint xml - end
         
+        func trim(rawXml: String, endpoint: String) -> String {
+            
+            return ""
+        }
+        
     }
 }

@@ -2185,7 +2185,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            }
                             
                             // remove individual objects that are scoped to the policy from XML
-                            for xmlTag in ["self_service_icon", "computers"] {
+                            for xmlTag in ["self_service_icon"] {   // , "computers" - computers removed above with scope options
                                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                             }
                             
