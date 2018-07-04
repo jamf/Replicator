@@ -3406,10 +3406,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         plistData["maxHistory"]         = maxHistory as Any?
         plistData["storeCredentials"]   = storeCredentials_button.state as Any?
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-        
-//        print("saveSettings xml: \(String(describing: plistData["xml"]))\n")
-//        (plistData as NSDictionary).write(toFile: plistPath!, atomically: false)
     }
+    
     func savePrefs(prefs: [String:Any]) {
 //        DispatchQueue.main.async {
         plistData          = readSettings()
@@ -3712,44 +3710,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read scope settings - start
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-            }
-            if scopeOptions["policies"]!["copy"] != nil {
-                scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
-            }
-            if scopeOptions["policies"]!["disable"] != nil {
-                policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
-            }
-            if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
-            }
-            if scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
-            }
-            if scopeOptions["scg"] != nil {
-                if scopeOptions["scg"]!["copy"] != nil {
-                    scopeScgCopy = scopeOptions["scg"]!["copy"]!
-                }
-                if scopeOptions["sig"]!["copy"] != nil {
-                    scopeSigCopy = scopeOptions["sig"]!["copy"]!
-                }
-                if scopeOptions["users"]!["copy"] != nil {
-                    scopeUsersCopy = scopeOptions["users"]!["copy"]!
-                }
-            } else {
-                plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
-                                      "policies":["copy":true,"disable":false],
-                                      "osxconfigurationprofiles":["copy":true],
-                                      "restrictedsoftware":["copy":true],
-                                      "scg":["copy":true],
-                                      "sig":["copy":true],
-                                      "users":["copy":true]] as Any
-                saveSettings()
-            }
-            
+            scopeMcpCopy = (scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!:true
+            scopePoliciesCopy = (scopeOptions["policies"]!["copy"] != nil) ? scopeOptions["policies"]!["copy"]!:true
+            policyPoliciesDisable = (scopeOptions["policies"]!["disable"] != nil) ? scopeOptions["policies"]!["disable"]!:true
+            scopeOcpCopy = (scopeOptions["osxconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["osxconfigurationprofiles"]!["copy"]!:true
+            scopeRsCopy = (scopeOptions["restrictedsoftware"]!["copy"] != nil) ? scopeOptions["restrictedsoftware"]!["copy"]!:true
         } else {
-            // initilize new settings
+            // reset/initialize new settings
+            plistData          = readSettings()
             plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
                                   "policies":["copy":true,"disable":false],
                                   "osxconfigurationprofiles":["copy":true],
@@ -3757,9 +3725,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
-            saveSettings()
+            
+            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         }
         // read scope settings - end
+        
+        if scopeOptions["scg"] != nil && scopeOptions["sig"] != nil && scopeOptions["users"] != nil  {
+            scopeScgCopy = (scopeOptions["scg"]!["copy"] != nil) ? scopeOptions["scg"]!["copy"]!:true
+            scopeSigCopy = (scopeOptions["sig"]!["copy"] != nil) ? scopeOptions["sig"]!["copy"]!:true
+            scopeUsersCopy = (scopeOptions["sig"]!["users"] != nil) ? scopeOptions["users"]!["copy"]!:true
+        } else {
+            // reset/initialize scope preferences
+            plistData          = readSettings()
+            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
+                                  "policies":["copy":true,"disable":false],
+                                  "osxconfigurationprofiles":["copy":true],
+                                  "restrictedsoftware":["copy":true],
+                                  "scg":["copy":true],
+                                  "sig":["copy":true],
+                                  "users":["copy":true]] as Any
+            
+            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+        }
+        
         // read xml settings - start
         if plistData["xml"] != nil {
             xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
@@ -3768,10 +3756,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             saveOnly        = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
         } else {
             // set default values
+            plistData        = readSettings()
             plistData["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
                                 "saveOnly":false] as Any
-            saveSettings()
+            
+            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         }
         // read xml settings - end
         // read environment settings - end

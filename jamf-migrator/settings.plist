@@ -24,6 +24,21 @@
 	<integer>0</integer>
 	<key>scope</key>
 	<dict>
+		<key>sig</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+		</dict>
+		<key>users</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+		</dict>
+		<key>scg</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+		</dict>
 		<key>mobiledeviceconfigurationprofiles</key>
 		<dict>
 			<key>copy</key>
