@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-               BuildableName = "jamf-migrator.app"
-               BlueprintName = "jamf-migrator"
-               ReferencedContainer = "container:jamf-migrator.xcodeproj">
+               BuildableName = "Jamf Migrator.app"
+               BlueprintName = "Jamf Migrator"
+               ReferencedContainer = "container:Jamf Migrator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "jamf-migrator.app"
-            BlueprintName = "jamf-migrator"
-            ReferencedContainer = "container:jamf-migrator.xcodeproj">
+            BuildableName = "Jamf Migrator.app"
+            BlueprintName = "Jamf Migrator"
+            ReferencedContainer = "container:Jamf Migrator.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "jamf-migrator.app"
-            BlueprintName = "jamf-migrator"
-            ReferencedContainer = "container:jamf-migrator.xcodeproj">
+            BuildableName = "Jamf Migrator.app"
+            BlueprintName = "Jamf Migrator"
+            ReferencedContainer = "container:Jamf Migrator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -82,9 +82,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "jamf-migrator.app"
-            BlueprintName = "jamf-migrator"
-            ReferencedContainer = "container:jamf-migrator.xcodeproj">
+            BuildableName = "Jamf Migrator.app"
+            BlueprintName = "Jamf Migrator"
+            ReferencedContainer = "container:Jamf Migrator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

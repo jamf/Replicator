@@ -31,7 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "jamf-migrator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BC01C5C1DFB0C07007E634E /* Jamf Migrator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jamf Migrator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9BC01C611DFB0C07007E634E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		9BC01C631DFB0C07007E634E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -78,7 +78,7 @@
 		9BC01C5D1DFB0C07007E634E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */,
+				9BC01C5C1DFB0C07007E634E /* Jamf Migrator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,9 +131,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9BC01C5B1DFB0C07007E634E /* jamf-migrator */ = {
+		9BC01C5B1DFB0C07007E634E /* Jamf Migrator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "jamf-migrator" */;
+			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Migrator" */;
 			buildPhases = (
 				9BC01C581DFB0C07007E634E /* Sources */,
 				9BC01C591DFB0C07007E634E /* Frameworks */,
@@ -143,9 +143,9 @@
 			);
 			dependencies = (
 			);
-			name = "jamf-migrator";
+			name = "Jamf Migrator";
 			productName = "jamf-migrator";
-			productReference = 9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */;
+			productReference = 9BC01C5C1DFB0C07007E634E /* Jamf Migrator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +166,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "jamf-migrator" */;
+			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Migrator" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -179,7 +179,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9BC01C5B1DFB0C07007E634E /* jamf-migrator */,
+				9BC01C5B1DFB0C07007E634E /* Jamf Migrator */,
 			);
 		};
 /* End PBXProject section */
@@ -382,7 +382,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "jamf-migrator" */ = {
+		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Migrator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C691DFB0C07007E634E /* Debug */,
@@ -391,7 +391,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "jamf-migrator" */ = {
+		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Migrator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C6C1DFB0C07007E634E /* Debug */,

@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:jamf-migrator.xcodeproj">
+      location = "self:/Users/lesliehelou/Documents/GitHub/JamfMigrator/Jamf Migrator.xcodeproj">
    </FileRef>
 </Workspace>
