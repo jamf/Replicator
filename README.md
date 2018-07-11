@@ -1,4 +1,4 @@
-# JamfMigrator
+# Jamf Migrator
 A tool to migrate data granularly between Jamf Pro servers
 
 ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.png "JamfMigrator")
