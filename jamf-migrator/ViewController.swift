@@ -52,7 +52,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func storeCredentials(_ sender: Any) {
         storeCredentials = storeCredentials_button.state.rawValue
     }
-    
+        
     // Buttons
     // macOS tab
     @IBOutlet weak var allNone_button: NSButton!
@@ -2389,6 +2389,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }   // look to see if we are processing the next localEndPointType - end
                     
                     DispatchQueue.main.async {
+                        
+                    // update global counters
+                    //                        if self.counters[endpointType]?["\(action)"] == nil {
+                    //                            self.counters[endpointType]?["\(action)"] = 0
+                    //                        }
+                    
+                    // ? remove creation of counters dict defined earlier ?
+                    if self.counters[endpointType] == nil {
+                        self.counters[endpointType] = ["create":0, "update":0, "fail":0]
+                        self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                    }
                     
                     if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                         self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
@@ -2397,17 +2408,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
                         if endpointCount == endpointCurrent && self.progressCountArray["\(endpointType)"] == endpointCount {
                             self.labelColor(endpoint: endpointType, theColor: self.greenText)
-                        }
-                        
-                        // update global counters
-//                        if self.counters[endpointType]?["\(action)"] == nil {
-//                            self.counters[endpointType]?["\(action)"] = 0
-//                        }
-                        
-                        // ? remove creation of counters dict defined earlier ?
-                        if self.counters[endpointType] == nil {
-                            self.counters[endpointType] = ["create":0, "update":0, "fail":0]
-                            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                         }
                         
                         let localTmp = (self.counters[endpointType]?["\(action)"])!
