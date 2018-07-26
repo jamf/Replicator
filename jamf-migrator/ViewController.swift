@@ -2569,7 +2569,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if endpointCount == endpointCurrent && self.changeColor {
                                 self.labelColor(endpoint: endpointType, theColor: self.greenText)
                             }
-                            
                         } else {
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                             self.changeColor = false
@@ -3115,6 +3114,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if counters.count > 0 {
 //                print("summary:\n\(counters)")
 //                print("summary dict:\n\(summaryDict)")
+                // clear objects in selective field
+                if wipe_data {
+                    DispatchQueue.main.async {
+                        self.sourceDataArray.removeAll()
+                        self.srcSrvTableView.stringValue = ""
+                        self.srcSrvTableView.reloadData()
+                    }
+                }
             }
         } else {
             // clear previous results

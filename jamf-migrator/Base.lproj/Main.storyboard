@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
         <plugIn identifier="com.apple.WebKit2IBPlugin" version="14113"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -675,7 +676,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="Copy Options" identifier="copyOptions" id="ZJF-Wy-F4D">
-                                        <view key="view" id="ylm-IL-sae">
+                                        <view key="view" ambiguous="YES" id="ylm-IL-sae">
                                             <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -861,7 +862,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="Export Options" identifier="exportOptions" id="hIa-H1-kMK">
-                                        <view key="view" ambiguous="YES" id="fVK-68-4i0">
+                                        <view key="view" id="fVK-68-4i0">
                                             <rect key="frame" x="1" y="1" width="327" height="192"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1388,7 +1389,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
-                                        <view key="view" ambiguous="YES" id="fn5-oe-BJC">
+                                        <view key="view" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2282,7 +2283,7 @@
                                         <accessibility description="general" identifier="general"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" id="TA8-Ho-89h">
+                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="696" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2466,7 +2467,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="395" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="395" height="161"/>
