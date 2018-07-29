@@ -195,10 +195,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var srcSrvTableView: NSTableView!
     
     // source / destination array / dictionary of items
-    var sourceDataArray:[String] = []
-    var targetDataArray:[String] = []
-    var availableIDsToMigDict:[String:Int] = [:]   // something like xmlName, xmlID
+    var sourceDataArray:[String]            = []
+    var targetDataArray:[String]            = []
+    var availableIDsToMigDict:[String:Int]  = [:]   // something like xmlName, xmlID
     var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
+//    var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
+    var selectiveListCleared                = false
     
     // destination TextFieldCells
     @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
@@ -1068,6 +1070,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             return
                         }
                         
+                        // Used if we remove items from the list as they are removed from the server - not working
+//                        if self.wipe_data {
+//                            self.availableIdsToDelArray.removeAll()
+//                            for k in (0..<self.sourceDataArray.count) {
+//                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
+//                            }
+//                        }
+                        
                         if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
                         for j in (0..<self.targetDataArray.count) {
                             objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
@@ -1085,6 +1095,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             } else {
                                 // selective removal
                                 if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
+                                
                                 self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
                                 
                             }   // if !self.wipe_data else - end
@@ -2564,6 +2575,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                         }
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
+                            // remove items from the list as they are removed from the server
+                            // currently fails as it always removes the last item in the list, ignoring the value in IndexSet
+//                            let lineNumber = self.availableIdsToDelArray.index(of: endPointID)!
+//                            print("line number for \(endpointName): \(lineNumber)")
+//                            print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
+//                            self.srcSrvTableView.beginUpdates()
+//                            self.srcSrvTableView.removeRows(at: IndexSet(integer: 0), withAnimation: .effectFade)
+//                            self.srcSrvTableView.endUpdates()
+//                            self.availableIdsToDelArray.remove(at: lineNumber)
+                            
                             self.writeToLog(stringOfText: "\t[RemoveEndpoints] \(endpointName)\n")
                             self.POSTsuccessCount += 1
                             if endpointCount == endpointCurrent && self.changeColor {
@@ -3921,6 +3942,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             while true {
                 if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+                    // clear selective list of items when changing from migrition to delete mode
+                    if !self.selectiveListCleared {
+                        DispatchQueue.main.async {
+                            self.sourceDataArray.removeAll()
+                            self.srcSrvTableView.stringValue = ""
+                            self.srcSrvTableView.reloadData()
+                            self.selectiveListCleared = true
+                        }
+                    }
                     
                     DispatchQueue.main.async {
                         // disaable source server, username and password fields (to finish)
@@ -3949,6 +3979,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.sourceServerList_button.isEnabled  = true
                             self.source_user_field.isEnabled        = true
                             self.source_pwd_field.isEnabled         = true
+                            self.selectiveListCleared               = false
                         }
 
                         self.migrateOrRemove_label_field.stringValue = "Migrate"
