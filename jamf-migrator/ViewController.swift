@@ -269,17 +269,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var createDestUrlBase = ""
     
     var endpointDefDict = ["computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
-    var xmlName = ""
-    var destEPs = [String:Int]()
-    var currentEPs = [String:Int]()
-    var currentEndpointID = 0
-    var progressCountArray = [String:Int]() // track if post/put was successful
+    var xmlName             = ""
+    var destEPs             = [String:Int]()
+    var currentEPs          = [String:Int]()
+    var currentEndpointID   = 0
+    var progressCountArray  = [String:Int]() // track if post/put was successful
     
-    var whiteText:NSColor = NSColor.white
-    var greenText:NSColor = NSColor.green
-    var yellowText:NSColor = NSColor.yellow
-    var redText:NSColor = NSColor.red
-    var changeColor:Bool = true
+    var whiteText:NSColor   = NSColor.white
+    var greenText:NSColor   = NSColor.green
+    var yellowText:NSColor  = NSColor.yellow
+    var redText:NSColor     = NSColor.red
+    var changeColor:Bool    = true
     
     // This order must match the drop down for selective migration
     var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
@@ -575,13 +575,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // set credentials / servers - end
         
         // server is reachable - start
-        checkURL2(serverURL: self.source_jp_server)  {
-            (result: Bool) in
-//            print("checkURL2 returned result: \(result)")
-            if !result {
-                self.alert_dialog(header: "Attention:", message: "Unable to contact the source server:\n\(self.source_jp_server)")
-                self.goButtonEnabled(button_status: true)
-                return
+        if !wipe_data {
+            checkURL2(serverURL: self.source_jp_server)  {
+                (result: Bool) in
+    //            print("checkURL2 returned result: \(result)")
+                if !result {
+                    self.alert_dialog(header: "Attention:", message: "Unable to contact the source server:\n\(self.source_jp_server)")
+                    self.goButtonEnabled(button_status: true)
+                    return
+                }
             }
         }
         checkURL2(serverURL: self.dest_jp_server)  {
@@ -2324,10 +2326,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         theCreateQ.addOperation {
 
-            
-            print("theCreateQ - endpoint: \(localEndPointType)")
-            print("theCreateQ - action: \(action)")
-            print("theCreateQ - counters: \(self.counters)\n")
+//            print("theCreateQ - endpoint: \(localEndPointType)")
+//            print("theCreateQ - action: \(action)")
+//            print("theCreateQ - counters: \(self.counters)\n")
             
             // save trimmed XML - start
             if self.saveTrimmedXml {
@@ -3614,7 +3615,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    //// selective migration functions - start
+    // selective migration functions - start
     func numberOfRows(in aTableView: NSTableView) -> Int
     {
         var numberOfRows:Int = 0;
@@ -3637,7 +3638,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         return newString;
     }
-    //// selective migration functions - end
+    // selective migration functions - end
     
     override func viewDidAppear() {
         // set tab order
