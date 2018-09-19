@@ -15,6 +15,7 @@ class Xml {
 //    var saveXmlFolder = ""
     
     func save(node: String, xml: String, name: String, id: Int, format: String) {
+        
         // Create folder to store xml files if needed - start
         let saveXmlFolder = baseXmlFolder+"/"+format
         if !(fm.fileExists(atPath: saveXmlFolder)) {

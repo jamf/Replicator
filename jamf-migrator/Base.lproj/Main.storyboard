@@ -676,7 +676,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="Copy Options" identifier="copyOptions" id="ZJF-Wy-F4D">
-                                        <view key="view" ambiguous="YES" id="ylm-IL-sae">
+                                        <view key="view" id="ylm-IL-sae">
                                             <rect key="frame" x="1" y="1" width="327" height="192"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -862,7 +862,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="Export Options" identifier="exportOptions" id="hIa-H1-kMK">
-                                        <view key="view" id="fVK-68-4i0">
+                                        <view key="view" ambiguous="YES" id="fVK-68-4i0">
                                             <rect key="frame" x="1" y="1" width="327" height="192"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
