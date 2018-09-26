@@ -64,6 +64,8 @@
 	</dict>
 	<key>xml</key>
 	<dict>
+		<key>location</key>
+		<string></string>
 		<key>saveOnly</key>
 		<false/>
 		<key>saveRawXml</key>
