@@ -1972,84 +1972,140 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func readDataFiles(endpoint: String, completion: @escaping (_ result: String) -> Void) {
+        var local_endpointArray = [String]()
+        var local_general       = ""
         
-        do {
-            let dataFiles = try self.fm.contentsOfDirectory(atPath: self.dataFilesRoot + "/" + endpoint)
-            let dataFilesCount = dataFiles.count
-            for i in 1...dataFilesCount {
-                let dataFile = dataFiles[i-1]
-                // print("\t\txml file: \(dataFile)")
-                let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(endpoint)/\(dataFile)", isDirectory: false)
-                // let fileUrl = URL(string: "file://\(exportPathString)/\(dataFile)")
-//                print("fileUrl: \(String(describing: fileUrl!))")
-                do {
-                    let fileContents = try String(contentsOf: fileUrl!)
-                    //                                    print("\(fileContents)")
-                    let id   = self.tagValue2(xmlString:fileContents, startTag:"<id>", endTag:"</id><name>")
-                    let name = self.tagValue2(xmlString:fileContents, startTag:"</id><name>", endTag:"</name>")
-                    
-                    self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(endpoint): file name / object name - \(dataFile) \t \(name)\n") }
-                } catch {
-//                    print("unable to read \(dataFile)")
-                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+        switch endpoint {
+        case "computergroups":
+            if self.smart_comp_grps_button.state.rawValue == 1 {
+                local_endpointArray.append("smartcomputergroups")
+            }
+            if self.static_comp_grps_button.state.rawValue == 1 {
+                local_endpointArray.append("staticcomputergroups")
+            }
+        case "mobiledevicegroups":
+            if self.smart_ios_groups_button.state.rawValue == 1 {
+                local_endpointArray.append("smartiosgroups")
+            }
+            if self.static_ios_groups_button.state.rawValue == 1 {
+                local_endpointArray.append("staticiosgroups")
+            }
+        case "usergroups":
+            if self.smartUserGrps_button.state.rawValue == 1 {
+                local_endpointArray.append("smartusergroups")
+            }
+            if self.staticUserGrps_button.state.rawValue == 1 {
+                local_endpointArray.append("staticusergroups")
+            }
+        default:
+            local_endpointArray = [endpoint]
+        }
+        for local_folder in local_endpointArray {
+            do {
+                let dataFiles = try self.fm.contentsOfDirectory(atPath: self.dataFilesRoot + "/" + local_folder)
+                let dataFilesCount = dataFiles.count
+                for i in 1...dataFilesCount {
+                    let dataFile = dataFiles[i-1]
+                    let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                    // let fileUrl = URL(string: "file://\(exportPathString)/\(dataFile)")
+    //                print("fileUrl: \(String(describing: fileUrl!))")
+                    do {
+                        let fileContents = try String(contentsOf: fileUrl!)
+//                        print("\(fileContents)")
+                        switch endpoint {
+                        case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "usergroups", "users":
+                            local_general = fileContents
+                            for xmlTag in ["site", "criteron", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
+                                local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                            }
+                        case "buildings", "departments", "sites":
+                            local_general = fileContents
+                        default:
+                            local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
+                            for xmlTag in ["site", "category", "payloads"] {
+                                local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                            }
+                        }
+                        
+                        let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
+                        let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
+                        if (id == "" || name == "") {
+                            print("\t\txml file: \(dataFile)")
+                            print("\(local_general)")
+                            print("id: \(id) \t name:\(name)\n")
+                        }
+                        
+                        self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name / object name - \(dataFile) \t \(name)\n") }
+                    } catch {
+    //                    print("unable to read \(dataFile)")
+                        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                    }
+//                    usleep(100000)
                 }
+            } catch {
+                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
             }
-        } catch {
-            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(endpoint): unable to get files.\n") }
-        }
-    
-        var fileCount = self.availableFilesToMigDict.count
         
-//        print("node: \(endpoint) has \(fileCount) files.")
-        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(endpoint) has \(fileCount) files.\n") }
+            var fileCount = self.availableFilesToMigDict.count
         
-        if fileCount > 0 {
-            processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
-                (result: String) in
-                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
-                self.availableFilesToMigDict.removeAll()
+    //        print("node: \(local_folder) has \(fileCount) files.")
+            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
+        
+            if fileCount > 0 {
+                processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
+                    (result: String) in
+                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
+                    self.availableFilesToMigDict.removeAll()
+                }
+            } else {   // if fileCount - end
+                nodesMigrated+=1
             }
-        } else {   // if fileCount - end
-            nodesMigrated+=1
-        }
-        fileCount = 0
+            fileCount = 0
+    }
         completion("fetched xml for: \(endpoint)")
     }
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: Dictionary<String,[String]>, completion: @escaping (_ result: String) -> Void) {
 
         var pf_itemsDict = itemsDict
+//        theOpQ.maxConcurrentOperationCount = 1
+//        let semaphore = DispatchSemaphore(value: 0)
         
         self.existingEndpoints(destEndpoint: "\(endpoint)") {
             (result: String) in
             if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
-            var l_index = 1
-            for (_, objectInfo) in itemsDict {
-                self.readFilesQ.sync {
-                    let l_id   = Int(objectInfo[0])   // id of object
-                    let l_name = objectInfo[1]        // name of object
-                    let l_xml  = objectInfo[2]        // xml of object
-                    if !self.wipe_data  {
-                        if self.debug { self.writeToLog(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
-                        if self.currentEPs[l_name] != nil {
-                            if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
-                            self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: self.currentEPs[l_name]!, destEpName: l_name) {
-                                (result: String) in
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
-                            }
-                        } else {
-                            if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
-                            self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
-                                (result: String) in
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
+//            self.readFilesQ.async {
+//                self.theOpQ.addOperation {
+                var l_index = 1
+                for (_, objectInfo) in itemsDict {
+                    self.readFilesQ.sync {
+                        let l_id   = Int(objectInfo[0])   // id of object
+                        let l_name = objectInfo[1]        // name of object
+                        let l_xml  = objectInfo[2]        // xml of object
+                        if !self.wipe_data  {
+                            if self.debug { self.writeToLog(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
+                            if self.currentEPs[l_name] != nil {
+                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
+                                self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: self.currentEPs[l_name]!, destEpName: l_name) {
+                                    (result: String) in
+                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
+                                }
+                            } else {
+                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
+                                self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
+                                    (result: String) in
+                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
+                                }
                             }
                         }
-                    }
-                    l_index+=1
-                }   // readFilesQ.sync - end
-            }   // for (_, objectInfo) - end
+                        l_index+=1
+                    }   // readFilesQ.sync - end
+//                    semaphore.signal()
+                }   // for (_, objectInfo) - end
+//                semaphore.wait()
+//            }   // theOpQ.addOperation readFilesQ - end
         }
         pf_itemsDict.removeAll()
         completion("processed file")

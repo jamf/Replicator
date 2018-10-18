@@ -42,8 +42,9 @@ class Xml {
         
         // Save endpoint xml - start
         let xmlFile = "\(name)-\(id).xml"
+        let readableXml = xml.replacingOccurrences(of: "><", with: ">\n<")
         do {
-            try xml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
+            try readableXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
         } catch {
             if vc.debug { vc.writeToLog(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)") }
             return
