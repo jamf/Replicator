@@ -281,7 +281,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var fileImport      = false
     var dataFilesRoot   = ""
     
-    var endpointDefDict = ["macapplications":"mac_applications","computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
+    var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     var xmlName             = ""
     var destEPs             = [String:Int]()
     var currentEPs          = [String:Int]()
@@ -296,7 +296,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // This order must match the drop down for selective migration, provide the node name
     var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
-    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceconfigurationprofiles", "mobiledevicegroups",  "mobiledeviceextensionattributes", "mobiledevices"]
+    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "userextensionattributes", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "users", "usergroups"]
     var AllEndpointsArray = [String]()
     
@@ -439,6 +439,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.mobiledevices_button.state.rawValue == 1
                     && self.smart_ios_groups_button.state.rawValue == 1
                     && self.static_ios_groups_button.state.rawValue == 1
+                    && self.mobiledevicecApps_button.state.rawValue == 1
                     && self.mobiledeviceextensionattributes_button.state.rawValue == 1
                     && self.advancedmobiledevicesearches_button.state.rawValue == 1) ? 1 : 0);
         } else {
@@ -487,6 +488,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.mobiledevices_button.state = self.allNone_iOS_button.state
             self.smart_ios_groups_button.state = self.allNone_iOS_button.state
             self.static_ios_groups_button.state = self.allNone_iOS_button.state
+            self.mobiledevicecApps_button.state = self.allNone_iOS_button.state
             self.mobiledeviceextensionattributes_button.state = self.allNone_iOS_button.state
             self.mobiledeviceconfigurationprofiles_button.state = self.allNone_iOS_button.state
         } else {
@@ -990,7 +992,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             
                             if self.mobiledevicecApps_button.state.rawValue == 1 {
-                                //                    self.objectsToMigrate += ["mobiledeviceapplications"]
+                                self.objectsToMigrate += ["mobiledeviceapplications"]
                             }
                             
                             if self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
@@ -1392,16 +1394,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 
                                                 let record = endpointInfo[i] as! [String : AnyObject]
                                                 
-                                                if endpoint != "mobiledeviceapplications" {
+//                                                if endpoint != "mobiledeviceapplications" {
                                                     if record["name"] != nil {
                                                         self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                     } else {
                                                         self.availableObjsToMigDict[record["id"] as! Int] = ""
                                                     }
-                                                } else {
-                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
-                                                }
-                                                
+//                                                } else {
+//                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
+//                                                }
+                                            
                                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                             }   // for i in (0..<endpointCount) end
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
@@ -2575,12 +2577,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
         switch endpoint {
-        case "macapplications":
-            if !self.scopeMaCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
-            }
-        case "mobiledeviceconfigurationprofiles":
-            if !self.scopeMcpCopy {
+        case "osxconfigurationprofiles":
+            if !self.scopeOcpCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
             }
         case "policies":
@@ -2590,30 +2588,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.policyPoliciesDisable {
                 PostXML = self.disable(theXML: PostXML)
             }
-        case "osxconfigurationprofiles":
-            if !self.scopeOcpCopy {
+        case "macapplications":
+            if !self.scopeMaCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
             }
         case "restrictedsoftware":
             if !self.scopeRsCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
             }
+        case "mobiledeviceconfigurationprofiles":
+            if !self.scopeMcpCopy {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+            }
+        case "mobiledeviceapplications":
+            if !self.scopeIaCopy {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+            }
+        case "staticusergroups":
+            if !self.scopeUsersCopy {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "users")
+            }
             //                            case "staticcomputergroups":  // handled below in computers case
             //                            case "staticiosgroups":   // handled below in mobiledevicegroups case
             //                                if !self.scopeSigCopy {
             //                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
         //                            }
-        case "staticusergroups":
-            if !self.scopeUsersCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "users")
-            }
         default:
             break
         }
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -2638,16 +2644,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 //                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                 //                                }
                 
-            case "mobiledeviceapplications":
-                for xmlTag in ["scope"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-                }
-                
-                // update server reference of icons to new server
-                //                            let trimmedDestUrlArray = self.dest_jp_server.components(separatedBy: ":")
-                //                            let trimmedDestUrl = trimmedDestUrlArray[1]
-                let regexComp = try! NSRegularExpression(pattern: "\(self.source_jp_server)", options:.caseInsensitive)
-                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(self.dest_jp_server)")
+//            case "mobiledeviceapplications":
+//                // update server reference of icons to new server
+//                //                            let trimmedDestUrlArray = self.dest_jp_server.components(separatedBy: ":")
+//                //                            let trimmedDestUrl = trimmedDestUrlArray[1]
+//                let regexComp = try! NSRegularExpression(pattern: "\(self.source_jp_server)", options:.caseInsensitive)
+//                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(self.dest_jp_server)")
                 
             case "mobiledevices":
                 for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
@@ -2851,21 +2853,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             self.get_completed_field.stringValue = "\(endpointCurrent)"
             
-        case "policies", "macapplications":
+        case "policies", "macapplications", "mobiledeviceapplications":
             var iconName = ""
             var iconUri = ""
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing policies - verbose\n") }
+            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
             // check for a self service icon
             if PostXML.range(of: "</self_service_icon>") != nil {
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
             }
-            if endpoint == "macapplications" {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
-                for xmlTag in ["vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses", "used_vpp_licenses"] {   // , "computers" - computers removed above with scope options
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-                }
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "vpp_admin_account_id")
+            if (endpoint == "macapplications") || (endpoint == "mobiledeviceapplications") {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
+                let regexVPP = try! NSRegularExpression(pattern: "<vpp>(.*?)</vpp>", options:.caseInsensitive)
+                PostXML = regexVPP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<vpp><assign_vpp_device_based_licenses>false</assign_vpp_device_based_licenses><vpp_admin_account_id>-1</vpp_admin_account_id></vpp>")
+//                for xmlTag in ["vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses", "used_vpp_licenses"] {   // , "computers" - computers removed above with scope options
+//                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+//                }
             }
             
             // Self Service description fix, migrating from 9 to 10.2+
@@ -2886,8 +2889,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-            let regexVPP = try! NSRegularExpression(pattern: "<vpp>(.*?)</vpp>", options:.caseInsensitive)
-            PostXML = regexVPP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<assign_vpp_device_based_licenses>false</assign_vpp_device_based_licenses><vpp_admin_account_id>-1</vpp_admin_account_id>")
             //print("\nXML: \(PostXML)")
             
             if self.getEndpointInProgress != endpoint {
@@ -3455,15 +3456,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 let destRecord = destEndpointInfo[i] as! [String : AnyObject]
                                                 if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
                                                 let destXmlID: Int = (destRecord["id"] as! Int)
-                                                    if destEndpoint != "mobiledeviceapplications" {
+//                                                    if destEndpoint != "mobiledeviceapplications" {
                                                         if destRecord["name"] != nil {
                                                             destXmlName = destRecord["name"] as! String
                                                         } else {
                                                             destXmlName = ""
                                                         }
-                                                    } else {
-                                                        destXmlName = destRecord["bundle_id"] as! String
-                                                    }
+//                                                    } else {
+//                                                        destXmlName = destRecord["bundle_id"] as! String
+//                                                    }
                                                     if destXmlName != "" {
                                                         if "\(destXmlID)" != "" {
                                                             if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
@@ -4651,7 +4652,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // iOS tab
         allNone_iOS_button.state = NSControl.StateValue(rawValue: 1)
         advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 1)
-        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 1)
         mobiledevices_button.state = NSControl.StateValue(rawValue: 1)
         smart_ios_groups_button.state = NSControl.StateValue(rawValue: 1)
         static_ios_groups_button.state = NSControl.StateValue(rawValue: 1)
