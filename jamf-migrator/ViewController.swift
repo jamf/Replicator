@@ -62,6 +62,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // macOS tab
     @IBOutlet weak var allNone_button: NSButton!
     @IBOutlet weak var advcompsearch_button: NSButton!
+    @IBOutlet weak var macapplications_button: NSButton!
     @IBOutlet weak var computers_button: NSButton!
     @IBOutlet weak var configurations_button: NSButton!
     @IBOutlet weak var directory_bindings_button: NSButton!
@@ -133,6 +134,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // button labels
     // macOS button labels
     @IBOutlet weak var advcompsearch_label_field: NSTextField!
+    @IBOutlet weak var macapplications_label_field: NSTextField!
     @IBOutlet weak var computers_label_field: NSTextField!
     @IBOutlet weak var configurations_label_field: NSTextField!
     @IBOutlet weak var directory_bindings_field: NSTextField!
@@ -236,13 +238,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // scope preferences
     var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
-    var scopeMcpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
-    //    var policyMcpDisable:       Bool = false  // mobileconfigurationprofiles disable on copy
+    var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
+    var scopeMaCopy:            Bool = true   // macapps copy scope
+    var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
     var scopePoliciesCopy:      Bool = true   // policies copy scope
     var policyPoliciesDisable:  Bool = false  // policies disable on copy
-    var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
+    var scopeMcpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
+    var scopeIaCopy:            Bool = true   // iOSapps copy scope
+    //    var policyMcpDisable:       Bool = false  // mobileconfigurationprofiles disable on copy
     //    var policyOcpDisable:       Bool = false  // osxconfigurationprofiles disable on copy
-    var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
     var scopeScgCopy:           Bool = true // static computer groups copy scope
     var scopeSigCopy:           Bool = true // static iOS device groups copy scope
     var scopeUsersCopy:         Bool = true // static user groups copy scope
@@ -277,7 +281,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var fileImport      = false
     var dataFilesRoot   = ""
     
-    var endpointDefDict = ["computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
+    var endpointDefDict = ["macapplications":"mac_applications","computergroups":"computer_groups","computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     var xmlName             = ""
     var destEPs             = [String:Int]()
     var currentEPs          = [String:Int]()
@@ -290,8 +294,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var redText:NSColor     = NSColor.red
     var changeColor:Bool    = true
     
-    // This order must match the drop down for selective migration
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    // This order must match the drop down for selective migration, provide the node name
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceconfigurationprofiles", "mobiledevicegroups",  "mobiledeviceextensionattributes", "mobiledevices"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "userextensionattributes", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "users", "usergroups"]
     var AllEndpointsArray = [String]()
@@ -424,6 +428,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.static_comp_grps_button.state.rawValue == 1
                     && self.ext_attribs_button.state.rawValue == 1
                     && self.scripts_button.state.rawValue == 1
+                    && self.macapplications_button.state.rawValue == 1
                     && self.packages_button.state.rawValue == 1
                     && self.printers_button.state.rawValue == 1
                     && self.restrictedsoftware_button.state.rawValue == 1
@@ -472,6 +477,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.static_comp_grps_button.state = self.allNone_button.state
             self.ext_attribs_button.state = self.allNone_button.state
             self.scripts_button.state = self.allNone_button.state
+            self.macapplications_button.state = self.allNone_button.state
             self.packages_button.state = self.allNone_button.state
             self.printers_button.state = self.allNone_button.state
             self.restrictedsoftware_button.state = self.allNone_button.state
@@ -620,11 +626,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
         }
-        if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
-            alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
-            //self.go_button.isEnabled = true
-            goButtonEnabled(button_status: true)
-            return
+        if !saveOnly {
+            if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
+                alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
+                //self.go_button.isEnabled = true
+                goButtonEnabled(button_status: true)
+                return
+            }
         }
         // credentials check - end
         
@@ -645,7 +653,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // don't check if we're importing files
         if !fileImport {
             if !wipe_data {
-                checkURL2(serverURL: self.source_jp_server)  {
+                checkURL2(whichServer: "source", serverURL: self.source_jp_server)  {
                     (result: Bool) in
         //            print("checkURL2 returned result: \(result)")
                     if !result {
@@ -656,7 +664,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
-        checkURL2(serverURL: self.dest_jp_server)  {
+        checkURL2(whichServer: "dest", serverURL: self.dest_jp_server)  {
             (result: Bool) in
 //            print("checkURL2 returned result: \(result)")
             if !result {
@@ -677,25 +685,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
             // set credentials - end
             
-            var sourceURL = URL(string: "")
+            var sourceURL      = URL(string: "")
+            var destinationURL = URL(string: "")
             
             // check authentication - start
-            self.authCheck(f_sourceURL: self.source_jp_server, f_credentials: self.sourceBase64Creds)  {
+            self.authCheck(whichServer: "source", f_sourceURL: self.source_jp_server, f_credentials: self.sourceBase64Creds)  {
                 (result: Bool) in
                 if !result && !self.wipe_data {
                     if self.debug { self.writeToLog(stringOfText: "Source server authentication failure.") }
                     return
                 } else {
-                    if !self.fileImport {
+//                    if !self.fileImport {
                         self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
-                    }
-                    self.authCheck(f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
+//                    }
+                    self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
                         (result: Bool) in
                         if !result {
                             if self.debug { self.writeToLog(stringOfText: "Destination server authentication failure.") }
                             return
                         } else {
-                            self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
+                            if !self.saveOnly {
+                                self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
+                            }
                             // verify source server URL - start
                             if !self.fileImport && !self.wipe_data {
                                 sourceURL = URL(string: self.source_jp_server_field.stringValue)
@@ -709,10 +720,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     //===== change to go to function to check dest. server, which forwards to migrate if all is well
                                     // verify destination server URL - start
                                     DispatchQueue.main.async {
-                                        let destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                        if !self.saveOnly {
+                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                        } else {
+                                            destinationURL = URL(string: "https://www.jamf.com")
+                                        }
                                         URLCache.shared.removeAllCachedResponses()
                                         let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil {
+                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.saveOnly {
                                                 // print("Destination server response: \(response)")
                                                 if(!self.theOpQ.isSuspended) {
                                                     //====================================    Start Migrating/Removing    ====================================//
@@ -767,11 +782,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     //================================= migration functions =================================//
     
-    func authCheck(f_sourceURL: String, f_credentials: String, completion: @escaping (Bool) -> Void) {
+    func authCheck(whichServer: String, f_sourceURL: String, f_credentials: String, completion: @escaping (Bool) -> Void) {
         var validCredentials:Bool = false
         if self.debug { self.writeToLog(stringOfText: "--- checking authentication to: \(f_sourceURL)\n") }
         
-        if !(f_sourceURL == self.source_jp_server && (wipe_data || fileImport)) {
+        if (whichServer == "source" && (!wipe_data && !fileImport)) || (whichServer == "dest" && !saveOnly) {
             var myURL = "\(f_sourceURL)/JSSResource/buildings"
             myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
@@ -921,6 +936,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.objectsToMigrate += ["printers"]
                             }
                             
+                            if self.packages_button.state.rawValue == 1 {
+                                self.objectsToMigrate += ["packages"]
+                            }
+                            
                             if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
                                 self.objectsToMigrate += ["computergroups"]
                             }
@@ -933,8 +952,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.objectsToMigrate += ["osxconfigurationprofiles"]
                             }
                             
-                            if self.packages_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["packages"]
+                            if self.macapplications_button.state.rawValue == 1 {
+                                self.objectsToMigrate += ["macapplications"]
                             }
                             
                             if self.patch_policies_button.state.rawValue == 1 {
@@ -1084,8 +1103,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
             
             // get preference settings - start
-            if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            if self.scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            }
+            if self.scopeOptions["macapps"]!["copy"] != nil {
+                self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+            }
+            if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
             }
             if self.scopeOptions["policies"]!["copy"] != nil {
                 self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
@@ -1093,11 +1118,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.scopeOptions["policies"]!["disable"] != nil {
                 self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
             }
-            if self.scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
             }
-            if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
+            if self.scopeOptions["iosapps"]!["copy"] != nil {
+                self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
             }
             if self.scopeOptions["scg"]!["copy"] != nil {
                 self.scopeScgCopy = self.scopeOptions["scg"]!["copy"]!
@@ -1108,7 +1133,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.scopeOptions["users"]!["copy"] != nil {
                 self.scopeUsersCopy = self.scopeOptions["users"]!["copy"]!
             }
-            // get preference settings - start
+            // get preference settings - end
             
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             // loop through process of migrating or removing - start
@@ -1242,6 +1267,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // macOS items
         case "advancedcomputersearches":
             endpointParent = "advanced_computer_searches"
+        case "macapplications":
+            endpointParent = "mac_applications"
         case "computerconfigurations":
             endpointParent = "computer_configurations"
         case "computerextensionattributes":
@@ -1347,7 +1374,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))") }
                             
                             switch endpoint {
-                            case "advancedcomputersearches", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                            case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                 if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                     let endpointCount: Int = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -1504,14 +1531,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
-                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartcomputergroups"
                                                     }
                                                     if (self.static_comp_grps_button.state.rawValue == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
-                                                        print("computergroups static - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("computergroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "staticcomputergroups"
                                                     }
                                                 case "mobiledevicegroups":
@@ -1519,14 +1546,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
-                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartiosgroups"
                                                     }
                                                     if (self.static_ios_groups_button.state.rawValue == 1) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
-                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
+//                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "staticiosgroups"
                                                     }
                                                 case "usergroups":
@@ -1952,7 +1979,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // print("\t\txml file: \(dataFile)")
                 let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(endpoint)/\(dataFile)", isDirectory: false)
                 // let fileUrl = URL(string: "file://\(exportPathString)/\(dataFile)")
-                print("fileUrl: \(String(describing: fileUrl!))")
+//                print("fileUrl: \(String(describing: fileUrl!))")
                 do {
                     let fileContents = try String(contentsOf: fileUrl!)
                     //                                    print("\(fileContents)")
@@ -1960,19 +1987,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let name = self.tagValue2(xmlString:fileContents, startTag:"</id><name>", endTag:"</name>")
                     
                     self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                    if self.debug { self.writeToLog(stringOfText: "[processFiles] read \(endpoint): file name / object name - \(dataFile) \t \(name)\n") }
+                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(endpoint): file name / object name - \(dataFile) \t \(name)\n") }
                 } catch {
-                    print("unable to read \(dataFile)")
+//                    print("unable to read \(dataFile)")
+                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
                 }
             }
         } catch {
-            if self.debug { self.writeToLog(stringOfText: "[processFiles] Node: \(endpoint): unable to get files.\n") }
+            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(endpoint): unable to get files.\n") }
         }
     
         var fileCount = self.availableFilesToMigDict.count
         
 //        print("node: \(endpoint) has \(fileCount) files.")
-        if self.debug { self.writeToLog(stringOfText: "[processFiles] Node: \(endpoint) has \(fileCount) files.\n") }
+        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(endpoint) has \(fileCount) files.\n") }
         
         if fileCount > 0 {
             processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
@@ -1993,8 +2021,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         self.existingEndpoints(destEndpoint: "\(endpoint)") {
             (result: String) in
-            if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n")
-            }
+            if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
             var l_index = 1
             for (_, objectInfo) in itemsDict {
@@ -2548,6 +2575,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
         switch endpoint {
+        case "macapplications":
+            if !self.scopeMaCopy {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+            }
         case "mobiledeviceconfigurationprofiles":
             if !self.scopeMcpCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
@@ -2820,7 +2851,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             self.get_completed_field.stringValue = "\(endpointCurrent)"
             
-        case "policies":
+        case "policies", "macapplications":
             var iconName = ""
             var iconUri = ""
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing policies - verbose\n") }
@@ -2829,6 +2860,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
+            }
+            if endpoint == "macapplications" {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
+                for xmlTag in ["vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses", "used_vpp_licenses"] {   // , "computers" - computers removed above with scope options
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                }
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "vpp_admin_account_id")
             }
             
             // Self Service description fix, migrating from 9 to 10.2+
@@ -2849,6 +2886,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+            let regexVPP = try! NSRegularExpression(pattern: "<vpp>(.*?)</vpp>", options:.caseInsensitive)
+            PostXML = regexVPP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<assign_vpp_device_based_licenses>false</assign_vpp_device_based_licenses><vpp_admin_account_id>-1</vpp_admin_account_id>")
             //print("\nXML: \(PostXML)")
             
             if self.getEndpointInProgress != endpoint {
@@ -3136,7 +3175,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-    }
+    }   // func createEndpoints - end
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         // this is where we delete the endpoint
@@ -3268,199 +3307,211 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 semaphore.wait()
             }   // theOpQ.addOperation - end
         }
-    }
+        if endpointCurrent == endpointCount {
+            if self.debug { self.writeToLog(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+            nodesMigrated+=1
+            //            print("remove nodes complete: \(nodesMigrated)")
+        }
+    }   // func removeEndpoints - end
     
     func existingEndpoints(destEndpoint: String, completion: @escaping (_ result: String) -> Void) {
-        URLCache.shared.removeAllCachedResponses()
-        currentEPs.removeAll()
-        var existingDestUrl = ""
-        var destXmlName = ""
-        var existingEndpointNode = ""
-        (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
-//        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
-        var destEndpointDict:(Any)? = nil
-        var endpointParent = ""
-        switch destEndpoint {
-        // macOS items
-        case "advancedcomputersearches":
-            endpointParent = "advanced_computer_searches"
-        case "computerextensionattributes":
-            endpointParent = "computer_extension_attributes"
-        case "computergroups":
-            endpointParent = "computer_groups"
-        case "computerconfigurations":
-            endpointParent = "computer_configurations"
-        case "distributionpoints":
-            endpointParent = "distribution_points"
-        case "directorybindings":
-            endpointParent = "directory_bindings"
-        case "dockitems":
-            endpointParent = "dock_items"
-        case "netbootservers":
-            endpointParent = "netboot_servers"
-        case "osxconfigurationprofiles":
-            endpointParent = "os_x_configuration_profiles"
-        case "patches":
-            endpointParent = "patch_management_software_titles"
-        case "patchpolicies":
-            endpointParent = "patch_policies"
-        case "restrictedsoftware":
-            endpointParent = "restricted_software"
-        case "softwareupdateservers":
-            endpointParent = "software_update_servers"
-        // iOS items
-        case "advancedmobiledevicesearches":
-            endpointParent = "advanced_mobile_device_searches"
-        case "mobiledeviceconfigurationprofiles":
-            endpointParent = "configuration_profiles"
-        case "mobiledeviceextensionattributes":
-            endpointParent = "mobile_device_extension_attributes"
-        case "mobiledevicegroups":
-            endpointParent = "mobile_device_groups"
-        case "mobiledeviceapplications":
-            endpointParent = "mobile_device_applications"
-        case "mobiledevices":
-            endpointParent = "mobile_devices"
-        // general items
-        case "advancedusersearches":
-            endpointParent = "advanced_user_searches"
-        case "ldapservers":
-            endpointParent = "ldap_servers"
-        case "networksegments":
-            endpointParent = "network_segments"
-        case "userextensionattributes":
-            endpointParent = "user_extension_attributes"
-        case "usergroups":
-            endpointParent = "user_groups"
-        case "jamfusers", "jamfgroups":
-            endpointParent = "accounts"
-        default:
-            endpointParent = "\(destEndpoint)"
-        }
-        
-        existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
-        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//      print("existing endpoints URL: \(existingDestUrl)")
-        let destEncodedURL = NSURL(string: existingDestUrl)
-        let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
-        
-        let semaphore = DispatchSemaphore(value: 1)
-        destEPQ.async {
+        if !saveOnly {
+            URLCache.shared.removeAllCachedResponses()
+            currentEPs.removeAll()
+            var existingDestUrl = ""
+            var destXmlName = ""
+            var existingEndpointNode = ""
+            (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
+    //        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
+            var destEndpointDict:(Any)? = nil
+            var endpointParent = ""
+            switch destEndpoint {
+            // macOS items
+            case "advancedcomputersearches":
+                endpointParent = "advanced_computer_searches"
+            case "macapplications":
+                endpointParent = "mac_applications"
+            case "computerextensionattributes":
+                endpointParent = "computer_extension_attributes"
+            case "computergroups":
+                endpointParent = "computer_groups"
+            case "computerconfigurations":
+                endpointParent = "computer_configurations"
+            case "distributionpoints":
+                endpointParent = "distribution_points"
+            case "directorybindings":
+                endpointParent = "directory_bindings"
+            case "dockitems":
+                endpointParent = "dock_items"
+            case "netbootservers":
+                endpointParent = "netboot_servers"
+            case "osxconfigurationprofiles":
+                endpointParent = "os_x_configuration_profiles"
+            case "patches":
+                endpointParent = "patch_management_software_titles"
+            case "patchpolicies":
+                endpointParent = "patch_policies"
+            case "restrictedsoftware":
+                endpointParent = "restricted_software"
+            case "softwareupdateservers":
+                endpointParent = "software_update_servers"
+            // iOS items
+            case "advancedmobiledevicesearches":
+                endpointParent = "advanced_mobile_device_searches"
+            case "mobiledeviceconfigurationprofiles":
+                endpointParent = "configuration_profiles"
+            case "mobiledeviceextensionattributes":
+                endpointParent = "mobile_device_extension_attributes"
+            case "mobiledevicegroups":
+                endpointParent = "mobile_device_groups"
+            case "mobiledeviceapplications":
+                endpointParent = "mobile_device_applications"
+            case "mobiledevices":
+                endpointParent = "mobile_devices"
+            // general items
+            case "advancedusersearches":
+                endpointParent = "advanced_user_searches"
+            case "ldapservers":
+                endpointParent = "ldap_servers"
+            case "networksegments":
+                endpointParent = "network_segments"
+            case "userextensionattributes":
+                endpointParent = "user_extension_attributes"
+            case "usergroups":
+                endpointParent = "user_groups"
+            case "jamfusers", "jamfgroups":
+                endpointParent = "accounts"
+            default:
+                endpointParent = "\(destEndpoint)"
+            }
             
-            destRequest.httpMethod = "GET"
-            let destConf = URLSessionConfiguration.default
-            destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-            let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-            let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                if let httpResponse = response as? HTTPURLResponse {
-//                    print("httpResponse: \(String(describing: response))")
-                    do {
-                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                        if let destEndpointJSON = json as? [String: Any] {
-                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
-                            switch destEndpoint {
-                                
-                            // need to revisit as name isn't the best indicatory on whether or not a computer exists
-                            case "-computers":
-                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current computers\n") }
-                                if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
-                                    let destEndpointCount: Int = destEndpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
-                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
+            existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
+            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+    //      print("existing endpoints URL: \(existingDestUrl)")
+            let destEncodedURL = NSURL(string: existingDestUrl)
+            let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
+            
+            let semaphore = DispatchSemaphore(value: 1)
+            destEPQ.async {
+                
+                destRequest.httpMethod = "GET"
+                let destConf = URLSessionConfiguration.default
+                destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+                let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
+                let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    if let httpResponse = response as? HTTPURLResponse {
+    //                    print("httpResponse: \(String(describing: response))")
+                        do {
+                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                            if let destEndpointJSON = json as? [String: Any] {
+                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
+                                switch destEndpoint {
                                     
-                                    if destEndpointCount > 0 {
-                                        for i in (0..<destEndpointCount) {
-                                            let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                            let destXmlID: Int = (destRecord["id"] as! Int)
-                                            //                                            print("computer ID: \(destXmlID)")
-                                            if let destEpGeneral = destEndpointJSON["computers/id/\(destXmlID)/subset/General"] as? [Any] {
-                                                print("destEpGeneral: \(destEpGeneral)")
-                                                let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
-                                                print("destRecordGeneral: \(destRecordGeneral)")
-                                                let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
-                                                self.currentEPs[destXmlUdid] = destXmlID
+                                // need to revisit as name isn't the best indicatory on whether or not a computer exists
+                                case "-computers":
+                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current computers\n") }
+                                    if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
+                                        let destEndpointCount: Int = destEndpointInfo.count
+                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
+                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
+                                        
+                                        if destEndpointCount > 0 {
+                                            for i in (0..<destEndpointCount) {
+                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                let destXmlID: Int = (destRecord["id"] as! Int)
+                                                //                                            print("computer ID: \(destXmlID)")
+                                                if let destEpGeneral = destEndpointJSON["computers/id/\(destXmlID)/subset/General"] as? [Any] {
+//                                                    print("destEpGeneral: \(destEpGeneral)")
+                                                    let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
+//                                                    print("destRecordGeneral: \(destRecordGeneral)")
+                                                    let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
+                                                    self.currentEPs[destXmlUdid] = destXmlID
+                                                }
+                                                //print("Dest endpoint name: \(destXmlName)")
                                             }
-                                            //print("Dest endpoint name: \(destXmlName)")
-                                        }
-                                    }   // if destEndpointCount > 0
-                                }   //if let destEndpointInfo = destEndpointJSON - end
-                                
-                            default:
-                                if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
-                                    let accountsDict = destEndpointJSON as Dictionary<String, Any>
-                                    let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
-//                                    print("users: \(String(describing: usersGroups["users"]))")
-//                                    print("groups: \(String(describing: usersGroups["groups"]))")
-                                    destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
-                                } else {
-                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
-                                }
-                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
-                                if let destEndpointInfo = destEndpointDict as? [Any] {
-                                    let destEndpointCount: Int = destEndpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
+                                        }   // if destEndpointCount > 0
+                                    }   //if let destEndpointInfo = destEndpointJSON - end
                                     
-                                    if destEndpointCount > 0 {
-                                        for i in (0..<destEndpointCount) {
-                                            
-                                            let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
-                                            let destXmlID: Int = (destRecord["id"] as! Int)
-                                                if destEndpoint != "mobiledeviceapplications" {
-                                                    if destRecord["name"] != nil {
-                                                        destXmlName = destRecord["name"] as! String
-                                                    } else {
-                                                        destXmlName = ""
-                                                    }
-                                                } else {
-                                                    destXmlName = destRecord["bundle_id"] as! String
-                                                }
-                                                if destXmlName != "" {
-                                                    if "\(destXmlID)" != "" {
-                                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
-                                                        self.currentEPs[destXmlName] = destXmlID
-                                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
-                                                    } else {
-                                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
-                                                    }
-                                                } else {
-                                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping id: \(destXmlID), could not determine its name.\n") }
-                                                }
-                                            
-                                        }   // for i in (0..<destEndpointCount) - end
-                                    } else {   // if destEndpointCount > 0 - end
-                                        self.currentEPs.removeAll()
+                                default:
+                                    if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
+                                        let accountsDict = destEndpointJSON as Dictionary<String, Any>
+                                        let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
+    //                                    print("users: \(String(describing: usersGroups["users"]))")
+    //                                    print("groups: \(String(describing: usersGroups["groups"]))")
+                                        destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
+                                    } else {
+                                        destEndpointDict = destEndpointJSON["\(endpointParent)"]
                                     }
-                                }   // if let destEndpointInfo - end
-                            }   // switch - end
+                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
+                                    if let destEndpointInfo = destEndpointDict as? [Any] {
+                                        let destEndpointCount: Int = destEndpointInfo.count
+                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
+                                        
+                                        if destEndpointCount > 0 {
+                                            for i in (0..<destEndpointCount) {
+                                                
+                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
+                                                let destXmlID: Int = (destRecord["id"] as! Int)
+                                                    if destEndpoint != "mobiledeviceapplications" {
+                                                        if destRecord["name"] != nil {
+                                                            destXmlName = destRecord["name"] as! String
+                                                        } else {
+                                                            destXmlName = ""
+                                                        }
+                                                    } else {
+                                                        destXmlName = destRecord["bundle_id"] as! String
+                                                    }
+                                                    if destXmlName != "" {
+                                                        if "\(destXmlID)" != "" {
+                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
+                                                            self.currentEPs[destXmlName] = destXmlID
+                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
+                                                        } else {
+                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
+                                                        }
+                                                    } else {
+                                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping id: \(destXmlID), could not determine its name.\n") }
+                                                    }
+                                                
+                                            }   // for i in (0..<destEndpointCount) - end
+                                        } else {   // if destEndpointCount > 0 - end
+                                            self.currentEPs.removeAll()
+                                        }
+                                    }   // if let destEndpointInfo - end
+                                }   // switch - end
+                            } else {
+                                self.currentEPs.removeAll()
+                                completion("error parsing JSON")
+                            }   // if let destEndpointJSON - end
+                            
+                        }   // end do/catch
+                        
+                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
+                            //print(httpResponse.statusCode)
+                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
+    //                        print("returning existing endpoints: \(self.currentEPs)")
+                            completion("\nCurrent endpoints - \(self.currentEPs)")
                         } else {
-                            self.currentEPs.removeAll()
-                            completion("error parsing JSON")
-                        }   // if let destEndpointJSON - end
+                            // something went wrong
+                            completion("\ndestination count error")
+                            
+                        }   // if httpResponse/else - end
                         
-                    }   // end do/catch
-                    
-                    if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                        //print(httpResponse.statusCode)
-                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
-//                        print("returning existing endpoints: \(self.currentEPs)")
-                        completion("\nCurrent endpoints - \(self.currentEPs)")
-                    } else {
-                        // something went wrong
-                        completion("\ndestination count error")
-                        
-                    }   // if httpResponse/else - end
-                    
-                }   // if let httpResponse - end
-                semaphore.signal()
-                if error != nil {
-                }
-            })  // let task = destSession - end
-            //print("GET")
-            task.resume()
-        }   // destEPQ - end
+                    }   // if let httpResponse - end
+                    semaphore.signal()
+                    if error != nil {
+                    }
+                })  // let task = destSession - end
+                //print("GET")
+                task.resume()
+            }   // destEPQ - end
+        } else {
+            self.currentEPs["_"] = 0
+            completion("\nCurrent endpoints - saveOnly, not needed.")
+        }
     }
     
     
@@ -3624,45 +3675,49 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //return true
     }   // func alert_dialog - end
     
-    func checkURL2(serverURL: String, completion: @escaping (Bool) -> Void) {
+    func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
-        var available:Bool = false
-        if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- checking availability of server: \(serverURL)\n") }
+        if (whichServer == "dest" && saveOnly) {
+            completion(true)
+        } else {
+            var available:Bool = false
+            if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- checking availability of server: \(serverURL)\n") }
         
-        authQ.sync {
-            if self.debug { self.writeToLog(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
+            authQ.sync {
+                if self.debug { self.writeToLog(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
 
-            guard let encodedURL = URL(string: serverURL) else {
-                if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- Cannot cast to URL: \(serverURL)\n") }
-                completion(false)
-                return
-            }
-            let configuration = URLSessionConfiguration.default
-//            var request = URLRequest(url: encodedURL.appendingPathComponent("/JSSResource/accounts"))
-//            request.httpMethod = "HEAD"
-            var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
-            request.httpMethod = "GET"
+                guard let encodedURL = URL(string: serverURL) else {
+                    if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- Cannot cast to URL: \(serverURL)\n") }
+                    completion(false)
+                    return
+                }
+                let configuration = URLSessionConfiguration.default
+    //            var request = URLRequest(url: encodedURL.appendingPathComponent("/JSSResource/accounts"))
+    //            request.httpMethod = "HEAD"
+                var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
+                request.httpMethod = "GET"
 
-            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-            let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                if let httpResponse = response as? HTTPURLResponse {
-                    if self.debug { self.writeToLog(stringOfText: "[checkURL2] Server check: \(serverURL), httpResponse: \(httpResponse.statusCode)\n") }
-                    
-                    //                    print("response: \(response)")
-                    if let responseData = String(data: data!, encoding: .utf8) {
-                        if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: \(responseData)") }
-                    } else {
-                        if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: none") }
-                    }
-                    available = true
-                    
-                } // if let httpResponse - end
-                // server is not reachable - availability is still false
-                completion(available)
-            })  // let task = session - end
-            task.resume()
-        }   // authQ - end
+                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    if let httpResponse = response as? HTTPURLResponse {
+                        if self.debug { self.writeToLog(stringOfText: "[checkURL2] Server check: \(serverURL), httpResponse: \(httpResponse.statusCode)\n") }
+                        
+                        //                    print("response: \(response)")
+                        if let responseData = String(data: data!, encoding: .utf8) {
+                            if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: \(responseData)") }
+                        } else {
+                            if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: none") }
+                        }
+                        available = true
+                        
+                    } // if let httpResponse - end
+                    // server is not reachable - availability is still false
+                    completion(available)
+                })  // let task = session - end
+                task.resume()
+            }   // authQ - end
+        }
     }   // func checkURL2 - end
     
     func clearProcessingFields() {
@@ -3909,6 +3964,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             extension_attributes_label_field.textColor = theColor
         case "scripts":
             scripts_label_field.textColor = theColor
+        case "macapplications":
+            macapplications_label_field.textColor = theColor
         case "computergroups":
             smart_groups_label_field.textColor = theColor
             static_groups_label_field.textColor = theColor
@@ -4035,6 +4092,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
+                _ = serverOrFiles()
                 // re-enable source server, username, and password fields (to finish later)
 //                source_jp_server_field.isEnabled = true
 //                sourceServerList_button.isEnabled = true
@@ -4196,7 +4254,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //  extract the value between (different) tags - end
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
-        if !(fileImport && serverList == "source_server_array") {
+//        if !(fileImport && serverList == "source_server_array") {
             var local_serverArray = theArray
             let positionInList = local_serverArray.index(of: url)
             if positionInList == nil {
@@ -4225,7 +4283,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.destServerArray = local_serverArray
             default: break
             }
-        }
+//        }   // if !(fileImport && serverList == "source_server_array") - end
     }
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
@@ -4412,18 +4470,49 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read scope settings - start
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            scopeMcpCopy = (scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!:true
-            scopePoliciesCopy = (scopeOptions["policies"]!["copy"] != nil) ? scopeOptions["policies"]!["copy"]!:true
-            policyPoliciesDisable = (scopeOptions["policies"]!["disable"] != nil) ? scopeOptions["policies"]!["disable"]!:true
-            scopeOcpCopy = (scopeOptions["osxconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["osxconfigurationprofiles"]!["copy"]!:true
-            scopeRsCopy = (scopeOptions["restrictedsoftware"]!["copy"] != nil) ? scopeOptions["restrictedsoftware"]!["copy"]!:true
+//            scopeMcpCopy = (scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!:true
+//            scopePoliciesCopy = (scopeOptions["policies"]!["copy"] != nil) ? scopeOptions["policies"]!["copy"]!:true
+//            policyPoliciesDisable = (scopeOptions["policies"]!["disable"] != nil) ? scopeOptions["policies"]!["disable"]!:true
+//            scopeOcpCopy = (scopeOptions["osxconfigurationprofiles"]!["copy"] != nil) ? scopeOptions["osxconfigurationprofiles"]!["copy"]!:true
+//            scopeRsCopy = (scopeOptions["restrictedsoftware"]!["copy"] != nil) ? scopeOptions["restrictedsoftware"]!["copy"]!:true
+            if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            }
+            if self.scopeOptions["macapps"] != nil {
+                if self.scopeOptions["macapps"]!["copy"] != nil {
+                    self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+                }
+            } else {
+                self.scopeMaCopy = true
+            }
+            if scopeOptions["policies"]!["copy"] != nil {
+                scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
+            }
+            if scopeOptions["policies"]!["disable"] != nil {
+                policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
+            }
+            if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            }
+            if scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+            }
+            if self.scopeOptions["iosapps"] != nil {
+                if self.scopeOptions["iosapps"]!["copy"] != nil {
+                    self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+                }
+            } else {
+                self.scopeIaCopy = true
+            }
         } else {
             // reset/initialize new settings
             plistData          = readSettings()
-            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
+            plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                                  "macapps":["copy":true],
                                   "policies":["copy":true,"disable":false],
-                                  "osxconfigurationprofiles":["copy":true],
                                   "restrictedsoftware":["copy":true],
+                                  "mobiledeviceconfigurationprofiles":["copy":true],
+                                  "iosapps":["copy":true],
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
@@ -4439,10 +4528,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             // reset/initialize scope preferences
             plistData          = readSettings()
-            plistData["scope"] = ["mobiledeviceconfigurationprofiles":["copy":true],
+            plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                                  "macapps":["copy":true],
                                   "policies":["copy":true,"disable":false],
-                                  "osxconfigurationprofiles":["copy":true],
                                   "restrictedsoftware":["copy":true],
+                                  "mobiledeviceconfigurationprofiles":["copy":true],
+                                  "iosapps":["copy":true],
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
@@ -4538,6 +4629,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // macOS tab
         allNone_button.state = NSControl.StateValue(rawValue: 1)
         advcompsearch_button.state = NSControl.StateValue(rawValue: 1)
+        macapplications_button.state = NSControl.StateValue(rawValue: 1)
         computers_button.state = NSControl.StateValue(rawValue: 1)
         configurations_button.state = NSControl.StateValue(rawValue: 1)
         directory_bindings_button.state = NSControl.StateValue(rawValue: 1)
@@ -4649,7 +4741,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         if self.fileImport {
                             self.fileImport = false
-                            self.importFiles_button.isEnabled = false
+                            self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
+//                            self.importFiles_button.isEnabled = false
                         }
                     }
                 } else {

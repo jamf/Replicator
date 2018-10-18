@@ -24,6 +24,16 @@
 	<integer>0</integer>
 	<key>scope</key>
 	<dict>
+		<key>iosapps</key>
+		<dict>
+			<key>copy</key>
+			<false/>
+		</dict>
+		<key>macapps</key>
+		<dict>
+			<key>copy</key>
+			<true/>
+		</dict>
 		<key>sig</key>
 		<dict>
 			<key>copy</key>
