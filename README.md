@@ -76,7 +76,8 @@ Information about successes/failures can be found in the log, located in
 
 ## History
 **v3.0.0**
-Added ability to use locally stored XML files as a source rather than a server.  Added ability to migrate macOS and iOS Mac App Store apps.
+* Added ability to use locally stored XML files as a source rather than a server.
+* Added ability to migrate macOS and iOS Mac App Store apps.
 
 **v2.8.0**<p>
 * Moved text manipulation to main thread, fixing issues where the endpoint URL was incorrect.
