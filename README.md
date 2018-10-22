@@ -42,10 +42,10 @@ When importing XML files they must be organized into folders that, for the most 
 * Static Mobile Device Groups 
 * Static User Groups 
 
-In addition, Policies can be copied in a disabled state.
+In addition, Policies can be copied in a disabled state.<p>
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copy_migrator_prefs.png)
 
-Options to export XML from the source server are also available.
+Options to export XML from the source server are also available.<p>
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/export_migrator_prefs.png)
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
