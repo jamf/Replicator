@@ -116,6 +116,8 @@ class PrefsViewController: NSViewController {
             if self.scopeOptions["macapps"] != nil {
                 if self.scopeOptions["macapps"]!["copy"] != nil {
                     self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+                } else {
+                    self.scopeMaCopy = true
                 }
             } else {
                 self.scopeMaCopy = true
@@ -135,6 +137,8 @@ class PrefsViewController: NSViewController {
             if self.scopeOptions["iosapps"] != nil {
                 if self.scopeOptions["iosapps"]!["copy"] != nil {
                     self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+                } else {
+                    self.scopeIaCopy = true
                 }
             } else {
                 self.scopeIaCopy = true
