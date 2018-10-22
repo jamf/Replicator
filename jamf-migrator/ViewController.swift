@@ -896,168 +896,167 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "Migration Mode (startMigration): \(self.migrationMode).\n") }
             
                 // list the items in the order they need to be migrated
-                if self.migrationMode == "bulk" {
-                    // initialize list of items to migrate then add what we want - start
-                    self.objectsToMigrate.removeAll()
-                    if self.debug { self.writeToLog(stringOfText: "Types of objects to migrate: \(self.deviceType()).\n") }
+            if self.migrationMode == "bulk" {
+                // initialize list of items to migrate then add what we want - start
+                self.objectsToMigrate.removeAll()
+                if self.debug { self.writeToLog(stringOfText: "Types of objects to migrate: \(self.deviceType()).\n") }
 //                    DispatchQueue.main.async {
-                        // macOS
-                        switch self.deviceType() {
-                        case "macOS":
-                            if self.fileshares_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["distributionpoints"]
-                            }
-                            
-                            if self.directory_bindings_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["directorybindings"]
-                            }
-                            
-                            if self.dock_items_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["dockitems"]
-                            }
-                            
-                            if self.computers_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["computers"]
-                            }
-                            
-                            if self.sus_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["softwareupdateservers"]
-                            }
-                            
-                            if self.netboot_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["netbootservers"]
-                            }
-                            
-                            if self.ext_attribs_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["computerextensionattributes"]
-                            }
-                            
-                            if self.scripts_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["scripts"]
-                            }
-                            
-                            if self.printers_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["printers"]
-                            }
-                            
-                            if self.packages_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["packages"]
-                            }
-                            
-                            if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["computergroups"]
-                            }
-                            
-                            if self.restrictedsoftware_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["restrictedsoftware"]
-                            }
-                            
-                            if self.osxconfigurationprofiles_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["osxconfigurationprofiles"]
-                            }
-                            
-                            if self.macapplications_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["macapplications"]
-                            }
-                            
-                            if self.patch_policies_button.state.rawValue == 1 {
-                                //                    self.objectsToMigrate += ["patches"]
-                                self.objectsToMigrate += ["patchpolicies"]
-                            }
-                            
-                            if self.advcompsearch_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["advancedcomputersearches"]
-                            }
-                            
-                            if self.configurations_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["computerconfigurations"]
-                            }
-                            
-                            if self.policies_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["policies"]
-                            }
-                        case "iOS":
-                            if self.mobiledeviceextensionattributes_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["mobiledeviceextensionattributes"]
-                            }
-                            
-                            if self.mobiledevices_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["mobiledevices"]
-                            }
-                            
-                            if self.smart_ios_groups_button.state.rawValue == 1 || self.static_ios_groups_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["mobiledevicegroups"]
-                            }
-                            
-                            if self.advancedmobiledevicesearches_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["advancedmobiledevicesearches"]
-                            }
-                            
-                            if self.mobiledevicecApps_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["mobiledeviceapplications"]
-                            }
-                            
-                            if self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["mobiledeviceconfigurationprofiles"]
-                            }
-                        case "general":
-                            if self.sites_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["sites"]
-                            }
-                            
-                            if self.userEA_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["userextensionattributes"]
-                            }
-                            
-                            if self.ldapservers_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["ldapservers"]
-                            }
-                            
-                            if self.users_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["users"]
-                            }
-                            
-                            if self.building_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["buildings"]
-                            }
-                            
-                            if self.dept_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["departments"]
-                            }
-                            
-                            if self.categories_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["categories"]
-                            }
-                            
-                            if self.jamfUserAccounts_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["jamfusers"]
-                            }
-                            
-                            if self.jamfGroupAccounts_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["jamfgroups"]
-                            }
-                            
-                            if self.networks_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["networksegments"]
-                            }
-                            
-                            if self.advusersearch_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["advancedusersearches"]
-                            }
-                            
-                            if self.smartUserGrps_button.state.rawValue == 1 || self.staticUserGrps_button.state.rawValue == 1 {
-                                self.objectsToMigrate += ["usergroups"]
-                            }
-                        default: break
+                    // macOS
+                    switch self.deviceType() {
+                    case "macOS":
+                        if self.fileshares_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["distributionpoints"]
                         }
-//                        print(self.getCurrentTime()+" objectsToMigrate: \(self.objectsToMigrate)")
-                    
+                        
+                        if self.directory_bindings_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["directorybindings"]
+                        }
+                        
+                        if self.dock_items_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["dockitems"]
+                        }
+                        
+                        if self.computers_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["computers"]
+                        }
+                        
+                        if self.sus_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["softwareupdateservers"]
+                        }
+                        
+                        if self.netboot_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["netbootservers"]
+                        }
+                        
+                        if self.ext_attribs_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["computerextensionattributes"]
+                        }
+                        
+                        if self.scripts_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["scripts"]
+                        }
+                        
+                        if self.printers_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["printers"]
+                        }
+                        
+                        if self.packages_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["packages"]
+                        }
+                        
+                        if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["computergroups"]
+                        }
+                        
+                        if self.restrictedsoftware_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["restrictedsoftware"]
+                        }
+                        
+                        if self.osxconfigurationprofiles_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["osxconfigurationprofiles"]
+                        }
+                        
+                        if self.macapplications_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["macapplications"]
+                        }
+                        
+                        if self.patch_policies_button.state.rawValue == 1 {
+                            //                    self.objectsToMigrate += ["patches"]
+                            self.objectsToMigrate += ["patchpolicies"]
+                        }
+                        
+                        if self.advcompsearch_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["advancedcomputersearches"]
+                        }
+                        
+                        if self.configurations_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["computerconfigurations"]
+                        }
+                        
+                        if self.policies_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["policies"]
+                        }
+                    case "iOS":
+                        if self.mobiledeviceextensionattributes_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["mobiledeviceextensionattributes"]
+                        }
+                        
+                        if self.mobiledevices_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["mobiledevices"]
+                        }
+                        
+                        if self.smart_ios_groups_button.state.rawValue == 1 || self.static_ios_groups_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["mobiledevicegroups"]
+                        }
+                        
+                        if self.advancedmobiledevicesearches_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["advancedmobiledevicesearches"]
+                        }
+                        
+                        if self.mobiledevicecApps_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["mobiledeviceapplications"]
+                        }
+                        
+                        if self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["mobiledeviceconfigurationprofiles"]
+                        }
+                    case "general":
+                        if self.sites_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["sites"]
+                        }
+                        
+                        if self.userEA_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["userextensionattributes"]
+                        }
+                        
+                        if self.ldapservers_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["ldapservers"]
+                        }
+                        
+                        if self.users_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["users"]
+                        }
+                        
+                        if self.building_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["buildings"]
+                        }
+                        
+                        if self.dept_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["departments"]
+                        }
+                        
+                        if self.categories_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["categories"]
+                        }
+                        
+                        if self.jamfUserAccounts_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["jamfusers"]
+                        }
+                        
+                        if self.jamfGroupAccounts_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["jamfgroups"]
+                        }
+                        
+                        if self.networks_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["networksegments"]
+                        }
+                        
+                        if self.advusersearch_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["advancedusersearches"]
+                        }
+                        
+                        if self.smartUserGrps_button.state.rawValue == 1 || self.staticUserGrps_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["usergroups"]
+                        }
+                    default: break
                     }
+//                        print(self.getCurrentTime()+" objectsToMigrate: \(self.objectsToMigrate)")
+                
+            }   // if migrationMode == "bulk" - end
+            
+            // initialize list of items to migrate then add what we want - end
+            if self.debug { self.writeToLog(stringOfText: "objects: \(self.objectsToMigrate).\n") }
                     
-                    // initialize list of items to migrate then add what we want - end
-                    if self.debug { self.writeToLog(stringOfText: "objects: \(self.objectsToMigrate).\n") }
-                    
-//                }   // if migrationMode == "bulk" - end
             
             if self.objectsToMigrate.count == 0 {
                 if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
@@ -1155,131 +1154,127 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             var arrayIndex = 0
             // loop through process of migrating or removing - start
             self.readNodesQ.async {
-            while arrayIndex < self.objectsToMigrate.count {
-                let currentNode = self.objectsToMigrate[arrayIndex]
-//            for currentNode in self.objectsToMigrate {
-//                print("arrayIndex: \(arrayIndex) \t nodesMigrated: \(self.nodesMigrated)")
-                if !self.fileImport || (self.objectsToMigrate.first == currentNode || arrayIndex <= self.nodesMigrated) {
-//                    print("migrating: \(currentNode)")
-                    // initialize post/put success count switch endpoint {
-                    switch currentNode {
-                    case "computergroups":
-                        self.progressCountArray["smartcomputergroups"] = 0
-                        self.progressCountArray["staticcomputergroups"] = 0
-                        self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-                    case "mobiledevicegroups":
-                        self.progressCountArray["smartiosgroups"] = 0
-                        self.progressCountArray["staticiosgroups"] = 0
-                        self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-                    case "usergroups":
-                        self.progressCountArray["smartusergroups"] = 0
-                        self.progressCountArray["staticusergroups"] = 0
-                        self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-                    case "accounts":
-                        self.progressCountArray["jamfusers"] = 0
-                        self.progressCountArray["jamfgroups"] = 0
-                        self.progressCountArray["accounts"] = 0 // this is the recognized end point
-                    default:
-                        self.progressCountArray["\(currentNode)"] = 0
-                    }
-                    
-                    
-                    if self.debug { self.writeToLog(stringOfText: "Starting to process \(currentNode)\n") }
-                    if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
-                        if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(currentNode)\n") }
-                        if self.fileImport {
-                            
-                            self.readDataFiles(endpoint: currentNode) {
-                                (result: String) in
-                                if self.debug { self.writeToLog(stringOfText: "processFiles result: \(result)\n") }
-                                //                                    print("result of processFiles: \(result)")
-                            }
-                        } else {
-                            self.getEndpoints(endpoint: currentNode)  {
-                                (result: String) in
-                                if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
-                            }
-                        }
-                    } else {
-                        // **************************************** selective migration - start ****************************************
-                        if self.fileImport {
-                            self.alert_dialog(header: "Attention:", message: "Selective migration is not yet available when importing files.")
-                            self.goButtonEnabled(button_status: true)
-                            return
-                        }
-                        var selectedEndpoint = ""
-                        switch self.objectsToMigrate[0] {
-                        case "jamfusers":
-                            selectedEndpoint = "accounts/userid"
-                        case "jamfgroups":
-                            selectedEndpoint = "accounts/groupid"
+                while arrayIndex < self.objectsToMigrate.count {
+                    let currentNode = self.objectsToMigrate[arrayIndex]
+
+                    if !self.fileImport || (self.objectsToMigrate.first == currentNode || arrayIndex <= self.nodesMigrated) {
+    //                    print("migrating: \(currentNode)")
+                        // initialize post/put success count switch endpoint {
+                        switch currentNode {
+                        case "computergroups":
+                            self.progressCountArray["smartcomputergroups"] = 0
+                            self.progressCountArray["staticcomputergroups"] = 0
+                            self.progressCountArray["computergroups"] = 0 // this is the recognized end point
+                        case "mobiledevicegroups":
+                            self.progressCountArray["smartiosgroups"] = 0
+                            self.progressCountArray["staticiosgroups"] = 0
+                            self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
+                        case "usergroups":
+                            self.progressCountArray["smartusergroups"] = 0
+                            self.progressCountArray["staticusergroups"] = 0
+                            self.progressCountArray["usergroups"] = 0 // this is the recognized end point
+                        case "accounts":
+                            self.progressCountArray["jamfusers"] = 0
+                            self.progressCountArray["jamfgroups"] = 0
+                            self.progressCountArray["accounts"] = 0 // this is the recognized end point
                         default:
-                            selectedEndpoint = self.objectsToMigrate[0]
+                            self.progressCountArray["\(currentNode)"] = 0
                         }
-                        self.existingEndpoints(destEndpoint: "\(self.objectsToMigrate[0])")  {
-                            (result: String) in
-                            if self.debug { self.writeToLog(stringOfText: "Returned from existing endpoints: \(result)\n") }
-                            var objToMigrateID = 0
-                            // clear targetDataArray - needed to handle switching tabs
-                            self.targetDataArray.removeAll()
-                            // create targetDataArray
-                            for k in (0..<self.sourceDataArray.count) {
-                                if self.srcSrvTableView.isRowSelected(k) {
-                                    // prevent the removal of the account we're using
-                                    if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
-                                        self.targetDataArray.append(self.sourceDataArray[k])
-                                    }
+                        
+                        
+                        if self.debug { self.writeToLog(stringOfText: "Starting to process \(currentNode)\n") }
+                        if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
+                            if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(currentNode)\n") }
+                            if self.fileImport {
+                                
+                                self.readDataFiles(endpoint: currentNode) {
+                                    (result: String) in
+                                    if self.debug { self.writeToLog(stringOfText: "processFiles result: \(result)\n") }
+                                }
+                            } else {
+                                self.getEndpoints(endpoint: currentNode)  {
+                                    (result: String) in
+                                    if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
                                 }
                             }
-                            
-                            if self.targetDataArray.count == 0 {
-                                if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
-                                self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
+                        } else {
+                            // **************************************** selective migration - start ****************************************
+                            if self.fileImport {
+                                self.alert_dialog(header: "Attention:", message: "Selective migration is not yet available when importing files.")
                                 self.goButtonEnabled(button_status: true)
                                 return
                             }
-                            
-                            // Used if we remove items from the list as they are removed from the server - not working
-                            //                        if self.wipe_data {
-                            //                            self.availableIdsToDelArray.removeAll()
-                            //                            for k in (0..<self.sourceDataArray.count) {
-                            //                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
-                            //                            }
-                            //                        }
-                            
-                            if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
-                            for j in (0..<self.targetDataArray.count) {
-                                objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
-                                if !self.wipe_data  {
-                                    if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
-                                        if self.debug { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                        if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
-                                            if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
-                                            //self.currentEndpointID = self.currentEPs[xmlName]!
-                                            self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
-                                        } else {
-                                            self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
+                            var selectedEndpoint = ""
+                            switch self.objectsToMigrate[0] {
+                            case "jamfusers":
+                                selectedEndpoint = "accounts/userid"
+                            case "jamfgroups":
+                                selectedEndpoint = "accounts/groupid"
+                            default:
+                                selectedEndpoint = self.objectsToMigrate[0]
+                            }
+                            self.existingEndpoints(destEndpoint: "\(self.objectsToMigrate[0])")  {
+                                (result: String) in
+                                if self.debug { self.writeToLog(stringOfText: "Returned from existing endpoints: \(result)\n") }
+                                var objToMigrateID = 0
+                                // clear targetDataArray - needed to handle switching tabs
+                                self.targetDataArray.removeAll()
+                                // create targetDataArray
+                                for k in (0..<self.sourceDataArray.count) {
+                                    if self.srcSrvTableView.isRowSelected(k) {
+                                        // prevent the removal of the account we're using
+                                        if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
+                                            self.targetDataArray.append(self.sourceDataArray[k])
                                         }
                                     }
-                                } else {
-                                    // selective removal
-                                    if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
-                                    
-                                    self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
-                                    
-                                }   // if !self.wipe_data else - end
-                            }   // for j in  - end
-                        }
-                    }   //for i in - else - end
-                    arrayIndex+=1
-                    // **************************************** selective migration - end ****************************************
-                } else {
-                    sleep(1)
-                }
-            }   // for currentNode in - end
-                
-            }   //readFiles.async - end
-            
+                                }
+                                
+                                if self.targetDataArray.count == 0 {
+                                    if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
+                                    self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
+                                    self.goButtonEnabled(button_status: true)
+                                    return
+                                }
+                                
+                                // Used if we remove items from the list as they are removed from the server - not working
+                                //                        if self.wipe_data {
+                                //                            self.availableIdsToDelArray.removeAll()
+                                //                            for k in (0..<self.sourceDataArray.count) {
+                                //                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
+                                //                            }
+                                //                        }
+                                
+                                if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
+                                for j in (0..<self.targetDataArray.count) {
+                                    objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
+                                    if !self.wipe_data  {
+                                        if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
+                                            if self.debug { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
+                                            if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
+                                                if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
+                                                //self.currentEndpointID = self.currentEPs[xmlName]!
+                                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
+                                            } else {
+                                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
+                                            }
+                                        }
+                                    } else {
+                                        // selective removal
+                                        if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
+                                        
+                                        self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
+                                        
+                                    }   // if !self.wipe_data else - end
+                                }   // for j in  - end
+                            }
+                        }   //for i in - else - end
+                        arrayIndex+=1
+                        // **************************************** selective migration - end ****************************************
+                    } else {
+                        sleep(1)
+                    }
+                }   // while arrayIndex  - end
+            }   // self.readFiles.async - end
         }   //DispatchQueue.man.async - end
     }   // func startMigrating - end
     
