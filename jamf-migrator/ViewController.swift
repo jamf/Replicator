@@ -1153,7 +1153,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             var arrayIndex = 0
             // loop through process of migrating or removing - start
-            self.readNodesQ.async {
+//            self.readNodesQ.async {
+            DispatchQueue.main.async {
                 while arrayIndex < self.objectsToMigrate.count {
                     let currentNode = self.objectsToMigrate[arrayIndex]
 
@@ -1220,14 +1221,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // clear targetDataArray - needed to handle switching tabs
                                 self.targetDataArray.removeAll()
                                 // create targetDataArray
-                                for k in (0..<self.sourceDataArray.count) {
-                                    if self.srcSrvTableView.isRowSelected(k) {
-                                        // prevent the removal of the account we're using
-                                        if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
-                                            self.targetDataArray.append(self.sourceDataArray[k])
-                                        }
-                                    }
-                                }
+                                
+//                                DispatchQueue.main.async {
+                                    for k in (0..<self.sourceDataArray.count) {
+//                                        DispatchQueue.main.async {
+                                            if self.srcSrvTableView.isRowSelected(k) {
+                                                // prevent the removal of the account we're using
+                                                if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
+                                                    self.targetDataArray.append(self.sourceDataArray[k])
+                                                }
+                                            }
+//                                        }   // DispatchQueue.main.async - end
+                                    }   // for k in - end
+//                                }
                                 
                                 if self.targetDataArray.count == 0 {
                                     if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
@@ -1275,7 +1281,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 }   // while arrayIndex  - end
             }   // self.readFiles.async - end
-        }   //DispatchQueue.man.async - end
+        }   //DispatchQueue.main.async - end
     }   // func startMigrating - end
     
     
@@ -2530,13 +2536,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
             // remove computers that are a member of a smart group
             if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeScgCopy) {
+                // groups containing thousands of computers could not be cleared by only using the computers tag
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computer")
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers")
             }
-            //                            if PostXML.range(of:"<is_smart>true</is_smart>") != nil {
-            //                                let regexComp = try! NSRegularExpression(pattern: "<computers>(.*?)</computers>", options:.caseInsensitive)
-            //                                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-            //                            }
-            //print("\n\(endpoint) XML: \(PostXML)\n")
+//            print("\n\(endpoint) XML: \(PostXML)\n")
             
             if self.getEndpointInProgress != endpoint {
                 self.endpointInProgress = endpoint
@@ -2603,6 +2607,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
             
+            // update references to the Jamf server
+            let regexServer = try! NSRegularExpression(pattern: urlToFqdn(serverUrl: source_jp_server), options:.caseInsensitive)
+            PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: urlToFqdn(serverUrl: dest_jp_server))
             
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
@@ -2853,17 +2860,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // create failed
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                             //                        self.changeColor = false
-                            self.writeToLog(stringOfText: "\n\n**** [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed\n")
+//                            self.writeToLog(stringOfText: "\n**** [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode))")
                         
                             // Write xml for degugging - start
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n")}
-                            self.writeToLog(stringOfText: "[CreateEndpoints] HTTP status code: \(httpResponse.statusCode)\n")
+//                            self.writeToLog(stringOfText: "[CreateEndpoints] HTTP status code: \(httpResponse.statusCode)\n")
                             let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
-                            if errorMsg != "" {
-                                self.writeToLog(stringOfText: "[CreateEndpoints] Create/update error: \(errorMsg)\n\n")
-                            } else {
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Error parsing conflict.") }
-                            }
+                            var localErrorMsg = ""
+//                            if errorMsg != "" {
+//                                self.writeToLog(stringOfText: "[CreateEndpoints] \(action) error: \(errorMsg)\n\n")
+//                            } else {
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Error parsing conflict.") }
+//                            }
+                            errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: unknown")
+                            
+                            self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                             // Write xml for degugging - end
                         
                             if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
@@ -3617,8 +3627,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func getStatusUpdate(endpoint: String, count: Int) {
-        //self.get_name_field.stringValue = endpoint
-        //self.get_found_field.stringValue = "\(count)"
         self.get_completed_field.stringValue = "\(count)"
     }
     
@@ -3832,10 +3840,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func rmXmlData(theXML: String, theTag: String) -> String {
+//        let f_regexCompNl = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>\n", options:.caseInsensitive)
+//        var newXML = f_regexCompNl.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
+//
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
-        
-        return newXML
+//        let newXML_trimmed = newXML.trimmingCharacters(in: .newlines)
+        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
+        return newXML_trimmed
     }
     
     func readSettings() -> [String:Any] {
@@ -3861,7 +3873,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func savePrefs(prefs: [String:Any]) {
-//        DispatchQueue.main.async {
         plistData          = readSettings()
         plistData["scope"] = prefs["scope"]
         plistData["xml"]   = prefs["xml"]
@@ -3871,12 +3882,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         saveRawXml         = xmlPrefOptions["saveRawXml"]!
         saveTrimmedXml     = xmlPrefOptions["saveTrimmedXml"]!
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
-//            self.plistData = self.readSettings()
-//            print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
-//        }
+//      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
     }
     
-    // functions used to get existing self service icons to new server - start
     func myExitValue(cmd: String, args: String...) -> String {
         var status  = ""
         let pipe    = Pipe()
@@ -3902,6 +3910,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     
+// functions used to get existing self service icons to new server - start
     // using curl to deal with self service icons
 //    func selfServiceIconGet(newPolicyId: String, ssIconName: String, ssIconUri: String) {
 //        theCreateQ.maxConcurrentOperationCount = 1
@@ -4014,6 +4023,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        }   // if !(fileImport && serverList == "source_server_array") - end
     }
     
+    func urlToFqdn(serverUrl: String) -> String {
+        var fqdn = serverUrl.replacingOccurrences(of: "http://", with: "")
+        fqdn = serverUrl.replacingOccurrences(of: "https://", with: "")
+        let fqdnArray = fqdn.split(separator: "/")
+        fqdn = "\(fqdnArray[0])"
+        return fqdn
+    }
+    
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
         switch sender.tag {
         case 0:
@@ -4074,10 +4091,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.exportedFilesUrl = URL(string: "file://\(self.dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
                     self.source_user_field.isHidden = true
                     self.source_pwd_field.isHidden = true
-                    //                source_user_field.stringValue = ""
-                    //                source_user_field.isEnabled = false
-                    //                source_pwd_field.stringValue = ""
-                    //                source_pwd_field.isEnabled = false
                     self.fileImport = true
                     sourceType = "files"
                 }
@@ -4323,7 +4336,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
             self.validCreds = false
         }
-        // check for stored passwords - start
+        // check for stored passwords - end
         
         // read commandline args
         var numberOfArgs = 0
