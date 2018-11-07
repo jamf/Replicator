@@ -1153,8 +1153,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
             var arrayIndex = 0
             // loop through process of migrating or removing - start
-//            self.readNodesQ.async {
-            DispatchQueue.main.async {
+            self.readNodesQ.async {
+//            DispatchQueue.main.async { // caused issues with selective migration, when selecting more then one endpoint
                 while arrayIndex < self.objectsToMigrate.count {
                     let currentNode = self.objectsToMigrate[arrayIndex]
 
@@ -1222,7 +1222,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.targetDataArray.removeAll()
                                 // create targetDataArray
                                 
-//                                DispatchQueue.main.async {
+                                DispatchQueue.main.async {
                                     for k in (0..<self.sourceDataArray.count) {
 //                                        DispatchQueue.main.async {
                                             if self.srcSrvTableView.isRowSelected(k) {
@@ -1235,43 +1235,46 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }   // for k in - end
 //                                }
                                 
-                                if self.targetDataArray.count == 0 {
-                                    if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
-                                    self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
-                                    self.goButtonEnabled(button_status: true)
-                                    return
-                                }
-                                
-                                // Used if we remove items from the list as they are removed from the server - not working
-                                //                        if self.wipe_data {
-                                //                            self.availableIdsToDelArray.removeAll()
-                                //                            for k in (0..<self.sourceDataArray.count) {
-                                //                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
-                                //                            }
-                                //                        }
-                                
-                                if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
-                                for j in (0..<self.targetDataArray.count) {
-                                    objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
-                                    if !self.wipe_data  {
-                                        if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
-                                            if self.debug { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                            if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
-                                                if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
-                                                //self.currentEndpointID = self.currentEPs[xmlName]!
-                                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
-                                            } else {
-                                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
+                                    if self.targetDataArray.count == 0 {
+                                        if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
+                                        self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
+                                        self.goButtonEnabled(button_status: true)
+                                        return
+                                    }
+                                    
+                                    // Used if we remove items from the list as they are removed from the server - not working
+                                    //                        if self.wipe_data {
+                                    //                            self.availableIdsToDelArray.removeAll()
+                                    //                            for k in (0..<self.sourceDataArray.count) {
+                                    //                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
+                                    //                            }
+                                    //                        }
+                                    
+                                    if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
+                                    for j in (0..<self.targetDataArray.count) {
+                                        objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
+                                        if !self.wipe_data  {
+                                            if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
+                                                if self.debug { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
+                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
+                                                    if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
+                                                    //self.currentEndpointID = self.currentEPs[xmlName]!
+                                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
+                                                } else {
+                                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
+                                                }
                                             }
-                                        }
-                                    } else {
-                                        // selective removal
-                                        if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
-                                        
-                                        self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
-                                        
-                                    }   // if !self.wipe_data else - end
-                                }   // for j in  - end
+                                        } else {
+                                            // selective removal
+                                            if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
+                                            
+                                            self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
+                                            
+                                        }   // if !self.wipe_data else - end
+                                    }   // for j in  - end
+                                    
+                                }   // DispatchQueue.main.async - end
+                                
                             }
                         }   //for i in - else - end
                         arrayIndex+=1
@@ -2601,6 +2604,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //                                    PostXML = regexSsDesc.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: SsText+"\n"+SsDesc)
             //                                }
             //                            }
+            
+            // fix names that start with spaces - convert space to hex: &#xA0;
+            let regexPolicyName = try! NSRegularExpression(pattern: "<name> ", options:.caseInsensitive)
+            PostXML = regexPolicyName.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<name>&#xA0;")
             
             // remove individual objects that are scoped to the policy from XML
             for xmlTag in ["self_service_icon"] {
