@@ -2689,7 +2689,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             completion("")
         }
-//        completion("")
     }
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String, completion: @escaping (_ result: String) -> Void) {
@@ -2794,11 +2793,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //                            print("go button enabled")
                         }
 
-//                        if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
-//                            self.rmDELETE()
-//                            self.goButtonEnabled(button_status: true)
-//                            print("Done")
-//                        }
                     }   // DispatchQueue.main.async - end
                     // look to see if we are processing the next endpointType - start
                     if self.endpointInProgress != endpointType {
@@ -2838,7 +2832,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
                                 self.summaryDict[endpointType]?["\(action)"] = summaryArray
                             }
-                            if ((endpointType == "policies") || (endpointType == "macapplications") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                            // currently there is no way to upload mac app store icons
+                            // removed check for those -  || (endpointType == "macapplications")
+                            if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
                                 if (ssIconName != "") && (ssIconUri != "") {
                                     var iconNode = "policies"
                                     switch endpointType {
@@ -2869,46 +2865,54 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         } else {
                             // create failed
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            //                        self.changeColor = false
-//                            self.writeToLog(stringOfText: "\n**** [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode))")
                         
                             // Write xml for degugging - start
-//                            self.writeToLog(stringOfText: "[CreateEndpoints] HTTP status code: \(httpResponse.statusCode)\n")
                             let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
                             var localErrorMsg = ""
-//                            if errorMsg != "" {
-//                                self.writeToLog(stringOfText: "[CreateEndpoints] \(action) error: \(errorMsg)\n\n")
-//                            } else {
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Error parsing conflict.") }
-//                            }
+
                             errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: unknown")
                             
-                            self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                             // Write xml for degugging - end
-                        
-                            if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
-                                self.labelColor(endpoint: endpointType, theColor: self.redText)
+                            
+                            // retry computers with dublicate serial or MAC - start
+                            if (errorMsg == "Duplicate serial number"  || errorMsg == "Duplicate MAC address") {
+                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
+                                var tmp_endPointXML = endPointXML
+                                for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                }
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent-1), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri) {
+                                    (result: String) in
+//                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                                }
+                                self.postCount -= 1
+                                return
+                            } else {    // retry computers with dublicate serial or MAC - end
+                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                                if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
+                                    self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                }
+                                if self.debug { self.writeToLog(stringOfText: "\n\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
+                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
+                                // 400 - likely the format of the xml is incorrect or wrong endpoint
+                                // 401 - wrong username and/or password
+                                // 409 - unable to create object; already exists or data missing or xml error
+                            
+                                // update global counters
+                                let localTmp = (self.counters[endpointType]?["fail"])!
+                                self.counters[endpointType]?["fail"] = localTmp + 1
+                                if var summaryArray = self.summaryDict[endpointType]?["fail"] {
+                                    summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
+                                    self.summaryDict[endpointType]?["fail"] = summaryArray
+                                }
                             }
-                            if self.debug { self.writeToLog(stringOfText: "\n\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
-                            // 400 - likely the format of the xml is incorrect or wrong endpoint
-                            // 401 - wrong username and/or password
-                            // 409 - unable to create object; already exists or data missing or xml error
-                        
-                            // update global counters
-                            let localTmp = (self.counters[endpointType]?["fail"])!
-                            self.counters[endpointType]?["fail"] = localTmp + 1
-                            if var summaryArray = self.summaryDict[endpointType]?["fail"] {
-                                summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
-                                self.summaryDict[endpointType]?["fail"] = summaryArray
-                            }
-                        }
+                        }   // create failed - end
                     }
                 }   // if let httpResponse = response - end
                 
