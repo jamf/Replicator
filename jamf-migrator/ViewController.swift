@@ -2490,6 +2490,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
             
+            // change serial number 'Not Available' to blank so machines will migrate
+            PostXML = PostXML.replacingOccurrences(of: "<serial_number>Not Available</serial_number>", with: "<serial_number></serial_number>")
+            
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             PostXML = PostXML.replacingOccurrences(of: "<xprotect_version/>", with: "")
