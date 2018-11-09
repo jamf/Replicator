@@ -2687,7 +2687,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // switch - end
         
         if knownEndpoint {
-            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri) {
+            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri, retry: false) {
                 (result: String) in
                 if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
                 completion("")
@@ -2697,7 +2697,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String, completion: @escaping (_ result: String) -> Void) {
+    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         // this is where we create the new endpoint
         if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
@@ -2708,6 +2708,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
+        var whichError        = ""
         
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -2757,10 +2758,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
             
             if endpointCurrent == 1 {
-                self.postCount = 1
+                if !retry {
+                    self.postCount = 1
+                }
             } else {
-                self.postCount += 1
-//                print("createDestUrl: \(createDestUrl)\n")
+                if !retry {
+                    self.postCount += 1
+                }
             }
             let encodedURL = NSURL(string: createDestUrl)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -2880,20 +2884,61 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             // Write xml for degugging - end
                             
+                            if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
+                                whichError = "category"
+                            } else {
+                                whichError = errorMsg
+                            }
+                            
                             // retry computers with dublicate serial or MAC - start
-                            if (errorMsg == "Duplicate serial number"  || errorMsg == "Duplicate MAC address") {
+                            switch whichError {
+                            case "Duplicate serial number", "Duplicate MAC address":
                                 self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
-                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent-1), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri) {
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-//                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                                    //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
                                 }
-                                self.postCount -= 1
-                                return
-                            } else {    // retry computers with dublicate serial or MAC - end
+                              //  self.postCount -= 1
+                              //  return
+                            case "category":
+                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
+                                var tmp_endPointXML = endPointXML
+                                for xmlTag in ["category"] {
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                }
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                    (result: String) in
+                                }
+                            //    self.postCount -= 1
+                           //     return
+                            case "Problem with department in location":
+                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
+                                var tmp_endPointXML = endPointXML
+                                for xmlTag in ["department"] {
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                }
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                    (result: String) in
+                                }
+                            //    self.postCount -= 1
+                            //    return
+                            case "Problem with building in location":
+                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
+                                var tmp_endPointXML = endPointXML
+                                for xmlTag in ["building"] {
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                }
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                    (result: String) in
+                                    //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                                }
+                              //  self.postCount -= 1
+                             //   return
+                            default:
                                 self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                 if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
                                     self.labelColor(endpoint: endpointType, theColor: self.redText)
@@ -2909,7 +2954,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // 400 - likely the format of the xml is incorrect or wrong endpoint
                                 // 401 - wrong username and/or password
                                 // 409 - unable to create object; already exists or data missing or xml error
-                            
+                                
                                 // update global counters
                                 let localTmp = (self.counters[endpointType]?["fail"])!
                                 self.counters[endpointType]?["fail"] = localTmp + 1
@@ -2918,6 +2963,45 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.summaryDict[endpointType]?["fail"] = summaryArray
                                 }
                             }
+                            // moved to switch statement - start
+//                            if (errorMsg == "Duplicate serial number"  || errorMsg == "Duplicate MAC address") {
+//                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
+//                                var tmp_endPointXML = endPointXML
+//                                for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
+//                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+//                                }
+//                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri) {
+//                                    (result: String) in
+////                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+//                                }
+//                                self.postCount -= 1
+//                                return
+//                            } else {    // retry computers with dublicate serial or MAC - end
+//                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+//                                if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
+//                                    self.labelColor(endpoint: endpointType, theColor: self.redText)
+//                                }
+//                                if self.debug { self.writeToLog(stringOfText: "\n\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
+//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
+//                                // 400 - likely the format of the xml is incorrect or wrong endpoint
+//                                // 401 - wrong username and/or password
+//                                // 409 - unable to create object; already exists or data missing or xml error
+//
+//                                // update global counters
+//                                let localTmp = (self.counters[endpointType]?["fail"])!
+//                                self.counters[endpointType]?["fail"] = localTmp + 1
+//                                if var summaryArray = self.summaryDict[endpointType]?["fail"] {
+//                                    summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
+//                                    self.summaryDict[endpointType]?["fail"] = summaryArray
+//                                }
+//                            }   // if errorMsg - end
+                            // moved to switch statement - start
                         }   // create failed - end
                     }
                 }   // if let httpResponse = response - end
