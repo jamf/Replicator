@@ -2230,6 +2230,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         // save source XML - end
                         
+                        if self.debug { self.writeToLog(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
                         self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                             (result: String) in
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
@@ -2620,6 +2621,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // update references to the Jamf server
             let regexServer = try! NSRegularExpression(pattern: urlToFqdn(serverUrl: source_jp_server), options:.caseInsensitive)
             PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: urlToFqdn(serverUrl: dest_jp_server))
+            
+            // set the password used in the accounts payload to jamfchangeme - start
+            let regexAccounts = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
+            PostXML = regexAccounts.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<password>jamfchangeme</password>")
+            // set the password used in the accounts payload to jamfchangeme - end
             
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")

@@ -116,6 +116,7 @@ body
 <div>Limitations/requirements to be aware of:</div>
 <ul style="margin-left:17px;">
     <li>Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, LDAP Servers, Jamf Users - credentials must be reset on the destination server.</li>
+    <li>Policies with the Accounts payload will migrate with <strong>a new password assigned</strong> to the user defined within the payload.  The password being <strong>jamfchangeme</strong>.</li>
     <li>Icons associated with Mac App Store apps are not migrated (can't be migrated).</li>
     <li>Only AFP and SMB shares can be migrated.</li>
    <li>Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.</li>

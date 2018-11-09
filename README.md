@@ -75,7 +75,15 @@ Information about successes/failures can be found in the log, located in
 ```touch ~/Library/Application\ Support/jamf-migrator/delete```
 
 ## History
-**v3.0.0**
+**v3.0.5**<p>
+* Policies with the Account payload can now be migrated.  **Note:** Account password is set to jamfchangeme.
+* Resolved an issue where a smart group with thousands of computers would not get cleared.
+* Resolved issue migrating machines with duplicate serial numbers or MAC addresses.  Duplicate addresses are cleared.
+* Resolved issue trying to copy computers with no serial number.
+* Resolved issue where a policy name starting with a space would lose the leading space when it was posted to the new server.
+* References to the source server in the App Config are now updated to the destination server.
+
+**v3.0.0**<p>
 * Added ability to use locally stored XML files as a source rather than a server.
 * Added ability to migrate macOS and iOS Mac App Store apps.
 
