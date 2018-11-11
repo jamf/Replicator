@@ -214,6 +214,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var dest_TableColumn: NSTableColumn!
     // selective migration items - end
     
+    // smartgroup vars
+    var migrateSmartComputerGroups = false
+    var migrateStaticComputerGroups = false
+    var migrateSmartMobileGroups   = false
+    var migrateStaticMobileGroups   = false
+    var migrateSmartUserGroups     = false
+    var migrateStaticUserGroups     = false
+    
     var isDir: ObjCBool = false
     
     // command line switches
@@ -584,7 +592,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // verify source and destination are not the same - start
             if source_jp_server_field.stringValue == dest_jp_server_field.stringValue {
                 alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
-                //self.go_button.isEnabled = true
                 self.goButtonEnabled(button_status: true)
                 return
             }
@@ -744,7 +751,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                }
                                                 
                                                 if self.debug { self.writeToLog(stringOfText: "Failed to connect to destination server.") }
-                                                //self.go_button.isEnabled = true
                                                 self.goButtonEnabled(button_status: true)
                                                 return
                                             }
@@ -759,7 +765,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
                                     }
                                     if self.debug { self.writeToLog(stringOfText: "Failed to connect source server.") }
-                                    //self.go_button.isEnabled = true
                                     self.goButtonEnabled(button_status: true)
                                     return
                                 }
@@ -779,7 +784,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that sets mode to delete data from destination server, delete if found - start
         rmDELETE()
         // check for file that allows deleting data from destination server, delete if found - end
-        //self.go_button.isEnabled = true
         self.goButtonEnabled(button_status: true)
         NSApplication.shared.terminate(self)
     }
@@ -853,7 +857,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                             //                        401 - wrong username and/or password
                             //                        409 - unable to create object; data missing or xml error
-                            //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
                             self.validCreds = false
                             completion(validCredentials)
@@ -946,6 +949,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
                             self.objectsToMigrate += ["computergroups"]
+                            self.smart_comp_grps_button.state.rawValue == 1 ? (self.migrateSmartComputerGroups = true):(self.migrateSmartComputerGroups = false)
+                            self.static_comp_grps_button.state.rawValue == 1 ? (self.migrateStaticComputerGroups = true):(self.migrateStaticComputerGroups = false)
                         }
                         
                         if self.restrictedsoftware_button.state.rawValue == 1 {
@@ -987,6 +992,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if self.smart_ios_groups_button.state.rawValue == 1 || self.static_ios_groups_button.state.rawValue == 1 {
                             self.objectsToMigrate += ["mobiledevicegroups"]
+                            self.smart_ios_groups_button.state.rawValue == 1 ? (self.migrateSmartMobileGroups = true):(self.migrateSmartMobileGroups = false)
+                            self.static_ios_groups_button.state.rawValue == 1 ? (self.migrateStaticMobileGroups = true):(self.migrateStaticMobileGroups = false)
                         }
                         
                         if self.advancedmobiledevicesearches_button.state.rawValue == 1 {
@@ -1047,6 +1054,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if self.smartUserGrps_button.state.rawValue == 1 || self.staticUserGrps_button.state.rawValue == 1 {
                             self.objectsToMigrate += ["usergroups"]
+                            self.smartUserGrps_button.state.rawValue == 1 ? (self.migrateSmartUserGroups = true):(self.migrateSmartUserGroups = false)
+                            self.staticUserGrps_button.state.rawValue == 1 ? (self.migrateStaticUserGroups = true):(self.migrateStaticUserGroups = false)
                         }
                     default: break
                     }
@@ -1086,7 +1095,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                }
                     
                 } else {
-                    //go_button.isEnabled = true
                     self.goButtonEnabled(button_status: true)
                     return
                 }// end if objectsToMigrate - end
@@ -1194,8 +1202,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                             } else {
                                 self.getEndpoints(endpoint: currentNode)  {
-                                    (result: String) in
+                                    (result: [String]) in
                                     if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
+                                    
+//                                    print("createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t currentNode: \(self.objectsToMigrate.last!)")
+                                    if self.theCreateQ.operationCount == 0 && result[1] == "0" && self.theOpQ.operationCount < 2 && currentNode == self.objectsToMigrate.last! {
+                                        self.rmDELETE()
+                                        self.goButtonEnabled(button_status: true)
+                                        self.nodesMigrated = 0
+                                        print("Done")
+                                    }
+                                    
                                 }
                             }
                         } else {
@@ -1288,11 +1305,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func startMigrating - end
     
     
-    func getEndpoints(endpoint: String, completion: @escaping (_ result: String) -> Void) {
+    func getEndpoints(endpoint: String, completion: @escaping (_ result: [String]) -> Void) {
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Getting \(endpoint)\n") }
         var endpointParent = ""
-        var node = ""
+        var node           = ""
+        var endpointCount  = 0
+        
         switch endpoint {
         // macOS items
         case "advancedcomputersearches":
@@ -1406,7 +1425,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             switch endpoint {
                             case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                 if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
-                                    let endpointCount: Int = endpointInfo.count
+                                    endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
                                     
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
@@ -1482,7 +1501,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion("Got endpoint - \(endpoint)")
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }// if endpointCount - end
                                 }   // end if let buildings, departments...
@@ -1491,7 +1510,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing device groups\n") }
                                 if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
                                     
-                                    let endpointCount: Int = endpointInfo.count
+                                    endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
                                     //self.migrationStatus(endpoint: "computer groups", count: endpointCount)
                                     
@@ -1660,7 +1679,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion("Got endpoint - \(endpoint)")
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount - end
                                 }   // if let endpointInfo = endpointJSON["computer_groups"] - end
@@ -1668,7 +1687,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             case "policies":
                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
                                 if let endpointInfo = endpointJSON[endpoint] as? [Any] {
-                                    let endpointCount: Int = endpointInfo.count
+                                    endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
                                     
                                     var computerPoliciesDict: [Int: String] = [:]
@@ -1729,7 +1748,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion("Got endpoint - \(endpoint)")
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount > 0
                                 }   //if let endpointInfo = endpointJSON - end
@@ -1739,7 +1758,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
                                 
                                 if let endpointInfo = usersGroups[endpointParent] as? [Any] {
-                                    let endpointCount: Int = endpointInfo.count
+                                    endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(node) found: \(endpointCount)\n") }
                                     
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
@@ -1813,14 +1832,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion("Got endpoint - \(endpoint)")
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }// if endpointCount - end
                                 }   // end if let buildings, departments...
                               
                             case "computerconfigurations":
                                 if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
-                                    let endpointCount: Int = endpointInfo.count
+                                    endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
                                     
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
@@ -1986,7 +2005,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion("Got endpoint - \(endpoint)")
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount > 0 - end
                             }   // end if computerconfigurations
@@ -2010,49 +2029,49 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
         }   // theOpQ - end
-        completion("Got endpoint - \(endpoint)")
+        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
     }
     
     func readDataFiles(endpoint: String, completion: @escaping (_ result: String) -> Void) {
 
         var local_endpointArray = [String]()
         var local_general       = ""
-        var currentNode         = nodesMigrated
+//        var currentNode         = nodesMigrated
         
-        switch endpoint {
-        case "computergroups":
-            if self.smart_comp_grps_button.state.rawValue == 1 {
-                local_endpointArray.append("smartcomputergroups")
+            switch endpoint {
+            case "computergroups":
+                if migrateSmartComputerGroups {
+                    local_endpointArray.append("smartcomputergroups")
+                }
+                if migrateStaticComputerGroups {
+                    local_endpointArray.append("staticcomputergroups")
+                }
+                if migrateSmartComputerGroups && migrateStaticComputerGroups {
+                    self.nodesMigrated-=1
+                }
+            case "mobiledevicegroups":
+                if migrateSmartMobileGroups {
+                    local_endpointArray.append("smartiosgroups")
+                }
+                if migrateStaticMobileGroups {
+                    local_endpointArray.append("staticiosgroups")
+                }
+                if migrateSmartMobileGroups && migrateStaticMobileGroups {
+                    self.nodesMigrated-=1
+                }
+            case "usergroups":
+                if migrateSmartUserGroups {
+                    local_endpointArray.append("smartusergroups")
+                }
+                if migrateStaticUserGroups {
+                    local_endpointArray.append("staticusergroups")
+                }
+                if migrateSmartUserGroups && migrateStaticUserGroups {
+                    self.nodesMigrated-=1
+                }
+            default:
+                local_endpointArray = [endpoint]
             }
-            if self.static_comp_grps_button.state.rawValue == 1 {
-                local_endpointArray.append("staticcomputergroups")
-            }
-            if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 {
-                self.nodesMigrated-=1
-            }
-        case "mobiledevicegroups":
-            if self.smart_ios_groups_button.state.rawValue == 1 {
-                local_endpointArray.append("smartiosgroups")
-            }
-            if self.static_ios_groups_button.state.rawValue == 1 {
-                local_endpointArray.append("staticiosgroups")
-            }
-            if self.smart_ios_groups_button.state.rawValue == 1 && self.static_ios_groups_button.state.rawValue == 1 {
-                self.nodesMigrated-=1
-            }
-        case "usergroups":
-            if self.smartUserGrps_button.state.rawValue == 1 {
-                local_endpointArray.append("smartusergroups")
-            }
-            if self.staticUserGrps_button.state.rawValue == 1 {
-                local_endpointArray.append("staticusergroups")
-            }
-            if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 {
-                self.nodesMigrated-=1
-            }
-        default:
-            local_endpointArray = [endpoint]
-        }
         
         self.availableFilesToMigDict.removeAll()
         
@@ -3369,9 +3388,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // matches the id to name of objects in a configuration (imaging)
         if self.debug { self.writeToLog(stringOfText: "[nameIdDict] start matching \(endPoint) (by name) that exist on both servers\n") }
         URLCache.shared.removeAllCachedResponses()
-        var serverUrl   = "\(server)/JSSResource/\(endPoint)"
-        serverUrl       = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        var recordName  = ""
+        var serverUrl     = "\(server)/JSSResource/\(endPoint)"
+        serverUrl         = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        var recordName    = ""
+        var endpointCount = 0
         
         var serverCreds = ""
         let serverConf = URLSessionConfiguration.default
@@ -3397,7 +3417,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if let endpointJSON = json as? [String: Any] {
                         
                         if let endpointInfo = endpointJSON[self.endpointDefDict[endPoint]!] as? [Any] {
-                            let endpointCount: Int = endpointInfo.count
+                            endpointCount = endpointInfo.count
                             
                             if endpointCount > 0 {
                                 for i in (0..<endpointCount) {
@@ -3653,9 +3673,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if theImageNo > 2 {
                             theImageNo = 0
                         }
-                        if theImageNo == 0 {
-//                            print("createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count)")
+                        
+//                        print("[go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count)")
+                        
+                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count {
+                            self.goButtonEnabled(button_status: true)
+                            //                            print("go button enabled")
                         }
+                        
                     }
                     usleep(300000)  // sleep 0.3 seconds
 //                    usleep(100000)  // sleep 0.1 seconds
