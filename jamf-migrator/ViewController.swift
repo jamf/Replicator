@@ -791,6 +791,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //================================= migration functions =================================//
     
     func authCheck(whichServer: String, f_sourceURL: String, f_credentials: String, completion: @escaping (Bool) -> Void) {
+        URLCache.shared.removeAllCachedResponses()
         var validCredentials:Bool = false
         if self.debug { self.writeToLog(stringOfText: "--- checking authentication to: \(f_sourceURL)\n") }
         
@@ -805,8 +806,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
                 request.httpMethod = "GET"
                 let configuration = URLSessionConfiguration.default
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(f_credentials)", "Content-Type" : "application/json", "Accept" : "application/json"]
-                URLCache.shared.removeAllCachedResponses()
+                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(f_credentials)", "Accept" : "application/json"]
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
@@ -887,11 +887,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // set all the labels to white - start
             self.AllEndpointsArray = self.macOSEndpointArray + self.iOSEndpointArray + self.generalEndpointArray
-//            DispatchQueue.main.async {
-                for i in (0..<self.AllEndpointsArray.count) {
-                    self.labelColor(endpoint: self.AllEndpointsArray[i], theColor: self.whiteText)
-                }
-//            }
+            for i in (0..<self.AllEndpointsArray.count) {
+                self.labelColor(endpoint: self.AllEndpointsArray[i], theColor: self.whiteText)
+            }
             // set all the labels to white - end
             
             if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
@@ -1101,7 +1099,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // if wipe_data - end
             
             self.writeToLog(stringOfText: self.migrateOrWipe)
-//            self.goButtonEnabled(button_status: false)
             
            // need to add code to handle computergroups, mobiledevicegroups, and usergroups (done?)
             for currentNode in self.objectsToMigrate {
@@ -1205,13 +1202,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     (result: [String]) in
                                     if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
                                     
-//                                    print("createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t currentNode: \(self.objectsToMigrate.last!)")
-                                    if self.theCreateQ.operationCount == 0 && result[1] == "0" && self.theOpQ.operationCount < 2 && currentNode == self.objectsToMigrate.last! {
-                                        self.rmDELETE()
-                                        self.goButtonEnabled(button_status: true)
-                                        self.nodesMigrated = 0
-                                        print("Done")
-                                    }
+//                                    print("[startMigrating] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t currentNode: \(currentNode) \t lastNode: \(self.objectsToMigrate.last!)")
+//                                    if self.theCreateQ.operationCount == 0 && result[1] == "0" && self.theOpQ.operationCount == 0 && currentNode == self.objectsToMigrate.last! {
+//                                        self.rmDELETE()
+//                                        self.goButtonEnabled(button_status: true)
+//                                        self.nodesMigrated = 0
+//                                        print("Done - startMigrating")
+//                                    }
                                     
                                 }
                             }
@@ -2273,7 +2270,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         var PostXML       = Xml
         var knownEndpoint = true
-        
+
         var iconName = ""
         var iconUri  = ""
 
@@ -2434,6 +2431,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                 }
                 
+            case "scripts":
+                for xmlTag in ["script_contents_encoded"] {
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                }
+                
             default: break
             }
             
@@ -2471,7 +2473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
                     self.goButtonEnabled(button_status: true)
-                    print("Done")
+                    print("Done - cleanupXml")
                 }
             }
             
@@ -2564,6 +2566,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeScgCopy) {
                 // groups containing thousands of computers could not be cleared by only using the computers tag
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "computer")
+                PostXML = self.rmBlankLines(theXML: PostXML)
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers")
             }
 //            print("\n\(endpoint) XML: \(PostXML)\n")
@@ -2768,7 +2771,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
                     self.goButtonEnabled(button_status: true)
-                    print("Done")
+                    print("Done - CreateEndpoints")
                 }
                 return
             }
@@ -2814,13 +2817,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.objects_completed_field.stringValue = "\(self.postCount)"
                         
 //                        print("createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count)")
-                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated == self.objectsToMigrate.count {
-                            self.rmDELETE()
-                            self.goButtonEnabled(button_status: true)
-                            self.nodesMigrated = 0
-                            print("Done")
-                            //                            print("go button enabled")
-                        }
+//                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated == self.objectsToMigrate.count {
+//                            self.rmDELETE()
+//                            self.goButtonEnabled(button_status: true)
+//                            self.nodesMigrated = 0
+//                            print("Done")
+//                            //                            print("go button enabled")
+//                        }
 
                     }   // DispatchQueue.main.async - end
                     // look to see if we are processing the next endpointType - start
@@ -3674,16 +3677,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             theImageNo = 0
                         }
                         
-//                        print("[go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count)")
+//                        print("[go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count) \t objectsToMigrate: \(self.objectsToMigrate.count)")
                         
-                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count {
+                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0  {
                             self.goButtonEnabled(button_status: true)
+//                            print("[Done - go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count) \t objectsToMigrate: \(self.objectsToMigrate.count)")
                             //                            print("go button enabled")
                         }
                         
                     }
                     usleep(300000)  // sleep 0.3 seconds
-//                    usleep(100000)  // sleep 0.1 seconds
                 }
             }
             self.mySpinner_ImageView.isHidden = button_status
@@ -3968,6 +3971,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    func rmBlankLines(theXML: String) -> String {
+        let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
+        let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
+//        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
+        return newXML
+    }
+    
     func rmXmlData(theXML: String, theTag: String) -> String {
 //        let f_regexCompNl = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>\n", options:.caseInsensitive)
 //        var newXML = f_regexCompNl.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
@@ -3975,7 +3985,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.trimmingCharacters(in: .newlines)
-        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
+        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
         return newXML_trimmed
     }
     
