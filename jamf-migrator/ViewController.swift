@@ -2074,6 +2074,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
 //        for j in 0..<local_endpointArray.count {
         for local_folder in local_endpointArray {
+            print("scanning folder: \(local_folder)")
 //                let local_folder = local_endpointArray[j]
                 do {
                     let dataFiles = try self.fm.contentsOfDirectory(atPath: self.dataFilesRoot + "/" + local_folder)
@@ -2090,7 +2091,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for xmlTag in ["site", "criteron", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
                                     local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
                                 }
-                            case "buildings", "departments", "sites":
+                            case "buildings", "departments", "sites", "directorybindings":
                                 local_general = fileContents
                             default:
                                 local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
@@ -2104,7 +2105,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            if (id == "" || name == "") {
 //                                print("\t\txml file: \(dataFile)")
 //                                print("\(local_general)")
-//                                print("id: \(id) \t name:\(name)\n")
+                                print("id: \(id) \t name:\(name)\n")
 //                            }
                             
                             self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
