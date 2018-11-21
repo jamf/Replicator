@@ -891,7 +891,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.labelColor(endpoint: self.AllEndpointsArray[i], theColor: self.whiteText)
             }
             // set all the labels to white - end
-            
             if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
             if self.debug { self.writeToLog(stringOfText: "platform: \(self.deviceType()).\n") }
             if self.debug { self.writeToLog(stringOfText: "Migration Mode (startMigration): \(self.migrationMode).\n") }
@@ -1269,8 +1268,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
                                         if !self.wipe_data  {
                                             if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
-                                                if self.debug { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] {
+                                                if self.debug && !self.saveOnly { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
+                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !self.saveOnly {
                                                     if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
                                                     //self.currentEndpointID = self.currentEPs[xmlName]!
                                                     self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
@@ -2105,7 +2104,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            if (id == "" || name == "") {
 //                                print("\t\txml file: \(dataFile)")
 //                                print("\(local_general)")
-                                print("id: \(id) \t name:\(name)\n")
+//                                print("id: \(id) \t name:\(name)\n")
 //                            }
                             
                             self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
@@ -2236,14 +2235,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     (data, response, error) -> Void in
                     
                     if let httpResponse = response as? HTTPURLResponse {
-                        var PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                        if self.debug { self.writeToLog(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                        let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                         
                         // save source XML - start
                         if self.saveRawXml {
+                            if self.debug { self.writeToLog(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                             Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
-                            if self.debug {
-                                return
-                            }
+//                            if self.debug {
+//                                return
+//                            }
                         }
                         // save source XML - end
                         
@@ -2272,8 +2273,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var PostXML       = Xml
         var knownEndpoint = true
 
-        var iconName = ""
-        var iconUri  = ""
+        var iconName        = ""
+        var iconId_string   = ""
+        var iconId          = 0
+        var iconUri         = ""
+        
 
         var localEndPointType = ""
         var theEndpoint       = endpoint
@@ -2350,8 +2354,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerextensionattributes", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
+        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+            if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
             // clean up PostXML, remove unwanted/conflicting data
@@ -2448,6 +2452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             self.get_completed_field.stringValue = "\(endpointCurrent)"
             
+        case "computerextensionattributes":
             if self.tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
                 knownEndpoint = false
                 // Currently patch EAs are not migrated - handle those here
@@ -2593,22 +2598,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
         case "policies", "macapplications", "mobiledeviceapplications":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
-            // check for a self service icon
+            // check for a self service icon and grab name and id if present - start
             if PostXML.range(of: "</self_service_icon>") != nil {
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
-                if iconName == "" {
-//                    print("self service icon name not found, using id.")
-//                    print(selfServiceIconXml)
-                    if let index = iconUri.index(of: "=") {
-                        iconName = String(iconUri.suffix(from: index)).replacingOccurrences(of: "=", with: "")
-//                        print("[cleanupXml] adjusted - self service icon name: \(iconName) \t uri: \(iconUri)")
+                if let index = iconUri.index(of: "=") {
+                    iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
+                    if let index = iconId_string.index(of: "&") {
+//                        iconId = Int(iconId_string.prefix(upTo: index))!
+                        Int(iconId_string.prefix(upTo: index)) == nil ? (iconId = 0):(iconId = Int(iconId_string.prefix(upTo: index))!)
                     }
+                } else {
+                    iconId = 0
                 }
             }
-            
-//            print("[cleanupXml] self service icon name: \(iconName) \t uri: \(iconUri)")
+            // check for a self service icon and grab name and id if present - end
             
             if (endpoint == "macapplications") || (endpoint == "mobiledeviceapplications") {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
                 if let index = iconUri.index(of: "&") {
@@ -2710,7 +2715,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // switch - end
         
         if knownEndpoint {
-            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconUri: iconUri, retry: false) {
+            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                 (result: String) in
                 if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
                 completion("")
@@ -2720,10 +2725,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         // this is where we create the new endpoint
-        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
+        if !self.saveOnly {
+            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
+        } else {
+            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Save only selected, skipping \(action) for: \(endpointType)\n") }
+        }
 //        var createDestUrl = createDestUrlBase
         let destinationEpId = destEpId
         //if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
@@ -2732,6 +2741,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
         var whichError        = ""
+//        var curlResult        = ""
         
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -2749,6 +2759,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //        }
         
         var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
+        
         if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
         createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
@@ -2763,16 +2774,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // save trimmed XML - start
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
+                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
+                
             }
             // save trimmed XML - end
             
+            
+            //******************                // add option to save icons to folder if using the export option
             if self.saveOnly {
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
                     self.goButtonEnabled(button_status: true)
                     print("Done - CreateEndpoints")
+                }
+                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData)
                 }
                 return
             }
@@ -2816,15 +2834,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.migrationStatus(endpoint: endpointType, count: endpointCount)
                         
                         self.objects_completed_field.stringValue = "\(self.postCount)"
-                        
-//                        print("createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count)")
-//                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated == self.objectsToMigrate.count {
-//                            self.rmDELETE()
-//                            self.goButtonEnabled(button_status: true)
-//                            self.nodesMigrated = 0
-//                            print("Done")
-//                            //                            print("go button enabled")
-//                        }
 
                     }   // DispatchQueue.main.async - end
                     // look to see if we are processing the next endpointType - start
@@ -2865,35 +2874,44 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
                                 self.summaryDict[endpointType]?["\(action)"] = summaryArray
                             }
+                            
                             // currently there is no way to upload mac app store icons
                             // removed check for those -  || (endpointType == "macapplications")
                             if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                                if (ssIconName != "") && (ssIconUri != "") {
-                                    var iconNode = "policies"
-                                    switch endpointType {
-                                    case "macapplications":
-                                        iconNode = "macapplicationsicon"
-                                    case "mobiledeviceapplications":
-                                        iconNode = "mobiledeviceapplicationsicon"
-                                    default:
-                                        break
-                                    }
-    //                                print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
-//                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
-                                    createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-                                    createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-    //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
-                                    let curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
-                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).") }
-//                                    print("result of icon GET: "+curlResult)
-                                    let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@/tmp/\(ssIconName)\" -X POST")
-                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
-//                                    print("result of icon POST: "+curlResult2)
-                                    if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
-                                        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).") }
-                                    }
-                                }
-                            }
+                                self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData)
+//                                if (ssIconName != "") && (ssIconUri != "") {
+//                                    var iconNode = "policies"
+//                                    switch endpointType {
+//                                    case "macapplications":
+//                                        iconNode = "macapplicationsicon"
+//                                    case "mobiledeviceapplications":
+//                                        iconNode = "mobiledeviceapplicationsicon"
+//                                    default:
+//                                        break
+//                                    }
+//    //                                print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
+////                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
+//                                    createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+//                                    createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+//    //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
+//
+////******************                // add option to save icons to folder if using the export option
+//                                    if self.saveRawXml || self.saveTrimmedXml {
+//                                        print("save")
+//                                        curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
+//                                    } else {
+//                                            curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
+//                                    }
+//                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).") }
+////                                    print("result of icon GET: "+curlResult)
+//                                    let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@/tmp/\(ssIconName)\" -X POST")
+//                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
+////                                    print("result of icon POST: "+curlResult2)
+//                                    if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
+//                                        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).") }
+//                                    }
+//                                }
+                            }   // if ((endpointType == "policies") - end
                             
                         } else {
                             // create failed
@@ -2921,7 +2939,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
-                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
                                     //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
                                 }
@@ -2933,7 +2951,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
-                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
                                 }
                             //    self.postCount -= 1
@@ -2944,7 +2962,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
-                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
                                 }
                             //    self.postCount -= 1
@@ -2955,7 +2973,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
-                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri, retry: true) {
+                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
                                     //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
                                 }
@@ -2986,45 +3004,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.summaryDict[endpointType]?["fail"] = summaryArray
                                 }
                             }
-                            // moved to switch statement - start
-//                            if (errorMsg == "Duplicate serial number"  || errorMsg == "Duplicate MAC address") {
-//                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
-//                                var tmp_endPointXML = endPointXML
-//                                for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
-//                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
-//                                }
-//                                self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconUri: ssIconUri) {
-//                                    (result: String) in
-////                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
-//                                }
-//                                self.postCount -= 1
-//                                return
-//                            } else {    // retry computers with dublicate serial or MAC - end
-//                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
-//                                if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
-//                                    self.labelColor(endpoint: endpointType, theColor: self.redText)
-//                                }
-//                                if self.debug { self.writeToLog(stringOfText: "\n\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
-//                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
-//                                // 400 - likely the format of the xml is incorrect or wrong endpoint
-//                                // 401 - wrong username and/or password
-//                                // 409 - unable to create object; already exists or data missing or xml error
-//
-//                                // update global counters
-//                                let localTmp = (self.counters[endpointType]?["fail"])!
-//                                self.counters[endpointType]?["fail"] = localTmp + 1
-//                                if var summaryArray = self.summaryDict[endpointType]?["fail"] {
-//                                    summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
-//                                    self.summaryDict[endpointType]?["fail"] = summaryArray
-//                                }
-//                            }   // if errorMsg - end
-                            // moved to switch statement - start
                         }   // create failed - end
                     }
                 }   // if let httpResponse = response - end
@@ -3383,7 +3362,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // destEPQ - end
         } else {
             self.currentEPs["_"] = 0
-            completion("\nCurrent endpoints - saveOnly, not needed.")
+            completion(" Current endpoints - saveOnly, not needed.")
         }
     }
     
@@ -3763,6 +3742,46 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.get_completed_field.stringValue = "\(count)"
     }
     
+    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: Int, ssIconUri: String, f_createDestUrl: String, responseData: String) {
+        var curlResult    = ""
+        var curlResult2   = ""
+        var createDestUrl = f_createDestUrl
+        
+        if (ssIconName != "") && (ssIconUri != "") {
+            var iconNode = "policies"
+            switch endpointType {
+            case "macapplications":
+                iconNode = "macapplicationsicon"
+            case "mobiledeviceapplications":
+                iconNode = "mobiledeviceapplicationsicon"
+            default:
+                break
+            }
+            //                                print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
+            //                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
+            createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+            createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
+            
+            //******************                // add option to save icons to folder if using the export option
+            curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
+            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
+            if self.saveRawXml {
+                if self.debug { self.writeToLog(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
+                Xml().save(node: iconNode, xml: "/tmp/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+            }
+            if !saveOnly {
+                //                                    print("result of icon GET: "+curlResult)
+                curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@/tmp/\(ssIconName)\" -X POST")
+                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
+                //                                    print("result of icon POST: "+curlResult2)
+            }   // if !saveOnly - end
+            if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
+                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).\n") }
+            }
+        }   // if (ssIconName != "") && (ssIconUri != "") - end
+    }   // func icons - end
+    
     // func logCleanup - start
     func logCleanup() {
         if didRun {
@@ -3780,13 +3799,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // remove old history files
                 if logCount-1 >= maxHistory {
                     for i in (0..<logCount-maxHistory) {
-                        if self.debug { self.writeToLog(stringOfText: "Deleting log file: " + logArray[i]) }
+                        if self.debug { self.writeToLog(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
                         
                         do {
                             try fm.removeItem(atPath: logArray[i])
                         }
                         catch let error as NSError {
-                            if self.debug { self.writeToLog(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)") }
+                            if self.debug { self.writeToLog(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)\n") }
                         }
                     }
                 }
@@ -3799,7 +3818,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 try fm.removeItem(atPath: logPath! + logFile)
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Error deleting log file:    \n" + logPath! + logFile + "\n    \(error)") }
+                if self.debug { self.writeToLog(stringOfText: "Error deleting log file:    \n" + logPath! + logFile + "\n    \(error)\n") }
             }
         }
 
@@ -3994,7 +4013,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read environment settings - start
         plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
         if plistData.count == 0 {
-            if self.debug { self.writeToLog(stringOfText: "Error reading plist") }
+            if self.debug { self.writeToLog(stringOfText: "Error reading plist\n") }
         }
 //        print("readSettings - plistData: \(String(describing: plistData["xml"]))\n")
         return(plistData)
@@ -4164,11 +4183,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func urlToFqdn(serverUrl: String) -> String {
-        var fqdn = serverUrl.replacingOccurrences(of: "http://", with: "")
-        fqdn = serverUrl.replacingOccurrences(of: "https://", with: "")
-        let fqdnArray = fqdn.split(separator: "/")
-        fqdn = "\(fqdnArray[0])"
-        return fqdn
+        if serverUrl != "" {
+            var fqdn = serverUrl.replacingOccurrences(of: "http://", with: "")
+            fqdn = serverUrl.replacingOccurrences(of: "https://", with: "")
+            let fqdnArray = fqdn.split(separator: "/")
+            fqdn = "\(fqdnArray[0])"
+            return fqdn
+        } else {
+            return ""
+        }
     }
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
@@ -4481,7 +4504,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read commandline args
         var numberOfArgs = 0
         
-        //        debug = true
+//        debug = true
         
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
         if numberOfArgs >= 0 {
@@ -4504,6 +4527,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
+        
+        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        if self.debug { self.writeToLog(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n") }
+        
     }   //viewDidAppear - end
     
     override func viewDidLoad() {
