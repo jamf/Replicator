@@ -23,27 +23,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
-        // Help Window
+    // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
         let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
         let helpWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Help View Controller")) as! NSWindowController
-        helpWindowController.showWindow(self)
+        if !windowIsVisible(windowName: "Help") {
+            helpWindowController.window?.hidesOnDeactivate = false
+            helpWindowController.showWindow(self)
+        }
         
 //        if let helpWindow = helpWindowController.window {
-//            //            let helpViewController = helpWindow.contentViewController as! HelpViewController
-//            
-//            let application = NSApplication.shared()
+////            let helpViewController = helpWindow.contentViewController as! HelpViewController
+//
+//            let application = NSApplication.shared
 //            application.runModal(for: helpWindow)
-//            
+//
 //            helpWindow.close()
 //        }
     }
     
     // Show Preferences Window
+    var prefWindowController: PrefsWindowController?
     @IBAction func showPrefsWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-        let prefsWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Prefs View Controller")) as! NSWindowController
-        prefsWindowController.showWindow(self)
+        AppDelegate().showPrefsWindow()
+        
+//        if prefWindowController == nil {
+//            prefWindowController = PrefsWindowController.loadFromNib()
+//        }
+//
+//        if windowIsVisible(windowName: "Preferences") {
+//            prefWindowController?.window?.close()
+//            prefWindowController?.window?.orderFront("prefs")
+//        }
+        
+        //        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
+//        let prefsWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Prefs View Controller")) as! NSWindowController
+//
+//        if !windowIsVisible(windowName: "Preferences") {
+//            prefsWindowController.window?.hidesOnDeactivate = false
+//            prefsWindowController.showWindow(self)
+//        } // else {
+//            print("prefsWindowController.window?.orderedIndex: \(String(describing: prefsWindowController.window?.orderedIndex))")
+//            prefsWindowController.window?.order(NSWindow.OrderingMode.above, relativeTo: 0)
+////            prefsWindowController.window?.orderFront(nil)   // opens new window
+//            //            prefsWindowController.window?.orderFront(self)   // opens new window
+//        }
+        
     }
 
         
@@ -309,12 +334,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var AllEndpointsArray = [String]()
     
     
-    var getEndpointInProgress: String = ""     // end point currently in the GET queue
-    var endpointInProgress: String = ""     // end point currently in the POST queue
-    var endpointName: String = ""
-    var POSTsuccessCount: Int = 0
-    var failedCount: Int = 0
-    var postCount: Int = 1
+    var getEndpointInProgress = ""     // end point currently in the GET queue
+    var endpointInProgress    = ""     // end point currently in the POST queue
+    var endpointName          = ""
+    var POSTsuccessCount      = 0
+    var failedCount           = 0
+    var postCount             = 1
     var counters = Dictionary<String, Dictionary<String,Int>>()     // summary counters of created, updated, and failed objects
     var tmp_counter = Dictionary<String, Dictionary<String,Int>>() // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
@@ -350,9 +375,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     let fm = FileManager()
     var theOpQ = OperationQueue() // create operation queue for API calls
     var theCreateQ = OperationQueue() // create operation queue for API POST/PUT calls
-    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ")   // for reading in data files
+    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
     var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
-//    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
     
     var authQ = DispatchQueue(label: "com.jamf.auth")
     var theModeQ = DispatchQueue(label: "com.jamf.addRemove")
@@ -577,6 +601,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         saveOnly        = xmlPrefOptions["saveOnly"]!
         saveRawXml      = xmlPrefOptions["saveRawXml"]!
         saveTrimmedXml  = xmlPrefOptions["saveTrimmedXml"]!
+        
+        if fileImport && saveOnly {
+            alert_dialog(header: "Attention", message: "Cannot select Save Only (Preferneces -> Export) when using File Import.")
+            return
+        }
 
         didRun = true
 
@@ -876,7 +905,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func startMigrating() {
         // make sure the labels can change color when we start
-        changeColor  = true
+                  changeColor = true
+        getEndpointInProgress = "start"
         
         DispatchQueue.main.async {
             self.importFiles_button.state.rawValue == 0 ? (self.fileImport = false):(self.fileImport = true)
@@ -1370,28 +1400,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "\(endpoint)"
         }
         
-//        // initialize post/put success count switch endpoint {
-//        switch endpoint {
-//        case "computergroups":
-//            progressCountArray["smartcomputergroups"] = 0
-//            progressCountArray["staticcomputergroups"] = 0
-//            progressCountArray["computergroups"] = 0 // this is the recognized end point
-//        case "mobiledevicegroups":
-//            progressCountArray["smartiosgroups"] = 0
-//            progressCountArray["staticiosgroups"] = 0
-//            progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-//        case "usergroups":
-//            progressCountArray["smartusergroups"] = 0
-//            progressCountArray["staticusergroups"] = 0
-//            progressCountArray["usergroups"] = 0 // this is the recognized end point
-//        case "accounts":
-//            progressCountArray["jamfusers"] = 0
-//            progressCountArray["jamfgroups"] = 0
-//            progressCountArray["accounts"] = 0 // this is the recognized end point
-//        default:
-//            progressCountArray["\(endpoint)"] = 0
-//        }
-        
         (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -1508,7 +1516,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                     endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
-                                    //self.migrationStatus(endpoint: "computer groups", count: endpointCount)
                                     
                                     var smartGroupDict: [Int: String] = [:]
                                     var staticGroupDict: [Int: String] = [:]
@@ -2032,7 +2039,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         var local_endpointArray = [String]()
         var local_general       = ""
-//        var currentNode         = nodesMigrated
         
             switch endpoint {
             case "computergroups":
@@ -2071,50 +2077,45 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         self.availableFilesToMigDict.removeAll()
         
-//        for j in 0..<local_endpointArray.count {
         for local_folder in local_endpointArray {
-            print("scanning folder: \(local_folder)")
-//                let local_folder = local_endpointArray[j]
                 do {
-                    let dataFiles = try self.fm.contentsOfDirectory(atPath: self.dataFilesRoot + "/" + local_folder)
-                    let dataFilesCount = dataFiles.count
-                    for i in 1...dataFilesCount {
-                        let dataFile = dataFiles[i-1]
-                        let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                        do {
-                            let fileContents = try String(contentsOf: fileUrl!)
-                            //                        print("\(fileContents)")
-                            switch endpoint {
-                            case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "usergroups", "users":
-                                local_general = fileContents
-                                for xmlTag in ["site", "criteron", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
-                                    local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                    let allFiles = FileManager.default.enumerator(atPath: self.dataFilesRoot + "/" + local_folder)
+                    if let allFilePaths = allFiles?.allObjects {
+                        let allFilePathsArray = allFilePaths as! [String]
+                        let xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")} // filter for only files with xml extension
+                        let dataFilesCount = xmlFilePaths.count
+                        for i in 1...dataFilesCount {
+                            let dataFile = xmlFilePaths[i-1]
+    //                        let dataFile = dataFiles[i-1]
+                            let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                            do {
+                                let fileContents = try String(contentsOf: fileUrl!)
+                                switch endpoint {
+                                case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "usergroups", "users":
+                                    local_general = fileContents
+                                    for xmlTag in ["site", "criteron", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                    }
+                                case "buildings", "departments", "sites", "directorybindings":
+                                    local_general = fileContents
+                                default:
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
+                                    for xmlTag in ["site", "category", "payloads"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                    }
                                 }
-                            case "buildings", "departments", "sites", "directorybindings":
-                                local_general = fileContents
-                            default:
-                                local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
-                                for xmlTag in ["site", "category", "payloads"] {
-                                    local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
-                                }
+                                
+                                let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
+                                let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
+                                
+                                self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name / object name - \(dataFile) \t \(name)\n") }
+                            } catch {
+                                //                    print("unable to read \(dataFile)")
+                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
                             }
-                            
-                            let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
-                            let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
-//                            if (id == "" || name == "") {
-//                                print("\t\txml file: \(dataFile)")
-//                                print("\(local_general)")
-//                                print("id: \(id) \t name:\(name)\n")
-//                            }
-                            
-                            self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name / object name - \(dataFile) \t \(name)\n") }
-                        } catch {
-                            //                    print("unable to read \(dataFile)")
-                            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
-                        }
-                        //                    usleep(100000)
-                    }
+                        }   // for i in 1...dataFilesCount - end
+                    }   // if let allFilePaths - end
                 } catch {
                     if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
                 }
@@ -2123,7 +2124,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 //        print("node: \(local_folder) has \(fileCount) files.")
                 if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
-                
+            
                 if fileCount > 0 {
                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
                         (result: String) in
@@ -2141,48 +2142,40 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: Dictionary<String,[String]>, completion: @escaping (_ result: String) -> Void) {
 
-//        var pf_itemsDict = itemsDict
-//        theOpQ.maxConcurrentOperationCount = 1
-//        let semaphore = DispatchSemaphore(value: 0)
-        
         self.existingEndpoints(destEndpoint: "\(endpoint)") {
             (result: String) in
             if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
-//            self.readFilesQ.async {
-//                self.theOpQ.addOperation {
-                var l_index = 1
-                for (_, objectInfo) in itemsDict {
-                    self.readFilesQ.sync {
-                        let l_id   = Int(objectInfo[0])   // id of object
-                        let l_name = objectInfo[1]        // name of object
-                        let l_xml  = objectInfo[2]        // xml of object
-                        if !self.wipe_data  {
-                            if self.debug { self.writeToLog(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
-                            if self.currentEPs[l_name] != nil {
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
-                                self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: self.currentEPs[l_name]!, destEpName: l_name) {
-                                    (result: String) in
-                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
-                                    completion("processed file")
-                                }
-                            } else {
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
-                                self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
-                                    (result: String) in
-                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
-                                    completion("processed file")
-                                }
+            var l_index = 1
+            for (_, objectInfo) in itemsDict {
+                self.readFilesQ.sync {
+                    let l_id   = Int(objectInfo[0])   // id of object
+                    let l_name = objectInfo[1]        // name of object
+                    let l_xml  = objectInfo[2]        // xml of object
+
+                    if !self.wipe_data  {
+                        if self.debug { self.writeToLog(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
+                        if self.currentEPs[l_name] != nil {
+                            if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
+                            self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: self.currentEPs[l_name]!, destEpName: l_name) {
+                                (result: String) in
+                                if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
+                                completion("processed file")
+                            }
+                        } else {
+                            if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
+                            self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
+                                (result: String) in
+                                if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from cleanupXml\n") }
+                                completion("processed file")
                             }
                         }
-                        l_index+=1
-                    }   // readFilesQ.sync - end
-//                    semaphore.signal()
-                }   // for (_, objectInfo) - end
-//                semaphore.wait()
-//            }   // theOpQ.addOperation readFilesQ - end
+                    }
+                    l_index+=1
+                    usleep(50000)  // slow the file read process
+                }   // readFilesQ.sync - end
+            }   // for (_, objectInfo) - end
         }
-//        pf_itemsDict.removeAll()
     }
     
     
@@ -2241,10 +2234,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         // save source XML - start
                         if self.saveRawXml {
                             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
-//                            if self.debug {
-//                                return
-//                            }
+                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw", debug: self.debug)
                         }
                         // save source XML - end
                         
@@ -2278,7 +2268,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var iconId          = 0
         var iconUri         = ""
         
-
         var localEndPointType = ""
         var theEndpoint       = endpoint
         
@@ -2343,16 +2332,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if !self.scopeUsersCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "users")
             }
-            //                            case "staticcomputergroups":  // handled below in computers case
-            //                            case "staticiosgroups":   // handled below in mobiledevicegroups case
-            //                                if !self.scopeSigCopy {
-            //                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
-        //                            }
+
         default:
             break
         }
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
-        
         switch endpoint {
         case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
@@ -2370,21 +2354,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeSigCopy) {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
                 }
-                //                                for xmlTag in ["mobile_devices"] {
-                //                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-                //                                }
-                
-                //                            case "mobiledeviceconfigurationprofiles":
-                //                                for xmlTag in ["scope"] {
-                //                                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-                //                                }
-                
-//            case "mobiledeviceapplications":
-//                // update server reference of icons to new server
-//                //                            let trimmedDestUrlArray = self.dest_jp_server.components(separatedBy: ":")
-//                //                            let trimmedDestUrl = trimmedDestUrlArray[1]
-//                let regexComp = try! NSRegularExpression(pattern: "\(self.source_jp_server)", options:.caseInsensitive)
-//                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(self.dest_jp_server)")
                 
             case "mobiledevices":
                 for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
@@ -2444,14 +2413,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             default: break
             }
             
-            //                        DispatchQueue.main.async {
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-                
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-            
         case "computerextensionattributes":
             if self.tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
                 knownEndpoint = false
@@ -2464,9 +2425,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 // update global counters
                 let patchEaName = self.getName(endpoint: endpoint, objectXML: PostXML)
-                //                                if self.counters[endpoint]?["fail"] == nil {
-                //                                    self.counters[endpoint]?["fail"] = 0
-                //                                }
+
                 let localTmp = (self.counters[endpoint]?["fail"])!
                 self.counters[endpoint]?["fail"] = localTmp + 1
                 if var summaryArray = self.summaryDict[endpoint]?["fail"] {
@@ -2490,26 +2449,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
             
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-            
         case "advancedcomputersearches":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["computers"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
-            
-            //print("\nXML: \(PostXML)")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
             
         case "computers":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing computers - verbose\n") }
@@ -2526,12 +2471,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = PostXML.replacingOccurrences(of: "<xprotect_version/>", with: "")
             //print("\nXML: \(PostXML)")
             
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-            
         case "networksegments":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing network segments - verbose\n") }
             // remove items not transfered; distribution points, netboot server, SUS from XML
@@ -2542,29 +2481,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexSUS = try! NSRegularExpression(pattern: "<swu_server>(.*?)</swu_server>", options:.caseInsensitive)
             PostXML = regexDistro1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_server/>")
             // if not migrating file shares remove then from network segments xml - start
-            if self.fileshares_button.state.rawValue == 0 {
-                PostXML = regexDistro2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point/>")
-                PostXML = regexDistro3.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
+            DispatchQueue.main.async {
+                if self.fileshares_button.state.rawValue == 0 {
+                    PostXML = regexDistro2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point/>")
+                    PostXML = regexDistro3.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
+                }
+                // if not migrating file shares remove then from network segments xml - end
+                // if not migrating netboot server remove then from network segments xml - start
+                if self.netboot_button.state.rawValue == 0 {
+                    PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
+                }
+                // if not migrating netboot server remove then from network segments xml - end
+                // if not migrating software update server remove then from network segments xml - start
+                if self.sus_button.state.rawValue == 0 {
+                    PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
+                }
+                // if not migrating software update server remove then from network segments xml - end
             }
-            // if not migrating file shares remove then from network segments xml - end
-            // if not migrating netboot server remove then from network segments xml - start
-            if self.netboot_button.state.rawValue == 0 {
-                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-            }
-            // if not migrating netboot server remove then from network segments xml - end
-            // if not migrating software update server remove then from network segments xml - start
-            if self.sus_button.state.rawValue == 0 {
-                PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
-            }
-            // if not migrating software update server remove then from network segments xml - end
             
             //print("\nXML: \(PostXML)")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
             
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
@@ -2575,13 +2510,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmBlankLines(theXML: PostXML)
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers")
             }
-//            print("\n\(endpoint) XML: \(PostXML)\n")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
+            //            print("\n\(endpoint) XML: \(PostXML)\n")
             
         case "packages":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
@@ -2589,12 +2518,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexComp = try! NSRegularExpression(pattern: "<category>No category assigned</category>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<category/>")
             //print("\nXML: \(PostXML)")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
             
         case "policies", "macapplications", "mobiledeviceapplications":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
@@ -2605,12 +2528,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 if let index = iconUri.index(of: "=") {
                     iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
-                    if let index = iconId_string.index(of: "&") {
-//                        iconId = Int(iconId_string.prefix(upTo: index))!
-                        Int(iconId_string.prefix(upTo: index)) == nil ? (iconId = 0):(iconId = Int(iconId_string.prefix(upTo: index))!)
+                    if endpoint != "policies" {
+                        if let index = iconId_string.index(of: "&") {
+                            iconId = Int(iconId_string.prefix(upTo: index))!
+                        }
+                    } else {
+                        iconId = Int(iconId_string)!
                     }
-                } else {
-                    iconId = 0
                 }
             }
             // check for a self service icon and grab name and id if present - end
@@ -2618,13 +2542,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if (endpoint == "macapplications") || (endpoint == "mobiledeviceapplications") {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
                 if let index = iconUri.index(of: "&") {
                     iconUri = String(iconUri.prefix(upTo: index))
-//                    print("[cleanupXml] adjusted - self service icon name: \(iconName) \t uri: \(iconUri)")
+                    //                    print("[cleanupXml] adjusted - self service icon name: \(iconName) \t uri: \(iconUri)")
                 }
                 let regexVPP = try! NSRegularExpression(pattern: "<vpp>(.*?)</vpp>", options:.caseInsensitive)
                 PostXML = regexVPP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<vpp><assign_vpp_device_based_licenses>false</assign_vpp_device_based_licenses><vpp_admin_account_id>-1</vpp_admin_account_id></vpp>")
-//                for xmlTag in ["vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses", "used_vpp_licenses"] {   // , "computers" - computers removed above with scope options
-//                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-//                }
             }
             
             // Self Service description fix, migrating from 9 to 10.2+
@@ -2647,8 +2568,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             // update references to the Jamf server
-            let regexServer = try! NSRegularExpression(pattern: urlToFqdn(serverUrl: source_jp_server), options:.caseInsensitive)
-            PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: urlToFqdn(serverUrl: dest_jp_server))
+            let regexServer = try! NSRegularExpression(pattern: self.urlToFqdn(serverUrl: self.source_jp_server), options:.caseInsensitive)
+            PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: self.urlToFqdn(serverUrl: self.dest_jp_server))
             
             // set the password used in the accounts payload to jamfchangeme - start
             let regexAccounts = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
@@ -2658,13 +2579,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-
             
         case "users":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing users - verbose\n") }
@@ -2676,13 +2590,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
             //print("\nXML: \(PostXML)")
-            
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-            
             
         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing jamf users/groups (\(endpoint)) - verbose\n") }
@@ -2703,24 +2610,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
             
-            if self.getEndpointInProgress != endpoint {
-                self.endpointInProgress = endpoint
-                self.getStatusInit(endpoint: endpoint, count: endpointCount)
-            }
-            self.get_completed_field.stringValue = "\(endpointCurrent)"
-            
         default:
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
             knownEndpoint = false
         }   // switch - end
+
+        self.getStatusUpdate(endpoint: endpoint, current: endpointCurrent, total: endpointCount)
         
         if knownEndpoint {
             self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                 (result: String) in
                 if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                
                 completion("")
             }
         } else {
+            if endpointCurrent == endpointCount {
+            if self.debug { self.writeToLog(stringOfText: "[cleanupXml] Last item in \(theEndpoint) was unkown.\n") }
+                self.nodesMigrated+=1
+                // ;print("added node: \(localEndPointType) - createEndpoints")
+                //                    print("nodes complete: \(self.nodesMigrated)")
+            }
             completion("")
         }
     }
@@ -2775,7 +2685,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
                 if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
-                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
+                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed", debug: self.debug)
                 
             }
             // save trimmed XML - end
@@ -2787,7 +2697,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
                     self.goButtonEnabled(button_status: true)
-                    print("Done - CreateEndpoints")
+//                    print("Done - CreateEndpoints")
                 }
                 if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData)
@@ -2830,12 +2740,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.debug { self.writeToLog(stringOfText: "\n\n[CreateEndpoints] No data was returned from post/put.\n") }
                     }
                     
-                    DispatchQueue.main.async {
-                        self.migrationStatus(endpoint: endpointType, count: endpointCount)
-                        
-                        self.objects_completed_field.stringValue = "\(self.postCount)"
-
-                    }   // DispatchQueue.main.async - end
+//                    DispatchQueue.main.async {
+////                        self.migrationStatus(endpoint: endpointType, count: endpointCount)
+//
+//                        self.object_name_field.stringValue       = "\(endpointType)"
+//                        self.objects_completed_field.stringValue = "\(endpointCurrent)"
+//                        self.objects_found_field.stringValue     = "\(endpointCount)"
+//
+//                    }   // DispatchQueue.main.async - end
                     // look to see if we are processing the next endpointType - start
                     if self.endpointInProgress != endpointType {
                         self.writeToLog(stringOfText: "[CreateEndpoints] Migrating \(endpointType)\n")
@@ -2855,6 +2767,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
+                            
+                            DispatchQueue.main.async {
+                                self.object_name_field.stringValue       = "\(endpointType)"
+                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                                self.objects_found_field.stringValue     = "\(endpointCount)"
+                            }   // DispatchQueue.main.async - end
                             
                             self.POSTsuccessCount += 1
                             
@@ -2879,42 +2797,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // removed check for those -  || (endpointType == "macapplications")
                             if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
                                 self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData)
-//                                if (ssIconName != "") && (ssIconUri != "") {
-//                                    var iconNode = "policies"
-//                                    switch endpointType {
-//                                    case "macapplications":
-//                                        iconNode = "macapplicationsicon"
-//                                    case "mobiledeviceapplications":
-//                                        iconNode = "mobiledeviceapplicationsicon"
-//                                    default:
-//                                        break
-//                                    }
-//    //                                print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
-////                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
-//                                    createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-//                                    createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//    //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
-//
-////******************                // add option to save icons to folder if using the export option
-//                                    if self.saveRawXml || self.saveTrimmedXml {
-//                                        print("save")
-//                                        curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
-//                                    } else {
-//                                            curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
-//                                    }
-//                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).") }
-////                                    print("result of icon GET: "+curlResult)
-//                                    let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@/tmp/\(ssIconName)\" -X POST")
-//                                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
-////                                    print("result of icon POST: "+curlResult2)
-//                                    if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
-//                                        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).") }
-//                                    }
-//                                }
-                            }   // if ((endpointType == "policies") - end
+                            }
                             
                         } else {
                             // create failed
+                            
+                            DispatchQueue.main.async {
+                                self.object_name_field.stringValue       = "\(endpointType)"
+                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                                self.objects_found_field.stringValue     = "\(endpointCount)"
+                            }   // DispatchQueue.main.async - end
+                            
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                         
                             // Write xml for degugging - start
@@ -3059,6 +2952,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
             }
             if saveOnly {
+                if endpointCurrent == endpointCount {
+                    if self.debug { self.writeToLog(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+                    nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
+                    //            print("remove nodes complete: \(nodesMigrated)")
+                }
                 return
             }
             
@@ -3081,8 +2979,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //print(httpResponse)
                         
                         DispatchQueue.main.async {
-                            self.migrationStatus(endpoint: endpointType, count: endpointCount)
+//                            self.migrationStatus(endpoint: endpointType, count: endpointCount)
+                            self.object_name_field.stringValue       = "\(endpointType)"
                             self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                            self.objects_found_field.stringValue     = "\(endpointCount)"
                             
                             // look to see if we are processing the next endpointType - start
                             if self.endpointInProgress != endpointType {
@@ -3091,8 +2991,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.POSTsuccessCount = 0
                                 self.writeToLog(stringOfText: "[RemoveEndpoints] Removing \(endpointType)\n")
                             }   // look to see if we are processing the next endpointType - end
-                            //                            self.object_name_field.stringValue = endpointType
-                            //                            self.objects_completed_field.stringValue = "\(endpointCurrent)"
                             
                         }
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
@@ -3716,7 +3614,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return stringDate
     }
     
-    
     // replace with tagValue function?
     func getName(endpoint: String, objectXML: String) -> String {
         var theName: String = ""
@@ -3733,27 +3630,41 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func getStatusInit(endpoint: String, count: Int) {
-        self.get_name_field.stringValue = endpoint
-        self.get_found_field.stringValue = "\(count)"
-        self.get_completed_field.stringValue = "0"
+//        DispatchQueue.main.async {
+//            self.get_name_field.stringValue = endpoint
+//            self.get_found_field.stringValue = "\(count)"
+//            self.get_completed_field.stringValue = "0"
+//        }
     }
     
-    func getStatusUpdate(endpoint: String, count: Int) {
-        self.get_completed_field.stringValue = "\(count)"
+    func getStatusUpdate(endpoint: String, current: Int, total: Int) {
+//        if self.getEndpointInProgress != endpoint {
+//            self.getEndpointInProgress = endpoint
+//            self.getStatusInit(endpoint: endpoint, count: total)
+//        }
+        DispatchQueue.main.async {
+            self.get_name_field.stringValue = endpoint
+            self.get_completed_field.stringValue = "\(current)"
+            self.get_found_field.stringValue = "\(total)"
+        }
     }
     
     func icons(endpointType: String, action: String, ssIconName: String, ssIconId: Int, ssIconUri: String, f_createDestUrl: String, responseData: String) {
         var curlResult    = ""
         var curlResult2   = ""
         var createDestUrl = f_createDestUrl
+        var iconToUpload  = ""
         
         if (ssIconName != "") && (ssIconUri != "") {
-            var iconNode = "policies"
+            var iconNode     = "policies"
+            var iconNodeSave = "selfservicepolicyicon"
             switch endpointType {
             case "macapplications":
-                iconNode = "macapplicationsicon"
+                iconNode     = "macapplicationsicon"
+                iconNodeSave = "macapplicationsicon"
             case "mobiledeviceapplications":
-                iconNode = "mobiledeviceapplicationsicon"
+                iconNode     = "mobiledeviceapplicationsicon"
+                iconNodeSave = "mobiledeviceapplicationsicon"
             default:
                 break
             }
@@ -3763,21 +3674,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
             
-            //******************                // add option to save icons to folder if using the export option
-            curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
-            if self.saveRawXml {
-                if self.debug { self.writeToLog(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
-                Xml().save(node: iconNode, xml: "/tmp/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+            if !fileImport {
+                iconToUpload = "/tmp/\(ssIconName)"
+                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
+//              print("result of icon GET: "+curlResult)
+                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
+                if self.saveRawXml {
+                    if self.debug { self.writeToLog(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
+                    Xml().save(node: iconNodeSave, xml: "/tmp/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw", debug: debug)
+                }
+            } else {
+                iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             }
+            
             if !saveOnly {
-                //                                    print("result of icon GET: "+curlResult)
-                curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@/tmp/\(ssIconName)\" -X POST")
+                curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
                 if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
                 //                                    print("result of icon POST: "+curlResult2)
             }   // if !saveOnly - end
-            if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).\n") }
+            if fm.fileExists(atPath: "/tmp/\(ssIconName)") {
+                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
+                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).\n") }
+                }
             }
         }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
@@ -3827,107 +3745,109 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // func labelColor - start
     func labelColor(endpoint: String, theColor: NSColor) {
-        switch endpoint {
-        // macOS tab
-        case "advancedcomputersearches":
-            advcompsearch_label_field.textColor = theColor
-        case "computers":
-            computers_label_field.textColor = theColor
-        case "computerconfigurations":
-            configurations_label_field.textColor = theColor
-        case "directorybindings":
-            directory_bindings_field.textColor = theColor
-        case "distributionpoints":
-            file_shares_label_field.textColor = theColor
-        case "dockitems":
-            dock_items_field.textColor = theColor
-        case "softwareupdateservers":
-            sus_label_field.textColor = theColor
-        case "netbootservers":
-            netboot_label_field.textColor = theColor
-        case "osxconfigurationprofiles":
-            osxconfigurationprofiles_label_field.textColor = theColor
-        case "patchpolicies":
-            patch_policies_field.textColor = theColor
-        case "computerextensionattributes":
-            extension_attributes_label_field.textColor = theColor
-        case "scripts":
-            scripts_label_field.textColor = theColor
-        case "macapplications":
-            macapplications_label_field.textColor = theColor
-        case "computergroups":
-            smart_groups_label_field.textColor = theColor
-            static_groups_label_field.textColor = theColor
-        case "smartcomputergroups":
-            smart_groups_label_field.textColor = theColor
-        case "staticcomputergroups":
-            static_groups_label_field.textColor = theColor
-        case "packages":
-            packages_label_field.textColor = theColor
-        case "printers":
-            printers_label_field.textColor = theColor
-        case "policies":
-            policies_label_field.textColor = theColor
-        case "restrictedsoftware":
-            restrictedsoftware_label_field.textColor = theColor
-        // iOS tab
-        case "advancedmobiledevicesearches":
-            advancedmobiledevicesearches_label_field.textColor = theColor
-        case "mobiledeviceapplications":
-            mobiledeviceApps_label_field.textColor = theColor
-        case "mobiledeviceconfigurationprofiles":
-            mobiledeviceconfigurationprofile_label_field.textColor = theColor
-        case "mobiledeviceextensionattributes":
-            mobiledeviceextensionattributes_label_field.textColor = theColor
-        case "mobiledevices":
-            mobiledevices_label_field.textColor = theColor
-        case "mobiledevicegroups":
-            smart_ios_groups_label_field.textColor = theColor
-            static_ios_groups_label_field.textColor = theColor
-        case "smartiosgroups":
-            smart_ios_groups_label_field.textColor = theColor
-        case "staticiosgroups":
-            static_ios_groups_label_field.textColor = theColor
-        // general tab
-        case "advancedusersearches":
-            advusersearch_label_field.textColor = theColor
-        case "buildings":
-            building_label_field.textColor = theColor
-        case "categories":
-            categories_label_field.textColor = theColor
-        case "departments":
-            departments_label_field.textColor = theColor
-        case "userextensionattributes":
-            userEA_label_field.textColor = theColor
-        case "ldapservers":
-            ldapservers_label_field.textColor = theColor
-        case "sites":
-            sites_label_field.textColor = theColor
-        case "networksegments":
-            network_segments_label_field.textColor = theColor
-        case "users":
-            users_label_field.textColor = theColor
-        case "usergroups":
-            smartUserGrps_label_field.textColor = theColor
-            staticUserGrps_label_field.textColor = theColor
-        case "jamfusers", "accounts/userid":
-            jamfUserAccounts_field.textColor = theColor
-        case "jamfgroups", "accounts/groupid":
-            jamfGroupAccounts_field.textColor = theColor
-        case "smartusergroups":
-            smartUserGrps_label_field.textColor = theColor
-        case "staticusergroups":
-            staticUserGrps_label_field.textColor = theColor
-        default:
-            print("function labelColor: unknown label - \(endpoint)")
+        DispatchQueue.main.async {
+            switch endpoint {
+            // macOS tab
+            case "advancedcomputersearches":
+                self.advcompsearch_label_field.textColor = theColor
+            case "computers":
+                self.computers_label_field.textColor = theColor
+            case "computerconfigurations":
+                self.configurations_label_field.textColor = theColor
+            case "directorybindings":
+                self.directory_bindings_field.textColor = theColor
+            case "distributionpoints":
+                self.file_shares_label_field.textColor = theColor
+            case "dockitems":
+                self.dock_items_field.textColor = theColor
+            case "softwareupdateservers":
+                self.sus_label_field.textColor = theColor
+            case "netbootservers":
+                self.netboot_label_field.textColor = theColor
+            case "osxconfigurationprofiles":
+                self.osxconfigurationprofiles_label_field.textColor = theColor
+            case "patchpolicies":
+                self.patch_policies_field.textColor = theColor
+            case "computerextensionattributes":
+                self.extension_attributes_label_field.textColor = theColor
+            case "scripts":
+                self.scripts_label_field.textColor = theColor
+            case "macapplications":
+                self.macapplications_label_field.textColor = theColor
+            case "computergroups":
+                self.smart_groups_label_field.textColor = theColor
+                self.static_groups_label_field.textColor = theColor
+            case "smartcomputergroups":
+                self.smart_groups_label_field.textColor = theColor
+            case "staticcomputergroups":
+                self.static_groups_label_field.textColor = theColor
+            case "packages":
+                self.packages_label_field.textColor = theColor
+            case "printers":
+                self.printers_label_field.textColor = theColor
+            case "policies":
+                self.policies_label_field.textColor = theColor
+            case "restrictedsoftware":
+                self.restrictedsoftware_label_field.textColor = theColor
+            // iOS tab
+            case "advancedmobiledevicesearches":
+                self.advancedmobiledevicesearches_label_field.textColor = theColor
+            case "mobiledeviceapplications":
+                self.mobiledeviceApps_label_field.textColor = theColor
+            case "mobiledeviceconfigurationprofiles":
+                self.mobiledeviceconfigurationprofile_label_field.textColor = theColor
+            case "mobiledeviceextensionattributes":
+                self.mobiledeviceextensionattributes_label_field.textColor = theColor
+            case "mobiledevices":
+                self.mobiledevices_label_field.textColor = theColor
+            case "mobiledevicegroups":
+                self.smart_ios_groups_label_field.textColor = theColor
+                self.static_ios_groups_label_field.textColor = theColor
+            case "smartiosgroups":
+                self.smart_ios_groups_label_field.textColor = theColor
+            case "staticiosgroups":
+                self.static_ios_groups_label_field.textColor = theColor
+            // general tab
+            case "advancedusersearches":
+                self.advusersearch_label_field.textColor = theColor
+            case "buildings":
+                self.building_label_field.textColor = theColor
+            case "categories":
+                self.categories_label_field.textColor = theColor
+            case "departments":
+                self.departments_label_field.textColor = theColor
+            case "userextensionattributes":
+                self.userEA_label_field.textColor = theColor
+            case "ldapservers":
+                self.ldapservers_label_field.textColor = theColor
+            case "sites":
+                self.sites_label_field.textColor = theColor
+            case "networksegments":
+                self.network_segments_label_field.textColor = theColor
+            case "users":
+                self.users_label_field.textColor = theColor
+            case "usergroups":
+                self.smartUserGrps_label_field.textColor = theColor
+                self.staticUserGrps_label_field.textColor = theColor
+            case "jamfusers", "accounts/userid":
+                self.jamfUserAccounts_field.textColor = theColor
+            case "jamfgroups", "accounts/groupid":
+                self.jamfGroupAccounts_field.textColor = theColor
+            case "smartusergroups":
+                self.smartUserGrps_label_field.textColor = theColor
+            case "staticusergroups":
+                self.staticUserGrps_label_field.textColor = theColor
+            default:
+                print("function labelColor: unknown label - \(endpoint)")
+            }
         }
     }
     // func labelColor - end
     
-    func migrationStatus(endpoint: String, count: Int) {
-        object_name_field.stringValue = endpoint
-        objects_found_field.stringValue = "\(count)"
-    }
+//    func migrationStatus(endpoint: String, count: Int) {
+//        object_name_field.stringValue = endpoint
+//        objects_found_field.stringValue = "\(count)"
+//    }
     
     // move history to log - start
     func moveHistoryToLog (source: String, destination: String) {
@@ -4206,6 +4126,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // see if we're migrating from files or a server
         _ = serverOrFiles()
+    }
+    
+    func windowIsVisible(windowName: String) -> Bool {
+        let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
+        let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
+        let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
+        for item in infoList! {
+            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
+                return true
+            }
+        }
+        return false
     }
     
     func writeToLog(stringOfText: String) {
@@ -4624,7 +4556,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             while true {
                 if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-                    // clear selective list of items when changing from migrition to delete mode
+                    // clear selective list of items when changing from migration to delete mode
                     if !self.selectiveListCleared {
                         DispatchQueue.main.async {
                             self.sourceDataArray.removeAll()

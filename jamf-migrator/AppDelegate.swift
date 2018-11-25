@@ -11,7 +11,9 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    
+    let vc = ViewController()
+    var prefWindowController: NSWindowController?
+
     @IBAction func checkForUpdates(_ sender: AnyObject) {
         let verCheck = VersionCheck()
         
@@ -20,7 +22,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         verCheck.versionCheck() {
             (result: Bool) in
-//            print("AppDelegate update avail: \(result)")
             if result {
                 self.alert_dialog(header: "Running Jamf Migrator: \(version)", message: "A new versions is available.", updateAvail: result)
             } else {
@@ -28,6 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
+    
     func alert_dialog(header: String, message: String, updateAvail: Bool) {
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
@@ -50,5 +52,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         //return true
     }   // func alert_dialog - end
+    
+    @IBAction func showPreferences(_ sender: Any) {
+        if !(prefWindowController != nil) {
+            let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Preferences"), bundle: nil)
+            prefWindowController = storyboard.instantiateInitialController() as? NSWindowController
+        }
+
+        if (prefWindowController != nil) {
+            prefWindowController?.showWindow(sender)
+        }
+    }
+    
+    // disabled to prevent multiple preference windows from opening
+    func showPrefsWindow() {
+        if !(prefWindowController != nil) {
+            let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Preferences"), bundle: nil)
+            prefWindowController = storyboard.instantiateInitialController() as? NSWindowController
+        }
+        if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export")) {
+            if (prefWindowController != nil) {
+                prefWindowController?.showWindow(self)
+            }
+        }
+    }
+    
 }
 

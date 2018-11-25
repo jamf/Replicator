@@ -15,17 +15,17 @@ class Xml {
     var saveXmlFolder = ""
     var endpointPath  = ""
     
-    func save(node: String, xml: String, name: String, id: Int, format: String) {
+    
+    func save(node: String, xml: String, name: String, id: Int, format: String, debug: Bool) {
         
-        print("[saveXML] saving \(name), format: \(format), to folder \(node)")
-        if vc.debug { vc.writeToLog(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
+        if debug { ViewController().writeToLog(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
         saveXmlFolder = baseXmlFolder+"/"+format
         if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if vc.debug { vc.writeToLog(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
+                if debug { vc.writeToLog(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
                 return
             }
         }
@@ -33,7 +33,7 @@ class Xml {
         
         // Create endpoint type to store xml files if needed - start
         switch node {
-        case "macapplicationsicon", "mobiledeviceapplicationsicon":
+        case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
             endpointPath = saveXmlFolder+"/"+node+"/\(id)"
         default:
             endpointPath = saveXmlFolder+"/"+node
@@ -42,32 +42,25 @@ class Xml {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if vc.debug { vc.writeToLog(stringOfText: "Problem creating \(endpointPath) folder: Error \(error)\n") }
+                if debug { vc.writeToLog(stringOfText: "Problem creating \(endpointPath) folder: Error \(error)\n") }
                 return
             }
         }
         // Create endpoint type to store xml files if needed - end
         
         switch node {
-        case "macapplicationsicon", "mobiledeviceapplicationsicon":
+        case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
             
             let iconSource = "\(xml)"
             let iconDest   = "\(endpointPath)/\(name)"
-//            guard let iconSourceUrl = URL(string: iconSource) else {
-//                vc.writeToLog(stringOfText: "Problem converting \(iconSource) to URL\n")
-//                return
-//            }
-//            guard let iconDestUrl = URL(string: iconDest) else {
-//                vc.writeToLog(stringOfText: "Problem converting \(iconDest) to URL\n")
-//                return
-//            }
-            print("copy from \(iconSource) to: \(iconDest)")
+
+//            print("copy from \(iconSource) to: \(iconDest)")
             do {
                 try fm.copyItem(atPath: iconSource, toPath: iconDest)
-                print("Copied \(iconSource) to: \(iconDest)")
+//                print("Copied \(iconSource) to: \(iconDest)")
             } catch {
-                print("Problem copying \(iconSource) to: \(iconDest)")
-                if vc.debug { vc.writeToLog(stringOfText: "Problem copying \(iconSource) to: \(iconDest)\n") }
+//                print("Problem copying \(iconSource) to: \(iconDest)")
+                if debug { vc.writeToLog(stringOfText: "Problem copying \(iconSource) to: \(iconDest)\n") }
             }
         default:
             let xmlFile = "\(name)-\(id).xml"
@@ -80,21 +73,11 @@ class Xml {
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
                     } catch {
-                        if vc.debug { vc.writeToLog(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)\n") }
+                        if debug { vc.writeToLog(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)\n") }
                         return
                     }
-                }
+                }   // if let prettyXml - end
             }
-        }
-        
-        // Save endpoint xml - start
-//        let readableXml = xml.replacingOccurrences(of: "><", with: ">\n<")
-
-        // Save endpoint xml - end
-        
-        func trim(rawXml: String, endpoint: String) -> String {
-            
-            return ""
         }
         
     }
