@@ -67,6 +67,11 @@ Information about successes/failures can be found in the log, located in
 
 ```~/Library/Logs/jamf-migrator/<date>_<time>_migration.log```
 
+If you have used jamf-migrator and saved passwords you will see the following after launching a new version. 
+ ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/allowAccess.png "Allow Keychain Access")
+ If you'd like the new version to access existing credentials select the desired option.
+
+
 **Important:**<p>
 * There are many dependancies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
 * Summary window doesn't seem to be the most responsive.  May need to click the window or give the cursor some extra motion before the detailed summary appears.
