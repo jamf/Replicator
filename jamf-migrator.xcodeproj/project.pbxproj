@@ -17,7 +17,6 @@
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
-		B58D87FE20C22293003F8D4C /* PrefsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58D87FD20C22293003F8D4C /* PrefsViewController.swift */; };
 		B5927AF820CAE22D0059C25B /* prefs.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF720CAE22D0059C25B /* prefs.png */; };
 		B5927AFA20CAEECC0059C25B /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF920CAEECC0059C25B /* help.png */; };
 		B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5927AFB20CC394F0059C25B /* VersionCheck.swift */; };
@@ -49,7 +48,6 @@
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
-		B58D87FD20C22293003F8D4C /* PrefsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsViewController.swift; sourceTree = "<group>"; };
 		B5927AF720CAE22D0059C25B /* prefs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prefs.png; sourceTree = "<group>"; };
 		B5927AF920CAEECC0059C25B /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		B5927AFB20CC394F0059C25B /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
@@ -102,7 +100,6 @@
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				B59D0C39202B97BA006203CE /* Credentials.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
-				B58D87FD20C22293003F8D4C /* PrefsViewController.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
@@ -247,7 +244,6 @@
 			files = (
 				B5165E1620E580A00086E31D /* Xml.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
-				B58D87FE20C22293003F8D4C /* PrefsViewController.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,

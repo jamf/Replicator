@@ -602,8 +602,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         saveRawXml      = xmlPrefOptions["saveRawXml"]!
         saveTrimmedXml  = xmlPrefOptions["saveTrimmedXml"]!
         
-        if fileImport && saveOnly {
-            alert_dialog(header: "Attention", message: "Cannot select Save Only (Preferneces -> Export) when using File Import.")
+        if fileImport && (saveOnly || saveRawXml) {
+            alert_dialog(header: "Attention", message: "Cannot select Save Only or Raw Source XML (Preferneces -> Export) when using File Import.")
             return
         }
 

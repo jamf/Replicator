@@ -144,7 +144,7 @@ body
         <li>macOS Configuration Profiles</li>
         <li>macOS Applications</li>
         <li>Restrictions</li>
-        <li>Policies.</li>
+        <li>Policies</li>
         <li>Mobile Device Configuration Profiles</li>
         <li>Mobile Device Applications</li>
         <li>Static Computer Groups</li>
@@ -153,16 +153,17 @@ body
 </ul>
 In addition, Policies can be copied in a disabled state.</div>
 <div>
-    <img src="images/copy_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 423px; height: 257px;">
+    <img src="images/copy_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 428px; height: 397px;">
 </div>
 Options to export XML from the source server are also available.
 <div>
-    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 423px; height: 214px;">
+    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 428px; height: 397px;">
 </div>
     <ul style="margin-left:17px;">
    <li>Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).</li>
    <li>Trimmed Source XML give you the XML that is sent to the destination server.</li>
    <li>Save only saves the XML files and does not send them to the destination server.</li>
+   <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected .</li>
     </ul>
     Files are saved to the ~/Documents/Jamf Migrator/xml, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.
     <div>
