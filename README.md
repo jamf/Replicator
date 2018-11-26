@@ -90,6 +90,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 **v3.1.0**<p>
 * Resolved app crashes when exporting XML and destination server field is blank.
 * Resolved potential app hanging when migrating extension attributes that include patch policy EAs.
+* Re-tool preferences.
 * Removed preferences button and help button to prevent duplicate windows from opening.
 * Resolved issue where scripts could get corrupted when migration.
     
