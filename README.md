@@ -69,7 +69,9 @@ Information about successes/failures can be found in the log, located in
 
 If you have used jamf-migrator and saved passwords you will see the following after launching a new version. 
  ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/allowAccess.png "Allow Keychain Access")
+ 
  If you'd like the new version to access existing credentials select the desired option.
+
 
 
 **Important:**<p>
