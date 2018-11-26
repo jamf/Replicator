@@ -89,6 +89,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 * Resolved potential app hanging when migrating extension attributes that include patch policy EAs.
 * Removed preferences button and help button to prevent duplicate windows from opening.
 * Resolved issue where scripts could get corrupted when migration.
+    
 **v3.0.6**<p>
 * Items will now migrate if category, building, or department is missing on the destination server. The field will be blanked out to allow the migration.
 
