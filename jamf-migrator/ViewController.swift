@@ -330,7 +330,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // This order must match the drop down for selective migration, provide the node name
     var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
-    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "userextensionattributes", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "users", "usergroups"]
+    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "usergroups"]
     var AllEndpointsArray = [String]()
     
     
