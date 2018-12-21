@@ -2190,7 +2190,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
-        var theEndpoint       = endpoint
+//        var theEndpoint       = endpoint
         
         switch endpoint {
 //      adjust the lookup endpoint
@@ -2202,9 +2202,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             localEndPointType = "usergroups"
 //      adjust the where the data is sent
         case "accounts/userid":
-            theEndpoint = "jamfusers"
+            localEndPointType = "jamfusers"
         case "accounts/groupid":
-            theEndpoint = "jamfgroups"
+            localEndPointType = "jamfgroups"
         default:
             localEndPointType = endpoint
         }
@@ -2677,10 +2677,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         theCreateQ.addOperation {
             
-//            print("theCreateQ - endpoint: \(localEndPointType)")
-//            print("theCreateQ - action: \(action)")
-//            print("theCreateQ - counters: \(self.counters)\n")
-            
             // save trimmed XML - start
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
@@ -2689,7 +2685,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
             }
             // save trimmed XML - end
-            
             
             //******************                // add option to save icons to folder if using the export option
             if self.saveOnly {
