@@ -1025,6 +1025,299 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
+                                    <tabViewItem label="General" identifier="" id="88A-Nu-WEM">
+                                        <view key="view" ambiguous="YES" id="CPy-PU-zBW">
+                                            <rect key="frame" x="10" y="33" width="707" height="186"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <userGuides>
+                                                <userLayoutGuide location="334" affinity="minX"/>
+                                                <userLayoutGuide location="95" affinity="minY"/>
+                                            </userGuides>
+                                            <subviews>
+                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v6Z-fi-xq1">
+                                                    <rect key="frame" x="351" y="115" width="135" height="16"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Smart User Groups" id="g6q-oz-EHG">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mU3-Y6-Mvb">
+                                                    <rect key="frame" x="39" y="159" width="129" height="24"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select all/none" id="dTW-1l-THp">
+                                                        <font key="font" metaFont="system" size="18"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QJL-w2-5jw">
+                                                    <rect key="frame" x="18" y="162" width="150" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="uD8-eh-XFS">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="allNone:" target="XfG-lQ-9wD" id="gw3-6N-Xdy"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZRd-jK-zIk" userLabel="Categories fld">
+                                                    <rect key="frame" x="195" y="113" width="99" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Categories" id="AQ1-sd-5lM" userLabel="Categories">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
+                                                    <rect key="frame" x="175" y="112" width="91" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Yfo-KR-732"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="W9z-MB-k3t" userLabel="Buildings fld">
+                                                    <rect key="frame" x="38" y="54" width="84" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Buildings" id="kbH-To-cfx">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
+                                                    <rect key="frame" x="18" y="52" width="79" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="cWY-si-yVy"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="upy-EX-NVp" userLabel="Users fld">
+                                                    <rect key="frame" x="38" y="73" width="63" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Users" id="Prs-Mx-Pod">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
+                                                    <rect key="frame" x="18" y="72" width="62" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="asM-hy-xl0">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="1el-CX-7J1"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhD-Q3-KDx" userLabel="Sites fld">
+                                                    <rect key="frame" x="38" y="134" width="60" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Sites" id="MWJ-Aq-pQb">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
+                                                    <rect key="frame" x="18" y="132" width="58" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ePN-1b-ca5">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="atd-5g-QPN"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2kz-HF-tp3" userLabel="Network Segments fld">
+                                                    <rect key="frame" x="195" y="54" width="142" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Network Segments" id="Xqq-4e-Xn8">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
+                                                    <rect key="frame" x="175" y="52" width="142" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Gc3-co-4uL"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ujv-CO-BGg" userLabel="Departments fld">
+                                                    <rect key="frame" x="195" y="134" width="107" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Departments" id="eQQ-ao-LEj">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
+                                                    <rect key="frame" x="175" y="132" width="104" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="P5G-c0-uq7"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXm-Uk-9pd" userLabel="LDAP fld">
+                                                    <rect key="frame" x="38" y="94" width="104" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LDAP Servers" id="5xk-91-LbY">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
+                                                    <rect key="frame" x="18" y="92" width="114" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="uRg-Bj-vZx"/>
+                                                    </connections>
+                                                </button>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="peA-aJ-t5r" userLabel="smart grp button">
+                                                    <rect key="frame" x="332" y="113" width="141" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="jlb-Xt-7ge">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Y0J-zf-4LP"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UU9-3N-hsp" userLabel="Users EA fld">
+                                                    <rect key="frame" x="38" y="113" width="75" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="User EAs" id="uRm-mD-UAh" userLabel="User EAs">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
+                                                    <rect key="frame" x="18" y="112" width="82" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hN0-Fe-gk1">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Kro-uv-V8r"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qck-dJ-qag" userLabel="Users fld">
+                                                    <rect key="frame" x="352" y="133" width="136" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. User Searches" id="doX-Jd-Vvg">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Users">
+                                                    <rect key="frame" x="332" y="132" width="141" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="f3B-7V-Jjn"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="85a-8h-YWe">
+                                                    <rect key="frame" x="195" y="94" width="96" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Users" id="v23-mz-drf">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
+                                                    <rect key="frame" x="175" y="92" width="97" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="5Uf-ej-2g6"/>
+                                                    </connections>
+                                                </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="77F-Xy-56l" userLabel="jamf Groups">
+                                                    <rect key="frame" x="195" y="74" width="96" height="17"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Groups" id="GIb-DE-w31">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
+                                                    <rect key="frame" x="175" y="72" width="97" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="BSi-oB-ls4"/>
+                                                    </connections>
+                                                </button>
+                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Sh-gj-yTi">
+                                                    <rect key="frame" x="352" y="89" width="129" height="22"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Static User Groups" id="CrH-g7-vAg">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Agg-yV-dbS" userLabel="static grp button">
+                                                    <rect key="frame" x="332" y="93" width="138" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="bak-wu-We2">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="h2j-3G-hdN"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                        </view>
+                                        <accessibility description="general" identifier="general"/>
+                                    </tabViewItem>
                                     <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
                                         <view key="view" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
@@ -1658,301 +1951,8 @@
                                         </view>
                                         <accessibility description="iOS" identifier="iOS"/>
                                     </tabViewItem>
-                                    <tabViewItem label="General" identifier="" id="88A-Nu-WEM">
-                                        <view key="view" id="CPy-PU-zBW">
-                                            <rect key="frame" x="10" y="33" width="707" height="186"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                            <userGuides>
-                                                <userLayoutGuide location="334" affinity="minX"/>
-                                                <userLayoutGuide location="95" affinity="minY"/>
-                                            </userGuides>
-                                            <subviews>
-                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v6Z-fi-xq1">
-                                                    <rect key="frame" x="351" y="115" width="135" height="16"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Smart User Groups" id="g6q-oz-EHG">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mU3-Y6-Mvb">
-                                                    <rect key="frame" x="39" y="159" width="129" height="24"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select all/none" id="dTW-1l-THp">
-                                                        <font key="font" metaFont="system" size="18"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QJL-w2-5jw">
-                                                    <rect key="frame" x="18" y="162" width="150" height="18"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="uD8-eh-XFS">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" metaFont="system"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="allNone:" target="XfG-lQ-9wD" id="gw3-6N-Xdy"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZRd-jK-zIk" userLabel="Categories fld">
-                                                    <rect key="frame" x="195" y="113" width="99" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Categories" id="AQ1-sd-5lM" userLabel="Categories">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="175" y="112" width="91" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Yfo-KR-732"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="W9z-MB-k3t" userLabel="Buildings fld">
-                                                    <rect key="frame" x="38" y="54" width="84" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Buildings" id="kbH-To-cfx">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="18" y="52" width="79" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="cWY-si-yVy"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="upy-EX-NVp" userLabel="Users fld">
-                                                    <rect key="frame" x="38" y="73" width="63" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Users" id="Prs-Mx-Pod">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="72" width="62" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="asM-hy-xl0">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="1el-CX-7J1"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhD-Q3-KDx" userLabel="Sites fld">
-                                                    <rect key="frame" x="38" y="134" width="60" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Sites" id="MWJ-Aq-pQb">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
-                                                    <rect key="frame" x="18" y="132" width="58" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ePN-1b-ca5">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="atd-5g-QPN"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2kz-HF-tp3" userLabel="Network Segments fld">
-                                                    <rect key="frame" x="195" y="54" width="142" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Network Segments" id="Xqq-4e-Xn8">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="175" y="52" width="142" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Gc3-co-4uL"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ujv-CO-BGg" userLabel="Departments fld">
-                                                    <rect key="frame" x="195" y="134" width="107" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Departments" id="eQQ-ao-LEj">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="175" y="132" width="104" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="P5G-c0-uq7"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXm-Uk-9pd" userLabel="LDAP fld">
-                                                    <rect key="frame" x="38" y="94" width="104" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LDAP Servers" id="5xk-91-LbY">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="92" width="114" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="uRg-Bj-vZx"/>
-                                                    </connections>
-                                                </button>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="peA-aJ-t5r" userLabel="smart grp button">
-                                                    <rect key="frame" x="332" y="113" width="141" height="18"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="jlb-Xt-7ge">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" metaFont="system"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Y0J-zf-4LP"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UU9-3N-hsp" userLabel="Users EA fld">
-                                                    <rect key="frame" x="38" y="113" width="75" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="User EAs" id="uRm-mD-UAh" userLabel="User EAs">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="112" width="82" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hN0-Fe-gk1">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Kro-uv-V8r"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qck-dJ-qag" userLabel="Users fld">
-                                                    <rect key="frame" x="352" y="133" width="136" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. User Searches" id="doX-Jd-Vvg">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Users">
-                                                    <rect key="frame" x="332" y="132" width="141" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="f3B-7V-Jjn"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="85a-8h-YWe">
-                                                    <rect key="frame" x="195" y="94" width="96" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Users" id="v23-mz-drf">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="175" y="92" width="97" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="5Uf-ej-2g6"/>
-                                                    </connections>
-                                                </button>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="77F-Xy-56l" userLabel="jamf Groups">
-                                                    <rect key="frame" x="195" y="74" width="96" height="17"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Groups" id="GIb-DE-w31">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="175" y="72" width="97" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="BSi-oB-ls4"/>
-                                                    </connections>
-                                                </button>
-                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Sh-gj-yTi">
-                                                    <rect key="frame" x="352" y="89" width="129" height="22"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Static User Groups" id="CrH-g7-vAg">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Agg-yV-dbS" userLabel="static grp button">
-                                                    <rect key="frame" x="332" y="93" width="138" height="18"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="bak-wu-We2">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" metaFont="system"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="h2j-3G-hdN"/>
-                                                    </connections>
-                                                </button>
-                                            </subviews>
-                                        </view>
-                                        <accessibility description="general" identifier="general"/>
-                                    </tabViewItem>
                                     <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
-                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
+                                        <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
