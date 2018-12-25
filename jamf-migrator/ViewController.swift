@@ -1407,6 +1407,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         
+        self.sourceDataArray.removeAll()
+        self.availableIDsToMigDict.removeAll()
+        
         theOpQ.addOperation {
             
             let encodedURL = NSURL(string: myURL)
@@ -1486,18 +1489,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        
-                                                        self.srcSrvTableView.reloadData()
-                                                        
+                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            self.srcSrvTableView.reloadData()
+                                                            self.goButtonEnabled(button_status: true)
+                                                        }   //if self.availableIDsToMigDict.count - end
                                                     }   // DispatchQueue.main.async - end
                                                     counter+=1
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                DispatchQueue.main.async {
-                                                    //self.sourceDataArray.sort()
-                                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                    
-                                                    self.srcSrvTableView.reloadData()
-                                                }
+                                                
                                             }   // if self.goSender else - end
                                         }   // self.existingEndpoints - end
                                     } else {
@@ -1505,10 +1505,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
-                                    }// if endpointCount - end
-                                }   // end if let buildings, departments...
+                                    }// if endpointCount > 0 - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                } else {   // end if let buildings, departments...
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                }
                                 
                             case "computergroups", "mobiledevicegroups", "usergroups":
                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing device groups\n") }
@@ -1593,14 +1596,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 var localEndpoint = endpoint
                                                 switch endpoint {
                                                 case "computergroups":
-                                                    if (self.smart_comp_grps_button.state.rawValue == 1) && (g == 0) {
+                                                    if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartcomputergroups"
                                                     }
-                                                    if (self.static_comp_grps_button.state.rawValue == 1) && (g == 1) {
+                                                    if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -1608,14 +1611,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         localEndpoint = "staticcomputergroups"
                                                     }
                                                 case "mobiledevicegroups":
-                                                    if (self.smart_ios_groups_button.state.rawValue == 1) && (g == 0) {
+                                                    if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartiosgroups"
                                                     }
-                                                    if (self.static_ios_groups_button.state.rawValue == 1) && (g == 1) {
+                                                    if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -1623,14 +1626,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         localEndpoint = "staticiosgroups"
                                                     }
                                                 case "usergroups":
-                                                    if (self.smartUserGrps_button.state.rawValue == 1) && (g == 0) {
+                                                    if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartusergroups"
                                                     }
-                                                    if (self.staticUserGrps_button.state.rawValue == 1) && (g == 1) {
+                                                    if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
                                                         self.DeviceGroupType = "staticcomputergroups"
@@ -1662,12 +1665,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     } else {
                                                         // populate source server under the selective tab
                                                         DispatchQueue.main.async {
-                                                            //print("adding \(l_xmlName) to array")
+//                                                            print("adding \(l_xmlName) to array")
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
-                                                            
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                            self.srcSrvTableView.reloadData()
+                                                            if self.availableIDsToMigDict.count == currentGroupDict.count {
+                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                self.srcSrvTableView.reloadData()
+                                                                self.goButtonEnabled(button_status: true)
+                                                            }
                                                             
                                                         }   // DispatchQueue.main.async - end
                                                     }   // if self.goSender else - end
@@ -1684,8 +1689,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
-                                    }   // if endpointCount - end
-                                }   // if let endpointInfo = endpointJSON["computer_groups"] - end
+                                    }   // if endpointCount > 0 - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                }
                                 
                             case "policies":
                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
@@ -1694,6 +1702,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
                                     
                                     var computerPoliciesDict: [Int: String] = [:]
+
                                     if endpointCount > 0 {
                                         
                                         // create dictionary of existing policies
@@ -1701,20 +1710,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             (result: String) in
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing endpoints: \(result)\n") }
                                             
-                                            for _ in (0..<endpointCount) {
-                                                //var nonRemotePolicies = 0
-                                                // filter out policies created from casper remote - start
-                                                for i in (0..<endpointCount) {
-                                                    let record = endpointInfo[i] as! [String : AnyObject]
-                                                    let nameCheck = record["name"] as! String
-                                                    if nameCheck.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
-                                                        computerPoliciesDict[record["id"] as! Int] = nameCheck
-                                                    }
+                                            // filter out policies created from casper remote - start
+                                            for i in (0..<endpointCount) {
+                                                let record = endpointInfo[i] as! [String : AnyObject]
+                                                let nameCheck = record["name"] as! String
+                                                if nameCheck.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
+                                                    computerPoliciesDict[record["id"] as! Int] = nameCheck
                                                 }
                                             }
                                             self.availableObjsToMigDict = computerPoliciesDict
                                             let nonRemotePolicies = computerPoliciesDict.count
                                             var counter = 1
+                                            
                                             for (l_xmlID, l_xmlName) in computerPoliciesDict {
                                                 if self.goSender == "goButton" {
                                                     if !self.wipe_data  {
@@ -1735,13 +1742,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }   // if !self.wipe_data else - end
                                                 } else {
                                                     // populate source server under the selective tab
-                                                    DispatchQueue.main.async {
-                                                        //print("adding \(l_xmlName) to array")
-                                                        self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
-                                                        self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                        self.srcSrvTableView.reloadData()
-                                                    }   // DispatchQueue.main.async - end
+//                                                        print("adding \(l_xmlName) to array")
+                                                    self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
+                                                    self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
+                                                    if self.availableIDsToMigDict.count == computerPoliciesDict.count {
+                                                        DispatchQueue.main.async {
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            self.srcSrvTableView.reloadData()
+                                                            self.goButtonEnabled(button_status: true)
+                                                        }
+                                                    }
                                                 }   // if self.goSender else - end
                                                 counter += 1
                                             }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
@@ -1751,10 +1761,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount > 0
-                                }   //if let endpointInfo = endpointJSON - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                } else {   //if let endpointInfo = endpointJSON - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                }
                                 
                             case "jamfusers", "jamfgroups":
                                 let accountsDict = endpointJSON as Dictionary<String, Any>
@@ -1816,18 +1829,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        
-                                                        self.srcSrvTableView.reloadData()
-                                                        
+                                                        if self.availableObjsToMigDict.count == self.sourceDataArray.count {
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            self.srcSrvTableView.reloadData()
+                                                            self.goButtonEnabled(button_status: true)
+                                                        }
                                                     }   // DispatchQueue.main.async - end
                                                     counter+=1
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                DispatchQueue.main.async {
-                                                    //self.sourceDataArray.sort()
-                                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                    
-                                                    self.srcSrvTableView.reloadData()
-                                                }
                                             }   // if self.goSender else - end
                                         }   // self.existingEndpoints - end
                                     } else {
@@ -1837,8 +1846,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
-                                    }// if endpointCount - end
-                                }   // end if let buildings, departments...
+                                    }   // if endpointCount > 0 - end
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                } else {   // end if let buildings, departments...
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                }
                               
                             case "computerconfigurations":
                                 if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
@@ -1978,18 +1990,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                             //print("adding \(l_xmlName) to array")
                                                                                             self.availableIDsToMigDict[l_xmlName!] = l_xmlID
                                                                                             self.sourceDataArray.append(l_xmlName!)
-                                                                                            
-                                                                                            self.srcSrvTableView.reloadData()
-                                                                                            
+                                                                                            if orderedConfArray.count == self.sourceDataArray.count {
+                                                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                                self.srcSrvTableView.reloadData()
+                                                                                                self.goButtonEnabled(button_status: true)
+                                                                                            }
                                                                                         }   // DispatchQueue.main.async - end
                                                                                         counter+=1
                                                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                                    DispatchQueue.main.async {
-                                                                                        //self.sourceDataArray.sort()
-                                                                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCompare($1) == .orderedAscending}
-                                                                                        
-                                                                                        self.srcSrvTableView.reloadData()
-                                                                                    }
                                                                                 }   // if self.goSender else - end
                                                                             }   // self.existingEndpoints - end
                                             
@@ -2011,13 +2019,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount > 0 - end
-                            }   // end if computerconfigurations
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                } else {  // end if computerconfigurations
+                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                }
                                 
                             default:
                                 break
                             }   // switch - end
                         }   // if let endpointJSON - end
-                        
                     }
                     
                 }   // if let httpResponse as? HTTPURLResponse - end
@@ -2026,13 +2036,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             })  // let task = session - end
             task.resume()
-            semaphore.wait()
-            if self.goSender == "selectToMigrateButton" {
-                self.goButtonEnabled(button_status: true)
-            }
-            
         }   // theOpQ - end
-        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
     }
     
     func readDataFiles(endpoint: String, completion: @escaping (_ result: String) -> Void) {
