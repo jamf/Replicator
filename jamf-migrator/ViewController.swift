@@ -390,6 +390,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var URLisValid: Bool = true
     var processGroup = DispatchGroup()
     
+    @IBAction func deleteMode_fn(_ sender: Any) {
+        print("entered deleteMode fn")
+        var isDir: ObjCBool = false
+        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+            if self.debug { self.writeToLog(stringOfText: "Disabling delete mode\n") }
+            do {
+                try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
+                _ = serverOrFiles()
+            }
+            catch let error as NSError {
+                if self.debug { self.writeToLog(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
+            }
+            wipe_data = false
+        } else {
+            if self.debug { self.writeToLog(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
+            do {
+                try self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
+            }
+            catch let error as NSError {
+                if self.debug { self.writeToLog(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
+            }
+            wipe_data = true
+        }
+    }
+    
+    
+    
     @IBAction func showLogFolder(_ sender: Any) {
         isDir = true
         if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
@@ -1282,7 +1309,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         for k in (0..<self.sourceDataArray.count) {
                                             self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
                                         }
-                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
+//                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
                                     }
                                     
                                     if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
@@ -3541,29 +3568,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func goButtonEnabled(button_status: Bool) {
+        var local_button_status = button_status
         DispatchQueue.main.async {
             self.theSpinnerQ.async {
                 var theImageNo = 0
-                while !button_status {
-                    DispatchQueue.main.async {
-                        self.mySpinner_ImageView.image = self.theImage[theImageNo]
-                        theImageNo += 1
-                        if theImageNo > 2 {
-                            theImageNo = 0
+                if !local_button_status {
+                    repeat {
+                        DispatchQueue.main.async {
+                            self.mySpinner_ImageView.image = self.theImage[theImageNo]
+                            theImageNo += 1
+                            if theImageNo > 2 {
+                                theImageNo = 0
+                            }
+                            if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0  {
+                                self.goButtonEnabled(button_status: true)
+                                local_button_status = true
+//                                print("go button enabled")
+                            }
                         }
-                        
-//                        print("[go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count) \t objectsToMigrate: \(self.objectsToMigrate.count)")
-                        
-                        if self.theCreateQ.operationCount == 0 && self.theOpQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0  {
-                            self.goButtonEnabled(button_status: true)
-//                            print("[Done - go button] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t objectsToMigrate: \(self.objectsToMigrate.count) \t objectsToMigrate: \(self.objectsToMigrate.count)")
-                            //                            print("go button enabled")
-                        }
-                        
-                    }
-                    usleep(300000)  // sleep 0.3 seconds
+                        usleep(300000)  // sleep 0.3 seconds
+                    } while !local_button_status  // while !button_status - end
                 }
-            }
+            }   // self.theSpinnerQ.async - end
             self.mySpinner_ImageView.isHidden = button_status
             self.stop_button.isHidden = button_status
             self.go_button.isEnabled = button_status
@@ -3576,11 +3602,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                print("summary:\n\(counters)")
 //                print("summary dict:\n\(summaryDict)")
                 // clear objects in selective field
-                if wipe_data {
-                    DispatchQueue.main.async {
-//                        self.sourceDataArray.removeAll()
-                        self.srcSrvTableView.stringValue = ""
-                        self.srcSrvTableView.reloadData()
+                DispatchQueue.main.async {
+                    if self.wipe_data && self.srcSrvTableView.isEnabled == true {
+    //                        self.sourceDataArray.removeAll()
+                            self.srcSrvTableView.stringValue = ""
+                            self.srcSrvTableView.reloadData()
                     }
                 }
             }
@@ -4554,12 +4580,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             while true {
                 if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
                     // clear selective list of items when changing from migration to delete mode
-                    if !self.selectiveListCleared {
-                        DispatchQueue.main.async {
+                    DispatchQueue.main.async {
+                        if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
                             self.sourceDataArray.removeAll()
                             self.srcSrvTableView.stringValue = ""
                             self.srcSrvTableView.reloadData()
                             self.selectiveListCleared = true
+                        } else {
+                            self.selectiveListCleared = true
+                            self.srcSrvTableView.isEnabled = true
                         }
                     }
                     
@@ -4604,7 +4633,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 }
                 sleep(1)
-            }
+            }   // while true - end
         }
         
         NSApplication.shared.activate(ignoringOtherApps: true)
