@@ -231,7 +231,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var targetDataArray:[String]            = []
     var availableIDsToMigDict:[String:Int]  = [:]   // something like xmlName, xmlID
     var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
-//    var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
+    var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
     var selectiveListCleared                = false
     
     // destination TextFieldCells
@@ -1230,15 +1230,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.getEndpoints(endpoint: currentNode)  {
                                     (result: [String]) in
                                     if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
-                                    
-//                                    print("[startMigrating] createQ: \(self.theCreateQ.operationCount) \t theOpQ: \(self.theOpQ.operationCount) \t nodesMigrated: \(self.nodesMigrated) \t currentNode: \(currentNode) \t lastNode: \(self.objectsToMigrate.last!)")
-//                                    if self.theCreateQ.operationCount == 0 && result[1] == "0" && self.theOpQ.operationCount == 0 && currentNode == self.objectsToMigrate.last! {
-//                                        self.rmDELETE()
-//                                        self.goButtonEnabled(button_status: true)
-//                                        self.nodesMigrated = 0
-//                                        print("Done - startMigrating")
-//                                    }
-                                    
                                 }
                             }
                         } else {
@@ -1286,12 +1277,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                     
                                     // Used if we remove items from the list as they are removed from the server - not working
-                                    //                        if self.wipe_data {
-                                    //                            self.availableIdsToDelArray.removeAll()
-                                    //                            for k in (0..<self.sourceDataArray.count) {
-                                    //                                self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
-                                    //                            }
-                                    //                        }
+                                    if self.wipe_data {
+                                        self.availableIdsToDelArray.removeAll()
+                                        for k in (0..<self.sourceDataArray.count) {
+                                            self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
+                                        }
+                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
+                                    }
                                     
                                     if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
                                     for j in (0..<self.targetDataArray.count) {
@@ -1407,6 +1399,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         theOpQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
         
+        DispatchQueue.main.async {
+            self.srcSrvTableView.isEnabled = true
+        }
         self.sourceDataArray.removeAll()
         self.availableIDsToMigDict.removeAll()
         
@@ -2995,14 +2990,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             // remove items from the list as they are removed from the server
-                            // currently fails as it always removes the last item in the list, ignoring the value in IndexSet
-//                            let lineNumber = self.availableIdsToDelArray.index(of: endPointID)!
-//                            print("line number for \(endpointName): \(lineNumber)")
-//                            print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
-//                            self.srcSrvTableView.beginUpdates()
-//                            self.srcSrvTableView.removeRows(at: IndexSet(integer: 0), withAnimation: .effectFade)
-//                            self.srcSrvTableView.endUpdates()
-//                            self.availableIdsToDelArray.remove(at: lineNumber)
+                            let lineNumber = self.availableIdsToDelArray.index(of: endPointID)!
+                            
+                            DispatchQueue.main.async {
+                                self.srcSrvTableView.beginUpdates()
+                                self.srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
+                                self.srcSrvTableView.endUpdates()
+                                self.availableIdsToDelArray.remove(at: lineNumber)
+                                self.sourceDataArray.remove(at: lineNumber)
+                                self.srcSrvTableView.isEnabled = false
+                            }
                             
                             self.writeToLog(stringOfText: "\t[RemoveEndpoints] \(endpointName)\n")
                             self.POSTsuccessCount += 1
@@ -3581,7 +3578,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // clear objects in selective field
                 if wipe_data {
                     DispatchQueue.main.async {
-                        self.sourceDataArray.removeAll()
+//                        self.sourceDataArray.removeAll()
                         self.srcSrvTableView.stringValue = ""
                         self.srcSrvTableView.reloadData()
                     }
