@@ -217,20 +217,23 @@ Options to export XML from the source server are also available.
 <ul style="margin-left:28px; list-style-type: none;">
    <li><span style="font-family:'Courier New';">touch ~/Library/Application\ Support/jamf-migrator/delete</span></li>
 </ul>
-<div><br></div>
+    <div>You can also toggle the mode using &#8984;D.</div>
 <div>The application will alert you that data will be removed by flashing <strong>-- Removing --</strong> in yellow and red.&nbsp; Data is removed from the destination server.&nbsp; Once you hit 'Go!' items will get removed and once the process finishes the 'delete' file is removed and the application is back in migration mode.</div>
-<div>Note, source server credentials are not required (and are ignored) when removing items from the destination server.</div>
-</div>
+<div>Note, source server credentials are not required (and are ignored) when removing items from the destination server.  Also, dependencies play a role in deletions/removals as they do with migrations.&nbsp; For example, a site can not be deleted if it contains, say, users and users can't be deleted if they are associated with a device.</div>
 </div>
 <div id="app_image" style="position:relative;width:800px;height:522px;">
-<img src="images/migrator4.png" id="Image3" alt=""></div>
+<img src="images/migrator4.png" id="Image4" alt=""></div>
+    <div>When using the Selective tab while doing removals, the list of available objects is greyed out once all the selected items have been removed.  If you wish to remove additional items either touch the 'delete' file or hit &#8984;D, the list will be re-enabled.</div>
+</div>
+<div id="app_image" style="position:relative;width:800px;height:522px;">
+<img src="images/migrator4.1.png" id="Image4.1" alt=""></div>
+    
 <div id="main_body" style="position:relative;">
     <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
-        <div>You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords will not be exported.</div>
+        <div>You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.</div>
     <div>
-    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width: 423px; height: 214px;">
+    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width: 423px; height: 397px;">
 </div>
-        <div>Dependencies play a role in deletions/removals as they do with migrations.&nbsp; For example, a site can not be deleted if it contains, say, users and users can't be deleted if they are associated with a device.&nbsp; </div>
     </div>
 </div>
     <a name="migration_order"></a>    

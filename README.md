@@ -87,6 +87,9 @@ If you have used jamf-migrator and saved passwords you will see the following af
 ```touch ~/Library/Application\ Support/jamf-migrator/delete```
 
 ## History
+**v3.2.0**<p>
+
+
 **v3.1.0**<p>
 * Resolved app crashes when exporting XML and destination server field is blank.
 * Resolved potential app hanging when migrating extension attributes that include patch policy EAs.
