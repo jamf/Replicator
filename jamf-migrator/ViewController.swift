@@ -23,6 +23,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
+    let userDefaults = UserDefaults.standard
+    
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
         let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
@@ -418,9 +420,69 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    var tabImage:[NSImage] = [NSImage(named: NSImage.Name(rawValue: "general.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "general_active.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "macos.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "macos_active.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "ios.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "ios_active.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "selective.png"))!,
+                              NSImage(named: NSImage.Name(rawValue: "selective_active.png"))!]
     
+    @IBOutlet weak var generalTab_NSButton: NSButton!
+    @IBOutlet weak var macosTab_NSButton: NSButton!
+    @IBOutlet weak var iosTab_NSButton: NSButton!
+    @IBOutlet weak var selectiveTab_NSButton: NSButton!
+    var tabIndex = ""
+    
+    @IBAction func selectTab_fn(_ sender: NSButton) {
+        let whichTab = (sender.identifier?.rawValue)!
+        switch whichTab {
+        case "generalTab":
+            setTab_fn(selectedTab: "General")
+        case "macosTab":
+            setTab_fn(selectedTab: "macOS")
+        case "iosTab":
+            setTab_fn(selectedTab: "iOS")
+        default:
+            setTab_fn(selectedTab: "Selective")
+        }
+    }
+    
+    func setTab_fn(selectedTab: String) {
+        DispatchQueue.main.async {
+            switch selectedTab {
+            case "General":
+                self.activeTab_TabView.selectTabViewItem(at: 0)
+                self.generalTab_NSButton.image = self.tabImage[1]
+                self.macosTab_NSButton.image = self.tabImage[2]
+                self.iosTab_NSButton.image = self.tabImage[4]
+                self.selectiveTab_NSButton.image = self.tabImage[6]
+            case "macOS":
+                self.activeTab_TabView.selectTabViewItem(at: 1)
+                self.generalTab_NSButton.image = self.tabImage[0]
+                self.macosTab_NSButton.image = self.tabImage[3]
+                self.iosTab_NSButton.image = self.tabImage[4]
+                self.selectiveTab_NSButton.image = self.tabImage[6]
+            case "iOS":
+                self.activeTab_TabView.selectTabViewItem(at: 2)
+                self.generalTab_NSButton.image = self.tabImage[0]
+                self.macosTab_NSButton.image = self.tabImage[2]
+                self.iosTab_NSButton.image = self.tabImage[5]
+                self.selectiveTab_NSButton.image = self.tabImage[6]
+            default:
+                self.activeTab_TabView.selectTabViewItem(at: 3)
+                self.generalTab_NSButton.image = self.tabImage[0]
+                self.macosTab_NSButton.image = self.tabImage[2]
+                self.iosTab_NSButton.image = self.tabImage[4]
+                self.selectiveTab_NSButton.image = self.tabImage[7]
+            }
+        }
+    }
     
     @IBAction func showLogFolder(_ sender: Any) {
+//        activeTab_TabView.selectTabViewItem(at: 0)
+        
         isDir = true
         if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
             NSWorkspace.shared.openFile(logPath!)
@@ -844,6 +906,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         rmDELETE()
         // check for file that allows deleting data from destination server, delete if found - end
         self.goButtonEnabled(button_status: true)
+        
+        let tabLabel = (activeTab_TabView.selectedTabViewItem?.label)!        
+        userDefaults.set(tabLabel, forKey: "activeTab")
+        
         NSApplication.shared.terminate(self)
     }
     
@@ -2229,6 +2295,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     //                    print("unable to read \(dataFile)")
                                     if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
                                 }
+                                self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
                             }   // for i in 1...dataFilesCount - end
                         }   // if let allFilePaths - end
                     } catch {
@@ -4352,12 +4419,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
 //        [NSColor colorWithCalibratedRed:0xE8/255.0 green:0xEE/255.0 blue:0xEE/255.0 alpha:0xFF/255.0]/* E8EEEEFF */
         let bkgndAlpha:CGFloat = 0.95
-        get_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        object_name_field.backgroundColor     = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        get_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        get_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
         objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        objects_found_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        objects_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
         
         let def_plist = Bundle.main.path(forResource: "settings", ofType: "plist")!
         var isDir: ObjCBool = true
@@ -4394,6 +4461,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // read environment settings - start
         plistData = readSettings()
+        
+        if userDefaults.object(forKey: "activeTab") as? String != nil {
+            let setActiveTab = userDefaults.object(forKey: "activeTab") as? String
+            setTab_fn(selectedTab: setActiveTab!)
+        } else {
+            userDefaults.set("General", forKey: "activeTab")
+            setTab_fn(selectedTab: "generalTab")
+        }
 
         if plistData["source_jp_server"] != nil {
             source_jp_server = plistData["source_jp_server"] as! String
@@ -4591,7 +4666,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        if self.debug { self.writeToLog(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n") }
+        self.writeToLog(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
         
     }   //viewDidAppear - end
     

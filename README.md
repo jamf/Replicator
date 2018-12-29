@@ -88,7 +88,17 @@ If you have used jamf-migrator and saved passwords you will see the following af
 
 ## History
 **v3.2.0**<p>
-
+* Tabs reordered, General tab is now first to align with suggested migration order.
+* Buttons are off by default when the app is launched.
+* You can now switch back and forth between removal and migration modes using &#8984;D.
+* When using the Selective tab, items are removed from the list as they are deleted from the server.  Once all selected items are removed the list is greyed out.
+* Fixed an issue with Policies and Selective migration where the app could become unresponsive.  Policies should be listed much more quickly.
+* Fixed an issue where groups would not be listed when working with the Selective tab.
+* Fixed potential crash when importing a software update server from an XML file.
+* Fixed issue where xxxgroup would be displayed along with staticxxxgroup and smartxxxgroup in the summary.
+* Fixed an issue where a computer record would get resubmitted indefinitely.
+* Fixed issued with log file names.
+* Fixed issue where migration order might not go as designed.
 
 **v3.1.0**<p>
 * Resolved app crashes when exporting XML and destination server field is blank.
@@ -142,7 +152,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 * Only log xml from failed items when in debug mode.
 * More informative logging, give reason of failure along with http status code.
 * Move history files to ~/Library/Logs/jamf-migrator and change extension to log. Refer to them as log files now.
-* Added summary to provide count of items created, updated, and failed (command+s) after a migration run.
+* Added summary to provide count of items created, updated, and failed (&#8984;S) after a migration run.
 * Patch Extension Attributes are no longer migrated.
 * Log file naming has been corrected, for future logging. Current logs named incorrectly need to be manually deleted or renamed. Issue#13
 * Added recommended migration and dependencies to help. Issue#12
@@ -186,5 +196,5 @@ If you have used jamf-migrator and saved passwords you will see the following af
 ```…/jamf-migrator.app/Contents/MacOS/jamf-migrator –debug```
 
 * Debug info is added to the history file
-* Easily open the history folder from View on the menu bar, or command+L
+* Easily open the history folder from View on the menu bar, or &#8984;L
 

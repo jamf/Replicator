@@ -1038,8 +1038,8 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
-                                    <tabViewItem label="General" identifier="" id="88A-Nu-WEM">
-                                        <view key="view" identifier="general" id="CPy-PU-zBW">
+                                    <tabViewItem label="General" identifier="tab0" id="88A-Nu-WEM">
+                                        <view key="view" identifier="General" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <userGuides>
@@ -1329,9 +1329,9 @@
                                                 </button>
                                             </subviews>
                                         </view>
-                                        <accessibility description="general" identifier="general"/>
+                                        <accessibility description="General" identifier="General"/>
                                     </tabViewItem>
-                                    <tabViewItem label="macOS" identifier="1" id="Nof-Zl-FoE">
+                                    <tabViewItem label="macOS" identifier="tab1" id="Nof-Zl-FoE">
                                         <view key="view" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1756,7 +1756,7 @@
                                         </view>
                                         <accessibility description="macOS" identifier="macOS"/>
                                     </tabViewItem>
-                                    <tabViewItem label="iOS" identifier="2" id="ECI-6E-ufR">
+                                    <tabViewItem label="iOS" identifier="tab2" id="ECI-6E-ufR">
                                         <view key="view" id="p6U-ah-Cbx">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1964,7 +1964,7 @@
                                         </view>
                                         <accessibility description="iOS" identifier="iOS"/>
                                     </tabViewItem>
-                                    <tabViewItem label="Selective" identifier="3" id="Fo1-1P-mP5">
+                                    <tabViewItem label="Selective" identifier="tab3" id="Fo1-1P-mP5">
                                         <view key="view" ambiguous="YES" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -2289,6 +2289,54 @@
                                     <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                 </textFieldCell>
                             </textField>
+                            <button identifier="selectiveTab" fixedFrame="YES" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pZE-bV-fJk" userLabel="selective tab Button">
+                                <rect key="frame" x="501" y="242" width="82" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="selective" imagePosition="only" alignment="center" alternateImage="selective_active" imageScaling="proportionallyUpOrDown" inset="2" id="GWc-2W-Hsr">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <accessibility identifier="selectiveTab"/>
+                                <connections>
+                                    <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="837-f6-b2o"/>
+                                </connections>
+                            </button>
+                            <button identifier="iosTab" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nNc-Ty-fZF" userLabel="ios tab Button">
+                                <rect key="frame" x="420" y="242" width="82" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="ios" imagePosition="only" alignment="center" alternateImage="ios_active" imageScaling="proportionallyUpOrDown" inset="2" id="KFZ-Ds-YcW">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <accessibility identifier="iosTab"/>
+                                <connections>
+                                    <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="hhh-ax-XyX"/>
+                                </connections>
+                            </button>
+                            <button identifier="macosTab" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AT7-Qd-mL1" userLabel="macos tab Button">
+                                <rect key="frame" x="339" y="242" width="82" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="macos" imagePosition="only" alignment="center" alternateImage="macos_active" imageScaling="proportionallyUpOrDown" inset="2" id="kyW-NK-ohZ">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <accessibility identifier="macosTab"/>
+                                <connections>
+                                    <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="pU6-8e-J2Z"/>
+                                </connections>
+                            </button>
+                            <button identifier="generalTab" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="514-dK-Ce9" userLabel="general tab Button">
+                                <rect key="frame" x="258" y="242" width="82" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="general" imagePosition="only" alignment="center" alternateImage="general_active" imageScaling="proportionallyUpOrDown" inset="2" id="QKt-Zd-rcB">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <accessibility identifier="generalTab"/>
+                                <connections>
+                                    <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="zPx-Sf-UgR"/>
+                                </connections>
+                            </button>
                         </subviews>
                     </view>
                     <connections>
@@ -2327,6 +2375,7 @@
                         <outlet property="file_shares_label_field" destination="b5v-KK-ZKw" id="cRu-fH-njt"/>
                         <outlet property="fileshares_button" destination="maX-gS-OdH" id="ssl-a0-eYr"/>
                         <outlet property="generalSectionToMigrate_button" destination="TN6-YH-Hxp" id="Zaj-43-uhw"/>
+                        <outlet property="generalTab_NSButton" destination="514-dK-Ce9" id="9Yd-7F-WM7"/>
                         <outlet property="general_tabViewItem" destination="88A-Nu-WEM" id="paL-qP-o9T"/>
                         <outlet property="get_completed_field" destination="tgA-67-9IM" id="UJ7-vM-pqL"/>
                         <outlet property="get_found_field" destination="k6C-xI-Q9G" id="hby-c2-CCG"/>
@@ -2335,6 +2384,7 @@
                         <outlet property="iOS_tabViewItem" destination="ECI-6E-ufR" id="hDg-OB-fcs"/>
                         <outlet property="iOSsectionToMigrate_button" destination="K3i-ud-Xoc" id="oON-7T-NR8"/>
                         <outlet property="importFiles_button" destination="jUj-qp-uuH" id="TSi-bV-usW"/>
+                        <outlet property="iosTab_NSButton" destination="nNc-Ty-fZF" id="Rzk-vY-8XQ"/>
                         <outlet property="jamfGroupAccounts_button" destination="gkm-20-cSk" id="rfl-Wf-qLy"/>
                         <outlet property="jamfGroupAccounts_field" destination="77F-Xy-56l" id="0uJ-6J-rjU"/>
                         <outlet property="jamfUserAccounts_button" destination="VAd-jA-PuU" id="QSV-5L-2j2"/>
@@ -2344,6 +2394,7 @@
                         <outlet property="macOS_tabViewItem" destination="Nof-Zl-FoE" id="6gS-C5-k4O"/>
                         <outlet property="macapplications_button" destination="hUv-Gv-ET3" id="X4a-qb-36V"/>
                         <outlet property="macapplications_label_field" destination="vif-GW-Rxk" id="W4r-L0-7jp"/>
+                        <outlet property="macosTab_NSButton" destination="AT7-Qd-mL1" id="xBQ-7b-Vkw"/>
                         <outlet property="migrateOrRemove_label_field" destination="1dY-rP-xsl" id="gss-SL-Jzl"/>
                         <outlet property="migrator_window" destination="m2S-Jp-Qdl" id="gcn-bM-U52"/>
                         <outlet property="mobiledeviceApps_label_field" destination="E48-BQ-8XI" id="Bkt-5u-ksS"/>
@@ -2379,6 +2430,7 @@
                         <outlet property="scripts_button" destination="tIV-9V-gpi" id="dT1-Rm-sdD"/>
                         <outlet property="scripts_label_field" destination="kMV-ND-9Kx" id="273-mW-H5M"/>
                         <outlet property="sectionToMigrate_button" destination="tpb-Lh-nzm" id="kLi-3f-CgI"/>
+                        <outlet property="selectiveTab_NSButton" destination="pZE-bV-fJk" id="p7c-mM-4gw"/>
                         <outlet property="selective_tabViewItem" destination="Fo1-1P-mP5" id="LUA-Dx-kTy"/>
                         <outlet property="sites_button" destination="AFT-cj-oMR" id="BOd-zQ-Rx3"/>
                         <outlet property="sites_label_field" destination="rhD-Q3-KDx" id="sCb-XG-r5l"/>
@@ -2416,8 +2468,16 @@
     </scenes>
     <resources>
         <image name="0" width="72" height="72"/>
+        <image name="general" width="82" height="25"/>
+        <image name="general_active" width="82" height="25"/>
         <image name="go" width="87" height="39"/>
+        <image name="ios" width="82" height="25"/>
+        <image name="ios_active" width="82" height="25"/>
+        <image name="macos" width="82" height="25"/>
+        <image name="macos_active" width="82" height="25"/>
         <image name="quit" width="86" height="39"/>
+        <image name="selective" width="82" height="25"/>
+        <image name="selective_active" width="82" height="25"/>
         <image name="stop" width="74" height="32"/>
     </resources>
 </document>
