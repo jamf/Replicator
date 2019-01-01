@@ -89,7 +89,8 @@ If you have used jamf-migrator and saved passwords you will see the following af
 ## History
 **v3.2.0**<p>
 * Tabs reordered, General tab is now first to align with suggested migration order.
-* Buttons are off by default when the app is launched.
+* Updated buttons used for navigating between General, macOS, iOS, and Selective sections.
+* Buttons for items to migrate are off by default when the app is launched.
 * You can now switch back and forth between removal and migration modes using &#8984;D.
 * When using the Selective tab, items are removed from the list as they are deleted from the server.  Once all selected items are removed the list is greyed out.
 * Fixed an issue with Policies and Selective migration where the app could become unresponsive.  Policies should be listed much more quickly.
