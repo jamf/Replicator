@@ -379,7 +379,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     let fm         = FileManager()
     var theOpQ     = OperationQueue() // create operation queue for API calls
     var theCreateQ = OperationQueue() // create operation queue for API POST/PUT calls
-    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
+    var readFilesQ = OperationQueue() // for reading in data files
+//    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
     var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
@@ -1787,9 +1788,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     
                                                     counter += 1
                                                 }   // for (l_xmlID, l_xmlName) - end
+                                                
+                                                self.nodesMigrated+=1
+                                                
                                             }   //for g in (0...1) - end
-                                        }
-                                    } else {
+                                        }   // self.existingEndpoints(destEndpoint: "\(endpoint)") - end
+                                    } else {    //if endpointCount > 0 - end
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
                                         if endpoint == self.objectsToMigrate.last {
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
@@ -1797,10 +1801,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
-                                    }   // if endpointCount > 0 - end
+                                    }   // else if endpointCount > 0 - end
                                     if nodeIndex < nodesToMigrate.count - 1 {
                                         self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                     }
+                                    
+                                    if endpoint == self.objectsToMigrate.last {
+                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                        self.rmDELETE()
+                                    }
+                                    
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
                                     if nodeIndex < nodesToMigrate.count - 1 {
@@ -1872,7 +1882,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
                                         }   // self.existingEndpoints - end
                                     } else {
-                                        self.nodesMigrated+=1
+//                                        self.nodesMigrated+=1
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
@@ -2320,9 +2330,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             (result: String) in
             if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
+            self.readFilesQ.maxConcurrentOperationCount = 2
+            
             var l_index = 1
             for (_, objectInfo) in itemsDict {
-                self.readFilesQ.sync {
+//                self.readFilesQ.sync {
+                self.readFilesQ.addOperation {
                     let l_id   = Int(objectInfo[0])   // id of object
                     let l_name = objectInfo[1]        // name of object
                     let l_xml  = objectInfo[2]        // xml of object
@@ -3202,7 +3215,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                     }
                     if self.activeTab() != "selective" {
-                        if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
+//                        print("localEndPointType: \(localEndPointType) \t count: \(endpointCount)")
+                        if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
                             // check for file that allows deleting data from destination server, delete if found - end
@@ -3478,6 +3492,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 for i in (0..<endpointCount) {
                                     let record = endpointInfo[i] as! [String : AnyObject]
                                     let recordId = (record["id"] != nil) ? record["id"] as? Int:0
+//                                    print("[nameIdDict] record: \(record ) \t recordId: \(recordId!)")
                                     
                                     if endPoint == "computerconfigurations" {
                                         self.configInfo(server: "\(server)", endPoint: "computerconfigurations", recordId: recordId!) {
@@ -3508,7 +3523,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         completion(self.idDict)
                     } else {
                         // something went wrong
-                        print("status code: \(httpResponse.statusCode)")
+//                        print("[nameIdDict] status code: \(httpResponse.statusCode)")
                         completion([:])
                         
                     }   // if httpResponse/else - end
@@ -3557,12 +3572,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }   // if let endpointInfo = endpointJSON - end
                     
                     if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                        //                        print(httpResponse.statusCode)
-                        //                            print("\nconfig \(recordId): \(self.configObjectsDict)\n")
+//                      print(httpResponse.statusCode)
+//                        print("\nconfig \(recordId): \(self.configObjectsDict)\n")
                         completion(self.configObjectsDict)
                     } else {
                         // something went wrong
-                        print("status code: \(httpResponse.statusCode)")
+//                        print("[configInfo] status code: \(httpResponse.statusCode)")
                         completion([:])
                         
                     }   // if httpResponse/else - end
@@ -3766,6 +3781,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func stopButton(_ sender: Any) {
         self.writeToLog(stringOfText: "Migration was manually stopped.\n\n")
+        readFilesQ.cancelAllOperations()
         theOpQ.cancelAllOperations()
         theCreateQ.cancelAllOperations()
         goButtonEnabled(button_status: true)
