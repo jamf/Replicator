@@ -2330,7 +2330,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             (result: String) in
             if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
-            self.readFilesQ.maxConcurrentOperationCount = 2
+            self.readFilesQ.maxConcurrentOperationCount = 1
             
             var l_index = 1
             for (_, objectInfo) in itemsDict {
@@ -2531,6 +2531,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             break
         }
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
+        
+        print("endpoint: \(endpoint) \t current: \(endpointCurrent)")
+        
         switch endpoint {
         case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
