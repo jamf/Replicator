@@ -49,28 +49,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func showPrefsWindow(_ sender: AnyObject) {
         AppDelegate().showPrefsWindow()
         
-//        if prefWindowController == nil {
-//            prefWindowController = PrefsWindowController.loadFromNib()
-//        }
-//
-//        if windowIsVisible(windowName: "Preferences") {
-//            prefWindowController?.window?.close()
-//            prefWindowController?.window?.orderFront("prefs")
-//        }
-        
-        //        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-//        let prefsWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Prefs View Controller")) as! NSWindowController
-//
-//        if !windowIsVisible(windowName: "Preferences") {
-//            prefsWindowController.window?.hidesOnDeactivate = false
-//            prefsWindowController.showWindow(self)
-//        } // else {
-//            print("prefsWindowController.window?.orderedIndex: \(String(describing: prefsWindowController.window?.orderedIndex))")
-//            prefsWindowController.window?.order(NSWindow.OrderingMode.above, relativeTo: 0)
-////            prefsWindowController.window?.orderFront(nil)   // opens new window
-//            //            prefsWindowController.window?.orderFront(self)   // opens new window
-//        }
-        
     }
 
         
@@ -330,9 +308,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var changeColor:Bool    = true
     
     // This order must match the drop down for selective migration, provide the node name
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "computergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
-    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
-    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "usergroups"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
+    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
     var AllEndpointsArray = [String]()
     
     
@@ -356,7 +334,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // group counters
     var smartCount      = 0
     var staticCount     = 0
-    var DeviceGroupType = ""  // either smart or static
+    //var DeviceGroupType = ""  // either smart or static
     //var groupCheckArray: [Bool] = []
     
     
@@ -1226,11 +1204,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0]
                     self.summaryDict["staticcomputergroups"] = ["create":[], "update":[], "fail":[]]
                 case "mobiledevicegroups":
-                    self.progressCountArray["smartiosgroups"] = 0
-                    self.progressCountArray["staticiosgroups"] = 0
+                    self.progressCountArray["smartmobiledevicegroups"] = 0
+                    self.progressCountArray["staticmobiledevicegroups"] = 0
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-                    self.counters["smartiosgroups"] = ["create":0, "update":0, "fail":0]
-                    self.summaryDict["staticiosgroups"] = ["create":[], "update":[], "fail":[]]
+                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0]
+                    self.summaryDict["staticmobiledevicegroups"] = ["create":[], "update":[], "fail":[]]
                 case "usergroups":
                     self.progressCountArray["smartusergroups"] = 0
                     self.progressCountArray["staticusergroups"] = 0
@@ -1310,7 +1288,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
                     if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(currentNode)\n") }
                     
-                        self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
+                    self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
                     
                 } else {
                     // **************************************** selective migration - start ****************************************
@@ -1328,7 +1306,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     default:
                         selectedEndpoint = self.objectsToMigrate[0]
                     }
-                    self.existingEndpoints(destEndpoint: "\(self.objectsToMigrate[0])")  {
+                    self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: String) in
                         if self.debug { self.writeToLog(stringOfText: "Returned from existing endpoints: \(result)\n") }
                         var objToMigrateID = 0
@@ -1343,7 +1321,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
                                         self.targetDataArray.append(self.sourceDataArray[k])
                                     }
-                                }
+                                }   // if self.srcSrvTableView.isRowSelected(k) - end
                             }   // for k in - end
                         
                             if self.targetDataArray.count == 0 {
@@ -1353,7 +1331,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 return
                             }
                             
-                            // Used if we remove items from the list as they are removed from the server - not working
+                            // Used if we remove items from the list as they are removed from the server - working?
                             if self.wipe_data {
                                 self.availableIdsToDelArray.removeAll()
                                 for k in (0..<self.sourceDataArray.count) {
@@ -1395,16 +1373,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func startMigrating - end
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
+//        print("nodesToMigrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
-        case "computergroups":
-            self.progressCountArray["smartcomputergroups"] = 0
+        case "computergroups", "smartcomputergroups", "staticcomputergroups":
+            self.progressCountArray["smartcomputergroups"]  = 0
             self.progressCountArray["staticcomputergroups"] = 0
-            self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-        case "mobiledevicegroups":
-            self.progressCountArray["smartiosgroups"] = 0
-            self.progressCountArray["staticiosgroups"] = 0
+            self.progressCountArray["computergroups"]       = 0 // this is the recognized end point
+        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+            self.progressCountArray["smartmobiledevicegroups"]     = 0
+            self.progressCountArray["staticmobiledevicegroups"]    = 0
             self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-        case "usergroups":
+        case "usergroups", "smartusergroups", "staticusergroups":
             self.progressCountArray["smartusergroups"] = 0
             self.progressCountArray["staticusergroups"] = 0
             self.progressCountArray["usergroups"] = 0 // this is the recognized end point
@@ -1432,30 +1411,39 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         URLCache.shared.removeAllCachedResponses()
-        let endpoint       = nodesToMigrate[nodeIndex]
+        var endpoint       = nodesToMigrate[nodeIndex]
         var endpointParent = ""
         var node           = ""
         var endpointCount  = 0
+        var groupType      = ""
         if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Getting \(endpoint)\n") }
+        
+        
+        if endpoint.contains("smart") {
+            groupType = "smart"
+        } else if endpoint.contains("static") {
+            groupType = "static"
+        }
         
         switch endpoint {
         // macOS items
+        case "advancedcomputersearches":
+            endpointParent = "advanced_computer_searches"
+        case "computerconfigurations":
+            endpointParent = "computer_configurations"
+        case "computerextensionattributes":
+            endpointParent = "computer_extension_attributes"
+        case "computergroups", "smartcomputergroups", "staticcomputergroups":
+            endpoint       = "computergroups"
+            endpointParent = "computer_groups"
         case "distributionpoints":
             endpointParent = "distribution_points"
         case "directorybindings":
             endpointParent = "directory_bindings"
         case "dockitems":
             endpointParent = "dock_items"
-        case "advancedcomputersearches":
-            endpointParent = "advanced_computer_searches"
         case "macapplications":
             endpointParent = "mac_applications"
-        case "computerconfigurations":
-            endpointParent = "computer_configurations"
-        case "computerextensionattributes":
-            endpointParent = "computer_extension_attributes"
-        case "computergroups":
-            endpointParent = "computer_groups"
         case "netbootservers":
             endpointParent = "netboot_servers"
         case "osxconfigurationprofiles":
@@ -1477,7 +1465,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "mobile_device_extension_attributes"
         case "mobiledeviceapplications":
             endpointParent = "mobile_device_applications"
-        case "mobiledevicegroups":
+        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+            endpoint       = "mobiledevicegroups"
             endpointParent = "mobile_device_groups"
         case "mobiledevices":
             endpointParent = "mobile_devices"
@@ -1490,7 +1479,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             endpointParent = "network_segments"
         case "userextensionattributes":
             endpointParent = "user_extension_attributes"
-        case "usergroups":
+        case "usergroups", "smartusergroups", "staticusergroups":
+            endpoint       = "usergroups"
             endpointParent = "user_groups"
         case "jamfusers":
             endpointParent = "users"
@@ -1542,7 +1532,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                     if endpointCount > 0 {
                                         
-                                        self.existingEndpoints(destEndpoint: "\(endpoint)")  {
+                                        self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                             (result: String) in
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
                                             
@@ -1597,6 +1587,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             self.srcSrvTableView.reloadData()
                                                             self.goButtonEnabled(button_status: true)
                                                         }   //if self.availableIDsToMigDict.count - end
+                                                        self.srcSrvTableView.reloadData()
                                                     }   // DispatchQueue.main.async - end
                                                     counter+=1
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -1632,7 +1623,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     var smartGroupDict: [Int: String] = [:]
                                     var staticGroupDict: [Int: String] = [:]
                                     if endpointCount > 0 {
-                                        self.existingEndpoints(destEndpoint: "\(endpoint)")  {
+                                        self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                             (result: String) in
                                             // find number of groups
                                             self.smartCount = 0
@@ -1645,7 +1636,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 let smart: Bool = (record["is_smart"] as! Bool)
                                                 if smart {
                                                     //self.smartCount += 1
-                                                    if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" {
+                                                    if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
                                                         smartGroupDict[record["id"] as! Int] = record["name"] as! String?
                                                     }
                                                 } else {
@@ -1661,33 +1652,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             // split devicegroups into smart and static - end
                                             switch endpoint {
                                             case "computergroups":
-                                                if self.smart_comp_grps_button.state.rawValue == 0 {
+                                                if (self.smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.static_comp_grps_button.state.rawValue == 0 {
+                                                if (self.static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
                                                     excludeCount += staticGroupDict.count
                                                 }
-                                                if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 {
+                                                if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 && groupType == "" {
                                                     self.nodesMigrated-=1
                                                 }
                                             case "mobiledevicegroups":
-                                                if self.smart_ios_groups_button.state.rawValue == 0 {
+                                                if (self.smart_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.static_ios_groups_button.state.rawValue == 0 {
+                                                if (self.static_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
                                                     excludeCount += staticGroupDict.count
                                                 }
                                                 if self.smart_ios_groups_button.state.rawValue == 1 && self.static_ios_groups_button.state.rawValue == 1 {
                                                     self.nodesMigrated-=1
                                                 }
                                             case "usergroups":
-                                                if self.smartUserGrps_button.state.rawValue == 0 {
+                                                if (self.smartUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
                                                     excludeCount += smartGroupDict.count
                                                 }
-                                                if self.staticUserGrps_button.state.rawValue == 0 {
+                                                if (self.staticUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
                                                     excludeCount += staticGroupDict.count
                                                 }
-                                                if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 {
+                                                if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 && groupType == "" {
                                                     self.nodesMigrated-=1
                                                 }
                                                 
@@ -1705,47 +1696,47 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 var localEndpoint = endpoint
                                                 switch endpoint {
                                                 case "computergroups":
-                                                    if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
+                                                    if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "smartcomputergroups"
+//                                                        self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartcomputergroups"
                                                     }
-                                                    if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
+                                                    if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "staticcomputergroups"
+//                                                        self.DeviceGroupType = "staticcomputergroups"
 //                                                        print("computergroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "staticcomputergroups"
                                                     }
                                                 case "mobiledevicegroups":
-                                                    if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
+                                                    if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "smartcomputergroups"
+//                                                        self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "smartiosgroups"
+                                                        localEndpoint = "smartmobiledevicegroups"
                                                     }
-                                                    if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
+                                                    if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "staticcomputergroups"
+//                                                        self.DeviceGroupType = "staticcomputergroups"
 //                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "staticiosgroups"
+                                                        localEndpoint = "staticmobiledevicegroups"
                                                     }
                                                 case "usergroups":
-                                                    if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 0) {
+                                                    if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                         currentGroupDict = smartGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "smartcomputergroups"
+//                                                        self.DeviceGroupType = "smartcomputergroups"
 //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "smartusergroups"
                                                     }
-                                                    if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton")) && (g == 1) {
+                                                    if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
                                                         currentGroupDict = staticGroupDict
                                                         groupCount = currentGroupDict.count
-                                                        self.DeviceGroupType = "staticcomputergroups"
+//                                                        self.DeviceGroupType = "staticcomputergroups"
 //                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                         localEndpoint = "staticusergroups"
                                                     }
@@ -1777,11 +1768,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                            print("adding \(l_xmlName) to array")
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
-                                                            if self.availableIDsToMigDict.count == currentGroupDict.count {
+                                                            if counter == currentGroupDict.count {
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                 self.srcSrvTableView.reloadData()
                                                                 self.goButtonEnabled(button_status: true)
                                                             }
+                                                            self.srcSrvTableView.reloadData()
                                                             
                                                         }   // DispatchQueue.main.async - end
                                                     }   // if self.goSender else - end
@@ -1792,7 +1784,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 self.nodesMigrated+=1
                                                 
                                             }   //for g in (0...1) - end
-                                        }   // self.existingEndpoints(destEndpoint: "\(endpoint)") - end
+                                        }   // self.existingEndpoints(theDestEndpoint: "\(endpoint)") - end
                                     } else {    //if endpointCount > 0 - end
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
                                         if endpoint == self.objectsToMigrate.last {
@@ -1831,7 +1823,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if endpointCount > 0 {
                                         
                                         // create dictionary of existing policies
-                                        self.existingEndpoints(destEndpoint: "policies")  {
+                                        self.existingEndpoints(theDestEndpoint: "policies")  {
                                             (result: String) in
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing endpoints: \(result)\n") }
                                             
@@ -1870,13 +1862,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        print("adding \(l_xmlName) to array")
                                                     self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
                                                     self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                    if self.availableIDsToMigDict.count == computerPoliciesDict.count {
+                                                    if counter == computerPoliciesDict.count {
+//                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
                                                         DispatchQueue.main.async {
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                             self.srcSrvTableView.reloadData()
                                                             self.goButtonEnabled(button_status: true)
                                                         }
                                                     }
+                                                    self.srcSrvTableView.reloadData()
                                                 }   // if self.goSender else - end
                                                 counter += 1
                                             }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
@@ -1916,8 +1910,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                     if endpointCount > 0 {
                                         
-//                                        self.existingEndpoints(destEndpoint: "accounts")  {
-                                        self.existingEndpoints(destEndpoint: endpoint)  {
+//                                        self.existingEndpoints(theDestEndpoint: "accounts")  {
+                                        self.existingEndpoints(theDestEndpoint: endpoint)  {
                                             (result: String) in
                                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(node): \(result)\n") }
                                         
@@ -1964,11 +1958,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        if self.availableObjsToMigDict.count == self.sourceDataArray.count {
+                                                        if self.availableObjsToMigDict.count == counter {
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                             self.srcSrvTableView.reloadData()
                                                             self.goButtonEnabled(button_status: true)
                                                         }
+                                                        self.srcSrvTableView.reloadData()
                                                     }   // DispatchQueue.main.async - end
                                                     counter+=1
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -2070,7 +2065,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                             }
 //                                                                            print("parent array: \(orderedConfArray)")
                                                                             
-                                                                            self.existingEndpoints(destEndpoint: "\(endpoint)")  {
+                                                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                                                                 (result: String) in
                                                                                 if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
                                                                                 
@@ -2136,6 +2131,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                                 self.srcSrvTableView.reloadData()
                                                                                                 self.goButtonEnabled(button_status: true)
                                                                                             }
+                                                                                            self.srcSrvTableView.reloadData()
                                                                                         }   // DispatchQueue.main.async - end
                                                                                         counter+=1
                                                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -2199,8 +2195,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.progressCountArray["staticcomputergroups"] = 0
             self.progressCountArray["computergroups"] = 0 // this is the recognized end point
         case "mobiledevicegroups":
-            self.progressCountArray["smartiosgroups"] = 0
-            self.progressCountArray["staticiosgroups"] = 0
+            self.progressCountArray["smartmobiledevicegroups"] = 0
+            self.progressCountArray["staticmobiledevicegroups"] = 0
             self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
         case "usergroups":
             self.progressCountArray["smartusergroups"] = 0
@@ -2227,10 +2223,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             case "mobiledevicegroups":
                 if migrateSmartMobileGroups {
-                    local_endpointArray.append("smartiosgroups")
+                    local_endpointArray.append("smartmobiledevicegroups")
                 }
                 if migrateStaticMobileGroups {
-                    local_endpointArray.append("staticiosgroups")
+                    local_endpointArray.append("staticmobiledevicegroups")
                 }
                 if migrateSmartMobileGroups && migrateStaticMobileGroups {
                     self.nodesMigrated-=1
@@ -2326,7 +2322,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: Dictionary<String,[String]>, completion: @escaping (_ result: String) -> Void) {
 
-        self.existingEndpoints(destEndpoint: "\(endpoint)") {
+        self.existingEndpoints(theDestEndpoint: "\(endpoint)") {
             (result: String) in
             if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
@@ -2390,7 +2386,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //      adjust the lookup endpoint
         case "smartcomputergroups", "staticcomputergroups":
             localEndPointType = "computergroups"
-        case "smartiosgroups", "staticiosgroups":
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
             localEndPointType = "mobiledevicegroups"
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
@@ -2469,7 +2465,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //      adjust the lookup endpoint
         case "smartcomputergroups", "staticcomputergroups":
             localEndPointType = "computergroups"
-        case "smartiosgroups", "staticiosgroups":
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
             localEndPointType = "mobiledevicegroups"
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
@@ -2532,7 +2528,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         switch endpoint {
-        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartiosgroups", "staticiosgroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -2543,7 +2539,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                 }
                 
-            case "advancedmobiledevicesearches", "mobiledevicegroups", "smartiosgroups", "staticiosgroups":
+            case "advancedmobiledevicesearches", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
                 //                                 !self.scopeSigCopy
                 if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeSigCopy) {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
@@ -2855,7 +2851,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
             localEndPointType = "computergroups"
-        case "smartiosgroups", "staticiosgroups":
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
             localEndPointType = "mobiledevicegroups"
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
@@ -2957,8 +2953,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             self.POSTsuccessCount += 1
                             
-    //                        print("endpointType: \(endpointType)")
-    //                        print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
+//                            print("endpointType: \(endpointType)")
+//                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
                             
                             self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
                             if endpointCount == endpointCurrent && self.progressCountArray["\(endpointType)"] == endpointCount {
@@ -3114,7 +3110,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
             localEndPointType = "computergroups"
-        case "smartiosgroups", "staticiosgroups":
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
             localEndPointType = "mobiledevicegroups"
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
@@ -3252,14 +3248,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }   // func removeEndpoints - end
     
-    func existingEndpoints(destEndpoint: String, completion: @escaping (_ result: String) -> Void) {
+    func existingEndpoints(theDestEndpoint: String, completion: @escaping (_ result: String) -> Void) {
         if !saveOnly {
             URLCache.shared.removeAllCachedResponses()
             currentEPs.removeAll()
-            var existingDestUrl = ""
-            var destXmlName = ""
+            var destEndpoint         = theDestEndpoint
+            var existingDestUrl      = ""
+            var destXmlName          = ""
             var existingEndpointNode = ""
-            (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
+//            (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
+            switch destEndpoint {
+            case "smartusergroups", "staticusergroups":
+                destEndpoint = "usergroups"
+                existingEndpointNode = "usergroups"
+            case "smartcomputergroups", "staticcomputergroups":
+                destEndpoint = "computergroups"
+                existingEndpointNode = "computergroups"
+            case "smartmobiledevicegroups", "staticmobiledevicegroups":
+                destEndpoint = "mobiledevicegroups"
+                existingEndpointNode = "mobiledevicegroups"
+            case "jamfusers", "jamfgroups":
+                existingEndpointNode = "accounts"
+            default:
+                existingEndpointNode = destEndpoint
+            }
+            
     //        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
             var destEndpointDict:(Any)? = nil
             var endpointParent = ""
@@ -3751,8 +3764,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         usleep(300000)  // sleep 0.3 seconds
                     } while !local_button_status  // while !button_status - end
-                }
-            }   // self.theSpinnerQ.async - end
+                }   // self.theSpinnerQ.async - end
+            }   // DispatchQueue.main.async  -end
             self.mySpinner_ImageView.isHidden = button_status
             self.stop_button.isHidden = button_status
             self.go_button.isEnabled = button_status
@@ -3988,9 +4001,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             case "mobiledevicegroups":
                 self.smart_ios_groups_label_field.textColor = theColor
                 self.static_ios_groups_label_field.textColor = theColor
-            case "smartiosgroups":
+            case "smartmobiledevicegroups":
                 self.smart_ios_groups_label_field.textColor = theColor
-            case "staticiosgroups":
+            case "staticmobiledevicegroups":
                 self.static_ios_groups_label_field.textColor = theColor
             // general tab
             case "advancedusersearches":
