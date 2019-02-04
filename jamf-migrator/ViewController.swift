@@ -1768,7 +1768,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                            print("adding \(l_xmlName) to array")
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
-                                                            if counter == currentGroupDict.count {
+                                                            if self.sourceDataArray.count == groupCount {
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                 self.srcSrvTableView.reloadData()
                                                                 self.goButtonEnabled(button_status: true)
@@ -1876,20 +1876,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
                                         }   // self.existingEndpoints - end
                                     } else {
-//                                        self.nodesMigrated+=1
+                                        self.nodesMigrated+=1
                                         if endpoint == self.objectsToMigrate.last {
+                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
+                                            print("rmDelete 1")
 //                                            self.goButtonEnabled(button_status: true)
-//                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
                                     }   // if endpointCount > 0
                                     if nodeIndex < nodesToMigrate.count - 1 {
                                         self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                     }
-                                    self.nodesMigrated+=1
-                                    if endpoint == self.objectsToMigrate.last {
-                                        self.rmDELETE()
-                                    }
+//                                    self.nodesMigrated+=1
+//                                    if endpoint == self.objectsToMigrate.last {
+//                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+//                                        self.rmDELETE()
+//                                        print("rmDelete 2")
+//                                    }
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 } else {   //if let endpointInfo = endpointJSON - end
                                     if nodeIndex < nodesToMigrate.count - 1 {
