@@ -1862,7 +1862,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        print("adding \(l_xmlName) to array")
                                                     self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
                                                     self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                    if counter == computerPoliciesDict.count {
+                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
 //                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
                                                         DispatchQueue.main.async {
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
@@ -1958,7 +1958,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        if self.availableObjsToMigDict.count == counter {
+                                                        if self.availableObjsToMigDict.count == self.sourceDataArray.count {
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                             self.srcSrvTableView.reloadData()
                                                             self.goButtonEnabled(button_status: true)
