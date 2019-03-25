@@ -29,6 +29,7 @@
 		B5927AFA20CAEECC0059C25B /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF920CAEECC0059C25B /* help.png */; };
 		B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5927AFB20CC394F0059C25B /* VersionCheck.swift */; };
 		B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D0C39202B97BA006203CE /* Credentials.swift */; };
+		B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
 		B5C042481EB11CF400C6E872 /* 0.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423C1EB11CF400C6E872 /* 0.png */; };
@@ -68,6 +69,7 @@
 		B5927AF920CAEECC0059C25B /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		B5927AFB20CC394F0059C25B /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
 		B59D0C39202B97BA006203CE /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		B5C0423C1EB11CF400C6E872 /* 0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 0.png; sourceTree = "<group>"; };
@@ -119,10 +121,11 @@
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
+				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
 				B5165E1520E580A00086E31D /* Xml.swift */,
+				9BC01C651DFB0C07007E634E /* Main.storyboard */,
 				9BC01C631DFB0C07007E634E /* Assets.xcassets */,
 				B55A277F1EAF8CAE00AF8398 /* Images */,
-				9BC01C651DFB0C07007E634E /* Main.storyboard */,
 				9BC01C681DFB0C07007E634E /* Info.plist */,
 				9BC01C6E1DFBC564007E634E /* settings.plist */,
 				B5E179EF1F1FDACF00A20AAA /* help */,
@@ -291,6 +294,7 @@
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
+				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

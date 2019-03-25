@@ -335,7 +335,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var smartCount      = 0
     var staticCount     = 0
     //var DeviceGroupType = ""  // either smart or static
-    //var groupCheckArray: [Bool] = []
+    // var groupCheckArray: [Bool] = []
     
     
     // define list of items to migrate
@@ -3650,6 +3650,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 let configuration = URLSessionConfiguration.default
 
+                if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- checking healthCheck page.\n") }
                 var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
                 request.httpMethod = "GET"
 
@@ -4420,9 +4421,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
-        //[NSColor colorWithCalibratedRed:0x5C/255.0 green:0x78/255.0 blue:0x94/255.0 alpha:0xFF/255.0]/* 5C7894FF */
         
-//        [NSColor colorWithCalibratedRed:0xE8/255.0 green:0xEE/255.0 blue:0xEE/255.0 alpha:0xFF/255.0]/* E8EEEEFF */
         let bkgndAlpha:CGFloat = 0.95
         get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
         object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
