@@ -87,6 +87,12 @@ If you have used jamf-migrator and saved passwords you will see the following af
 ```touch ~/Library/Application\ Support/jamf-migrator/delete```
 
 ## History
+**v3.2.2**<p>
+* Fixed issue #24, group and policy selective removal broken.
+* Changed arrangement of drop-downs on selective to align with suggested migration order.
+* Split selective migration/removal or group items into smart and static.
+* Fixed issue where the listing of items in selective mode would not refresh as desired.
+
 **v3.2.0**<p>
 * Tabs reordered, General tab is now first to align with suggested migration order.
 * Updated tabs/buttons used for navigating between General, macOS, iOS, and Selective sections.
