@@ -14,6 +14,9 @@
 		9BC01C6F1DFBC564007E634E /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BC01C6E1DFBC564007E634E /* settings.plist */; };
 		B508D5D71FA1A1780069ED0B /* stop.png in Resources */ = {isa = PBXBuildFile; fileRef = B508D5D61FA1A1780069ED0B /* stop.png */; };
 		B5165E1620E580A00086E31D /* Xml.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5165E1520E580A00086E31D /* Xml.swift */; };
+		B53796C32273AF310006C1E4 /* go_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C22273AF310006C1E4 /* go_dark.png */; };
+		B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C42273AF4A0006C1E4 /* quit_dark.png */; };
+		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
@@ -53,6 +56,9 @@
 		9BC01C6E1DFBC564007E634E /* settings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = settings.plist; sourceTree = "<group>"; };
 		B508D5D61FA1A1780069ED0B /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
 		B5165E1520E580A00086E31D /* Xml.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xml.swift; sourceTree = "<group>"; };
+		B53796C22273AF310006C1E4 /* go_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = go_dark.png; path = Assets.xcassets/go_dark.imageset/go_dark.png; sourceTree = "<group>"; };
+		B53796C42273AF4A0006C1E4 /* quit_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = quit_dark.png; path = Assets.xcassets/quit_dark.imageset/quit_dark.png; sourceTree = "<group>"; };
+		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
@@ -88,6 +94,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +106,7 @@
 			children = (
 				9BC01C5E1DFB0C07007E634E /* jamf-migrator */,
 				9BC01C5D1DFB0C07007E634E /* Products */,
+				B53796C82273FFBA0006C1E4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -133,6 +141,14 @@
 			path = "jamf-migrator";
 			sourceTree = "<group>";
 		};
+		B53796C82273FFBA0006C1E4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B53796C92273FFBA0006C1E4 /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B55A277F1EAF8CAE00AF8398 /* Images */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,7 +161,9 @@
 				B5927AF920CAEECC0059C25B /* help.png */,
 				B5927AF720CAE22D0059C25B /* prefs.png */,
 				B55A277B1EAF8CA700AF8398 /* quit.png */,
+				B53796C42273AF4A0006C1E4 /* quit_dark.png */,
 				B55A277C1EAF8CA700AF8398 /* go.png */,
+				B53796C22273AF310006C1E4 /* go_dark.png */,
 				B508D5D61FA1A1780069ED0B /* stop.png */,
 			);
 			name = Images;
@@ -221,8 +239,11 @@
 						LastSwiftMigration = 0930;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.HardenedRuntime = {
+								enabled = 1;
+							};
 							com.apple.Sandbox = {
-								enabled = 0;
+								enabled = 1;
 							};
 						};
 					};
@@ -233,6 +254,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -263,7 +285,9 @@
 				B57B1F0E21D7A16B0098326E /* macos.png in Resources */,
 				B57B1EFB21D7999F0098326E /* selective.png in Resources */,
 				9BC01C641DFB0C07007E634E /* Assets.xcassets in Resources */,
+				B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */,
 				B5927AFA20CAEECC0059C25B /* help.png in Resources */,
+				B53796C32273AF310006C1E4 /* go_dark.png in Resources */,
 				B57B1F0821D7A0300098326E /* ios.png in Resources */,
 				B55A277D1EAF8CA700AF8398 /* quit.png in Resources */,
 				B57B1EFC21D7999F0098326E /* selective_active.png in Resources */,
@@ -432,9 +456,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = PS2F6S478M;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -449,9 +475,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = PS2F6S478M;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="14113"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="14490.70"/>
+        <capability name="System colors introduced in macOS 10.14" minToolsVersion="10.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -645,7 +646,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="jamf-migrator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="jamf-migrator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -666,7 +667,7 @@
         <scene sceneID="dpm-Vs-BK7">
             <objects>
                 <windowController storyboardIdentifier="Help View Controller" id="md9-xU-Yaj" sceneMemberID="viewController">
-                    <window key="window" title="Help" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="Lg4-MW-haW">
+                    <window key="window" title="Help" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="" animationBehavior="default" id="Lg4-MW-haW">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="245" y="301" width="480" height="270"/>
@@ -687,7 +688,7 @@
         <scene sceneID="e6I-b9-s6U">
             <objects>
                 <windowController storyboardIdentifier="Summary Window Controller" id="UDh-wr-lId" sceneMemberID="viewController">
-                    <window key="window" title="Summary" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="qfs-AC-LGi">
+                    <window key="window" title="Summary" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="qfs-AC-LGi">
                         <windowStyleMask key="styleMask" titled="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="1734" y="133" width="480" height="270"/>
@@ -757,14 +758,6 @@
                                     <wkPreferences key="preferences"/>
                                 </wkWebViewConfiguration>
                             </wkWebView>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6c8-6L-1RG">
-                                <rect key="frame" x="950" y="-3" width="75" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES"/>
-                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wAH-wV-kT1">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
                         </subviews>
                     </view>
                     <connections>
@@ -799,7 +792,7 @@
                             <popUpButton focusRingType="none" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XlU-vN-bbJ">
                                 <rect key="frame" x="37" y="414" width="349" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="T4b-a1-PDH">
+                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" refusesFirstResponder="YES" focusRingType="none" transparent="YES" imageScaling="proportionallyDown" inset="2" id="T4b-a1-PDH">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="o2W-CR-ENk"/>
@@ -813,7 +806,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" placeholderString="https://source.jamf.server:port" drawsBackground="YES" id="djf-h0-RCW">
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
@@ -823,7 +816,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" placeholderString="username" drawsBackground="YES" id="Gzm-Cu-v85">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <secureTextField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GTJ-yW-OOe">
@@ -831,7 +824,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" placeholderString="password" drawsBackground="YES" usesSingleLineMode="YES" id="LDk-MB-Wrw">
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
                                         <string>NSAllRomanInputSourcesLocaleIdentifier</string>
@@ -850,7 +843,7 @@
                             <popUpButton focusRingType="none" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="Kb9-jI-pZI">
                                 <rect key="frame" x="450" y="414" width="353" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" refusesFirstResponder="YES" focusRingType="none" userInterfaceLayoutDirection="rightToLeft" imageScaling="proportionallyDown" inset="2" id="6Qj-M4-y7I">
+                                <popUpButtonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" refusesFirstResponder="YES" focusRingType="none" userInterfaceLayoutDirection="rightToLeft" transparent="YES" imageScaling="proportionallyDown" inset="2" id="6Qj-M4-y7I">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" userInterfaceLayoutDirection="rightToLeft" id="QXS-l4-TID"/>
@@ -864,7 +857,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="https://destination.jamf.server:port" drawsBackground="YES" id="5bd-hN-tZn">
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
@@ -874,7 +867,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="username" drawsBackground="YES" id="D56-ZL-Aj0">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="deviceWhite"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <secureTextField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2FL-Bn-T2a">
@@ -882,7 +875,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="password" drawsBackground="YES" usesSingleLineMode="YES" id="EjT-Di-6DA">
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
                                         <string>NSAllRomanInputSourcesLocaleIdentifier</string>
@@ -931,7 +924,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="left" placeholderString="" drawsBackground="YES" id="x2c-Mo-tXt">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wuf-zx-zv7">
@@ -949,7 +942,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="right" placeholderString="" drawsBackground="YES" id="XDj-sj-lnZ">
                                     <font key="font" size="14" name="Menlo-Regular"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZqA-01-bzB">
@@ -967,7 +960,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="right" placeholderString="" drawsBackground="YES" id="uUx-DR-6OW">
                                     <font key="font" size="14" name="Menlo-Regular"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UMW-p7-6qE">
@@ -976,7 +969,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="right" placeholderString="" drawsBackground="YES" id="SCn-tT-P1y">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="k6C-xI-Q9G">
@@ -985,7 +978,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="right" placeholderString="" drawsBackground="YES" id="4bY-jX-jJ8">
                                     <font key="font" size="14" name="Menlo-Regular"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7oa-bJ-2d1">
@@ -1039,8 +1032,8 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="General" identifier="tab0" id="88A-Nu-WEM">
-                                        <view key="view" identifier="General" ambiguous="YES" id="CPy-PU-zBW">
-                                            <rect key="frame" x="10" y="33" width="250" height="0.0"/>
+                                        <view key="view" identifier="General" id="CPy-PU-zBW">
+                                            <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <userGuides>
                                                 <userLayoutGuide location="334" affinity="minX"/>
@@ -1048,25 +1041,25 @@
                                             </userGuides>
                                             <subviews>
                                                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v6Z-fi-xq1">
-                                                    <rect key="frame" x="351" y="-71" width="135" height="16"/>
+                                                    <rect key="frame" x="351" y="115" width="135" height="16"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Smart User Groups" id="g6q-oz-EHG">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mU3-Y6-Mvb">
-                                                    <rect key="frame" x="39" y="-27" width="129" height="24"/>
+                                                    <rect key="frame" x="39" y="159" width="129" height="24"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select all/none" id="dTW-1l-THp">
                                                         <font key="font" metaFont="system" size="18"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QJL-w2-5jw">
-                                                    <rect key="frame" x="18" y="-24" width="150" height="18"/>
+                                                    <rect key="frame" x="18" y="162" width="150" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="uD8-eh-XFS">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1077,16 +1070,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZRd-jK-zIk" userLabel="Categories fld">
-                                                    <rect key="frame" x="195" y="-73" width="99" height="17"/>
+                                                    <rect key="frame" x="195" y="113" width="99" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Categories" id="AQ1-sd-5lM" userLabel="Categories">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="175" y="-74" width="91" height="20"/>
+                                                    <rect key="frame" x="175" y="112" width="91" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1097,16 +1090,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="W9z-MB-k3t" userLabel="Buildings fld">
-                                                    <rect key="frame" x="38" y="-132" width="84" height="17"/>
+                                                    <rect key="frame" x="38" y="54" width="84" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Buildings" id="kbH-To-cfx">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="18" y="-134" width="79" height="20"/>
+                                                    <rect key="frame" x="18" y="52" width="79" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1117,16 +1110,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="upy-EX-NVp" userLabel="Users fld">
-                                                    <rect key="frame" x="38" y="-113" width="63" height="17"/>
+                                                    <rect key="frame" x="38" y="73" width="63" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Users" id="Prs-Mx-Pod">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="-114" width="62" height="20"/>
+                                                    <rect key="frame" x="18" y="72" width="62" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="asM-hy-xl0">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1137,16 +1130,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhD-Q3-KDx" userLabel="Sites fld">
-                                                    <rect key="frame" x="38" y="-52" width="60" height="17"/>
+                                                    <rect key="frame" x="38" y="134" width="60" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Sites" id="MWJ-Aq-pQb">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
-                                                    <rect key="frame" x="18" y="-54" width="58" height="20"/>
+                                                    <rect key="frame" x="18" y="132" width="58" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ePN-1b-ca5">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1157,16 +1150,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2kz-HF-tp3" userLabel="Network Segments fld">
-                                                    <rect key="frame" x="195" y="-132" width="142" height="17"/>
+                                                    <rect key="frame" x="195" y="54" width="142" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Network Segments" id="Xqq-4e-Xn8">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="175" y="-134" width="142" height="20"/>
+                                                    <rect key="frame" x="175" y="52" width="142" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1177,16 +1170,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ujv-CO-BGg" userLabel="Departments fld">
-                                                    <rect key="frame" x="195" y="-52" width="107" height="17"/>
+                                                    <rect key="frame" x="195" y="134" width="107" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Departments" id="eQQ-ao-LEj">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="175" y="-54" width="104" height="20"/>
+                                                    <rect key="frame" x="175" y="132" width="104" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1197,16 +1190,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXm-Uk-9pd" userLabel="LDAP fld">
-                                                    <rect key="frame" x="38" y="-92" width="104" height="17"/>
+                                                    <rect key="frame" x="38" y="94" width="104" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LDAP Servers" id="5xk-91-LbY">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="-94" width="114" height="20"/>
+                                                    <rect key="frame" x="18" y="92" width="114" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1217,7 +1210,7 @@
                                                     </connections>
                                                 </button>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="peA-aJ-t5r" userLabel="smart grp button">
-                                                    <rect key="frame" x="332" y="-73" width="141" height="18"/>
+                                                    <rect key="frame" x="332" y="113" width="141" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="jlb-Xt-7ge">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1228,16 +1221,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UU9-3N-hsp" userLabel="Users EA fld">
-                                                    <rect key="frame" x="38" y="-73" width="75" height="17"/>
+                                                    <rect key="frame" x="38" y="113" width="75" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="User EAs" id="uRm-mD-UAh" userLabel="User EAs">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="-74" width="82" height="20"/>
+                                                    <rect key="frame" x="18" y="112" width="82" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hN0-Fe-gk1">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1248,16 +1241,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qck-dJ-qag" userLabel="Users fld">
-                                                    <rect key="frame" x="352" y="-53" width="136" height="17"/>
+                                                    <rect key="frame" x="352" y="133" width="136" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. User Searches" id="doX-Jd-Vvg">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Users">
-                                                    <rect key="frame" x="332" y="-54" width="141" height="20"/>
+                                                    <rect key="frame" x="332" y="132" width="141" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1268,16 +1261,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="85a-8h-YWe">
-                                                    <rect key="frame" x="195" y="-92" width="96" height="17"/>
+                                                    <rect key="frame" x="195" y="94" width="96" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Users" id="v23-mz-drf">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="175" y="-94" width="97" height="20"/>
+                                                    <rect key="frame" x="175" y="92" width="97" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1288,16 +1281,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="77F-Xy-56l" userLabel="jamf Groups">
-                                                    <rect key="frame" x="195" y="-112" width="96" height="17"/>
+                                                    <rect key="frame" x="195" y="74" width="96" height="17"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Jamf Groups" id="GIb-DE-w31">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="175" y="-114" width="97" height="20"/>
+                                                    <rect key="frame" x="175" y="72" width="97" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1308,16 +1301,16 @@
                                                     </connections>
                                                 </button>
                                                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Sh-gj-yTi">
-                                                    <rect key="frame" x="352" y="-97" width="129" height="22"/>
+                                                    <rect key="frame" x="352" y="89" width="129" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="Static User Groups" id="CrH-g7-vAg">
                                                         <font key="font" metaFont="system"/>
-                                                        <color key="textColor" red="0.97313048769999999" green="0.99239205259999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Agg-yV-dbS" userLabel="static grp button">
-                                                    <rect key="frame" x="332" y="-93" width="138" height="18"/>
+                                                    <rect key="frame" x="332" y="93" width="138" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="bak-wu-We2">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1329,7 +1322,6 @@
                                                 </button>
                                             </subviews>
                                         </view>
-                                        <accessibility description="General" identifier="General"/>
                                     </tabViewItem>
                                     <tabViewItem label="macOS" identifier="tab1" id="Nof-Zl-FoE">
                                         <view key="view" id="fn5-oe-BJC">
@@ -1355,7 +1347,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select all/none" id="HDM-bX-pbV">
                                                                             <font key="font" metaFont="system" size="18"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1375,7 +1367,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Smart Groups" id="amc-BE-ccT">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1395,7 +1387,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Static Groups" id="U2a-Hj-2a6">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1415,7 +1407,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scripts" id="ZpL-PA-KAB" userLabel="Scripts">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1435,7 +1427,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Extension Attributes" id="ak3-bv-jcT">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1455,7 +1447,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="File Shares (AFP/SMB)" id="uPY-59-Z8S" userLabel="File Shares (AFP/SMB)">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1475,7 +1467,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="SUS" id="2U7-3I-wVG" userLabel="SUS">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1495,7 +1487,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Policies" id="BFj-tq-ijr">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1515,7 +1507,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Computers" id="Jy4-LW-D3v">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1535,7 +1527,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Config. Profiles" id="QZL-Gw-khb" userLabel="Config. Profiles">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1555,7 +1547,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. Comp. Searches" id="uck-Ja-k1k">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1575,7 +1567,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Netboot Servers" id="tyP-dN-sR7" userLabel="Netboot Servers">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1595,7 +1587,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Packages" id="NYX-6G-Sy2">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1615,7 +1607,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Printers" id="OIy-sf-l4M">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1635,7 +1627,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Directory Bindings" id="zwS-WF-yjC">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1652,7 +1644,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Dock Items" id="MAw-V6-H2m" userLabel="dock items">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1672,7 +1664,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Configurations" id="E8z-4Z-5Mp" userLabel="Configurations">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1692,7 +1684,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Restricted Software" id="U0T-5A-2wL" userLabel="Restricted Software">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1712,7 +1704,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Patch Policies" id="GJT-As-0Ty">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1732,7 +1724,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Applications" id="EUY-IK-jiI" userLabel="Apps">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1754,10 +1746,9 @@
                                                 </tabView>
                                             </subviews>
                                         </view>
-                                        <accessibility description="macOS" identifier="macOS"/>
                                     </tabViewItem>
                                     <tabViewItem label="iOS" identifier="tab2" id="ECI-6E-ufR">
-                                        <view key="view" id="p6U-ah-Cbx">
+                                        <view key="view" ambiguous="YES" id="p6U-ah-Cbx">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1780,7 +1771,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select all/none" id="Wc3-P4-pZf">
                                                                             <font key="font" metaFont="system" size="18"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1800,7 +1791,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Static Groups" id="huh-00-MTQ">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1820,7 +1811,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Smart Groups" id="0ih-cl-ewk">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1840,7 +1831,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. iOS Searches" id="CAJ-gf-HZM">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1860,7 +1851,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS Devices" id="Ycm-g0-yPN">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1880,7 +1871,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Classes" id="ipP-vx-KYP" userLabel="Classes">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1900,7 +1891,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Extension Attributes" id="51k-7g-p3d">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1920,7 +1911,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Config. Profiles" id="L9P-9t-33O" userLabel="Config. Profiles">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1940,7 +1931,7 @@
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Apps" id="uBY-yG-WKr">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
@@ -1962,7 +1953,6 @@
                                                 </tabView>
                                             </subviews>
                                         </view>
-                                        <accessibility description="iOS" identifier="iOS"/>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="tab3" id="Fo1-1P-mP5">
                                         <view key="view" id="TA8-Ho-89h">
@@ -2096,15 +2086,16 @@
                                                         <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LkZ-VI-6p8">
                                                             <rect key="frame" x="218" y="7" width="475" height="163"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
+                                                            <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
-                                                                    <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
+                                                                    <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="161"/>
                                                                         <autoresizingMask key="autoresizingMask"/>
                                                                         <size key="intercellSpacing" width="3" height="2"/>
-                                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="separatorColor" catalog="System" colorSpace="catalog"/>
+                                                                        <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                                                         <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                                         <tableColumns>
                                                                             <tableColumn identifier="sourceObjectID" editable="NO" width="470" minWidth="40" maxWidth="1000" id="EVv-n3-oMc">
@@ -2127,12 +2118,13 @@
                                                                         </connections>
                                                                     </tableView>
                                                                 </subviews>
+                                                                <nil key="backgroundColor"/>
                                                             </clipView>
-                                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="gEQ-tu-8t7">
+                                                            <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="gEQ-tu-8t7">
                                                                 <rect key="frame" x="1" y="-15" width="0.0" height="16"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </scroller>
-                                                            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="lbA-xB-Awp">
+                                                            <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="lbA-xB-Awp">
                                                                 <rect key="frame" x="-100" y="-100" width="15" height="102"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </scroller>
@@ -2207,7 +2199,6 @@
                                                 </view>
                                             </subviews>
                                         </view>
-                                        <accessibility description="Selective" identifier="Selective"/>
                                     </tabViewItem>
                                 </tabViewItems>
                             </tabView>
@@ -2246,7 +2237,7 @@
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="right" placeholderString="" drawsBackground="YES" id="ywl-VL-HHd">
                                     <font key="font" size="14" name="Menlo-Regular"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uaY-SR-87H">
@@ -2301,7 +2292,7 @@
                             <button identifier="selectiveTab" fixedFrame="YES" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pZE-bV-fJk" userLabel="selective tab Button">
                                 <rect key="frame" x="501" y="242" width="82" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="selective" imagePosition="only" alignment="center" alternateImage="selective_active" imageScaling="proportionallyUpOrDown" inset="2" id="GWc-2W-Hsr">
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="selective" imagePosition="overlaps" alignment="center" alternateImage="selective_active" imageScaling="proportionallyUpOrDown" inset="2" id="GWc-2W-Hsr">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -2434,6 +2425,7 @@
                         <outlet property="policies_label_field" destination="V21-1X-tzz" id="rTj-9V-7al"/>
                         <outlet property="printers_button" destination="cMq-R0-wLL" id="Qv5-ZV-gaz"/>
                         <outlet property="printers_label_field" destination="VB2-eO-067" id="xMU-HY-HXq"/>
+                        <outlet property="quit_button" destination="lc3-4c-kgf" id="DBl-Xk-l14"/>
                         <outlet property="restrictedsoftware_button" destination="TsB-ot-L5w" id="Dbb-g5-xYa"/>
                         <outlet property="restrictedsoftware_label_field" destination="2tr-YW-IQ0" id="kE8-m5-Dpw"/>
                         <outlet property="scripts_button" destination="tIV-9V-gpi" id="dT1-Rm-sdD"/>

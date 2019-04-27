@@ -122,7 +122,6 @@ body
    <li>Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.</li>
    <li>Buildings - the Jamf API only allows the name to be migrated.</li>
    <li>If you have duplicate names within a category, say different policies named the same, using the migrator to update one of them will likely fail.</li>
-   <li>LDAP based extension attributes are not migrated.</li>
 </ul>
 <div><br></div>
 <div>The 'Selective' tab provides the ability to select a subset of items within a category.&nbsp; For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.</div>
@@ -166,7 +165,7 @@ Options to export XML from the source server are also available.
    <li>Save only saves the XML files and does not send them to the destination server.</li>
    <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected .</li>
     </ul>
-    Files are saved to the ~/Documents/Jamf Migrator/xml, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.
+    Files are saved to the ~/Library/Containers/com.jamf.jamf-migrator/Data/Documents/Jamf Migrator/, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.
     <div>
     <img src="images/xmlFiles.png" alt="" style="position:relative; left: 100px; width: 30%; height: 30%;">
 </div>
@@ -202,7 +201,7 @@ Options to export XML from the source server are also available.
 </div>
 <div><strong>Logging:</strong>
 <ul>
-   <li>Basic log information is written to the following folder: ~/Library/Logs/jamf-migrator/.  The log directory can easily be accessed by typing &#8984;L or select Show Logs under View in the menu bar.</li>
+   <li>Basic log information is written to the following folder: ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/jamf-migrator/.  The log directory can easily be accessed by typing &#8984;L or select Show Logs under View in the menu bar.</li>
    <li>More detailed logging can be captured by launching the application through Terminal using the '-debug' switch.&nbsp; If the application is located in /Applications:</li>
 </div>
 <ul style="margin-left:28px; list-style-type: none;">
@@ -216,7 +215,7 @@ Options to export XML from the source server are also available.
 </ul>
 <div>The application may also be used to clear information from a server.&nbsp; To place the application in removal mode run the following command in Terminal <strong>after</strong> the application has been launched:</div>
 <ul style="margin-left:28px; list-style-type: none;">
-   <li><span style="font-family:'Courier New';">touch ~/Library/Application\ Support/jamf-migrator/delete</span></li>
+   <li><span style="font-family:'Courier New';">touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete</span></li>
 </ul>
     <div>You can also toggle the mode using &#8984;D.</div>
 <div>The application will alert you that data will be removed by flashing <strong>-- Removing --</strong> in yellow and red.&nbsp; Data is removed from the destination server.&nbsp; Once you hit 'Go!' items will get removed and once the process finishes the 'delete' file is removed and the application is back in migration mode.</div>

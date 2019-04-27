@@ -24,6 +24,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
     let userDefaults = UserDefaults.standard
+    // determine if we're using dark mode
+    var isDarkMode: Bool {
+        let mode = userDefaults.string(forKey: "AppleInterfaceStyle")
+        return mode == "Dark"
+    }
     
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
@@ -114,6 +119,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
     
+    @IBOutlet weak var quit_button: NSButton!
     @IBOutlet weak var go_button: NSButton!
     @IBOutlet weak var stop_button: NSButton!
     
@@ -4355,18 +4361,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    // selective migration functions - start
-    func numberOfRows(in aTableView: NSTableView) -> Int
-    {
-        var numberOfRows:Int = 0;
-        if (aTableView == srcSrvTableView)
-        {
-            numberOfRows = sourceDataArray.count
-        }
-        
-        return numberOfRows
-    }
-    
     func serverOrFiles() -> String {
         // see if we last migrated from files or a server
 //        print("entered serverOrFiles.")
@@ -4395,15 +4389,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         return(sourceType)
     }
-    //
-    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any?
+    
+    // selective migration functions - start
+    func numberOfRows(in tableView: NSTableView) -> Int
     {
+        var numberOfRows:Int = 0;
+        if (tableView == srcSrvTableView)
+        {
+            numberOfRows = sourceDataArray.count
+        }
+        
+        return numberOfRows
+    }
+    
+        func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
+//    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
         if (tableView == srcSrvTableView)
         {
             newString = sourceDataArray[row]
         }
+        
+        //            // [NSColor colorWithCalibratedRed:0x6F/255.0 green:0x8E/255.0 blue:0x9D/255.0 alpha:0xFF/255.0]/* 6F8E9DFF */
+        //            //[NSColor colorWithCalibratedRed:0x8C/255.0 green:0xB5/255.0 blue:0xC8/255.0 alpha:0xFF/255.0]/* 8CB5C8FF */
+//        rowView.backgroundColor = (row % 2 == 0)
+//            ? NSColor(calibratedRed: 0x6F/255.0, green: 0x8E/255.0, blue: 0x9D/255.0, alpha: 0xFF/255.0)
+//            : NSColor(calibratedRed: 0x8C/255.0, green: 0xB5/255.0, blue: 0xC8/255.0, alpha: 0xFF/255.0)
         
         return newString;
     }
@@ -4422,13 +4434,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
         
-        let bkgndAlpha:CGFloat = 0.95
-        get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-        objects_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        if !isDarkMode {
+            // light mode settings
+            let bkgndAlpha:CGFloat = 0.95
+            get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            objects_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+        } else {
+            // dark mode settings
+            //            [NSColor colorWithCalibratedRed:0x85/255.0 green:0x9C/255.0 blue:0xB0/255.0 alpha:0xFF/255.0]/* 859CB0FF */
+//            srcSrvTableView.backgroundColor = NSColor(calibratedRed: 0x85/255.0, green: 0x9c/255.0, blue: 0xb0/255.0, alpha: 1.0)
+            srcSrvTableView.usesAlternatingRowBackgroundColors = false
+//            srcSrvTableView.gridColor = .black
+            quit_button.image = NSImage(named: NSImage.Name(rawValue: "quit_dark.png"))!
+            go_button.image = NSImage(named: NSImage.Name(rawValue: "go_dark.png"))!
+        }
         
         let def_plist = Bundle.main.path(forResource: "settings", ofType: "plist")!
         var isDir: ObjCBool = true
@@ -4800,7 +4823,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 } else {
                     DispatchQueue.main.async {
                         if !self.source_jp_server_field.isEnabled {
-                            self.source_jp_server_field.textColor   = NSColor.black
+                            if !self.isDarkMode {
+                                self.source_jp_server_field.textColor   = NSColor.black
+                            } else {
+                                self.source_jp_server_field.textColor   = NSColor.white
+                            }
                             self.source_jp_server_field.isEnabled   = true
                             self.sourceServerList_button.isEnabled  = true
                             self.source_user_field.isEnabled        = true

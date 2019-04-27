@@ -78,6 +78,17 @@ class PreferencesViewController: NSViewController {
         return boolValue
     }
     
+    @IBAction func showExportFolder(_ sender: Any) {
+        
+        var isDir: ObjCBool = true
+        let exportFilePath:String? = (NSHomeDirectory() + "/Documents/Jamf Migrator/")
+        if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
+            NSWorkspace.shared.openFile(exportFilePath!)
+        } else {
+            ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Set view sizes
