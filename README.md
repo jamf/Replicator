@@ -89,7 +89,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 * You can also toggle the mode using &#8984;D.
 
 ## History
-**v3.2.2**<p>
+**v3.3.0**<p>
 * Adjustment to the GUI for Dark Mode
 * App is not sandboxed, hardened, and notarized
 * Updated help with new images and file paths
