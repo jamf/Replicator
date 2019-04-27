@@ -68,7 +68,7 @@ Options to export XML from the source server are also available.<p>
   
 Information about successes/failures can be found in the log, located in 
 
-```~/Library/Logs/jamf-migrator/<date>_<time>_migration.log```
+```~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/jamf-migrator/<date>_<time>_migration.log```
 
 If you have used jamf-migrator and saved passwords you will see the following after launching a new version. 
  ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/allowAccess.png "Allow Keychain Access")
@@ -84,9 +84,16 @@ If you have used jamf-migrator and saved passwords you will see the following af
 
 **Note:** the app can also be used to clear out a Jamf server.  Typing the following after launching the app will set it into removal mode.  Items from the destination server are deleted once Go is clicked.
 
-```touch ~/Library/Application\ Support/jamf-migrator/delete```
+```touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete```
+
+* You can also toggle the mode using &#8984;D.
 
 ## History
+**v3.2.2**<p>
+* Adjustment to the GUI for Dark Mode
+* App is not sandboxed, hardened, and notarized
+* Updated help with new images and file paths
+  
 **v3.2.2**<p>
 * Fixed issue #24, group and policy selective removal broken.
 * Changed arrangement of drop-downs on selective to align with suggested migration order.
