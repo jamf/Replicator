@@ -91,7 +91,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 ## History
 **v3.3.0**<p>
 * Adjustment to the GUI for Dark Mode
-* App is not sandboxed, hardened, and notarized
+* App is now sandboxed, hardened, and notarized
 * Updated help with new images and file paths
   
 **v3.2.2**<p>
