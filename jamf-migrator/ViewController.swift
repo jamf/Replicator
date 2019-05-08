@@ -3884,13 +3884,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
             
             if !fileImport {
-                iconToUpload = "/tmp/\(ssIconName)"
-                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"/tmp/\(ssIconName)\"")
+                iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
+                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
 //              print("result of icon GET: "+curlResult)
                 if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
                 if self.saveRawXml {
                     if self.debug { self.writeToLog(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
-                    Xml().save(node: iconNodeSave, xml: "/tmp/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw", debug: debug)
+                    Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw", debug: debug)
                 }
             } else {
                 iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
@@ -3901,9 +3901,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
                 //                                    print("result of icon POST: "+curlResult2)
             }   // if !saveOnly - end
-            if fm.fileExists(atPath: "/tmp/\(ssIconName)") {
-                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"/tmp/\(ssIconName)\"") != "0" {
-                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete /tmp/\(ssIconName).\n") }
+            if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
+                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
                 }
             }
         }   // if (ssIconName != "") && (ssIconUri != "") - end
