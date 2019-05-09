@@ -89,6 +89,10 @@ If you have used jamf-migrator and saved passwords you will see the following af
 * You can also toggle the mode using &#8984;D.
 
 ## History
+**v3.3.2**<p>
+* Fixed issue where icons were not migrating
+* Fixed app crash issue (#28) that resulted when running in removal mode and no credentials were entered for the source server.
+  
 **v3.3.0**<p>
 * Adjustment to the GUI for Dark Mode
 * App is now sandboxed, hardened, and notarized
