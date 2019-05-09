@@ -711,7 +711,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allow deleting data from destination server - end
         
         
-        if debug { writeToLog(stringOfText: "go sender tag: \(sender.tag)\n") }
+        if debug { writeToLog(stringOfText: "go sender tag: \(String(describing: sender.tag))\n") }
         // determine if we got here from the Go button or selectToMigrate button
         if sender.tag != nil {
             self.goSender = "goButton"
@@ -757,7 +757,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // set credentials / servers - start
         // don't set user / pass if we're importing files
         self.source_jp_server = source_jp_server_field.stringValue
-        if !fileImport {
+        if !fileImport && !self.wipe_data {
             self.source_user = source_user_field.stringValue
             self.source_pass = source_pwd_field.stringValue
         }
@@ -814,8 +814,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     return
                 } else {
 //                    if !self.fileImport {
+                    if !self.wipe_data {
                         self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
-//                    }
+                    }
                     self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
                         (result: Bool) in
                         if !result {
