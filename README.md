@@ -86,7 +86,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 
 **Important:**
 
-* There are many dependancies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
+* There are many dependencies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
 * Summary window doesn't seem to be the most responsive.  May need to click the window or give the cursor some extra motion before the detailed summary appears.
 
 
@@ -123,7 +123,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * Updated tabs/buttons used for navigating between General, macOS, iOS, and Selective sections.
 * Buttons for items to migrate are off by default when the app is launched.
 * You can now switch back and forth between removal and migration modes using &#8984;D.
-* When using the Selective tab, items are removed from the list as they are deleted from the server.  Once all selected items are removed the list is greyed out.
+* When using the Selective tab, items are removed from the list as they are deleted from the server.  Once all selected items are removed the list is grayed out.
 * Fixed an issue with Policies and Selective migration where the app could become unresponsive.  Policies should be listed much more quickly.
 * Fixed an issue where groups would not be listed when working with the Selective tab.
 * Fixed potential crash when importing a software update server from an XML file.
@@ -201,13 +201,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 **v2.2.5**
 
-* Added migration of computer configuratons.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be migrated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
+* Added migration of computer configurations.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be migrated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
 * Added ability to select frequently used source/destination servers from the user interface.  Up to 10 server are selectable by using the up/down arrows to the right of the URL text box.
 
 **v2.1.5**
 
 * Added migration of dock items.
-* Added stop button to stop the migration in progess.
+* Added stop button to stop the migration in progress.
   
 **v2.1.4**
 
@@ -234,7 +234,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 * fixed issue where app would hang if last/only item migrated had no endpoints.
 * credentials no longer needed for source server when removing data.
-* UI button improvememts for select all/none (thanks @jdhovaland).
+* UI button improvements for select all/none (thanks @jdhovaland).
 
 **v1.2.0**
 
