@@ -146,7 +146,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 **v3.0.5**
 
-* Policies with the Account payload can now be migrated.  **Note:** Account password is set to jamfchangeme.
+* Policies with the Account payload can now be migrated.  **Note:** Account password is set to `jamfchangeme`.
 * Resolved an issue where a smart group with thousands of computers would not get cleared.
 * Resolved issue migrating machines with duplicate serial numbers or MAC addresses.  Duplicate addresses are cleared.
 * Resolved issue trying to copy computers with no serial number.
