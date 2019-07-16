@@ -102,7 +102,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 **v3.3.3**
 
-* Markdown formatting and spelling corrections.
+* Markdown formatting and spelling corrections.  Thanks @homebysix
 
 **v3.3.2**
 
