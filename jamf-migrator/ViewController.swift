@@ -330,7 +330,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var tmp_counter = Dictionary<String, Dictionary<String,Int>>() // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
 
-    
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
     var theImage:[NSImage] = [NSImage(named: NSImage.Name(rawValue: "0.png"))!,
                               NSImage(named: NSImage.Name(rawValue: "1.png"))!,
