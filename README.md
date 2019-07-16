@@ -99,6 +99,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v3.3.3**
+
+* Markdown formatting and spelling corrections.
+
 **v3.3.2**
 
 * Fixed issue where icons were not migrating
