@@ -798,7 +798,7 @@
                                     <menu key="menu" id="o2W-CR-ENk"/>
                                 </popUpButtonCell>
                                 <connections>
-                                    <action selector="setServerUrl_button:" target="XfG-lQ-9wD" id="K20-pJ-dfl"/>
+                                    <action selector="setServerUrl_button:" target="XfG-lQ-9wD" id="kRT-UR-0Iq"/>
                                 </connections>
                             </popUpButton>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qDb-1R-ECk">
@@ -1032,7 +1032,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="General" identifier="tab0" id="88A-Nu-WEM">
-                                        <view key="view" identifier="General" id="CPy-PU-zBW">
+                                        <view key="view" identifier="General" ambiguous="YES" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <userGuides>
@@ -1748,7 +1748,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="iOS" identifier="tab2" id="ECI-6E-ufR">
-                                        <view key="view" ambiguous="YES" id="p6U-ah-Cbx">
+                                        <view key="view" id="p6U-ah-Cbx">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2088,7 +2088,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="161"/>
@@ -2363,6 +2363,7 @@
                         <outlet property="departments_label_field" destination="Ujv-CO-BGg" id="U7t-Vm-vOG"/>
                         <outlet property="dept_button" destination="1gD-S5-cVs" id="1q3-K8-9aV"/>
                         <outlet property="destServerList_button" destination="Kb9-jI-pZI" id="Nhg-fD-g1q"/>
+                        <outlet property="destServerPopup_button" destination="Kb9-jI-pZI" id="PS5-rd-A33"/>
                         <outlet property="dest_jp_server_field" destination="o5b-UU-ZL9" id="Vce-gN-uvY"/>
                         <outlet property="dest_pwd_field" destination="2FL-Bn-T2a" id="DJe-ck-mHT"/>
                         <outlet property="dest_user_field" destination="U40-E2-DvW" id="zbJ-fX-KP1"/>
@@ -2442,6 +2443,7 @@
                         <outlet property="smart_ios_groups_button" destination="VyL-Hh-erV" id="lpd-Mz-OLa"/>
                         <outlet property="smart_ios_groups_label_field" destination="P8w-fr-x4i" id="Ela-y9-zTe"/>
                         <outlet property="sourceServerList_button" destination="XlU-vN-bbJ" id="lHb-6l-xZC"/>
+                        <outlet property="sourceServerPopup_button" destination="XlU-vN-bbJ" id="4c4-hr-hKI"/>
                         <outlet property="source_jp_server_field" destination="qDb-1R-ECk" id="7FN-YJ-fgA"/>
                         <outlet property="source_pwd_field" destination="GTJ-yW-OOe" id="jzD-RG-cOd"/>
                         <outlet property="source_user_field" destination="vfR-O9-7xw" id="ePz-l2-QRg"/>

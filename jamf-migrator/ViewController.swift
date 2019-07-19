@@ -199,6 +199,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var dest_user_field: NSTextField!
     @IBOutlet weak var dest_pwd_field: NSSecureTextField!
     
+    // Source and destination buttons
+    @IBOutlet weak var sourceServerPopup_button: NSPopUpButton!
+    @IBOutlet weak var destServerPopup_button: NSPopUpButton!
+    
     // GET and POST fields
     @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
     @IBOutlet weak var objects_completed_field: NSTextField!
@@ -2198,6 +2202,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
+        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
+
         
         switch nodesToMigrate[nodeIndex] {
         case "computergroups":
@@ -4116,6 +4122,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func rmBlankLines(theXML: String) -> String {
+        if self.debug { self.writeToLog(stringOfText: "Removing blank lines.\n") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
@@ -4126,10 +4133,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        let f_regexCompNl = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>\n", options:.caseInsensitive)
 //        var newXML = f_regexCompNl.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //
+        var newXML_trimmed = ""
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.trimmingCharacters(in: .newlines)
-        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
+        // prevent removing blank lines from scripts
+        if (theTag == "script_contents_encoded") || (theTag == "id") {
+            newXML_trimmed = newXML
+        } else {
+            if self.debug { self.writeToLog(stringOfText: "Removing blank lines.\n") }
+            newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
+        }
         return newXML_trimmed
     }
     
@@ -4434,7 +4448,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
         
-        if !isDarkMode {
+        // OS version info
+        let os = ProcessInfo().operatingSystemVersion
+        if os.minorVersion < 14 {
+            sourceServerPopup_button.isTransparent = false
+            destServerPopup_button.isTransparent = false
+        }
+        if !isDarkMode || os.minorVersion < 14 {
             // light mode settings
             let bkgndAlpha:CGFloat = 0.95
             get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
@@ -4843,7 +4863,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 sleep(1)
             }   // while true - end
         }
-        
+        // bring app to foreground
         NSApplication.shared.activate(ignoringOtherApps: true)
     }   //override func viewDidLoad() - end
     
