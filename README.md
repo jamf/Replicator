@@ -100,6 +100,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v3.3.4**
+
+* Resovled display issue with High Sierra (#31)
+* Resovled issue where blank lines were removed from scripts when migrated (#33)
+
 **v3.3.3**
 
 * Markdown formatting and spelling corrections.  Thanks @homebysix
