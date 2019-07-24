@@ -2615,6 +2615,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 for xmlTag in ["script_contents_encoded"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
                 }
+                // fix to remove parameter labels that have been deleted from existing scripts
+                PostXML = self.parameterFix(theXML: PostXML)
                 
             default: break
             }
@@ -4104,6 +4106,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
     }
+    
+    // script parameter label fix
+    func parameterFix(theXML: String) -> String {
+
+        let parameterRegex  = try! NSRegularExpression(pattern: "</parameters>", options:.caseInsensitive)
+        var updatedScript   = theXML
+        var scriptParameter = ""
+        
+        // add parameter keys for those with no value
+        for i in (4...11) {
+            scriptParameter = tagValue2(xmlString: updatedScript, startTag: "parameter\(i)", endTag: "parameter\(i)")
+            if scriptParameter == "" {
+                updatedScript = parameterRegex.stringByReplacingMatches(in: updatedScript, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "<parameter\(i)></parameter\(i)></parameters>")
+            }
+        }
+
+        return updatedScript
+    }
+    
     
     func rmDELETE() {
         var isDir: ObjCBool = false
