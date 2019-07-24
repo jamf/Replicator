@@ -100,6 +100,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v3.3.5**
+
+* Resovled script parameter issue (#34)
+
 **v3.3.4**
 
 * Resovled display issue with High Sierra (issue #31)
