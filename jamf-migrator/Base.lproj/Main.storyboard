@@ -2337,6 +2337,26 @@
                                     <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="zPx-Sf-UgR"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XYJ-PI-8wf">
+                                <rect key="frame" x="694" y="439" width="111" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="check" title="Migrate to Site" bezelStyle="regularSquare" imagePosition="left" inset="2" id="hrc-Cb-INr">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="migrateToSite:" target="XfG-lQ-9wD" id="nKz-4u-Lku"/>
+                                </connections>
+                            </button>
+                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RTI-so-K4r">
+                                <rect key="frame" x="578" y="441" width="110" height="22"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="qmE-eI-01D">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                     </view>
                     <connections>
@@ -2367,6 +2387,7 @@
                         <outlet property="dest_jp_server_field" destination="o5b-UU-ZL9" id="Vce-gN-uvY"/>
                         <outlet property="dest_pwd_field" destination="2FL-Bn-T2a" id="DJe-ck-mHT"/>
                         <outlet property="dest_user_field" destination="U40-E2-DvW" id="zbJ-fX-KP1"/>
+                        <outlet property="destinationLabel_TextField" destination="Uw9-pw-Waq" id="Lzl-3g-AY8"/>
                         <outlet property="directory_bindings_button" destination="tfr-3a-8nS" id="Me9-JY-iHK"/>
                         <outlet property="directory_bindings_field" destination="Jh1-S4-tyb" id="6iu-zl-ABJ"/>
                         <outlet property="dock_items_button" destination="864-jA-QKf" id="XMw-sV-FPV"/>
@@ -2434,6 +2455,7 @@
                         <outlet property="sectionToMigrate_button" destination="tpb-Lh-nzm" id="kLi-3f-CgI"/>
                         <outlet property="selectiveTab_NSButton" destination="pZE-bV-fJk" id="p7c-mM-4gw"/>
                         <outlet property="selective_tabViewItem" destination="Fo1-1P-mP5" id="LUA-Dx-kTy"/>
+                        <outlet property="siteMigrate" destination="XYJ-PI-8wf" id="ggX-rd-eUY"/>
                         <outlet property="sites_button" destination="AFT-cj-oMR" id="BOd-zQ-Rx3"/>
                         <outlet property="sites_label_field" destination="rhD-Q3-KDx" id="sCb-XG-r5l"/>
                         <outlet property="smartUserGrps_button" destination="peA-aJ-t5r" id="Pf5-Vy-7hO"/>
@@ -2458,6 +2480,7 @@
                         <outlet property="storeCredentials_button" destination="lsc-CO-2iT" id="uhK-Zf-c16"/>
                         <outlet property="sus_button" destination="0Oq-z3-hPc" id="tAC-fB-AAZ"/>
                         <outlet property="sus_label_field" destination="TGh-dy-khY" id="l8I-32-bex"/>
+                        <outlet property="theSite_TextField" destination="RTI-so-K4r" id="9rl-El-XhU"/>
                         <outlet property="userEA_button" destination="5QD-Ga-H9N" id="Ib7-Aj-kw9"/>
                         <outlet property="userEA_label_field" destination="UU9-3N-hsp" id="i91-CO-i9i"/>
                         <outlet property="users_button" destination="ycJ-dt-zVj" id="s4w-mq-oDB"/>

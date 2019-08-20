@@ -118,6 +118,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
+    @IBOutlet weak var siteMigrate: NSButton!
+    var itemToSite = false
+    
+    @IBOutlet weak var theSite_TextField: NSTextField!
+    var destinationSite = "None"
+    
+    @IBOutlet weak var destinationLabel_TextField: NSTextField!
     
     @IBOutlet weak var quit_button: NSButton!
     @IBOutlet weak var go_button: NSButton!
@@ -700,7 +707,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             migrateOrWipe = "----------- Starting To Wipe Data -----------\n"
         } else {
             // verify source and destination are not the same - start
-            if source_jp_server_field.stringValue == dest_jp_server_field.stringValue {
+            if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate.state.rawValue == 0 {
                 alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
                 self.goButtonEnabled(button_status: true)
                 return
@@ -764,10 +771,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.source_user = source_user_field.stringValue
             self.source_pass = source_pwd_field.stringValue
         }
-        
+
         self.dest_jp_server = dest_jp_server_field.stringValue
         self.dest_user = dest_user_field.stringValue
         self.dest_pass = dest_pwd_field.stringValue
+
         // set credentials / servers - end
         
         // server is reachable - start
@@ -2720,6 +2728,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             //            print("\n\(endpoint) XML: \(PostXML)\n")
             
+            // migrating to another site
+            if siteMigrate.state.rawValue == 1 && theSite_TextField.stringValue != "" {
+                PostXML = setSite(xmlString: PostXML, site: theSite_TextField.stringValue, endpoint: endpoint)
+            }
+            
         case "packages":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
             // remove 'No category assigned' from XML
@@ -2788,6 +2801,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
             
+            // migrating to another site
+            if siteMigrate.state.rawValue == 1 && theSite_TextField.stringValue != "" {
+                PostXML = setSite(xmlString: PostXML, site: theSite_TextField.stringValue, endpoint: endpoint)
+            }
+            
         case "users":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing users - verbose\n") }
             
@@ -2850,14 +2868,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
+        var destinationEpId = destEpId
+        var apiAction       = action
+        
+        if self.itemToSite {
+            destinationEpId = 0
+            apiAction       = "create"
+        }
+        
         // this is where we create the new endpoint
         if !self.saveOnly {
             if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
         } else {
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Save only selected, skipping \(action) for: \(endpointType)\n") }
+            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
         }
 //        var createDestUrl = createDestUrlBase
-        let destinationEpId = destEpId
         //if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         theCreateQ.maxConcurrentOperationCount = 1
         let semaphore = DispatchSemaphore(value: 0)
@@ -2877,6 +2902,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             localEndPointType = endpointType
         }
         var responseData = ""
+        
+        if self.itemToSite {
+            
+        }
         
         var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
         
@@ -2910,7 +2939,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
             
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Action: \(action)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
+            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
             if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
             
             if endpointCurrent == 1 {
@@ -2924,7 +2953,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             let encodedURL = NSURL(string: createDestUrl)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
-            if action == "create" {
+            if apiAction == "create" {
                 request.httpMethod = "POST"
             } else {
                 request.httpMethod = "PUT"
@@ -2979,13 +3008,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.labelColor(endpoint: endpointType, theColor: self.greenText)
                             }
                             
-                            let localTmp = (self.counters[endpointType]?["\(action)"])!
+                            let localTmp = (self.counters[endpointType]?["\(apiAction)"])!
     //                        print("localTmp: \(localTmp)")
-                            self.counters[endpointType]?["\(action)"] = localTmp + 1
+                            self.counters[endpointType]?["\(apiAction)"] = localTmp + 1
                             
-                            if var summaryArray = self.summaryDict[endpointType]?["\(action)"] {
+                            if var summaryArray = self.summaryDict[endpointType]?["\(apiAction)"] {
                                 summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
-                                self.summaryDict[endpointType]?["\(action)"] = summaryArray
+                                self.summaryDict[endpointType]?["\(apiAction)"] = summaryArray
                             }
                             
                             // currently there is no way to upload mac app store icons
@@ -3621,6 +3650,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // theOpQ - end
     }
     
+    @IBAction func migrateToSite(_ sender: Any) {
+        if siteMigrate.state.rawValue == 1 {
+            itemToSite = true
+//            let tmp_dest_jp_server = dest_jp_server_field.stringValue
+//            let tmp_dest_user = dest_user_field.stringValue
+//            let tmp_dest_pwd = dest_pwd_field.stringValue
+            destinationLabel_TextField.stringValue = "Site Name"
+//            dest_user_field.stringValue = source_user_field.stringValue
+//            dest_pwd_field.stringValue = source_pwd_field.stringValue
+//            dest_user_field.isEditable = false
+//            dest_pwd_field.isEditable = false
+        } else {
+            destinationLabel_TextField.stringValue = "Destination"
+//            dest_pwd_field.isEditable = true
+//            dest_user_field.isEditable = true
+//            dest_pwd_field.isEditable = true
+        }
+        
+    }
+    
+    
     //==================================== Utility functions ====================================
     
     func activeTab() -> String {
@@ -4201,6 +4251,79 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         saveTrimmedXml     = xmlPrefOptions["saveTrimmedXml"]!
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
 //      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
+    }
+    
+    func setSite(xmlString:String, site:String, endpoint:String) -> String {
+        var rawValue = ""
+        var startTag = ""
+        let siteEncoded = Xml().encodeSpecialChars(textString: site)
+        switch endpoint {
+        case "computergroups", "smartcomputergroups", "staticcomputergroups":
+            rawValue = tagValue2(xmlString: xmlString, startTag: "<computer_group>", endTag: "</computer_group>")
+            startTag = "computer_group"
+        default:
+            rawValue = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
+            startTag = "general"
+        }
+        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
+//        print("[setSite] itemName: \(itemName)")
+        
+        // update item Name - ...<name>currentName - site</name>
+        rawValue = xmlString.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
+        
+        // update site
+        let siteInfo = tagValue2(xmlString: rawValue, startTag: "<site>", endTag: "</site>")
+        let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
+        rawValue = rawValue.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+        
+        // update scope
+        rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
+        let rawValueArray = rawValue.split(separator: "\n")
+        rawValue = ""
+        var currentLine = 0
+        let numberOfLines = rawValueArray.count
+        while true {
+            rawValue.append("\(rawValueArray[currentLine])\n")
+            if currentLine+1 < numberOfLines {
+                currentLine+=1
+            } else {
+                break
+            }
+            if rawValueArray[currentLine].contains("<scope>") {
+                while !rawValueArray[currentLine].contains("</scope>") {
+                    if rawValueArray[currentLine].contains("<computer_group>") {
+                        rawValue.append("\(rawValueArray[currentLine])\n")
+                        if currentLine+1 < numberOfLines {
+                            currentLine+=1
+                        } else {
+                            break
+                        }
+                        let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
+                        
+        //                print("siteGroupName: \(siteGroupName)")
+                        
+                        rawValue.append("\(siteGroupName)\n")
+                        if currentLine+1 < numberOfLines {
+                            currentLine+=1
+                        } else {
+                            break
+                        }
+                    } else {  // if rawValueArray[currentLine].contains("<computer_group>") - end
+                        rawValue.append("\(rawValueArray[currentLine])\n")
+                        if currentLine+1 < numberOfLines {
+                            currentLine+=1
+                        } else {
+                            break
+                        }
+                    }
+                }   // while !rawValueArray[currentLine].contains("</scope>")
+            }   // if rawValueArray[currentLine].contains("<scope>")
+        }
+        
+//        print("[setSite] rawValue: \(rawValue)")
+        
+
+        return rawValue
     }
     
     func myExitValue(cmd: String, args: String...) -> String {

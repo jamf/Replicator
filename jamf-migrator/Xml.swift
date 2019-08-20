@@ -80,5 +80,16 @@ class Xml {
             }
         }
         
+    }   // func save
+    
+    func encodeSpecialChars(textString: String) -> String {
+        
+        let newString = textString.replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "<", with: "&gt;")
+            .replacingOccurrences(of: ">", with: "&lt;")
+        
+        return newString
     }
 }
