@@ -10,7 +10,7 @@ A tool to migrate data granularly between Jamf Pro servers
 Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
   ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5a.png "Files")
   
-  Groups, Profiles, and Configuration Profiles can be targeted to a particular site.
+  Groups, Policies, and Configuration Profiles can be targeted to a particular site.
   ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5b.png "Files")
 
 Feedback in the GUI gives a simplistic overview of the success of a transfer:
