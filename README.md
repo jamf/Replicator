@@ -27,6 +27,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.
 * Buildings - the API only allows the name to be migrated.
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.
+* Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 
  
 The 'Selective' tab provides the ability to select a subset of items within a category.  For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.
