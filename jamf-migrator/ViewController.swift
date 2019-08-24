@@ -50,10 +50,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     // Show Preferences Window
-    var prefWindowController: PrefsWindowController?
-    @IBAction func showPrefsWindow(_ sender: AnyObject) {
-        AppDelegate().showPrefsWindow()
-        
+    var prefWindowController2: PrefsWindowController?
+    @IBAction func showPrefsWindow(_ sender: Any) {
+        PrefsWindowController().show()
     }
 
         
@@ -119,10 +118,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
     @IBOutlet weak var siteMigrate: NSButton!
-    var itemToSite = false
+    @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
     
-    @IBOutlet weak var theSite_TextField: NSTextField!
-    var destinationSite = "None"
+    var itemToSite      = false
+    var destinationSite = ""
     
     @IBOutlet weak var destinationLabel_TextField: NSTextField!
     
@@ -283,6 +282,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // xml prefs
     var xmlPrefOptions:        Dictionary<String,Bool> = [:]
+    
+    // site copy / move pref
+    var sitePref = ""
     
     var sourceServerArray   = [String]()
     var destServerArray     = [String]()
@@ -775,7 +777,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.dest_jp_server = dest_jp_server_field.stringValue
         self.dest_user = dest_user_field.stringValue
         self.dest_pass = dest_pwd_field.stringValue
-
         // set credentials / servers - end
         
         // server is reachable - start
@@ -793,6 +794,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
+        
+        // set site, if option selected - start
+        if siteMigrate.state.rawValue == 1 {
+            destinationSite = availableSites_button.selectedItem!.title
+        }
+        // set site, if option selected - end
+        
         checkURL2(whichServer: "dest", serverURL: self.dest_jp_server)  {
             (result: Bool) in
 //            print("checkURL2 returned result: \(result)")
@@ -2569,9 +2577,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
                 }
                 
+                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
+                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+                }
+                
             case "mobiledevices":
                 for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                }
+                
+            case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
+                // migrating to another site
+                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
+                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
             case "usergroups", "smartusergroups", "staticusergroups":
@@ -2729,9 +2747,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //            print("\n\(endpoint) XML: \(PostXML)\n")
             
             // migrating to another site
-            if siteMigrate.state.rawValue == 1 && theSite_TextField.stringValue != "" {
-                PostXML = setSite(xmlString: PostXML, site: theSite_TextField.stringValue, endpoint: endpoint)
-            }
+//            DispatchQueue.main.async {
+                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
+                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+                }
+//            }
             
         case "packages":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
@@ -2802,9 +2822,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
             // migrating to another site
-            if siteMigrate.state.rawValue == 1 && theSite_TextField.stringValue != "" {
-                PostXML = setSite(xmlString: PostXML, site: theSite_TextField.stringValue, endpoint: endpoint)
-            }
+//            DispatchQueue.main.async {
+                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint == "policies" {
+                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+                }
+//            }
             
         case "users":
             if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing users - verbose\n") }
@@ -2844,6 +2866,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.getStatusUpdate(endpoint: endpoint, current: endpointCurrent, total: endpointCount)
         
         if knownEndpoint {
+//            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
             self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                 (result: String) in
                 if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
@@ -2871,7 +2894,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var destinationEpId = destEpId
         var apiAction       = action
         
-        if self.itemToSite {
+        // if working a site migrations within a single server force create when copying an item
+        if self.itemToSite && sitePref == "Copy" {
             destinationEpId = 0
             apiAction       = "create"
         }
@@ -3653,24 +3677,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func migrateToSite(_ sender: Any) {
         if siteMigrate.state.rawValue == 1 {
             itemToSite = true
-//            let tmp_dest_jp_server = dest_jp_server_field.stringValue
-//            let tmp_dest_user = dest_user_field.stringValue
-//            let tmp_dest_pwd = dest_pwd_field.stringValue
-            destinationLabel_TextField.stringValue = "Site Name"
-//            dest_user_field.stringValue = source_user_field.stringValue
-//            dest_pwd_field.stringValue = source_pwd_field.stringValue
-//            dest_user_field.isEditable = false
-//            dest_pwd_field.isEditable = false
+            availableSites_button.removeAllItems()
+
+            Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") {
+                (result: [String]) in
+                let destSitesArray = result
+                if destSitesArray.count == 0 {
+                    self.alert_dialog(header: "Attention", message: "No sites were found or the server cound not be queried.")
+                    self.siteMigrate.state = NSControl.StateValue(rawValue: 0) // or convertToNSControlStateValue(0)
+                    self.itemToSite = false
+                    return
+                }
+                    self.destinationLabel_TextField.stringValue = "Site Name"
+                    for theSite in destSitesArray {
+                        self.availableSites_button.addItems(withTitles: [theSite])
+                    }
+                    self.availableSites_button.isEnabled = true
+            }
         } else {
             destinationLabel_TextField.stringValue = "Destination"
-//            dest_pwd_field.isEditable = true
-//            dest_user_field.isEditable = true
-//            dest_pwd_field.isEditable = true
+            self.availableSites_button.isEnabled = false
+            destinationSite = ""
+            itemToSite = false
         }
         
     }
-    
-    
+
     //==================================== Utility functions ====================================
     
     func activeTab() -> String {
@@ -4257,72 +4289,116 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var rawValue = ""
         var startTag = ""
         let siteEncoded = Xml().encodeSpecialChars(textString: site)
+        
+        // get copy / move preference - start
+        switch endpoint {
+        case "computergroups", "smartcomputergroups", "staticcomputergroups", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+            sitePref = userDefaults.string(forKey: "siteGroupsAction") ?? "Copy"
+            
+        case "policies":
+            sitePref = userDefaults.string(forKey: "sitePoliciesAction") ?? "Copy"
+            
+        case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
+            sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
+            
+        default:
+            sitePref = "Copy"
+        }
+        
+        print("[siteSet] site operation for \(endpoint): \(sitePref)")
+        if self.debug { self.writeToLog(stringOfText: "[siteSet] site operation for \(endpoint): \(sitePref)\n") }
+        // get copy / move preference - end
+        
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             rawValue = tagValue2(xmlString: xmlString, startTag: "<computer_group>", endTag: "</computer_group>")
             startTag = "computer_group"
+            
+        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+            rawValue = tagValue2(xmlString: xmlString, startTag: "<mobile_device_group>", endTag: "</mobile_device_group>")
+            startTag = "mobile_device_group"
+            
         default:
             rawValue = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
             startTag = "general"
         }
         let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
-//        print("[setSite] itemName: \(itemName)")
-        
-        // update item Name - ...<name>currentName - site</name>
-        rawValue = xmlString.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
         
         // update site
-        let siteInfo = tagValue2(xmlString: rawValue, startTag: "<site>", endTag: "</site>")
+        let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
         let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
-        rawValue = rawValue.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+        rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+        print("[siteSet] changing site from \(currentSiteName) to \(siteEncoded)")
+        if self.debug { self.writeToLog(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
         
-        // update scope
-        rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
-        let rawValueArray = rawValue.split(separator: "\n")
-        rawValue = ""
-        var currentLine = 0
-        let numberOfLines = rawValueArray.count
-        while true {
-            rawValue.append("\(rawValueArray[currentLine])\n")
-            if currentLine+1 < numberOfLines {
-                currentLine+=1
-            } else {
-                break
-            }
-            if rawValueArray[currentLine].contains("<scope>") {
-                while !rawValueArray[currentLine].contains("</scope>") {
-                    if rawValueArray[currentLine].contains("<computer_group>") {
-                        rawValue.append("\(rawValueArray[currentLine])\n")
-                        if currentLine+1 < numberOfLines {
-                            currentLine+=1
-                        } else {
-                            break
-                        }
-                        let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
-                        
-        //                print("siteGroupName: \(siteGroupName)")
-                        
-                        rawValue.append("\(siteGroupName)\n")
-                        if currentLine+1 < numberOfLines {
-                            currentLine+=1
-                        } else {
-                            break
-                        }
-                    } else {  // if rawValueArray[currentLine].contains("<computer_group>") - end
-                        rawValue.append("\(rawValueArray[currentLine])\n")
-                        if currentLine+1 < numberOfLines {
-                            currentLine+=1
-                        } else {
-                            break
-                        }
-                    }
-                }   // while !rawValueArray[currentLine].contains("</scope>")
-            }   // if rawValueArray[currentLine].contains("<scope>")
+        // do not redeploy profile to existing scope
+        if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
+            let regexComp = try! NSRegularExpression(pattern: "<redeploy_on_update>(.*?)</redeploy_on_update>", options:.caseInsensitive)
+            rawValue = regexComp.stringByReplacingMatches(in: rawValue, options: [], range: NSRange(0..<rawValue.utf16.count), withTemplate: "<redeploy_on_update>Newly Assigned</redeploy_on_update>")
         }
         
-//        print("[setSite] rawValue: \(rawValue)")
-        
-
+        if sitePref == "Copy" {
+            // update item Name - ...<name>currentName - site</name>
+            rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
+//            print("[setSite]  rawValue: \(rawValue)\n")
+            
+            // generate a new uuid for configuration profiles - start
+            if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
+                let profileGeneral = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
+                let payloadUuid    = tagValue2(xmlString: profileGeneral, startTag: "<uuid>", endTag: "</uuid>")
+                let newUuid        = UUID().uuidString
+                
+                rawValue = rawValue.replacingOccurrences(of: payloadUuid, with: newUuid)
+//                print("[setSite] rawValue2: \(rawValue)")
+            }
+            // generate a new uuid for configuration profiles - end
+            
+            // update scope - start
+            rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
+            let rawValueArray = rawValue.split(separator: "\n")
+            rawValue = ""
+            var currentLine = 0
+            let numberOfLines = rawValueArray.count
+            while true {
+                rawValue.append("\(rawValueArray[currentLine])\n")
+                if currentLine+1 < numberOfLines {
+                    currentLine+=1
+                } else {
+                    break
+                }
+                if rawValueArray[currentLine].contains("<scope>") {
+                    while !rawValueArray[currentLine].contains("</scope>") {
+                        if rawValueArray[currentLine].contains("<computer_group>") || rawValueArray[currentLine].contains("<mobile_device_group>") {
+                            rawValue.append("\(rawValueArray[currentLine])\n")
+                            if currentLine+1 < numberOfLines {
+                                currentLine+=1
+                            } else {
+                                break
+                            }
+                            let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
+                            
+                            //                print("siteGroupName: \(siteGroupName)")
+                            
+                            rawValue.append("\(siteGroupName)\n")
+                            if currentLine+1 < numberOfLines {
+                                currentLine+=1
+                            } else {
+                                break
+                            }
+                        } else {  // if rawValueArray[currentLine].contains("<computer_group>") - end
+                            rawValue.append("\(rawValueArray[currentLine])\n")
+                            if currentLine+1 < numberOfLines {
+                                currentLine+=1
+                            } else {
+                                break
+                            }
+                        }
+                    }   // while !rawValueArray[currentLine].contains("</scope>")
+                }   // if rawValueArray[currentLine].contains("<scope>")
+            }   // while true - end
+            // update scope - end
+        }   // if sitePref - end
+                
         return rawValue
     }
     
@@ -4488,6 +4564,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case 1:
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)
+            // reset list of available sites
+            if siteMigrate.state.rawValue == 1 {
+                siteMigrate.state = NSControl.StateValue(rawValue: 0)
+                availableSites_button.isEnabled = false
+                availableSites_button.removeAllItems()
+                destinationLabel_TextField.stringValue = "Destination"
+                destinationSite = ""
+                itemToSite = false
+            }
         default: break
         }
         // see if we're migrating from files or a server

@@ -102,6 +102,24 @@ body
 <div id="app_image" style="position:relative;margin: auto;width:800px;height:226px;">
     <img src="images/migrator2.5a.png" alt=""></div>
 <div><br></div>
+    
+    <div>Groups, Profiles, and Configuration Profiles can also be targeted to a specific site.  When targeting sites the source and destination servers can be the same or different.</div>
+<div id="app_image" style="position:relative;margin: auto;width:800px;height:226px;">
+    <img src="images/migrator2.5b.png" alt=""></div>
+<div><br></div>
+    
+    <div>The items can be either copied or moved when the source and destination server are the same, configure the desired option in preferences.</div>
+<div id="app_image" style="position:relative;margin: auto;width:360px;height:344px;">
+    <img src="images/migrator2.5c.png" alt=""></div>
+    <div>About site operations:
+<ul>
+   <li id="body_li">When copying an object the site name is appended to the existing object name.</li>
+   <li id="body_li">Dependencies must still be met.  ex. Work with groups before policies that depend on the groups.</li>
+   <li id="body_li">Groups with groups as a criteria will not copy properly, moving them should be fine.</li>
+</ul>
+        </div>
+    <hr/>
+<div><br></div>
 <div>Feedback in the GUI gives a simplistic overview of the success of a transfer:</div>
 <ul>
    <li id="body_li">Green - everything transferred.</li>
@@ -153,11 +171,11 @@ body
 </ul>
 In addition, Policies can be copied in a disabled state.</div>
 <div>
-    <img src="images/copy_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 428px; height: 397px;">
+    <img src="images/copy_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
 Options to export XML from the source server are also available.
 <div>
-    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width: 428px; height: 397px;">
+    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
     <ul style="margin-left:17px;">
    <li>Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).</li>
@@ -232,7 +250,7 @@ Options to export XML from the source server are also available.
     <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
         <div>You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.</div>
     <div>
-    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width: 423px; height: 397px;">
+    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
     </div>
 </div>

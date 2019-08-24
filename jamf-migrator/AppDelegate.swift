@@ -12,6 +12,7 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
     
     let vc = ViewController()
+    
     var prefWindowController: NSWindowController?
 
     @IBAction func checkForUpdates(_ sender: AnyObject) {
@@ -54,27 +55,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }   // func alert_dialog - end
     
     @IBAction func showPreferences(_ sender: Any) {
-        if !(prefWindowController != nil) {
-            let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Preferences"), bundle: nil)
-            prefWindowController = storyboard.instantiateInitialController() as? NSWindowController
-        }
-
-        if (prefWindowController != nil) {
-            prefWindowController?.showWindow(sender)
-        }
-    }
-    
-    // disabled to prevent multiple preference windows from opening
-    func showPrefsWindow() {
-        if !(prefWindowController != nil) {
-            let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Preferences"), bundle: nil)
-            prefWindowController = storyboard.instantiateInitialController() as? NSWindowController
-        }
-        if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export")) {
-            if (prefWindowController != nil) {
-                prefWindowController?.showWindow(self)
-            }
-        }
+        PrefsWindowController().show()
     }
     
 }

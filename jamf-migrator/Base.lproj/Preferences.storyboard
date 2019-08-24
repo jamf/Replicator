@@ -32,12 +32,9 @@
             <objects>
                 <tabViewController selectedTabViewItemIndex="0" tabStyle="toolbar" id="MHg-xI-p5c" sceneMemberID="viewController">
                     <tabViewItems>
-                        <tabViewItem image="copy" id="w5P-39-MbD">
-                            <nil key="label"/>
-                        </tabViewItem>
-                        <tabViewItem image="export" id="FcM-63-2LA">
-                            <nil key="label"/>
-                        </tabViewItem>
+                        <tabViewItem label="copy" image="copy" id="w5P-39-MbD"/>
+                        <tabViewItem label="export" image="export" id="FcM-63-2LA"/>
+                        <tabViewItem label="site" image="siteIcon" id="9cE-lL-9J7"/>
                     </tabViewItems>
                     <viewControllerTransitionOptions key="transitionOptions" allowUserInteraction="YES"/>
                     <tabView key="tabView" type="noTabsNoBorder" id="VZi-S2-Oid">
@@ -52,11 +49,12 @@
                         <outlet property="tabView" destination="VZi-S2-Oid" id="Orp-eM-sF4"/>
                         <segue destination="Lwu-vt-54h" kind="relationship" relationship="tabItems" id="Bqf-9G-EjF"/>
                         <segue destination="zJe-p7-yg6" kind="relationship" relationship="tabItems" id="1OD-sg-CI7"/>
+                        <segue destination="Wtb-LD-naZ" kind="relationship" relationship="tabItems" id="qAu-JV-yBH"/>
                     </connections>
                 </tabViewController>
                 <customObject id="VJS-aQ-7Am" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="11" y="488"/>
+            <point key="canvasLocation" x="8" y="496"/>
         </scene>
         <!--Copy-->
         <scene sceneID="geR-qQ-7PU">
@@ -301,7 +299,7 @@
                 </viewController>
                 <customObject id="fnb-gq-G8w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="626.5" y="271"/>
+            <point key="canvasLocation" x="626" y="141"/>
         </scene>
         <!--Export-->
         <scene sceneID="7h3-eD-AW9">
@@ -403,11 +401,121 @@
                 </viewController>
                 <customObject id="z2o-1J-PGa" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="625.5" y="593"/>
+            <point key="canvasLocation" x="626" y="457"/>
+        </scene>
+        <!--Site-->
+        <scene sceneID="KG6-wj-ncu">
+            <objects>
+                <viewController title="Site" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="btl-X1-946">
+                        <rect key="frame" x="0.0" y="0.0" width="341" height="248"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z9p-7n-bVG">
+                                <rect key="frame" x="11" y="178" width="319" height="57"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="Htk-fl-gX9">
+                                    <font key="font" metaFont="system"/>
+                                    <string key="title">When migrating within the same server you can either copy or move the item(s).  Use caution as to not inadvertently unscope configuration profiles.</string>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="00w-rL-Cme">
+                                <rect key="frame" x="114" y="139" width="49" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Groups" id="qaC-VC-TfO">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CVl-1u-4EI">
+                                <rect key="frame" x="26" y="115" width="137" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Policies" id="eVd-eg-5CH">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZOc-ap-lS4">
+                                <rect key="frame" x="23" y="91" width="140" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Configuration Profiles" id="cN5-GU-lLg">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TQL-zV-GhE">
+                                <rect key="frame" x="167" y="134" width="77" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="J9F-Fg-eDv" id="T6P-Nd-djx">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="sdO-CZ-wjw">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="J9F-Fg-eDv"/>
+                                            <menuItem title="Move" tag="1" id="x0i-cq-gmt"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="siteGroup_action:" target="Wtb-LD-naZ" id="brO-H1-kki"/>
+                                </connections>
+                            </popUpButton>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VIh-bS-JeH">
+                                <rect key="frame" x="167" y="110" width="77" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="eUE-QE-YRg" id="wq4-IH-mem">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="9ej-gp-BwF">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="eUE-QE-YRg"/>
+                                            <menuItem title="Move" id="Obu-p8-U2b"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="sitePolicy_action:" target="Wtb-LD-naZ" id="G9E-39-uzs"/>
+                                </connections>
+                            </popUpButton>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PYt-cK-DKX">
+                                <rect key="frame" x="167" y="86" width="77" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UGA-4u-HO2" id="rSW-Xy-J9g">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="1PZ-fc-f3R">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="UGA-4u-HO2"/>
+                                            <menuItem title="Move" id="SzU-gR-TMi"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="siteProfiles_action:" target="Wtb-LD-naZ" id="ock-59-N1I"/>
+                                </connections>
+                            </popUpButton>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="groupsAction_button" destination="TQL-zV-GhE" id="ScC-cg-CZT"/>
+                        <outlet property="policiesAction_button" destination="VIh-bS-JeH" id="nqW-QO-gY9"/>
+                        <outlet property="profilesAction_button" destination="PYt-cK-DKX" id="Dgs-s0-ZwB"/>
+                        <outlet property="site_View" destination="btl-X1-946" id="ak4-m7-55J"/>
+                    </connections>
+                </viewController>
+                <customObject id="rCK-DO-ett" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="626" y="786"/>
         </scene>
     </scenes>
     <resources>
         <image name="copy" width="64" height="64"/>
         <image name="export" width="64" height="64"/>
+        <image name="siteIcon" width="64" height="64"/>
     </resources>
 </document>

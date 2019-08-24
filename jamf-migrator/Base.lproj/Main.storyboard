@@ -640,7 +640,7 @@
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="jamf_migrator" customModuleProvider="target"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="351" y="-41"/>
+            <point key="canvasLocation" x="532" y="-46"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -2348,15 +2348,26 @@
                                     <action selector="migrateToSite:" target="XfG-lQ-9wD" id="nKz-4u-Lku"/>
                                 </connections>
                             </button>
-                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RTI-so-K4r">
-                                <rect key="frame" x="578" y="441" width="110" height="22"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="qmE-eI-01D">
-                                    <font key="font" usesAppearanceFont="YES"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9W-KL-Gg4">
+                                <rect key="frame" x="563" y="436" width="129" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" enabled="NO" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="aag-xc-usP">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="9N8-xI-uR8"/>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <button toolTip="Preferences" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DjG-yq-DnX">
+                                <rect key="frame" x="18" y="15" width="25" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAdvanced" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="nTb-Hf-Ygi">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="showPrefsWindow:" target="XfG-lQ-9wD" id="Pvy-OA-HZk"/>
+                                </connections>
+                            </button>
                         </subviews>
                     </view>
                     <connections>
@@ -2370,6 +2381,7 @@
                         <outlet property="allNone_button" destination="vJA-rz-FWc" id="eCb-jb-Ayy"/>
                         <outlet property="allNone_general_button" destination="QJL-w2-5jw" id="hxI-ni-Hyc"/>
                         <outlet property="allNone_iOS_button" destination="14Q-PR-ssk" id="4hq-CS-pwp"/>
+                        <outlet property="availableSites_button" destination="aag-xc-usP" id="V1y-W4-21X"/>
                         <outlet property="building_button" destination="zSQ-Vt-PWI" id="foY-Pp-fCh"/>
                         <outlet property="building_label_field" destination="W9z-MB-k3t" id="5d6-hk-TwF"/>
                         <outlet property="bulk_iOS_tabViewItem" destination="hjR-Z4-r7D" id="XMy-JF-seW"/>
@@ -2480,7 +2492,6 @@
                         <outlet property="storeCredentials_button" destination="lsc-CO-2iT" id="uhK-Zf-c16"/>
                         <outlet property="sus_button" destination="0Oq-z3-hPc" id="tAC-fB-AAZ"/>
                         <outlet property="sus_label_field" destination="TGh-dy-khY" id="l8I-32-bex"/>
-                        <outlet property="theSite_TextField" destination="RTI-so-K4r" id="9rl-El-XhU"/>
                         <outlet property="userEA_button" destination="5QD-Ga-H9N" id="Ib7-Aj-kw9"/>
                         <outlet property="userEA_label_field" destination="UU9-3N-hsp" id="i91-CO-i9i"/>
                         <outlet property="users_button" destination="ycJ-dt-zVj" id="s4w-mq-oDB"/>
@@ -2494,6 +2505,7 @@
     </scenes>
     <resources>
         <image name="0" width="72" height="72"/>
+        <image name="NSAdvanced" width="32" height="32"/>
         <image name="general" width="82" height="25"/>
         <image name="general_active" width="82" height="25"/>
         <image name="go" width="87" height="39"/>

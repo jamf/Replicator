@@ -22,11 +22,20 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var copyScopeScg_button: NSButton!       // static computer groups
     @IBOutlet weak var copyScopeSig_button: NSButton!       // static ios groups
     @IBOutlet weak var copyScopeUsers_button: NSButton!     // static user groups
+    
     @IBOutlet weak var saveRawXml_button: NSButton!
     @IBOutlet weak var saveTrimmedXml_button: NSButton!
     @IBOutlet weak var saveOnly_button: NSButton!
     
+    @IBOutlet var site_View: NSView!
+    
+    @IBOutlet weak var groupsAction_button: NSPopUpButton!
+    @IBOutlet weak var policiesAction_button: NSPopUpButton!
+    @IBOutlet weak var profilesAction_button: NSPopUpButton!
+    
+    
     let vc = ViewController()
+    let userDefaults = UserDefaults.standard
     var plistData:[String:Any] = [:]  //our server/username data
     
     // default scope preferences
@@ -41,11 +50,26 @@ class PreferencesViewController: NSViewController {
     var scopeScgCopy:           Bool = true   // static computer groups copy scope
     var scopeSigCopy:           Bool = true   // static iOS device groups copy scope
     var scopeUsersCopy:         Bool = true   // static user groups copy scope
+    
     var saveRawXml:             Bool = false
     var saveTrimmedXml:         Bool = false
     var saveOnly:               Bool = false
     
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
+    
+    @IBAction func siteGroup_action(_ sender: Any) {
+        userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
+        userDefaults.synchronize()
+    }
+    @IBAction func sitePolicy_action(_ sender: Any) {
+        userDefaults.set("\(policiesAction_button.selectedItem!.title)", forKey: "sitePoliciesAction")
+        userDefaults.synchronize()
+    }
+    @IBAction func siteProfiles_action(_ sender: Any) {
+        userDefaults.set("\(profilesAction_button.selectedItem!.title)", forKey: "siteProfilesAction")
+        userDefaults.synchronize()
+    }
+    
     
 //    var buttonState = true
     
@@ -95,14 +119,33 @@ class PreferencesViewController: NSViewController {
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
         self.view.wantsLayer = true
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
-        
-            }
+    }
     
     override func viewDidAppear() {
         super.viewDidAppear()
         
         // set window title
         self.parent?.view.window?.title = self.title!
+        
+        if self.title! == "Site" {
+            if (userDefaults.string(forKey: "siteGroupsAction") == "Copy" || userDefaults.string(forKey: "siteGroupsAction") == "Move")  {
+                groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction")!)
+            } else {
+                userDefaults.set("Copy", forKey: "siteGroupsAction")
+            }
+            if (userDefaults.string(forKey: "sitePoliciesAction") == "Copy" || userDefaults.string(forKey: "sitePoliciesAction") == "Move") {
+                policiesAction_button.selectItem(withTitle: userDefaults.string(forKey: "sitePoliciesAction")!)
+            } else {
+                userDefaults.set("Copy", forKey: "sitePoliciesAction")
+            }
+            if (userDefaults.string(forKey: "siteProfilesAction") == "Copy" || userDefaults.string(forKey: "siteProfilesAction") == "Move") {
+                profilesAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteProfilesAction")!)
+            } else {
+                userDefaults.set("Copy", forKey: "siteProfilesAction")
+            }
+            userDefaults.synchronize()
+        }
+        
         plistData = vc.readSettings()
         
         if plistData["scope"] != nil {
@@ -207,6 +250,7 @@ class PreferencesViewController: NSViewController {
             saveTrimmedXml_button.state = boolToState(TF: saveTrimmedXml)
             saveOnly_button.state = boolToState(TF: saveOnly)
         }
+        
     }
     
 }

@@ -9,6 +9,9 @@ A tool to migrate data granularly between Jamf Pro servers
 
 Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
   ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5a.png "Files")
+  
+  Groups, Profiles, and Configuration Profiles can be targeted to a particular site.
+  ![alt text](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5b.png "Files")
 
 Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Green - everything transferred.
@@ -99,6 +102,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v4.0.0**
+
+* Added the ability to migrate objects (groups, policies, and configuration profiles) to a particular site, either on the source server or another server.
+* Re-added button to bring up preferences.  
 
 **v3.3.5**
 

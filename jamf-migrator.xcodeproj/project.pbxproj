@@ -37,6 +37,7 @@
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
 		B5C042481EB11CF400C6E872 /* 0.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423C1EB11CF400C6E872 /* 0.png */; };
 		B5C042491EB11CF400C6E872 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423D1EB11CF400C6E872 /* 1.png */; };
+		B5C993C0230E211100558040 /* Sites.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C993BF230E211100558040 /* Sites.swift */; };
 		B5E179F21F1FDAFA00A20AAA /* images in Resources */ = {isa = PBXBuildFile; fileRef = B5E179F01F1FDAFA00A20AAA /* images */; };
 		B5E179F31F1FDAFA00A20AAA /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = B5E179F11F1FDAFA00A20AAA /* index.html */; };
 		B5E1912721AAA63400A1A9CA /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912521AAA63400A1A9CA /* Preferences.storyboard */; };
@@ -80,6 +81,7 @@
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		B5C0423C1EB11CF400C6E872 /* 0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 0.png; sourceTree = "<group>"; };
 		B5C0423D1EB11CF400C6E872 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		B5C993BF230E211100558040 /* Sites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sites.swift; sourceTree = "<group>"; };
 		B5E179F01F1FDAFA00A20AAA /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		B5E179F11F1FDAFA00A20AAA /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		B5E1912621AAA63400A1A9CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "jamf-migrator/Base.lproj/Preferences.storyboard"; sourceTree = SOURCE_ROOT; };
@@ -126,6 +128,7 @@
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				B59D0C39202B97BA006203CE /* Credentials.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
+				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
@@ -318,6 +321,7 @@
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
+				B5C993C0230E211100558040 /* Sites.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
