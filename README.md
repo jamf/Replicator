@@ -64,7 +64,7 @@ Options to export XML from the source server are also available.
 * Save only saves the XML files and does not send them to the destination server.
 * Note Save only and Raw Source XML options should not be selected when File Import is being used.
 
-Options to object migration to a particular site can be set.
+Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
 
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5c.png)
 * When copying an object to a site, the site name is appended to the object name.
