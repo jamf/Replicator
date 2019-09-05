@@ -385,6 +385,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var writeLogQ   = DispatchQueue(label: "com.jamf.writeLogQ", qos: DispatchQoS.background)
+    var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
     
     var migrateOrWipe: String = ""
     var httpStatusCode: Int = 0
@@ -1604,18 +1605,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             } else {
                                                 // populate source server under the selective tab
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                    DispatchQueue.main.async {
+//                                                    DispatchQueue.main.async {
+                                                    self.sortQ.async {
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
+//                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                            self.srcSrvTableView.reloadData()
+                                                            DispatchQueue.main.async {
+                                                                self.srcSrvTableView.reloadData()
+                                                            }
+                                                            usleep(50000)
+//                                                            self.goButtonEnabled(button_status: true)
+//                                                        }   //if self.availableIDsToMigDict.count - end
+//                                                        DispatchQueue.main.async {
+//                                                            self.srcSrvTableView.reloadData()
+//                                                        }
+                                                        print("counter: \(counter) of \(self.availableObjsToMigDict.count)")
+                                                        if counter == self.availableObjsToMigDict.count {
+                                                            print("done sorting")
                                                             self.goButtonEnabled(button_status: true)
-                                                        }   //if self.availableIDsToMigDict.count - end
-                                                        self.srcSrvTableView.reloadData()
+                                                        }
+                                                        counter+=1
                                                     }   // DispatchQueue.main.async - end
-                                                    counter+=1
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                 
                                             }   // if self.goSender else - end
