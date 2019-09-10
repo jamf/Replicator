@@ -1605,7 +1605,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             } else {
                                                 // populate source server under the selective tab
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-//                                                    DispatchQueue.main.async {
                                                     self.sortQ.async {
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
@@ -1615,19 +1614,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             DispatchQueue.main.async {
                                                                 self.srcSrvTableView.reloadData()
                                                             }
+                                                        // slight delay in building the list - visual effect
                                                             usleep(50000)
 //                                                            self.goButtonEnabled(button_status: true)
 //                                                        }   //if self.availableIDsToMigDict.count - end
 //                                                        DispatchQueue.main.async {
 //                                                            self.srcSrvTableView.reloadData()
 //                                                        }
-                                                        print("counter: \(counter) of \(self.availableObjsToMigDict.count)")
                                                         if counter == self.availableObjsToMigDict.count {
-                                                            print("done sorting")
                                                             self.goButtonEnabled(button_status: true)
                                                         }
                                                         counter+=1
-                                                    }   // DispatchQueue.main.async - end
+                                                    }   // self.sortQ.async - end
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                 
                                             }   // if self.goSender else - end
@@ -1800,23 +1798,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             
                                                             self.RemoveEndpoints(endpointType: localEndpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
                                                         }   // if !self.wipe_data else - end
+                                                        counter += 1
                                                     } else {
                                                         // populate source server under the selective tab
-                                                        DispatchQueue.main.async {
+                                                        self.sortQ.async {
 //                                                            print("adding \(l_xmlName) to array")
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
-                                                            if self.sourceDataArray.count == groupCount {
-                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+
+                                                            DispatchQueue.main.async {
                                                                 self.srcSrvTableView.reloadData()
+                                                            }
+                                                            usleep(50000)
+                                                            
+                                                            if counter == self.sourceDataArray.count {
                                                                 self.goButtonEnabled(button_status: true)
                                                             }
-                                                            self.srcSrvTableView.reloadData()
-                                                            
-                                                        }   // DispatchQueue.main.async - end
+
+                                                            counter += 1
+                                                        }   // self.sortQ.async - end
                                                     }   // if self.goSender else - end
                                                     
-                                                    counter += 1
                                                 }   // for (l_xmlID, l_xmlName) - end
                                                 
                                                 self.nodesMigrated+=1
@@ -1895,22 +1898,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         if self.debug { self.writeToLog(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                         self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
                                                     }   // if !self.wipe_data else - end
+                                                    counter += 1
                                                 } else {
                                                     // populate source server under the selective tab
 //                                                        print("adding \(l_xmlName) to array")
-                                                    self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
-                                                    self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
+//                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
 //                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
-                                                        DispatchQueue.main.async {
+                                                        self.sortQ.async {
+                                                            self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
+                                                            self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
                                                             self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                            self.srcSrvTableView.reloadData()
-                                                            self.goButtonEnabled(button_status: true)
-                                                        }
-                                                    }
-                                                    self.srcSrvTableView.reloadData()
+                                                            DispatchQueue.main.async {
+                                                                self.srcSrvTableView.reloadData()
+                                                            }
+                                                            // slight delay in building the list - visual effect
+                                                            usleep(50000)
+
+                                                            if counter == computerPoliciesDict.count {
+                                                                self.goButtonEnabled(button_status: true)
+                                                            }
+                                                            counter+=1
+                                                        }   // self.sortQ.async - end
+                                                    
                                                 }   // if self.goSender else - end
-                                                counter += 1
                                             }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
                                         }   // self.existingEndpoints - end
                                     } else {
@@ -1996,18 +2006,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             } else {
                                                 // populate source server under the selective tab
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                    DispatchQueue.main.async {
+                                                    self.sortQ.async {
                                                         //print("adding \(l_xmlName) to array")
                                                         self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                         self.sourceDataArray.append(l_xmlName)
-                                                        if self.availableObjsToMigDict.count == self.sourceDataArray.count {
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+
+                                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                        DispatchQueue.main.async {
                                                             self.srcSrvTableView.reloadData()
+                                                        }
+                                                        // slight delay in building the list - visual effect
+                                                        usleep(50000)
+                                                        
+                                                        if counter == self.availableObjsToMigDict.count {
                                                             self.goButtonEnabled(button_status: true)
                                                         }
-                                                        self.srcSrvTableView.reloadData()
-                                                    }   // DispatchQueue.main.async - end
-                                                    counter+=1
+                                                        counter+=1
+                                                    }   // self.sortQ.async - end
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                             }   // if self.goSender else - end
                                         }   // self.existingEndpoints - end
@@ -2164,18 +2179,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                     for orderedId in orderedConfArray {
                                                                                         let l_xmlID = Int(orderedId)
                                                                                         let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
-                                                                                        DispatchQueue.main.async {
+                                                                                        self.sortQ.async {
                                                                                             //print("adding \(l_xmlName) to array")
                                                                                             self.availableIDsToMigDict[l_xmlName!] = l_xmlID
                                                                                             self.sourceDataArray.append(l_xmlName!)
-                                                                                            if orderedConfArray.count == self.sourceDataArray.count {
-                                                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                            DispatchQueue.main.async {
                                                                                                 self.srcSrvTableView.reloadData()
+                                                                                            }
+                                                                                            // slight delay in building the list - visual effect
+                                                                                            usleep(50000)
+
+                                                                                            if counter == orderedConfArray.count {
                                                                                                 self.goButtonEnabled(button_status: true)
                                                                                             }
-                                                                                            self.srcSrvTableView.reloadData()
+                                                                                            counter+=1
                                                                                         }   // DispatchQueue.main.async - end
-                                                                                        counter+=1
                                                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                                                 }   // if self.goSender else - end
                                                                             }   // self.existingEndpoints - end
@@ -4317,7 +4336,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             sitePref = "Copy"
         }
         
-        print("[siteSet] site operation for \(endpoint): \(sitePref)")
         if self.debug { self.writeToLog(stringOfText: "[siteSet] site operation for \(endpoint): \(sitePref)\n") }
         // get copy / move preference - end
         
@@ -4340,7 +4358,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
         let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
         rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
-        print("[siteSet] changing site from \(currentSiteName) to \(siteEncoded)")
         if self.debug { self.writeToLog(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
         
         // do not redeploy profile to existing scope
