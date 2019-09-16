@@ -22,7 +22,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
         
         var updateAvailable = false
         
-        let versionUrl = URL(string: "https://api.github.com/repos/jamfprofessionalservices/JamfMigrator/releases")
+        let versionUrl = URL(string: "https://api.github.com/repos/jamf/JamfMigrator/releases")
         let configuration = URLSessionConfiguration.default
         var request = URLRequest(url: versionUrl!)
         request.httpMethod = "GET"
