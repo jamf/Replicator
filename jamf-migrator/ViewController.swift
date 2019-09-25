@@ -800,6 +800,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // set site, if option selected - start
         if siteMigrate.state.rawValue == 1 {
             destinationSite = availableSites_button.selectedItem!.title
+            itemToSite = true
+        } else {
+            itemToSite = false
         }
         // set site, if option selected - end
         
@@ -2618,7 +2621,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
                 }
                 
-                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
+                if itemToSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
+//                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -2629,7 +2633,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
             case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
                 // migrating to another site
-                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
+                if itemToSite && destinationSite != "" {
+//                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -2789,7 +2794,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             // migrating to another site
 //            DispatchQueue.main.async {
-                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
+            if itemToSite && destinationSite != "" {
+//                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
 //            }
@@ -2864,7 +2870,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             // migrating to another site
 //            DispatchQueue.main.async {
-                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint == "policies" {
+            if itemToSite && destinationSite != "" && endpoint == "policies" {
+//                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint == "policies" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
 //            }
