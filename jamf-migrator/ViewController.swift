@@ -57,7 +57,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         
     // keychain access
-    let Creds            = Credentials()
+//    let Creds            = Credentials()
+    let Creds2           = Credentials2()
     var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
@@ -339,8 +340,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var POSTsuccessCount      = 0
     var failedCount           = 0
     var postCount             = 1
-    var counters = Dictionary<String, Dictionary<String,Int>>()     // summary counters of created, updated, and failed objects
-    var tmp_counter = Dictionary<String, Dictionary<String,Int>>() // used to hold value of counter and avoid simultaneous access when updating
+    var counters = Dictionary<String, Dictionary<String,Int>>()             // summary counters of created, updated, and failed objects
+    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()          // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
 
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
@@ -954,13 +955,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if f_sourceURL == self.source_jp_server && !self.wipe_data {
                                     if self.storeCredentials_button.state.rawValue == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds.save("migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+                                        self.Creds2.save(service: "migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+//                                        self.Creds.save("migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
                                         self.storedSourceUser = self.source_user_field.stringValue
                                     }
                                 } else {
                                     if self.storeCredentials_button.state.rawValue == 1 {
                                         let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds.save("migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+                                        self.Creds2.save(service: "migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+//                                        self.Creds.save("migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
                                         self.storedDestUser = self.dest_user_field.stringValue
                                     }
                                 }
@@ -2310,75 +2313,82 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         self.availableFilesToMigDict.removeAll()
         theOpQ.maxConcurrentOperationCount = 1
-        let semaphore = DispatchSemaphore(value: 0)
+//        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
             for local_folder in local_endpointArray {
-                    do {
-                        let allFiles = FileManager.default.enumerator(atPath: self.dataFilesRoot + "/" + local_folder)
-                        if let allFilePaths = allFiles?.allObjects {
-                            let allFilePathsArray = allFilePaths as! [String]
-                            let xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")} // filter for only files with xml extension
-                            let dataFilesCount = xmlFilePaths.count
-                            for i in 1...dataFilesCount {
-                                let dataFile = xmlFilePaths[i-1]
-        //                        let dataFile = dataFiles[i-1]
-                                let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                                do {
-                                    let fileContents = try String(contentsOf: fileUrl!)
-                                    switch endpoint {
-                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
-                                        local_general = fileContents
-                                        for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
-                                        }
-                                    case "buildings", "departments", "sites", "directorybindings":
-                                        local_general = fileContents
-                                    default:
-                                        local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
-                                        for xmlTag in ["site", "category", "payloads"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
-                                        }
-                                    }
-                                    
-                                    let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
-                                    let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
-                                    
-                                    self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
-                                } catch {
-                                    //                    print("unable to read \(dataFile)")
-                                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
-                                }
-                                self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
-                            }   // for i in 1...dataFilesCount - end
-                        }   // if let allFilePaths - end
-                    } catch {
-                        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
-                    }
-                
-                    var fileCount = self.availableFilesToMigDict.count
-                
-                    //        print("node: \(local_folder) has \(fileCount) files.")
-                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
-                
-                    if fileCount > 0 {
-                        self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
-                            (result: String) in
-                            if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
-                            self.availableFilesToMigDict.removeAll()
-                            if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                            }
-                            completion("fetched xml for: \(endpoint)")
+                do {
+                    let allFiles = FileManager.default.enumerator(atPath: self.dataFilesRoot + "/" + local_folder)
+                    if let allFilePaths = allFiles?.allObjects {
+                        let allFilePathsArray = allFilePaths as! [String]
+                        let xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")} // filter for only files with xml extension
+                        let dataFilesCount = xmlFilePaths.count
+                    
+//                        print("dataFilesCount: \(dataFilesCount)")
+                    
+                        if dataFilesCount < 1 {
+                            self.alert_dialog(header: "Attention:", message: "No files found.")
+                            completion("no files found for: \(endpoint)")
                         }
-                    } else {   // if fileCount - end
-                        self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
+                        for i in 1...dataFilesCount {
+                            let dataFile = xmlFilePaths[i-1]
+    //                        let dataFile = dataFiles[i-1]
+                            let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                            do {
+                                let fileContents = try String(contentsOf: fileUrl!)
+                                switch endpoint {
+                                case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
+                                    local_general = fileContents
+                                    for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                    }
+                                case "buildings", "departments", "sites", "directorybindings":
+                                    local_general = fileContents
+                                default:
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
+                                    for xmlTag in ["site", "category", "payloads"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                    }
+                                }
+                                
+                                let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
+                                let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
+                                
+                                self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
+                            } catch {
+                                //                    print("unable to read \(dataFile)")
+                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                            }
+                            self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
+                        }   // for i in 1...dataFilesCount - end
+                    }   // if let allFilePaths - end
+                } catch {
+                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
+                }
+            
+                var fileCount = self.availableFilesToMigDict.count
+            
+                //        print("node: \(local_folder) has \(fileCount) files.")
+                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
+            
+                if fileCount > 0 {
+                    self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
+                        (result: String) in
+                        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
+                        self.availableFilesToMigDict.removeAll()
                         if nodeIndex < nodesToMigrate.count - 1 {
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                         }
                         completion("fetched xml for: \(endpoint)")
                     }
-                    fileCount = 0
+                } else {   // if fileCount - end
+                    self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
+                    if nodeIndex < nodesToMigrate.count - 1 {
+                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                    }
+                    completion("fetched xml for: \(endpoint)")
+                }
+                fileCount = 0
             }
         }   // self.theOpQ - end
     }
@@ -3848,31 +3858,67 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func fetchPassword(whichServer: String, url: String, theUser: String) {
         let regexKey        = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
         let credKey         = regexKey.stringByReplacingMatches(in: url, options: [], range: NSRange(0..<url.utf16.count), withTemplate: "")
-        let storedPassword  = Creds.retrieve("migrator - "+credKey, account: theUser)
+        let credentailArray  = Creds2.retrieve(service: "migrator - "+credKey)
         
-        if whichServer == "source" {
-            if (url != "") && (theUser != "") {
-                if storedPassword != nil {
-                    source_pwd_field.stringValue = storedPassword!
-                    self.storedSourceUser = source_user
-                } else {
-                    source_pwd_field.stringValue = ""
-                    source_pwd_field.becomeFirstResponder()
+        if credentailArray.count == 2 {
+            if whichServer == "source" {
+                if (url != "") {
+                    source_user_field.stringValue = credentailArray[0]
+                    source_pwd_field.stringValue = credentailArray[1]
+                    self.storedSourceUser = credentailArray[0]
                 }
-            }
-        } else {
-            if (url != "") && (theUser != "") {
-                if storedPassword != nil {
-                    dest_pwd_field.stringValue = storedPassword!
-                    self.storedDestUser = dest_user
+            } else {
+                if (url != "") {
+                    dest_user_field.stringValue = credentailArray[0]
+                    dest_pwd_field.stringValue = credentailArray[1]
+                    self.storedDestUser = credentailArray[0]
                 } else {
                     dest_pwd_field.stringValue = ""
                     if source_pwd_field.stringValue != "" {
                         dest_pwd_field.becomeFirstResponder()
                     }
                 }
+            }   // if whichServer - end
+        } else {
+            // blank out username / password fields
+            if whichServer == "source" {
+                source_user_field.stringValue = ""
+                source_pwd_field.stringValue = ""
+                self.storedSourceUser = ""
+                source_user_field.becomeFirstResponder()
+            } else {
+                dest_user_field.stringValue = ""
+                dest_pwd_field.stringValue = ""
+                self.storedSourceUser = ""
+                dest_user_field.becomeFirstResponder()
             }
         }
+        
+//        let storedPassword  = Creds.retrieve("migrator - "+credKey, account: theUser)
+//
+//        if whichServer == "source" {
+//            if (url != "") && (theUser != "") {
+//                if storedPassword != nil {
+//                    source_pwd_field.stringValue = storedPassword!
+//                    self.storedSourceUser = source_user
+//                } else {
+//                    source_pwd_field.stringValue = ""
+//                    source_pwd_field.becomeFirstResponder()
+//                }
+//            }
+//        } else {
+//            if (url != "") && (theUser != "") {
+//                if storedPassword != nil {
+//                    dest_pwd_field.stringValue = storedPassword!
+//                    self.storedDestUser = dest_user
+//                } else {
+//                    dest_pwd_field.stringValue = ""
+//                    if source_pwd_field.stringValue != "" {
+//                        dest_pwd_field.becomeFirstResponder()
+//                    }
+//                }
+//            }
+//        }
     }
     
     func goButtonEnabled(button_status: Bool) {
@@ -4908,30 +4954,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         _ = serverOrFiles()
 
         // check for stored passwords - start
-        let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-        if (source_jp_server != "") && (source_user != "") {
-            let credKey = regexKey.stringByReplacingMatches(in: source_jp_server, options: [], range: NSRange(0..<source_jp_server.utf16.count), withTemplate: "")
-            let storedSourcePassword = Creds.retrieve("migrator - "+credKey, account: source_user)
-            if storedSourcePassword != nil {
-                source_pwd_field.stringValue = storedSourcePassword!
-                self.storedSourceUser = source_user
-            } else {
-                source_pwd_field.stringValue = ""
-                source_pwd_field.becomeFirstResponder()
-            }
+        if (dest_jp_server != "") {
+            fetchPassword(whichServer: "destination", url: dest_jp_server, theUser: dest_user)
         }
-        if (dest_jp_server != "") && (dest_user != "") {
-            let credKey = regexKey.stringByReplacingMatches(in: dest_jp_server, options: [], range: NSRange(0..<dest_jp_server.utf16.count), withTemplate: "")
-            let storedDestPassword = Creds.retrieve("migrator - "+credKey, account: dest_user)
-            if storedDestPassword != nil {
-                dest_pwd_field.stringValue = storedDestPassword!
-                self.storedDestUser = dest_user
-            } else {
-                dest_pwd_field.stringValue = ""
-                if source_pwd_field.stringValue != "" {
-                    dest_pwd_field.becomeFirstResponder()
-                }
-            }
+        if (source_jp_server != "") {
+            fetchPassword(whichServer: "source", url: source_jp_server, theUser: source_user)
         }
         if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
             self.validCreds = false
@@ -4944,10 +4971,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        debug = true
         
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
+        print("all arguments: \(CommandLine.arguments)")
         if numberOfArgs >= 0 {
-            //            print("all arguments: \(CommandLine.arguments)")
-            for i in stride(from: 1, through: numberOfArgs+1, by: 1) {
-                //print("i: \(i)\t argument: \(CommandLine.arguments[i])")
+            for i in stride(from: 1, through: numberOfArgs+1, by: 2) {
+                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
                 switch CommandLine.arguments[i]{
                 case "-saveRawXml":
                     saveRawXml = true
@@ -4955,6 +4982,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     saveTrimmedXml = true
                 case "-saveOnly":
                     saveOnly = true
+                case "-sourceServer":
+                    source_jp_server = "\(CommandLine.arguments[i+1])"
+                case "-destServer":
+                    dest_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-debug":
                     debug = true
                 case "-NSDocumentRevisionsDebugMode","YES":

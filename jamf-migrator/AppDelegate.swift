@@ -32,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func alert_dialog(header: String, message: String, updateAvail: Bool) {
+        
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
         dialog.informativeText = message
@@ -46,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let clicked:NSApplication.ModalResponse = dialog.runModal()
 
         if clicked.rawValue == 1000 && updateAvail {
-            if let url = URL(string: "https://github.com/jamfprofessionalservices/JamfMigrator/releases") {
+            if let url = URL(string: "https://github.com/jamf/JamfMigrator/releases") {
                     NSWorkspace.shared.open(url)
             }
         }
