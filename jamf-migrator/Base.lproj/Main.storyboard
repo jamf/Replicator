@@ -773,7 +773,7 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="841" height="488"/>
+                        <rect key="frame" x="0.0" y="0.0" width="848" height="488"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yF6-Ie-7cn" userLabel="deleteMode - hidden">
@@ -1338,8 +1338,8 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="702" height="191"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <userGuides>
-                                                                    <userLayoutGuide location="136" affinity="minY"/>
-                                                                    <userLayoutGuide location="549" affinity="minX"/>
+                                                                    <userLayoutGuide location="55" affinity="minY"/>
+                                                                    <userLayoutGuide location="383" affinity="minX"/>
                                                                 </userGuides>
                                                                 <subviews>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P2x-us-N4m">
@@ -1739,6 +1739,23 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="5eV-c7-idl"/>
                                                                         </connections>
                                                                     </button>
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Myf-Ot-UmX">
+                                                                        <rect key="frame" x="402" y="54" width="128" height="17"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Disk Encryptions" id="Kcb-Yq-Nrw">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZNF-kE-Dab" userLabel="Disk Encryptions btn">
+                                                                        <rect key="frame" x="382" y="52" width="139" height="20"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="QR9-5s-6x9">
+                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                            <font key="font" size="14" name="Helvetica"/>
+                                                                        </buttonCell>
+                                                                    </button>
                                                                 </subviews>
                                                             </view>
                                                         </tabViewItem>
@@ -2051,6 +2068,9 @@
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                         <menuItem title="Directory Bindings" id="0Kb-4Y-MlD">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="Disk Encryptions" id="Hc2-WO-itE" userLabel="Disk Encryptions">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                         <menuItem title="Dock Items" id="X9I-p1-P7q">
@@ -2402,6 +2422,8 @@
                         <outlet property="destinationLabel_TextField" destination="Uw9-pw-Waq" id="Lzl-3g-AY8"/>
                         <outlet property="directory_bindings_button" destination="tfr-3a-8nS" id="Me9-JY-iHK"/>
                         <outlet property="directory_bindings_field" destination="Jh1-S4-tyb" id="6iu-zl-ABJ"/>
+                        <outlet property="disk_encryptions_button" destination="ZNF-kE-Dab" id="rTI-yI-3Wa"/>
+                        <outlet property="disk_encryptions_field" destination="Myf-Ot-UmX" id="nKq-gg-IH3"/>
                         <outlet property="dock_items_button" destination="864-jA-QKf" id="XMw-sV-FPV"/>
                         <outlet property="dock_items_field" destination="y2r-qc-GSV" id="xIM-vA-Lbj"/>
                         <outlet property="ext_attribs_button" destination="hPA-qy-uIr" id="ztY-kw-YX2"/>
@@ -2500,7 +2522,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-152.5" y="720"/>
+            <point key="canvasLocation" x="-45" y="720"/>
         </scene>
     </scenes>
     <resources>

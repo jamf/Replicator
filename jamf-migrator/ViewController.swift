@@ -76,6 +76,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var computers_button: NSButton!
     @IBOutlet weak var configurations_button: NSButton!
     @IBOutlet weak var directory_bindings_button: NSButton!
+    @IBOutlet weak var disk_encryptions_button: NSButton!
     @IBOutlet weak var dock_items_button: NSButton!
     @IBOutlet weak var fileshares_button: NSButton!
     @IBOutlet weak var sus_button: NSButton!
@@ -156,6 +157,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var computers_label_field: NSTextField!
     @IBOutlet weak var configurations_label_field: NSTextField!
     @IBOutlet weak var directory_bindings_field: NSTextField!
+    @IBOutlet weak var disk_encryptions_field: NSTextField!
     @IBOutlet weak var dock_items_field: NSTextField!
     @IBOutlet weak var file_shares_label_field: NSTextField!
     @IBOutlet weak var sus_label_field: NSTextField!
@@ -315,7 +317,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var fileImport      = false
     var dataFilesRoot   = ""
     
-    var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
+    var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     var xmlName             = ""
     var destEPs             = [String:Int]()
     var currentEPs          = [String:Int]()
@@ -328,8 +330,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var redText:NSColor     = NSColor.red
     var changeColor:Bool    = true
     
-    // This order must match the drop down for selective migration, provide the node name
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
     var AllEndpointsArray = [String]()
@@ -544,6 +546,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.computers_button.state.rawValue == 1
                     && self.configurations_button.state.rawValue == 1
                     && self.directory_bindings_button.state.rawValue == 1
+                    && self.disk_encryptions_button.state.rawValue == 1
                     && self.dock_items_button.state.rawValue == 1
                     && self.fileshares_button.state.rawValue == 1
                     && self.sus_button.state.rawValue == 1
@@ -594,6 +597,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.computers_button.state = self.allNone_button.state
             self.configurations_button.state = self.allNone_button.state
             self.directory_bindings_button.state = self.allNone_button.state
+            self.disk_encryptions_button.state = self.allNone_button.state
             self.dock_items_button.state = self.allNone_button.state
             self.fileshares_button.state = self.allNone_button.state
             self.sus_button.state = self.allNone_button.state
@@ -1052,6 +1056,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.objectsToMigrate += ["directorybindings"]
                         }
                         
+                        if self.disk_encryptions_button.state.rawValue == 1 {
+                            self.objectsToMigrate += ["diskencryptionconfigurations"]
+                        }
+                        
                         if self.dock_items_button.state.rawValue == 1 {
                             self.objectsToMigrate += ["dockitems"]
                         }
@@ -1470,10 +1478,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             endpoint       = "computergroups"
             endpointParent = "computer_groups"
-        case "distributionpoints":
-            endpointParent = "distribution_points"
         case "directorybindings":
             endpointParent = "directory_bindings"
+        case "diskencryptionconfigurations":
+            endpointParent = "disk_encryption_configurations"
+        case "distributionpoints":
+            endpointParent = "distribution_points"
         case "dockitems":
             endpointParent = "dock_items"
         case "macapplications":
@@ -1557,7 +1567,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if self.debug { self.writeToLog(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))\n") }
                             
                             switch endpoint {
-                            case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                            case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                 if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                     endpointCount = endpointInfo.count
                                     if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -2605,7 +2615,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         switch endpoint {
-        case "buildings", "departments", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -3408,6 +3418,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointParent = "computer_groups"
             case "computerconfigurations":
                 endpointParent = "computer_configurations"
+            case "diskencryptionconfigurations":
+                endpointParent = "disk_encryption_configurations"
             case "distributionpoints":
                 endpointParent = "distribution_points"
             case "directorybindings":
@@ -4140,6 +4152,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.configurations_label_field.textColor = theColor
             case "directorybindings":
                 self.directory_bindings_field.textColor = theColor
+            case "diskencryptionconfigurations":
+                self.file_shares_label_field.textColor = theColor
             case "distributionpoints":
                 self.file_shares_label_field.textColor = theColor
             case "dockitems":
@@ -5028,6 +5042,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         computers_button.state = NSControl.StateValue(rawValue: 0)
         configurations_button.state = NSControl.StateValue(rawValue: 0)
         directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+        disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
         dock_items_button.state = NSControl.StateValue(rawValue: 0)
         netboot_button.state = NSControl.StateValue(rawValue: 0)
         osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
