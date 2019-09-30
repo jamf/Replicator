@@ -248,6 +248,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // command line switches
     var debug           = false
+    var hideGui         = false
     var saveOnly        = false
     var saveRawXml      = false
     var saveTrimmedXml  = false
@@ -4993,6 +4994,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     source_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-destServer":
                     dest_jp_server = "\(CommandLine.arguments[i+1])"
+                case "-hidden":
+                    hideGui = true
                 case "-debug":
                     debug = true
                 case "-NSDocumentRevisionsDebugMode","YES":
@@ -5006,6 +5009,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
         self.writeToLog(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
+        
+        if hideGui {
+            
+        }
         
     }   //viewDidAppear - end
     

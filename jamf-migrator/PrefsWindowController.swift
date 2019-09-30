@@ -34,6 +34,8 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
 //                print("show prefs window")
                 pwc?.showWindow(nil)
             } else {
+                self.window?.makeKey()
+//                pwc?.close()
 //                print("[PreferenceWindowController] pref window already visible, bring to front - close/reopen")
             }
         }
