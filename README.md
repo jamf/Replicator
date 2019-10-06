@@ -28,6 +28,9 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Buildings - the API only allows the name to be migrated.
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
+* Institutional disk encryptions that contain the private key cannot be migrated.
+* Approved Kernel Extension payloads that contain bundle IDs will be dropped from the Configuration Profile.
+* Approved Kernel Extension - the display name for the Approved Team ID does not migrate.
 
  
 The 'Selective' tab provides the ability to select a subset of items within a category.  For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.
@@ -109,6 +112,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v4.1.0**
+
+* Added the ability to migrate disk encryption configurations.  Since passwords cannot be migrated Institutional configurations containing the private key will not migrate.
 
 **v4.0.0**
 

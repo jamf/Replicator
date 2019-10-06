@@ -3326,6 +3326,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                             self.changeColor = false
                             self.writeToLog(stringOfText: "[RemoveEndpoints] **** Failed to remove: \(endpointName)\n")
+                            if httpResponse.statusCode == 400 {
+                                self.writeToLog(stringOfText: "[RemoveEndpoints] **** Verify other items are not dependent on \(endpointName)\n")
+                                self.writeToLog(stringOfText: "[RemoveEndpoints] **** For example, \(endpointName) is not used in a policy\n")
+                            }
                             if self.POSTsuccessCount == 0 && endpointCount == endpointCurrent {
                                 self.labelColor(endpoint: endpointType, theColor: self.redText)
                             }
@@ -4993,10 +4997,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        debug = true
         
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
-        print("all arguments: \(CommandLine.arguments)")
+//        print("all arguments: \(CommandLine.arguments)")
+        if CommandLine.arguments.contains("-debug") {
+            numberOfArgs -= 1
+            debug = true
+        }
         if numberOfArgs >= 0 {
             for i in stride(from: 1, through: numberOfArgs+1, by: 2) {
-                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
+//                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
                 switch CommandLine.arguments[i]{
                 case "-saveRawXml":
                     saveRawXml = true
@@ -5010,8 +5018,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     dest_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-hidden":
                     hideGui = true
-                case "-debug":
-                    debug = true
                 case "-NSDocumentRevisionsDebugMode","YES":
                     continue
                 default:
