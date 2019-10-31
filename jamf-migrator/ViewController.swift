@@ -3747,11 +3747,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") {
                 (result: [String]) in
                 let destSitesArray = result
-                if destSitesArray.count == 0 {
-                    self.alert_dialog(header: "Attention", message: "No sites were found or the server cound not be queried.")
-                    self.siteMigrate.state = NSControl.StateValue(rawValue: 0) // or convertToNSControlStateValue(0)
-                    self.itemToSite = false
-                    return
+                if destSitesArray.count == 0 {self.destinationLabel_TextField.stringValue = "Site Name"
+                    self.availableSites_button.addItems(withTitles: ["None"])
+                    self.availableSites_button.isEnabled = true
+//                    self.alert_dialog(header: "Attention", message: "No sites were found or the server cound not be queried.")
+//                    self.siteMigrate.state = NSControl.StateValue(rawValue: 0) // or convertToNSControlStateValue(0)
+//                    self.itemToSite = false
+//                    return
                 }
                     self.destinationLabel_TextField.stringValue = "Site Name"
                     for theSite in destSitesArray {
