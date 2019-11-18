@@ -24,7 +24,7 @@ class HelpViewController: NSViewController {
         super.viewDidLoad()
         // Do view setup here.
         
-        let filePath = Bundle.main.path(forResource: "index", ofType: "html")
+        let   filePath = Bundle.main.path(forResource: "index", ofType: "html")
         let folderPath = Bundle.main.resourcePath
         
         let fileUrl = NSURL(fileURLWithPath: filePath!)

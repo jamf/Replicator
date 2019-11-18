@@ -18,7 +18,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Import file variables
     @IBOutlet weak var importFiles_button: NSButton!
-    var exportedFilesUrl                     = URL(string: "")
+    var exportedFilesUrl                          = URL(string: "")
     var availableFilesToMigDict:[String:[String]] = [:]   // something like xmlID, xmlName
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
@@ -232,6 +232,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
     var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
     var selectiveListCleared                = false
+    var delayInt: UInt32                    = 50000
     
     // destination TextFieldCells
     @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
@@ -239,11 +240,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // selective migration items - end
     
     // smartgroup vars
-    var migrateSmartComputerGroups = false
+    var migrateSmartComputerGroups  = false
     var migrateStaticComputerGroups = false
-    var migrateSmartMobileGroups   = false
+    var migrateSmartMobileGroups    = false
     var migrateStaticMobileGroups   = false
-    var migrateSmartUserGroups     = false
+    var migrateSmartUserGroups      = false
     var migrateStaticUserGroups     = false
     
     var isDir: ObjCBool = false
@@ -261,13 +262,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var format = PropertyListSerialization.PropertyListFormat.xml //format of the property list
     var plistData:[String:Any] = [:]   //our server/username data
 
-    var maxHistory: Int = 20
+    var maxHistory:     Int = 20
     var historyFile: String = ""
-    var logFile: String = ""
+    var logFile:     String = ""
     let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
-    let logPath:String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    var historyFileW: FileHandle?  = FileHandle(forUpdatingAtPath: "")
-    var logFileW: FileHandle?  = FileHandle(forUpdatingAtPath: "")
+    let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
+    var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
+    var logFileW:     FileHandle? = FileHandle(forUpdatingAtPath: "")
     
     // scope preferences
     var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
@@ -285,7 +286,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var scopeUsersCopy:         Bool = true // static user groups copy scope
     
     // xml prefs
-    var xmlPrefOptions:        Dictionary<String,Bool> = [:]
+    var xmlPrefOptions: Dictionary<String,Bool> = [:]
     
     // site copy / move pref
     var sitePref = ""
@@ -1354,9 +1355,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         var objToMigrateID = 0
                         // clear targetDataArray - needed to handle switching tabs
                         self.targetDataArray.removeAll()
-                        // create targetDataArray
                         
                         DispatchQueue.main.async {
+                            // create targetDataArray - start
                             for k in (0..<self.sourceDataArray.count) {
                                 if self.srcSrvTableView.isRowSelected(k) {
                                     // prevent the removal of the account we're using
@@ -1365,6 +1366,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }   // if self.srcSrvTableView.isRowSelected(k) - end
                             }   // for k in - end
+                            // create targetDataArray - end
                         
                             if self.targetDataArray.count == 0 {
                                 if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
@@ -1373,7 +1375,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 return
                             }
                             
-                            // Used if we remove items from the list as they are removed from the server - working?
+                            // Used if we remove items from the list as they are removed from the server
                             if self.wipe_data {
                                 self.availableIdsToDelArray.removeAll()
                                 for k in (0..<self.sourceDataArray.count) {
@@ -1538,7 +1540,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         
-        theOpQ.maxConcurrentOperationCount = 1
+        theOpQ.maxConcurrentOperationCount = 3
         let semaphore = DispatchSemaphore(value: 0)
         
         DispatchQueue.main.async {
@@ -1621,6 +1623,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                             } else {
                                                 // populate source server under the selective tab
+                                                self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                     self.sortQ.async {
                                                         //print("adding \(l_xmlName) to array")
@@ -1632,7 +1635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.srcSrvTableView.reloadData()
                                                             }
                                                         // slight delay in building the list - visual effect
-                                                            usleep(50000)
+                                                        usleep(self.delayInt)
 //                                                            self.goButtonEnabled(button_status: true)
 //                                                        }   //if self.availableIDsToMigDict.count - end
 //                                                        DispatchQueue.main.async {
@@ -1796,6 +1799,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 default: break
                                                 }
                                                 var counter = 1
+                                                self.delayInt = self.listDelay(itemCount: currentGroupDict.count)
                                                 for (l_xmlID, l_xmlName) in currentGroupDict {
                                                     self.availableObjsToMigDict[l_xmlID] = l_xmlName
                                                     if self.goSender == "goButton" {
@@ -1827,7 +1831,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             DispatchQueue.main.async {
                                                                 self.srcSrvTableView.reloadData()
                                                             }
-                                                            usleep(50000)
+                                                            // slight delay in building the list - visual effect
+                                                            usleep(self.delayInt)
                                                             
                                                             if counter == self.sourceDataArray.count {
                                                                 self.goButtonEnabled(button_status: true)
@@ -1897,6 +1902,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             let nonRemotePolicies = computerPoliciesDict.count
                                             var counter = 1
                                             
+                                            self.delayInt = self.listDelay(itemCount: computerPoliciesDict.count)
                                             for (l_xmlID, l_xmlName) in computerPoliciesDict {
                                                 if self.goSender == "goButton" {
                                                     if !self.wipe_data  {
@@ -1929,7 +1935,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.srcSrvTableView.reloadData()
                                                             }
                                                             // slight delay in building the list - visual effect
-                                                            usleep(50000)
+                                                            usleep(self.delayInt)
 
                                                             if counter == computerPoliciesDict.count {
                                                                 self.goButtonEnabled(button_status: true)
@@ -2022,6 +2028,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                             } else {
                                                 // populate source server under the selective tab
+                                                self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                     self.sortQ.async {
                                                         //print("adding \(l_xmlName) to array")
@@ -2033,7 +2040,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             self.srcSrvTableView.reloadData()
                                                         }
                                                         // slight delay in building the list - visual effect
-                                                        usleep(50000)
+                                                        usleep(self.delayInt)
                                                         
                                                         if counter == self.availableObjsToMigDict.count {
                                                             self.goButtonEnabled(button_status: true)
@@ -2193,6 +2200,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                 } else {
                                                                                     // populate source server under the selective tab
                                                                                     // for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                                    self.delayInt = self.listDelay(itemCount: orderedConfArray.count)
                                                                                     for orderedId in orderedConfArray {
                                                                                         let l_xmlID = Int(orderedId)
                                                                                         let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
@@ -2205,7 +2213,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                                 self.srcSrvTableView.reloadData()
                                                                                             }
                                                                                             // slight delay in building the list - visual effect
-                                                                                            usleep(50000)
+                                                                                            usleep(self.delayInt)
 
                                                                                             if counter == orderedConfArray.count {
                                                                                                 self.goButtonEnabled(button_status: true)
@@ -2463,7 +2471,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
-        theOpQ.maxConcurrentOperationCount = 1
+        theOpQ.maxConcurrentOperationCount = 3
         let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
@@ -2967,7 +2975,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 //        var createDestUrl = createDestUrlBase
         //if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
-        theCreateQ.maxConcurrentOperationCount = 1
+        theCreateQ.maxConcurrentOperationCount = 3
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
@@ -3072,14 +3080,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                         }
                         
+                        
+                        DispatchQueue.main.async {
+                            self.object_name_field.stringValue       = "\(endpointType)"
+                            let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                            if endpointCurrent > currentCompleted {
+                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                            }
+                            self.objects_found_field.stringValue     = "\(endpointCount)"
+                        }   // DispatchQueue.main.async - end
+                        
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
-                            
-                            DispatchQueue.main.async {
-                                self.object_name_field.stringValue       = "\(endpointType)"
-                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
-                                self.objects_found_field.stringValue     = "\(endpointCount)"
-                            }   // DispatchQueue.main.async - end
                             
                             self.POSTsuccessCount += 1
                             
@@ -3108,12 +3120,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                         } else {
                             // create failed
-                            
-                            DispatchQueue.main.async {
-                                self.object_name_field.stringValue       = "\(endpointType)"
-                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
-                                self.objects_found_field.stringValue     = "\(endpointCount)"
-                            }   // DispatchQueue.main.async - end
+//
+//                            DispatchQueue.main.async {
+//                                self.object_name_field.stringValue       = "\(endpointType)"
+//                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
+//                                self.objects_found_field.stringValue     = "\(endpointCount)"
+//                            }   // DispatchQueue.main.async - end
                             
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                         
@@ -3234,7 +3246,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         // this is where we delete the endpoint
         var removeDestUrl = ""
-        theOpQ.maxConcurrentOperationCount = 1
+        theOpQ.maxConcurrentOperationCount = 3
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
         switch endpointType {
@@ -3290,7 +3302,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         DispatchQueue.main.async {
 //                            self.migrationStatus(endpoint: endpointType, count: endpointCount)
                             self.object_name_field.stringValue       = "\(endpointType)"
-                            self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                            let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                            if endpointCurrent > currentCompleted {
+                                self.objects_completed_field.stringValue = "\(endpointCurrent)"
+                            }
                             self.objects_found_field.stringValue     = "\(endpointCount)"
                             
                             // look to see if we are processing the next endpointType - start
@@ -3748,6 +3763,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 (result: [String]) in
                 let destSitesArray = result
                 if destSitesArray.count == 0 {self.destinationLabel_TextField.stringValue = "Site Name"
+                    // no sites found - allow migration from a site to none
                     self.availableSites_button.addItems(withTitles: ["None"])
                     self.availableSites_button.isEnabled = true
 //                    self.alert_dialog(header: "Attention", message: "No sites were found or the server cound not be queried.")
@@ -3756,6 +3772,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                    return
                 }
                     self.destinationLabel_TextField.stringValue = "Site Name"
+                    self.availableSites_button.addItems(withTitles: ["None"])
                     for theSite in destSitesArray {
                         self.availableSites_button.addItems(withTitles: [theSite])
                     }
@@ -3919,32 +3936,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 dest_user_field.becomeFirstResponder()
             }
         }
-        
-//        let storedPassword  = Creds.retrieve("migrator - "+credKey, account: theUser)
-//
-//        if whichServer == "source" {
-//            if (url != "") && (theUser != "") {
-//                if storedPassword != nil {
-//                    source_pwd_field.stringValue = storedPassword!
-//                    self.storedSourceUser = source_user
-//                } else {
-//                    source_pwd_field.stringValue = ""
-//                    source_pwd_field.becomeFirstResponder()
-//                }
-//            }
-//        } else {
-//            if (url != "") && (theUser != "") {
-//                if storedPassword != nil {
-//                    dest_pwd_field.stringValue = storedPassword!
-//                    self.storedDestUser = dest_user
-//                } else {
-//                    dest_pwd_field.stringValue = ""
-//                    if source_pwd_field.stringValue != "" {
-//                        dest_pwd_field.becomeFirstResponder()
-//                    }
-//                }
-//            }
-//        }
     }
     
     func goButtonEnabled(button_status: Bool) {
@@ -4018,6 +4009,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return stringDate
     }
     
+    // add leading zero to single digit integers
     func leadingZero(value: Int) -> String {
         var formattedValue = ""
         if value < 10 {
@@ -4026,6 +4018,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             formattedValue = "\(value)"
         }
         return formattedValue
+    }
+    
+    // scale the delay when listing items with selective migrations based on the number of items
+    func listDelay(itemCount: Int) -> UInt32 {
+        let factor = (5000000/itemCount)
+        if factor > 50000 {
+            return 50000
+        } else {
+            return UInt32(factor)
+        }
     }
     
     // replace with tagValue function?

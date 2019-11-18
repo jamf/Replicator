@@ -65,7 +65,7 @@ class Xml {
         default:
             let xmlFile = "\(name)-\(id).xml"
             if let xmlDoc = try? XMLDocument(xmlString: xml, options: .nodePrettyPrint) {
-                if let prettyXml = try? XMLElement.init(xmlString:"\(xml)") {
+                if let _ = try? XMLElement.init(xmlString:"\(xml)") {
                     let data = xmlDoc.xmlData(options:.nodePrettyPrint)
                     let formattedXml = String(data: data, encoding: .utf8)!
                     //                print("policy xml:\n\(formattedXml)")
