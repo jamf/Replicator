@@ -113,6 +113,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v4.1.2**
+
+* Added site None to list of available sites to migrate to.  
+* Increased concurrent threads for post/put/delete from 1 to 3.  
+* Speedier listing of objects when using selective migration.
+
 **v4.1.0**
 
 * Added the ability to migrate disk encryption configurations.  Since passwords cannot be migrated Institutional configurations containing the private key will not migrate.
