@@ -391,6 +391,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var writeLogQ   = DispatchQueue(label: "com.jamf.writeLogQ", qos: DispatchQoS.background)
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
+    var concurrentThreads      = 3
     
     var migrateOrWipe: String = ""
     var httpStatusCode: Int = 0
@@ -1540,7 +1541,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         
-        theOpQ.maxConcurrentOperationCount = 3
+        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         DispatchQueue.main.async {
@@ -2471,7 +2473,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         URLCache.shared.removeAllCachedResponses()
         if self.debug { self.writeToLog(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
-        theOpQ.maxConcurrentOperationCount = 3
+        
+        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
@@ -2975,7 +2979,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 //        var createDestUrl = createDestUrlBase
         //if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
-        theCreateQ.maxConcurrentOperationCount = 3
+        
+        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
@@ -3246,7 +3252,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         // this is where we delete the endpoint
         var removeDestUrl = ""
-        theOpQ.maxConcurrentOperationCount = 3
+        
+        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
         switch endpointType {
@@ -5044,6 +5052,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        // read maxConcurrentOperationCount setting
+        concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 3:userDefaults.integer(forKey: "concurrentThreads")
+        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        
         // Sellect all items to be migrated
         // macOS tab
         allNone_button.state = NSControl.StateValue(rawValue: 0)
