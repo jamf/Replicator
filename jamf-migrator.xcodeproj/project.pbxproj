@@ -18,6 +18,7 @@
 		B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C42273AF4A0006C1E4 /* quit_dark.png */; };
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
+		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
@@ -62,6 +63,7 @@
 		B53796C42273AF4A0006C1E4 /* quit_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = quit_dark.png; path = Assets.xcassets/quit_dark.imageset/quit_dark.png; sourceTree = "<group>"; };
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
+		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 		9BC01C5E1DFB0C07007E634E /* jamf-migrator */ = {
 			isa = PBXGroup;
 			children = (
+				B53ECDF72391F8FB005EE6E5 /* Globals.swift */,
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B562410D215151C4007F8144 /* jamf-migrator.entitlements */,
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
@@ -321,6 +324,7 @@
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */,
+				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,

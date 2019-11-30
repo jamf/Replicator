@@ -16,6 +16,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet var migrator_window: NSView!
     @IBOutlet weak var modeTab_TabView: NSTabView!
     
+    @IBOutlet weak var sitesSpinner_ProgressIndicator: NSProgressIndicator!
+    
+    
     // Import file variables
     @IBOutlet weak var importFiles_button: NSButton!
     var exportedFilesUrl                          = URL(string: "")
@@ -265,10 +268,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var maxHistory:     Int = 20
     var historyFile: String = ""
     var logFile:     String = ""
-    let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
     let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     var logFileW:     FileHandle? = FileHandle(forUpdatingAtPath: "")
+    // legacy logging (history) path and file
+    let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
+    var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     
     // scope preferences
     var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
@@ -3767,6 +3771,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             itemToSite = true
             availableSites_button.removeAllItems()
 
+            DispatchQueue.main.async {
+                self.siteMigrate.isEnabled = false
+                self.sitesSpinner_ProgressIndicator.startAnimation(self)
+            }
+            
             Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") {
                 (result: [String]) in
                 let destSitesArray = result
@@ -3785,12 +3794,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.availableSites_button.addItems(withTitles: [theSite])
                     }
                     self.availableSites_button.isEnabled = true
+                    
+                    DispatchQueue.main.async {
+                        self.sitesSpinner_ProgressIndicator.stopAnimation(self)
+                        self.siteMigrate.isEnabled = true
+                    }
             }
+            
         } else {
             destinationLabel_TextField.stringValue = "Destination"
             self.availableSites_button.isEnabled = false
             destinationSite = ""
             itemToSite = false
+            DispatchQueue.main.async {
+                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
+                self.siteMigrate.isEnabled = true
+            }
         }
         
     }
@@ -4708,7 +4727,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         writeLogQ.async {
             let logString = (self.debug) ? "\(self.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.getCurrentTime()) \(stringOfText)"
 
-            self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
+            self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + self.logFile))
+//            self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
             
             self.logFileW?.seekToEndOfFile()
             let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
@@ -5013,6 +5033,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if CommandLine.arguments.contains("-debug") {
             numberOfArgs -= 1
             debug = true
+            LogLevel.debug = true
         }
         if numberOfArgs >= 0 {
             for i in stride(from: 1, through: numberOfArgs+1, by: 2) {
@@ -5128,6 +5149,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         
         logFile = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_migration.log"
+        History.logFile = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_migration.log"
 
         isDir = false
         if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {

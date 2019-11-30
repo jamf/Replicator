@@ -8,16 +8,22 @@
 
 import Foundation
 class WriteToLog {
+    
+    let vc = ViewController()
+    var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
+    var writeToLogQ = DispatchQueue(label: "com.jamf.writeLogQ", qos: DispatchQoS.background)
 
-//    func message(stringOfText: String) {
-//        let logString = (self.debug) ? "\(self.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.getCurrentTime()) \(stringOfText)"
-//        
-//        self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
-//        
-//        self.logFileW?.seekToEndOfFile()
-//        let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-//        self.logFileW?.write(historyText!)
-//        self.logFileW?.closeFile()
-//    }
+    func message(stringOfText: String) {
+        writeToLogQ.async {
+            let logString = (LogLevel.debug) ? "\(self.vc.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.vc.getCurrentTime()) \(stringOfText)"
+            
+            self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
+            
+            self.logFileW?.seekToEndOfFile()
+            let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
+            self.logFileW?.write(historyText!)
+            self.logFileW?.closeFile()
+        }
+    }
 
 }

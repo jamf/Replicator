@@ -33,6 +33,7 @@ class Sites: NSObject, URLSessionDelegate {
         resourcePath = "\(server)/JSSResource/sites"
         resourcePath = resourcePath.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         // get all the sites - start
+        WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
         getSites() {
             (result: [String]) in
             siteArray = result
@@ -86,7 +87,7 @@ class Sites: NSObject, URLSessionDelegate {
                     completion(destSiteArray)
                 } else {
                     // something went wrong
-                    print("status code: \(httpResponse.statusCode)")
+                    WriteToLog().message(stringOfText: "[Sites] Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)\n")
                     self.vc.alert_dialog(header: "Alert", message: "Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
                     
                     //                        self.enableSites_Button.state = convertToNSControlStateValue(0)
