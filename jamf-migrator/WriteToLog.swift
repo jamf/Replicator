@@ -11,7 +11,7 @@ class WriteToLog {
     
     let vc = ViewController()
     var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
-    var writeToLogQ = DispatchQueue(label: "com.jamf.writeLogQ", qos: DispatchQoS.background)
+    var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.background)
 
     func message(stringOfText: String) {
         writeToLogQ.async {
