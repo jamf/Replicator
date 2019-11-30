@@ -14,7 +14,7 @@ class WriteToLog {
     var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.background)
 
     func message(stringOfText: String) {
-        writeToLogQ.async {
+        writeToLogQ.sync {
             let logString = (LogLevel.debug) ? "\(self.vc.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.vc.getCurrentTime()) \(stringOfText)"
             
             self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
@@ -22,7 +22,7 @@ class WriteToLog {
             self.logFileW?.seekToEndOfFile()
             let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
             self.logFileW?.write(historyText!)
-            self.logFileW?.closeFile()
+//            self.logFileW?.closeFile()
         }
     }
 

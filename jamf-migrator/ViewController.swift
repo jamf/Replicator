@@ -405,7 +405,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func deleteMode_fn(_ sender: Any) {
         var isDir: ObjCBool = false
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-            if self.debug { self.writeToLog(stringOfText: "Disabling delete mode\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
                 self.sourceDataArray.removeAll()
@@ -415,16 +415,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 _ = serverOrFiles()
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
             }
             wipe_data = false
         } else {
-            if self.debug { self.writeToLog(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
             do {
                 try self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
             }
             wipe_data = true
         }
@@ -653,7 +653,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         let whichTab = sender.identifier!.rawValue
         
-        if debug { writeToLog(stringOfText: "func sectionToMigrate active tab: \(String(describing: whichTab)).\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "func sectionToMigrate active tab: \(String(describing: whichTab)).\n") }
         var itemIndex = 0
         switch whichTab {
         case "macOS":
@@ -691,7 +691,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             objectsToMigrate.append(AllEndpointsArray[itemIndex-1])
-            if self.debug { self.writeToLog(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
             Go(sender: self)
         }
     }
@@ -712,11 +712,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         didRun = true
 
-        if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
+        if self.debug { WriteToLog().message(stringOfText: "Start Migrating/Removal\n") }
         // check for file that allow deleting data from destination server - start
         //       var isDir: ObjCBool = false
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-            if self.debug { self.writeToLog(stringOfText: "Removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
             wipe_data = true
             
             migrateOrWipe = "----------- Starting To Wipe Data -----------\n"
@@ -728,7 +728,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
             // verify source and destination are not the same - end
-            if self.debug { self.writeToLog(stringOfText: "Migrating data from \(source_jp_server_field.stringValue) to \(dest_jp_server_field.stringValue).\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Migrating data from \(source_jp_server_field.stringValue) to \(dest_jp_server_field.stringValue).\n") }
             wipe_data = false
             
             migrateOrWipe = "----------- Starting Migration -----------\n"
@@ -736,14 +736,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allow deleting data from destination server - end
         
         
-        if debug { writeToLog(stringOfText: "go sender tag: \(String(describing: sender.tag))\n") }
+        if debug { WriteToLog().message(stringOfText: "go sender tag: \(String(describing: sender.tag))\n") }
         // determine if we got here from the Go button or selectToMigrate button
         if sender.tag != nil {
             self.goSender = "goButton"
         } else {
             self.goSender = "selectToMigrateButton"
         }
-        if debug { writeToLog(stringOfText: "Go button pressed from: \(goSender)\n") }
+        if debug { WriteToLog().message(stringOfText: "Go button pressed from: \(goSender)\n") }
         
         // which migration mode tab are we on - start
         if activeTab() != "selective" {
@@ -751,7 +751,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             migrationMode = "selective"
         }
-        if debug { writeToLog(stringOfText: "Migration Mode (Go): \(migrationMode)\n") }
+        if debug { WriteToLog().message(stringOfText: "Migration Mode (Go): \(migrationMode)\n") }
         
         //self.go_button.isEnabled = false
         nodesMigrated = -1
@@ -845,7 +845,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.authCheck(whichServer: "source", f_sourceURL: self.source_jp_server, f_credentials: self.sourceBase64Creds)  {
                 (result: Bool) in
                 if !result && !self.wipe_data {
-                    if self.debug { self.writeToLog(stringOfText: "Source server authentication failure.") }
+                    if self.debug { WriteToLog().message(stringOfText: "Source server authentication failure.") }
                     return
                 } else {
 //                    if !self.fileImport {
@@ -855,7 +855,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
                         (result: Bool) in
                         if !result {
-                            if self.debug { self.writeToLog(stringOfText: "Destination server authentication failure.") }
+                            if self.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.") }
                             return
                         } else {
                             if !self.saveOnly {
@@ -893,7 +893,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
 //                                                }
                                                 
-                                                if self.debug { self.writeToLog(stringOfText: "Failed to connect to destination server.") }
+                                                if self.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.") }
                                                 self.goButtonEnabled(button_status: true)
                                                 return
                                             }
@@ -907,7 +907,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     DispatchQueue.main.async {
                                         self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
                                     }
-                                    if self.debug { self.writeToLog(stringOfText: "Failed to connect source server.") }
+                                    if self.debug { WriteToLog().message(stringOfText: "Failed to connect source server.") }
                                     self.goButtonEnabled(button_status: true)
                                     return
                                 }
@@ -931,7 +931,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         let tabLabel = (activeTab_TabView.selectedTabViewItem?.label)!        
         userDefaults.set(tabLabel, forKey: "activeTab")
-        
+
+        WriteToLog().logFileW?.closeFile()
         NSApplication.shared.terminate(self)
     }
     
@@ -940,13 +941,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func authCheck(whichServer: String, f_sourceURL: String, f_credentials: String, completion: @escaping (Bool) -> Void) {
         URLCache.shared.removeAllCachedResponses()
         var validCredentials:Bool = false
-        if self.debug { self.writeToLog(stringOfText: "--- checking authentication to: \(f_sourceURL)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "--- checking authentication to: \(f_sourceURL)\n") }
         
         if (whichServer == "source" && (!wipe_data && !fileImport)) || (whichServer == "dest" && !saveOnly) {
             var myURL = "\(f_sourceURL)/JSSResource/buildings"
             myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
-                if self.debug { self.writeToLog(stringOfText: "checking: \(myURL)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
                 
                 let encodedURL = NSURL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -958,10 +959,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
                     if let httpResponse = response as? HTTPURLResponse {
-                        if self.debug { self.writeToLog(stringOfText: "\(myURL) auth check httpResponse: \(httpResponse.statusCode)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "\(myURL) auth check httpResponse: \(httpResponse.statusCode)\n") }
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            if self.debug { self.writeToLog(stringOfText: "\(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
                             
                             if (!self.validCreds) || (self.source_user_field.stringValue != self.storedSourceUser) || (self.dest_user_field.stringValue != self.storedDestUser) {
                                 // save credentials to login keychain - start
@@ -987,14 +988,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             validCredentials = true
                             completion(validCredentials)
                         } else {
-                            if self.debug { self.writeToLog(stringOfText: "\n\n") }
-                            if self.debug { self.writeToLog(stringOfText: "---------- status code ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "\(httpResponse.statusCode)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\n\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "---------- status code ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\(httpResponse.statusCode)\n") }
                             self.httpStatusCode = httpResponse.statusCode
-                            if self.debug { self.writeToLog(stringOfText: "---------- status code ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "\n\n---------- response ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "\(httpResponse)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "---------- response ----------\n\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "---------- status code ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\n\n---------- response ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\(httpResponse)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "---------- response ----------\n\n") }
                             self.theOpQ.cancelAllOperations()
                             switch self.httpStatusCode {
                             case 401:
@@ -1041,15 +1042,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.labelColor(endpoint: self.AllEndpointsArray[i], theColor: self.whiteText)
             }
             // set all the labels to white - end
-            if self.debug { self.writeToLog(stringOfText: "Start Migrating/Removal\n") }
-            if self.debug { self.writeToLog(stringOfText: "platform: \(self.deviceType()).\n") }
-            if self.debug { self.writeToLog(stringOfText: "Migration Mode (startMigration): \(self.migrationMode).\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Start Migrating/Removal\n") }
+            if self.debug { WriteToLog().message(stringOfText: "platform: \(self.deviceType()).\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Migration Mode (startMigration): \(self.migrationMode).\n") }
             
                 // list the items in the order they need to be migrated
             if self.migrationMode == "bulk" {
                 // initialize list of items to migrate then add what we want - start
                 self.objectsToMigrate.removeAll()
-                if self.debug { self.writeToLog(stringOfText: "Types of objects to migrate: \(self.deviceType()).\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Types of objects to migrate: \(self.deviceType()).\n") }
 //                    DispatchQueue.main.async {
                     // macOS
                     switch self.deviceType() {
@@ -1215,11 +1216,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // if migrationMode == "bulk" - end
             
             // initialize list of items to migrate then add what we want - end
-            if self.debug { self.writeToLog(stringOfText: "objects: \(self.objectsToMigrate).\n") }
+            if self.debug { WriteToLog().message(stringOfText: "objects: \(self.objectsToMigrate).\n") }
                     
             
             if self.objectsToMigrate.count == 0 {
-                if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
+                if self.debug { WriteToLog().message(stringOfText: "nothing selected to migrate/remove.\n") }
                 self.goButtonEnabled(button_status: true)
                 return
             } else {
@@ -1239,7 +1240,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }// end if objectsToMigrate - end
             }   // if wipe_data - end
             
-            self.writeToLog(stringOfText: self.migrateOrWipe)
+            WriteToLog().message(stringOfText: self.migrateOrWipe)
             
             // initialize created/updated/failed counters
            // need to add code to handle computergroups, mobiledevicegroups, and usergroups (done?)
@@ -1326,15 +1327,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             // get preference settings - end
             
-            if self.debug { self.writeToLog(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
+            if self.debug { WriteToLog().message(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
 //            var arrayIndex = 0
             // loop through process of migrating or removing - start
             self.readNodesQ.sync {
                 let currentNode = self.objectsToMigrate[0]
 
-                if self.debug { self.writeToLog(stringOfText: "Starting to process \(currentNode)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Starting to process \(currentNode)\n") }
                 if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
-                    if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(currentNode)\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "getting endpoint: \(currentNode)\n") }
                     
                     self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
                     
@@ -1356,7 +1357,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                     self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: String) in
-                        if self.debug { self.writeToLog(stringOfText: "Returned from existing endpoints: \(result)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "Returned from existing endpoints: \(result)\n") }
                         var objToMigrateID = 0
                         // clear targetDataArray - needed to handle switching tabs
                         self.targetDataArray.removeAll()
@@ -1374,7 +1375,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // create targetDataArray - end
                         
                             if self.targetDataArray.count == 0 {
-                                if self.debug { self.writeToLog(stringOfText: "nothing selected to migrate/remove.\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "nothing selected to migrate/remove.\n") }
                                 self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
                                 self.goButtonEnabled(button_status: true)
                                 return
@@ -1389,14 +1390,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
                             }
                             
-                            if self.debug { self.writeToLog(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
                             for j in (0..<self.targetDataArray.count) {
                                 objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
                                 if !self.wipe_data  {
                                     if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
-                                        if self.debug && !self.saveOnly { self.writeToLog(stringOfText: "check for existing object: \(selectedObject)\n") }
+                                        if self.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
                                         if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !self.saveOnly {
-                                            if self.debug { self.writeToLog(stringOfText: "\(selectedObject) already exists\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "\(selectedObject) already exists\n") }
                                             //self.currentEndpointID = self.currentEPs[xmlName]!
                                             self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
                                         } else {
@@ -1405,7 +1406,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 } else {
                                     // selective removal
-                                    if self.debug { self.writeToLog(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
                                     
                                     self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
                                     
@@ -1443,16 +1444,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
         }
-        if self.debug { self.writeToLog(stringOfText: "getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
+        if self.debug { WriteToLog().message(stringOfText: "getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
         if self.fileImport {
             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex) {
                 (result: String) in
-                if self.debug { self.writeToLog(stringOfText: "processFiles result: \(result)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "processFiles result: \(result)\n") }
             }
         } else {
             self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
-                if self.debug { self.writeToLog(stringOfText: "getEndpoints result: \(result)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "getEndpoints result: \(result)\n") }
             }
         }
     }
@@ -1465,7 +1466,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var node           = ""
         var endpointCount  = 0
         var groupType      = ""
-        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Getting \(endpoint)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Getting \(endpoint)\n") }
         
         
         if endpoint.contains("smart") {
@@ -1569,24 +1570,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                    print("httpResponse: \(httpResponse.statusCode)")
                     
                     do {
-                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Getting all endpoints from: \(myURL)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Getting all endpoints from: \(myURL)\n") }
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                         if let endpointJSON = json as? [String: Any] {
-                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))\n") }
                             
                             switch endpoint {
                             case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                 if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                     endpointCount = endpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
                                     
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
                                     
                                     if endpointCount > 0 {
                                         
                                         self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                             (result: String) in
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
                                             
                                             for i in (0..<endpointCount) {
                                                 if i == 0 { self.availableObjsToMigDict.removeAll() }
@@ -1603,26 +1604,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
 //                                                }
                                             
-                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                             }   // for i in (0..<endpointCount) end
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
                                             
                                             var counter = 1
                                             if self.goSender == "goButton" {
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                     if !self.wipe_data  {
-                                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
                                                         if self.currentEPs[l_xmlName] != nil {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                     } else {
-                                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                         self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
                                                     }   // if !self.wipe_data else - end
                                                     counter+=1
@@ -1676,11 +1677,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                                 
                             case "computergroups", "mobiledevicegroups", "usergroups":
-                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing device groups\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing device groups\n") }
                                 if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
                                     
                                     endpointCount = endpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
                                     
                                     var smartGroupDict: [Int: String] = [:]
                                     var staticGroupDict: [Int: String] = [:]
@@ -1748,8 +1749,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
                                             
                                             
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(smartGroupDict.count) smart groups\n") }
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(staticGroupDict.count) static groups\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(smartGroupDict.count) smart groups\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(staticGroupDict.count) static groups\n") }
                                             var currentGroupDict: [Int: String] = [:]
                                             // verify we have some groups
                                             for g in (0...1) {
@@ -1813,11 +1814,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             
                                                             //need to call existingEndpoints here to keep proper order?
                                                             if self.currentEPs[l_xmlName] != nil {
-                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
                                                                 self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                             } else {
-                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
+                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
                                                                 self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                             }
                                                             
@@ -1857,7 +1858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     } else {    //if endpointCount > 0 - end
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
                                         if endpoint == self.objectsToMigrate.last {
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
@@ -1868,7 +1869,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                     
                                     if endpoint == self.objectsToMigrate.last {
-                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                         self.rmDELETE()
                                     }
                                     
@@ -1881,11 +1882,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                                 
                             case "policies":
-                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
                                 if let endpointInfo = endpointJSON[endpoint] as? [Any] {
                                     endpointCount = endpointInfo.count
                                     
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
                                     
                                     var computerPoliciesDict: [Int: String] = [:]
 
@@ -1894,7 +1895,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         // create dictionary of existing policies
                                         self.existingEndpoints(theDestEndpoint: "policies")  {
                                             (result: String) in
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing endpoints: \(result)\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing endpoints: \(result)\n") }
                                             
                                             // filter out policies created from casper remote - start
                                             for i in (0..<endpointCount) {
@@ -1912,19 +1913,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             for (l_xmlID, l_xmlName) in computerPoliciesDict {
                                                 if self.goSender == "goButton" {
                                                     if !self.wipe_data  {
-                                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
                                                         if self.currentEPs[l_xmlName] != nil {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                         //self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0)
                                                     } else {
-                                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                         self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
                                                     }   // if !self.wipe_data else - end
                                                     counter += 1
@@ -1955,7 +1956,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     } else {
                                         self.nodesMigrated+=1
                                         if endpoint == self.objectsToMigrate.last {
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
                                             print("rmDelete 1")
 //                                            self.goButtonEnabled(button_status: true)
@@ -1967,7 +1968,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
 //                                    self.nodesMigrated+=1
 //                                    if endpoint == self.objectsToMigrate.last {
-//                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+//                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
 //                                        self.rmDELETE()
 //                                        print("rmDelete 2")
 //                                    }
@@ -1985,16 +1986,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 if let endpointInfo = usersGroups[endpointParent] as? [Any] {
                                     endpointCount = endpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(node) found: \(endpointCount)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(node) found: \(endpointCount)\n") }
                                     
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
                                     
                                     if endpointCount > 0 {
                                         
 //                                        self.existingEndpoints(theDestEndpoint: "accounts")  {
                                         self.existingEndpoints(theDestEndpoint: endpoint)  {
                                             (result: String) in
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(node): \(result)\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(node): \(result)\n") }
                                         
                                             for i in (0..<endpointCount) {
                                                 if i == 0 { self.availableObjsToMigDict.removeAll() }
@@ -2004,28 +2005,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                 }
                                                 
-                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                             }   // for i in (0..<endpointCount) end
-                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
                                             
                                             var counter = 1
                                             if self.goSender == "goButton" {
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                     if !self.wipe_data  {
-                                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
                                                         
                                                         if self.currentEPs[l_xmlName] != nil {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
                                                     } else {
                                                         if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                             self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
                                                         }
                                                         
@@ -2078,12 +2079,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             case "computerconfigurations":
                                 if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
                                     endpointCount = endpointInfo.count
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
                                     
-                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
                                     
                                     if endpointCount > 0 {
-                                        if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Create Id Mappings - start.\n") }
+                                        if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - start.\n") }
                                         
                                         self.nameIdDict(server: self.source_jp_server, endPoint: "computerconfigurations", id: "sourceId") {
                                             (result: [String:Dictionary<String,Int>]) in
@@ -2095,7 +2096,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 self.nameIdDict(server: self.dest_jp_server, endPoint: "packages", id: "destId") {
                                                     (result: [String:Dictionary<String,Int>]) in
                                                     self.packages_id_map = result
-                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] packages id map:\n\(self.packages_id_map)\n") }
+                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] packages id map:\n\(self.packages_id_map)\n") }
                                                     self.idDict.removeAll()
                                                     
                                                     self.nameIdDict(server: self.source_jp_server, endPoint: "scripts", id: "sourceId") {
@@ -2104,7 +2105,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         self.nameIdDict(server: self.dest_jp_server, endPoint: "scripts", id: "destId") {
                                                             (result: [String:Dictionary<String,Int>]) in
                                                             self.scripts_id_map = result
-                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] scripts id map:\n\(self.scripts_id_map)\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] scripts id map:\n\(self.scripts_id_map)\n") }
                                                             self.idDict.removeAll()
                                                             
                                                             self.nameIdDict(server: self.source_jp_server, endPoint: "printers", id: "sourceId") {
@@ -2113,7 +2114,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.nameIdDict(server: self.dest_jp_server, endPoint: "printers", id: "destId") {
                                                                     (result: [String:Dictionary<String,Int>]) in
                                                                     self.printers_id_map = result
-                                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] printers id map:\n\(self.printers_id_map)\n")}
+                                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] printers id map:\n\(self.printers_id_map)\n")}
                                                                     self.idDict.removeAll()
                                                                     
                                                                     self.nameIdDict(server: self.source_jp_server, endPoint: "directorybindings", id: "sourceId") {
@@ -2122,10 +2123,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                         self.nameIdDict(server: self.dest_jp_server, endPoint: "directorybindings", id: "destId") {
                                                                             (result: [String:Dictionary<String,Int>]) in
                                                                             self.bindings_id_map = result
-                                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] bindings id map:\n\(self.bindings_id_map)\n")}
+                                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] bindings id map:\n\(self.bindings_id_map)\n")}
                                                                             self.idDict.removeAll()
 
-                                                                            if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Create Id Mappings - end.\n") }
+                                                                            if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - end.\n") }
                                                                             
                                                                             var orderedConfArray = [String]()
                                                                             var movedParentArray = [String]()
@@ -2139,8 +2140,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                         movedParentArray.append(key)
                                                                                         // look for configs missing their parent
                                                                                     } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.index(of: key) == nil) {
-                                                                                        self.writeToLog(stringOfText: "[getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
-                                                                                        self.writeToLog(stringOfText: "[getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
+                                                                                        WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
+                                                                                        WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
                                                                                         orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
                                                                                         movedParentArray.append(key)
                                                                                         self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
@@ -2154,7 +2155,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                             
                                                                             self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                                                                 (result: String) in
-                                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
+                                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
                                                                                 
                                                                                 var tmp_availableObjsToMigDict = [Int:String]()
                                                                                 
@@ -2172,11 +2173,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                     
                                                                                     self.availableObjsToMigDict[Int(orderedId)!] = tmp_availableObjsToMigDict[Int(orderedId)!]
                                                                                     
-                                                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                                                                 }   // for i in (0..<endpointCount) end
                                                                                 
                                                                                 
-                                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+                                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
                                                                                 
                                                                                 var counter = 1
                                                                                 if self.goSender == "goButton" {
@@ -2186,18 +2187,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                         let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
                                                                                         if (l_xmlID != nil) && (l_xmlName != nil) {
                                                                                             if !self.wipe_data  {
-                                                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
+                                                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
                                                                                                 if self.currentEPs[l_xmlName!] != nil {
-                                                                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) already exists\n") }
+                                                                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) already exists\n") }
                                                                                                     //self.currentEndpointID = self.currentEPs[l_xmlName]!
                                                                                                     self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!, destEpName: l_xmlName!)
                                                                                                 } else {
-                                                                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) - create\n") }
-                                                                                                    if self.debug { self.writeToLog(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) - create\n") }
+                                                                                                    if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                                                                     self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName!)
                                                                                                 }
                                                                                             } else {
-                                                                                                if self.debug { self.writeToLog(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
+                                                                                                if self.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
                                                                                                 self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID!, endpointName: l_xmlName!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
                                                                                             }   // if !self.wipe_data else - end
                                                                                         }
@@ -2280,7 +2281,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
-        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
 
         
         switch nodesToMigrate[nodeIndex] {
@@ -2382,27 +2383,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
                                 
                                 self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
                             } catch {
                                 //                    print("unable to read \(dataFile)")
-                                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
                             }
                             self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
                         }   // for i in 1...dataFilesCount - end
                     }   // if let allFilePaths - end
                 } catch {
-                    if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
                 }
             
                 var fileCount = self.availableFilesToMigDict.count
             
                 //        print("node: \(local_folder) has \(fileCount) files.")
-                if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
             
                 if fileCount > 0 {
                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
                         (result: String) in
-                        if self.debug { self.writeToLog(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
                         self.availableFilesToMigDict.removeAll()
                         if nodeIndex < nodesToMigrate.count - 1 {
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
@@ -2425,7 +2426,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         self.existingEndpoints(theDestEndpoint: "\(endpoint)") {
             (result: String) in
-            if self.debug { self.writeToLog(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
             
             self.readFilesQ.maxConcurrentOperationCount = 1
             
@@ -2439,21 +2440,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                     if l_id != nil && l_name != "" && l_xml != "" {
                         if !self.wipe_data  {
-                            if self.debug { self.writeToLog(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
                             if self.currentEPs[l_name] != nil {
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists\n") }
                                 self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: self.currentEPs[l_name]!, destEpName: l_name) {
                                     (result: String) in
-                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml\n") }
                                     if result == "last" {
                                         completion("processed last file")
                                     }
                                 }
                             } else {
-                                if self.debug { self.writeToLog(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create\n") }
                                 self.cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id!, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
                                     (result: String) in
-                                    if self.debug { self.writeToLog(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml\n") }
                                     if result == "last" {
                                         completion("processed last file")
                                     }
@@ -2476,7 +2477,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         saveRawXml        = xmlPrefOptions["saveRawXml"]!
 
         URLCache.shared.removeAllCachedResponses()
-        if self.debug { self.writeToLog(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
         concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
@@ -2510,7 +2511,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
             
             theOpQ.addOperation {
-                if self.debug { self.writeToLog(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
                 let encodedURL = NSURL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "GET"
@@ -2521,20 +2522,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     (data, response, error) -> Void in
                     
                     if let httpResponse = response as? HTTPURLResponse {
-                        if self.debug { self.writeToLog(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
                         let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                         
                         // save source XML - start
                         if self.saveRawXml {
-                            if self.debug { self.writeToLog(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw", debug: self.debug)
+                            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
                         }
                         // save source XML - end
                         
-                        if self.debug { self.writeToLog(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
                         self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                             (result: String) in
-                            if self.debug { self.writeToLog(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
                         }
                     }   // if let httpResponse - end
                     semaphore.signal()
@@ -2632,7 +2633,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         switch endpoint {
         case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
-            if self.debug { self.writeToLog(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
             // clean up PostXML, remove unwanted/conflicting data
@@ -2671,7 +2672,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
             case "computerconfigurations":
-                if self.debug { self.writeToLog(stringOfText: "[endPointByID] cleaning up computerconfigurations - verbose\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[endPointByID] cleaning up computerconfigurations - verbose\n") }
                 // remove password from XML, since it doesn't work on the new server
                 let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=(.*?)</password_sha256>", options:.caseInsensitive)
                 PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
@@ -2739,7 +2740,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     summaryArray.append(patchEaName)
                     self.summaryDict[endpoint]?["fail"] = summaryArray
                 }
-                self.writeToLog(stringOfText: "[endPointByID] Patch EAs are not migrated, skipping \(patchEaName)\n")
+                WriteToLog().message(stringOfText: "[endPointByID] Patch EAs are not migrated, skipping \(patchEaName)\n")
                 self.postCount += 1
                 if self.objectsToMigrate.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
@@ -2750,21 +2751,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
         case "directorybindings", "ldapservers":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing ldapservers - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing ldapservers - verbose\n") }
             // remove password from XML, since it doesn't work on the new server
             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
             
         case "advancedcomputersearches":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["computers"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
             
         case "computers":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing computers - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["package", "mapped_printers", "plugins", "running_services", "licensed_software", "computer_group_memberships", "managed", "management_username"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
@@ -2779,7 +2780,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
         case "networksegments":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing network segments - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing network segments - verbose\n") }
             // remove items not transfered; distribution points, netboot server, SUS from XML
             let regexDistro1 = try! NSRegularExpression(pattern: "<distribution_server>(.*?)</distribution_server>", options:.caseInsensitive)
             let regexDistro2 = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
@@ -2809,7 +2810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
             // remove computers that are a member of a smart group
             if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeScgCopy) {
                 // groups containing thousands of computers could not be cleared by only using the computers tag
@@ -2828,14 +2829,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            }
             
         case "packages":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing packages - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing packages - verbose\n") }
             // remove 'No category assigned' from XML
             let regexComp = try! NSRegularExpression(pattern: "<category>No category assigned</category>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<category/>")
             //print("\nXML: \(PostXML)")
             
         case "policies", "macapplications", "mobiledeviceapplications":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
             // check for a self service icon and grab name and id if present - start
             if PostXML.range(of: "</self_service_icon>") != nil {
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
@@ -2904,7 +2905,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            }
             
         case "users":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing users - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing users - verbose\n") }
             
             let regexComp = try! NSRegularExpression(pattern: "<self_service_icon>(.*?)</self_service_icon>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<self_service_icon/>")
@@ -2915,7 +2916,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] processing jamf users/groups (\(endpoint)) - verbose\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] processing jamf users/groups (\(endpoint)) - verbose\n") }
             // remove password from XML, since it doesn't work on the new server
             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.32\">(.*?)</password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
@@ -2934,7 +2935,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
         default:
-            if self.debug { self.writeToLog(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
             knownEndpoint = false
         }   // switch - end
 
@@ -2944,7 +2945,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
             self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                 (result: String) in
-                if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                 if endpointCurrent == endpointCount {
                     completion("last")
                 } else {
@@ -2953,7 +2954,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         } else {
             if endpointCurrent == endpointCount {
-                if self.debug { self.writeToLog(stringOfText: "[cleanupXml] Last item in \(theEndpoint) was unkown.\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[cleanupXml] Last item in \(theEndpoint) was unkown.\n") }
                 self.nodesMigrated+=1
                 completion("last")
                 // ;print("added node: \(localEndPointType) - createEndpoints")
@@ -2977,12 +2978,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // this is where we create the new endpoint
         if !self.saveOnly {
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
         } else {
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
         }
 //        var createDestUrl = createDestUrlBase
-        //if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
+        //if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         
         concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
@@ -3010,7 +3011,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
         
-        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
         createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
@@ -3020,8 +3021,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // save trimmed XML - start
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
-                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed", debug: self.debug)
+                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
+                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
                 
             }
             // save trimmed XML - end
@@ -3040,8 +3041,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
             
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
-            if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
             
             if endpointCurrent == 1 {
                 if !retry {
@@ -3069,15 +3070,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
-//                        if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
+//                        if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
 //                        print("create data response: \(responseData)")
                     } else {
-                        if self.debug { self.writeToLog(stringOfText: "\n\n[CreateEndpoints] No data was returned from post/put.\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "\n\n[CreateEndpoints] No data was returned from post/put.\n") }
                     }
                     
                     // look to see if we are processing the next endpointType - start
                     if self.endpointInProgress != endpointType {
-                        self.writeToLog(stringOfText: "[CreateEndpoints] Migrating \(endpointType)\n")
+                        WriteToLog().message(stringOfText: "[CreateEndpoints] Migrating \(endpointType)\n")
                         self.endpointInProgress = endpointType
                         self.POSTsuccessCount = 0
                     }   // look to see if we are processing the next localEndPointType - end
@@ -3101,7 +3102,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }   // DispatchQueue.main.async - end
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
+                            WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
                             
                             self.POSTsuccessCount += 1
                             
@@ -3157,20 +3158,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             switch whichError {
                             case "Duplicate serial number", "Duplicate MAC address":
                                 if !retry {
-                                    self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
+                                    WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                     }
                                     self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                         (result: String) in
-                                        //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                                        //                                    if self.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                                     }
                                 } else {
-                                    self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
+                                    WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
                                 }
                             case "category":
-                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
+                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3181,7 +3182,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //    self.postCount -= 1
                            //     return
                             case "Problem with department in location":
-                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
+                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3192,30 +3193,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //    self.postCount -= 1
                             //    return
                             case "Problem with building in location":
-                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
+                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
                                 }
                                 self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-                                    //                                    if self.debug { self.writeToLog(stringOfText: "[endPointByID] \(result)\n") }
+                                    //                                    if self.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                                 }
                               //  self.postCount -= 1
                              //   return
                             default:
-                                self.writeToLog(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                 if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
                                     self.labelColor(endpoint: endpointType, theColor: self.redText)
                                 }
-                                if self.debug { self.writeToLog(stringOfText: "\n\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "\n\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
                                 // 400 - likely the format of the xml is incorrect or wrong endpoint
                                 // 401 - wrong username and/or password
                                 // 409 - unable to create object; already exists or data missing or xml error
@@ -3233,15 +3234,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
                 }   // if let httpResponse = response - end
                 
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] POST or PUT Operation: \(request.httpMethod)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation: \(request.httpMethod)\n") }
                 
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]))!\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]))!\n") }
                 semaphore.signal()
                 if error != nil {
                 }
 //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
                 if endpointCurrent == endpointCount {
-                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.\n") }
                     self.nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
 //                    print("nodes complete: \(self.nodesMigrated)")
                 }
@@ -3275,7 +3276,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
             
             removeDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-            if self.debug { self.writeToLog(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
@@ -3286,7 +3287,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             if saveOnly {
                 if endpointCurrent == endpointCount {
-                    if self.debug { self.writeToLog(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
                     nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
                     //            print("remove nodes complete: \(nodesMigrated)")
                 }
@@ -3295,8 +3296,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             theOpQ.addOperation {
 
-                if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
-                if self.debug { self.writeToLog(stringOfText: "\n[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
                 
                 let encodedURL = NSURL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -3325,7 +3326,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.endpointInProgress = endpointType
                                 self.changeColor = true
                                 self.POSTsuccessCount = 0
-                                self.writeToLog(stringOfText: "[RemoveEndpoints] Removing \(endpointType)\n")
+                                WriteToLog().message(stringOfText: "[RemoveEndpoints] Removing \(endpointType)\n")
                             }   // look to see if we are processing the next endpointType - end
                             
                         }
@@ -3344,7 +3345,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                             }
                             
-                            self.writeToLog(stringOfText: "\t[RemoveEndpoints] \(endpointName)\n")
+                            WriteToLog().message(stringOfText: "\t[RemoveEndpoints] \(endpointName)\n")
                             self.POSTsuccessCount += 1
                             if endpointCount == endpointCurrent && self.changeColor {
                                 self.labelColor(endpoint: endpointType, theColor: self.greenText)
@@ -3352,22 +3353,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         } else {
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                             self.changeColor = false
-                            self.writeToLog(stringOfText: "[RemoveEndpoints] **** Failed to remove: \(endpointName)\n")
+                            WriteToLog().message(stringOfText: "[RemoveEndpoints] **** Failed to remove: \(endpointName)\n")
                             if httpResponse.statusCode == 400 {
-                                self.writeToLog(stringOfText: "[RemoveEndpoints] **** Verify other items are not dependent on \(endpointName)\n")
-                                self.writeToLog(stringOfText: "[RemoveEndpoints] **** For example, \(endpointName) is not used in a policy\n")
+                                WriteToLog().message(stringOfText: "[RemoveEndpoints] **** Verify other items are not dependent on \(endpointName)\n")
+                                WriteToLog().message(stringOfText: "[RemoveEndpoints] **** For example, \(endpointName) is not used in a policy\n")
                             }
                             if self.POSTsuccessCount == 0 && endpointCount == endpointCurrent {
                                 self.labelColor(endpoint: endpointType, theColor: self.redText)
                             }
-                            if self.debug { self.writeToLog(stringOfText: "\n\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] ---------- endpoint info ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t ID: \(endPointID)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] ---------- status code ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] \(httpResponse.statusCode)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] ---------- response ----------\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] \(httpResponse)\n") }
-                            if self.debug { self.writeToLog(stringOfText: "[RemoveEndpoints] ---------- response ----------\n\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "\n\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- endpoint info ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t ID: \(endPointID)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- status code ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] \(httpResponse.statusCode)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- response ----------\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] \(httpResponse)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- response ----------\n\n") }
                         }
                         
                     }
@@ -3379,13 +3380,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
-                            if self.debug { self.writeToLog(stringOfText: "Done\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "Done\n") }
                         }
                         semaphore.signal()
                         if error != nil {
                         }
                     } else {
-                        if self.debug { self.writeToLog(stringOfText: "\n[RemoveEndpoints] endpointCount: \(endpointCount)\t endpointCurrent: \(endpointCurrent)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] endpointCount: \(endpointCount)\t endpointCurrent: \(endpointCurrent)\n") }
                         
                         if endpointCount == endpointCurrent {
                             // check for file that allows deleting data from destination server, delete if found - start
@@ -3393,7 +3394,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
-                            if self.debug { self.writeToLog(stringOfText: "Done\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "Done\n") }
                         }
                         semaphore.signal()
                     }
@@ -3403,7 +3404,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // theOpQ.addOperation - end
         }
         if endpointCurrent == endpointCount {
-            if self.debug { self.writeToLog(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
             nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
             //            print("remove nodes complete: \(nodesMigrated)")
         }
@@ -3519,17 +3520,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let destEndpointJSON = json as? [String: Any] {
-                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
-                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
+                                if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
                                 switch destEndpoint {
                                     
                                 // need to revisit as name isn't the best indicatory on whether or not a computer exists
                                 case "-computers":
-                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current computers\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current computers\n") }
                                     if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
                                         let destEndpointCount: Int = destEndpointInfo.count
-                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
-                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
+                                        if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
+                                        if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
                                         
                                         if destEndpointCount > 0 {
                                             for i in (0..<destEndpointCount) {
@@ -3558,16 +3559,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     } else {
                                         destEndpointDict = destEndpointJSON["\(endpointParent)"]
                                     }
-                                    if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
+                                    if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
                                     if let destEndpointInfo = destEndpointDict as? [Any] {
                                         let destEndpointCount: Int = destEndpointInfo.count
-                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
+                                        if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
                                         
                                         if destEndpointCount > 0 {
                                             for i in (0..<destEndpointCount) {
                                                 
                                                 let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
+                                                if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
                                                 let destXmlID: Int = (destRecord["id"] as! Int)
 //                                                    if destEndpoint != "mobiledeviceapplications" {
                                                         if destRecord["name"] != nil {
@@ -3580,14 +3581,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                    }
                                                     if destXmlName != "" {
                                                         if "\(destXmlID)" != "" {
-                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
                                                             self.currentEPs[destXmlName] = destXmlID
-                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
                                                         } else {
-                                                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
+                                                            if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
                                                         }
                                                     } else {
-                                                        if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] skipping id: \(destXmlID), could not determine its name.\n") }
+                                                        if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping id: \(destXmlID), could not determine its name.\n") }
                                                     }
                                                 
                                             }   // for i in (0..<destEndpointCount) - end
@@ -3605,7 +3606,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             //print(httpResponse.statusCode)
-                            if self.debug { self.writeToLog(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
 //                            print("returning existing endpoints: \(self.currentEPs)")
                             completion("\nCurrent endpoints - \(self.currentEPs)")
                         } else {
@@ -3631,7 +3632,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func nameIdDict(server: String, endPoint: String, id: String, completion: @escaping (_ result: [String:Dictionary<String,Int>]) -> Void) {
         // matches the id to name of objects in a configuration (imaging)
-        if self.debug { self.writeToLog(stringOfText: "[nameIdDict] start matching \(endPoint) (by name) that exist on both servers\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[nameIdDict] start matching \(endPoint) (by name) that exist on both servers\n") }
         URLCache.shared.removeAllCachedResponses()
         var serverUrl     = "\(server)/JSSResource/\(endPoint)"
         serverUrl         = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -3680,12 +3681,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         recordName = record["name"] as! String
                                         if self.idDict[recordName]?.count == nil || recordId == 0 {
                                             self.idDict[recordName] = ["sourceId":0, "destId":0]
-                                            self.writeToLog(stringOfText: "[nameIdDict] \(String(describing: recordName)): new object.\n")
+                                            WriteToLog().message(stringOfText: "[nameIdDict] \(String(describing: recordName)): new object.\n")
                                         }
                                         self.idDict[recordName]?[id] = recordId
                                         if self.debug {
-                                            self.writeToLog(stringOfText: "[nameIdDict] \(String(describing: recordName)): existing object.\n")
-                                            self.writeToLog(stringOfText: "[nameIdDict] \(String(describing: self.idDict[recordName]!)) ID matching dictionary :\n")
+                                            WriteToLog().message(stringOfText: "[nameIdDict] \(String(describing: recordName)): existing object.\n")
+                                            WriteToLog().message(stringOfText: "[nameIdDict] \(String(describing: self.idDict[recordName]!)) ID matching dictionary :\n")
                                     }
 
                                 }   // for i in (0..<endpointCount) end
@@ -3825,7 +3826,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else if selective_tabViewItem.tabState.rawValue == 0 {
             activeTab = "selective"
         }
-        if self.debug { self.writeToLog(stringOfText: "Active tab: \(activeTab)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "Active tab: \(activeTab)\n") }
         return activeTab
     }
     
@@ -3845,19 +3846,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             completion(true)
         } else {
             var available:Bool = false
-            if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- checking availability of server: \(serverURL)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[checkURL2] --- checking availability of server: \(serverURL)\n") }
         
             authQ.sync {
-                if self.debug { self.writeToLog(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
 
                 guard let encodedURL = URL(string: serverURL) else {
-                    if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- Cannot cast to URL: \(serverURL)\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "[checkURL2] --- Cannot cast to URL: \(serverURL)\n") }
                     completion(false)
                     return
                 }
                 let configuration = URLSessionConfiguration.default
 
-                if self.debug { self.writeToLog(stringOfText: "[checkURL2] --- checking healthCheck page.\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[checkURL2] --- checking healthCheck page.\n") }
                 var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
                 request.httpMethod = "GET"
 
@@ -3865,13 +3866,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
                     if let httpResponse = response as? HTTPURLResponse {
-                        if self.debug { self.writeToLog(stringOfText: "[checkURL2] Server check: \(serverURL), httpResponse: \(httpResponse.statusCode)\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "[checkURL2] Server check: \(serverURL), httpResponse: \(httpResponse.statusCode)\n") }
                         
                         //                    print("response: \(response)")
                         if let responseData = String(data: data!, encoding: .utf8) {
-                            if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: \(responseData)") }
+                            if self.debug { WriteToLog().message(stringOfText: "[checkURL2] checkURL2 data: \(responseData)") }
                         } else {
-                            if self.debug { self.writeToLog(stringOfText: "[checkURL2] checkURL2 data: none") }
+                            if self.debug { WriteToLog().message(stringOfText: "[checkURL2] checkURL2 data: none") }
                         }
                         available = true
                         
@@ -4015,7 +4016,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func stopButton(_ sender: Any) {
-        self.writeToLog(stringOfText: "Migration was manually stopped.\n\n")
+        WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
         readFilesQ.cancelAllOperations()
         theOpQ.cancelAllOperations()
         theCreateQ.cancelAllOperations()
@@ -4109,10 +4110,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
                 curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
 //              print("result of icon GET: "+curlResult)
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
+                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
                 if self.saveRawXml {
-                    if self.debug { self.writeToLog(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
-                    Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw", debug: debug)
+                    if self.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
+                    Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
                 }
             } else {
                 iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
@@ -4120,12 +4121,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             if !saveOnly {
                 curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
-                if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
+                if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
                 //                                    print("result of icon POST: "+curlResult2)
             }   // if !saveOnly - end
             if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
                 if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
-                    if self.debug { self.writeToLog(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
+                    if self.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
                 }
             }
         }   // if (ssIconName != "") && (ssIconUri != "") - end
@@ -4148,13 +4149,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // remove old history files
                 if logCount-1 >= maxHistory {
                     for i in (0..<logCount-maxHistory) {
-                        if self.debug { self.writeToLog(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
+                        if self.debug { WriteToLog().message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
                         
                         do {
                             try fm.removeItem(atPath: logArray[i])
                         }
                         catch let error as NSError {
-                            if self.debug { self.writeToLog(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)\n") }
+                            if self.debug { WriteToLog().message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)\n") }
                         }
                     }
                 }
@@ -4167,7 +4168,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 try fm.removeItem(atPath: logPath! + logFile)
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Error deleting log file:    \n" + logPath! + logFile + "\n    \(error)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Error deleting log file:    \n" + logPath! + logFile + "\n    \(error)\n") }
             }
         }
 
@@ -4285,23 +4286,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let historyFiles = try fm.contentsOfDirectory(atPath: source)
             
             for historyFile in historyFiles {
-                if self.debug { self.writeToLog(stringOfText: "Moving: " + source + historyFile + " to " + destination) }
+                if self.debug { WriteToLog().message(stringOfText: "Moving: " + source + historyFile + " to " + destination) }
                 do {
                     try fm.moveItem(atPath: source + historyFile, toPath: destination + historyFile.replacingOccurrences(of: ".txt", with: ".log"))
                 }
                 catch let error as NSError {
-                    self.writeToLog(stringOfText: "Ooops! Something went wrong moving the history file: \(error)\n")
+                    WriteToLog().message(stringOfText: "Ooops! Something went wrong moving the history file: \(error)\n")
                     allClear = false
                 }
             }
         } catch {
-            if self.debug { self.writeToLog(stringOfText: "no history to display\n") }
+            if self.debug { WriteToLog().message(stringOfText: "no history to display\n") }
         }
         if allClear {
             do {
                 try fm.removeItem(atPath: source)
             } catch {
-                if self.debug { self.writeToLog(stringOfText: "Unable to remove \(source)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Unable to remove \(source)\n") }
             }
         }
     }
@@ -4353,13 +4354,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                sourceServerList_button.isEnabled = true
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
+                if self.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
             }
         }
     }
     
     func rmBlankLines(theXML: String) -> String {
-        if self.debug { self.writeToLog(stringOfText: "Removing blank lines.\n") }
+        if self.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
@@ -4378,7 +4379,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (theTag == "script_contents_encoded") || (theTag == "id") {
             newXML_trimmed = newXML
         } else {
-            if self.debug { self.writeToLog(stringOfText: "Removing blank lines.\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
             newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
         }
         return newXML_trimmed
@@ -4388,7 +4389,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read environment settings - start
         plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
         if plistData.count == 0 {
-            if self.debug { self.writeToLog(stringOfText: "Error reading plist\n") }
+            if self.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
         }
 //        print("readSettings - plistData: \(String(describing: plistData["xml"]))\n")
         return(plistData)
@@ -4439,7 +4440,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             sitePref = "Copy"
         }
         
-        if self.debug { self.writeToLog(stringOfText: "[siteSet] site operation for \(endpoint): \(sitePref)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[siteSet] site operation for \(endpoint): \(sitePref)\n") }
         // get copy / move preference - end
         
         switch endpoint {
@@ -4461,7 +4462,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
         let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
         rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
-        if self.debug { self.writeToLog(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
+        if self.debug { WriteToLog().message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
         
         // do not redeploy profile to existing scope
         if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
@@ -4568,7 +4569,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 ////        var responseData = ""
 //
 //        theCreateQ.addOperation {
-//            if self.debug { self.writeToLog(stringOfText: "Getting icon \(ssIconName) from \(ssIconUri)\n") }
+//            if self.debug { WriteToLog().message(stringOfText: "Getting icon \(ssIconName) from \(ssIconUri)\n") }
 //
 //            let encodedURL = NSURL(string: ssIconUri)
 //            let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -4584,17 +4585,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                    
 //                    if let _ = String(data: data!, encoding: .unicode) {
 //                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-//                            self.writeToLog(stringOfText: "icon get succeeded: \(ssIconName)\n")
+//                            WriteToLog().message(stringOfText: "icon get succeeded: \(ssIconName)\n")
 //                            self.selfServiceIconPost(newPolicyId: newPolicyId, ssIconName: ssIconName, ssIcon: data!)
 //                            
 //                        } else {
-//                            self.writeToLog(stringOfText: "icon get failed: \(ssIconName)\n")
+//                            WriteToLog().message(stringOfText: "icon get failed: \(ssIconName)\n")
 //                        }
 ////                        responseData = String(data: data!, encoding: .unicode)!
-//                        //                        if self.debug { self.writeToLog(stringOfText: "\n\nfull response from create:\n\(responseData)") }
+//                        //                        if self.debug { WriteToLog().message(stringOfText: "\n\nfull response from create:\n\(responseData)") }
 ////                        print("create data response: \(responseData)")
 //                    } else {
-//                        if self.debug { self.writeToLog(stringOfText: "\n\nNo data was returned from icon GET.\n") }
+//                        if self.debug { WriteToLog().message(stringOfText: "\n\nNo data was returned from icon GET.\n") }
 //                    }
 //                }
 //                
@@ -4619,9 +4620,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
             rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
         } else {
-            if self.debug { self.writeToLog(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.\n") }
-            if self.debug { self.writeToLog(stringOfText: "\t[tagValue] tag: \(xmlTag)\n") }
-            if self.debug { self.writeToLog(stringOfText: "\t[tagValue] xml: \(xmlString)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.\n") }
+            if self.debug { WriteToLog().message(stringOfText: "\t[tagValue] tag: \(xmlTag)\n") }
+            if self.debug { WriteToLog().message(stringOfText: "\t[tagValue] xml: \(xmlString)\n") }
         }
         return rawValue
     }
@@ -4633,7 +4634,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
             rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
         } else {
-            if self.debug { self.writeToLog(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.\n") }
+            if self.debug { WriteToLog().message(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.\n") }
         }
         return rawValue
     }
@@ -4723,19 +4724,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return false
     }
     
-    func writeToLog(stringOfText: String) {
-        writeLogQ.async {
-            let logString = (self.debug) ? "\(self.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.getCurrentTime()) \(stringOfText)"
-
-            self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + self.logFile))
-//            self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
-            
-            self.logFileW?.seekToEndOfFile()
-            let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-            self.logFileW?.write(historyText!)
-            self.logFileW?.closeFile()
-        }
-    }
+//    func writeToLog(stringOfText: String) {
+//        writeLogQ.async {
+//            let logString = (self.debug) ? "\(self.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.getCurrentTime()) \(stringOfText)"
+//
+//            self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + self.logFile))
+////            self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
+//            
+//            self.logFileW?.seekToEndOfFile()
+//            let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
+//            self.logFileW?.write(historyText!)
+//            self.logFileW?.closeFile()
+//        }
+//    }
     
     func serverOrFiles() -> String {
         // see if we last migrated from files or a server
@@ -4845,7 +4846,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             do {
                 try manager.createDirectory(atPath: app_support_path, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if self.debug { self.writeToLog(stringOfText: "Problem creating '/Library/Application Support/jamf-migrator' folder:  \(error)") }
+                if self.debug { WriteToLog().message(stringOfText: "Problem creating '/Library/Application Support/jamf-migrator' folder:  \(error)") }
             }
         }
         // Create Application Support folder for the app if missing - end
@@ -4857,7 +4858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 try fm.copyItem(atPath: def_plist, toPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
             }
             catch let error as NSError {
-                if self.debug { self.writeToLog(stringOfText: "Failed creating default settings.plist! Something went wrong: \(error)") }
+                if self.debug { WriteToLog().message(stringOfText: "Failed creating default settings.plist! Something went wrong: \(error)") }
                 alert_dialog(header: "Error:", message: "Failed creating default settings.plist")
                 exit(0)
             }
@@ -5024,6 +5025,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for stored passwords - end
         
         // read commandline args
+
+        
+        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
+        
+        if hideGui {
+            
+        }
+        
+    }   //viewDidAppear - end
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // read command line arguments - start
         var numberOfArgs = 0
         
 //        debug = true
@@ -5058,19 +5075,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
-        
-        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        self.writeToLog(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
-        
-        if hideGui {
-            
-        }
-        
-    }   //viewDidAppear - end
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
+        // read command line arguments - start
 
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
@@ -5157,7 +5162,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         sleep(1)
-        if debug { writeToLog(stringOfText: "----- Debug Mode -----\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
+//            DispatchQueue.main.async {
+//                WriteToLog().message(stringOfText: "----- Debug Mode -----\n")
+//            }
+//        }
+        
         
         theModeQ.async {
             var isDir: ObjCBool = false

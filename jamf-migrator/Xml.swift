@@ -16,16 +16,16 @@ class Xml {
     var endpointPath  = ""
     
     
-    func save(node: String, xml: String, name: String, id: Int, format: String, debug: Bool) {
+    func save(node: String, xml: String, name: String, id: Int, format: String) {
         
-        if debug { ViewController().writeToLog(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
         saveXmlFolder = baseXmlFolder+"/"+format
         if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if debug { vc.writeToLog(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
                 return
             }
         }
@@ -42,7 +42,7 @@ class Xml {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if debug { vc.writeToLog(stringOfText: "Problem creating \(endpointPath) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem creating \(endpointPath) folder: Error \(error)\n") }
                 return
             }
         }
@@ -60,7 +60,7 @@ class Xml {
 //                print("Copied \(iconSource) to: \(iconDest)")
             } catch {
 //                print("Problem copying \(iconSource) to: \(iconDest)")
-                if debug { vc.writeToLog(stringOfText: "Problem copying \(iconSource) to: \(iconDest)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem copying \(iconSource) to: \(iconDest)\n") }
             }
         default:
             let xmlFile = "\(name)-\(id).xml"
@@ -73,7 +73,7 @@ class Xml {
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
                     } catch {
-                        if debug { vc.writeToLog(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)\n") }
                         return
                     }
                 }   // if let prettyXml - end
