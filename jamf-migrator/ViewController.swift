@@ -326,6 +326,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var xmlName             = ""
     var destEPs             = [String:Int]()
     var currentEPs          = [String:Int]()
+    
+    var currentEPDict       = [String:[String:Int]]()
+    
     var currentEndpointID   = 0
     var progressCountArray  = [String:Int]() // track if post/put was successful
     
@@ -1362,7 +1365,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.targetDataArray.removeAll()
                         
                         DispatchQueue.main.async {
-                            // create targetDataArray - start
+                            // create targetDataArray, list of objects to migrate/remove - start
                             for k in (0..<self.sourceDataArray.count) {
                                 if self.srcSrvTableView.isRowSelected(k) {
                                     // prevent the removal of the account we're using
@@ -1371,7 +1374,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }   // if self.srcSrvTableView.isRowSelected(k) - end
                             }   // for k in - end
-                            // create targetDataArray - end
+                            // create targetDataArray, list of objects to migrate/remove - end
                         
                             if self.targetDataArray.count == 0 {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "nothing selected to migrate/remove.\n") }
@@ -1612,7 +1615,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                     if !self.wipe_data  {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
-                                                        if self.currentEPs[l_xmlName] != nil {
+//                                                        if self.currentEPs[l_xmlName] != nil {
+                                                        if self.currentEPDict[endpoint]![l_xmlName] != nil {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[l_xmlName]!
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
@@ -1904,6 +1908,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     computerPoliciesDict[record["id"] as! Int] = nameCheck
                                                 }
                                             }
+                                            // filter out policies created from casper remote - end
+                                            
                                             self.availableObjsToMigDict = computerPoliciesDict
                                             let nonRemotePolicies = computerPoliciesDict.count
                                             var counter = 1
@@ -1957,7 +1963,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
-                                            print("rmDelete 1")
+//                                            print("rmDelete 1")
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2470,7 +2476,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    
+    // get full record in XML format
     func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
         
         saveRawXml        = xmlPrefOptions["saveRawXml"]!
@@ -3413,9 +3419,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if !saveOnly {
             URLCache.shared.removeAllCachedResponses()
             currentEPs.removeAll()
+            currentEPDict.removeAll()
+            
             var destEndpoint         = theDestEndpoint
             var existingDestUrl      = ""
             var destXmlName          = ""
+            var destXmlID:Int?
             var existingEndpointNode = ""
 //            (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
             switch destEndpoint {
@@ -3534,9 +3543,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if destEndpointCount > 0 {
                                             for i in (0..<destEndpointCount) {
                                                 let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                let destXmlID: Int = (destRecord["id"] as! Int)
+                                                destXmlID = (destRecord["id"] as! Int)
                                                 //                                            print("computer ID: \(destXmlID)")
-                                                if let destEpGeneral = destEndpointJSON["computers/id/\(destXmlID)/subset/General"] as? [Any] {
+                                                if let destEpGeneral = destEndpointJSON["computers/id/\(String(describing: destXmlID))/subset/General"] as? [Any] {
 //                                                    print("destEpGeneral: \(destEpGeneral)")
                                                     let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
 //                                                    print("destRecordGeneral: \(destRecordGeneral)")
@@ -3568,7 +3577,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 
                                                 let destRecord = destEndpointInfo[i] as! [String : AnyObject]
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
-                                                let destXmlID: Int = (destRecord["id"] as! Int)
+                                                destXmlID = (destRecord["id"] as! Int)
 //                                                    if destEndpoint != "mobiledeviceapplications" {
                                                         if destRecord["name"] != nil {
                                                             destXmlName = destRecord["name"] as! String
@@ -3579,21 +3588,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        destXmlName = destRecord["bundle_id"] as! String
 //                                                    }
                                                     if destXmlName != "" {
-                                                        if "\(destXmlID)" != "" {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(destXmlID)) to currentEP array.\n") }
-                                                            self.currentEPs[destXmlName] = destXmlID
+                                                        if "\(String(describing: destXmlID))" != "" {
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID))) to currentEP array.\n") }
+                                                            
+                                                            // filter out policies created from casper remote - start
+//                                                                let record = endpointInfo[i] as! [String : AnyObject]
+//                                                                let nameCheck = record["name"] as! String
+                                                                if destXmlName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && destXmlName != "Update Inventory" {
+                                                                    self.currentEPs[destXmlName] = destXmlID
+                                                                }
+                                                            // filter out policies created from casper remote - end
+                                                            
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
                                                         } else {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
                                                         }
                                                     } else {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping id: \(destXmlID), could not determine its name.\n") }
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping id: \(String(describing: destXmlID)), could not determine its name.\n") }
                                                     }
                                                 
                                             }   // for i in (0..<destEndpointCount) - end
                                         } else {   // if destEndpointCount > 0 - end
                                             self.currentEPs.removeAll()
                                         }
+                                        self.currentEPDict[destEndpoint] = self.currentEPs
+                                        print("currentEPDict[\(destEndpoint)]: \(String(describing: self.currentEPDict[destEndpoint]!))")
                                     }   // if let destEndpointInfo - end
                                 }   // switch - end
                             } else {
@@ -4049,7 +4068,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
-        let factor = (5000000/itemCount)
+        let delayFactor = (itemCount < 10) ? 10:itemCount
+        
+        let factor = (5000000/delayFactor)
         if factor > 50000 {
             return 50000
         } else {
