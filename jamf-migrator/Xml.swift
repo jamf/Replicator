@@ -15,7 +15,6 @@ class Xml {
     var saveXmlFolder = ""
     var endpointPath  = ""
     
-    
     func save(node: String, xml: String, name: String, id: Int, format: String) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }

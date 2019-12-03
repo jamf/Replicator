@@ -19,6 +19,7 @@
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
+		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
@@ -64,6 +65,7 @@
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				B59D0C39202B97BA006203CE /* Credentials.swift */,
 				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
+				B53ECDFB2394474B005EE6E5 /* Json.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
@@ -325,6 +328,7 @@
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
+				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
@@ -476,6 +480,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 5.0.0b1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -495,6 +500,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 5.0.0b1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

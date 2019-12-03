@@ -1391,10 +1391,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
 //                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
                             }
-                            
+                        
                             if LogLevel.debug { WriteToLog().message(stringOfText: "Item(s) chosen from selective: \(self.targetDataArray)\n") }
+                            var advancedMigrateDict = [String:[String:String]]()    // dictionary of dependencies - category:dictionary of dependencies
                             for j in (0..<self.targetDataArray.count) {
                                 objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
+                                Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(selectedEndpoint)/id/\(objToMigrateID)")  {
+                                    (result: [String:AnyObject]) in
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Returned from Json.getRecord: \(result)\n") }
+                                    switch selectedEndpoint {
+                                    case "policies":
+                                        advancedMigrateDict = self.getDependencies(object: "policy", json: result)
+                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
+                                    default:
+                                        advancedMigrateDict = [:]
+                                    }
+
+                                }
+                                
                                 if !self.wipe_data  {
                                     if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
                                         if LogLevel.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
@@ -1618,8 +1632,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        if self.currentEPs[l_xmlName] != nil {
                                                         if self.currentEPDict[endpoint]![l_xmlName] != nil {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-                                                            //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+//                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
@@ -1919,16 +1933,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 if self.goSender == "goButton" {
                                                     if !self.wipe_data  {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
-                                                        if self.currentEPs[l_xmlName] != nil {
+//                                                        if self.currentEPs[l_xmlName] != nil {
+                                                        if self.currentEPDict[endpoint]![l_xmlName] != nil {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-                                                            //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+//                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                         } else {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                         }
-                                                        //self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0)
                                                     } else {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                         self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
@@ -3426,7 +3440,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             var destXmlName          = ""
             var destXmlID:Int?
             var existingEndpointNode = ""
-//            (destEndpoint == "jamfusers" || destEndpoint == "jamfgroups") ? (existingEndpointNode = "accounts"):(existingEndpointNode = destEndpoint)
+
             switch destEndpoint {
             case "smartusergroups", "staticusergroups":
                 destEndpoint = "usergroups"
@@ -3508,143 +3522,236 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointParent = "\(destEndpoint)"
             }
             
-            existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
-            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-    //      print("existing endpoints URL: \(existingDestUrl)")
-            let destEncodedURL = NSURL(string: existingDestUrl)
-            let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
+            var endpointDependendyArray = [String]()
+            var completed               = 0
+            var waiting                 = false
+            switch endpointParent {
+            case "policies":
+                endpointDependendyArray = ["\(existingEndpointNode)", "sites", "buildings", "categories", "departments", "directorybindings", "distributionpoints", "dockitems", "networksegments", "packages", "scripts"]
+            default:
+                endpointDependendyArray = ["\(existingEndpointNode)"]
+            }
             
             let semaphore = DispatchSemaphore(value: 1)
             destEPQ.async {
-                
-                destRequest.httpMethod = "GET"
-                let destConf = URLSessionConfiguration.default
-                destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-                let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-                let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
-                    (data, response, error) -> Void in
-                    if let httpResponse = response as? HTTPURLResponse {
-    //                    print("httpResponse: \(String(describing: response))")
-                        do {
-                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                            if let destEndpointJSON = json as? [String: Any] {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
-                                switch destEndpoint {
-                                    
-                                // need to revisit as name isn't the best indicatory on whether or not a computer exists
-                                case "-computers":
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current computers\n") }
-                                    if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
-                                        let destEndpointCount: Int = destEndpointInfo.count
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
-                                        
-                                        if destEndpointCount > 0 {
-                                            for i in (0..<destEndpointCount) {
-                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                destXmlID = (destRecord["id"] as! Int)
-                                                //                                            print("computer ID: \(destXmlID)")
-                                                if let destEpGeneral = destEndpointJSON["computers/id/\(String(describing: destXmlID))/subset/General"] as? [Any] {
-//                                                    print("destEpGeneral: \(destEpGeneral)")
-                                                    let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
-//                                                    print("destRecordGeneral: \(destRecordGeneral)")
-                                                    let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
-                                                    self.currentEPs[destXmlUdid] = destXmlID
-                                                }
-                                                //print("Dest endpoint name: \(destXmlName)")
-                                            }
-                                        }   // if destEndpointCount > 0
-                                    }   //if let destEndpointInfo = destEndpointJSON - end
-                                    
-                                default:
-                                    if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
-                                        let accountsDict = destEndpointJSON as Dictionary<String, Any>
-                                        let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
-    //                                    print("users: \(String(describing: usersGroups["users"]))")
-    //                                    print("groups: \(String(describing: usersGroups["groups"]))")
-                                        destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
-                                    } else {
-                                        destEndpointDict = destEndpointJSON["\(endpointParent)"]
-                                    }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
-                                    if let destEndpointInfo = destEndpointDict as? [Any] {
-                                        let destEndpointCount: Int = destEndpointInfo.count
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
-                                        
-                                        if destEndpointCount > 0 {
-                                            for i in (0..<destEndpointCount) {
+                while (completed < endpointDependendyArray.count) {
+                    if !waiting {
+                        URLCache.shared.removeAllCachedResponses()
+                        waiting = true
+                        existingEndpointNode = endpointDependendyArray[completed]
+                        existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
+                        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+                        print("existing endpoints URL: \(existingDestUrl)")
+                        let destEncodedURL = NSURL(string: existingDestUrl)
+                        let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
+                        
+                        destRequest.httpMethod = "GET"
+                        let destConf = URLSessionConfiguration.default
+                        destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+                        let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
+                        let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
+                            (data, response, error) -> Void in
+                            if let httpResponse = response as? HTTPURLResponse {
+//                                print("httpResponse: \(String(describing: response))!")
+                                do {
+                                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                                    if let destEndpointJSON = json as? [String: Any] {
+//                                        print("destEndpointJSON: \(destEndpointJSON)")
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
+                                        switch destEndpoint {
+                                            
+                                        // need to revisit as name isn't the best indicatory on whether or not a computer exists
+                                        case "-computers":
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current computers\n") }
+                                            if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
+                                                let destEndpointCount: Int = destEndpointInfo.count
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
                                                 
-                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
-                                                destXmlID = (destRecord["id"] as! Int)
-//                                                    if destEndpoint != "mobiledeviceapplications" {
-                                                        if destRecord["name"] != nil {
-                                                            destXmlName = destRecord["name"] as! String
-                                                        } else {
-                                                            destXmlName = ""
+                                                if destEndpointCount > 0 {
+                                                    for i in (0..<destEndpointCount) {
+                                                        let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                        destXmlID = (destRecord["id"] as! Int)
+                                                        //                                            print("computer ID: \(destXmlID)")
+                                                        if let destEpGeneral = destEndpointJSON["computers/id/\(String(describing: destXmlID))/subset/General"] as? [Any] {
+        //                                                    print("destEpGeneral: \(destEpGeneral)")
+                                                            let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
+        //                                                    print("destRecordGeneral: \(destRecordGeneral)")
+                                                            let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
+                                                            self.currentEPs[destXmlUdid] = destXmlID
                                                         }
-//                                                    } else {
-//                                                        destXmlName = destRecord["bundle_id"] as! String
-//                                                    }
-                                                    if destXmlName != "" {
-                                                        if "\(String(describing: destXmlID))" != "" {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID))) to currentEP array.\n") }
-                                                            
-                                                            // filter out policies created from casper remote - start
-//                                                                let record = endpointInfo[i] as! [String : AnyObject]
-//                                                                let nameCheck = record["name"] as! String
-                                                                if destXmlName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && destXmlName != "Update Inventory" {
-                                                                    self.currentEPs[destXmlName] = destXmlID
-                                                                }
-                                                            // filter out policies created from casper remote - end
-                                                            
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
-                                                        } else {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
-                                                        }
-                                                    } else {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping id: \(String(describing: destXmlID)), could not determine its name.\n") }
+                                                        //print("Dest endpoint name: \(destXmlName)")
                                                     }
+                                                }   // if destEndpointCount > 0
+                                            }   //if let destEndpointInfo = destEndpointJSON - end
+                                            
+                                        default:
+                                            if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
+                                                let accountsDict = destEndpointJSON as Dictionary<String, Any>
+                                                let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
+            //                                    print("users: \(String(describing: usersGroups["users"]))")
+            //                                    print("groups: \(String(describing: usersGroups["groups"]))")
+                                                destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
+                                            } else {
+                                                destEndpointDict = destEndpointJSON["\(existingEndpointNode)"]
+                                            }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
+                                            if let destEndpointInfo = destEndpointDict as? [Any] {
+                                                let destEndpointCount: Int = destEndpointInfo.count
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server\n") }
                                                 
-                                            }   // for i in (0..<destEndpointCount) - end
-                                        } else {   // if destEndpointCount > 0 - end
-                                            self.currentEPs.removeAll()
-                                        }
-                                        self.currentEPDict[destEndpoint] = self.currentEPs
-                                        print("currentEPDict[\(destEndpoint)]: \(String(describing: self.currentEPDict[destEndpoint]!))")
-                                    }   // if let destEndpointInfo - end
-                                }   // switch - end
-                            } else {
-                                self.currentEPs.removeAll()
-                                completion("error parsing JSON")
-                            }   // if let destEndpointJSON - end
-                            
-                        }   // end do/catch
-                        
-                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            //print(httpResponse.statusCode)
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
-//                            print("returning existing endpoints: \(self.currentEPs)")
-                            completion("\nCurrent endpoints - \(self.currentEPs)")
-                        } else {
-                            // something went wrong
-                            completion("\ndestination count error")
-                            
-                        }   // if httpResponse/else - end
-                        
-                    }   // if let httpResponse - end
-                    semaphore.signal()
-                    if error != nil {
-                    }
-                })  // let task = destSession - end
-                //print("GET")
-                task.resume()
+                                                if destEndpointCount > 0 {
+                                                    for i in (0..<destEndpointCount) {
+                                                        
+                                                        let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] Processing: \(destRecord).\n") }
+                                                        destXmlID = (destRecord["id"] as! Int)
+        //                                                    if destEndpoint != "mobiledeviceapplications" {
+                                                                if destRecord["name"] != nil {
+                                                                    destXmlName = destRecord["name"] as! String
+                                                                } else {
+                                                                    destXmlName = ""
+                                                                }
+        //                                                    } else {
+        //                                                        destXmlName = destRecord["bundle_id"] as! String
+        //                                                    }
+                                                            if destXmlName != "" {
+                                                                if "\(String(describing: destXmlID))" != "" {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID))) to currentEP array.\n") }
+                                                                    
+                                                                    // filter out policies created from casper remote - start
+        //                                                                let record = endpointInfo[i] as! [String : AnyObject]
+        //                                                                let nameCheck = record["name"] as! String
+                                                                        if destXmlName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && destXmlName != "Update Inventory" {
+                                                                            self.currentEPs[destXmlName] = destXmlID
+                                                                        }
+                                                                    // filter out policies created from casper remote - end
+                                                                    
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]    Array has \(self.currentEPs.count) entries.\n") }
+                                                                } else {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping object: \(destXmlName), could not determine its id.\n") }
+                                                                }
+                                                            } else {
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] skipping id: \(String(describing: destXmlID)), could not determine its name.\n") }
+                                                            }
+                                                        
+                                                    }   // for i in (0..<destEndpointCount) - end
+                                                } else {   // if destEndpointCount > 0 - end
+                                                    self.currentEPs.removeAll()
+                                                }
+                                                self.currentEPDict[existingEndpointNode] = self.currentEPs
+                                                self.currentEPs.removeAll()
+//                                                print("currentEPDict[\(existingEndpointNode)]: \(self.currentEPDict[existingEndpointNode]!)")
+                                            }   // if let destEndpointInfo - end
+                                        }   // switch - end
+                                    } else {
+                                        self.currentEPs.removeAll()
+                                        completion("error parsing JSON")
+                                    }   // if let destEndpointJSON - end
+                                    
+                                }   // end do/catch
+                                
+                                completed += 1
+                                waiting = (completed < endpointDependendyArray.count) ? false:true
+                                print("completed: \(completed) of \(endpointDependendyArray.count) (\(existingEndpointNode))")
+                                
+                                if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
+                                    print(httpResponse.statusCode)
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
+        //                            print("returning existing endpoints: \(self.currentEPs)")
+                                    if completed == endpointDependendyArray.count {
+                                        print("currentEPDict[]: \(String(describing: self.currentEPDict))")
+                                        self.currentEPs = self.currentEPDict[destEndpoint]!
+                                        completion("\nCurrent endpoints - \(self.currentEPs)")
+                                    }
+                                } else {
+                                    // something went wrong
+                                    if completed == endpointDependendyArray.count {
+                                        print("currentEPDict[] - error: \(String(describing: self.currentEPDict))")
+                                        self.currentEPs = self.currentEPDict[destEndpoint]!
+                                        completion("\ndestination count error")
+                                    }
+                                    
+                                }   // if httpResponse/else - end
+                                
+                            }   // if let httpResponse - end
+                            semaphore.signal()
+                            if error != nil {
+                            }
+                        })  // let task = destSession - end
+                        //print("GET")
+                        task.resume()
+                    }   //for currentDependency in endpointDependendyArray - end
+                }
             }   // destEPQ - end
         } else {
             self.currentEPs["_"] = 0
             completion(" Current endpoints - saveOnly, not needed.")
         }
+    }
+    
+    func getDependencies(object: String, json: [String:AnyObject]) -> Dictionary<String, [String:String]> {
+        var objectDict         = [String:Any]()
+        var fullDependencyDict = Dictionary<String, [String:String]>()
+        var dependencyArray    = [String:String]()
+        
+        switch object {
+        case "policy":
+            let local_dependency_array = ["site", "category", "buildings", "computer_groups", "scripts", "package_configuration"]
+            
+            objectDict     = json[object] as! [String:Any]
+            let general    = objectDict["general"] as! [String:Any]
+            let scope      = objectDict["scope"] as! [String:Any]
+            let exclusions = scope["exclusions"] as! [String:Any]
+            
+            for the_dependency in local_dependency_array {
+                dependencyArray.removeAll()
+                switch the_dependency {
+                case "computer_groups", "buildings", "departments", "network_segments", "ibeacons":
+                    if let _ = scope[the_dependency] {
+                        let scope_dep = scope[the_dependency] as! [AnyObject]
+                        for theObject in scope_dep {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
+                    }
+                    
+                    if let _ = exclusions[the_dependency] {
+                        let scope_excl_dep = exclusions[the_dependency] as! [AnyObject]
+                        for theObject in scope_excl_dep {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
+                    }
+                  
+                default:
+                    if let _ = general[the_dependency] {
+                        let general_dep = general[the_dependency]! as! [String:Any]
+                        let local_name = general_dep["name"] as! String
+                        let local_id   = general_dep["id"] as! Int
+                        if local_id != -1 {
+                            dependencyArray["\(local_name)"] = "\(local_id)"
+                        }
+                    }
+                }
+                if dependencyArray.count > 0 {
+                    fullDependencyDict[the_dependency] = dependencyArray
+                    print("fullDependencyDict[\(the_dependency)]: \(fullDependencyDict[the_dependency]!)")
+                }
+            }
+            
+//            print("excluded computer groups: \(excl_computer_groups)")
+//            for (local_key, local_item) in exclusions["computer_groups"]! {
+//                print("local_item: \(local_key)")
+//            }
+
+        default:
+            print("[getDependencies] json: \(json)")
+        }
+        return fullDependencyDict
     }
     
     
@@ -4733,30 +4840,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func windowIsVisible(windowName: String) -> Bool {
-        let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
-        let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
-        let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
-        for item in infoList! {
-            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
-                return true
-            }
-        }
+        // having trouble since Catalina
+//        let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
+//        let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
+//        let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
+//        for item in infoList! {
+//            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
+//                return true
+//            }
+//        }
         return false
     }
-    
-//    func writeToLog(stringOfText: String) {
-//        writeLogQ.async {
-//            let logString = (LogLevel.debug) ? "\(self.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.getCurrentTime()) \(stringOfText)"
-//
-//            self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + self.logFile))
-////            self.logFileW = FileHandle(forUpdatingAtPath: (self.logPath! + self.logFile))
-//            
-//            self.logFileW?.seekToEndOfFile()
-//            let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-//            self.logFileW?.write(historyText!)
-//            self.logFileW?.closeFile()
-//        }
-//    }
     
     func serverOrFiles() -> String {
         // see if we last migrated from files or a server
