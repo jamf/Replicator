@@ -3527,7 +3527,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             var waiting                 = false
             switch endpointParent {
             case "policies":
-                endpointDependendyArray = ["\(existingEndpointNode)", "sites", "buildings", "categories", "departments", "directorybindings", "distributionpoints", "dockitems", "networksegments", "packages", "scripts"]
+                endpointDependendyArray = ["\(existingEndpointNode)", "sites", "buildings", "categories", "departments", "directorybindings", "distributionpoints", "dockitems", "networksegments", "packages", "printers", "scripts"]
             default:
                 endpointDependendyArray = ["\(existingEndpointNode)"]
             }
@@ -3556,7 +3556,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 do {
                                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                                     if let destEndpointJSON = json as? [String: Any] {
-//                                        print("destEndpointJSON: \(destEndpointJSON)")
+                                        print("destEndpointJSON: \(destEndpointJSON)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
                                         switch destEndpoint {
@@ -3594,7 +3594,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                                 destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                             } else {
-                                                destEndpointDict = destEndpointJSON["\(existingEndpointNode)"]
+                                                switch endpointParent {
+                                                case "policies":
+                                                    destEndpointDict = destEndpointJSON["\(existingEndpointNode)"]
+                                                default:
+                                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
+                                                }
+                                                
+//
                                             }
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
                                             if let destEndpointInfo = destEndpointDict as? [Any] {
@@ -3640,7 +3647,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 } else {   // if destEndpointCount > 0 - end
                                                     self.currentEPs.removeAll()
                                                 }
-                                                self.currentEPDict[existingEndpointNode] = self.currentEPs
+                                                
+                                                switch endpointParent {
+                                                case "policies":
+                                                    self.currentEPDict[existingEndpointNode] = self.currentEPs
+                                                default:
+                                                    self.currentEPDict[destEndpoint] = self.currentEPs
+                                                }
+//                                                self.currentEPDict[existingEndpointNode] = self.currentEPs
                                                 self.currentEPs.removeAll()
 //                                                print("currentEPDict[\(existingEndpointNode)]: \(self.currentEPDict[existingEndpointNode]!)")
                                             }   // if let destEndpointInfo - end
@@ -4076,7 +4090,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }   // if whichServer - end
         } else {
-            // blank out username / password fields
+            // credentials not found - blank out username / password fields
             if whichServer == "source" {
                 source_user_field.stringValue = ""
                 source_pwd_field.stringValue = ""
