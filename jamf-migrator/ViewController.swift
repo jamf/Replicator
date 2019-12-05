@@ -4049,7 +4049,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
-        let factor = (5000000/itemCount)
+        let delayFactor = (itemCount < 10) ? 10:itemCount
+        
+        let factor = (5000000/delayFactor)
         if factor > 50000 {
             return 50000
         } else {
