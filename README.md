@@ -113,6 +113,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v4.1.3**
+
+* Resolved app crash when doing a selective migration on groups.
+
 **v4.1.2**
 
 * Added site None to list of available sites to migrate to.  
