@@ -34,6 +34,8 @@ class Xml {
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
             endpointPath = saveXmlFolder+"/"+node+"/\(id)"
+        case "jamfgroups":
+            endpointPath = saveXmlFolder+"/accounts/groupid"
         default:
             endpointPath = saveXmlFolder+"/"+node
         }
