@@ -710,7 +710,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             objectsToMigrate.append(AllEndpointsArray[itemIndex-1])
             
-            print("wipeData.on: \(wipeData.on)")
+//            print("wipeData.on: \(wipeData.on)")
             if AllEndpointsArray[itemIndex-1] == "policies" && !wipeData.on {
                 DispatchQueue.main.async {
                     self.migrateDependencies.isHidden = false
@@ -1028,7 +1028,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     print("token received.")
                                     UapiCall().get(serverUrl: f_sourceURL, path: "preview/jamf-pro-information", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
-                                        print("json \(json)")
+//                                        print("json \(json)")
                                         if let fullVersion = json["jamfProVersion"] {
                                             let versionArray = "\(fullVersion)".split(separator: ".")
                                             if versionArray.count >= 2 {

@@ -18,7 +18,7 @@ class UapiCall: NSObject, URLSessionDelegate {
                 
         var urlString = "\(serverUrl)/uapi/\(path)"
         urlString     = urlString.replacingOccurrences(of: "//uapi", with: "/uapi")
-        print("[UapiCall] urlString: \(urlString)")
+//        print("[UapiCall] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.default
@@ -64,7 +64,7 @@ class UapiCall: NSObject, URLSessionDelegate {
         
         var tokenUrlString = "\(serverUrl)/uapi/auth/tokens"
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//uapi", with: "/uapi")
-        print("\(tokenUrlString)")
+//        print("\(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
         let configuration  = URLSessionConfiguration.default
