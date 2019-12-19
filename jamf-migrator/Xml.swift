@@ -15,7 +15,6 @@ class Xml {
     var saveXmlFolder = ""
     var endpointPath  = ""
     
-    
     func save(node: String, xml: String, name: String, id: Int, format: String) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
@@ -35,6 +34,10 @@ class Xml {
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
             endpointPath = saveXmlFolder+"/"+node+"/\(id)"
+        case "jamfgroups":
+            endpointPath = saveXmlFolder+"/accounts/groupid"
+        case "jamfusers":
+            endpointPath = saveXmlFolder+"/accounts/userid"
         default:
             endpointPath = saveXmlFolder+"/"+node
         }

@@ -1032,7 +1032,7 @@
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
                                     <tabViewItem label="General" identifier="tab0" id="88A-Nu-WEM">
-                                        <view key="view" identifier="General" ambiguous="YES" id="CPy-PU-zBW">
+                                        <view key="view" identifier="General" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <userGuides>
@@ -1972,7 +1972,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="tab3" id="Fo1-1P-mP5">
-                                        <view key="view" id="TA8-Ho-89h">
+                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2108,7 +2108,7 @@
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="161"/>
@@ -2215,6 +2215,14 @@
                                                                 <action selector="sectionToMigrate:" target="XfG-lQ-9wD" id="fWP-IL-j44"/>
                                                             </connections>
                                                         </popUpButton>
+                                                        <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wiT-wp-Gbk">
+                                                            <rect key="frame" x="467" y="174" width="159" height="14"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            <buttonCell key="cell" type="check" title="Migrate Dependencies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="eNy-iP-zFq">
+                                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                <font key="font" metaFont="system"/>
+                                                            </buttonCell>
+                                                        </button>
                                                     </subviews>
                                                 </view>
                                             </subviews>
@@ -2455,6 +2463,7 @@
                         <outlet property="macapplications_button" destination="hUv-Gv-ET3" id="X4a-qb-36V"/>
                         <outlet property="macapplications_label_field" destination="vif-GW-Rxk" id="W4r-L0-7jp"/>
                         <outlet property="macosTab_NSButton" destination="AT7-Qd-mL1" id="xBQ-7b-Vkw"/>
+                        <outlet property="migrateDependencies" destination="wiT-wp-Gbk" id="IYd-uV-ZTm"/>
                         <outlet property="migrateOrRemove_label_field" destination="1dY-rP-xsl" id="gss-SL-Jzl"/>
                         <outlet property="migrator_window" destination="m2S-Jp-Qdl" id="gcn-bM-U52"/>
                         <outlet property="mobiledeviceApps_label_field" destination="E48-BQ-8XI" id="Bkt-5u-ksS"/>

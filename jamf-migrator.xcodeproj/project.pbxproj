@@ -19,8 +19,10 @@
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
+		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
+		B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55BB46D23A9BC7C0024B357 /* UapiCall.swift */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
 		B57B1EFC21D7999F0098326E /* selective_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EFA21D7999E0098326E /* selective_active.png */; };
 		B57B1F0721D7A0300098326E /* ios_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1F0521D7A02F0098326E /* ios_active.png */; };
@@ -32,7 +34,6 @@
 		B5927AF820CAE22D0059C25B /* prefs.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF720CAE22D0059C25B /* prefs.png */; };
 		B5927AFA20CAEECC0059C25B /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF920CAEECC0059C25B /* help.png */; };
 		B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5927AFB20CC394F0059C25B /* VersionCheck.swift */; };
-		B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D0C39202B97BA006203CE /* Credentials.swift */; };
 		B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
@@ -64,8 +65,10 @@
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
+		B55BB46D23A9BC7C0024B357 /* UapiCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UapiCall.swift; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
 		B57B1EF921D7999E0098326E /* selective.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = selective.png; sourceTree = "<group>"; };
 		B57B1EFA21D7999E0098326E /* selective_active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = selective_active.png; sourceTree = "<group>"; };
@@ -78,7 +81,6 @@
 		B5927AF720CAE22D0059C25B /* prefs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prefs.png; sourceTree = "<group>"; };
 		B5927AF920CAEECC0059C25B /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		B5927AFB20CC394F0059C25B /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
-		B59D0C39202B97BA006203CE /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
@@ -131,11 +133,12 @@
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B562410D215151C4007F8144 /* jamf-migrator.entitlements */,
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
-				B59D0C39202B97BA006203CE /* Credentials.swift */,
 				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
+				B53ECDFB2394474B005EE6E5 /* Json.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
+				B55BB46D23A9BC7C0024B357 /* UapiCall.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
 				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
@@ -320,11 +323,12 @@
 			files = (
 				B5165E1620E580A00086E31D /* Xml.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
+				B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
-				B59D0C3A202B97BA006203CE /* Credentials.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
+				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
@@ -476,7 +480,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 4.1.3;
+                MARKETING_VERSION = 5.0.0b1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -496,7 +500,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 4.1.3;
+                MARKETING_VERSION = 5.0.0b1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
