@@ -2120,7 +2120,7 @@
                                                                         <tableColumns>
                                                                             <tableColumn identifier="sourceObjectID" editable="NO" width="470" minWidth="40" maxWidth="1000" id="EVv-n3-oMc">
                                                                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                                                    <font key="font" metaFont="controlContent" size="11"/>
+                                                                                    <font key="font" metaFont="message" size="11"/>
                                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                                                 </tableHeaderCell>
@@ -2216,7 +2216,7 @@
                                                             </connections>
                                                         </popUpButton>
                                                         <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wiT-wp-Gbk">
-                                                            <rect key="frame" x="467" y="174" width="159" height="14"/>
+                                                            <rect key="frame" x="467" y="171" width="159" height="22"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="check" title="Migrate Dependencies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="eNy-iP-zFq">
                                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2291,7 +2291,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="R8b-G6-Yv6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="controlContent" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>

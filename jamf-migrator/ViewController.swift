@@ -1025,7 +1025,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(false)
                                         return
                                     }
-                                    print("token received.")
+//                                    print("token received.")
                                     UapiCall().get(serverUrl: f_sourceURL, path: "preview/jamf-pro-information", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
 //                                        print("json \(json)")
@@ -1466,7 +1466,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Returned from Json.getRecord: \(result)\n") }
                                     if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
                                         advancedMigrateDict = self.getDependencies(object: "policy", json: result)
-                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
+//                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
                                     } else {
                                         advancedMigrateDict = [:]
                                     }
@@ -1498,8 +1498,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
                                                         for (name, id) in advancedMigrateDict[object]! {
                                                             if LogLevel.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(name)\n") }
-                                                            print("self.saveOnly: \(self.saveOnly)")
-                                                            print("object: \(object) - name: \(name)")
+//                                                            print("self.saveOnly: \(self.saveOnly)")
+//                                                            print("object: \(object) - name: \(name)")
                                                             if nil != self.currentEPDict[object]![name] && !self.saveOnly {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
                                                                 //self.currentEndpointID = self.currentEPs[xmlName]!
@@ -3951,12 +3951,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                  case "printers":
                  let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
-                 print("[getDependencies] jsonPrinterArray: \(jsonPrinterArray)")
                  for i in 0..<jsonPrinterArray.count {
                     if "\(jsonPrinterArray[i])" != "" {
                         let scope_item = jsonPrinterArray[i] as! Dictionary<String,Any>
-                        print("[getDependencies] scope_item: \(scope_item)")
-
                         let local_name = scope_item["name"]
                         let local_id   = scope_item["id"]
 //                        for theObject in scope_item {
