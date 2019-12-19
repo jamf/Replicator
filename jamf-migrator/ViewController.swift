@@ -3669,7 +3669,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         existingEndpointNode = endpointDependendyArray[completed]
                         existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-                        print("existing endpoints URL: \(existingDestUrl)")
+//                        print("existing endpoints URL: \(existingDestUrl)")
                         let destEncodedURL = NSURL(string: existingDestUrl)
                         let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
@@ -3684,7 +3684,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 do {
                                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                                     if let destEndpointJSON = json as? [String: Any] {
-                                        print("destEndpointJSON: \(destEndpointJSON)")
+//                                        print("destEndpointJSON: \(destEndpointJSON)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
                                         switch destEndpoint {
@@ -3788,14 +3788,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     self.currentEPs.removeAll()
                                                 }
                                                 
-                                                print("\n[existingEndpoints] endpointParent: \(endpointParent)\n")
+//                                                print("\n[existingEndpoints] endpointParent: \(endpointParent)\n")
                                                 switch endpointParent {
                                                 case "policies":
                                                     self.currentEPDict[existingEndpointNode] = self.currentEPs
-                                                    print("[existingEndpoints] currentEPDict[\(existingEndpointNode)]: \(self.currentEPDict[existingEndpointNode]!)")
+//                                                    print("[existingEndpoints] currentEPDict[\(existingEndpointNode)]: \(self.currentEPDict[existingEndpointNode]!)")
                                                 default:
                                                     self.currentEPDict[destEndpoint] = self.currentEPs
-                                                    print("[existingEndpoints] currentEPDict[\(destEndpoint)]: \(self.currentEPDict[destEndpoint]!)")
+//                                                    print("[existingEndpoints] currentEPDict[\(destEndpoint)]: \(self.currentEPDict[destEndpoint]!)")
                                                 }
 //                                                self.currentEPDict[existingEndpointNode] = self.currentEPs
                                                 self.currentEPs.removeAll()
@@ -3810,7 +3810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 completed += 1
                                 waiting = (completed < endpointDependendyArray.count) ? false:true
-                                print("completed: \(completed) of \(endpointDependendyArray.count) (\(existingEndpointNode))")
+//                                print("completed: \(completed) of \(endpointDependendyArray.count) (\(existingEndpointNode))")
                                 
                                 if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
 //                                    print(httpResponse.statusCode)
@@ -3819,9 +3819,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if completed == endpointDependendyArray.count {
                                         if endpointParent == "ldap_servers" {
                                             self.currentLDAPServers = self.currentEPDict[destEndpoint]!
-                                            print("[existingEndpoints-LDAP] currentLDAPServers: \(String(describing: self.currentLDAPServers))")
+//                                            print("[existingEndpoints-LDAP] currentLDAPServers: \(String(describing: self.currentLDAPServers))")
                                         }
-                                        print("[existingEndpoints] currentEPDict[]: \(String(describing: self.currentEPDict))")
+//                                        print("[existingEndpoints] currentEPDict[]: \(String(describing: self.currentEPDict))")
                                         self.currentEPs = self.currentEPDict[destEndpoint]!
                                         completion("\n[existingEndpoints] Current endpoints - \(self.currentEPs)")
                                     }
