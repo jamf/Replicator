@@ -119,7 +119,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 **v5.0.0**
 
-* Introduce smart selective migrations for policies.  When migrating a policy dependent items (scripts, packages, printers, computer groups, ...) will also be migrated/updated, if desired.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
+* Introduce smart selective migrations for policies.  When migrating a policy dependent items (scripts, packages, printers, computer groups, ...) will also be migrated/updated, if desired.  Only 'top-level' dependencies are checked.  i.e. if the scope of a policy is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
 * Resolve problem of migrating LDAP Jamf User Groups to Jamf Pro v10.17+ (issue #42).
 
 **v4.1.3**
