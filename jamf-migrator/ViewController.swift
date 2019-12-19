@@ -1082,6 +1082,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func authCheck - end
     
     func startMigrating() {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[startMigrating] enter\n") }
+        
         // make sure the labels can change color when we start
                   changeColor = true
         getEndpointInProgress = "start"
@@ -1544,6 +1547,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func startMigrating - end
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] enter\n") }
+        
 //        print("nodesToMigrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
@@ -1577,10 +1583,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "getEndpoints result: \(result)\n") }
             }
         }
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] exit\n") }
     }
     
     
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] enter\n") }
+        
         URLCache.shared.removeAllCachedResponses()
         var endpoint       = nodesToMigrate[nodeIndex]
         var endpointParent = ""
@@ -2413,7 +2424,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func readDataFiles(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: String) -> Void) {
-
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] enter\n") }
+        
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
@@ -2559,7 +2572,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: Dictionary<String,[String]>, completion: @escaping (_ result: String) -> Void) {
-
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] enter\n") }
+        
         self.existingEndpoints(theDestEndpoint: "\(endpoint)") {
             (result: String) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] Returned from existing \(endpoint): \(result)\n") }
@@ -2609,6 +2624,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // get full record in XML format
     func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
         saveRawXml        = xmlPrefOptions["saveRawXml"]!
 
@@ -2686,6 +2703,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func cleanupXml(endpoint: String, Xml: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] enter\n") }
         
         if !fileImport {
             completion("")
@@ -3115,6 +3134,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
+        
         var destinationEpId = destEpId
         var apiAction       = action
         
@@ -3381,7 +3402,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation: \(request.httpMethod)\n") }
                 
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))\n") }
+                if endpointCurrent > 0 {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))\n") }
+                }
                 semaphore.signal()
                 if error != nil {
                 }
@@ -3400,6 +3423,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func createEndpoints - end
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] enter\n") }
         // this is where we delete the endpoint
         var removeDestUrl = ""
         
@@ -3556,6 +3580,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func removeEndpoints - end
     
     func existingEndpoints(theDestEndpoint: String, completion: @escaping (_ result: String) -> Void) {
+        
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter\n") }
+        
         if !saveOnly {
             URLCache.shared.removeAllCachedResponses()
             currentEPs.removeAll()
@@ -3663,6 +3690,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let semaphore = DispatchSemaphore(value: 1)
             destEPQ.async {
                 while (completed < endpointDependendyArray.count) {
+//                    print("[\(endpointParent)] completed \(completed) of \(endpointDependendyArray.count)")
+                    usleep(10)
                     if !waiting {
                         URLCache.shared.removeAllCachedResponses()
                         waiting = true
@@ -3844,6 +3873,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         task.resume()
                     }   //for currentDependency in endpointDependendyArray - end
                 }
+//                print("[\(endpointParent)] completed \(completed) of \(endpointDependendyArray.count)")
             }   // destEPQ - end
         } else {
             self.currentEPs["_"] = 0
@@ -3852,6 +3882,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
 
     func getDependencies(object: String, json: [String:AnyObject]) -> Dictionary<String, [String:String]> {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] enter\n") }
         var objectDict         = [String:Any]()
         var fullDependencyDict = Dictionary<String, [String:String]>()
         var dependencyArray    = [String:String]()
@@ -3991,6 +4022,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             print("[getDependencies] not implemented for \(object)")
         }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] exit\n") }
         return fullDependencyDict
     }
     
