@@ -8,6 +8,16 @@
 
 import Foundation
 
+struct jamfProVersion {
+    static var major = 0
+    static var minor = 0
+    static var patch = 0
+}
+
+struct wipeData {
+    static var on = false
+}
+
 struct History {
     static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
     static var logFile = ""

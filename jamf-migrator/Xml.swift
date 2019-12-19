@@ -36,6 +36,8 @@ class Xml {
             endpointPath = saveXmlFolder+"/"+node+"/\(id)"
         case "jamfgroups":
             endpointPath = saveXmlFolder+"/accounts/groupid"
+        case "jamfusers":
+            endpointPath = saveXmlFolder+"/accounts/userid"
         default:
             endpointPath = saveXmlFolder+"/"+node
         }
