@@ -35,8 +35,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-        let helpWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Help View Controller")) as! NSWindowController
+        let storyboard = NSStoryboard(name: "Main", bundle: nil)
+        let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
         if !windowIsVisible(windowName: "Help") {
             helpWindowController.window?.hidesOnDeactivate = false
             helpWindowController.showWindow(self)
@@ -359,9 +359,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
 
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
-    var theImage:[NSImage] = [NSImage(named: NSImage.Name(rawValue: "0.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "1.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "2.png"))!]
+    var theImage:[NSImage] = [NSImage(named: "0.png")!,
+                              NSImage(named: "1.png")!,
+                              NSImage(named: "2.png")!]
     var showSpinner = false
     
     // group counters
@@ -441,14 +441,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    var tabImage:[NSImage] = [NSImage(named: NSImage.Name(rawValue: "general.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "general_active.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "macos.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "macos_active.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "ios.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "ios_active.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "selective.png"))!,
-                              NSImage(named: NSImage.Name(rawValue: "selective_active.png"))!]
+    var tabImage:[NSImage] = [NSImage(named: "general.png")!,
+                              NSImage(named: "general_active.png")!,
+                              NSImage(named: "macos.png")!,
+                              NSImage(named: "macos_active.png")!,
+                              NSImage(named: "ios.png")!,
+                              NSImage(named: "ios_active.png")!,
+                              NSImage(named: "selective.png")!,
+                              NSImage(named: "selective_active.png")!]
     
     @IBOutlet weak var generalTab_NSButton: NSButton!
     @IBOutlet weak var macosTab_NSButton: NSButton!
@@ -1025,7 +1025,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(false)
                                         return
                                     }
-                                    print("token received.")
+//                                    print("token received.")
                                     UapiCall().get(serverUrl: f_sourceURL, path: "preview/jamf-pro-information", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
 //                                        print("json \(json)")
@@ -1466,7 +1466,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Returned from Json.getRecord: \(result)\n") }
                                     if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
                                         advancedMigrateDict = self.getDependencies(object: "policy", json: result)
-                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
+//                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
                                     } else {
                                         advancedMigrateDict = [:]
                                     }
@@ -1498,8 +1498,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                        print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
                                                         for (name, id) in advancedMigrateDict[object]! {
                                                             if LogLevel.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(name)\n") }
-                                                            print("self.saveOnly: \(self.saveOnly)")
-                                                            print("object: \(object) - name: \(name)")
+//                                                            print("self.saveOnly: \(self.saveOnly)")
+//                                                            print("object: \(object) - name: \(name)")
                                                             if nil != self.currentEPDict[object]![name] && !self.saveOnly {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
                                                                 //self.currentEndpointID = self.currentEPs[xmlName]!
@@ -2271,11 +2271,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                             
                                                                             while self.configObjectsDict.count != movedParentArray.count {
                                                                                 for (key, _) in self.configObjectsDict {
-                                                                                    if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.index(of: key) == nil)) || ((movedParentArray.index(of: key) == nil) && (movedParentArray.index(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
+                                                                                    if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.firstIndex(of: key) == nil)) || ((movedParentArray.firstIndex(of: key) == nil) && (movedParentArray.firstIndex(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
                                                                                         orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
                                                                                         movedParentArray.append(key)
                                                                                         // look for configs missing their parent
-                                                                                    } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.index(of: key) == nil) {
+                                                                                    } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.firstIndex(of: key) == nil) {
                                                                                         WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
                                                                                         WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
                                                                                         orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
@@ -2838,7 +2838,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let regexComp = try! NSRegularExpression(pattern: "<directory_bindings><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
                     PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<directory_bindings><id>\(destId ?? 0)</id><name>\(item)</name>")
                 }
-                if self.orphanIds.index(of: "\(endpointID)") != nil {
+                if self.orphanIds.firstIndex(of: "\(endpointID)") != nil {
                     let regexComp = try! NSRegularExpression(pattern: "<type>Smart<type>", options:.caseInsensitive)
                     PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<type>Standard<type>")
                     let regexComp2 = try! NSRegularExpression(pattern: "<parent>(.*?)</parent>", options:.caseInsensitive)
@@ -2979,10 +2979,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
-                if let index = iconUri.index(of: "=") {
+                if let index = iconUri.firstIndex(of: "=") {
                     iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
                     if endpoint != "policies" {
-                        if let index = iconId_string.index(of: "&") {
+                        if let index = iconId_string.firstIndex(of: "&") {
                             iconId = Int(iconId_string.prefix(upTo: index))!
                         }
                     } else {
@@ -2993,7 +2993,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // check for a self service icon and grab name and id if present - end
             
             if (endpoint == "macapplications") || (endpoint == "mobiledeviceapplications") {  // "vpp_admin_account_id", "total_vpp_licenses", "remaining_vpp_licenses"
-                if let index = iconUri.index(of: "&") {
+                if let index = iconUri.firstIndex(of: "&") {
                     iconUri = String(iconUri.prefix(upTo: index))
                     //                    print("[cleanupXml] adjusted - self service icon name: \(iconName) \t uri: \(iconUri)")
                 }
@@ -3243,7 +3243,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         DispatchQueue.main.async {
                             self.object_name_field.stringValue = "\(endpointType)"
                             let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-                            if endpointCurrent > currentCompleted || endpointCurrent < 4 {
+                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                                 self.objects_completed_field.stringValue = "\(endpointCurrent)"
                             }
                             self.objects_found_field.stringValue     = "\(endpointCount)"
@@ -3461,7 +3461,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            self.migrationStatus(endpoint: endpointType, count: endpointCount)
                             self.object_name_field.stringValue       = "\(endpointType)"
                             let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-                            if endpointCurrent > currentCompleted || endpointCurrent < 4 {
+                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                                 self.objects_completed_field.stringValue = "\(endpointCurrent)"
                             }
                             self.objects_found_field.stringValue     = "\(endpointCount)"
@@ -3478,7 +3478,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             // remove items from the list as they are removed from the server
                             if self.activeTab() == "selective" {
-                                let lineNumber = self.availableIdsToDelArray.index(of: endPointID)!
+                                let lineNumber = self.availableIdsToDelArray.firstIndex(of: endPointID)!
                                 
                                 DispatchQueue.main.async {
                                     self.srcSrvTableView.beginUpdates()
@@ -3951,11 +3951,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                  case "printers":
                  let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
-                 print("[getDependencies] jsonPrinterArray: \(jsonPrinterArray)")
                  for i in 0..<jsonPrinterArray.count {
                     if "\(jsonPrinterArray[i])" != "" {
                         let scope_item = jsonPrinterArray[i] as! Dictionary<String,Any>
-                        print("[getDependencies] scope_item: \(scope_item)")
 
                         let local_name = scope_item["name"]
                         let local_id   = scope_item["id"]
@@ -3991,7 +3989,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 
         default:
-            print("[getDependencies] json: \(json)")
+            print("[getDependencies] not implemented for \(object)")
         }
         return fullDependencyDict
     }
@@ -4444,7 +4442,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func getStatusUpdate(endpoint: String, current: Int, total: Int) {
         DispatchQueue.main.async {
             self.get_name_field.stringValue = endpoint
-            self.get_completed_field.stringValue = "\(current)"
+            if current > 0 {
+                self.get_completed_field.stringValue = "\(current)"
+            }
             self.get_found_field.stringValue = "\(total)"
         }
     }
@@ -5011,7 +5011,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
 //        if !(fileImport && serverList == "source_server_array") {
             var local_serverArray = theArray
-            let positionInList = local_serverArray.index(of: url)
+            let positionInList = local_serverArray.firstIndex(of: url)
             if positionInList == nil && url != "" {
                     local_serverArray.insert(url, at: 0)
             } else if positionInList! > 0 && url != "" {
@@ -5187,8 +5187,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            srcSrvTableView.backgroundColor = NSColor(calibratedRed: 0x85/255.0, green: 0x9c/255.0, blue: 0xb0/255.0, alpha: 1.0)
             srcSrvTableView.usesAlternatingRowBackgroundColors = false
 //            srcSrvTableView.gridColor = .black
-            quit_button.image = NSImage(named: NSImage.Name(rawValue: "quit_dark.png"))!
-            go_button.image = NSImage(named: NSImage.Name(rawValue: "go_dark.png"))!
+            quit_button.image = NSImage(named: "quit_dark.png")!
+            go_button.image = NSImage(named: "go_dark.png")!
         }
         
         let def_plist = Bundle.main.path(forResource: "settings", ofType: "plist")!
@@ -5607,8 +5607,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Summary Window - start
     @IBAction func showSummaryWindow(_ sender: AnyObject) {
-        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-        let summaryWindowController = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Summary Window Controller")) as! NSWindowController
+        let storyboard = NSStoryboard(name: "Main", bundle: nil)
+        let summaryWindowController = storyboard.instantiateController(withIdentifier: "Summary Window Controller") as! NSWindowController
         if let summaryWindow = summaryWindowController.window {
             let summaryViewController = summaryWindow.contentViewController as! SummaryViewController
             

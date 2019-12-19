@@ -25,7 +25,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
         var pwc: NSWindowController?
         
         if !(pwc != nil) {
-            let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Preferences"), bundle: nil)
+            let storyboard = NSStoryboard(name: "Preferences", bundle: nil)
             pwc = storyboard.instantiateInitialController() as? NSWindowController
         }
 
