@@ -38,7 +38,7 @@ The 'Selective' tab provides the ability to select a subset of items within a ca
   
 Note: Policies are listed along with the their ID.  They'll be listed with a format of: policy name (ID)
 
-Also, policies may have their dependencies check/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
+Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
 ![alt text](./jamf-migrator/images/migrator3Policies.png "Selective")
 
 
