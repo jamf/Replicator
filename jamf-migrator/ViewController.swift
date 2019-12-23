@@ -1746,7 +1746,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     if !wipeData.on  {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
 //                                                        if self.currentEPs[l_xmlName] != nil {
-                                                        if self.currentEPDict[endpoint]![l_xmlName] != nil {
+                                                        if self.currentEPDict[endpoint]?[l_xmlName] != nil {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
 //                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
@@ -2054,7 +2054,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     if !wipeData.on  {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
 //                                                        if self.currentEPs[l_xmlName] != nil {
-                                                        if self.currentEPDict[endpoint]![l_xmlName] != nil {
+                                                        if self.currentEPDict[endpoint]?[l_xmlName] != nil {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
 //                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                             self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
@@ -2681,7 +2681,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         // save source XML - start
                         if self.saveRawXml {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                            Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
+                            DispatchQueue.main.async {
+                                Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
+                            }
                         }
                         // save source XML - end
                         
@@ -2717,24 +2719,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var iconId          = 0
         var iconUri         = ""
         
-        var localEndPointType = ""
+//        var localEndPointType = ""    // disabled lnh 191223
         var theEndpoint       = endpoint
         
         switch endpoint {
         //      adjust the lookup endpoint
-        case "smartcomputergroups", "staticcomputergroups":
-            localEndPointType = "computergroups"
-        case "smartmobiledevicegroups", "staticmobiledevicegroups":
-            localEndPointType = "mobiledevicegroups"
-        case "smartusergroups", "staticusergroups":
-            localEndPointType = "usergroups"
+//        case "smartcomputergroups", "staticcomputergroups":
+//            localEndPointType = "computergroups"
+//        case "smartmobiledevicegroups", "staticmobiledevicegroups":
+//            localEndPointType = "mobiledevicegroups"
+//        case "smartusergroups", "staticusergroups":
+//            localEndPointType = "usergroups"
         //      adjust the where the data is sent
         case "accounts/userid":
             theEndpoint = "jamfusers"
         case "accounts/groupid":
             theEndpoint = "jamfgroups"
         default:
-            localEndPointType = endpoint
+            theEndpoint = endpoint
+//            localEndPointType = endpoint
         }
         
         // strip out <id> tag from XML
@@ -3191,7 +3194,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
-                Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
+                DispatchQueue.main.async {
+                    Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
+                }
                 
             }
             // save trimmed XML - end
@@ -4513,7 +4518,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
                 if self.saveRawXml {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
-                    Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+                    DispatchQueue.main.async {
+                        Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+                    }
                 }
             } else {
                 iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
