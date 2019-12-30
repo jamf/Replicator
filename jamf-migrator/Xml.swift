@@ -16,9 +16,7 @@ class Xml {
     var endpointPath  = ""
     
     func save(node: String, xml: String, name: String, id: Int, format: String) {
-        
-//        let baseXmlFolder = "\(getDownloadDirectory().appendingPathComponent("Jamf Migrator"))"
-        
+                
         if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
         saveXmlFolder = baseXmlFolder+"/"+format
@@ -97,10 +95,5 @@ class Xml {
             .replacingOccurrences(of: ">", with: "&lt;")
         
         return newString
-    }
-    
-    func getDownloadDirectory() -> URL {
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-        return downloadsDirectory
     }
 }

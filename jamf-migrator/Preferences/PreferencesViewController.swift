@@ -105,7 +105,7 @@ class PreferencesViewController: NSViewController {
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
-        let exportFilePath:String? = (NSHomeDirectory() + "/Documents/Jamf Migrator/")
+        let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
             NSWorkspace.shared.openFile(exportFilePath!)
         } else {
