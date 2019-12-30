@@ -11,11 +11,13 @@ import Foundation
 class Xml {
     let vc = ViewController()
     let fm = FileManager()
-    let baseXmlFolder = NSHomeDirectory() + "/Documents/Jamf Migrator"
+    let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
     var saveXmlFolder = ""
     var endpointPath  = ""
     
     func save(node: String, xml: String, name: String, id: Int, format: String) {
+        
+//        let baseXmlFolder = "\(getDownloadDirectory().appendingPathComponent("Jamf Migrator"))"
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
@@ -24,7 +26,7 @@ class Xml {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
                 return
             }
         }
@@ -45,7 +47,7 @@ class Xml {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem creating \(endpointPath) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem creating \(endpointPath) folder: Error \(error)\n") }
                 return
             }
         }
@@ -63,7 +65,7 @@ class Xml {
 //                print("Copied \(iconSource) to: \(iconDest)")
             } catch {
 //                print("Problem copying \(iconSource) to: \(iconDest)")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Problem copying \(iconSource) to: \(iconDest)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem copying \(iconSource) to: \(iconDest)\n") }
             }
         default:
             let xmlFile = "\(name)-\(id).xml"
@@ -75,8 +77,9 @@ class Xml {
                     
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] saved to: \(endpointPath)\n") }
                     } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "Problem writing \(endpointPath) folder: Error \(error)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem writing \(endpointPath) folder: Error \(error)\n") }
                         return
                     }
                 }   // if let prettyXml - end
@@ -94,5 +97,10 @@ class Xml {
             .replacingOccurrences(of: ">", with: "&lt;")
         
         return newString
+    }
+    
+    func getDownloadDirectory() -> URL {
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+        return downloadsDirectory
     }
 }

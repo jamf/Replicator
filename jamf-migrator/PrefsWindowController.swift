@@ -10,6 +10,8 @@ import Cocoa
 
 class PrefsWindowController: NSWindowController, NSWindowDelegate {
     
+    
+    
     override func windowDidLoad() {
         super.windowDidLoad()
     }
@@ -31,11 +33,12 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
 
         if (pwc != nil) {
             if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site")) {
-//                print("show prefs window")
+//                print("show new prefs window")
                 pwc?.showWindow(nil)
             } else {
                 self.window?.makeKey()
 //                pwc?.close()
+//                PrefsWindowController().close()
 //                print("[PreferenceWindowController] pref window already visible, bring to front - close/reopen")
             }
         }

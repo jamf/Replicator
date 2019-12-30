@@ -5120,15 +5120,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func windowIsVisible(windowName: String) -> Bool {
-        // having trouble since Catalina
-//        let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
-//        let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
-//        let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
-//        for item in infoList! {
-//            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
-//                return true
-//            }
-//        }
+        let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
+        let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
+        let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
+        for item in infoList! {
+            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" {
+                print("\(item["kCGWindowOwnerName"]!) \t \(item["kCGWindowName"]!)")
+            }
+            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
+                return true
+            }
+        }
         return false
     }
     
@@ -5468,7 +5470,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
-        // read command line arguments - start
+        // read command line arguments - end
 
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting

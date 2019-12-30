@@ -119,10 +119,13 @@ class PreferencesViewController: NSViewController {
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
         self.view.wantsLayer = true
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
+        
+
     }
     
     override func viewDidAppear() {
         super.viewDidAppear()
+          
         
         // set window title
         self.parent?.view.window?.title = self.title!
