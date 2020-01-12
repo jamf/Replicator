@@ -106,8 +106,14 @@ class PreferencesViewController: NSViewController {
         
         var isDir: ObjCBool = true
         let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        print("exportFilePath: \(String(describing: exportFilePath!))")
+//        let path2:URL? = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+        NSWorkspace.shared.open(URL(fileURLWithPath: exportFilePath!))
+//        NSWorkspace.shared.open(path2!)
+        
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
-            NSWorkspace.shared.openFile(exportFilePath!)
+            print("open exportFilePath: \(exportFilePath!)")
+            NSWorkspace.shared.openFile("exportFilePath!")
         } else {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
         }
@@ -120,13 +126,13 @@ class PreferencesViewController: NSViewController {
         self.view.wantsLayer = true
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
         
-
+//        print("[PreferencesViewController] viewDidLoad")
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     override func viewDidAppear() {
         super.viewDidAppear()
-          
-        
+
         // set window title
         self.parent?.view.window?.title = self.title!
         

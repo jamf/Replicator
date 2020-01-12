@@ -34,9 +34,13 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
         if (pwc != nil) {
             if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site")) {
 //                print("show new prefs window")
-                pwc?.showWindow(nil)
+                pwc?.showWindow(self)
             } else {
-                self.window?.makeKey()
+//                self.window?.makeKey()
+//                PreferencesViewController().view.window?.becomeFirstResponder()
+//                DispatchQueue.main.async {
+//                    PreferencesViewController().view.window?.makeKeyAndOrderFront(self)
+//                }
 //                pwc?.close()
 //                PrefsWindowController().close()
 //                print("[PreferenceWindowController] pref window already visible, bring to front - close/reopen")

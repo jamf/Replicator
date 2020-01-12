@@ -56,6 +56,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var prefWindowController2: PrefsWindowController?
     @IBAction func showPrefsWindow(_ sender: Any) {
         PrefsWindowController().show()
+//        let myPrefs = PrefsWindowController().window
+//        myPrefs?.makeKeyAndOrderFront(self)
+//        PrefsWindowController().window?.orderFrontRegardless()
+//        PrefsWindowController().window?.makeKeyAndOrderFront(self)
+//        
+//        self.view.window?.orderFront(self)
+//        self.view.window?.makeKeyAndOrderFront(self)
     }
 
         
@@ -5124,11 +5131,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
         let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
         for item in infoList! {
-            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" {
-                print("\(item["kCGWindowOwnerName"]!) \t \(item["kCGWindowName"]!)")
-            }
-            if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
-                return true
+            if let _ = item["kCGWindowOwnerName"], let _ = item["kCGWindowName"] {
+//                if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" {
+//                    print("\(item["kCGWindowOwnerName"]!) \t \(item["kCGWindowName"]!)")
+//                }
+                if "\(item["kCGWindowOwnerName"]!)" == "jamf-migrator" && "\(item["kCGWindowName"]!)" == windowName {
+//                    print("[viewController] item: \(item)")
+                    print("[viewController] \(item["kCGWindowOwnerName"]!) -> \(item["kCGWindowName"]!) is visible")
+                    return true
+                }
             }
         }
         return false
