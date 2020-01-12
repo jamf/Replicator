@@ -36,6 +36,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
 //                print("show new prefs window")
                 pwc?.showWindow(self)
             } else {
+                pwc?.window?.makeKeyAndOrderFront(self)
 //                self.window?.makeKey()
 //                PreferencesViewController().view.window?.becomeFirstResponder()
 //                DispatchQueue.main.async {
