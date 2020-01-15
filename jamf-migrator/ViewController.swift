@@ -4520,6 +4520,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             if !fileImport {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] fetching icon from \(ssIconUri).\n") }
                 curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
 //              print("result of icon GET: "+curlResult)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
@@ -4535,7 +4536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             if !saveOnly {
                 curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
                 //                                    print("result of icon POST: "+curlResult2)
             }   // if !saveOnly - end
             if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
@@ -4950,24 +4951,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func myExitValue(cmd: String, args: String...) -> String {
-        var status  = ""
-        let pipe    = Pipe()
-        let task    = Process()
+        var status       = "unknown"
+        var statusArray  = [String]()
+        let pipe         = Pipe()
+        let task         = Process()
         
         task.launchPath     = cmd
         task.arguments      = args
         task.standardOutput = pipe
-        let outputHandle    = pipe.fileHandleForReading
-        
-        outputHandle.readabilityHandler = { pipe in
-            if let testResult = String(data: pipe.availableData, encoding: String.Encoding.utf8) {
-                status = testResult.replacingOccurrences(of: "\n", with: "")
-            } else {
-                status = "unknown"
-            }
-        }
+//        let outputHandle    = pipe.fileHandleForReading
+//
+//        outputHandle.readabilityHandler = { pipe in
+//            if let testResult = String(data: pipe.availableData, encoding: String.Encoding.utf8) {
+//                print("[myExitValue] testResult: \(testResult)")
+//                status = testResult.replacingOccurrences(of: "\n", with: "")
+//            } else {
+//                status = "unknown"
+//            }
+//        }
         
         task.launch()
+        
+        let outdata = pipe.fileHandleForReading.readDataToEndOfFile()
+        if var string = String(data: outdata, encoding: .utf8) {
+            string = string.trimmingCharacters(in: .newlines)
+            statusArray = string.components(separatedBy: "\n")
+            status = statusArray[0]
+            print("createPolicy: \(statusArray)")
+        }
+        
         task.waitUntilExit()
         
         return(status)

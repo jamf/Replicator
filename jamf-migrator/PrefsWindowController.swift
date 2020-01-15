@@ -11,7 +11,6 @@ import Cocoa
 class PrefsWindowController: NSWindowController, NSWindowDelegate {
     
     
-    
     override func windowDidLoad() {
         super.windowDidLoad()
     }
@@ -34,17 +33,30 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
         if (pwc != nil) {
             if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site")) {
 //                print("show new prefs window")
-                pwc?.showWindow(self)
+//                pwc?.showWindow(self)
+
+                pwc?.window?.setIsVisible(true)
+                
             } else {
-                pwc?.window?.makeKeyAndOrderFront(self)
-//                self.window?.makeKey()
-//                PreferencesViewController().view.window?.becomeFirstResponder()
-//                DispatchQueue.main.async {
-//                    PreferencesViewController().view.window?.makeKeyAndOrderFront(self)
-//                }
+                DispatchQueue.main.async {
+                    print("[PrefsWindowController] show existing preference window")
+                    
+//                    pwc?.window?.orderFront(self)   // creates new window
+//                    pwc?.window?.orderedIndex = 0   // creates new window
+//                    pwc?.window?.center()   // nothing
+//                    pwc?.window?.display()  // nothing
+//                    pwc?.window?.hidesOnDeactivate = true
+//                    windowShouldClose(PrefsWindowController)
+//                    pwc?.window?.orderOut(self)
+//                    pwc?.window?.close()
+//                    pwc?.window?.setIsVisible(false)
+//                    pwc?.window?.hidesOnDeactivate = false
+//                    pwc?.window?.setIsVisible(true)
+                    
+                }
 //                pwc?.close()
-//                PrefsWindowController().close()
-//                print("[PreferenceWindowController] pref window already visible, bring to front - close/reopen")
+//                NSApp.activate(ignoringOtherApps: true)
+//                pwc?.window?.makeKeyAndOrderFront(self) // this opens a second prefs window
             }
         }
         
