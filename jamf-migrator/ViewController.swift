@@ -4498,6 +4498,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var curlResult2   = ""
         var createDestUrl = f_createDestUrl
         var iconToUpload  = ""
+        var action        = "GET"
         
         if (ssIconName != "") && (ssIconUri != "") {
             var iconNode     = "policies"
@@ -4516,12 +4517,78 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
             createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-            //                                self.selfServiceIconGet(newPolicyId: "\(self.tagValue(xmlString: responseData, xmlTag: "id"))", ssIconName: ssIconName, ssIconUri: ssIconUri)
             
+            if fileImport {
+                action       = "SKIP"
+                iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+            }
+            
+            // Get or skip icon from Jamf Pro
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] before icon download.\n") }
+            iconMigrate(action: action, ssIconUri: ssIconUri, ssIconName: ssIconName, iconToUpload: "", createDestUrl: "") {
+                (result: Int) in
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] after icon download.\n") }
+                if result > 199 && result < 300 {
+                    iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] retrieved icon from \(ssIconUri)\n") }
+                    if self.saveRawXml {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
+                        DispatchQueue.main.async {
+                            Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+                        }
+                    }   // if self.saveRawXml - end
+                    // upload icon if not in save only mode
+                    if !self.saveOnly {
+                        curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
+                        //                                    print("result of icon POST: "+curlResult2)
+                    }   // if !saveOnly - end
+                    if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+                        if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
+                        }
+                    }
+                } else {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] failed to retrieved icon from \(ssIconUri).\n") }
+                }
+            }
+/*
             if !fileImport {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] fetching icon from \(ssIconUri).\n") }
-                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
+                
+                // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
+                let url = URL(string: "\(ssIconUri)")!
+                var curlResult = "unknown"
+                
+                let downloadTask = URLSession.shared.downloadTask(with: url) {
+                    urlOrNil, responseOrNil, errorOrNil in
+                    // check for and handle errors:
+                    // * errorOrNil should be nil
+                    // * responseOrNil should be an HTTPURLResponse with statusCode in 200..<299
+                    
+                    guard let fileURL = urlOrNil else { return }
+                    do {
+                        let documentsURL = try
+                            FileManager.default.url(for: .libraryDirectory,
+                                                    in: .userDomainMask,
+                                                    appropriateFor: nil,
+                                                    create: false)
+                        let savedURL = documentsURL.appendingPathComponent("Caches/\(ssIconName)")
+                        try FileManager.default.moveItem(at: fileURL, to: savedURL)
+                    } catch {
+                        print ("file error: \(error)")
+                    }
+                    curlResult = responseData
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of Swift icon GET: \(curlResult).\n") }
+                }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] before icon download.\n") }
+                downloadTask.resume()
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] after icon download.\n") }
+                // swift file download - end
+
+                
+//                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
 //              print("result of icon GET: "+curlResult)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
                 if self.saveRawXml {
@@ -4544,8 +4611,63 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
                 }
             }
+*/
         }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
+    
+    func iconMigrate(action: String, ssIconUri: String, ssIconName: String, iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
+
+        var curlResult = 0
+        
+        switch action {
+        case "GET":
+            print("[iconMigrate] GET")
+
+            // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
+            let url = URL(string: "\(ssIconUri)")!
+            
+            let downloadTask = URLSession.shared.downloadTask(with: url) {
+                urlOrNil, responseOrNil, errorOrNil in
+                // check for and handle errors:
+                // * errorOrNil should be nil
+                // * responseOrNil should be an HTTPURLResponse with statusCode in 200..<299
+                
+                guard let fileURL = urlOrNil else { return }
+                do {
+                    let documentsURL = try
+                        FileManager.default.url(for: .libraryDirectory,
+                                                in: .userDomainMask,
+                                                appropriateFor: nil,
+                                                create: false)
+                    let savedURL = documentsURL.appendingPathComponent("Caches/\(ssIconName)")
+                    try FileManager.default.moveItem(at: fileURL, to: savedURL)
+                } catch {
+                    print ("file error: \(error)")
+                }
+                let curlResponse = responseOrNil as! HTTPURLResponse
+                curlResult = curlResponse.statusCode
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of Swift icon GET: \(curlResult).\n") }
+                completion(curlResult)
+            }
+            downloadTask.resume()
+            // swift file download - end
+            
+        case "POST":
+            print("POST")
+            
+        default:
+            print("skip")
+//            let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
+//            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
+//            if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+//                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
+//                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
+//                }
+//            }
+            completion(0)
+        }
+     
+    }
     
     // func logCleanup - start
     func logCleanup() {
@@ -4959,17 +5081,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         task.launchPath     = cmd
         task.arguments      = args
         task.standardOutput = pipe
-//        let outputHandle    = pipe.fileHandleForReading
-//
-//        outputHandle.readabilityHandler = { pipe in
-//            if let testResult = String(data: pipe.availableData, encoding: String.Encoding.utf8) {
-//                print("[myExitValue] testResult: \(testResult)")
-//                status = testResult.replacingOccurrences(of: "\n", with: "")
-//            } else {
-//                status = "unknown"
-//            }
-//        }
-        
+
         task.launch()
         
         let outdata = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -4977,7 +5089,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             string = string.trimmingCharacters(in: .newlines)
             statusArray = string.components(separatedBy: "\n")
             status = statusArray[0]
-            print("createPolicy: \(statusArray)")
         }
         
         task.waitUntilExit()
