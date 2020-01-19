@@ -401,6 +401,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var readFilesQ = OperationQueue() // for reading in data files
 //    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
     var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
+    let theIconsQ  = OperationQueue() // que to upload/download icons
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
     var theModeQ    = DispatchQueue(label: "com.jamf.addRemove")
@@ -1025,14 +1026,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             validCredentials = true
                             
                             if whichServer == "dest" {
+
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Query Jamf Pro API for token.\n") }
+                                
                                 UapiCall().getToken(serverUrl: f_sourceURL, base64creds: f_credentials) {
                                     (returnedToken: String) in
                                     if returnedToken == "" {
-                                        print("unable to get token")
-                                        completion(false)
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get token.\n") }
+//                                        completion(false)
+                                        completion(validCredentials)
                                         return
                                     }
 //                                    print("token received.")
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
                                     UapiCall().get(serverUrl: f_sourceURL, path: "preview/jamf-pro-information", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
 //                                        print("json \(json)")
@@ -1042,6 +1048,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
                                                 jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
                                             }
+                                        } else {
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
                                         }
                                         completion(validCredentials)
                                     }
@@ -1065,7 +1073,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             case 401:
                                 self.alert_dialog(header: "Authentication Failure", message: "Please verify username and password for:\n\(f_sourceURL)")
                             case 503:
-                                self.alert_dialog(header: "Service Unavailable", message: "Verify you can manually log into the API:\n\(f_sourceURL)/api \nError: \(self.httpStatusCode)")
+                                self.alert_dialog(header: "Service Unavailable", message: "Verify you can manually log into the API:\n\(f_sourceURL)/api. \nError: \(self.httpStatusCode)")
                             default:
                                 self.alert_dialog(header: "Error", message: "An unknown error (\(self.httpStatusCode)) occured trying to query the server:\n\(f_sourceURL)")
                             }
@@ -2832,6 +2840,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
+                if endpoint == "osxconfigurationprofiles" {
+                    // correct issue when an & is in the name of a macOS configuration profiles - real issue is in the encoded payload
+                    PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
+                    //print("\nXML: \(PostXML)")
+                }
+                
             case "usergroups", "smartusergroups", "staticusergroups":
                 for xmlTag in ["full_name", "phone_number", "email_address"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
@@ -3392,9 +3406,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response ----------\n") }
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse)\n") }
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response ----------\n\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \n\(responseData)\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n\n") }
                                 // 400 - likely the format of the xml is incorrect or wrong endpoint
                                 // 401 - wrong username and/or password
                                 // 409 - unable to create object; already exists or data missing or xml error
@@ -4539,79 +4553,50 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }   // if self.saveRawXml - end
                     // upload icon if not in save only mode
                     if !self.saveOnly {
+                        
+//                        self.iconMigrate(action: "POST", ssIconUri: "", ssIconName: ssIconName, iconToUpload: iconToUpload, createDestUrl: createDestUrl) {
+//                            (result: Int) in
+//                            if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Uploaded icon: \(ssIconName).\n") }
+//
+//                            if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+//                                do {
+//                                    try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"))
+//                                }
+//                                catch let error as NSError {
+//                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
+//                                }
+//                            }
+//                        }
+                        
                         curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
-                        //                                    print("result of icon POST: "+curlResult2)
-                    }   // if !saveOnly - end
-                    if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
-                        if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
+                        if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+                            do {
+                                try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"))
+                            }
+                            catch let error as NSError {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
+                            }
                         }
-                    }
+                        
+                        //                                    print("result of icon POST: "+curlResult2)
+                    } else {
+                        if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
+                            do {
+                                try FileManager.default.removeItem(at: URL(string: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)")!)
+                            }
+                            catch let error as NSError {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
+                            }
+//                            if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
+//                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
+//                            }
+                        }
+                    }  // if !saveOnly - end
                 } else {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] failed to retrieved icon from \(ssIconUri).\n") }
                 }
             }
-/*
-            if !fileImport {
-                iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] fetching icon from \(ssIconUri).\n") }
-                
-                // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
-                let url = URL(string: "\(ssIconUri)")!
-                var curlResult = "unknown"
-                
-                let downloadTask = URLSession.shared.downloadTask(with: url) {
-                    urlOrNil, responseOrNil, errorOrNil in
-                    // check for and handle errors:
-                    // * errorOrNil should be nil
-                    // * responseOrNil should be an HTTPURLResponse with statusCode in 200..<299
-                    
-                    guard let fileURL = urlOrNil else { return }
-                    do {
-                        let documentsURL = try
-                            FileManager.default.url(for: .libraryDirectory,
-                                                    in: .userDomainMask,
-                                                    appropriateFor: nil,
-                                                    create: false)
-                        let savedURL = documentsURL.appendingPathComponent("Caches/\(ssIconName)")
-                        try FileManager.default.moveItem(at: fileURL, to: savedURL)
-                    } catch {
-                        print ("file error: \(error)")
-                    }
-                    curlResult = responseData
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of Swift icon GET: \(curlResult).\n") }
-                }
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] before icon download.\n") }
-                downloadTask.resume()
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] after icon download.\n") }
-                // swift file download - end
-
-                
-//                curlResult = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk \(ssIconUri) -o \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"")
-//              print("result of icon GET: "+curlResult)
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon GET: \(curlResult).\n") }
-                if self.saveRawXml {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
-                    DispatchQueue.main.async {
-                        Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
-                    }
-                }
-            } else {
-                iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
-            }
-            
-            if !saveOnly {
-                curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
-                //                                    print("result of icon POST: "+curlResult2)
-            }   // if !saveOnly - end
-            if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
-                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
-                }
-            }
-*/
         }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
@@ -4653,18 +4638,103 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // swift file download - end
             
         case "POST":
-            print("POST")
+            print("[iconMigrate] POST")
+
+            var statusCode = 0
+            let nameArray  = ssIconName.split(separator: ".")
+            let uuid = NSUUID().uuidString
+            let boundary = String(repeating: "-", count: 19) + uuid.replacingOccurrences(of: "-", with: "")
+            let startBoundary = "\r\n-\(boundary)\r\nContent-Type: image/png\r\nContent-Disposition: form-data; filename=\(ssIconName); name=\(nameArray[0])\r\n\r\n"
+//            let startBoundary = "\r\n-\(boundary)\r\n\r\n"
+
+                    var httpResponse:HTTPURLResponse?
+                    
+                    theIconsQ.maxConcurrentOperationCount = 1
+                    let semaphore = DispatchSemaphore(value: 0)
+                    
+//                        print("uploading package: \(package) with id: \(newPackageId)")
+                        
+                        self.theIconsQ.addOperation {
+                            
+                            var postData = Data()
+                            
+                            let fileURL = URL(fileURLWithPath: "\(iconToUpload)")
+                            print("fileURL: \(fileURL)")
+
+                            // Create URL to the destination server - this must be a trusted server
+                            let serverURL = URL(string: "\(createDestUrl)")!
+                            print("serverURL: \(serverURL)")
+                            
+                            let sessionConfig = URLSessionConfiguration.default
+                            let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+                            
+                            var request = URLRequest(url:serverURL)
+                            
+                            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+                            request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
+                            
+                            // prep the data for uploading
+                            if let startData = startBoundary.data(using: .utf8) {
+                                postData.append(startData)
+                            }
+                            do {
+                                let fileData = try Data(contentsOf:fileURL, options:[])
+                                postData.append(fileData)
+                                print("loaded file to data.")
+                            } catch {
+                                print("unable to get file")
+                            }
+                            let endBoundary = "\r\n-\(boundary)"
+                            if let endData = endBoundary.data(using: .utf8) {
+                                    postData.append(endData)
+                            }
+
+                            request.httpBody   = postData
+                            request.httpMethod = "POST"
+                            
+                            // start upload process
+                            URLCache.shared.removeAllCachedResponses()
+                            // let task = session.dataTask(with: request) { (data, response, error) in
+                            let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+                                // Success
+                //                if let httpResponse = response as? HTTPURLResponse {
+                                if let _ = (response as? HTTPURLResponse)?.statusCode {
+                                    httpResponse = response as? HTTPURLResponse
+                                    statusCode = httpResponse!.statusCode
+                                    print("Response from server - Status code: \(statusCode)")
+            //                        print("Response (package) data string: \(String(data: data!, encoding: .utf8)!)")
+                                } else {
+                                    print("No response from the server.")
+                                    completion(statusCode)
+                                }
+
+                                switch (response as? HTTPURLResponse)?.statusCode {
+                                case 200, 201:
+                                    print("\t file successfully uploaded.")
+                                case 401:
+                                    print("\t Authentication failed.")
+                                case 404:
+                                    print("\t server / file not found.")
+                                default:
+                                    print("\t unknown error occured.\n")
+                                    print("\t Error took place while uploading a file. Error description: %@", error?.localizedDescription ?? "unknown")
+                                }
+
+                                completion(httpResponse?.statusCode ?? 0)
+                                // upload checksum - end
+                                
+                                semaphore.signal()
+                            })   // let task = session - end
+                            task.resume()
+                            semaphore.wait()
+                        }   // theUploadQ.addOperation - end
+                            // end upload procdess
+            
             
         default:
-            print("skip")
-//            let curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
-//            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
-//            if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
-//                if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
-//                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
-//                }
-//            }
-            completion(0)
+            print("[iconMigrate] skip")
+            completion(200)
         }
      
     }

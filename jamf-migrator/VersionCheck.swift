@@ -59,7 +59,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                    print("response error: \(httpResponse.statusCode)")
+                    print("[versionCheck] response error: \(httpResponse.statusCode)")
                     completion(false)
                     return
                 }
