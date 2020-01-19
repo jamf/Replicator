@@ -117,6 +117,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.0.3**
+
+* Provide additional logging around icon migration.  Slight change in process.
+* Better handling of Jamf Pro API (UAPI) calls.
+* Use encoding different than what the Jamf server uses for the ampersand in the name of a macOS configuration profile (issue #45).
+
 **v5.0.1**
 
 * Fix app crashes during XML export.
