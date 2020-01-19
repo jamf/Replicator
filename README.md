@@ -119,7 +119,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 **v5.0.3**
 
-* Provide additional logging around icon migration.  Slight change in process.
+* Provide additional logging around icon migration.  Slight change in process (issue #46).
 * Better handling of Jamf Pro API (UAPI) calls.
 * Use encoding different than what the Jamf server uses for the ampersand in the name of a macOS configuration profile (issue #45).
 
