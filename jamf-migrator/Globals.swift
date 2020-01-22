@@ -14,6 +14,10 @@ struct jamfProVersion {
     static var patch = 0
 }
 
+struct dependency {
+    static var wait = true
+}
+
 struct wipeData {
     static var on = false
 }

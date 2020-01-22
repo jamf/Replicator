@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15505"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="15505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="15702"/>
         <capability name="System colors introduced in macOS 10.14" minToolsVersion="10.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -982,9 +982,9 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7oa-bJ-2d1">
-                                <rect key="frame" x="465" y="336" width="43" height="20"/>
+                                <rect key="frame" x="465" y="336" width="75" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="POST" id="kni-Qv-Zlt">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="POST/PUT" id="kni-Qv-Zlt">
                                     <font key="font" size="14" name="ArialMT"/>
                                     <color key="textColor" red="0.9999235272" green="1" blue="0.99988299609999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1324,7 +1324,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="macOS" identifier="tab1" id="Nof-Zl-FoE">
-                                        <view key="view" id="fn5-oe-BJC">
+                                        <view key="view" ambiguous="YES" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1972,7 +1972,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="Selective" identifier="tab3" id="Fo1-1P-mP5">
-                                        <view key="view" ambiguous="YES" id="TA8-Ho-89h">
+                                        <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -2120,7 +2120,7 @@
                                                                         <tableColumns>
                                                                             <tableColumn identifier="sourceObjectID" editable="NO" width="470" minWidth="40" maxWidth="1000" id="EVv-n3-oMc">
                                                                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                                                    <font key="font" metaFont="message" size="11"/>
+                                                                                    <font key="font" metaFont="controlContent" size="11"/>
                                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                                                 </tableHeaderCell>
@@ -2291,7 +2291,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="R8b-G6-Yv6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="message" size="11"/>
+                                    <font key="font" metaFont="controlContent" size="11"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>
@@ -2432,6 +2432,7 @@
                         <outlet property="dest_pwd_field" destination="2FL-Bn-T2a" id="DJe-ck-mHT"/>
                         <outlet property="dest_user_field" destination="U40-E2-DvW" id="zbJ-fX-KP1"/>
                         <outlet property="destinationLabel_TextField" destination="Uw9-pw-Waq" id="Lzl-3g-AY8"/>
+                        <outlet property="destinationMethod_TextField" destination="7oa-bJ-2d1" id="1bu-JH-HFY"/>
                         <outlet property="directory_bindings_button" destination="tfr-3a-8nS" id="Me9-JY-iHK"/>
                         <outlet property="directory_bindings_field" destination="Jh1-S4-tyb" id="6iu-zl-ABJ"/>
                         <outlet property="disk_encryptions_button" destination="ZNF-kE-Dab" id="rTI-yI-3Wa"/>
@@ -2464,7 +2465,7 @@
                         <outlet property="macapplications_label_field" destination="vif-GW-Rxk" id="W4r-L0-7jp"/>
                         <outlet property="macosTab_NSButton" destination="AT7-Qd-mL1" id="xBQ-7b-Vkw"/>
                         <outlet property="migrateDependencies" destination="wiT-wp-Gbk" id="IYd-uV-ZTm"/>
-                        <outlet property="migrateOrRemove_label_field" destination="1dY-rP-xsl" id="gss-SL-Jzl"/>
+                        <outlet property="migrateOrRemove_TextField" destination="1dY-rP-xsl" id="zAM-hS-uho"/>
                         <outlet property="migrator_window" destination="m2S-Jp-Qdl" id="gcn-bM-U52"/>
                         <outlet property="mobiledeviceApps_label_field" destination="E48-BQ-8XI" id="Bkt-5u-ksS"/>
                         <outlet property="mobiledevicecApps_button" destination="w1S-rf-b7s" id="Xcu-QH-R8A"/>
