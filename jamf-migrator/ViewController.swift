@@ -1398,7 +1398,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
 
-            
             // get scope copy / policy disable options
             self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
 //            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
@@ -1630,7 +1629,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }   // for j in  - end
                             
                         }   // DispatchQueue.main.async - end
-                        
                     }
                 }   //for i in - else - end
             // **************************************** selective migration - end ****************************************
