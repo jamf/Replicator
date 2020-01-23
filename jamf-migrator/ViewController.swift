@@ -1337,34 +1337,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.progressCountArray["smartcomputergroups"] = 0
                     self.progressCountArray["staticcomputergroups"] = 0
                     self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-                    self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                    self.summaryDict["staticcomputergroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.summaryDict["staticcomputergroups"] = ["create":[], "update":[], "fail":[]]
                     self.getCounters["smartcomputergroups"] = ["get":0]
                 case "mobiledevicegroups":
                     self.progressCountArray["smartmobiledevicegroups"] = 0
                     self.progressCountArray["staticmobiledevicegroups"] = 0
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                    self.summaryDict["staticmobiledevicegroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.summaryDict["staticmobiledevicegroups"] = ["create":[], "update":[], "fail":[]]
                     self.getCounters["smartmobiledevicegroups"] = ["get":0]
                 case "usergroups":
                     self.progressCountArray["smartusergroups"] = 0
                     self.progressCountArray["staticusergroups"] = 0
                     self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-                    self.counters["smartusergroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                    self.summaryDict["staticusergroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.counters["smartusergroups"] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.summaryDict["staticusergroups"] = ["create":[], "update":[], "fail":[]]
                     self.getCounters["smartusergroups"] = ["get":0]
                 case "accounts":
                     self.progressCountArray["jamfusers"] = 0
                     self.progressCountArray["jamfgroups"] = 0
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
-                    self.counters["jamfusers"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                    self.summaryDict["jamfgroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.counters["jamfusers"] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.summaryDict["jamfgroups"] = ["create":[], "update":[], "fail":[]]
                     self.getCounters["jamfusers"] = ["get":0]
                 default:
                     self.progressCountArray["\(currentNode)"] = 0
-                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                    self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
                     self.getCounters[currentNode] = ["get":0]
                 }
             }
@@ -3223,8 +3223,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
         
         if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
         
         var destinationEpId = destEpId
@@ -3363,8 +3363,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                         // ? remove creation of counters dict defined earlier ?
                         if self.counters[endpointType] == nil {
-                            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-                            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
+                            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                         }
                         
                         
@@ -3556,8 +3556,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var removeDestUrl = ""
         
         if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
         
         // whether the operation was successful or not, either delete or fail
@@ -6176,14 +6176,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(updateIndex)'>\(values["update"] ?? 0)</a></td>")
                 endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(failIndex)'>\(values["fail"] ?? 0)</a></td>")
                 endpointSummary.append("</tr>\n")
-                cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)", values: createHtml))
+                cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)d", values: createHtml))
                 cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key)) Updated", values: updateHtml))
                 cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key)) Failed", values: failHtml))
             }
             summaryResult.append("<table style='table-layout:fixed; border-collapse: collapse; margin-left: auto; margin-right: auto; width: 95%;'>" +
             "<tr>" +
                 "<th style='text-align:right; width: 35%;'>Endpoint</th>" +
-                "<th style='text-align:right; width: 20%;'>\(summaryHeader.createDelete)</th>" +
+                "<th style='text-align:right; width: 20%;'>\(summaryHeader.createDelete)d</th>" +
                 "<th style='text-align:right; width: 20%;'>Updated</th>" +
                 "<th style='text-align:right; width: 20%;'>Failed</th>" +
             "</tr>" +

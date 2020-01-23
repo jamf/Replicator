@@ -689,7 +689,7 @@
             <objects>
                 <windowController storyboardIdentifier="Summary Window Controller" id="UDh-wr-lId" sceneMemberID="viewController">
                     <window key="window" title="Summary" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="qfs-AC-LGi">
-                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="1734" y="133" width="480" height="270"/>
                         <rect key="screenRect" x="1440" y="-180" width="1920" height="1057"/>
@@ -713,17 +713,23 @@
                         <rect key="frame" x="0.0" y="0.0" width="527" height="288"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <wkWebView wantsLayer="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Af-mt-qgZ">
-                                <rect key="frame" x="-1" y="32" width="529" height="256"/>
-                                <autoresizingMask key="autoresizingMask"/>
+                            <wkWebView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Af-mt-qgZ">
+                                <rect key="frame" x="-1" y="32" width="529" height="236"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="529" id="A5A-SH-H3M"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="236" id="Q9T-C1-s5h"/>
+                                </constraints>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
                                     <wkPreferences key="preferences"/>
                                 </wkWebViewConfiguration>
                             </wkWebView>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZMA-Kh-Ry9">
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZMA-Kh-Ry9">
                                 <rect key="frame" x="454" y="-1" width="75" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="63" id="Gx5-MY-7I4"/>
+                                    <constraint firstAttribute="height" constant="21" id="OFd-Lc-BYl"/>
+                                </constraints>
                                 <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lg0-KK-qqv">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -733,6 +739,14 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="3Af-mt-qgZ" firstAttribute="leading" secondItem="4c1-IQ-bRf" secondAttribute="leading" constant="-1" id="DEV-2I-Fiz"/>
+                            <constraint firstItem="3Af-mt-qgZ" firstAttribute="top" secondItem="4c1-IQ-bRf" secondAttribute="top" constant="20" symbolic="YES" id="Gym-ii-dbK"/>
+                            <constraint firstItem="ZMA-Kh-Ry9" firstAttribute="top" secondItem="3Af-mt-qgZ" secondAttribute="bottom" constant="5" id="USL-LO-hgd"/>
+                            <constraint firstAttribute="bottom" secondItem="ZMA-Kh-Ry9" secondAttribute="bottom" constant="6" id="fZV-BD-oN5"/>
+                            <constraint firstAttribute="trailing" secondItem="ZMA-Kh-Ry9" secondAttribute="trailing" constant="4" id="hSZ-2y-ESr"/>
+                            <constraint firstAttribute="trailing" secondItem="3Af-mt-qgZ" secondAttribute="trailing" constant="-1" id="iTH-hD-f9F"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="summary_WebView" destination="3Af-mt-qgZ" id="83N-6c-2fT"/>
@@ -2120,7 +2134,7 @@
                                                                         <tableColumns>
                                                                             <tableColumn identifier="sourceObjectID" editable="NO" width="470" minWidth="40" maxWidth="1000" id="EVv-n3-oMc">
                                                                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                                                    <font key="font" metaFont="controlContent" size="11"/>
+                                                                                    <font key="font" metaFont="message" size="11"/>
                                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                                                 </tableHeaderCell>
@@ -2291,7 +2305,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="R8b-G6-Yv6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="controlContent" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>
