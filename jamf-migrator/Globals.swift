@@ -30,3 +30,7 @@ struct History {
 struct LogLevel {
     static var debug = false
 }
+
+struct summaryHeader {
+    static var createDelete = "create"
+}

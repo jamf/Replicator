@@ -362,8 +362,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var POSTsuccessCount      = 0
     var failedCount           = 0
     var postCount             = 1       // is this needed?
-    var counters = Dictionary<String, Dictionary<String,Int>>()             // summary counters of created, updated, and failed objects
-    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()          // used to hold value of counter and avoid simultaneous access when updating
+    var counters    = Dictionary<String, Dictionary<String,Int>>()             // summary counters of created, updated, failed, and deleted objects
+    var getCounters = [String:[String:Int]]()
+//    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()          // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
 
     @IBOutlet weak var mySpinner_ImageView: NSImageView!
@@ -420,6 +421,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func deleteMode_fn(_ sender: Any) {
         var isDir: ObjCBool = false
+        // turn off all selected items - start
+        resetAllCheckboxes()
+        // turn off all selected items - end
+        
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
             do {
@@ -1104,6 +1109,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // make sure the labels can change color when we start
                   changeColor = true
         getEndpointInProgress = "start"
+        endpointInProgress    = ""
         var idPath            = ""  // adjust for jamf users/groups that use userid/groupid instead of id
         
         DispatchQueue.main.async {
@@ -1304,7 +1310,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.nodesMigrated = 0
             }
             
-            // reverse migration order for removal
+            // reverse migration order for removal and set create / delete header for summary table
             if wipeData.on {
                 self.objectsToMigrate.reverse()
                 if self.objectsToMigrate.count > 0 {
@@ -1315,7 +1321,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.goButtonEnabled(button_status: true)
                     return
                 }// end if objectsToMigrate - end
-            }   // if wipeData.on - end
+                summaryHeader.createDelete = "Delete"
+            } else {   // if wipeData.on - end
+                summaryHeader.createDelete = "Create"
+            }
+            
             
             WriteToLog().message(stringOfText: self.migrateOrWipe)
             
@@ -1327,30 +1337,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.progressCountArray["smartcomputergroups"] = 0
                     self.progressCountArray["staticcomputergroups"] = 0
                     self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-                    self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0, "delete":0]
+                    self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                     self.summaryDict["staticcomputergroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.getCounters["smartcomputergroups"] = ["get":0]
                 case "mobiledevicegroups":
                     self.progressCountArray["smartmobiledevicegroups"] = 0
                     self.progressCountArray["staticmobiledevicegroups"] = 0
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0, "delete":0]
+                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                     self.summaryDict["staticmobiledevicegroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.getCounters["smartmobiledevicegroups"] = ["get":0]
                 case "usergroups":
                     self.progressCountArray["smartusergroups"] = 0
                     self.progressCountArray["staticusergroups"] = 0
                     self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-                    self.counters["smartusergroups"] = ["create":0, "update":0, "fail":0, "delete":0]
+                    self.counters["smartusergroups"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                     self.summaryDict["staticusergroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.getCounters["smartusergroups"] = ["get":0]
                 case "accounts":
                     self.progressCountArray["jamfusers"] = 0
                     self.progressCountArray["jamfgroups"] = 0
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
-                    self.counters["jamfusers"] = ["create":0, "update":0, "fail":0, "delete":0]
+                    self.counters["jamfusers"] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                     self.summaryDict["jamfgroups"] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.getCounters["jamfusers"] = ["get":0]
                 default:
                     self.progressCountArray["\(currentNode)"] = 0
-                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "delete":0]
+                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                     self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[], "delete":[]]
+                    self.getCounters[currentNode] = ["get":0]
                 }
             }
 
@@ -1843,6 +1858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints1")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
+                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
 //                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2042,6 +2058,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
+                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2053,6 +2070,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if endpoint == self.objectsToMigrate.last {
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                         self.rmDELETE()
+                                        self.resetAllCheckboxes()
                                     }
                                     
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
@@ -2146,6 +2164,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
+                                            self.resetAllCheckboxes()
 //                                            print("rmDelete 1")
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
@@ -2257,6 +2276,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints4")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
+                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2441,6 +2461,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints5")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
+                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2959,6 +2980,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if self.objectsToMigrate.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
+                    self.resetAllCheckboxes()
                     self.goButtonEnabled(button_status: true)
                     print("Done - cleanupXml")
                 }
@@ -3163,8 +3185,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
             knownEndpoint = false
         }   // switch - end
-
-        self.getStatusUpdate(endpoint: endpoint, current: endpointCurrent, total: endpointCount)
+        if self.getCounters[endpoint] == nil {
+            self.getCounters[endpoint] = ["get":1]
+        } else {
+            self.getCounters[endpoint]!["get"]! += 1
+        }
+//        self.getCounters[endpoint]!["get"]! += 1
+        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[endpoint]!["get"]!, total: endpointCount)
+//        self.getStatusUpdate(endpoint: endpoint, current: endpointCurrent, total: endpointCount)
         
         if knownEndpoint {
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
@@ -3194,6 +3222,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
         
+        if counters[endpointType] == nil {
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
+        }
+        
         var destinationEpId = destEpId
         var apiAction       = action
         
@@ -3202,6 +3235,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalUpdated   = 0
         var totalFailed    = 0
         var totalCompleted = 0
+        
+        if counters[endpointType] == nil {
+            counters[endpointType] = ["total":endpointCount]
+        } else {
+            counters[endpointType]!["total"] = endpointCount
+        }
         
         // if working a site migrations within a single server force create when copying an item
         if self.itemToSite && sitePref == "Copy" {
@@ -3267,6 +3306,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
+                    self.resetAllCheckboxes()
                     self.goButtonEnabled(button_status: true)
 //                    print("Done - CreateEndpoints")
                 }
@@ -3313,7 +3353,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                     
                     // look to see if we are processing the next endpointType - start
-                    if self.endpointInProgress != endpointType {
+                    if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
                         WriteToLog().message(stringOfText: "[CreateEndpoints] Migrating \(endpointType)\n")
                         self.endpointInProgress = endpointType
                         self.POSTsuccessCount = 0
@@ -3323,13 +3363,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                         // ? remove creation of counters dict defined earlier ?
                         if self.counters[endpointType] == nil {
-                            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0]
+                            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
                             self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
                         }
                         
                         
                         if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                            WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
+                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
                             
                             self.POSTsuccessCount += 1
                             
@@ -3338,9 +3378,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             if let _ = self.progressCountArray["\(endpointType)"] {
                                 self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
-                                if endpointCount == endpointCurrent && self.progressCountArray["\(endpointType)"] == endpointCount {
-                                    self.labelColor(endpoint: endpointType, theColor: self.greenText)
-                                }
+//                                if endpointCount == endpointCurrent && self.progressCountArray["\(endpointType)"] == endpointCount {
+//                                    self.labelColor(endpoint: endpointType, theColor: self.greenText)
+//                                }
                                 
                             }
                             
@@ -3382,7 +3422,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             switch whichError {
                             case "Duplicate serial number", "Duplicate MAC address":
                                 if !retry {
-                                    WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3392,10 +3432,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                                     }
                                 } else {
-                                    WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
                                 }
                             case "category":
-                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
+                                WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3406,7 +3446,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //    self.postCount -= 1
                            //     return
                             case "Problem with department in location":
-                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
+                                WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3417,7 +3457,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //    self.postCount -= 1
                             //    return
                             case "Problem with building in location":
-                                WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
+                                WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
@@ -3430,9 +3470,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                              //   return
                             default:
                                 WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
-                                if self.progressCountArray["\(endpointType)"] == 0 && endpointCount == endpointCurrent {
-                                    self.labelColor(endpoint: endpointType, theColor: self.redText)
-                                }
+                                
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
@@ -3461,20 +3499,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         totalCompleted = totalCreated + totalUpdated + totalFailed
                         
                         // update counter
-//                        DispatchQueue.main.async {
-                            self.object_name_field.stringValue = "\(endpointType)"
-                            let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-//                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
-                            if totalCompleted > currentCompleted {
-                                self.objects_completed_field.stringValue = "\(totalCompleted)"
-                            }
-                            self.objects_found_field.stringValue     = "\(endpointCount)"
+                        //                        DispatchQueue.main.async {
+                        self.object_name_field.stringValue = "\(endpointType)"
+                        let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                        //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
+//                        if totalCompleted > currentCompleted {
+                        if totalCompleted > 0 {
+                            self.objects_completed_field.stringValue = "\(totalCompleted)"
+                        }
+                        self.objects_found_field.stringValue = "\(String(describing: self.counters[endpointType]!["total"]!))"
+//                            self.objects_found_field.stringValue     = "\(endpointCount)"
 //                        }   // DispatchQueue.main.async - end
                         
                         // move to the next dependency
 //                        print("[CreateEndpoints] [\(localEndPointType)] process complete: \(self.getName(endpoint: endpointType, objectXML: endPointXML))")
 //                        print("[CreateEndpoints] [\(localEndPointType)] dependency \(endpointCurrent): completed \(totalCompleted) of \(endpointCount)")
                         if totalCompleted == endpointCount {
+                            if totalFailed == 0 {   // removed  && self.changeColor from if condition
+                                self.labelColor(endpoint: endpointType, theColor: self.greenText)
+                            } else if totalFailed == endpointCount {
+                                self.labelColor(endpoint: endpointType, theColor: self.redText)
+                            }
 //                            print("[CreateEndpoints] set dependency.wait = false")
                             dependency.wait = false
                         }
@@ -3510,8 +3555,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // this is where we delete the endpoint
         var removeDestUrl = ""
         
+        if counters[endpointType] == nil {
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "delete":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[], "delete":[]]
+        }
+        
         // whether the operation was successful or not, either delete or fail
-        var methodResult = "delete"
+        var methodResult = "create"
+//        var methodResult = "delete"
         
         // counters for completed objects
         var totalDeleted   = 0
@@ -3558,7 +3609,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 DispatchQueue.main.async {
                     // look to see if we are processing the next endpointType - start
-                    if self.endpointInProgress != endpointType {
+                    if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
                         self.endpointInProgress = endpointType
                         self.changeColor = true
                         self.POSTsuccessCount = 0
@@ -3596,23 +3647,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                             }
                             
-                            WriteToLog().message(stringOfText: "\t[RemoveEndpoints] \(endpointName)\n")
+                            WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] \(endpointName)\n")
                             self.POSTsuccessCount += 1
-                            if endpointCount == endpointCurrent && self.changeColor {
-                                self.labelColor(endpoint: endpointType, theColor: self.greenText)
-                            }
+//                            if endpointCount == endpointCurrent && self.changeColor {
+//                                self.labelColor(endpoint: endpointType, theColor: self.greenText)
+//                            }
                         } else {
                             methodResult = "fail"
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
                             self.changeColor = false
-                            WriteToLog().message(stringOfText: "[RemoveEndpoints] **** Failed to remove: \(endpointName)\n")
+                            WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName)\n")
                             if httpResponse.statusCode == 400 {
-                                WriteToLog().message(stringOfText: "[RemoveEndpoints] **** Verify other items are not dependent on \(endpointName)\n")
-                                WriteToLog().message(stringOfText: "[RemoveEndpoints] **** For example, \(endpointName) is not used in a policy\n")
+                                WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Verify other items are not dependent on \(endpointName)\n")
+                                WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** For example, \(endpointName) is not used in a policy\n")
                             }
-                            if self.POSTsuccessCount == 0 && endpointCount == endpointCurrent {
-                                self.labelColor(endpoint: endpointType, theColor: self.redText)
-                            }
+                            
                             if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- endpoint info ----------\n") }
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t ID: \(endPointID)\n") }
@@ -3632,7 +3681,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.summaryDict[endpointType]?[methodResult] = summaryArray
                         }
                         
-                        totalDeleted   = self.counters[endpointType]!["delete"]!
+                        totalDeleted   = self.counters[endpointType]!["create"]!
                         totalFailed    = self.counters[endpointType]!["fail"]!
                         totalCompleted = totalDeleted + totalFailed
 
@@ -3640,10 +3689,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.object_name_field.stringValue       = "\(endpointType)"
                             let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
 //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
-                            if totalCompleted > currentCompleted {
+                            if totalCompleted > 0 {
                                 self.objects_completed_field.stringValue = "\(totalCompleted)"
                             }
                             self.objects_found_field.stringValue     = "\(endpointCount)"
+                            
+                            if totalDeleted == endpointCount && self.changeColor {
+                                self.labelColor(endpoint: endpointType, theColor: self.greenText)
+                            } else if totalFailed == endpointCount {
+                                self.labelColor(endpoint: endpointType, theColor: self.redText)
+                            }
                             
                         }
                         
@@ -3653,6 +3708,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
@@ -3667,6 +3723,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if endpointCount == endpointCurrent {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
@@ -5248,6 +5305,58 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return(status)
     }
     
+    func resetAllCheckboxes() {
+        DispatchQueue.main.async {
+        // Sellect all items to be migrated
+            // macOS tab
+            self.allNone_button.state = NSControl.StateValue(rawValue: 0)
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
+            self.computers_button.state = NSControl.StateValue(rawValue: 0)
+            self.configurations_button.state = NSControl.StateValue(rawValue: 0)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
+            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+    //        patch_mgmt_button.state = 1
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.sus_button.state = NSControl.StateValue(rawValue: 0)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
+            self.packages_button.state = NSControl.StateValue(rawValue: 0)
+            self.policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.printers_button.state = NSControl.StateValue(rawValue: 0)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+            // iOS tab
+            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            // general tab
+            self.allNone_general_button.state = NSControl.StateValue(rawValue: 0)
+            self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.building_button.state = NSControl.StateValue(rawValue: 0)
+            self.categories_button.state = NSControl.StateValue(rawValue: 0)
+            self.dept_button.state = NSControl.StateValue(rawValue: 0)
+            self.userEA_button.state = NSControl.StateValue(rawValue: 0)
+            self.sites_button.state = NSControl.StateValue(rawValue: 0)
+            self.ldapservers_button.state = NSControl.StateValue(rawValue: 0)
+            self.networks_button.state = NSControl.StateValue(rawValue: 0)
+            self.users_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+        }
+    }
     
 // functions used to get existing self service icons to new server - start
     // using curl to deal with self service icons
@@ -5763,54 +5872,55 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 3:userDefaults.integer(forKey: "concurrentThreads")
         concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
         
-        // Sellect all items to be migrated
-        // macOS tab
-        allNone_button.state = NSControl.StateValue(rawValue: 0)
-        advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
-        macapplications_button.state = NSControl.StateValue(rawValue: 0)
-        computers_button.state = NSControl.StateValue(rawValue: 0)
-        configurations_button.state = NSControl.StateValue(rawValue: 0)
-        directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
-        disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
-        dock_items_button.state = NSControl.StateValue(rawValue: 0)
-        netboot_button.state = NSControl.StateValue(rawValue: 0)
-        osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-//        patch_mgmt_button.state = 1
-        patch_policies_button.state = NSControl.StateValue(rawValue: 0)
-        sus_button.state = NSControl.StateValue(rawValue: 0)
-        fileshares_button.state = NSControl.StateValue(rawValue: 0)
-        ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
-        smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-        static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-        scripts_button.state = NSControl.StateValue(rawValue: 0)
-        packages_button.state = NSControl.StateValue(rawValue: 0)
-        policies_button.state = NSControl.StateValue(rawValue: 0)
-        printers_button.state = NSControl.StateValue(rawValue: 0)
-        restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
-        // iOS tab
-        allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
-        advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
-        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
-        mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
-        smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-        static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-        mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-        mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
-        // general tab
-        allNone_general_button.state = NSControl.StateValue(rawValue: 0)
-        advusersearch_button.state = NSControl.StateValue(rawValue: 0)
-        building_button.state = NSControl.StateValue(rawValue: 0)
-        categories_button.state = NSControl.StateValue(rawValue: 0)
-        dept_button.state = NSControl.StateValue(rawValue: 0)
-        userEA_button.state = NSControl.StateValue(rawValue: 0)
-        sites_button.state = NSControl.StateValue(rawValue: 0)
-        ldapservers_button.state = NSControl.StateValue(rawValue: 0)
-        networks_button.state = NSControl.StateValue(rawValue: 0)
-        users_button.state = NSControl.StateValue(rawValue: 0)
-        jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
-        jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
-        smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
-        staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+        // Set all checkboxes off
+        resetAllCheckboxes()
+//        // macOS tab
+//        allNone_button.state = NSControl.StateValue(rawValue: 0)
+//        advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
+//        macapplications_button.state = NSControl.StateValue(rawValue: 0)
+//        computers_button.state = NSControl.StateValue(rawValue: 0)
+//        configurations_button.state = NSControl.StateValue(rawValue: 0)
+//        directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+//        disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
+//        dock_items_button.state = NSControl.StateValue(rawValue: 0)
+//        netboot_button.state = NSControl.StateValue(rawValue: 0)
+//        osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+////        patch_mgmt_button.state = 1
+//        patch_policies_button.state = NSControl.StateValue(rawValue: 0)
+//        sus_button.state = NSControl.StateValue(rawValue: 0)
+//        fileshares_button.state = NSControl.StateValue(rawValue: 0)
+//        ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
+//        smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+//        static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+//        scripts_button.state = NSControl.StateValue(rawValue: 0)
+//        packages_button.state = NSControl.StateValue(rawValue: 0)
+//        policies_button.state = NSControl.StateValue(rawValue: 0)
+//        printers_button.state = NSControl.StateValue(rawValue: 0)
+//        restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+//        // iOS tab
+//        allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
+//        advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
+//        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+//        mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
+//        smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+//        static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+//        mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+//        mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+//        // general tab
+//        allNone_general_button.state = NSControl.StateValue(rawValue: 0)
+//        advusersearch_button.state = NSControl.StateValue(rawValue: 0)
+//        building_button.state = NSControl.StateValue(rawValue: 0)
+//        categories_button.state = NSControl.StateValue(rawValue: 0)
+//        dept_button.state = NSControl.StateValue(rawValue: 0)
+//        userEA_button.state = NSControl.StateValue(rawValue: 0)
+//        sites_button.state = NSControl.StateValue(rawValue: 0)
+//        ldapservers_button.state = NSControl.StateValue(rawValue: 0)
+//        networks_button.state = NSControl.StateValue(rawValue: 0)
+//        users_button.state = NSControl.StateValue(rawValue: 0)
+//        jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
+//        jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
+//        smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+//        staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
         
         source_jp_server_field.becomeFirstResponder()
         go_button.isEnabled = true
@@ -5922,7 +6032,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         isRed = false
                     }
                 }
-                sleep(1)
+                usleep(500000)  // 0.5 seconds
             }   // while true - end
         }
         // bring app to foreground
@@ -6066,14 +6176,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(updateIndex)'>\(values["update"] ?? 0)</a></td>")
                 endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(failIndex)'>\(values["fail"] ?? 0)</a></td>")
                 endpointSummary.append("</tr>\n")
-                cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) Created", values: createHtml))
+                cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)", values: createHtml))
                 cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key)) Updated", values: updateHtml))
                 cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key)) Failed", values: failHtml))
             }
             summaryResult.append("<table style='table-layout:fixed; border-collapse: collapse; margin-left: auto; margin-right: auto; width: 95%;'>" +
             "<tr>" +
                 "<th style='text-align:right; width: 35%;'>Endpoint</th>" +
-                "<th style='text-align:right; width: 20%;'>Created</th>" +
+                "<th style='text-align:right; width: 20%;'>\(summaryHeader.createDelete)</th>" +
                 "<th style='text-align:right; width: 20%;'>Updated</th>" +
                 "<th style='text-align:right; width: 20%;'>Failed</th>" +
             "</tr>" +
