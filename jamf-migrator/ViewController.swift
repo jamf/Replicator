@@ -422,6 +422,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func deleteMode_fn(_ sender: Any) {
         var isDir: ObjCBool = false
         // turn off all selected items - start
+        print("[deleteMode_fn] endpoint: NA")
         resetAllCheckboxes()
         // turn off all selected items - end
         
@@ -1334,33 +1335,61 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for currentNode in self.objectsToMigrate {
                 switch currentNode {
                 case "computergroups":
-                    self.progressCountArray["smartcomputergroups"] = 0
-                    self.progressCountArray["staticcomputergroups"] = 0
+                    if self.smart_comp_grps_button.state.rawValue == 1 {
+                        self.progressCountArray["smartcomputergroups"] = 0
+                        self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["staticcomputergroups"]       = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["smartcomputergroups"]        = ["get":0]
+                    }
+                    if self.static_comp_grps_button.state.rawValue == 1 {
+                        self.progressCountArray["staticcomputergroups"] = 0
+                        self.counters["staticcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["staticcomputergroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["staticcomputergroups"]        = ["get":0]
+                    }
                     self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-                    self.counters["smartcomputergroups"] = ["create":0, "update":0, "fail":0, "total":0]
-                    self.summaryDict["staticcomputergroups"] = ["create":[], "update":[], "fail":[]]
-                    self.getCounters["smartcomputergroups"] = ["get":0]
                 case "mobiledevicegroups":
-                    self.progressCountArray["smartmobiledevicegroups"] = 0
-                    self.progressCountArray["staticmobiledevicegroups"] = 0
+                    if self.smart_ios_groups_button.state.rawValue == 1 {
+                        self.progressCountArray["smartmobiledevicegroups"] = 0
+                        self.counters["smartmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["smartmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["smartmobiledevicegroups"]        = ["get":0]
+                    }
+                    if self.static_ios_groups_button.state.rawValue == 1 {
+                        self.progressCountArray["staticmobiledevicegroups"] = 0
+                        self.counters["staticmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["staticmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["staticmobiledevicegroups"]        = ["get":0]
+                    }
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-                    self.counters["smartmobiledevicegroups"] = ["create":0, "update":0, "fail":0, "total":0]
-                    self.summaryDict["staticmobiledevicegroups"] = ["create":[], "update":[], "fail":[]]
-                    self.getCounters["smartmobiledevicegroups"] = ["get":0]
                 case "usergroups":
-                    self.progressCountArray["smartusergroups"] = 0
-                    self.progressCountArray["staticusergroups"] = 0
+                    if self.smartUserGrps_button.state.rawValue == 1 {
+                        self.progressCountArray["smartusergroups"] = 0
+                        self.counters["smartusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["smartusergroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["smartusergroups"]        = ["get":0]
+                    }
+                    if self.staticUserGrps_button.state.rawValue == 1 {
+                        self.progressCountArray["staticusergroups"] = 0
+                        self.counters["staticusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["staticusergroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["staticusergroups"]        = ["get":0]
+                    }
                     self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-                    self.counters["smartusergroups"] = ["create":0, "update":0, "fail":0, "total":0]
-                    self.summaryDict["staticusergroups"] = ["create":[], "update":[], "fail":[]]
-                    self.getCounters["smartusergroups"] = ["get":0]
                 case "accounts":
-                    self.progressCountArray["jamfusers"] = 0
-                    self.progressCountArray["jamfgroups"] = 0
+                    if self.jamfUserAccounts_button.state.rawValue == 1 {
+                        self.progressCountArray["jamfusers"] = 0
+                        self.counters["jamfusers"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["jamfusers"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["jamfusers"]        = ["get":0]
+                    }
+                    if self.jamfGroupAccounts_button.state.rawValue == 1 {
+                        self.progressCountArray["jamfgroups"] = 0
+                        self.counters["jamfgroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.summaryDict["jamfgroups"]        = ["create":[], "update":[], "fail":[]]
+                        self.getCounters["jamfgroups"]        = ["get":0]
+                    }
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
-                    self.counters["jamfusers"] = ["create":0, "update":0, "fail":0, "total":0]
-                    self.summaryDict["jamfgroups"] = ["create":[], "update":[], "fail":[]]
-                    self.getCounters["jamfusers"] = ["get":0]
                 default:
                     self.progressCountArray["\(currentNode)"] = 0
                     self.counters[currentNode] = ["create":0, "update":0, "fail":0, "total":0]
@@ -1737,7 +1766,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             endpointParent = "\(endpoint)"
         }
-        
+                
         (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -1883,6 +1912,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                     var smartGroupDict: [Int: String] = [:]
                                     var staticGroupDict: [Int: String] = [:]
+                                                                        
                                     if endpointCount > 0 {
                                         self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                             (result: String) in
@@ -2067,11 +2097,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                     }
                                     
-                                    if endpoint == self.objectsToMigrate.last {
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                        self.rmDELETE()
-                                        self.resetAllCheckboxes()
-                                    }
+                                    // commented out lnh 200123
+//                                    if endpoint == self.objectsToMigrate.last {
+//                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+//                                        self.rmDELETE()
+//                                        print("[getEndpoints] endpoint: \(endpoint)")
+//                                        self.resetAllCheckboxes()
+//                                    }
                                     
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
@@ -3708,6 +3740,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            print("[removeEndpoints] endpoint: \(endpointType)")
                             self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
@@ -3723,6 +3756,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if endpointCount == endpointCurrent {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            print("[removeEndpoints] endpoint: \(endpointType)")
                             self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
