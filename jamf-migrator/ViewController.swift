@@ -5150,15 +5150,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        var newXML = f_regexCompNl.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //
         var newXML_trimmed = ""
-        let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>", options:.caseInsensitive)
-        let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
-//        let newXML_trimmed = newXML.trimmingCharacters(in: .newlines)
+        let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n|\r)*?</\(theTag)>", options:.caseInsensitive)
+        var newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
+
         // prevent removing blank lines from scripts
         if (theTag == "script_contents_encoded") || (theTag == "id") {
             newXML_trimmed = newXML
         } else {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
             newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
+            newXML_trimmed = newXML.replacingOccurrences(of: "\r\r", with: "\r")
         }
         return newXML_trimmed
     }
