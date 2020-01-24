@@ -117,6 +117,15 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.1.0**
+
+* Addressed several issues around GET and POST counters, including issues #43 and #48.
+* Updated UI.  Replaced POST with either POST/PUT (for migrations) or DELETE (for removals), issue #47.
+* Fixed issue where user/iOS device/computer groups would not migrate if they were the last item to migrate.
+* Allow resizing of summary window.
+* Resolved issues around migrating policies along with their dependencies in the proper order.
+* Added summary for items removed.
+
 **v5.0.3**
 
 * Provide additional logging around icon migration.  Slight change in process (issue #46).
