@@ -5639,7 +5639,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let os = ProcessInfo().operatingSystemVersion
         if os.minorVersion < 14 {
             sourceServerPopup_button.isTransparent = false
-            destServerPopup_button.isTransparent = false
+            destServerPopup_button.isTransparent   = false
         }
         if !isDarkMode || os.minorVersion < 14 {
             // light mode settings
@@ -5848,7 +5848,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // check for stored passwords - end
         
-        // read commandline args
 
         
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
@@ -5869,6 +5868,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
 //        debug = true
         
+        // read commandline args
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
 //        print("all arguments: \(CommandLine.arguments)")
         if CommandLine.arguments.contains("-debug") {
