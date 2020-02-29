@@ -107,14 +107,13 @@ class PreferencesViewController: NSViewController {
         var isDir: ObjCBool = true
         let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
         print("exportFilePath: \(String(describing: exportFilePath!))")
-        let path2:URL? = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-//        NSWorkspace.shared.open(URL(fileURLWithPath: exportFilePath!))
-        NSWorkspace.shared.open(path2!)
+//        let path2:URL? = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+//        NSWorkspace.shared.activateFileViewerSelecting([path2!])
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
             print("open exportFilePath: \(exportFilePath!)")
 //            NSWorkspace.shared.openFile("exportFilePath!")
-            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "exportFilePath!")
+            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "\(exportFilePath!)")
         } else {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
         }
