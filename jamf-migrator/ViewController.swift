@@ -263,10 +263,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // command line switches
 //    var debug           = false
-    var hideGui         = false
-    var saveOnly        = false
-    var saveRawXml      = false
-    var saveTrimmedXml  = false
+    var hideGui             = false
+    var saveOnly            = false
+    var saveRawXml          = false
+    var saveTrimmedXml      = false
+    var saveRawXmlScope     = true
+    var saveTrimmedXmlScope = true
     
     // plist and log variables
     var didRun            = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
@@ -743,12 +745,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func Go(sender: AnyObject) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
-        plistData       = readSettings()
-        scopeOptions    = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-        xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
-        saveOnly        = xmlPrefOptions["saveOnly"]!
-        saveRawXml      = xmlPrefOptions["saveRawXml"]!
-        saveTrimmedXml  = xmlPrefOptions["saveTrimmedXml"]!
+        plistData           = readSettings()
+        scopeOptions        = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        xmlPrefOptions      = plistData["xml"] as! Dictionary<String,Bool>
+        saveOnly            = xmlPrefOptions["saveOnly"]!
+        saveRawXml          = xmlPrefOptions["saveRawXml"]!
+        saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
+        saveRawXmlScope     = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
+        saveTrimmedXmlScope = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
         
         if fileImport && (saveOnly || saveRawXml) {
             alert_dialog(header: "Attention", message: "Cannot select Save Only or Raw Source XML (Preferneces -> Export) when using File Import.")
@@ -2727,7 +2731,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
-        saveRawXml        = xmlPrefOptions["saveRawXml"]!
+        saveRawXml      = xmlPrefOptions["saveRawXml"]!
+        saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"]!
 
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
@@ -2782,7 +2787,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.saveRawXml {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                             DispatchQueue.main.async {
-                                Xml().save(node: endpoint, xml: PostXML, name: destEpName, id: endpointID, format: "raw")
+                                // added option to remove scope
+//                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+                                let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                Xml().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
                             }
                         }
                         // save source XML - end
@@ -3325,7 +3333,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 DispatchQueue.main.async {
-                    Xml().save(node: endpointType, xml: endPointXML, name: endpointName, id: sourceEpId, format: "trimmed")
+                    let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope")
+                    Xml().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
                 }
                 
             }
@@ -5187,14 +5196,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func savePrefs(prefs: [String:Any]) {
-        plistData          = readSettings()
-        plistData["scope"] = prefs["scope"]
-        plistData["xml"]   = prefs["xml"]
-        scopeOptions       = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-        xmlPrefOptions     = prefs["xml"] as! Dictionary<String,Bool>
-        saveOnly           = xmlPrefOptions["saveOnly"]!
-        saveRawXml         = xmlPrefOptions["saveRawXml"]!
-        saveTrimmedXml     = xmlPrefOptions["saveTrimmedXml"]!
+        plistData           = readSettings()
+        plistData["scope"]  = prefs["scope"]
+        plistData["xml"]    = prefs["xml"]
+        scopeOptions        = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        xmlPrefOptions      = prefs["xml"] as! Dictionary<String,Bool>
+        saveOnly            = xmlPrefOptions["saveOnly"]!
+        saveRawXml          = xmlPrefOptions["saveRawXml"]!
+        saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
+        saveRawXmlScope     = xmlPrefOptions["saveRawXmlScope"]!
+        saveTrimmedXmlScope = xmlPrefOptions["saveTrimmedXmlScope"]!
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
 //      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
     }
@@ -5624,6 +5635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidAppear() {
         // set tab order
+        // Use interface builder, right click a field and drag nextKeyView to the next
         source_jp_server_field.nextKeyView  = source_user_field
         source_user_field.nextKeyView       = source_pwd_field
         source_pwd_field.nextKeyView        = dest_jp_server_field
@@ -5817,16 +5829,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // read xml settings - start
         if plistData["xml"] != nil {
-            xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
-            saveRawXml      = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
-            saveTrimmedXml  = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
-            saveOnly        = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
+            xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+            saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
+            saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
+            saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
+//            saveRawXmlScope      = (xmlPrefOptions["saveRawXmlScope"] != nil) ? xmlPrefOptions["saveRawXmlScope"]!:true
+//            saveTrimmedXmlScope  = (xmlPrefOptions["saveTrimmedXmlScope"] != nil) ? xmlPrefOptions["saveTrimmedXmlScope"]!:true
+            if xmlPrefOptions["saveRawXmlScope"] == nil {
+                xmlPrefOptions["saveRawXmlScope"] = true
+                saveRawXmlScope = true
+            }
+            if xmlPrefOptions["saveTrimmedXmlScope"] == nil {
+                xmlPrefOptions["saveTrimmedXmlScope"] = true
+                saveTrimmedXmlScope = true
+            }
         } else {
             // set default values
             plistData        = readSettings()
             plistData["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
-                                "saveOnly":false] as Any
+                                "saveOnly":false,
+                                "saveRawXmlScope":true,
+                                "saveTrimmedXmlScope":true] as Any
             
             NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         }
@@ -5851,7 +5875,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
         WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
         
         if hideGui {

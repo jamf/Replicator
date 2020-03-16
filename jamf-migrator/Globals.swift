@@ -34,3 +34,11 @@ struct LogLevel {
 struct summaryHeader {
     static var createDelete = "create"
 }
+
+struct export {
+    static var rawXml          = false
+    static var trimmedXml      = false
+    static var saveOnly        = false
+    static var rawXmlScope     = true
+    static var trimmedXmlScope = true
+}

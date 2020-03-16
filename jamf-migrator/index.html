@@ -144,6 +144,7 @@ body
    <li>Institutional disk encryptions that contain the private key cannot be migrated.</li>
    <li>Approved Kernel Extension payloads that contain bundle IDs will be dropped from the Configuration Profile.</li>
    <li>Approved Kernel Extension - the display name for the Approved Team ID does not migrate.</li>
+   <li>Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.</li>
 </ul>
 <div><br></div>
 <div>The 'Selective' tab provides the ability to select a subset of items within a category.&nbsp; For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.</div>
@@ -189,7 +190,8 @@ Options to export XML from the source server are also available.
    <li>Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).</li>
    <li>Trimmed Source XML give you the XML that is sent to the destination server.</li>
    <li>Save only saves the XML files and does not send them to the destination server.</li>
-   <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected .</li>
+   <li>Save the object XML either with or without its scope.  Unchecked removes the scope.</li>
+   <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected.</li>
     </ul>
     Files are saved to ~/Downloads/Jamf Migrator/, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.
     <div>
@@ -258,7 +260,7 @@ Options to export XML from the source server are also available.
     <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
         <div>You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.</div>
     <div>
-    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
+    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
     </div>
 </div>

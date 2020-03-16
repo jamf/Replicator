@@ -26,6 +26,8 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var saveRawXml_button: NSButton!
     @IBOutlet weak var saveTrimmedXml_button: NSButton!
     @IBOutlet weak var saveOnly_button: NSButton!
+    @IBOutlet weak var saveRawXmlScope_button: NSButton!
+    @IBOutlet weak var saveTrimmedXmlScope_button: NSButton!
     
     @IBOutlet var site_View: NSView!
     
@@ -54,6 +56,10 @@ class PreferencesViewController: NSViewController {
     var saveRawXml:             Bool = false
     var saveTrimmedXml:         Bool = false
     var saveOnly:               Bool = false
+    var saveRawXmlScope:        Bool = true
+    var saveTrimmedXmlScope:    Bool = true
+    
+    
     
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
     
@@ -85,11 +91,18 @@ class PreferencesViewController: NSViewController {
                               "users":["copy":convertToBool(state: copyScopeUsers_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
         vc.savePrefs(prefs: plistData)
     }
+    
     @IBAction func updateExportPrefs_button(_ sender: Any) {
                 plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
                                     "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-                                    "saveOnly":convertToBool(state: saveOnly_button.state.rawValue)]
+                                    "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
+                                    "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
+                                    "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
         vc.savePrefs(prefs: plistData)
+
+        export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
+        export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
+//        print("[updateCopyPrefs_button] export.rawXmlScope: \(export.rawXmlScope)")
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -229,37 +242,41 @@ class PreferencesViewController: NSViewController {
         }
         // read xml settings - start
         if plistData["xml"] != nil {
-            xmlPrefOptions  = plistData["xml"] as! Dictionary<String,Bool>
-            saveRawXml      = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
-            saveTrimmedXml  = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
-            saveOnly        = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
+            xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+            saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
+            saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
+            saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
+            saveRawXmlScope      = (xmlPrefOptions["saveRawXmlScope"] != nil) ? xmlPrefOptions["saveRawXmlScope"]!:true
+            saveTrimmedXmlScope  = (xmlPrefOptions["saveTrimmedXmlScope"] != nil) ? xmlPrefOptions["saveTrimmedXmlScope"]!:true
         } else {
             // set default values
             plistData["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
-                                "saveOnly":false] as Any
+                                "saveOnly":false,
+                                "saveRawXmlScope":true,
+                                "saveTrimmedXmlScope":true] as Any
             vc.saveSettings()
         }
         // read xml settings - end
 
         if self.title! == "Copy" {
-            copyScopeMCP_button.state = boolToState(TF: scopeMcpCopy)
-            copyScopeMA_button.state = boolToState(TF: scopeMaCopy)
-            copyScopeRS_button.state = boolToState(TF: scopeRsCopy)
+            copyScopeMCP_button.state    = boolToState(TF: scopeMcpCopy)
+            copyScopeMA_button.state     = boolToState(TF: scopeMaCopy)
+            copyScopeRS_button.state     = boolToState(TF: scopeRsCopy)
             copyScopePolicy_button.state = boolToState(TF: scopePoliciesCopy)
             disablePolicies_button.state = boolToState(TF: policyPoliciesDisable)
-            copyScopeOCP_button.state = boolToState(TF: scopeOcpCopy)
-            copyScopeIA_button.state = boolToState(TF: scopeIaCopy)
-            copyScopeScg_button.state = boolToState(TF: scopeScgCopy)
-            copyScopeSig_button.state = boolToState(TF: scopeSigCopy)
-            copyScopeUsers_button.state = boolToState(TF: scopeUsersCopy)
+            copyScopeOCP_button.state    = boolToState(TF: scopeOcpCopy)
+            copyScopeIA_button.state     = boolToState(TF: scopeIaCopy)
+            copyScopeScg_button.state    = boolToState(TF: scopeScgCopy)
+            copyScopeSig_button.state    = boolToState(TF: scopeSigCopy)
+            copyScopeUsers_button.state  = boolToState(TF: scopeUsersCopy)
         }
         if self.title! == "Export" {
-            saveRawXml_button.state = boolToState(TF: saveRawXml)
-            saveTrimmedXml_button.state = boolToState(TF: saveTrimmedXml)
-            saveOnly_button.state = boolToState(TF: saveOnly)
+            saveRawXml_button.state          = boolToState(TF: saveRawXml)
+            saveTrimmedXml_button.state      = boolToState(TF: saveTrimmedXml)
+            saveOnly_button.state            = boolToState(TF: saveOnly)
+            saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
+            saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
         }
-        
     }
-    
 }

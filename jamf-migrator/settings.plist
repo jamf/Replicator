@@ -80,6 +80,10 @@
 		<false/>
 		<key>saveTrimmedXml</key>
 		<false/>
+		<key>saveRawXmlScope</key>
+		<true/>
+		<key>saveTrimmedXmlScope</key>
+		<true/>
 	</dict>
 </dict>
 </plist>
