@@ -38,9 +38,9 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
                 DispatchQueue.main.async {
 //                    print("[PrefsWindowController] show existing preference window")
                     NSApp.windows[1].makeKeyAndOrderFront(self)
-                    for theWindow in NSApp.windows {
-                        print("theWindow: \(theWindow.title)")
-                    }
+//                    for theWindow in NSApp.windows {
+//                        print("theWindow: \(theWindow.title)")
+//                    }
                     
                 }
             }

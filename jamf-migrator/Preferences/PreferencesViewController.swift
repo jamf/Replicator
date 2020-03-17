@@ -102,7 +102,7 @@ class PreferencesViewController: NSViewController {
 
         export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
         export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
-//        print("[updateCopyPrefs_button] export.rawXmlScope: \(export.rawXmlScope)")
+
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -119,12 +119,12 @@ class PreferencesViewController: NSViewController {
         
         var isDir: ObjCBool = true
         let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-        print("exportFilePath: \(String(describing: exportFilePath!))")
+//        print("exportFilePath: \(String(describing: exportFilePath!))")
 //        let path2:URL? = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
 //        NSWorkspace.shared.activateFileViewerSelecting([path2!])
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
-            print("open exportFilePath: \(exportFilePath!)")
+//            print("open exportFilePath: \(exportFilePath!)")
 //            NSWorkspace.shared.openFile("exportFilePath!")
             NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "\(exportFilePath!)")
         } else {
