@@ -69,6 +69,7 @@ Options to export XML from the source server are also available.
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
 * Save only saves the XML files and does not send them to the destination server.
+* Save the object XML either with or without its scope.  Unchecked removes the scope.
 * Note Save only and Raw Source XML options should not be selected when File Import is being used.
 
 Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
@@ -116,6 +117,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v5.2.0**
+
+* Exporting (saving) raw or trimmed XML now has the to include/exclude the scope.
+* Updated help.
+* Better handleing in bringing the preferences window to the foreground when it is already open, but behind another window.
 
 **v5.1.0**
 
