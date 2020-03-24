@@ -118,6 +118,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.1**
+
+* Fixed smart/static group lookups giving 404 responses.
+
 **v5.2.0**
 
 * Exporting (saving) raw or trimmed XML now has the to include/exclude the scope.
