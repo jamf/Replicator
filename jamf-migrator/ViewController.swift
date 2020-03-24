@@ -1534,6 +1534,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 switch selectedEndpoint {
                                     case "smartcomputergroups", "staticcomputergroups":
                                         rawEndpoint = "computergroups"
+                                    case "smartmobiledevicegroups", "staticmobiledevicegroups":
+                                        rawEndpoint = "mobiledevicegroups"
                                     default:
                                         rawEndpoint = selectedEndpoint
                                 }
