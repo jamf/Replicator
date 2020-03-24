@@ -1529,7 +1529,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     idPath = "id/"
                                 }
                                 
-                                Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(selectedEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
+                                // adjust the endpoint used for the lookup
+                                var rawEndpoint = ""
+                                switch selectedEndpoint {
+                                    case "smartcomputergroups", "staticcomputergroups":
+                                        rawEndpoint = "computergroups"
+                                    default:
+                                        rawEndpoint = selectedEndpoint
+                                }
+                                
+                                Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
                                     (result: [String:AnyObject]) in
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Returned from Json.getRecord: \(result)\n") }
                                     if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
@@ -5678,9 +5687,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // Create Application Support folder for the app if missing - start
         let app_support_path = NSHomeDirectory() + "/Library/Application Support/jamf-migrator"
         if !(fm.fileExists(atPath: app_support_path, isDirectory: &isDir)) {
-            let manager = FileManager.default
+//            let manager = FileManager.default
             do {
-                try manager.createDirectory(atPath: app_support_path, withIntermediateDirectories: true, attributes: nil)
+                try fm.createDirectory(atPath: app_support_path, withIntermediateDirectories: true, attributes: nil)
             } catch {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Problem creating '/Library/Application Support/jamf-migrator' folder:  \(error)") }
             }
