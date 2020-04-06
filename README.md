@@ -118,6 +118,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.2**
+
+* Code cleanup and fix issue (#50) where app would crash if preference for saveRawXmlScope was missing.
+
 **v5.2.1**
 
 * Fixed smart/static group lookups giving 404 responses.
