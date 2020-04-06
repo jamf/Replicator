@@ -2744,7 +2744,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         saveRawXml      = xmlPrefOptions["saveRawXml"]!
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(saveRawXml)\n") }
-        saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"]!
+        saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"] ?? false
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXmlScope: \(saveRawXmlScope)\n") }
 
         URLCache.shared.removeAllCachedResponses()
