@@ -2743,7 +2743,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
         saveRawXml      = xmlPrefOptions["saveRawXml"]!
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(saveRawXml)\n") }
         saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"]!
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXmlScope: \(saveRawXmlScope)\n") }
 
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
@@ -5819,9 +5821,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read scope settings - end
         
         if scopeOptions["scg"] != nil && scopeOptions["sig"] != nil && scopeOptions["users"] != nil  {
-            scopeScgCopy = (scopeOptions["scg"]!["copy"] != nil) ? scopeOptions["scg"]!["copy"]!:true
-            scopeSigCopy = (scopeOptions["sig"]!["copy"] != nil) ? scopeOptions["sig"]!["copy"]!:true
-            scopeUsersCopy = (scopeOptions["sig"]!["users"] != nil) ? scopeOptions["users"]!["copy"]!:true
+
+            if (scopeOptions["scg"]!["copy"] != nil) {
+                scopeScgCopy = scopeOptions["scg"]!["copy"]!
+            } else {
+                scopeScgCopy                  = true
+                scopeOptions["scg"]!["copy"] = scopeScgCopy
+            }
+
+            if (scopeOptions["sig"]!["copy"] != nil) {
+                scopeSigCopy = scopeOptions["sig"]!["copy"]!
+            } else {
+                scopeSigCopy                  = true
+                scopeOptions["sig"]!["copy"] = scopeSigCopy
+            }
+
+            if (scopeOptions["sig"]!["users"] != nil) {
+                scopeUsersCopy = scopeOptions["sig"]!["users"]!
+            } else {
+                scopeUsersCopy                 = true
+                scopeOptions["sig"]!["users"] = scopeUsersCopy
+            }
         } else {
             // reset/initialize scope preferences
             plistData          = readSettings()
@@ -5834,18 +5854,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
-            
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         }
         
         // read xml settings - start
         if plistData["xml"] != nil {
             xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
-            saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
-            saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
-            saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
-//            saveRawXmlScope      = (xmlPrefOptions["saveRawXmlScope"] != nil) ? xmlPrefOptions["saveRawXmlScope"]!:true
-//            saveTrimmedXmlScope  = (xmlPrefOptions["saveTrimmedXmlScope"] != nil) ? xmlPrefOptions["saveTrimmedXmlScope"]!:true
+
+            if (xmlPrefOptions["saveRawXml"] != nil) {
+                saveRawXml = xmlPrefOptions["saveRawXml"]!
+            } else {
+                saveRawXml                   = false
+                xmlPrefOptions["saveRawXml"] = saveRawXml
+            }
+
+            if (xmlPrefOptions["saveTrimmedXml"] != nil) {
+                saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
+            } else {
+                saveTrimmedXml                   = false
+                xmlPrefOptions["saveTrimmedXml"] = saveTrimmedXml
+            }
+
+            if (xmlPrefOptions["saveOnly"] != nil) {
+                saveOnly = xmlPrefOptions["saveOnly"]!
+            } else {
+                saveOnly                   = false
+                xmlPrefOptions["saveOnly"] = saveOnly
+            }
+            
             if xmlPrefOptions["saveRawXmlScope"] == nil {
                 xmlPrefOptions["saveRawXmlScope"] = true
                 saveRawXmlScope = true
@@ -5862,9 +5897,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 "saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
-            
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         }
+        // update plist
+        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+        
         // read xml settings - end
         // read environment settings - end
         
@@ -5882,8 +5918,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.validCreds = false
         }
         // check for stored passwords - end
-        
-
         
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
@@ -5942,53 +5976,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // Set all checkboxes off
         resetAllCheckboxes()
-//        // macOS tab
-//        allNone_button.state = NSControl.StateValue(rawValue: 0)
-//        advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
-//        macapplications_button.state = NSControl.StateValue(rawValue: 0)
-//        computers_button.state = NSControl.StateValue(rawValue: 0)
-//        configurations_button.state = NSControl.StateValue(rawValue: 0)
-//        directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
-//        disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
-//        dock_items_button.state = NSControl.StateValue(rawValue: 0)
-//        netboot_button.state = NSControl.StateValue(rawValue: 0)
-//        osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-////        patch_mgmt_button.state = 1
-//        patch_policies_button.state = NSControl.StateValue(rawValue: 0)
-//        sus_button.state = NSControl.StateValue(rawValue: 0)
-//        fileshares_button.state = NSControl.StateValue(rawValue: 0)
-//        ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
-//        smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-//        static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-//        scripts_button.state = NSControl.StateValue(rawValue: 0)
-//        packages_button.state = NSControl.StateValue(rawValue: 0)
-//        policies_button.state = NSControl.StateValue(rawValue: 0)
-//        printers_button.state = NSControl.StateValue(rawValue: 0)
-//        restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
-//        // iOS tab
-//        allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
-//        advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
-//        mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
-//        mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
-//        smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-//        static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-//        mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-//        mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
-//        // general tab
-//        allNone_general_button.state = NSControl.StateValue(rawValue: 0)
-//        advusersearch_button.state = NSControl.StateValue(rawValue: 0)
-//        building_button.state = NSControl.StateValue(rawValue: 0)
-//        categories_button.state = NSControl.StateValue(rawValue: 0)
-//        dept_button.state = NSControl.StateValue(rawValue: 0)
-//        userEA_button.state = NSControl.StateValue(rawValue: 0)
-//        sites_button.state = NSControl.StateValue(rawValue: 0)
-//        ldapservers_button.state = NSControl.StateValue(rawValue: 0)
-//        networks_button.state = NSControl.StateValue(rawValue: 0)
-//        users_button.state = NSControl.StateValue(rawValue: 0)
-//        jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
-//        jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
-//        smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
-//        staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
         
         source_jp_server_field.becomeFirstResponder()
         go_button.isEnabled = true
