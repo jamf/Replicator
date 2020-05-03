@@ -2803,7 +2803,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // added option to remove scope
 //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                 let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope")
-                                Xml().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
+                                XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
                             }
                         }
                         // save source XML - end
@@ -3247,14 +3247,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if knownEndpoint {
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
-            self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
-                (result: String) in
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
-                if endpointCurrent == endpointCount {
-                    completion("last")
-                } else {
-                    completion("")
+            var destEndpoint = "skip"
+            if (action == "update") && (theEndpoint == "osxconfigurationprofiles") {
+                destEndpoint = theEndpoint
+            }
+            
+            XmlDelegate().apiAction(method: "GET", theServer: dest_jp_server, base64Creds: destBase64Creds, theEndpoint: "\(destEndpoint)/id/\(destEpId)") {
+                (xmlResult: (Int,String)) in
+                let (_, fullXML) = xmlResult
+                
+                if fullXML != "" {
+                    var destUUID = self.tagValue2(xmlString: fullXML, startTag: "<general>", endTag: "</general>")
+                    destUUID     = self.tagValue2(xmlString: destUUID, startTag: "<uuid>", endTag: "</uuid>")
+//                    print ("  destUUID: \(destUUID)")
+                    var sourceUUID = self.tagValue2(xmlString: PostXML, startTag: "<general>", endTag: "</general>")
+                    sourceUUID     = self.tagValue2(xmlString: sourceUUID, startTag: "<uuid>", endTag: "</uuid>")
+//                    print ("sourceUUID: \(sourceUUID)")
+
+                    // update XML to be posted with original/existing UUID of the configuration profile
+                    PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
+                                
+                self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+                    (result: String) in
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                    if endpointCurrent == endpointCount {
+                        completion("last")
+                    } else {
+                        completion("")
+                    }
+                }
+                
             }
         } else {
             if endpointCurrent == endpointCount {
@@ -3347,7 +3370,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope")
-                    Xml().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
+                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
                 }
                 
             }
@@ -4741,7 +4764,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if self.saveRawXml {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
                         DispatchQueue.main.async {
-                            Xml().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+                            XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
                         }
                     }   // if self.saveRawXml - end
                     // upload icon if not in save only mode
@@ -5226,7 +5249,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func setSite(xmlString:String, site:String, endpoint:String) -> String {
         var rawValue = ""
         var startTag = ""
-        let siteEncoded = Xml().encodeSpecialChars(textString: site)
+        let siteEncoded = XmlDelegate().encodeSpecialChars(textString: site)
         
         // get copy / move preference - start
         switch endpoint {
@@ -5278,7 +5301,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
 //            print("[setSite]  rawValue: \(rawValue)\n")
             
-            // generate a new uuid for configuration profiles - start
+            // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
             if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
                 let profileGeneral = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
                 let payloadUuid    = tagValue2(xmlString: profileGeneral, startTag: "<uuid>", endTag: "</uuid>")

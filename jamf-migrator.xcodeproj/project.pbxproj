@@ -13,7 +13,7 @@
 		9BC01C671DFB0C07007E634E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BC01C651DFB0C07007E634E /* Main.storyboard */; };
 		9BC01C6F1DFBC564007E634E /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BC01C6E1DFBC564007E634E /* settings.plist */; };
 		B508D5D71FA1A1780069ED0B /* stop.png in Resources */ = {isa = PBXBuildFile; fileRef = B508D5D61FA1A1780069ED0B /* stop.png */; };
-		B5165E1620E580A00086E31D /* Xml.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5165E1520E580A00086E31D /* Xml.swift */; };
+		B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5165E1520E580A00086E31D /* XmlDelegate.swift */; };
 		B53796C32273AF310006C1E4 /* go_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C22273AF310006C1E4 /* go_dark.png */; };
 		B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C42273AF4A0006C1E4 /* quit_dark.png */; };
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
@@ -59,7 +59,7 @@
 		9BC01C681DFB0C07007E634E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BC01C6E1DFBC564007E634E /* settings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = settings.plist; sourceTree = "<group>"; };
 		B508D5D61FA1A1780069ED0B /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
-		B5165E1520E580A00086E31D /* Xml.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xml.swift; sourceTree = "<group>"; };
+		B5165E1520E580A00086E31D /* XmlDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XmlDelegate.swift; sourceTree = "<group>"; };
 		B53796C22273AF310006C1E4 /* go_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = go_dark.png; path = Assets.xcassets/go_dark.imageset/go_dark.png; sourceTree = "<group>"; };
 		B53796C42273AF4A0006C1E4 /* quit_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = quit_dark.png; path = Assets.xcassets/quit_dark.imageset/quit_dark.png; sourceTree = "<group>"; };
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -142,7 +142,7 @@
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
 				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
-				B5165E1520E580A00086E31D /* Xml.swift */,
+				B5165E1520E580A00086E31D /* XmlDelegate.swift */,
 				9BC01C651DFB0C07007E634E /* Main.storyboard */,
 				9BC01C631DFB0C07007E634E /* Assets.xcassets */,
 				B55A277F1EAF8CAE00AF8398 /* Images */,
@@ -321,7 +321,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5165E1620E580A00086E31D /* Xml.swift in Sources */,
+				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
 				B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
@@ -481,7 +481,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 5.2.2;
+				MARKETING_VERSION = 5.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -502,7 +502,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 5.2.2;
+				MARKETING_VERSION = 5.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
