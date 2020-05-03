@@ -118,6 +118,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.3**
+
+* Added code to prevent the UUID of macOS configuration profiles from potentially being changed during an update.  Credit to @grahampugh for identifying (and blogging about) the issue.
+  
 **v5.2.2**
 
 * Code cleanup and fix issue (#50) where app would crash if preference for saveRawXmlScope was missing.
