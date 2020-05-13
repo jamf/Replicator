@@ -18,7 +18,7 @@ class XmlDelegate: NSURL, URLSessionDelegate {
 
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
         
-        if theEndpoint != "skip" {
+        if theEndpoint.prefix(4) != "skip" {
                     let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
                 
                     URLCache.shared.removeAllCachedResponses()
