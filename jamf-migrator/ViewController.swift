@@ -2862,14 +2862,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // strip out <id> tag from XML
-        if endpoint != "computerconfigurations" {
-            for xmlTag in ["id"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
-            }
-        } else {
+        switch endpoint {
+        case "computerconfigurations":
             // parent computerconfigurations reference child configurations by id not name
             let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
+        default:
+            for xmlTag in ["id"] {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+            }
         }
         
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
@@ -3166,7 +3167,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexPolicyName.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<name>&#xA0;")
             
             // remove individual objects that are scoped to the policy from XML
-            for xmlTag in ["self_service_icon"] {
+            for xmlTag in ["limit_to_users","self_service_icon"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
             }
             
