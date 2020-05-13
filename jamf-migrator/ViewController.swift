@@ -2952,6 +2952,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
                     //print("\nXML: \(PostXML)")
                 }
+                // fix limitations/exclusions LDAP issue
+                for xmlTag in ["limit_to_users"] {
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                }
                 
             case "usergroups", "smartusergroups", "staticusergroups":
                 for xmlTag in ["full_name", "phone_number", "email_address"] {
