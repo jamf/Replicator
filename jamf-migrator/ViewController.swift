@@ -998,6 +998,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
                 
+//                print("NSURL line 1")
+//                if "\(myURL)" == "" { myURL = "https://localhost" }
                 let encodedURL = NSURL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
@@ -1050,10 +1052,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
 //                                    print("token received.")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
-                                    UapiCall().get(serverUrl: f_sourceURL, path: "preview/jamf-pro-information", token: returnedToken, action: "GET") {
+                                    UapiCall().get(serverUrl: f_sourceURL, path: "v1/jamf-pro-version", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
 //                                        print("json \(json)")
-                                        if let fullVersion = json["jamfProVersion"] {
+                                        if let fullVersion = json["version"] {
                                             let versionArray = "\(fullVersion)".split(separator: ".")
                                             if versionArray.count >= 2 {
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
@@ -1299,7 +1301,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                     default: break
                     }
-//                        print(self.getCurrentTime()+" objectsToMigrate: \(self.objectsToMigrate)")
                 
             }   // if migrationMode == "bulk" - end
             
@@ -1795,7 +1796,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.availableIDsToMigDict.removeAll()
         
         theOpQ.addOperation {
-            
+
+//            print("NSURL line 2")
+//            if "\(myURL)" == "" { myURL = "https://localhost" }
             let encodedURL = NSURL(string: myURL)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
@@ -2632,14 +2635,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
                                     local_general = fileContents
                                     for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
-                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
                                     }
                                 case "buildings", "departments", "sites", "directorybindings":
                                     local_general = fileContents
                                 default:
                                     local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
                                     for xmlTag in ["site", "category", "payloads"] {
-                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag)
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
                                     }
                                 }
                                 
@@ -2783,6 +2786,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             theOpQ.addOperation {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
+//                print("NSURL line 3")
+//                if "\(myURL)" == "" { myURL = "https://localhost" }
                 let encodedURL = NSURL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "GET"
@@ -2802,7 +2807,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             DispatchQueue.main.async {
                                 // added option to remove scope
 //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
-                                let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope")
+                                let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
                                 XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
                             }
                         }
@@ -2869,7 +2874,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
         default:
             for xmlTag in ["id"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
         }
         
@@ -2877,34 +2882,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch endpoint {
         case "osxconfigurationprofiles":
             if !self.scopeOcpCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
         case "policies":
             if !self.scopePoliciesCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
             if self.policyPoliciesDisable {
                 PostXML = self.disable(theXML: PostXML)
             }
         case "macapplications":
             if !self.scopeMaCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
         case "restrictedsoftware":
             if !self.scopeRsCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
         case "mobiledeviceconfigurationprofiles":
             if !self.scopeMcpCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
         case "mobiledeviceapplications":
             if !self.scopeIaCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
         case "usergroups", "staticusergroups":
             if !self.scopeUsersCopy {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "users")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "users", keepTags: false)
             }
 
         default:
@@ -2921,13 +2926,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             switch endpoint {
             case "advancedusersearches":
                 for xmlTag in ["users"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
             case "advancedmobiledevicesearches", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
                 //                                 !self.scopeSigCopy
                 if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeSigCopy) {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices")
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices", keepTags: false)
                 }
                 
                 if itemToSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
@@ -2937,7 +2942,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
             case "mobiledevices":
                 for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
             case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
@@ -2954,12 +2959,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 // fix limitations/exclusions LDAP issue
                 for xmlTag in ["limit_to_users"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
             case "usergroups", "smartusergroups", "staticusergroups":
                 for xmlTag in ["full_name", "phone_number", "email_address"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
             case "computerconfigurations":
@@ -2999,12 +3004,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = regexComp2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
                 }
                 for xmlTag in ["script_contents", "script_contents_encoded", "ppd_contents"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
             case "scripts":
                 for xmlTag in ["script_contents_encoded"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 // fix to remove parameter labels that have been deleted from existing scripts
                 PostXML = self.parameterFix(theXML: PostXML)
@@ -3053,14 +3058,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["computers"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
         case "computers":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["package", "mapped_printers", "plugins", "running_services", "licensed_software", "computer_group_memberships", "managed", "management_username"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
             // change serial number 'Not Available' to blank so machines will migrate
@@ -3106,9 +3111,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // remove computers that are a member of a smart group
             if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !self.scopeScgCopy) {
                 // groups containing thousands of computers could not be cleared by only using the computers tag
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computer")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computer", keepTags: false)
                 PostXML = self.rmBlankLines(theXML: PostXML)
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers")
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "computers", keepTags: false)
             }
             //            print("\n\(endpoint) XML: \(PostXML)\n")
             
@@ -3172,7 +3177,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             // remove individual objects that are scoped to the policy from XML
             for xmlTag in ["limit_to_users","self_service_icon"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
             // update references to the Jamf server
@@ -3203,7 +3208,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<self_service_icon/>")
             // remove photo reference from XML
             for xmlTag in ["enable_custom_photo_url", "custom_photo_url", "links"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             //print("\nXML: \(PostXML)")
             
@@ -3233,7 +3238,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             } else {
                 // don't change enabled status of existing accounts on destination server.
                 for xmlTag in ["enabled"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag)
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
             }
             
@@ -3374,7 +3379,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 DispatchQueue.main.async {
-                    let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope")
+                    let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope", keepTags: false)
                     XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
                 }
                 
@@ -3409,6 +3414,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.postCount += 1
                 }
             }
+//            print("NSURL line 4")
+//            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
             let encodedURL = NSURL(string: createDestUrl)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             if apiAction == "create" {
@@ -3505,7 +3512,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
-                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                     }
                                     self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                         (result: String) in
@@ -3518,7 +3525,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
-                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                 }
                                 self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
@@ -3529,7 +3536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
-                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                 }
                                 self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
@@ -3540,7 +3547,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
-                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag)
+                                    tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                 }
                                 self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
@@ -3700,6 +3707,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
                 
+//                print("NSURL line 5")
+//                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
                 let encodedURL = NSURL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "DELETE"
@@ -3945,6 +3954,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 //                        print("existing endpoints URL: \(existingDestUrl)")
+//print("NSURL line 6")
+//if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
                         let destEncodedURL = NSURL(string: existingDestUrl)
                         let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
@@ -4289,7 +4300,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             serverCreds = self.destBase64Creds
         }
-        
+
+//        print("NSURL line 7")
+//        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
         let serverEncodedURL = NSURL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
         
@@ -4361,7 +4374,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         var serverUrl = "\(server)/JSSResource/\(endPoint)/id/\(recordId)"
         serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        
+
+//        print("NSURL line 8")
+//        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
         let serverEncodedURL = NSURL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
 
@@ -4666,30 +4681,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         goButtonEnabled(button_status: true)
     }
     
-    func getCurrentTime() -> String {
-        let current = Date()
-        let localCalendar = Calendar.current
-        let dateObjects: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
-        let dateTime = localCalendar.dateComponents(dateObjects, from: current)
-        let currentMonth  = leadingZero(value: dateTime.month!)
-        let currentDay    = leadingZero(value: dateTime.day!)
-        let currentHour   = leadingZero(value: dateTime.hour!)
-        let currentMinute = leadingZero(value: dateTime.minute!)
-        let currentSecond = leadingZero(value: dateTime.second!)
-        let stringDate = "\(dateTime.year!)\(currentMonth)\(currentDay)_\(currentHour)\(currentMinute)\(currentSecond)"
-        return stringDate
-    }
-    
-    // add leading zero to single digit integers
-    func leadingZero(value: Int) -> String {
-        var formattedValue = ""
-        if value < 10 {
-            formattedValue = "0\(value)"
-        } else {
-            formattedValue = "\(value)"
-        }
-        return formattedValue
-    }
+    // Moved to TimeDelegate
+//    func getCurrentTime() -> String {
+//        let current = Date()
+//        let localCalendar = Calendar.current
+//        let dateObjects: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
+//        let dateTime = localCalendar.dateComponents(dateObjects, from: current)
+//        let currentMonth  = leadingZero(value: dateTime.month!)
+//        let currentDay    = leadingZero(value: dateTime.day!)
+//        let currentHour   = leadingZero(value: dateTime.hour!)
+//        let currentMinute = leadingZero(value: dateTime.minute!)
+//        let currentSecond = leadingZero(value: dateTime.second!)
+//        let stringDate = "\(dateTime.year!)\(currentMonth)\(currentDay)_\(currentHour)\(currentMinute)\(currentSecond)"
+//        return stringDate
+//    }
+//
+//    // add leading zero to single digit integers
+//    func leadingZero(value: Int) -> String {
+//        var formattedValue = ""
+//        if value < 10 {
+//            formattedValue = "0\(value)"
+//        } else {
+//            formattedValue = "\(value)"
+//        }
+//        return formattedValue
+//    }
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
@@ -4729,7 +4745,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func icons(endpointType: String, action: String, ssIconName: String, ssIconId: Int, ssIconUri: String, f_createDestUrl: String, responseData: String) {
-        var curlResult    = ""
+//        var curlResult    = ""
         var curlResult2   = ""
         var createDestUrl = f_createDestUrl
         var iconToUpload  = ""
@@ -4759,13 +4775,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             // Get or skip icon from Jamf Pro
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] before icon download.\n") }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] before icon download.\n") }
             iconMigrate(action: action, ssIconUri: ssIconUri, ssIconName: ssIconName, iconToUpload: "", createDestUrl: "") {
                 (result: Int) in
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] after icon download.\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after icon download.\n") }
                 if result > 199 && result < 300 {
                     iconToUpload = "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] retrieved icon from \(ssIconUri)\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] retrieved icon from \(ssIconUri)\n") }
                     if self.saveRawXml {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] Saving icon id: \(ssIconName) for \(iconNode).\n") }
                         DispatchQueue.main.async {
@@ -4788,34 +4804,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                }
 //                            }
 //                        }
-                        
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] upload icon to: \(createDestUrl)\n") }
                         curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of icon POST: \(curlResult2).\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(curlResult2).\n") }
                         if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
                             do {
                                 try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)"))
                             }
                             catch let error as NSError {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
                             }
                         }
-                        
-                        //                                    print("result of icon POST: "+curlResult2)
                     } else {
                         if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)") {
                             do {
                                 try FileManager.default.removeItem(at: URL(string: "\(NSHomeDirectory())/Library/Caches/\(ssIconName)")!)
                             }
                             catch let error as NSError {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).  Error \(error).\n") }
                             }
-//                            if self.myExitValue(cmd: "/bin/bash", args: "-c", "/bin/rm \"\(NSHomeDirectory())/Library/Caches/\(ssIconName)\"") != "0" {
-//                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] unable to delete \(NSHomeDirectory())/Library/Caches/\(ssIconName).\n") }
-//                            }
                         }
                     }  // if !saveOnly - end
                 } else {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] failed to retrieved icon from \(ssIconUri).\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] failed to retrieved icon from \(ssIconUri).\n") }
                 }
             }
         }   // if (ssIconName != "") && (ssIconUri != "") - end
@@ -4827,8 +4838,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         switch action {
         case "GET":
-            print("[iconMigrate] GET")
 
+            WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] fetching icon: \(ssIconUri).\n")
             // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
             let url = URL(string: "\(ssIconUri)")!
             
@@ -4859,8 +4870,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // swift file download - end
             
         case "POST":
-            print("[iconMigrate] POST")
-
+        
+            WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] sending icon: \(ssIconName).\n")
             var statusCode = 0
             let nameArray  = ssIconName.split(separator: ".")
             let uuid = NSUUID().uuidString
@@ -4954,7 +4965,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             
         default:
-            print("[iconMigrate] skip")
+            WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] skipping icon: \(ssIconName).\n")
             completion(200)
         }
      
@@ -5195,13 +5206,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return newXML
     }
     
-    func rmXmlData(theXML: String, theTag: String) -> String {
-//        let f_regexCompNl = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n)*?</\(theTag)>\n", options:.caseInsensitive)
-//        var newXML = f_regexCompNl.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
-//
+    func rmXmlData(theXML: String, theTag: String, keepTags: Bool) -> String {
+        var newXML         = ""
         var newXML_trimmed = ""
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n|\r)*?</\(theTag)>", options:.caseInsensitive)
-        var newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
+        if keepTags {
+            newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "<\(theTag)></\(theTag)>")
+        } else {
+            newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
+        }
 
         // prevent removing blank lines from scripts
         if (theTag == "script_contents_encoded") || (theTag == "id") {
@@ -6027,8 +6040,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         
-        logFile = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_migration.log"
-        History.logFile = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_migration.log"
+        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
+        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
 
         isDir = false
         if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {

@@ -31,6 +31,7 @@
 		B57B1F0E21D7A16B0098326E /* macos.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1F0A21D7A16A0098326E /* macos.png */; };
 		B57B1F0F21D7A16B0098326E /* macos_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1F0B21D7A16A0098326E /* macos_active.png */; };
 		B57B1F1021D7A16B0098326E /* general_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1F0C21D7A16B0098326E /* general_active.png */; };
+		B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CCCD2249B016100AD0052 /* TimeDelegate.swift */; };
 		B5927AF820CAE22D0059C25B /* prefs.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF720CAE22D0059C25B /* prefs.png */; };
 		B5927AFA20CAEECC0059C25B /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = B5927AF920CAEECC0059C25B /* help.png */; };
 		B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5927AFB20CC394F0059C25B /* VersionCheck.swift */; };
@@ -78,6 +79,7 @@
 		B57B1F0A21D7A16A0098326E /* macos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = macos.png; sourceTree = "<group>"; };
 		B57B1F0B21D7A16A0098326E /* macos_active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = macos_active.png; sourceTree = "<group>"; };
 		B57B1F0C21D7A16B0098326E /* general_active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = general_active.png; sourceTree = "<group>"; };
+		B58CCCD2249B016100AD0052 /* TimeDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeDelegate.swift; sourceTree = "<group>"; };
 		B5927AF720CAE22D0059C25B /* prefs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prefs.png; sourceTree = "<group>"; };
 		B5927AF920CAEECC0059C25B /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		B5927AFB20CC394F0059C25B /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				B53ECDFB2394474B005EE6E5 /* Json.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
+				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
 				B55BB46D23A9BC7C0024B357 /* UapiCall.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
@@ -332,6 +335,7 @@
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
+				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
@@ -481,7 +485,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 5.2.5;
+				MARKETING_VERSION = 5.2.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -502,7 +506,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 5.2.5;
+				MARKETING_VERSION = 5.2.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

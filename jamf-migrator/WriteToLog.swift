@@ -9,13 +9,13 @@
 import Foundation
 class WriteToLog {
     
-    let vc = ViewController()
+//    let vc = ViewController()
     var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.utility)
 
     func message(stringOfText: String) {
         writeToLogQ.sync {
-            let logString = (LogLevel.debug) ? "\(self.vc.getCurrentTime()) [- debug -] \(stringOfText)":"\(self.vc.getCurrentTime()) \(stringOfText)"
+            let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)":"\(TimeDelegate().getCurrent()) \(stringOfText)"
             
             self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
             
