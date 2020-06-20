@@ -4871,52 +4871,54 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch action {
         case "GET":
 
-            // create folder to download/cache icon if it doesn't exist
-            do {
-                let documentsURL = try
-                    FileManager.default.url(for: .libraryDirectory,
-                                            in: .userDomainMask,
-                                            appropriateFor: nil,
-                                            create: false)
-                savedURL = documentsURL.appendingPathComponent("Caches/icons/\(iconId)/")
-                
-                if !(self.fm.fileExists(atPath: savedURL.path)) {
-                    do {if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] creating \(savedURL.path) folder to cache icon\n") }
-                        try self.fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
-                        usleep(1000)
-                    } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] problem creating \(savedURL.path) folder: Error \(error)\n") }
-                        moveIcon = false
-                    }
-                }
-            } catch {if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] failed to set cache location: Error \(error)\n") }
-            }
 
             WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] fetching icon: \(ssIconUri).\n")
             // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
             let url = URL(string: "\(ssIconUri)")!
-            
-            let downloadTask = URLSession.shared.downloadTask(with: url) {
-                urlOrNil, responseOrNil, errorOrNil in
-                // check for and handle errors:
-                // * errorOrNil should be nil
-                // * responseOrNil should be an HTTPURLResponse with statusCode in 200..<299
-                
-                guard let fileURL = urlOrNil else { return }
-                do {
-                    if moveIcon {
-                        try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
+                            
+                let downloadTask = URLSession.shared.downloadTask(with: url) {
+                    urlOrNil, responseOrNil, errorOrNil in
+                    // check for and handle errors:
+                    // * errorOrNil should be nil
+                    // * responseOrNil should be an HTTPURLResponse with statusCode in 200..<299
+                    // create folder to download/cache icon if it doesn't exist
+                    do {
+                        let documentsURL = try
+                            FileManager.default.url(for: .libraryDirectory,
+                                                    in: .userDomainMask,
+                                                    appropriateFor: nil,
+                                                    create: false)
+                        savedURL = documentsURL.appendingPathComponent("Caches/icons/\(iconId)/")
+                        
+                        if !(self.fm.fileExists(atPath: savedURL.path)) {
+                            do {if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] creating \(savedURL.path) folder to cache icon\n") }
+                                try self.fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
+                                usleep(1000)
+                            } catch {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] problem creating \(savedURL.path) folder: Error \(error)\n") }
+                                moveIcon = false
+                            }
+                        }
+                    } catch {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.iconMigrate] failed to set cache location: Error \(error)\n") }
                     }
-                } catch {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem moving icon: Error \(error)\n") }
+                    
+                    guard let fileURL = urlOrNil else { return }
+                    do {
+                        if moveIcon {
+                            try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
+                            usleep(100)
+                        }
+                    } catch {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem moving icon: Error \(error)\n") }
+                    }
+                    let curlResponse = responseOrNil as! HTTPURLResponse
+                    curlResult = curlResponse.statusCode
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of Swift icon GET: \(curlResult).\n") }
+                    completion(curlResult)
                 }
-                let curlResponse = responseOrNil as! HTTPURLResponse
-                curlResult = curlResponse.statusCode
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] result of Swift icon GET: \(curlResult).\n") }
-                completion(curlResult)
-            }
-            downloadTask.resume()
-            // swift file download - end
+                downloadTask.resume()
+                // swift file download - end
             
         case "POST":
         
