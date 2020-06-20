@@ -121,6 +121,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.8**
+
+* Tweaked icon download routine.
+
 **v5.2.7**
 
 * Changes on icon migration, where they're cached and check for a successful upload, retry if it failed.  
