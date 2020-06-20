@@ -1,5 +1,5 @@
 //
-//  SaveXml.swift
+//  XmlDelegate.swift
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 6/28/18.
@@ -28,7 +28,7 @@ class XmlDelegate: NSURL, URLSessionDelegate {
                     existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.apiAction] Looking up: \(existingDestUrl)\n") }
-//                    print("[Xml.apiAction] existing endpoints URL: \(existingDestUrl)")
+//                    if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
                     let destEncodedURL = NSURL(string: existingDestUrl)
                     let xmlRequest     = NSMutableURLRequest(url: destEncodedURL! as URL)
                     
@@ -78,14 +78,14 @@ class XmlDelegate: NSURL, URLSessionDelegate {
     
     func save(node: String, xml: String, name: String, id: Int, format: String) {
                 
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[saveXML] saving \(name), format: \(format), to folder \(node)\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
         saveXmlFolder = baseXmlFolder+"/"+format+"/"
         if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
                 return
             }
         }
@@ -94,19 +94,19 @@ class XmlDelegate: NSURL, URLSessionDelegate {
         // Create endpoint type to store xml files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
-            endpointPath = saveXmlFolder+"/"+node+"/\(id)"
+            endpointPath = saveXmlFolder+node+"/\(id)"
         case "accounts/groupid":
-            endpointPath = saveXmlFolder+"/jamfgroups"
+            endpointPath = saveXmlFolder+"jamfgroups"
         case "accounts/userid":
-            endpointPath = saveXmlFolder+"/jamfusers"
+            endpointPath = saveXmlFolder+"jamfusers"
         default:
-            endpointPath = saveXmlFolder+"/"+node
+            endpointPath = saveXmlFolder+node
         }
         if !(fm.fileExists(atPath: endpointPath)) {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem creating \(endpointPath) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] Problem creating \(endpointPath) folder: Error \(error)\n") }
                 return
             }
         }
@@ -123,11 +123,11 @@ class XmlDelegate: NSURL, URLSessionDelegate {
             do {
                 if self.fm.fileExists(atPath: iconDest) {
                     do {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] removing cached icon: \(iconDest)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing cached icon: \(iconDest)\n") }
                         try FileManager.default.removeItem(at: URL(fileURLWithPath: iconDest))
                     }
                     catch let error as NSError {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
                         copyIcon = false
                     }
                 }
@@ -137,7 +137,7 @@ class XmlDelegate: NSURL, URLSessionDelegate {
 //                print("Copied \(iconSource) to: \(iconDest)")
             } catch {
 //                print("Problem copying \(iconSource) to: \(iconDest)")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] problem copying \(iconSource) to: \(iconDest)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] problem copying \(iconSource) to: \(iconDest)\n") }
             }
         default:
             let xmlFile = "\(name)-\(id).xml"
@@ -149,9 +149,9 @@ class XmlDelegate: NSURL, URLSessionDelegate {
                     
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] saved to: \(endpointPath)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saved to: \(endpointPath)\n") }
                     } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.save] Problem writing \(endpointPath) folder: Error \(error)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] Problem writing \(endpointPath) folder: Error \(error)\n") }
                         return
                     }
                 }   // if let prettyXml - end
