@@ -3409,6 +3409,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
             
+            // don't create object if we're removing objects
             if !wipeData.on {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
@@ -4814,8 +4815,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                }
 //                            }
 //                        }
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] upload icon to: \(createDestUrl)\n") }
-                        curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] upload icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
+                        var tryAgain = true
+                        var retryCount = 1
+                        while tryAgain {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] Attempt \(retryCount) to upload icon (id=\(ssIconId))\n") }
+                            curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
+                            // verify icon uploaded successfully
+                            if curlResult2.contains("<policy><id>") {
+                                tryAgain = false
+                                usleep(100)
+                            } else {
+                                if retryCount < 6 {
+                                    retryCount+=1
+                                } else {
+                                    tryAgain = false
+                                }
+                                sleep(2)
+                            }
+                        }
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(curlResult2).\n") }
                         if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
                             do {
@@ -5411,6 +5429,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func myExitValue(cmd: String, args: String...) -> String {
+        var theCmdArray  = [String]()
+        var theCmd       = ""
         var status       = "unknown"
         var statusArray  = [String]()
         let pipe         = Pipe()
@@ -5425,8 +5445,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let outdata = pipe.fileHandleForReading.readDataToEndOfFile()
         if var string = String(data: outdata, encoding: .utf8) {
             string = string.trimmingCharacters(in: .newlines)
-            statusArray = string.components(separatedBy: "\n")
-            status = statusArray[0]
+            if args.count > 1 {
+                theCmdArray = args[1].components(separatedBy: " ")
+                if theCmdArray.count > 0 {
+                    theCmd = theCmdArray[0]
+                }
+            }
+            if theCmd == "/usr/bin/curl" {
+                status = string
+            } else {
+                statusArray = string.components(separatedBy: "\n")
+                status = statusArray[0]
+            }
         }
         
         task.waitUntilExit()
