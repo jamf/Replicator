@@ -121,6 +121,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.7**
+
+* Changes on icon migration, where they're cached and check for a successful upload, retry if it failed.  
+* Resolved issue where query would hang when looking to delete policies (and there were none) and saving xml was enabled.
+
 **v5.2.5**
 
 * Resolve issue (#53) when using LDAP groups in limitations/exclusions.
