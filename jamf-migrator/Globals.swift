@@ -36,8 +36,8 @@ struct summaryHeader {
 }
 
 struct export {
-    static var rawXml          = false
-    static var trimmedXml      = false
+    static var saveRawXml      = false
+    static var saveTrimmedXml  = false
     static var saveOnly        = false
     static var rawXmlScope     = true
     static var trimmedXmlScope = true

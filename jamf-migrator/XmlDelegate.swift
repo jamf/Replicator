@@ -120,25 +120,38 @@ class XmlDelegate: NSURL, URLSessionDelegate {
             let iconDest   = "\(endpointPath)/\(name)"
 
 //            print("copy from \(iconSource) to: \(iconDest)")
-            do {
-                if self.fm.fileExists(atPath: iconDest) {
-                    do {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing cached icon: \(iconDest)\n") }
-                        try FileManager.default.removeItem(at: URL(fileURLWithPath: iconDest))
-                    }
-                    catch let error as NSError {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
-                        copyIcon = false
-                    }
+            if self.fm.fileExists(atPath: iconDest) {
+                do {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing currently saved icon: \(iconDest)\n") }
+                    try FileManager.default.removeItem(at: URL(fileURLWithPath: iconDest))
                 }
-                if copyIcon {
-                    try fm.copyItem(atPath: iconSource, toPath: iconDest)
+                catch let error as NSError {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
+                    copyIcon = false
                 }
-//                print("Copied \(iconSource) to: \(iconDest)")
-            } catch {
-//                print("Problem copying \(iconSource) to: \(iconDest)")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] problem copying \(iconSource) to: \(iconDest)\n") }
             }
+            if copyIcon {
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving icon to: \(iconDest)\n") }
+                do {
+                    try fm.copyItem(atPath: iconSource, toPath: iconDest)
+                    if export.saveOnly {
+                        do {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing cached icon: \(iconSource)/\n") }
+                            try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(iconSource)/"))
+                        }
+                        catch let error as NSError {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete \(iconSource)/.  Error \(error)\n") }
+                        }
+                    }
+                    
+                }
+                catch let error as NSError {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete save icon: \(iconDest).  Error \(error).\n") }
+                    copyIcon = false
+                }
+            }
+//                print("Copied \(iconSource) to: \(iconDest)")
+            
         default:
             let xmlFile = "\(name)-\(id).xml"
             if let xmlDoc = try? XMLDocument(xmlString: xml, options: .nodePrettyPrint) {

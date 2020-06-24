@@ -264,9 +264,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // command line switches
 //    var debug           = false
     var hideGui             = false
-    var saveOnly            = false
-    var saveRawXml          = false
-    var saveTrimmedXml      = false
+//    var export.saveOnly     = false
+//    var saveRawXml          = false
+//    var saveTrimmedXml      = false
     var saveRawXmlScope     = true
     var saveTrimmedXmlScope = true
     
@@ -748,13 +748,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         plistData           = readSettings()
         scopeOptions        = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions      = plistData["xml"] as! Dictionary<String,Bool>
-        saveOnly            = xmlPrefOptions["saveOnly"]!
-        saveRawXml          = xmlPrefOptions["saveRawXml"]!
-        saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
+        export.saveOnly     = xmlPrefOptions["saveOnly"]!
+        export.saveRawXml   = xmlPrefOptions["saveRawXml"]!
+        export.saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
         saveRawXmlScope     = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
         saveTrimmedXmlScope = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
         
-        if fileImport && (saveOnly || saveRawXml) {
+        if fileImport && (export.saveOnly || export.saveRawXml) {
             alert_dialog(header: "Attention", message: "Cannot select Save Only or Raw Source XML (Preferneces -> Export) when using File Import.")
             return
         }
@@ -818,7 +818,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 return
             }
         }
-        if !saveOnly {
+        if !export.saveOnly {
             if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
                 alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
                 //self.go_button.isEnabled = true
@@ -907,7 +907,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.") }
                             return
                         } else {
-                            if !self.saveOnly {
+                            if !export.saveOnly {
                                 self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                             }
                             // verify source server URL - start
@@ -923,14 +923,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     //===== change to go to function to check dest. server, which forwards to migrate if all is well
                                     // verify destination server URL - start
                                     DispatchQueue.main.async {
-                                        if !self.saveOnly {
+                                        if !export.saveOnly {
                                             destinationURL = URL(string: self.dest_jp_server_field.stringValue)
                                         } else {
                                             destinationURL = URL(string: "https://www.jamf.com")
                                         }
                                         URLCache.shared.removeAllCachedResponses()
                                         let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.saveOnly {
+                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
                                                 // print("Destination server response: \(response)")
                                                 if(!self.theOpQ.isSuspended) {
                                                     //====================================    Start Migrating/Removing    ====================================//
@@ -992,7 +992,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var validCredentials:Bool = false
         if LogLevel.debug { WriteToLog().message(stringOfText: "--- checking authentication to \(whichServer) server: \(f_sourceURL)\n") }
         
-        if (whichServer == "source" && (!wipeData.on && !fileImport)) || (whichServer == "dest" && !saveOnly) {
+        if (whichServer == "source" && (!wipeData.on && !fileImport)) || (whichServer == "dest" && !export.saveOnly) {
             var myURL = "\(f_sourceURL)/JSSResource/buildings"
             myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
@@ -1594,11 +1594,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             for (name, id) in advancedMigrateDict[object]! {
 //                                                                print("object name: \(String(describing: name))")
                                                                 dependencyCounter += 1
-                                                                if LogLevel.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(name)\n") }
-    //                                                            print("self.saveOnly: \(self.saveOnly)")
+                                                                if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(name)\n") }
+    //                                                            print("export.saveOnly: \(export.saveOnly)")
     //                                                            print("object: \(object) - name: \(name)")
 //                                                                print("create or update \(object): \(name)")
-                                                                if nil != self.currentEPDict[object]![name] && !self.saveOnly {
+                                                                if nil != self.currentEPDict[object]![name] && !export.saveOnly {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
                                                                     //self.currentEndpointID = self.currentEPs[xmlName]!
                                                                     self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencyCount, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
@@ -1622,8 +1622,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 
                                             } else {
                                             
-                                                if LogLevel.debug && !self.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !self.saveOnly {
+                                                if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
+                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "\(selectedObject) already exists\n") }
                                                     //self.currentEndpointID = self.currentEPs[xmlName]!
                                                     self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
@@ -2753,8 +2753,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
-        saveRawXml      = xmlPrefOptions["saveRawXml"]!
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(saveRawXml)\n") }
+        export.saveRawXml      = xmlPrefOptions["saveRawXml"]!
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(export.saveRawXml)\n") }
         saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"] ?? false
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXmlScope: \(saveRawXmlScope)\n") }
 
@@ -2810,7 +2810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                         
                         // save source XML - start
-                        if self.saveRawXml {
+                        if export.saveRawXml {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                             DispatchQueue.main.async {
                                 // added option to remove scope
@@ -3341,7 +3341,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // this is where we create the new endpoint
-        if !self.saveOnly {
+        if !export.saveOnly {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
         } else {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
@@ -3383,7 +3383,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         theCreateQ.addOperation {
             
             // save trimmed XML - start
-            if self.saveTrimmedXml {
+            if export.saveTrimmedXml {
                 let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 DispatchQueue.main.async {
@@ -3395,7 +3395,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // save trimmed XML - end
             
             //******************                // add option to save icons to folder if using the export option
-            if self.saveOnly {
+            if export.saveOnly {
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
@@ -3691,10 +3691,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
             
-            if saveRawXml {
+            if export.saveRawXml {
                 endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
             }
-            if saveOnly {
+            if export.saveOnly {
                 if endpointCurrent == endpointCount {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
                     nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
@@ -3849,7 +3849,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter\n") }
         
-        if !saveOnly {
+        if !export.saveOnly {
             URLCache.shared.removeAllCachedResponses()
             currentEPs.removeAll()
             currentEPDict.removeAll()
@@ -4145,7 +4145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // destEPQ - end
         } else {
             self.currentEPs["_"] = 0
-            completion(" Current endpoints - saveOnly, not needed.")
+            completion(" Current endpoints - export.saveOnly, not needed.")
         }
     }
 
@@ -4511,7 +4511,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
-        if (whichServer == "dest" && saveOnly) {
+        if (whichServer == "dest" && export.saveOnly) {
             completion(true)
         } else {
             var available:Bool = false
@@ -4793,14 +4793,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if result > 199 && result < 300 {
                     iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] retrieved icon from \(ssIconUri)\n") }
-                    if self.saveRawXml {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[icons] saving icon: \(ssIconName) for \(iconNode).\n") }
+                    if export.saveRawXml || export.saveTrimmedXml {
+                        let saveFormat = export.saveRawXml ? "raw":"trimmed"
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icons] saving icon: \(ssIconName) for \(iconNode).\n") }
                         DispatchQueue.main.async {
-                            XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", name: ssIconName, id: ssIconId, format: "raw")
+                            XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", name: ssIconName, id: ssIconId, format: "\(saveFormat)")
                         }
-                    }   // if self.saveRawXml - end
+                    }   // if export.saveRawXml - end
                     // upload icon if not in save only mode
-                    if !self.saveOnly {
+                    if !export.saveOnly {
                         
 //                        self.iconMigrate(action: "POST", ssIconUri: "", ssIconName: ssIconName, iconToUpload: iconToUpload, createDestUrl: createDestUrl) {
 //                            (result: Int) in
@@ -4837,6 +4838,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(curlResult2).\n") }
                         if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
                             do {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\n") }
                                 try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/"))
                             }
                             catch let error as NSError {
@@ -4844,15 +4846,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                         }
                     } else {
-                        if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
-                            do {
-                                try FileManager.default.removeItem(at: URL(string: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/")!)
-                            }
-                            catch let error as NSError {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).\n") }
-                            }
-                        }
-                    }  // if !saveOnly - end
+//                        if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
+//                            do {
+//                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\n") }
+//                                try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/"))
+//                            }
+//                            catch let error as NSError {
+//                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).\n") }
+//                            }
+//                        }
+                    }  // if !export.saveOnly - end
                 } else {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] failed to retrieved icon from \(ssIconUri).\n") }
                 }
@@ -5301,16 +5304,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func savePrefs(prefs: [String:Any]) {
-        plistData           = readSettings()
-        plistData["scope"]  = prefs["scope"]
-        plistData["xml"]    = prefs["xml"]
-        scopeOptions        = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-        xmlPrefOptions      = prefs["xml"] as! Dictionary<String,Bool>
-        saveOnly            = xmlPrefOptions["saveOnly"]!
-        saveRawXml          = xmlPrefOptions["saveRawXml"]!
-        saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
-        saveRawXmlScope     = xmlPrefOptions["saveRawXmlScope"]!
-        saveTrimmedXmlScope = xmlPrefOptions["saveTrimmedXmlScope"]!
+        plistData            = readSettings()
+        plistData["scope"]   = prefs["scope"]
+        plistData["xml"]     = prefs["xml"]
+        scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
+//        export.saveOnly            = xmlPrefOptions["saveOnly"]!
+        export.saveOnly      = xmlPrefOptions["saveOnly"]!
+        export.saveRawXml    = xmlPrefOptions["saveRawXml"]!
+       export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
+        saveRawXmlScope      = xmlPrefOptions["saveRawXmlScope"]!
+        saveTrimmedXmlScope  = xmlPrefOptions["saveTrimmedXmlScope"]!
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
 //      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
     }
@@ -5965,24 +5969,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
 
             if (xmlPrefOptions["saveRawXml"] != nil) {
-                saveRawXml = xmlPrefOptions["saveRawXml"]!
+                export.saveRawXml = xmlPrefOptions["saveRawXml"]!
             } else {
-                saveRawXml                   = false
-                xmlPrefOptions["saveRawXml"] = saveRawXml
+                export.saveRawXml                   = false
+                xmlPrefOptions["saveRawXml"] = export.saveRawXml
             }
 
             if (xmlPrefOptions["saveTrimmedXml"] != nil) {
-                saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
+                export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
             } else {
-                saveTrimmedXml                   = false
-                xmlPrefOptions["saveTrimmedXml"] = saveTrimmedXml
+                export.saveTrimmedXml                   = false
+                xmlPrefOptions["saveTrimmedXml"] = export.saveTrimmedXml
             }
 
             if (xmlPrefOptions["saveOnly"] != nil) {
-                saveOnly = xmlPrefOptions["saveOnly"]!
+                export.saveOnly = xmlPrefOptions["saveOnly"]!
             } else {
-                saveOnly                   = false
-                xmlPrefOptions["saveOnly"] = saveOnly
+                export.saveOnly                   = false
+                xmlPrefOptions["saveOnly"] = export.saveOnly
             }
             
             if xmlPrefOptions["saveRawXmlScope"] == nil {
@@ -5998,7 +6002,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             plistData        = readSettings()
             plistData["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
-                                "saveOnly":false,
+                                "export.saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
         }
@@ -6053,11 +6057,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
                 switch CommandLine.arguments[i]{
                 case "-saveRawXml":
-                    saveRawXml = true
+                    export.saveRawXml = true
                 case "-saveTrimmedXml":
-                    saveTrimmedXml = true
-                case "-saveOnly":
-                    saveOnly = true
+                    export.saveTrimmedXml = true
+                case "-export.saveOnly":
+                    export.saveOnly = true
                 case "-sourceServer":
                     source_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-destServer":

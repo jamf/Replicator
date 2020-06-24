@@ -121,6 +121,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.2.9**
+
+* Prevent icon from being deleted before it is saved when using save only.  Note, if saving both raw and trimmed XML the icon will only be saved under the raw folder.  If saving only trimmed XML it will be saved under the trimmed folder.
+
 **v5.2.8**
 
 * Tweaked icon download routine.
