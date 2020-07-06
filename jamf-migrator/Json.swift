@@ -11,12 +11,14 @@ import Cocoa
 class Json: NSURL, URLSessionDelegate {
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
 
+        let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
+        WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
         let getRecordQ = DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
     
         URLCache.shared.removeAllCachedResponses()
         var existingDestUrl = ""
         
-        existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)"
+        existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
         existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)\n") }

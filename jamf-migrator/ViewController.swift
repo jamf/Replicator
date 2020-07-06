@@ -3082,6 +3082,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             PostXML = PostXML.replacingOccurrences(of: "<xprotect_version/>", with: "")
+            PostXML = PostXML.replacingOccurrences(of: "<size>0</size>", with: "")
             //print("\nXML: \(PostXML)")
             
         case "networksegments":
@@ -4820,22 +4821,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         var tryAgain = true
                         var retryCount = 1
                         while tryAgain {
+                            print("createDestUrl: \(createDestUrl)")
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] Attempt \(retryCount) to upload icon (id=\(ssIconId))\n") }
                             curlResult2 = self.myExitValue(cmd: "/bin/bash", args: "-c", "/usr/bin/curl -sk -H \"Authorization:Basic \(self.destBase64Creds)\" \(createDestUrl) -F \"name=@\(iconToUpload)\" -X POST")
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(curlResult2).\n") }
                             // verify icon uploaded successfully
                             if curlResult2.contains("<policy><id>") {
                                 tryAgain = false
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] icon (id=\(ssIconId)) successfully uploaded.\n") }
                                 usleep(100)
                             } else {
                                 if retryCount < 6 {
                                     retryCount+=1
                                 } else {
                                     tryAgain = false
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] icon (id=\(ssIconId)) failed to get uploaded.\n") }
                                 }
                                 sleep(2)
                             }
                         }
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(curlResult2).\n") }
                         if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
                             do {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\n") }
