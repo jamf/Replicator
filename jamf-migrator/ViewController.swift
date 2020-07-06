@@ -3255,14 +3255,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Unknown endpoint: \(endpoint)\n") }
             knownEndpoint = false
         }   // switch - end
-        if self.getCounters[endpoint] == nil {
-            self.getCounters[endpoint] = ["get":1]
+
+        if self.getCounters[theEndpoint] == nil {
+            self.getCounters[theEndpoint] = ["get":1]
         } else {
-            self.getCounters[endpoint]!["get"]! += 1
+            self.getCounters[theEndpoint]!["get"]! += 1
         }
-//        self.getCounters[endpoint]!["get"]! += 1
-        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[endpoint]!["get"]!, total: endpointCount)
-//        self.getStatusUpdate(endpoint: endpoint, current: endpointCurrent, total: endpointCount)
+
+        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[theEndpoint]!["get"]!, total: endpointCount)
+//        if self.getCounters[endpoint] == nil {
+//            self.getCounters[endpoint] = ["get":1]
+//        } else {
+//            self.getCounters[endpoint]!["get"]! += 1
+//        }
+//
+//        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[endpoint]!["get"]!, total: endpointCount)
         
         if knownEndpoint {
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
@@ -3395,7 +3402,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             // save trimmed XML - end
             
-            //******************                // add option to save icons to folder if using the export option
             if export.saveOnly {
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
@@ -3491,7 +3497,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.summaryDict[endpointType]?["\(apiAction)"] = summaryArray
                                 }
                                 
-                                // currently there is no way to upload mac app store icons
+                                // currently there is no way to upload mac app store icons; no api endpoint
                                 // removed check for those -  || (endpointType == "macapplications")
                                 if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData)
@@ -4761,8 +4767,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func getStatusUpdate(endpoint: String, current: Int, total: Int) {
+        var adjEndpoint = ""
+        switch endpoint {
+        case "accounts/userid":
+            adjEndpoint = "jamfusers"
+        case "accounts/groupid":
+            adjEndpoint = "jamfgroups"
+        default:
+            adjEndpoint = endpoint
+        }
         DispatchQueue.main.async {
-            self.get_name_field.stringValue = endpoint
+            self.get_name_field.stringValue = adjEndpoint
             if current > 0 {
                 self.get_completed_field.stringValue = "\(current)"
             }
@@ -4790,8 +4805,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             default:
                 break
             }
-            //                                print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
-            //                                    print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
+//          print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
+//          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
             createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             
