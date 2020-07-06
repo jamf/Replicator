@@ -4566,6 +4566,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    func clearSelectiveList() {
+        DispatchQueue.main.async {
+            if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
+                self.sourceDataArray.removeAll()
+                self.srcSrvTableView.stringValue = ""
+                self.srcSrvTableView.reloadData()
+                self.selectiveListCleared = true
+            } else {
+                self.selectiveListCleared = true
+                self.srcSrvTableView.isEnabled = true
+            }
+        }
+    }
+    
     // which platform mode tab are we on - start
     func deviceType() -> String {
 
@@ -5659,6 +5673,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
         switch sender.tag {
         case 0:
+            if self.source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
+                // source server changed, clear list of objects
+                clearSelectiveList()
+            }
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
         case 1:
