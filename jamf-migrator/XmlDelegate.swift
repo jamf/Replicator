@@ -146,7 +146,7 @@ class XmlDelegate: NSURL, URLSessionDelegate {
                     
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete save icon: \(iconDest).  Error \(error).\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to save icon: \(iconDest).  Error \(error).\n") }
                     copyIcon = false
                 }
             }

@@ -18,6 +18,11 @@ struct dependency {
     static var wait = true
 }
 
+struct iconfiles {
+    static public var policyDict  = [String:[String:String]]()
+    static var pendingDict = [String:Bool]()
+}
+
 struct wipeData {
     static var on = false
 }
