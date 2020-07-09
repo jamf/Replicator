@@ -20,7 +20,7 @@ struct dependency {
 
 struct iconfiles {
     static public var policyDict  = [String:[String:String]]()
-    static var pendingDict = [String:Bool]()
+    static var pendingDict        = [String:String]()
 }
 
 struct wipeData {
