@@ -40,6 +40,11 @@ struct summaryHeader {
     static var createDelete = "create"
 }
 
+struct appInfo {
+    static let dict = Bundle.main.infoDictionary!
+    static let version = dict["CFBundleShortVersionString"] as! String
+}
+
 struct export {
     static var saveRawXml      = false
     static var saveTrimmedXml  = false

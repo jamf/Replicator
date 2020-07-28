@@ -251,6 +251,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var dest_TableColumn: NSTableColumn!
     // selective migration items - end
     
+    // app version label
+    @IBOutlet weak var appVersion_TextField: NSTextField!
+    
     // smartgroup vars
     var migrateSmartComputerGroups  = false
     var migrateStaticComputerGroups = false
@@ -398,7 +401,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var orphanIds         = [String]()
     var idDict            = [String:Dictionary<String,Int>]()
     
-//    var wipeData.on: Bool = false
+    
+    
     
     let fm         = FileManager()
     var theOpQ     = OperationQueue() // create operation queue for API calls
@@ -3085,6 +3089,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             PostXML = PostXML.replacingOccurrences(of: "<xprotect_version/>", with: "")
             PostXML = PostXML.replacingOccurrences(of: "<size>0</size>", with: "")
+            let regexAvailable_mb = try! NSRegularExpression(pattern: "<available_mb>-(.*?)</available_mb>", options:.caseInsensitive)
+            PostXML = regexAvailable_mb.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<available_mb>0</available_mb>")
             //print("\nXML: \(PostXML)")
             
         case "networksegments":
@@ -6015,6 +6021,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+        
+        // Get app version
+        appVersion_TextField.stringValue = "v\(appInfo.version)"
         
         // OS version info
         let os = ProcessInfo().operatingSystemVersion

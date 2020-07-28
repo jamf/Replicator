@@ -15,10 +15,10 @@ class VersionCheck: NSObject, URLSessionDelegate {
         
         URLCache.shared.removeAllCachedResponses()
         
-        let appInfo = Bundle.main.infoDictionary!
-        let version = appInfo["CFBundleShortVersionString"] as! String
+//        let appInfo = Bundle.main.infoDictionary!
+//        let version = appInfo["CFBundleShortVersionString"] as! String
         
-        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: version)
+        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: appInfo.version)
         
         var updateAvailable = false
         
