@@ -460,6 +460,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 wipeData.on = true
                 self.migrateDependencies.state = NSControl.StateValue(rawValue: 0)
                 self.migrateDependencies.isHidden = true
+                if self.srcSrvTableView.isEnabled {
+                    self.sourceDataArray.removeAll()
+                    self.srcSrvTableView.stringValue = ""
+                    self.srcSrvTableView.reloadData()
+                    self.selectiveListCleared = true
+                }
             }
         }
     }
@@ -4578,7 +4584,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func clearSelectiveList() {
         DispatchQueue.main.async {
-            if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
+            if !self.selectiveListCleared && self.srcSrvTableView.isEnabled {
                 self.sourceDataArray.removeAll()
                 self.srcSrvTableView.stringValue = ""
                 self.srcSrvTableView.reloadData()
@@ -6388,15 +6394,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
                     // clear selective list of items when changing from migration to delete mode
                     DispatchQueue.main.async {
-                        if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
-                            self.sourceDataArray.removeAll()
-                            self.srcSrvTableView.stringValue = ""
-                            self.srcSrvTableView.reloadData()
-                            self.selectiveListCleared = true
-                        } else {
-                            self.selectiveListCleared = true
-                            self.srcSrvTableView.isEnabled = true
-                        }
+                        self.clearSelectiveList()
+//                        if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
+//                            self.sourceDataArray.removeAll()
+//                            self.srcSrvTableView.stringValue = ""
+//                            self.srcSrvTableView.reloadData()
+//                            self.selectiveListCleared = true
+//                        } else {
+//                            self.selectiveListCleared = true
+//                            self.srcSrvTableView.isEnabled = true
+//                        }
                     }
                     
                     DispatchQueue.main.async {
