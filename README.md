@@ -32,10 +32,11 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 * Institutional disk encryptions that contain the private key cannot be migrated.
-* Approved Kernel Extension payloads that contain bundle IDs will be dropped from the Configuration Profile.
-* Approved Kernel Extension - the display name for the Approved Team ID does not migrate.
+* Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a failure in profile deployment.
+* Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 
- 
+<hr>
+
 The 'Selective' tab provides the ability to select a subset of items within a category.  For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.
   ![alt text](./jamf-migrator/images/migrator3.png "Selective")
   
