@@ -34,6 +34,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Institutional disk encryptions that contain the private key cannot be migrated.
 * Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a failure in profile deployment.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
+* Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
 
 <hr>
 
@@ -121,6 +122,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v5.3.1**
+
+* Replaced use of curl to upload icons with native Swift functions. If the same Self Service icon is used on more then one policy, download icon only once. 
+* Fixed jamf user/group lookups and counter status/labeling.
+* Clear current list of objects on the selective tab if the source server changes.
+* Fix issue migrating computers where their inventory contains a volume of size 0 or negative partition size.
 
 **v5.2.9**
 
