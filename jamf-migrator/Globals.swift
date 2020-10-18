@@ -52,3 +52,7 @@ struct export {
     static var rawXmlScope     = true
     static var trimmedXmlScope = true
 }
+
+struct setting {
+    static var uapiToken = ""
+}

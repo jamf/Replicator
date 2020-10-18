@@ -12,20 +12,29 @@ class UapiCall: NSObject, URLSessionDelegate {
     
     var theUapiQ = OperationQueue() // create operation queue for API calls
     
-    func get(serverUrl: String, path: String, token: String, action: String, completion: @escaping (_ returnedJSON: [String:Any]) -> Void) {
+    func action(serverUrl: String, endpoint: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String:Any]) -> Void) {
         
         URLCache.shared.removeAllCachedResponses()
-                
-        var urlString = "\(serverUrl)/uapi/\(path)"
-        urlString     = urlString.replacingOccurrences(of: "//uapi", with: "/uapi")
-//        print("[UapiCall] urlString: \(urlString)")
+        var path = ""
+
+        switch endpoint {
+        case  "jamf-pro-version":
+            path = "v1/\(endpoint)"
+        default:
+            path = "v2/\(endpoint)"
+        }
+
+        var urlString = "\(serverUrl)/api/\(path)"
+        urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
+        print("[UapiCall] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.default
         var request        = URLRequest(url: url!)
-        request.httpMethod = "\(action)"
+        request.httpMethod = method
 
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.get] Attempting to retrieve info from \(urlString).\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] Attempting \(method) on \(urlString).\n") }
+        print("[UapiCall.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
@@ -35,28 +44,28 @@ class UapiCall: NSObject, URLSessionDelegate {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json! as? [String:Any] {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.get] Token retrieved from \(urlString).\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] Token retrieved from \(urlString).\n") }
                         completion(endpointJSON)
                         return
                     } else {    // if let endpointJSON error
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.get] JSON error.\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] JSON error.\n") }
                         completion([:])
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.get] Response error: \(httpResponse.statusCode).\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] Response error: \(httpResponse.statusCode).\n") }
                     completion([:])
                     return
                 }
             } else {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.get] GET response error.  Verify url and port.\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] GET response error.  Verify url and port.\n") }
                 completion([:])
                 return
             }
         })
         task.resume()
         
-    }   // func token - end
+    }   // func action - end
 
     
     func getToken(serverUrl: String, base64creds: String, completion: @escaping (_ returnedToken: String) -> Void) {

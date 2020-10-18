@@ -102,6 +102,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var printers_button: NSButton!
     @IBOutlet weak var policies_button: NSButton!
     @IBOutlet weak var restrictedsoftware_button: NSButton!
+    @IBOutlet weak var macPrestages_button: NSButton!
     // iOS tab
     @IBOutlet weak var allNone_iOS_button: NSButton!
     @IBOutlet weak var mobiledevices_button: NSButton!
@@ -111,6 +112,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var smart_ios_groups_button: NSButton!
     @IBOutlet weak var static_ios_groups_button: NSButton!
     @IBOutlet weak var advancedmobiledevicesearches_button: NSButton!
+    @IBOutlet weak var iosPrestages_button: NSButton!
     // general tab
     @IBOutlet weak var allNone_general_button: NSButton!
     @IBOutlet weak var advusersearch_button: NSButton!
@@ -186,6 +188,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var jamfUserAccounts_field: NSTextField!
     @IBOutlet weak var jamfGroupAccounts_field: NSTextField!
     @IBOutlet weak var restrictedsoftware_label_field: NSTextField!
+    @IBOutlet weak var macPrestages_label_field: NSTextField!
     // iOS button labels
     @IBOutlet weak var smart_ios_groups_label_field: NSTextField!
     @IBOutlet weak var static_ios_groups_label_field: NSTextField!
@@ -356,9 +359,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var changeColor:Bool    = true
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
-    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes"]
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
     
@@ -608,7 +611,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.packages_button.state.rawValue == 1
                     && self.printers_button.state.rawValue == 1
                     && self.restrictedsoftware_button.state.rawValue == 1
-                    && self.policies_button.state.rawValue == 1) ? 1 : 0);
+                    && self.policies_button.state.rawValue == 1
+                    && self.macPrestages_button.state.rawValue == 1) ? 1 : 0);
         } else if deviceType() == "iOS" {
             self.allNone_iOS_button.state = NSControl.StateValue(rawValue: (
                 self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1
@@ -617,7 +621,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.static_ios_groups_button.state.rawValue == 1
                     && self.mobiledevicecApps_button.state.rawValue == 1
                     && self.mobiledeviceextensionattributes_button.state.rawValue == 1
-                    && self.advancedmobiledevicesearches_button.state.rawValue == 1) ? 1 : 0);
+                    && self.advancedmobiledevicesearches_button.state.rawValue == 1
+                    && self.iosPrestages_button.state.rawValue == 1) ? 1 : 0);
         } else {
             // general
             self.allNone_general_button.state = NSControl.StateValue(rawValue: (
@@ -660,6 +665,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.printers_button.state = self.allNone_button.state
             self.restrictedsoftware_button.state = self.allNone_button.state
             self.policies_button.state = self.allNone_button.state
+            self.macPrestages_button.state = self.allNone_button.state
         } else if deviceType() == "iOS" {
             self.advancedmobiledevicesearches_button.state = self.allNone_iOS_button.state
             self.mobiledevices_button.state = self.allNone_iOS_button.state
@@ -668,6 +674,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.mobiledevicecApps_button.state = self.allNone_iOS_button.state
             self.mobiledeviceextensionattributes_button.state = self.allNone_iOS_button.state
             self.mobiledeviceconfigurationprofiles_button.state = self.allNone_iOS_button.state
+            self.iosPrestages_button.state = self.allNone_iOS_button.state
         } else {
             self.building_button.state = self.allNone_general_button.state
             self.categories_button.state = self.allNone_general_button.state
@@ -1062,16 +1069,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(validCredentials)
                                         return
                                     }
-//                                    print("token received.")
+                                    print("token received: \(returnedToken)")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
-                                    UapiCall().get(serverUrl: f_sourceURL, path: "v1/jamf-pro-version", token: returnedToken, action: "GET") {
+                                    UapiCall().action(serverUrl: f_sourceURL, endpoint: "jamf-pro-version", token: returnedToken, method: "GET") {
                                         (json: [String:Any] ) in
-//                                        print("json \(json)")
+                                        print("json for jamf-pro-version: \(json)")
                                         if let fullVersion = json["version"] {
                                             let versionArray = "\(fullVersion)".split(separator: ".")
-                                            if versionArray.count >= 2 {
+                                            if versionArray.count >= 3 {
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
                                                 jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
+                                                let patchArray = versionArray[2].split(separator: "-")
+                                                jamfProVersion.patch = Int("\(patchArray[0])") ?? 0
                                             }
                                         } else {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
@@ -4823,10 +4832,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
             createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-            
+
+            print("fileImport: \(fileImport)\n")
+
             if fileImport {
                 action       = "SKIP"
-                iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+                iconToUpload =  "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             } else {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
             }
@@ -4996,7 +5007,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch action {
         case "GET":
 
-//            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
+//            let exportSaveURL = URL(fileURLWithPath: "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw")
+
+            //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
 //            if iconfiles.policyDict["\(ssIconId)"] == nil {
 //                iconfiles.pendingDict["\(ssIconId)"] = true
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
@@ -5018,7 +5031,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     appropriateFor: nil,
                                                     create: false)
                         savedURL = documentsURL.appendingPathComponent("Caches/icons/\(ssIconId)/")
-                        
+
+                        // need to add something so if export is selected icon saves to downloads folder
+
+
                         if !(self.fm.fileExists(atPath: savedURL.path)) {
                             do {if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] creating \(savedURL.path) folder to cache icon\n") }
                                 try self.fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
@@ -5043,7 +5059,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            usleep(100)
                         }
                     } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] Problem moving icon: Error \(error)\n") }
+                        WriteToLog().message(stringOfText: "[iconMigrate.GET] Problem moving icon: Error \(error)\n")
                     }
                     let curlResponse = responseOrNil as! HTTPURLResponse
                     curlResult = curlResponse.statusCode
@@ -5066,11 +5082,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "POST":
             // upload icon to fileuploads endpoint
             WriteToLog().message(stringOfText: "[iconMigrate.POST] sending icon: \(ssIconName)\n")
-           
+
+
             var fileURL: URL!
             var newPolicyId = 0
             
             fileURL = URL(fileURLWithPath: iconToUpload)
+
+            // need to change fileURL if source is a folder
+            print("Icon file URL: \(String(describing: fileURL!))")
+
             let boundary = "------WebKitFormBoundary\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
 
             var httpResponse:HTTPURLResponse?
@@ -5752,6 +5773,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.policies_button.state = NSControl.StateValue(rawValue: 0)
             self.printers_button.state = NSControl.StateValue(rawValue: 0)
             self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+            self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
             // iOS tab
             self.allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
             self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
@@ -5761,6 +5783,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
             // general tab
             self.allNone_general_button.state = NSControl.StateValue(rawValue: 0)
             self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)

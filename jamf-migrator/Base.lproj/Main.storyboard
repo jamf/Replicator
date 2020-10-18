@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16097"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="16097"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16097.3"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="16097.3"/>
         <capability name="System colors introduced in macOS 10.14" minToolsVersion="10.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -1338,7 +1338,7 @@
                                         </view>
                                     </tabViewItem>
                                     <tabViewItem label="macOS" identifier="tab1" id="Nof-Zl-FoE">
-                                        <view key="view" ambiguous="YES" id="fn5-oe-BJC">
+                                        <view key="view" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1348,7 +1348,7 @@
                                                     <font key="font" metaFont="system"/>
                                                     <tabViewItems>
                                                         <tabViewItem label="Bulk" identifier="1" id="HJu-4l-pJU">
-                                                            <view key="view" ambiguous="YES" id="gsZ-k6-bEX">
+                                                            <view key="view" id="gsZ-k6-bEX">
                                                                 <rect key="frame" x="0.0" y="0.0" width="702" height="191"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <userGuides>
@@ -1770,6 +1770,23 @@
                                                                             <font key="font" size="14" name="Helvetica"/>
                                                                         </buttonCell>
                                                                     </button>
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8U0-Qe-paa" userLabel="Prestages">
+                                                                        <rect key="frame" x="567" y="54" width="74" height="17"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Prestages" id="txW-rc-axB">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdm-q1-rol" userLabel="Prestages">
+                                                                        <rect key="frame" x="547" y="52" width="79" height="20"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aj0-i2-NDK">
+                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                            <font key="font" size="14" name="Helvetica"/>
+                                                                        </buttonCell>
+                                                                    </button>
                                                                 </subviews>
                                                             </view>
                                                         </tabViewItem>
@@ -1789,12 +1806,12 @@
                                                     <font key="font" metaFont="system"/>
                                                     <tabViewItems>
                                                         <tabViewItem label="Bulk" identifier="1" id="hjR-Z4-r7D">
-                                                            <view key="view" ambiguous="YES" id="aZ8-2N-yEJ">
+                                                            <view key="view" id="aZ8-2N-yEJ">
                                                                 <rect key="frame" x="0.0" y="0.0" width="702" height="191"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <userGuides>
                                                                     <userLayoutGuide location="337" affinity="maxX"/>
-                                                                    <userLayoutGuide location="136" affinity="minY"/>
+                                                                    <userLayoutGuide location="115" affinity="minY"/>
                                                                 </userGuides>
                                                                 <subviews>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LKz-JF-Fz5">
@@ -1977,6 +1994,23 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="irz-8v-rw9"/>
                                                                         </connections>
                                                                     </button>
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vox-8P-XHa" userLabel="Prestages">
+                                                                        <rect key="frame" x="535" y="113" width="74" height="17"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Prestages" id="IU1-3h-8jR">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q6a-6E-m2M" userLabel="Prestages">
+                                                                        <rect key="frame" x="515" y="111" width="87" height="20"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="RuH-17-XjQ">
+                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                            <font key="font" size="14" name="Helvetica"/>
+                                                                        </buttonCell>
+                                                                    </button>
                                                                 </subviews>
                                                             </view>
                                                         </tabViewItem>
@@ -1994,19 +2028,19 @@
                                                     <rect key="frame" x="0.0" y="-3" width="707" height="192"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="osE-m4-tRQ">
-                                                            <rect key="frame" x="13" y="51" width="67" height="17"/>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gbc-Kd-A3X">
+                                                            <rect key="frame" x="218" y="173" width="205" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS / tvOS" id="uMo-rK-X7M">
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select object(s) to take action on" id="3et-gS-4zI">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gbc-Kd-A3X">
-                                                            <rect key="frame" x="218" y="173" width="205" height="17"/>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="osE-m4-tRQ">
+                                                            <rect key="frame" x="13" y="51" width="67" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select object(s) to take action on" id="3et-gS-4zI">
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS / tvOS" id="uMo-rK-X7M">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -2044,6 +2078,9 @@
                                                                         <menuItem title="Extension Attributes" id="Amv-Lr-jUK" userLabel="Extension Attributes">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
+                                                                        <menuItem title="Prestages" id="vLO-yr-149" userLabel="Prestages">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                     </items>
                                                                 </menu>
                                                             </popUpButtonCell>
@@ -2051,6 +2088,15 @@
                                                                 <action selector="sectionToMigrate:" target="XfG-lQ-9wD" id="r40-c3-GhT"/>
                                                             </connections>
                                                         </popUpButton>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qgQ-DV-Jc8">
+                                                            <rect key="frame" x="13" y="112" width="48" height="17"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS" id="Bhi-pK-ygK">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                        </textField>
                                                         <popUpButton identifier="macOS" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tpb-Lh-nzm" userLabel="macOS Migrate button">
                                                             <rect key="frame" x="9" y="85" width="200" height="26"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -2095,6 +2141,9 @@
                                                                         <menuItem title="Netboot Servers" id="e78-AX-SO6"/>
                                                                         <menuItem title="Packages" id="gPQ-gf-J3z"/>
                                                                         <menuItem title="Policies" id="jwH-Jm-D0E"/>
+                                                                        <menuItem title="Prestages" id="XWe-5m-1Pa">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Printers" id="DYb-Mc-wvX"/>
                                                                         <menuItem title="Restricted Software" id="RF3-Oc-qto">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -2108,23 +2157,14 @@
                                                                 <action selector="sectionToMigrate:" target="XfG-lQ-9wD" id="hip-D6-Szr"/>
                                                             </connections>
                                                         </popUpButton>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qgQ-DV-Jc8">
-                                                            <rect key="frame" x="13" y="112" width="48" height="17"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS" id="Bhi-pK-ygK">
-                                                                <font key="font" metaFont="system"/>
-                                                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                            </textFieldCell>
-                                                        </textField>
                                                         <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LkZ-VI-6p8">
                                                             <rect key="frame" x="218" y="7" width="475" height="163"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="xbF-pR-KVb">
+                                                            <clipView key="contentView" drawsBackground="NO" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="161"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
-                                                                    <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
+                                                                    <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="161"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <size key="intercellSpacing" width="3" height="2"/>
@@ -2304,7 +2344,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="R8b-G6-Yv6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="storeCredentials:" target="XfG-lQ-9wD" id="sxf-4l-2e7"/>
@@ -2476,6 +2516,7 @@
                         <outlet property="iOS_tabViewItem" destination="ECI-6E-ufR" id="hDg-OB-fcs"/>
                         <outlet property="iOSsectionToMigrate_button" destination="K3i-ud-Xoc" id="oON-7T-NR8"/>
                         <outlet property="importFiles_button" destination="jUj-qp-uuH" id="TSi-bV-usW"/>
+                        <outlet property="iosPrestages_button" destination="Q6a-6E-m2M" id="jBc-Jy-oYc"/>
                         <outlet property="iosTab_NSButton" destination="nNc-Ty-fZF" id="Rzk-vY-8XQ"/>
                         <outlet property="jamfGroupAccounts_button" destination="gkm-20-cSk" id="rfl-Wf-qLy"/>
                         <outlet property="jamfGroupAccounts_field" destination="77F-Xy-56l" id="0uJ-6J-rjU"/>
@@ -2484,6 +2525,8 @@
                         <outlet property="ldapservers_button" destination="d6K-kP-2mQ" id="eNI-4j-9ns"/>
                         <outlet property="ldapservers_label_field" destination="BXm-Uk-9pd" id="L7C-ka-h9W"/>
                         <outlet property="macOS_tabViewItem" destination="Nof-Zl-FoE" id="6gS-C5-k4O"/>
+                        <outlet property="macPrestages_button" destination="hdm-q1-rol" id="G62-oB-Kdf"/>
+                        <outlet property="macPrestages_label_field" destination="8U0-Qe-paa" id="14f-TK-mET"/>
                         <outlet property="macapplications_button" destination="hUv-Gv-ET3" id="X4a-qb-36V"/>
                         <outlet property="macapplications_label_field" destination="vif-GW-Rxk" id="W4r-L0-7jp"/>
                         <outlet property="macosTab_NSButton" destination="AT7-Qd-mL1" id="xBQ-7b-Vkw"/>
