@@ -4826,7 +4826,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             if fileImport {
                 action       = "SKIP"
-                iconToUpload = NSHomeDirectory() + "/Documents/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+                iconToUpload = "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             } else {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
             }
