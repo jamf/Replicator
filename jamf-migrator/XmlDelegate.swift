@@ -9,7 +9,7 @@
 import Cocoa
 import Foundation
 
-class XmlDelegate: NSURL, URLSessionDelegate {
+class XmlDelegate: NSObject, URLSessionDelegate {
 
     let fm = FileManager()
     let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
@@ -29,7 +29,7 @@ class XmlDelegate: NSURL, URLSessionDelegate {
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.apiAction] Looking up: \(existingDestUrl)\n") }
 //                    if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
-                    let destEncodedURL = NSURL(string: existingDestUrl)
+                    let destEncodedURL = URL(string: existingDestUrl)
                     let xmlRequest     = NSMutableURLRequest(url: destEncodedURL! as URL)
                     
                     let semaphore = DispatchSemaphore(value: 1)

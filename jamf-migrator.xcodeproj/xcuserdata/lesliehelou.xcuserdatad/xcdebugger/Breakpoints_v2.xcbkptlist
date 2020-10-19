@@ -3,22 +3,4 @@
    uuid = "07023A83-D456-43EA-831F-9AE94A650BE8"
    type = "1"
    version = "2.0">
-   <Breakpoints>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "638652D9-2F0C-4061-AA4B-7D51A8CECD22"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "jamf-migrator/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "5092"
-            endingLineNumber = "5092"
-            landmarkName = "iconMigrate(action:ssIconUri:ssIconId:ssIconName:iconToUpload:createDestUrl:completion:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-   </Breakpoints>
 </Bucket>

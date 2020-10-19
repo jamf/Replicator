@@ -197,6 +197,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var mobiledevices_label_field: NSTextField!
     @IBOutlet weak var mobiledeviceApps_label_field: NSTextField!
     @IBOutlet weak var advancedmobiledevicesearches_label_field: NSTextField!
+    @IBOutlet weak var mobiledevicePrestage_label_field: NSTextField!
     // general button labels
     @IBOutlet weak var advusersearch_label_field: NSTextField!
     @IBOutlet weak var building_label_field: NSTextField!
@@ -1019,7 +1020,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
 //                print("NSURL line 1")
 //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                let encodedURL = NSURL(string: myURL)
+                let encodedURL = URL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
                 request.httpMethod = "GET"
@@ -1820,7 +1821,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //            print("NSURL line 2")
 //            if "\(myURL)" == "" { myURL = "https://localhost" }
-            let encodedURL = NSURL(string: myURL)
+            let encodedURL = URL(string: myURL)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.default
@@ -2817,7 +2818,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
 //                print("NSURL line 3")
 //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                let encodedURL = NSURL(string: myURL)
+                let encodedURL = URL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "GET"
                 let configuration = URLSessionConfiguration.default
@@ -3451,7 +3452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
     //            print("NSURL line 4")
     //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: createDestUrl)
+                let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 if apiAction == "create" {
                     request.httpMethod = "POST"
@@ -3746,7 +3747,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
 //                print("NSURL line 5")
 //                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: removeDestUrl)
+                let encodedURL = URL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "DELETE"
                 let configuration = URLSessionConfiguration.default
@@ -3993,7 +3994,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        print("existing endpoints URL: \(existingDestUrl)")
 //print("NSURL line 6")
 //if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
-                        let destEncodedURL = NSURL(string: existingDestUrl)
+                        let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
                         destRequest.httpMethod = "GET"
@@ -4340,7 +4341,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //        print("NSURL line 7")
 //        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = NSURL(string: serverUrl)
+        let serverEncodedURL = URL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
         
         let semaphore = DispatchSemaphore(value: 1)
@@ -4414,7 +4415,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //        print("NSURL line 8")
 //        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = NSURL(string: serverUrl)
+        let serverEncodedURL = URL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
 
         let semaphore = DispatchSemaphore(value: 0)
@@ -4833,8 +4834,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
             createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 
-            print("fileImport: \(fileImport)\n")
-
             if fileImport {
                 action       = "SKIP"
                 iconToUpload =  "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
@@ -4931,7 +4930,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     var policyIconDict = iconfiles.policyDict
                                     Json().getRecord(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
-//                                            print("result: \(result)")
+                                            print("result: \(result)")
                                         
                                         let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
 //                                            print("selfServiceInfoDict: \(selfServiceInfoDict)")
@@ -5089,9 +5088,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             fileURL = URL(fileURLWithPath: iconToUpload)
 
-            // need to change fileURL if source is a folder
-            print("Icon file URL: \(String(describing: fileURL!))")
-
             let boundary = "------WebKitFormBoundary\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
 
             var httpResponse:HTTPURLResponse?
@@ -5216,7 +5212,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
     //            print("NSURL line 4")
     //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: createDestUrl)
+                let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
 
                 request.httpMethod = action
@@ -5393,6 +5389,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.policies_label_field.textColor = theColor
             case "restrictedsoftware":
                 self.restrictedsoftware_label_field.textColor = theColor
+            case "computer-prestages":
+                self.macPrestages_label_field.textColor = theColor
             // iOS tab
             case "advancedmobiledevicesearches":
                 self.advancedmobiledevicesearches_label_field.textColor = theColor
@@ -5411,6 +5409,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.smart_ios_groups_label_field.textColor = theColor
             case "staticmobiledevicegroups":
                 self.static_ios_groups_label_field.textColor = theColor
+            case "mobile-device-prestages":
+                self.mobiledevicePrestage_label_field.textColor = theColor
             // general tab
             case "advancedusersearches":
                 self.advusersearch_label_field.textColor = theColor

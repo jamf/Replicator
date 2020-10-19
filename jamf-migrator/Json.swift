@@ -24,7 +24,7 @@ class Json: NSObject, URLSessionDelegate {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)\n") }
 //      print("existing endpoints URL: \(existingDestUrl)")
-        let destEncodedURL = NSURL(string: existingDestUrl)
+        let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
         
         let semaphore = DispatchSemaphore(value: 1)
