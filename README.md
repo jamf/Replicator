@@ -123,6 +123,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.3.2**
+
+* Resolve issue migrating self service icons when using files as the source. 
+
 **v5.3.1**
 
 * Replaced use of curl to upload icons with native Swift functions. If the same Self Service icon is used on more then one policy, download icon only once. 
