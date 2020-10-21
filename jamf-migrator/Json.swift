@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class Json: NSURL, URLSessionDelegate {
+class Json: NSObject, URLSessionDelegate {
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
 
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
@@ -23,7 +23,7 @@ class Json: NSURL, URLSessionDelegate {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)\n") }
 //      print("existing endpoints URL: \(existingDestUrl)")
-        let destEncodedURL = NSURL(string: existingDestUrl)
+        let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
         
         let semaphore = DispatchSemaphore(value: 1)

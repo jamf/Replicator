@@ -27,8 +27,8 @@ class HelpViewController: NSViewController {
         let   filePath = Bundle.main.path(forResource: "index", ofType: "html")
         let folderPath = Bundle.main.resourcePath
         
-        let fileUrl = NSURL(fileURLWithPath: filePath!)
-        let baseUrl = NSURL(fileURLWithPath: folderPath!, isDirectory: true)
+        let fileUrl = URL(fileURLWithPath: filePath!)
+        let baseUrl = URL(fileURLWithPath: folderPath!, isDirectory: true)
         
         help_WebView.loadFileURL(fileUrl as URL, allowingReadAccessTo: baseUrl as URL)
     }

@@ -48,7 +48,7 @@ class Sites: NSObject, URLSessionDelegate {
 //        var local_allSites = Dictionary<String, Int>()
         var destSiteArray = [String]()
         
-        let serverEncodedURL = NSURL(string: resourcePath)
+        let serverEncodedURL = URL(string: resourcePath)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
         //        print("serverRequest: \(serverRequest)")
         serverRequest.httpMethod = "GET"

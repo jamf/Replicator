@@ -1140,7 +1140,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
 //                print("NSURL line 1")
 //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                let encodedURL = NSURL(string: myURL)
+                let encodedURL = URL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
                 request.httpMethod = "GET"
@@ -1939,7 +1939,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //            print("NSURL line 2")
 //            if "\(myURL)" == "" { myURL = "https://localhost" }
-            let encodedURL = NSURL(string: myURL)
+            let encodedURL = URL(string: myURL)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.default
@@ -2936,7 +2936,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
 //                print("NSURL line 3")
 //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                let encodedURL = NSURL(string: myURL)
+                let encodedURL = URL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "GET"
                 let configuration = URLSessionConfiguration.default
@@ -3570,7 +3570,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
     //            print("NSURL line 4")
     //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: createDestUrl)
+                let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 if apiAction == "create" {
                     request.httpMethod = "POST"
@@ -3865,7 +3865,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
 //                print("NSURL line 5")
 //                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: removeDestUrl)
+                let encodedURL = URL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "DELETE"
                 let configuration = URLSessionConfiguration.default
@@ -4112,7 +4112,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        print("existing endpoints URL: \(existingDestUrl)")
 //print("NSURL line 6")
 //if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
-                        let destEncodedURL = NSURL(string: existingDestUrl)
+                        let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
                         destRequest.httpMethod = "GET"
@@ -4459,7 +4459,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //        print("NSURL line 7")
 //        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = NSURL(string: serverUrl)
+        let serverEncodedURL = URL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
         
         let semaphore = DispatchSemaphore(value: 1)
@@ -4533,7 +4533,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //        print("NSURL line 8")
 //        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = NSURL(string: serverUrl)
+        let serverEncodedURL = URL(string: serverUrl)
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
 
         let semaphore = DispatchSemaphore(value: 0)
@@ -4712,10 +4712,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func clearSelectiveList() {
         DispatchQueue.main.async {
+
             if !self.selectiveListCleared && self.srcSrvTableView.isEnabled {
+
+                self.generalSectionToMigrate_button.selectItem(at: 0)
+                self.sectionToMigrate_button.selectItem(at: 0)
+                self.iOSsectionToMigrate_button.selectItem(at: 0)
+
+                self.objectsToMigrate.removeAll()
                 self.sourceDataArray.removeAll()
-                self.srcSrvTableView.stringValue = ""
                 self.srcSrvTableView.reloadData()
+                self.targetDataArray.removeAll()
+                self.srcSrvTableView.reloadData()
+
+//                self.sourceDataArray.removeAll()
+//                self.srcSrvTableView.stringValue = ""
+//                self.srcSrvTableView.reloadData()
                 self.selectiveListCleared = true
             } else {
                 self.selectiveListCleared = true
@@ -5323,7 +5335,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
     //            print("NSURL line 4")
     //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
-                let encodedURL = NSURL(string: createDestUrl)
+                let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
 
                 request.httpMethod = action
@@ -6046,6 +6058,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
         case 1:
+            print("change dest - wipeData.on: \(wipeData.on)")
+            print("source_jp_server_field: \(self.source_jp_server_field.stringValue)")
+            print("dest_jp_server_field: \(self.dest_jp_server_field.stringValue)")
+            print("destServerList_button: \(destServerList_button.titleOfSelectedItem!)")
+//            if (self.source_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
+            if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
+                // source server changed, clear list of objects
+                clearSelectiveList()
+            }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)
             // reset list of available sites
