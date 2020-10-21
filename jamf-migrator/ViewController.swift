@@ -585,6 +585,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     @IBAction func toggleAllNone(_ sender: NSButton) {
+
+//        var withOptionKey = false
+
+//        let state = (sender.state.rawValue == 1) ? "on":"off"
+
+        if NSEvent.modifierFlags.contains(.option) {
+//            withOptionKey = true
+            markAllNone(rawStateValue: sender.state.rawValue)
+        }
+
         //        platform = deviceType()
         if deviceType() == "macOS" {
             self.allNone_button.state = NSControl.StateValue(rawValue: (
@@ -635,9 +645,110 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     && self.staticUserGrps_button.state.rawValue == 1
                     && self.users_button.state.rawValue == 1) ? 1 : 0);
         }
+
+        // disable buttons on inactive tabs - start
+        if deviceType() != "macOS" {
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.computers_button.state = NSControl.StateValue(rawValue: 0)
+            self.configurations_button.state = NSControl.StateValue(rawValue: 0)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
+            self.sus_button.state = NSControl.StateValue(rawValue: 0)
+            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
+            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
+            self.packages_button.state = NSControl.StateValue(rawValue: 0)
+            self.printers_button.state = NSControl.StateValue(rawValue: 0)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+            self.policies_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        if deviceType() != "iOS" {
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        if deviceType() != "general" {
+            self.building_button.state = NSControl.StateValue(rawValue: 0)
+            self.categories_button.state = NSControl.StateValue(rawValue: 0)
+            self.dept_button.state = NSControl.StateValue(rawValue: 0)
+            self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.userEA_button.state = NSControl.StateValue(rawValue: 0)
+            self.ldapservers_button.state = NSControl.StateValue(rawValue: 0)
+            self.sites_button.state = NSControl.StateValue(rawValue: 0)
+            self.networks_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.users_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        // disable buttons on inactive tabs - end
     }
-    
-    @IBAction func allNone(_ sender: Any) {
+
+    func markAllNone(rawStateValue: Int) {
+
+        if deviceType() == "macOS" {
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.computers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.configurations_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.sus_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.netboot_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
+//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.scripts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.packages_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.printers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
+        } else if deviceType() == "iOS" {
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
+        } else {
+            self.building_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.categories_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.dept_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.advusersearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.userEA_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.ldapservers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.sites_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.networks_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.users_button.state = NSControl.StateValue(rawValue: rawStateValue)
+        }
+    }
+
+//    @IBAction func allNone(_ sender: Any) {
+    @IBAction func allNone(_ sender: NSButton) {
+
         if deviceType() == "macOS" {
             self.advcompsearch_button.state = self.allNone_button.state
             self.computers_button.state = self.allNone_button.state
