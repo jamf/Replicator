@@ -589,116 +589,240 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     @IBAction func toggleAllNone(_ sender: NSButton) {
-        //        platform = deviceType()
-        if deviceType() == "macOS" {
-            self.allNone_button.state = NSControl.StateValue(rawValue: (
-                self.advcompsearch_button.state.rawValue == 1
-                    && self.computers_button.state.rawValue == 1
-                    && self.configurations_button.state.rawValue == 1
-                    && self.directory_bindings_button.state.rawValue == 1
-                    && self.disk_encryptions_button.state.rawValue == 1
-                    && self.dock_items_button.state.rawValue == 1
-                    && self.fileshares_button.state.rawValue == 1
-                    && self.sus_button.state.rawValue == 1
-                    && self.netboot_button.state.rawValue == 1
-                    && self.osxconfigurationprofiles_button.state.rawValue == 1
-                    //                    && self.patch_mgmt_button.state == 1
-                    && self.patch_policies_button.state.rawValue == 1
-                    && self.smart_comp_grps_button.state.rawValue == 1
-                    && self.static_comp_grps_button.state.rawValue == 1
-                    && self.ext_attribs_button.state.rawValue == 1
-                    && self.scripts_button.state.rawValue == 1
-                    && self.macapplications_button.state.rawValue == 1
-                    && self.packages_button.state.rawValue == 1
-                    && self.printers_button.state.rawValue == 1
-                    && self.restrictedsoftware_button.state.rawValue == 1
-                    && self.policies_button.state.rawValue == 1
-                    && self.macPrestages_button.state.rawValue == 1) ? 1 : 0);
-        } else if deviceType() == "iOS" {
-            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: (
-                self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1
-                    && self.mobiledevices_button.state.rawValue == 1
-                    && self.smart_ios_groups_button.state.rawValue == 1
-                    && self.static_ios_groups_button.state.rawValue == 1
-                    && self.mobiledevicecApps_button.state.rawValue == 1
-                    && self.mobiledeviceextensionattributes_button.state.rawValue == 1
-                    && self.advancedmobiledevicesearches_button.state.rawValue == 1
-                    && self.iosPrestages_button.state.rawValue == 1) ? 1 : 0);
-        } else {
-            // general
-            self.allNone_general_button.state = NSControl.StateValue(rawValue: (
-                self.building_button.state.rawValue == 1
-                    && self.categories_button.state.rawValue == 1
-                    && self.dept_button.state.rawValue == 1
-                    && self.advusersearch_button.state.rawValue == 1
-                    && self.userEA_button.state.rawValue == 1
-                    && self.ldapservers_button.state.rawValue == 1
-                    && self.sites_button.state.rawValue == 1
-                    && self.networks_button.state.rawValue == 1
-                    && self.jamfUserAccounts_button.state.rawValue == 1
-                    && self.jamfGroupAccounts_button.state.rawValue == 1
-                    && self.smartUserGrps_button.state.rawValue == 1
-                    && self.staticUserGrps_button.state.rawValue == 1
-                    && self.users_button.state.rawValue == 1) ? 1 : 0);
+
+//        var withOptionKey = false
+
+//        let state = (sender.state.rawValue == 1) ? "on":"off"
+
+        if NSEvent.modifierFlags.contains(.option) {
+//            withOptionKey = true
+            markAllNone(rawStateValue: sender.state.rawValue)
         }
+
+        //        platform = deviceType()
+//        if deviceType() == "macOS" {
+//            self.allNone_button.state = NSControl.StateValue(rawValue: (
+//                self.advcompsearch_button.state.rawValue == 1
+//                    && self.computers_button.state.rawValue == 1
+//                    && self.configurations_button.state.rawValue == 1
+//                    && self.directory_bindings_button.state.rawValue == 1
+//                    && self.disk_encryptions_button.state.rawValue == 1
+//                    && self.dock_items_button.state.rawValue == 1
+//                    && self.fileshares_button.state.rawValue == 1
+//                    && self.sus_button.state.rawValue == 1
+//                    && self.netboot_button.state.rawValue == 1
+//                    && self.osxconfigurationprofiles_button.state.rawValue == 1
+//                    //                    && self.patch_mgmt_button.state == 1
+//                    && self.patch_policies_button.state.rawValue == 1
+//                    && self.smart_comp_grps_button.state.rawValue == 1
+//                    && self.static_comp_grps_button.state.rawValue == 1
+//                    && self.ext_attribs_button.state.rawValue == 1
+//                    && self.scripts_button.state.rawValue == 1
+//                    && self.macapplications_button.state.rawValue == 1
+//                    && self.packages_button.state.rawValue == 1
+//                    && self.printers_button.state.rawValue == 1
+//                    && self.restrictedsoftware_button.state.rawValue == 1
+//                    && self.policies_button.state.rawValue == 1) ? 1 : 0);
+//        } else if deviceType() == "iOS" {
+//            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: (
+//                self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1
+//                    && self.mobiledevices_button.state.rawValue == 1
+//                    && self.smart_ios_groups_button.state.rawValue == 1
+//                    && self.static_ios_groups_button.state.rawValue == 1
+//                    && self.mobiledevicecApps_button.state.rawValue == 1
+//                    && self.mobiledeviceextensionattributes_button.state.rawValue == 1
+//                    && self.advancedmobiledevicesearches_button.state.rawValue == 1) ? 1 : 0);
+//        } else {
+//            // general
+//            self.allNone_general_button.state = NSControl.StateValue(rawValue: (
+//                self.building_button.state.rawValue == 1
+//                    && self.categories_button.state.rawValue == 1
+//                    && self.dept_button.state.rawValue == 1
+//                    && self.advusersearch_button.state.rawValue == 1
+//                    && self.userEA_button.state.rawValue == 1
+//                    && self.ldapservers_button.state.rawValue == 1
+//                    && self.sites_button.state.rawValue == 1
+//                    && self.networks_button.state.rawValue == 1
+//                    && self.jamfUserAccounts_button.state.rawValue == 1
+//                    && self.jamfGroupAccounts_button.state.rawValue == 1
+//                    && self.smartUserGrps_button.state.rawValue == 1
+//                    && self.staticUserGrps_button.state.rawValue == 1
+//                    && self.users_button.state.rawValue == 1) ? 1 : 0);
+//        }
+
+		  inactiveTabDisable(activeTab: "bulk")
     }
     
-    @IBAction func allNone(_ sender: Any) {
+    func inactiveTabDisable(activeTab: String) {
+	    // disable buttons on inactive tabs - start
+        if deviceType() != "macOS" {
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.computers_button.state = NSControl.StateValue(rawValue: 0)
+            self.configurations_button.state = NSControl.StateValue(rawValue: 0)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
+            self.sus_button.state = NSControl.StateValue(rawValue: 0)
+            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
+            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
+            self.packages_button.state = NSControl.StateValue(rawValue: 0)
+            self.printers_button.state = NSControl.StateValue(rawValue: 0)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+            self.policies_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        if deviceType() != "iOS" {
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        if deviceType() != "general" {
+            self.building_button.state = NSControl.StateValue(rawValue: 0)
+            self.categories_button.state = NSControl.StateValue(rawValue: 0)
+            self.dept_button.state = NSControl.StateValue(rawValue: 0)
+            self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.userEA_button.state = NSControl.StateValue(rawValue: 0)
+            self.ldapservers_button.state = NSControl.StateValue(rawValue: 0)
+            self.sites_button.state = NSControl.StateValue(rawValue: 0)
+            self.networks_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.users_button.state = NSControl.StateValue(rawValue: 0)
+        }
+        if activeTab == "bulk" {
+            generalSectionToMigrate_button.selectItem(at: 0)
+            sectionToMigrate_button.selectItem(at: 0)
+            iOSsectionToMigrate_button.selectItem(at: 0)
+
+            objectsToMigrate.removeAll()
+            sourceDataArray.removeAll()
+            srcSrvTableView.reloadData()
+            targetDataArray.removeAll()
+        }
+        // disable buttons on inactive tabs - end
+	}
+
+    func markAllNone(rawStateValue: Int) {
+
         if deviceType() == "macOS" {
-            self.advcompsearch_button.state = self.allNone_button.state
-            self.computers_button.state = self.allNone_button.state
-            self.configurations_button.state = self.allNone_button.state
-            self.directory_bindings_button.state = self.allNone_button.state
-            self.disk_encryptions_button.state = self.allNone_button.state
-            self.dock_items_button.state = self.allNone_button.state
-            self.fileshares_button.state = self.allNone_button.state
-            self.sus_button.state = self.allNone_button.state
-            self.netboot_button.state = self.allNone_button.state
-            self.osxconfigurationprofiles_button.state = self.allNone_button.state
-//            self.patch_mgmt_button.state = self.allNone_button.state
-            self.patch_policies_button.state = self.allNone_button.state
-            self.smart_comp_grps_button.state = self.allNone_button.state
-            self.static_comp_grps_button.state = self.allNone_button.state
-            self.ext_attribs_button.state = self.allNone_button.state
-            self.scripts_button.state = self.allNone_button.state
-            self.macapplications_button.state = self.allNone_button.state
-            self.packages_button.state = self.allNone_button.state
-            self.printers_button.state = self.allNone_button.state
-            self.restrictedsoftware_button.state = self.allNone_button.state
-            self.policies_button.state = self.allNone_button.state
-            self.macPrestages_button.state = self.allNone_button.state
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.computers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.configurations_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.sus_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.netboot_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
+//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.scripts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.packages_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.printers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
         } else if deviceType() == "iOS" {
-            self.advancedmobiledevicesearches_button.state = self.allNone_iOS_button.state
-            self.mobiledevices_button.state = self.allNone_iOS_button.state
-            self.smart_ios_groups_button.state = self.allNone_iOS_button.state
-            self.static_ios_groups_button.state = self.allNone_iOS_button.state
-            self.mobiledevicecApps_button.state = self.allNone_iOS_button.state
-            self.mobiledeviceextensionattributes_button.state = self.allNone_iOS_button.state
-            self.mobiledeviceconfigurationprofiles_button.state = self.allNone_iOS_button.state
-            self.iosPrestages_button.state = self.allNone_iOS_button.state
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
         } else {
-            self.building_button.state = self.allNone_general_button.state
-            self.categories_button.state = self.allNone_general_button.state
-            self.dept_button.state = self.allNone_general_button.state
-            self.advusersearch_button.state = self.allNone_general_button.state
-            self.userEA_button.state = self.allNone_general_button.state
-            self.ldapservers_button.state = self.allNone_general_button.state
-            self.sites_button.state = self.allNone_general_button.state
-            self.networks_button.state = self.allNone_general_button.state
-            self.jamfUserAccounts_button.state = self.allNone_general_button.state
-            self.jamfGroupAccounts_button.state = self.allNone_general_button.state
-            self.smartUserGrps_button.state = self.allNone_general_button.state
-            self.staticUserGrps_button.state = self.allNone_general_button.state
-            self.users_button.state = self.allNone_general_button.state
+            self.building_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.categories_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.dept_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.advusersearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.userEA_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.ldapservers_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.sites_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.networks_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.users_button.state = NSControl.StateValue(rawValue: rawStateValue)
         }
     }
+
+//    @IBAction func allNone(_ sender: Any) {
+//    @IBAction func allNone(_ sender: NSButton) {
+//
+//        if deviceType() == "macOS" {
+//            self.advcompsearch_button.state = self.allNone_button.state
+//            self.computers_button.state = self.allNone_button.state
+//            self.configurations_button.state = self.allNone_button.state
+//            self.directory_bindings_button.state = self.allNone_button.state
+//            self.disk_encryptions_button.state = self.allNone_button.state
+//            self.dock_items_button.state = self.allNone_button.state
+//            self.fileshares_button.state = self.allNone_button.state
+//            self.sus_button.state = self.allNone_button.state
+//            self.netboot_button.state = self.allNone_button.state
+//            self.osxconfigurationprofiles_button.state = self.allNone_button.state
+////            self.patch_mgmt_button.state = self.allNone_button.state
+//            self.patch_policies_button.state = self.allNone_button.state
+//            self.smart_comp_grps_button.state = self.allNone_button.state
+//            self.static_comp_grps_button.state = self.allNone_button.state
+//            self.ext_attribs_button.state = self.allNone_button.state
+//            self.scripts_button.state = self.allNone_button.state
+//            self.macapplications_button.state = self.allNone_button.state
+//            self.packages_button.state = self.allNone_button.state
+//            self.printers_button.state = self.allNone_button.state
+//            self.restrictedsoftware_button.state = self.allNone_button.state
+//            self.policies_button.state = self.allNone_button.state
+//        } else if deviceType() == "iOS" {
+//            self.advancedmobiledevicesearches_button.state = self.allNone_iOS_button.state
+//            self.mobiledevices_button.state = self.allNone_iOS_button.state
+//            self.smart_ios_groups_button.state = self.allNone_iOS_button.state
+//            self.static_ios_groups_button.state = self.allNone_iOS_button.state
+//            self.mobiledevicecApps_button.state = self.allNone_iOS_button.state
+//            self.mobiledeviceextensionattributes_button.state = self.allNone_iOS_button.state
+//            self.mobiledeviceconfigurationprofiles_button.state = self.allNone_iOS_button.state
+//        } else {
+//            self.building_button.state = self.allNone_general_button.state
+//            self.categories_button.state = self.allNone_general_button.state
+//            self.dept_button.state = self.allNone_general_button.state
+//            self.advusersearch_button.state = self.allNone_general_button.state
+//            self.userEA_button.state = self.allNone_general_button.state
+//            self.ldapservers_button.state = self.allNone_general_button.state
+//            self.sites_button.state = self.allNone_general_button.state
+//            self.networks_button.state = self.allNone_general_button.state
+//            self.jamfUserAccounts_button.state = self.allNone_general_button.state
+//            self.jamfGroupAccounts_button.state = self.allNone_general_button.state
+//            self.smartUserGrps_button.state = self.allNone_general_button.state
+//            self.staticUserGrps_button.state = self.allNone_general_button.state
+//            self.users_button.state = self.allNone_general_button.state
+//        }
+//    }
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
+
         if fileImport {
             alert_dialog(header: "Attention:", message: "Selective migration while importing files is not yet available.")
             return
         }
-        
+
+        inactiveTabDisable(activeTab: "selective")
+
         let whichTab = sender.identifier!.rawValue
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "func sectionToMigrate active tab: \(String(describing: whichTab)).\n") }
@@ -1070,18 +1194,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(validCredentials)
                                         return
                                     }
-                                    print("token received: \(returnedToken)")
+//                                    print("token received.")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
-                                    UapiCall().action(serverUrl: f_sourceURL, endpoint: "jamf-pro-version", token: returnedToken, method: "GET") {
+                                    UapiCall().get(serverUrl: f_sourceURL, path: "v1/jamf-pro-version", token: returnedToken, action: "GET") {
                                         (json: [String:Any] ) in
-                                        print("json for jamf-pro-version: \(json)")
+//                                        print("json \(json)")
                                         if let fullVersion = json["version"] {
                                             let versionArray = "\(fullVersion)".split(separator: ".")
-                                            if versionArray.count >= 3 {
+                                            if versionArray.count >= 2 {
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
                                                 jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
-                                                let patchArray = versionArray[2].split(separator: "-")
-                                                jamfProVersion.patch = Int("\(patchArray[0])") ?? 0
                                             }
                                         } else {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
@@ -4594,10 +4716,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func clearSelectiveList() {
         DispatchQueue.main.async {
+
             if !self.selectiveListCleared && self.srcSrvTableView.isEnabled {
+
+                self.generalSectionToMigrate_button.selectItem(at: 0)
+                self.sectionToMigrate_button.selectItem(at: 0)
+                self.iOSsectionToMigrate_button.selectItem(at: 0)
+
+                self.objectsToMigrate.removeAll()
                 self.sourceDataArray.removeAll()
-                self.srcSrvTableView.stringValue = ""
                 self.srcSrvTableView.reloadData()
+                self.targetDataArray.removeAll()
+                self.srcSrvTableView.reloadData()
+
+//                self.sourceDataArray.removeAll()
+//                self.srcSrvTableView.stringValue = ""
+//                self.srcSrvTableView.reloadData()
                 self.selectiveListCleared = true
             } else {
                 self.selectiveListCleared = true
@@ -4836,7 +4970,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
             if fileImport {
                 action       = "SKIP"
-                iconToUpload =  "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+                iconToUpload = "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             } else {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
             }
@@ -4930,7 +5064,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     var policyIconDict = iconfiles.policyDict
                                     Json().getRecord(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
-                                            print("result: \(result)")
+//                                            print("result: \(result)")
                                         
                                         let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
 //                                            print("selfServiceInfoDict: \(selfServiceInfoDict)")
@@ -5006,9 +5140,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         switch action {
         case "GET":
 
-//            let exportSaveURL = URL(fileURLWithPath: "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw")
-
-            //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
+//            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
 //            if iconfiles.policyDict["\(ssIconId)"] == nil {
 //                iconfiles.pendingDict["\(ssIconId)"] = true
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
@@ -5030,10 +5162,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     appropriateFor: nil,
                                                     create: false)
                         savedURL = documentsURL.appendingPathComponent("Caches/icons/\(ssIconId)/")
-
-                        // need to add something so if export is selected icon saves to downloads folder
-
-
+                        
                         if !(self.fm.fileExists(atPath: savedURL.path)) {
                             do {if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] creating \(savedURL.path) folder to cache icon\n") }
                                 try self.fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
@@ -5081,8 +5210,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "POST":
             // upload icon to fileuploads endpoint
             WriteToLog().message(stringOfText: "[iconMigrate.POST] sending icon: \(ssIconName)\n")
-
-
+           
             var fileURL: URL!
             var newPolicyId = 0
             
@@ -5941,6 +6069,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
         case 1:
+            if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
+                // source server changed, clear list of objects
+                self.selectiveListCleared = false
+                clearSelectiveList()
+            }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)
             // reset list of available sites

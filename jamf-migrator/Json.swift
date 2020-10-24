@@ -9,7 +9,6 @@
 import Cocoa
 
 class Json: NSObject, URLSessionDelegate {
-
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
 
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")

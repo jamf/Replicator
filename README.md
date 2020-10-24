@@ -3,7 +3,7 @@
 Beta available: [JamfMigrator6](https://github.com/jamf/JamfMigrator/releases/tag/v6.0.0b1)
 <br>Supports groups of destination servers.
 
-Current release Download: [JamfMigrator v5.3.1](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/current/jamf-migrator.zip)
+Current release Download: [JamfMigrator v5.3.2](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/current/jamf-migrator.zip)
 
 A tool to migrate data granularly between Jamf Pro servers
 
@@ -122,6 +122,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v5.3.2**
+
+* Resolve issue migrating self service icons when using files as the source. 
 
 **v5.3.1**
 
