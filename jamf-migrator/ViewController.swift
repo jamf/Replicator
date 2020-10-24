@@ -6058,13 +6058,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
         case 1:
-            print("change dest - wipeData.on: \(wipeData.on)")
-            print("source_jp_server_field: \(self.source_jp_server_field.stringValue)")
-            print("dest_jp_server_field: \(self.dest_jp_server_field.stringValue)")
-            print("destServerList_button: \(destServerList_button.titleOfSelectedItem!)")
-//            if (self.source_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
                 // source server changed, clear list of objects
+                self.selectiveListCleared = false
                 clearSelectiveList()
             }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
