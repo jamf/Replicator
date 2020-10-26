@@ -677,6 +677,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.printers_button.state = NSControl.StateValue(rawValue: 0)
             self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
             self.policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
         }
         if deviceType() != "iOS" {
             self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
@@ -686,6 +687,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+            self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
         }
         if deviceType() != "general" {
             self.building_button.state = NSControl.StateValue(rawValue: 0)
@@ -739,6 +741,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.printers_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.macPrestages_button.state = NSControl.StateValue(rawValue: rawStateValue)
         } else if deviceType() == "iOS" {
             self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.mobiledevices_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -747,6 +750,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.iosPrestages_button.state = NSControl.StateValue(rawValue: rawStateValue)
         } else {
             self.building_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.categories_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -1196,7 +1200,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
 //                                    print("token received.")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
-                                    UapiCall().get(serverUrl: f_sourceURL, path: "v1/jamf-pro-version", token: returnedToken, action: "GET") {
+
+                                    UapiCall().action(serverUrl: f_sourceURL, endpoint: "jamf-pro-version", token: returnedToken, method: "GET") {
                                         (json: [String:Any] ) in
 //                                        print("json \(json)")
                                         if let fullVersion = json["version"] {
@@ -2047,7 +2052,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints1")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
-                                            self.resetAllCheckboxes()
+//                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
 //                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2248,7 +2253,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
-                                            self.resetAllCheckboxes()
+//                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2256,14 +2261,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if nodeIndex < nodesToMigrate.count - 1 {
                                         self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                     }
-                                    
-                                    // commented out lnh 200123
-//                                    if endpoint == self.objectsToMigrate.last {
-//                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-//                                        self.rmDELETE()
-//                                        print("[getEndpoints] endpoint: \(endpoint)")
-//                                        self.resetAllCheckboxes()
-//                                    }
                                     
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
@@ -2364,7 +2361,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpoint == self.objectsToMigrate.last {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                             self.rmDELETE()
-                                            self.resetAllCheckboxes()
+//                                            self.resetAllCheckboxes()
 //                                            print("rmDelete 1")
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
@@ -2476,7 +2473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints4")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
-                                            self.resetAllCheckboxes()
+//                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -2661,7 +2658,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints5")
                                         if endpoint == self.objectsToMigrate.last {
                                             self.rmDELETE()
-                                            self.resetAllCheckboxes()
+//                                            self.resetAllCheckboxes()
 //                                            self.goButtonEnabled(button_status: true)
                                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                         }
@@ -3193,7 +3190,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if self.objectsToMigrate.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
-                    self.resetAllCheckboxes()
+//                    self.resetAllCheckboxes()
                     self.goButtonEnabled(button_status: true)
                     print("Done - cleanupXml")
                 }
@@ -3458,7 +3455,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-        
+
+        if endpointCurrent == 1 && !retry {
+            migrationComplete.isDone = false
+        }
+
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
         
         if counters[endpointType] == nil {
@@ -3546,7 +3547,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     self.rmDELETE()
-                    self.resetAllCheckboxes()
+//                    self.resetAllCheckboxes()
                     self.goButtonEnabled(button_status: true)
 //                    print("Done - CreateEndpoints")
                 }
@@ -3761,6 +3762,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                        print("[CreateEndpoints] [\(localEndPointType)] process complete: \(self.getName(endpoint: endpointType, objectXML: endPointXML))")
     //                        print("[CreateEndpoints] [\(localEndPointType)] dependency \(endpointCurrent): completed \(totalCompleted) of \(endpointCount)")
                             if totalCompleted == endpointCount {
+
+
+                                migrationComplete.isDone = true
+
                                 if totalFailed == 0 {   // removed  && self.changeColor from if condition
                                     self.labelColor(endpoint: endpointType, theColor: self.greenText)
                                 } else if totalFailed == endpointCount {
@@ -3958,7 +3963,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
                             print("[removeEndpoints] endpoint: \(endpointType)")
-                            self.resetAllCheckboxes()
+//                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
@@ -3974,7 +3979,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
                             print("[removeEndpoints] endpoint: \(endpointType)")
-                            self.resetAllCheckboxes()
+//                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
                             self.goButtonEnabled(button_status: true)
@@ -4824,6 +4829,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 theImageNo = 0
                             }
                             if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
+//                            if migrationComplete.isDone && self.theIconsQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
+
+                                self.resetAllCheckboxes()
+
                                 self.goButtonEnabled(button_status: true)
                                 local_button_status = true
                                 iconfiles.policyDict.removeAll()

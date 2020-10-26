@@ -23,6 +23,10 @@ struct iconfiles {
     static var pendingDict        = [String:String]()
 }
 
+struct migrationComplete {
+    static var isDone = false
+}
+
 struct wipeData {
     static var on = false
 }
