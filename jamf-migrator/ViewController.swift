@@ -3327,8 +3327,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexPolicyName = try! NSRegularExpression(pattern: "<name> ", options:.caseInsensitive)
             PostXML = regexPolicyName.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<name>&#xA0;")
             
-            // remove individual objects that are scoped to the policy from XML
-            for xmlTag in ["limit_to_users","self_service_icon"] {
+            for xmlTag in ["limit_to_users","self_service_icon","open_firmware_efi_password"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
