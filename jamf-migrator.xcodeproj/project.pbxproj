@@ -14,6 +14,7 @@
 		9BC01C6F1DFBC564007E634E /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BC01C6E1DFBC564007E634E /* settings.plist */; };
 		B508D5D71FA1A1780069ED0B /* stop.png in Resources */ = {isa = PBXBuildFile; fileRef = B508D5D61FA1A1780069ED0B /* stop.png */; };
 		B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5165E1520E580A00086E31D /* XmlDelegate.swift */; };
+		B5245C39255D2BB1000A4E48 /* app.png in Resources */ = {isa = PBXBuildFile; fileRef = B5245C38255D2BB1000A4E48 /* app.png */; };
 		B53796C32273AF310006C1E4 /* go_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C22273AF310006C1E4 /* go_dark.png */; };
 		B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C42273AF4A0006C1E4 /* quit_dark.png */; };
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
@@ -61,6 +62,7 @@
 		9BC01C6E1DFBC564007E634E /* settings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = settings.plist; sourceTree = "<group>"; };
 		B508D5D61FA1A1780069ED0B /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
 		B5165E1520E580A00086E31D /* XmlDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XmlDelegate.swift; sourceTree = "<group>"; };
+		B5245C38255D2BB1000A4E48 /* app.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app.png; sourceTree = "<group>"; };
 		B53796C22273AF310006C1E4 /* go_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = go_dark.png; path = Assets.xcassets/go_dark.imageset/go_dark.png; sourceTree = "<group>"; };
 		B53796C42273AF4A0006C1E4 /* quit_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = quit_dark.png; path = Assets.xcassets/quit_dark.imageset/quit_dark.png; sourceTree = "<group>"; };
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -169,6 +171,7 @@
 			children = (
 				B57B1EF821D798670098326E /* tabs */,
 				B5E1912A21AAD5AB00A1A9CA /* copy.png */,
+				B5245C38255D2BB1000A4E48 /* app.png */,
 				B5E1912E21AAEFD400A1A9CA /* export.png */,
 				B5C0423C1EB11CF400C6E872 /* 0.png */,
 				B5C0423D1EB11CF400C6E872 /* 1.png */,
@@ -288,6 +291,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5245C39255D2BB1000A4E48 /* app.png in Resources */,
 				B57B1F0F21D7A16B0098326E /* macos_active.png in Resources */,
 				B5E179F21F1FDAFA00A20AAA /* images in Resources */,
 				B508D5D71FA1A1780069ED0B /* stop.png in Resources */,
@@ -485,7 +489,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 5.3.2;
+				MARKETING_VERSION = 5.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -506,7 +510,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 5.3.2;
+				MARKETING_VERSION = 5.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

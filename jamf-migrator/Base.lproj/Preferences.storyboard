@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16097.2"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -35,6 +35,7 @@
                         <tabViewItem label="copy" image="copy" id="w5P-39-MbD"/>
                         <tabViewItem label="export" image="export" id="FcM-63-2LA"/>
                         <tabViewItem label="site" image="siteIcon" id="9cE-lL-9J7"/>
+                        <tabViewItem label="app" image="app" id="0bc-QU-ZBt" userLabel="app"/>
                     </tabViewItems>
                     <viewControllerTransitionOptions key="transitionOptions" allowUserInteraction="YES"/>
                     <tabView key="tabView" type="noTabsNoBorder" id="VZi-S2-Oid">
@@ -50,6 +51,7 @@
                         <segue destination="Lwu-vt-54h" kind="relationship" relationship="tabItems" id="Bqf-9G-EjF"/>
                         <segue destination="zJe-p7-yg6" kind="relationship" relationship="tabItems" id="1OD-sg-CI7"/>
                         <segue destination="Wtb-LD-naZ" kind="relationship" relationship="tabItems" id="qAu-JV-yBH"/>
+                        <segue destination="Ojm-Op-AKi" kind="relationship" relationship="tabItems" id="RUm-vR-paH"/>
                     </connections>
                 </tabViewController>
                 <customObject id="VJS-aQ-7Am" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -521,7 +523,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="J9F-Fg-eDv" id="T6P-Nd-djx">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="sdO-CZ-wjw">
                                         <items>
                                             <menuItem title="Copy" state="on" id="J9F-Fg-eDv"/>
@@ -538,7 +540,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="eUE-QE-YRg" id="wq4-IH-mem">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="9ej-gp-BwF">
                                         <items>
                                             <menuItem title="Copy" state="on" id="eUE-QE-YRg"/>
@@ -555,7 +557,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UGA-4u-HO2" id="rSW-Xy-J9g">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="1PZ-fc-f3R">
                                         <items>
                                             <menuItem title="Copy" state="on" id="UGA-4u-HO2"/>
@@ -580,8 +582,84 @@
             </objects>
             <point key="canvasLocation" x="626" y="835"/>
         </scene>
+        <!--App-->
+        <scene sceneID="XAC-bA-Mde">
+            <objects>
+                <viewController title="App" id="Ojm-Op-AKi" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="Rdg-70-UCl" userLabel="app View">
+                        <rect key="frame" x="0.0" y="0.0" width="341" height="248"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y1Q-0c-cgq">
+                                <rect key="frame" x="32" y="184" width="192" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Maximum Concurrent Threads:" id="xZm-Lh-vjC">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
+                                <rect key="frame" x="32" y="159" width="192" height="24"/>
+                                <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="20" doubleValue="5" tickMarkPosition="below" numberOfTickMarks="20" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
+                                <connections>
+                                    <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
+                                </connections>
+                            </slider>
+                            <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mty-65-1H0">
+                                <rect key="frame" x="224" y="179" width="41" height="21"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="ZfT-OJ-e9T">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
+                                <rect key="frame" x="32" y="123" width="108" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
+                                <rect key="frame" x="147" y="120" width="41" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="41" id="S72-hv-cl9"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GFB-9j-KGo">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="34" id="0Xa-MU-vCo"/>
+                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="107" id="7UV-XO-T2H"/>
+                            <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="Zj6-mi-35l" secondAttribute="leading" id="AJ6-yE-Ejn"/>
+                            <constraint firstItem="gi8-H0-WPJ" firstAttribute="baseline" secondItem="GJ0-5l-PEg" secondAttribute="baseline" id="AJF-3U-Wyi"/>
+                            <constraint firstItem="y1Q-0c-cgq" firstAttribute="baseline" secondItem="mty-65-1H0" secondAttribute="firstBaseline" id="Dpz-eu-WuJ"/>
+                            <constraint firstItem="Zj6-mi-35l" firstAttribute="top" secondItem="y1Q-0c-cgq" secondAttribute="bottom" constant="3" id="EI6-oK-pR8"/>
+                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="trailing" constant="9" id="Eg8-7r-Foc"/>
+                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Zj6-mi-35l" secondAttribute="bottom" constant="19" id="P6f-b1-gWm"/>
+                            <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="leading" id="aWX-IO-uay"/>
+                            <constraint firstItem="mty-65-1H0" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="trailing" constant="4" id="iJ0-g9-soh"/>
+                            <constraint firstItem="y1Q-0c-cgq" firstAttribute="trailing" secondItem="Zj6-mi-35l" secondAttribute="trailing" id="mWa-Nw-cYn"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="concurrentThreads_slider" destination="Zj6-mi-35l" id="bhh-c4-Wzv"/>
+                        <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
+                        <outlet property="logFilesCountPref_textfield" destination="GJ0-5l-PEg" id="DiQ-A8-CZq"/>
+                    </connections>
+                </viewController>
+                <customObject id="Lin-gh-6s5" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="7.5" y="1021"/>
+        </scene>
     </scenes>
     <resources>
+        <image name="app" width="32" height="32"/>
         <image name="copy" width="64" height="64"/>
         <image name="export" width="64" height="64"/>
         <image name="siteIcon" width="64" height="64"/>

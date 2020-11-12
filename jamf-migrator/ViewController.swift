@@ -283,7 +283,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var format = PropertyListSerialization.PropertyListFormat.xml //format of the property list
     var plistData:[String:Any] = [:]   //our server/username data
 
-    var maxHistory:     Int = 20
+//    var maxHistory:     Int = 20
+    var maxLogFileCount     = 20
     var historyFile: String = ""
     var logFile:     String = ""
     let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
@@ -424,7 +425,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
     var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
     
-    var concurrentThreads = 3
+    var concurrentThreads = 5
     
     var migrateOrWipe: String = ""
     var httpStatusCode: Int = 0
@@ -1934,7 +1935,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         
-        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -2902,7 +2903,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
-        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -3497,7 +3498,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        var createDestUrl = createDestUrlBase
         //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         
-        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
@@ -3820,7 +3821,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalFailed    = 0
         var totalCompleted = 0
         
-        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
@@ -5437,6 +5438,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // func logCleanup - start
     func logCleanup() {
         if didRun {
+            maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
             var logArray: [String] = []
             var logCount: Int = 0
             do {
@@ -5449,8 +5451,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 logArray.sort()
                 logCount = logArray.count
                 // remove old history files
-                if logCount-1 >= maxHistory {
-                    for i in (0..<logCount-maxHistory) {
+//                if logCount-1 >= maxHistory {
+//                    for i in (0..<logCount-maxHistory) {
+                if logCount-1 >= maxLogFileCount {
+                    for i in (0..<logCount-maxLogFileCount) {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
                         
                         do {
@@ -5711,7 +5715,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         plistData["source_user"]        = storedSourceUser as Any?
         plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
         plistData["dest_user"]          = dest_user_field.stringValue as Any?
-        plistData["maxHistory"]         = maxHistory as Any?
+//        plistData["maxHistory"]         = maxHistory as Any?
         plistData["storeCredentials"]   = storeCredentials_button.state as Any?
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
     }
@@ -5990,6 +5994,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //    
 //    }
     // functions used to get existing self service icons to new server - end
+
+    func setConcurrentThreads() -> Int {
+        var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads")
+        concurrent = (concurrent > 20) ? 5:concurrent
+        return concurrent
+    }
     
     // extract the value between xml tags - start
     func tagValue(xmlString:String, xmlTag:String) -> String {
@@ -6281,9 +6291,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             dest_user = plistData["dest_user"] as! String
             dest_user_field.stringValue = dest_user
         }
-        if plistData["maxHistory"] != nil {
-            maxHistory = plistData["maxHistory"] as! Int
-        }
+//        if plistData["maxHistory"] != nil {
+//            maxHistory = plistData["maxHistory"] as! Int
+//        }
         if plistData["source_server_array"] != nil {
             sourceServerArray = plistData["source_server_array"] as! [String]
             for theServer in sourceServerArray {
@@ -6506,12 +6516,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
-
-
-//        userDefaults.set(10, forKey: "concurrentThreads")
-//        userDefaults.synchronize()
-        concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 5:userDefaults.integer(forKey: "concurrentThreads")
-        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads()
 //        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
         
         // Set all checkboxes off
@@ -6538,7 +6543,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             moveHistoryToLog (source: historyPath!, destination: logPath!)
         }
 
-        
+        maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
         logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
         History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
 

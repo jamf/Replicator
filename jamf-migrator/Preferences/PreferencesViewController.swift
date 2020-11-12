@@ -34,8 +34,12 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var groupsAction_button: NSPopUpButton!
     @IBOutlet weak var policiesAction_button: NSPopUpButton!
     @IBOutlet weak var profilesAction_button: NSPopUpButton!
-    
-    
+
+    @IBOutlet weak var concurrentThreads_slider: NSSlider!
+    @IBOutlet weak var concurrentThreads_textfield: NSTextField!
+
+    @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
+
     let vc = ViewController()
     let userDefaults = UserDefaults.standard
     var plistData:[String:Any] = [:]  //our server/username data
@@ -62,7 +66,13 @@ class PreferencesViewController: NSViewController {
     
     
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
-    
+
+    @IBAction func concurrentThreads_action(_ sender: Any) {
+        concurrentThreads_textfield.stringValue = concurrentThreads_slider.stringValue
+        userDefaults.set(Int(concurrentThreads_textfield.stringValue), forKey: "concurrentThreads")
+        userDefaults.synchronize()
+    }
+
     @IBAction func siteGroup_action(_ sender: Any) {
         userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
         userDefaults.synchronize()
@@ -163,6 +173,13 @@ class PreferencesViewController: NSViewController {
             } else {
                 userDefaults.set("Copy", forKey: "siteProfilesAction")
             }
+            userDefaults.synchronize()
+        }
+
+        if self.title! == "App" {
+            concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads"))"
+            concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
+            logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
             userDefaults.synchronize()
         }
         
@@ -275,6 +292,13 @@ class PreferencesViewController: NSViewController {
             saveOnly_button.state            = boolToState(TF: saveOnly)
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
+        }
+    }
+
+    override func viewDidDisappear() {
+        if title! == "App" {
+            userDefaults.set(Int(logFilesCountPref_textfield.stringValue), forKey: "logFilesCountPref")
+            userDefaults.synchronize()
         }
     }
 }
