@@ -1934,7 +1934,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         
-        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -2902,7 +2902,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
-        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -3090,7 +3090,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
             case "mobiledevices":
-                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "1applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
+                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "applications", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
@@ -3497,7 +3497,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        var createDestUrl = createDestUrlBase
         //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         
-        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
@@ -3820,7 +3820,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalFailed    = 0
         var totalCompleted = 0
         
-        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
@@ -6506,8 +6506,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
-        concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 3:userDefaults.integer(forKey: "concurrentThreads")
-        concurrentThreads = (concurrentThreads > 5) ? 3:concurrentThreads
+        concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 5:userDefaults.integer(forKey: "concurrentThreads")
+        concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
         
         // Set all checkboxes off
         resetAllCheckboxes()
