@@ -6506,8 +6506,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
+
+
+//        userDefaults.set(10, forKey: "concurrentThreads")
+//        userDefaults.synchronize()
         concurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") == 0) ? 5:userDefaults.integer(forKey: "concurrentThreads")
         concurrentThreads = (concurrentThreads > 10) ? 5:concurrentThreads
+//        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
         
         // Set all checkboxes off
         resetAllCheckboxes()

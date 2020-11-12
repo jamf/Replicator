@@ -119,7 +119,7 @@ class PreferencesViewController: NSViewController {
         
         var isDir: ObjCBool = true
         let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-        print("exportFilePath: \(String(describing: exportFilePath!))")
+//        print("exportFilePath: \(String(describing: exportFilePath!))")
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
 //            print("open exportFilePath: \(exportFilePath!)")

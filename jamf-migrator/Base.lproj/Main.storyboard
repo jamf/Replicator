@@ -1994,7 +1994,7 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="irz-8v-rw9"/>
                                                                         </connections>
                                                                     </button>
-                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vox-8P-XHa" userLabel="Prestages">
+                                                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vox-8P-XHa" userLabel="Prestages">
                                                                         <rect key="frame" x="535" y="113" width="74" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Prestages" id="IU1-3h-8jR">
@@ -2003,7 +2003,7 @@
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                     </textField>
-                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q6a-6E-m2M" userLabel="Prestages">
+                                                                    <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q6a-6E-m2M" userLabel="Prestages">
                                                                         <rect key="frame" x="515" y="111" width="87" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="RuH-17-XjQ">
