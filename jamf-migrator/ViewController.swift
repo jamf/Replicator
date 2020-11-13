@@ -5727,11 +5727,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
 //        export.saveOnly            = xmlPrefOptions["saveOnly"]!
-        export.saveOnly      = xmlPrefOptions["saveOnly"]!
-        export.saveRawXml    = xmlPrefOptions["saveRawXml"]!
-       export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
-        saveRawXmlScope      = xmlPrefOptions["saveRawXmlScope"]!
-        saveTrimmedXmlScope  = xmlPrefOptions["saveTrimmedXmlScope"]!
+        if let _ = xmlPrefOptions["saveOnly"] {
+            export.saveOnly = xmlPrefOptions["saveOnly"]!
+        } else {
+            export.saveOnly = false
+        }
+        if let _ = xmlPrefOptions["saveRawXml"] {
+            export.saveRawXml = xmlPrefOptions["saveRawXml"]!
+        } else {
+            export.saveRawXml = false
+        }
+        if let _ = xmlPrefOptions["saveTrimmedXml"] {
+            export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
+        } else {
+            export.saveTrimmedXml = false
+        }
+        if let _ = xmlPrefOptions["saveRawXmlScope"] {
+            saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"]!
+        } else {
+            saveRawXmlScope = false
+        }
+        if let _ = xmlPrefOptions["saveTrimmedXmlScope"] {
+            saveTrimmedXmlScope = xmlPrefOptions["saveTrimmedXmlScope"]!
+        } else {
+            saveRawXmlScope = false
+        }
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
 //      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
     }
