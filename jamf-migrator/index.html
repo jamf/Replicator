@@ -2,6 +2,12 @@
 <html>
 <head>
 <style>
+.active {
+    background-color: #828585;
+}
+.center {
+  text-align: center;
+}
 .nav_ul {
     list-style-type: none;
     margin: 0;
@@ -24,9 +30,6 @@
 }    
 li a:hover:not(.active) {
     background-color: #111;
-}
-.active {
-    background-color: #828585;
 }
     
 body
@@ -165,7 +168,8 @@ body
     <img src="images/open.png" alt=""><br><br>
     <strong>Important:</strong> Trimmed XML files cannot be used as they are missing data required for the migration.
 </div>
-<div><strong>Preferences:</strong> 
+
+<strong>Preferences:</strong>
 <div>You can modify how some items are copied.  The following items can be copied without any scope defined, leaving the existing scope on the destination server unchanged (if the item exists there already).
     <ul style="margin-left:17px;">
         <li>macOS Configuration Profiles</li>
@@ -177,87 +181,97 @@ body
         <li>Static Computer Groups</li>
         <li>Static Mobile Device Groups</li>
         <li>Static User Groups</li>
-</ul>
-In addition, Policies can be copied in a disabled state.</div>
+    </ul>
+    In addition, Policies can be copied in a disabled state.</div>
 <div>
     <img src="images/copy_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
-Options to export XML from the source server are also available.
+<div>Options to export XML from the source server are also available.</div>
 <div>
     <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
-    <ul style="margin-left:17px;">
+<ul style="margin-left:17px;">
    <li>Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).</li>
    <li>Trimmed Source XML give you the XML that is sent to the destination server.</li>
    <li>Save only saves the XML files and does not send them to the destination server.</li>
    <li>Save the object XML either with or without its scope.  Unchecked removes the scope.</li>
    <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected.</li>
+</ul>
+<div>Files are saved to ~/Downloads/Jamf Migrator/, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.</div>
+<div>
+    <img src="images/xmlFiles.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
+</div>
+
+<div>The number of concurrent API operations (from 1 to 20) and number of log files to retain can be configured.</div>
+<div>
+    <img src="images/appPrefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
+</div>
+<br><br>
+<div>
+    <strong>Migration Summary:</strong>
+    <ul style="list-style-type: none;">
+        <li>To get details on how many items were created/updated or failed to migrate type &#8984;S, or select Show Summary under the File menu.</li>
+        <div style="position:relative; left: 30px; width:480px;height:282px">
+            <img src="images/summary1.png" alt="">
+        </div>
+        <li>Additional information about each count can be obtained by clicking on the number.  For example, if we want to see a list of the 28 failed scripts, click on the 28.</li>
+        <div style="position:relative; left: 30px; width:480px;height:282px">
+            <img src="images/summary2.png" alt=""></div>
+        <li><br></li>
+        <li><br></li>
     </ul>
-    Files are saved to ~/Downloads/Jamf Migrator/, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.
-    <div>
-    <img src="images/xmlFiles.png" alt="" style="position:relative; left: 100px; width: 30%; height: 30%;">
 </div>
-    
-<div><strong>Migration Summary:</strong>
-<ul style="list-style-type: none;">
-   <li>To get details on how many items were created/updated or failed to migrate type &#8984;S, or select Show Summary under the File menu.</li>
-    <div style="position:relative; left: 30px; width:480px;height:282px">
-<img src="images/summary1.png" alt=""></div>
-   <li>Additional information about each count can be obtained by clicking on the number.  For example, if we want to see a list of the 28 failed scripts, click on the 28.</li>
-    <div style="position:relative; left: 30px; width:480px;height:282px">
-<img src="images/summary2.png" alt=""></div>
-   <li><br></li>
-   <li><br></li>
-</ul>
+If you have used jamf-migrator and saved passwords you will see the following after launching a new version.
+<div style="position:relative; left: 30px; width:420px;height:216px">
+    <ul style="list-style-type: none;">
+        <img src="images/allowAccess.png" alt="">
+    </ul>
 </div>
-    If you have used jamf-migrator and saved passwords you will see the following after launching a new version.
-    <div style="position:relative; left: 30px; width:420px;height:216px">
-        <ul style="list-style-type: none;">
-            <img src="images/allowAccess.png" alt="">
-        </ul>
-    </div>
-   <div>If you'd like the new version to access existing credentials select the desired option.<br><br></div>
-<div><strong>Important:</strong>
-<ul style="list-style-type: none;">
-   <li>There are many dependencies (<a class="body_a" href="#dependencies">view here</a>) between items, if they are not met, transfers fail.&nbsp; For example, if a policy is site specific the site must be migrated before the policy; if a script is assigned to a category the category must be migrated first....&nbsp; If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.</li>
-   <li><br></li>
-   <li>As a result it is best to start migrating items under the 'General' tab first.&nbsp; Items under macOS and iOS typically have some dependency on categories, network segments, sites...</li>
-   <li><br></li>
-   <li><br></li>
-</ul>
+<div>If you'd like the new version to access existing credentials select the desired option.<br><br></div>
+<div>
+    <strong>Important:</strong>
+    <ul style="list-style-type: none;">
+       <li>There are many dependencies (<a class="body_a" href="#dependencies">view here</a>) between items, if they are not met, transfers fail.&nbsp; For example, if a policy is site specific the site must be migrated before the policy; if a script is assigned to a category the category must be migrated first....&nbsp; If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.</li>
+       <li><br></li>
+       <li>As a result it is best to start migrating items under the 'General' tab first.&nbsp; Items under macOS and iOS typically have some dependency on categories, network segments, sites...</li>
+       <li><br></li>
+       <li><br></li>
+    </ul>
 </div>
-<div><strong>Logging:</strong>
-<ul>
-   <li>Basic log information is written to the following folder: ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/jamf-migrator/.  The log directory can easily be accessed by typing &#8984;L or select Show Logs under View in the menu bar.</li>
-   <li>More detailed logging can be captured by launching the application through Terminal using the '-debug' switch.&nbsp; If the application is located in /Applications:</li>
+<div>
+    <strong>Logging:</strong>
+    <ul>
+       <li>Basic log information is written to the following folder: <span style="font-family:'Courier New';">~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/jamf-migrator/</span>.  The log directory can easily be accessed by typing &#8984;L or select Show Logs under View in the menu bar.</li>
+       <li>More detailed logging can be captured by launching the application through Terminal using the '-debug' switch.&nbsp; If the application is located in /Applications:</li>
+        <span style="margin-left:28px;line-height:31px; font-family:'Courier New';">/Applications/jamf-migrator.app/Contents/MacOS/jamf-migrator -debug</span>
+    </ul>
+    <br><br><hr><br>
+
+    <ul style="text-align: center; list-style-type: none;">
+       <li><span style="font-size:27px;line-height:31px;color:#FF0000;"><strong>Danger, Danger, Danger</strong></span></li>
+    </ul>
+
 </div>
-<ul style="margin-left:28px; list-style-type: none;">
-   <li><span style="font-family:'Courier New';">/Applications/jamf-migrator.app/Contents/MacOS/jamf-migrator -debug</span></li>
-   <li><br></li>
-   <li><br></li>
-</ul>
-<ul style="text-align: center; list-style-type: none;">
-   <li><span style="font-size:27px;line-height:31px;color:#FF0000;"><strong>Danger, Danger, Danger</strong></span></li>
-</ul>
-</ul>
 <div>The application may also be used to clear information from a server.&nbsp; To place the application in removal mode run the following command in Terminal <strong>after</strong> the application has been launched:</div>
 <ul style="margin-left:28px; list-style-type: none;">
    <li><span style="font-family:'Courier New';">touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete</span></li>
 </ul>
-    <div>You can also toggle the mode using &#8984;D.</div>
+<div>You can also toggle the mode using &#8984;D.</div>
 <div>The application will alert you that data will be removed by flashing <strong>-- Removing --</strong> in yellow and red.&nbsp; Data is removed from the destination server.&nbsp; Once you hit 'Go!' items will get removed and once the process finishes the 'delete' file is removed and the application is back in migration mode.</div>
 <div>Note, source server credentials are not required (and are ignored) when removing items from the destination server.  Also, dependencies play a role in deletions/removals as they do with migrations.&nbsp; For example, a site can not be deleted if it contains, say, users and users can't be deleted if they are associated with a device.</div>
-</div>
+    
 <div id="app_image" style="position:relative;width:800px;height:522px;">
-<img src="images/migrator4.png" id="Image4" alt=""></div>
-    <div>When using the Selective tab while doing removals, the list of available objects is greyed out once all the selected items have been removed.  If you wish to remove additional items either touch the 'delete' file or hit &#8984;D, the list will be re-enabled.</div>
+    <img src="images/migrator4.png" id="Image4" alt="">
 </div>
+<div>When using the Selective tab while doing removals, the list of available objects is greyed out once all the selected items have been removed.  If you wish to remove additional items either touch the 'delete' file or hit &#8984;D, the list will be re-enabled.</div>
+</div>
+    
 <div id="app_image" style="position:relative;width:800px;height:522px;">
 <img src="images/migrator4.1.png" id="Image4.1" alt=""></div>
     
 <div id="main_body" style="position:relative;">
     <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
-        <div>You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.</div>
+        You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.
     <div>
     <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
