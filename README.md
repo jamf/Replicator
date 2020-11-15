@@ -83,6 +83,10 @@ Options for migrating object(s) (groups, policies, and configuration profiles) t
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
+The number of concurrent API operations (from 1 to 20) and number of log files to retain can be configured.
+
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/appPrefs.png)
+
 **Migration Summary:**
 
 * To get details on how many items were created/updated or failed to migrate type ⌘S, or select Show Summary under the File menu.
