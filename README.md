@@ -123,6 +123,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.4.0**
+
+* Resolve fix issue (#57), app crashing when copy preferences are changed.
+* Removed select all/none checkbox.  Toggle all/none by holding the option key down when selecting a class of objects to migrate.
+* Add ability to set concurrent API operations (from 1 to 20) and set the number of log files to keep.
+* Update readme and help.
+
 **v5.3.2**
 
 * Resolve issue migrating self service icons when using files as the source. 
