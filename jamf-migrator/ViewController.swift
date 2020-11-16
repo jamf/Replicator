@@ -919,17 +919,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             migrateOrWipe = "----------- Starting To Wipe Data -----------\n"
         } else {
-            // verify source and destination are not the same - start
-            if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate.state.rawValue == 0 {
-                alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
-                self.goButtonEnabled(button_status: true)
-                return
+            if !export.saveOnly {
+                // verify source and destination are not the same - start
+                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate.state.rawValue == 0 {
+                    alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
+                    self.goButtonEnabled(button_status: true)
+                    return
+                }
+                // verify source and destination are not the same - end
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(source_jp_server_field.stringValue) to \(dest_jp_server_field.stringValue).\n") }
+                migrateOrWipe = "----------- Starting Migration -----------\n"
+            } else {
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Exporting data from \(source_jp_server_field.stringValue).\n") }
+                migrateOrWipe = "----------- Starting Export -----------\n"
             }
-            // verify source and destination are not the same - end
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(source_jp_server_field.stringValue) to \(dest_jp_server_field.stringValue).\n") }
             wipeData.on = false
-            
-            migrateOrWipe = "----------- Starting Migration -----------\n"
+
         }
         // check for file that allow deleting data from destination server - end
         
@@ -2958,6 +2963,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // added option to remove scope
 //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                 let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
                                 XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
                             }
                         }
@@ -3231,30 +3237,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
         case "networksegments":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing network segments - verbose\n") }
-            // remove items not transfered; distribution points, netboot server, SUS from XML
+            // remove items not transfered; netboot server, SUS from XML
             let regexDistro1 = try! NSRegularExpression(pattern: "<distribution_server>(.*?)</distribution_server>", options:.caseInsensitive)
-            let regexDistro2 = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
-            let regexDistro3 = try! NSRegularExpression(pattern: "<url>(.*?)</url>", options:.caseInsensitive)
+//            let regexDistro2 = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
+            let regexDistroUrl = try! NSRegularExpression(pattern: "<url>(.*?)</url>", options:.caseInsensitive)
             let regexNetBoot = try! NSRegularExpression(pattern: "<netboot_server>(.*?)</netboot_server>", options:.caseInsensitive)
             let regexSUS = try! NSRegularExpression(pattern: "<swu_server>(.*?)</swu_server>", options:.caseInsensitive)
             PostXML = regexDistro1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_server/>")
-            // if not migrating file shares remove then from network segments xml - start
-            DispatchQueue.main.async {
-                if self.fileshares_button.state.rawValue == 0 {
-                    PostXML = regexDistro2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point/>")
-                    PostXML = regexDistro3.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
-                }
-                // if not migrating file shares remove then from network segments xml - end
-                // if not migrating netboot server remove then from network segments xml - start
-                if self.netboot_button.state.rawValue == 0 {
-                    PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-                }
-                // if not migrating netboot server remove then from network segments xml - end
-                // if not migrating software update server remove then from network segments xml - start
-                if self.sus_button.state.rawValue == 0 {
-                    PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
-                }
-                // if not migrating software update server remove then from network segments xml - end
+            // clear JCDS url from network segments xml - start
+//            DispatchQueue.main.async {
+//                if self.fileshares_button.state.rawValue == 0 {
+//                    PostXML = regexDistro2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point/>")
+            if tagValue2(xmlString: PostXML, startTag: "<distribution_point>", endTag: "</distribution_point>") == "Cloud Distribution Point" {
+                PostXML = regexDistroUrl.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
+            }
+//                }
+            // clear JCDS url from network segments xml - end
+            // if not migrating netboot server remove then from network segments xml - start
+            if self.netboot_button.state.rawValue == 0 {
+                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
+            }
+            // if not migrating netboot server remove then from network segments xml - end
+            // if not migrating software update server remove then from network segments xml - start
+            if self.sus_button.state.rawValue == 0 {
+                PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
+//                }
+            // if not migrating software update server remove then from network segments xml - end
             }
             
             //print("\nXML: \(PostXML)")
@@ -3537,6 +3545,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope", keepTags: false)
+                    WriteToLog().message(stringOfText: "[endPointByID] Exporting trimmed XML for \(endpointType) - \(endpointName).\n")
                     XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
                 }
                 
@@ -3713,8 +3722,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         (result: String) in
                                         //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                                     }
-                                  //  self.postCount -= 1
-                                 //   return
+
+                                // retry network segment without distribution point
+                                case "Problem in assignment to distribution point":
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point.\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["distribution_point", "url"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
+                                    }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                                    }
+
                                 default:
                                     WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                     
