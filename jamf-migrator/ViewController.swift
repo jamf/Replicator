@@ -894,6 +894,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func Go(sender: AnyObject) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
+
+        History.startTime = Date()
+
         plistData           = readSettings()
         scopeOptions        = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions      = plistData["xml"] as! Dictionary<String,Bool>
@@ -4849,6 +4852,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 theImageNo = 0
                             }
                             if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
+
+                                History.endTime = Date()
+
+                                let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
+
+                                let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+                                WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+
 //                            if migrationComplete.isDone && self.theIconsQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
 
                                 self.resetAllCheckboxes()

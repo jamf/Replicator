@@ -34,6 +34,8 @@ struct wipeData {
 struct History {
     static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
     static var logFile = ""
+    static var startTime   = Date()
+    static var endTime     = Date()
 }
 
 struct LogLevel {
