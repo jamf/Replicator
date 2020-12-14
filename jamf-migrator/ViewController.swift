@@ -3373,6 +3373,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for xmlTag in ["enable_custom_photo_url", "custom_photo_url", "links"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
+            if itemToSite && destinationSite != "" {
+                PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+            }
             //print("\nXML: \(PostXML)")
             
         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
@@ -3496,8 +3499,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // if working a site migrations within a single server force create when copying an item
         if self.itemToSite && sitePref == "Copy" {
-            destinationEpId = 0
-            apiAction       = "create"
+            if endpointType != "users"{
+                destinationEpId = 0
+                apiAction       = "create"
+            }
         }
         
         // this is where we create the new endpoint
@@ -5826,10 +5831,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
         
         // update site
-        let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
-        let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
-        rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
+        WriteToLog().message(stringOfText: "[siteSet] endpoint \(endpoint) to site \(siteEncoded)\n")
+        if endpoint != "users"{
+            let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
+            let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
+            rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
+        } else {
+            // remove current sites info
+            rawValue = self.rmXmlData(theXML: xmlString, theTag: "sites", keepTags: true)
+
+//            let siteInfo = tagValue2(xmlString: xmlString, startTag: "<sites>", endTag: "</sites>")
+            if siteEncoded != "None" {
+                rawValue = xmlString.replacingOccurrences(of: "<sites></sites>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
+                rawValue = xmlString.replacingOccurrences(of: "<sites/>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
+            }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[siteSet] changing site to \(siteEncoded)\n") }
+        }
         
         // do not redeploy profile to existing scope
         if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
@@ -5837,7 +5855,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             rawValue = regexComp.stringByReplacingMatches(in: rawValue, options: [], range: NSRange(0..<rawValue.utf16.count), withTemplate: "<redeploy_on_update>Newly Assigned</redeploy_on_update>")
         }
         
-        if sitePref == "Copy" {
+        if sitePref == "Copy" && endpoint != "users" {
             // update item Name - ...<name>currentName - site</name>
             rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
 //            print("[setSite]  rawValue: \(rawValue)\n")
