@@ -1174,19 +1174,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             if (!self.validCreds) || (self.source_user_field.stringValue != self.storedSourceUser) || (self.dest_user_field.stringValue != self.storedDestUser) {
                                 // save credentials to login keychain - start
-                                let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
+//                                let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
                                 if f_sourceURL == self.source_jp_server && !wipeData.on {
                                     if self.storeCredentials_button.state.rawValue == 1 {
-                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds2.save(service: "migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
-//                                        self.Creds.save("migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+//                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+//                                        self.Creds2.save(service: "migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+                                        self.Creds2.save(service: "migrator - "+f_sourceURL.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
                                         self.storedSourceUser = self.source_user_field.stringValue
                                     }
                                 } else {
                                     if self.storeCredentials_button.state.rawValue == 1 {
-                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-                                        self.Creds2.save(service: "migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
-//                                        self.Creds.save("migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+//                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
+//                                        self.Creds2.save(service: "migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+                                        self.Creds2.save(service: "migrator - "+f_sourceURL.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
                                         self.storedDestUser = self.dest_user_field.stringValue
                                     }
                                 }
@@ -3223,19 +3223,39 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "computers":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
-            for xmlTag in ["package", "mapped_printers", "plugins", "running_services", "licensed_software", "computer_group_memberships", "managed", "management_username"] {
+            for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships"] {
+//                for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships", "remote_management"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
-            
+            // remote management - fix to migrate computer that is managed
+            let regexRemote = try! NSRegularExpression(pattern: "<remote_management>(.*?)</remote_management>", options:.caseInsensitive)
+            if userDefaults.integer(forKey: "migrateAsManaged") == 1 {
+                PostXML = regexRemote.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: """
+            <remote_management>
+                <managed>true</managed>
+                <management_username>\(userDefaults.string(forKey: "prefMgmtAcct") ?? "jpmanage")</management_username>
+                <management_password>\(userDefaults.string(forKey: "prefMgmtPwd") ?? "changeM3!")</management_password>
+            </remote_management>
+""")
+            } else {
+                PostXML = regexRemote.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: """
+            <remote_management>
+                <managed>false</managed>
+            </remote_management>
+""")
+            }
+
+//            let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
+//            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+
             // change serial number 'Not Available' to blank so machines will migrate
             PostXML = PostXML.replacingOccurrences(of: "<serial_number>Not Available</serial_number>", with: "<serial_number></serial_number>")
-            
-            let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
-            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
+
             PostXML = PostXML.replacingOccurrences(of: "<xprotect_version/>", with: "")
             PostXML = PostXML.replacingOccurrences(of: "<size>0</size>", with: "")
+            PostXML = PostXML.replacingOccurrences(of: "<size>-1</size>", with: "")
             let regexAvailable_mb = try! NSRegularExpression(pattern: "<available_mb>-(.*?)</available_mb>", options:.caseInsensitive)
-            PostXML = regexAvailable_mb.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<available_mb>0</available_mb>")
+            PostXML = regexAvailable_mb.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<available_mb>1</available_mb>")
             //print("\nXML: \(PostXML)")
             
         case "networksegments":
@@ -3475,11 +3495,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
-        
-        if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+
+//        if counters[endpointType] == nil {
+//            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+//        } else {
+//            counters[endpointType]!["total"] = endpointCount
+//        }
+
+        if counters[endpointType]!["create"] == nil {
+            self.counters[endpointType]!["create"] = 0
+            self.summaryDict[endpointType]!["create"] = []
         }
+        if counters[endpointType]!["update"] == nil {
+            self.counters[endpointType]!["update"] = 0
+            self.summaryDict[endpointType]!["update"] = []
+        }
+        if counters[endpointType]!["fail"] == nil {
+            self.counters[endpointType]!["fail"] = 0
+            self.summaryDict[endpointType]!["fail"] = []
+        }
+        if counters[endpointType]!["total"] == nil {
+            self.counters[endpointType]!["total"] = 0
+            self.summaryDict[endpointType]!["total"] = []
+        }
+        counters[endpointType]!["total"] = endpointCount
+
         
         var destinationEpId = destEpId
         var apiAction       = action
@@ -3490,12 +3531,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalUpdated   = 0
         var totalFailed    = 0
         var totalCompleted = 0
-        
-        if counters[endpointType] == nil {
-            counters[endpointType] = ["total":endpointCount]
-        } else {
-            counters[endpointType]!["total"] = endpointCount
-        }
+
+        // moved a few lines up 201222
+//        if counters[endpointType] == nil {
+//            counters[endpointType] = ["total":endpointCount]
+//        } else {
+//            counters[endpointType]!["total"] = endpointCount
+//        }
         
         // if working a site migrations within a single server force create when copying an item
         if self.itemToSite && sitePref == "Copy" {
@@ -3767,16 +3809,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }
                             }   // create failed - end
-                            
-                            totalCreated   = self.counters[endpointType]!["create"]!
-                            totalUpdated   = self.counters[endpointType]!["update"]!
-                            totalFailed    = self.counters[endpointType]!["fail"]!
+
+                            totalCreated   = self.counters[endpointType]?["create"] ?? 0
+                            totalUpdated   = self.counters[endpointType]?["update"] ?? 0
+                            totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             totalCompleted = totalCreated + totalUpdated + totalFailed
                             
                             // update counter
                             //                        DispatchQueue.main.async {
                             self.object_name_field.stringValue = "\(endpointType)"
-                            let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
                             //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
     //                        if totalCompleted > currentCompleted {
                             if totalCompleted > 0 {
@@ -3898,7 +3940,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
-                if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
                 
 //                print("NSURL line 5")
 //                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
@@ -3963,13 +4005,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.summaryDict[endpointType]?[methodResult] = summaryArray
                         }
                         
-                        totalDeleted   = self.counters[endpointType]!["create"]!
-                        totalFailed    = self.counters[endpointType]!["fail"]!
+                        totalDeleted   = self.counters[endpointType]?["create"] ?? 0
+                        totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                         totalCompleted = totalDeleted + totalFailed
 
                         DispatchQueue.main.async {
                             self.object_name_field.stringValue       = "\(endpointType)"
-                            let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
 //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                             if totalCompleted > 0 {
                                 self.objects_completed_field.stringValue = "\(totalCompleted)"
@@ -4804,9 +4846,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func fetchPassword(whichServer: String, url: String, theUser: String) {
-        let regexKey        = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-        let credKey         = regexKey.stringByReplacingMatches(in: url, options: [], range: NSRange(0..<url.utf16.count), withTemplate: "")
-        let credentailArray  = Creds2.retrieve(service: "migrator - "+credKey)
+//        let regexKey        = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
+//        let credKey         = regexKey.stringByReplacingMatches(in: url, options: [], range: NSRange(0..<url.utf16.count), withTemplate: "")
+//        let credentailArray  = Creds2.retrieve(service: "migrator - "+credKey)
+        let credentailArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
         
         if credentailArray.count == 2 {
             if whichServer == "source" {
@@ -5831,7 +5874,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
         
         // update site
-        WriteToLog().message(stringOfText: "[siteSet] endpoint \(endpoint) to site \(siteEncoded)\n")
+        //WriteToLog().message(stringOfText: "[siteSet] endpoint \(endpoint) to site \(siteEncoded)\n")
         if endpoint != "users"{
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
@@ -6328,13 +6371,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // Create preference file if missing - end
         
-        // check for file that allows deleting data from destination server, delete if found - start
+        // check for file that allows deleting data from destination server, delete if found
         self.rmDELETE()
-        // check for file that allows deleting data from destination server, delete if found - end
-        
-        // read environment settings - start
-        plistData = readSettings()
-        
+
+       // read settings from userDefaults - start
         if userDefaults.object(forKey: "activeTab") as? String != nil {
             let setActiveTab = userDefaults.object(forKey: "activeTab") as? String
             setTab_fn(selectedTab: setActiveTab!)
@@ -6342,6 +6382,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             userDefaults.set("General", forKey: "activeTab")
             setTab_fn(selectedTab: "generalTab")
         }
+        // read settings from userDefaults - start
+        
+        // read environment settings from plist - start
+        plistData = readSettings()
 
         if plistData["source_jp_server"] != nil {
             source_jp_server = plistData["source_jp_server"] as! String
@@ -6888,3 +6932,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
 }
 
+extension String {
+    var fqdnFromUrl: String {
+        get {
+            var fqdn = ""
+            let nameArray = self.components(separatedBy: "://")
+            if nameArray.count > 1 {
+                fqdn = nameArray[1]
+            } else {
+                fqdn =  self
+            }
+            if fqdn.contains(":") {
+                let fqdnArray = fqdn.components(separatedBy: ":")
+                fqdn = fqdnArray[0]
+            }
+            return fqdn
+        }
+    }
+}

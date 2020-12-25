@@ -59,6 +59,12 @@ struct export {
     static var trimmedXmlScope = true
 }
 
+struct pref {
+    static var migrateAsManaged = 0
+    static var mgmtAcct         = ""
+    static var mgmtPwd          = ""
+}
+
 struct setting {
     static var uapiToken = ""
 }

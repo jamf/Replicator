@@ -10,7 +10,7 @@ import AppKit
 import Cocoa
 import CoreFoundation
 
-class PreferencesViewController: NSViewController {
+class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     @IBOutlet weak var copyScopeOCP_button: NSButton!       // os x config profiles
     @IBOutlet weak var copyScopeMA_button: NSButton!        // mac applications
@@ -35,10 +35,36 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var policiesAction_button: NSPopUpButton!
     @IBOutlet weak var profilesAction_button: NSPopUpButton!
 
+    // app prefs
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
     @IBOutlet weak var concurrentThreads_textfield: NSTextField!
-
     @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
+
+    // computer prefs
+    @IBOutlet weak var migrateAsManaged_button: NSButton!
+    @IBOutlet weak var prefMgmtAcct_label: NSTextField!
+    @IBOutlet weak var prefMgmtAcct_textfield: NSTextField!
+    @IBOutlet weak var prefMgmtPwd_label: NSTextField!
+    @IBOutlet weak var prefMgmtPwd_textfield: NSSecureTextField!
+
+    @IBAction func migrateAsManaged_action(_ sender: Any) {
+        if "\(sender as AnyObject)" != "viewDidAppear" {
+            userDefaults.set(migrateAsManaged_button.state.rawValue, forKey: "migrateAsManaged")
+            userDefaults.synchronize()
+        }
+
+        if migrateAsManaged_button.state.rawValue == 1 {
+            prefMgmtAcct_label.isHidden     = false
+            prefMgmtAcct_textfield.isHidden = false
+            prefMgmtPwd_label.isHidden      = false
+            prefMgmtPwd_textfield.isHidden  = false
+        } else {
+            prefMgmtAcct_label.isHidden     = true
+            prefMgmtAcct_textfield.isHidden = true
+            prefMgmtPwd_label.isHidden      = true
+            prefMgmtPwd_textfield.isHidden  = true
+        }
+    }
 
     let vc = ViewController()
     let userDefaults = UserDefaults.standard
@@ -62,9 +88,7 @@ class PreferencesViewController: NSViewController {
     var saveOnly:               Bool = false
     var saveRawXmlScope:        Bool = true
     var saveTrimmedXmlScope:    Bool = true
-    
-    
-    
+
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
 
     @IBAction func concurrentThreads_action(_ sender: Any) {
@@ -85,8 +109,7 @@ class PreferencesViewController: NSViewController {
         userDefaults.set("\(profilesAction_button.selectedItem!.title)", forKey: "siteProfilesAction")
         userDefaults.synchronize()
     }
-    
-    
+
 //    var buttonState = true
     
     @IBAction func updateCopyPrefs_button(_ sender: Any) {
@@ -139,6 +162,19 @@ class PreferencesViewController: NSViewController {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
         }
     }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if let textField = obj.object as? NSTextField {
+            if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
+                if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
+                    userDefaults.set(prefMgmtAcct_textfield.stringValue, forKey: "prefMgmtAcct")
+                    userDefaults.set(prefMgmtPwd_textfield.stringValue, forKey: "prefMgmtPwd")
+                    userDefaults.synchronize()
+                    Credentials2().save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, data: prefMgmtPwd_textfield.stringValue)
+                }
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -146,7 +182,8 @@ class PreferencesViewController: NSViewController {
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
         self.view.wantsLayer = true
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
-        
+
+
 //        print("[PreferencesViewController] viewDidLoad")
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -292,6 +329,14 @@ class PreferencesViewController: NSViewController {
             saveOnly_button.state            = boolToState(TF: saveOnly)
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
+        }
+        if self.title! == "Computer" {
+            prefMgmtAcct_textfield.delegate = self
+            prefMgmtPwd_textfield.delegate  = self
+            migrateAsManaged_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
+            prefMgmtAcct_textfield.stringValue = userDefaults.string(forKey: "prefMgmtAcct") ?? ""
+            prefMgmtPwd_textfield.stringValue = userDefaults.string(forKey: "prefMgmtPwd") ?? ""
+            migrateAsManaged_action("viewDidAppear")
         }
     }
 

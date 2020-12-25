@@ -36,6 +36,7 @@
                         <tabViewItem label="export" image="export" id="FcM-63-2LA"/>
                         <tabViewItem label="site" image="siteIcon" id="9cE-lL-9J7"/>
                         <tabViewItem label="app" image="app" id="0bc-QU-ZBt" userLabel="app"/>
+                        <tabViewItem label="computer" image="computer64" id="TmA-5M-S7z" userLabel="computer"/>
                     </tabViewItems>
                     <viewControllerTransitionOptions key="transitionOptions" allowUserInteraction="YES"/>
                     <tabView key="tabView" type="noTabsNoBorder" id="VZi-S2-Oid">
@@ -52,6 +53,7 @@
                         <segue destination="zJe-p7-yg6" kind="relationship" relationship="tabItems" id="1OD-sg-CI7"/>
                         <segue destination="Wtb-LD-naZ" kind="relationship" relationship="tabItems" id="qAu-JV-yBH"/>
                         <segue destination="Ojm-Op-AKi" kind="relationship" relationship="tabItems" id="RUm-vR-paH"/>
+                        <segue destination="QIN-ev-Ami" kind="relationship" relationship="tabItems" id="a77-uy-EBg"/>
                     </connections>
                 </tabViewController>
                 <customObject id="VJS-aQ-7Am" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -75,18 +77,16 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sWf-R4-F7L">
-                                <rect key="frame" x="167" y="212" width="80" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Copy Scope" id="nPJ-dv-TUn">
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sWf-R4-F7L">
+                                <rect key="frame" x="185" y="213" width="44" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scope" id="nPJ-dv-TUn">
                                     <font key="font" metaFont="systemSemibold" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0H3-MY-x0h">
-                                <rect key="frame" x="260" y="212" width="51" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0H3-MY-x0h">
+                                <rect key="frame" x="248" y="213" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Disable" id="tGl-wp-1zm">
                                     <font key="font" metaFont="systemSemibold" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -274,7 +274,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oG0-8N-egu">
-                                <rect key="frame" x="274" y="135" width="22" height="18"/>
+                                <rect key="frame" x="262" y="135" width="22" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZjN-ON-j4d">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -285,6 +285,12 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="sWf-R4-F7L" firstAttribute="leading" secondItem="RHL-Es-p2H" secondAttribute="leading" constant="187" id="OXm-Za-qBs"/>
+                            <constraint firstItem="0H3-MY-x0h" firstAttribute="top" secondItem="RHL-Es-p2H" secondAttribute="top" constant="9" id="SPG-fY-BMn"/>
+                            <constraint firstItem="0H3-MY-x0h" firstAttribute="leading" secondItem="sWf-R4-F7L" secondAttribute="trailing" constant="23" id="ShG-S5-X4m"/>
+                            <constraint firstItem="sWf-R4-F7L" firstAttribute="top" secondItem="RHL-Es-p2H" secondAttribute="top" constant="9" id="ZgW-ya-5W7"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="copyScopeIA_button" destination="Ogj-kd-mkk" id="LTU-9z-vL7"/>
@@ -301,7 +307,7 @@
                 </viewController>
                 <customObject id="fnb-gq-G8w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="626" y="141"/>
+            <point key="canvasLocation" x="625.5" y="141"/>
         </scene>
         <!--Export-->
         <scene sceneID="7h3-eD-AW9">
@@ -655,11 +661,103 @@
                 </viewController>
                 <customObject id="Lin-gh-6s5" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7.5" y="1021"/>
+            <point key="canvasLocation" x="248" y="1031"/>
+        </scene>
+        <!--Computer-->
+        <scene sceneID="lJ7-RC-Kt4">
+            <objects>
+                <viewController title="Computer" id="QIN-ev-Ami" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="pA7-Le-xOX" userLabel="computer View">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="q1O-r0-0ov">
+                                <rect key="frame" x="79" y="260" width="4" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" id="ETi-ay-tCq">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hzQ-6I-RWA">
+                                <rect key="frame" x="36" y="264" width="207" height="18"/>
+                                <buttonCell key="cell" type="check" title="Migrate computer as managed" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Znv-DC-QZf">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="migrateAsManaged_action:" target="QIN-ev-Ami" id="FFm-g4-fUh"/>
+                                </connections>
+                            </button>
+                            <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dz3-ly-Vnb">
+                                <rect key="frame" x="55" y="239" width="141" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Management Account:" id="wMX-gO-1Uz">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wnn-L0-Q8w">
+                                <rect key="frame" x="130" y="208" width="66" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Password:" id="Tw9-lc-2Pl">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField identifier="prefMgmtAcct" hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3a7-DQ-lyy">
+                                <rect key="frame" x="196" y="236" width="228" height="21"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="ypS-VH-Gln">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <secureTextField identifier="prefMgmtPwd" hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JhD-pI-Jwl">
+                                <rect key="frame" x="196" y="205" width="228" height="21"/>
+                                <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="uKe-e3-GvM">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <allowedInputSourceLocales>
+                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                    </allowedInputSourceLocales>
+                                </secureTextFieldCell>
+                            </secureTextField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="Dz3-ly-Vnb" firstAttribute="trailing" secondItem="wnn-L0-Q8w" secondAttribute="trailing" id="07X-1z-gXS"/>
+                            <constraint firstItem="q1O-r0-0ov" firstAttribute="leading" secondItem="pA7-Le-xOX" secondAttribute="leading" constant="81" id="2WE-8q-vtj"/>
+                            <constraint firstItem="hzQ-6I-RWA" firstAttribute="top" secondItem="pA7-Le-xOX" secondAttribute="top" constant="20" symbolic="YES" id="4Ly-dc-QVo"/>
+                            <constraint firstAttribute="trailing" secondItem="3a7-DQ-lyy" secondAttribute="trailing" constant="26" id="8QR-Zk-dAC"/>
+                            <constraint firstItem="Dz3-ly-Vnb" firstAttribute="leading" secondItem="pA7-Le-xOX" secondAttribute="leading" constant="57" id="QGs-ll-Pr5"/>
+                            <constraint firstItem="3a7-DQ-lyy" firstAttribute="top" secondItem="hzQ-6I-RWA" secondAttribute="bottom" constant="9" id="QH2-or-L1c"/>
+                            <constraint firstItem="wnn-L0-Q8w" firstAttribute="baseline" secondItem="JhD-pI-Jwl" secondAttribute="baseline" id="QJB-F3-Vww"/>
+                            <constraint firstItem="3a7-DQ-lyy" firstAttribute="leading" secondItem="Dz3-ly-Vnb" secondAttribute="trailing" constant="2" id="R2o-Kx-pXn"/>
+                            <constraint firstItem="q1O-r0-0ov" firstAttribute="top" secondItem="pA7-Le-xOX" secondAttribute="top" constant="24" id="VIM-ei-EPI"/>
+                            <constraint firstItem="3a7-DQ-lyy" firstAttribute="trailing" secondItem="JhD-pI-Jwl" secondAttribute="trailing" id="X4M-bb-Rk2"/>
+                            <constraint firstItem="Dz3-ly-Vnb" firstAttribute="baseline" secondItem="3a7-DQ-lyy" secondAttribute="baseline" id="YXo-dc-pRX"/>
+                            <constraint firstItem="hzQ-6I-RWA" firstAttribute="leading" secondItem="pA7-Le-xOX" secondAttribute="leading" constant="38" id="btA-Gh-7bh"/>
+                            <constraint firstItem="3a7-DQ-lyy" firstAttribute="leading" secondItem="JhD-pI-Jwl" secondAttribute="leading" id="sRh-YE-hTB"/>
+                            <constraint firstItem="JhD-pI-Jwl" firstAttribute="top" secondItem="3a7-DQ-lyy" secondAttribute="bottom" constant="10" symbolic="YES" id="xBZ-oT-hXE"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="migrateAsManaged_button" destination="hzQ-6I-RWA" id="b30-LZ-eMa"/>
+                        <outlet property="prefMgmtAcct_label" destination="Dz3-ly-Vnb" id="syw-Ye-FbS"/>
+                        <outlet property="prefMgmtAcct_textfield" destination="3a7-DQ-lyy" id="rN2-Gi-dWm"/>
+                        <outlet property="prefMgmtPwd_label" destination="wnn-L0-Q8w" id="Bou-Jb-RSI"/>
+                        <outlet property="prefMgmtPwd_textfield" destination="JhD-pI-Jwl" id="rtO-AC-5Mf"/>
+                    </connections>
+                </viewController>
+                <customObject id="haM-bS-cWw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-206" y="1057"/>
         </scene>
     </scenes>
     <resources>
         <image name="app" width="32" height="32"/>
+        <image name="computer64" width="64" height="65"/>
         <image name="copy" width="64" height="64"/>
         <image name="export" width="64" height="64"/>
         <image name="siteIcon" width="64" height="64"/>
