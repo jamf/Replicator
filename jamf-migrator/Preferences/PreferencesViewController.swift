@@ -47,27 +47,53 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var prefMgmtPwd_label: NSTextField!
     @IBOutlet weak var prefMgmtPwd_textfield: NSSecureTextField!
 
+    // passwords prefs
+    @IBOutlet weak var prefBindPwd_button: NSButton!
+    @IBOutlet weak var prefLdapPwd_button: NSButton!
+    @IBOutlet weak var prefFileSharePwd_button: NSButton!
+    @IBOutlet weak var prefBindPwd_textfield: NSSecureTextField!
+    @IBOutlet weak var prefLdapPwd_textfield: NSSecureTextField!
+    @IBOutlet weak var prefFsRwPwd_textfield: NSSecureTextField!
+    @IBOutlet weak var prefFsRoPwd_textfield: NSSecureTextField!
+
     @IBAction func migrateAsManaged_action(_ sender: Any) {
         if "\(sender as AnyObject)" != "viewDidAppear" {
             userDefaults.set(migrateAsManaged_button.state.rawValue, forKey: "migrateAsManaged")
             userDefaults.synchronize()
         }
 
-        if migrateAsManaged_button.state.rawValue == 1 {
-            prefMgmtAcct_label.isHidden     = false
-            prefMgmtAcct_textfield.isHidden = false
-            prefMgmtPwd_label.isHidden      = false
-            prefMgmtPwd_textfield.isHidden  = false
-        } else {
-            prefMgmtAcct_label.isHidden     = true
-            prefMgmtAcct_textfield.isHidden = true
-            prefMgmtPwd_label.isHidden      = true
-            prefMgmtPwd_textfield.isHidden  = true
-        }
+        prefMgmtAcct_label.isHidden     = !convertToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtAcct_textfield.isHidden = !convertToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtPwd_label.isHidden      = !convertToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtPwd_textfield.isHidden  = !convertToBool(state: migrateAsManaged_button.state.rawValue)
+
     }
 
-    let vc = ViewController()
-    let userDefaults = UserDefaults.standard
+    @IBAction func enableField_action(_ sender: Any) {
+        if let buttonName = (sender as? NSButton)?.identifier?.rawValue {
+            switch buttonName {
+            case "bind":
+                userDefaults.set(prefBindPwd_button.state.rawValue, forKey: "prefBindPwd")
+            case "ldap":
+                userDefaults.set(prefLdapPwd_button.state.rawValue, forKey: "prefLdapPwd")
+            case "fileshare":
+                userDefaults.set(prefFileSharePwd_button.state.rawValue, forKey: "prefFileSharePwd")
+            default:
+                break
+            }
+            userDefaults.synchronize()
+        }
+
+        prefBindPwd_textfield.isEnabled = convertToBool(state: prefBindPwd_button.state.rawValue)
+        prefLdapPwd_textfield.isEnabled = convertToBool(state: prefLdapPwd_button.state.rawValue)
+        prefFsRwPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
+        prefFsRoPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
+    }
+
+    let Creds2           = Credentials2()
+    var credentialsArray = [String]()
+    let vc               = ViewController()
+    let userDefaults     = UserDefaults.standard
     var plistData:[String:Any] = [:]  //our server/username data
     
     // default scope preferences
@@ -165,14 +191,39 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 
     func controlTextDidEndEditing(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
-            if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
-                if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
-                    userDefaults.set(prefMgmtAcct_textfield.stringValue, forKey: "prefMgmtAcct")
-                    userDefaults.set(prefMgmtPwd_textfield.stringValue, forKey: "prefMgmtPwd")
-                    userDefaults.synchronize()
-                    Credentials2().save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, data: prefMgmtPwd_textfield.stringValue)
+            switch self.title! {
+            case "Computer":
+//                if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
+                    if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
+                        userDefaults.set(prefMgmtAcct_textfield.stringValue, forKey: "prefMgmtAcct")
+                        Creds2.save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, data: prefMgmtPwd_textfield.stringValue)
+                    }
+//                }
+            case "Passwords":
+                switch "\(textField.identifier!.rawValue)" {
+                case "bind":
+                    if prefBindPwd_textfield.stringValue != "" {
+                        Creds2.save(service: "migrator-bind", account: "bind", data: prefBindPwd_textfield.stringValue)
+                    }
+                case "ldap":
+                    if prefLdapPwd_textfield.stringValue != "" {
+                        Creds2.save(service: "migrator-ldap", account: "ldap", data: prefLdapPwd_textfield.stringValue)
+                    }
+                case "fsrw":
+                    if prefFsRwPwd_textfield.stringValue != "" {
+                        Creds2.save(service: "migrator-fsrw", account: "FsRw", data: prefFsRwPwd_textfield.stringValue)
+                    }
+                case "fsro":
+                    if prefFsRoPwd_textfield.stringValue != "" {
+                        Creds2.save(service: "migrator-fsro", account: "FsRo", data: prefFsRoPwd_textfield.stringValue)
+                    }
+                default:
+                    break
                 }
+            default:
+                break
             }
+            userDefaults.synchronize()
         }
     }
     
@@ -334,9 +385,32 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefMgmtAcct_textfield.delegate = self
             prefMgmtPwd_textfield.delegate  = self
             migrateAsManaged_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
-            prefMgmtAcct_textfield.stringValue = userDefaults.string(forKey: "prefMgmtAcct") ?? ""
-            prefMgmtPwd_textfield.stringValue = userDefaults.string(forKey: "prefMgmtPwd") ?? ""
+            let credentialsArray  = Creds2.retrieve(service: "migrator-mgmtAcct")
+
+            if credentialsArray.count == 2 {
+                prefMgmtAcct_textfield.stringValue = credentialsArray[0]
+                prefMgmtPwd_textfield.stringValue = credentialsArray[1]
+            } else {
+                prefMgmtAcct_textfield.stringValue = ""
+                prefMgmtPwd_textfield.stringValue = ""
+            }
             migrateAsManaged_action("viewDidAppear")
+        }
+        if self.title! == "Passwords" {
+            credentialsArray.removeAll()
+            prefBindPwd_textfield.delegate = self
+            prefLdapPwd_textfield.delegate = self
+            prefFsRwPwd_textfield.delegate = self
+            prefFsRoPwd_textfield.delegate = self
+
+            prefBindPwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefBindPwd"))
+            prefLdapPwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefLdapPwd"))
+            prefFileSharePwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefFileSharePwd"))
+
+            credentialsArray = Creds2.retrieve(service: "migrator-bind")
+
+            enableField_action("viewDidAppear")
+
         }
     }
 

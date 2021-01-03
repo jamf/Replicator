@@ -1967,486 +1967,64 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 (data, response, error) -> Void in
                 if let httpResponse = response as? HTTPURLResponse {
 //                    print("httpResponse: \(httpResponse.statusCode)")
-                    
-                    do {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Getting all endpoints from: \(myURL)\n") }
-                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                        if let endpointJSON = json as? [String: Any] {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))\n") }
-                            
-                            switch endpoint {
-                            case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
-                                if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
-                                    endpointCount = endpointInfo.count
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
-                                    
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
-                                    
-                                    if endpointCount > 0 {
-                                        
-                                        self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
-                                            (result: String) in
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
-                                            
-                                            for i in (0..<endpointCount) {
-                                                if i == 0 { self.availableObjsToMigDict.removeAll() }
-                                                
-                                                let record = endpointInfo[i] as! [String : AnyObject]
-                                                
-//                                                if endpoint != "mobiledeviceapplications" {
-                                                    if record["name"] != nil {
-                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                                    } else {
-                                                        self.availableObjsToMigDict[record["id"] as! Int] = ""
-                                                    }
-//                                                } else {
-//                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
-//                                                }
-                                            
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
-                                            }   // for i in (0..<endpointCount) end
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
-                                            
-                                            var counter = 1
-                                            if self.goSender == "goButton" {
-                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                    if !wipeData.on  {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
-//                                                        if self.currentEPs[l_xmlName] != nil {
-                                                        if self.currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-//                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                        } else {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                        }
-                                                    } else {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                        self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
-                                                    }   // if !wipeData.on else - end
-                                                    counter+=1
-                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                            } else {
-                                                // populate source server under the selective tab
-                                                self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
-                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                    self.sortQ.async {
-                                                        //print("adding \(l_xmlName) to array")
-                                                        self.availableIDsToMigDict[l_xmlName] = l_xmlID
-                                                        self.sourceDataArray.append(l_xmlName)
-//                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                            DispatchQueue.main.async {
-                                                                self.srcSrvTableView.reloadData()
-                                                            }
-                                                        // slight delay in building the list - visual effect
-                                                        usleep(self.delayInt)
-//                                                            self.goButtonEnabled(button_status: true)
-//                                                        }   //if self.availableIDsToMigDict.count - end
-//                                                        DispatchQueue.main.async {
-//                                                            self.srcSrvTableView.reloadData()
-//                                                        }
-                                                        if counter == self.availableObjsToMigDict.count {
-                                                            self.goButtonEnabled(button_status: true)
-                                                        }
-                                                        counter+=1
-                                                    }   // self.sortQ.async - end
-                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                
-                                            }   // if self.goSender else - end
-                                        }   // self.existingEndpoints - end
-                                    } else {
-                                        self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints1")
-                                        if endpoint == self.objectsToMigrate.last {
-                                            self.rmDELETE()
-//                                            self.resetAllCheckboxes()
-//                                            self.goButtonEnabled(button_status: true)
-//                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                    }// if endpointCount > 0 - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                } else {   // end if let buildings, departments...
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                }
-                                
-                            case "computergroups", "mobiledevicegroups", "usergroups":
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing device groups\n") }
-                                if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
-                                    
-                                    endpointCount = endpointInfo.count
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
-                                    
-                                    var smartGroupDict: [Int: String] = [:]
-                                    var staticGroupDict: [Int: String] = [:]
-                                                                        
-                                    if endpointCount > 0 {
-                                        self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
-                                            (result: String) in
-                                            // find number of groups
-                                            self.smartCount = 0
-                                            self.staticCount = 0
-                                            var excludeCount = 0
-                                            // split computergroups into smart and static - start
-                                            for i in (0..<endpointCount) {
-                                                let record = endpointInfo[i] as! [String : AnyObject]
-                                                
-                                                let smart: Bool = (record["is_smart"] as! Bool)
-                                                if smart {
-                                                    //self.smartCount += 1
-                                                    if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
-                                                        smartGroupDict[record["id"] as! Int] = record["name"] as! String?
-                                                    }
-                                                } else {
-                                                    //self.staticCount += 1
-                                                    staticGroupDict[record["id"] as! Int] = record["name"] as! String?
-                                                }
-                                            }
-                                            
-                                            if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
-                                                self.nodesMigrated+=1
-                                            }
-                                            
-                                            // split devicegroups into smart and static - end
-                                            switch endpoint {
-                                            case "computergroups":
-                                                if (self.smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
-                                                    excludeCount += smartGroupDict.count
-                                                }
-                                                if (self.static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
-                                                    excludeCount += staticGroupDict.count
-                                                }
-                                                if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 && groupType == "" {
-                                                    self.nodesMigrated-=1
-                                                }
-                                            case "mobiledevicegroups":
-                                                if (self.smart_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
-                                                    excludeCount += smartGroupDict.count
-                                                }
-                                                if (self.static_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
-                                                    excludeCount += staticGroupDict.count
-                                                }
-                                                if self.smart_ios_groups_button.state.rawValue == 1 && self.static_ios_groups_button.state.rawValue == 1 {
-                                                    self.nodesMigrated-=1
-                                                }
-                                            case "usergroups":
-                                                if (self.smartUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
-                                                    excludeCount += smartGroupDict.count
-                                                }
-                                                if (self.staticUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
-                                                    excludeCount += staticGroupDict.count
-                                                }
-                                                if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 && groupType == "" {
-                                                    self.nodesMigrated-=1
-                                                }
-                                                
-                                            default: break
-                                            }
-                                            
-                                            
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(smartGroupDict.count) smart groups\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(staticGroupDict.count) static groups\n") }
-                                            var currentGroupDict: [Int: String] = [:]
-                                            // verify we have some groups
-                                            for g in (0...1) {
-                                                currentGroupDict.removeAll()
-                                                var groupCount = 0
-                                                var localEndpoint = endpoint
-                                                switch endpoint {
-                                                case "computergroups":
-                                                    if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                        currentGroupDict = smartGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "smartcomputergroups"
-//                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "smartcomputergroups"
-                                                    }
-                                                    if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                        currentGroupDict = staticGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "staticcomputergroups"
-//                                                        print("computergroups static - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "staticcomputergroups"
-                                                    }
-                                                case "mobiledevicegroups":
-                                                    if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                        currentGroupDict = smartGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "smartcomputergroups"
-//                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "smartmobiledevicegroups"
-                                                    }
-                                                    if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                        currentGroupDict = staticGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "staticcomputergroups"
-//                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "staticmobiledevicegroups"
-                                                    }
-                                                case "usergroups":
-                                                    if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                        currentGroupDict = smartGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "smartcomputergroups"
-//                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "smartusergroups"
-                                                    }
-                                                    if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                        currentGroupDict = staticGroupDict
-                                                        groupCount = currentGroupDict.count
-//                                                        self.DeviceGroupType = "staticcomputergroups"
-//                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
-                                                        localEndpoint = "staticusergroups"
-                                                    }
-                                                default: break
-                                                }
-                                                var counter = 1
-                                                self.delayInt = self.listDelay(itemCount: currentGroupDict.count)
-                                                for (l_xmlID, l_xmlName) in currentGroupDict {
-                                                    self.availableObjsToMigDict[l_xmlID] = l_xmlName
-                                                    if self.goSender == "goButton" {
-                                                        if !wipeData.on  {
-                                                            
-                                                            //need to call existingEndpoints here to keep proper order?
-                                                            if self.currentEPs[l_xmlName] != nil {
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                            } else {
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
-                                                                self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                            }
-                                                            
-                                                        } else {
-                                                            
-                                                            self.RemoveEndpoints(endpointType: localEndpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
-                                                        }   // if !wipeData.on else - end
-                                                        counter += 1
-                                                    } else {
-                                                        // populate source server under the selective tab
-                                                        self.sortQ.async {
-//                                                            print("adding \(l_xmlName) to array")
-                                                            self.availableIDsToMigDict[l_xmlName] = l_xmlID
-                                                            self.sourceDataArray.append(l_xmlName)
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                    if httpResponse.statusCode > 199 && httpResponse.statusCode < 300 {
+//                        do {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Getting all endpoints from: \(myURL)\n") }
+                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                            if let endpointJSON = json as? [String: Any] {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] endpointJSON: \(endpointJSON))\n") }
 
-                                                            DispatchQueue.main.async {
-                                                                self.srcSrvTableView.reloadData()
-                                                            }
-                                                            // slight delay in building the list - visual effect
-                                                            usleep(self.delayInt)
-                                                            
-                                                            if counter == self.sourceDataArray.count {
-                                                                self.goButtonEnabled(button_status: true)
-                                                            }
+                                switch endpoint {
+                                case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                    if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
+                                        endpointCount = endpointInfo.count
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
 
-                                                            counter += 1
-                                                        }   // self.sortQ.async - end
-                                                    }   // if self.goSender else - end
-                                                    
-                                                }   // for (l_xmlID, l_xmlName) - end
-                                                
-                                                self.nodesMigrated+=1
-                                                
-                                            }   //for g in (0...1) - end
-                                        }   // self.existingEndpoints(theDestEndpoint: "\(endpoint)") - end
-                                    } else {    //if endpointCount > 0 - end
-                                        self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
-                                        if endpoint == self.objectsToMigrate.last {
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                            self.rmDELETE()
-//                                            self.resetAllCheckboxes()
-//                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                    }   // else if endpointCount > 0 - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                }
-                                
-                            case "policies":
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
-                                if let endpointInfo = endpointJSON[endpoint] as? [Any] {
-                                    endpointCount = endpointInfo.count
-                                    
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
-                                    
-                                    var computerPoliciesDict: [Int: String] = [:]
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
 
-                                    if endpointCount > 0 {
-                                        // display migrateDependencies button
-                                        DispatchQueue.main.async {
-                                            self.migrateDependencies.isHidden = false
-                                        }
-                                        
-                                        // create dictionary of existing policies
-                                        self.existingEndpoints(theDestEndpoint: "policies")  {
-                                            (result: String) in
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] returned from existing endpoints: \(result)\n") }
-                                            
-                                            // filter out policies created from casper remote - start
-                                            for i in (0..<endpointCount) {
-                                                let record = endpointInfo[i] as! [String : AnyObject]
-                                                let nameCheck = record["name"] as! String
-                                                if nameCheck.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
-                                                    computerPoliciesDict[record["id"] as! Int] = nameCheck
-                                                }
-                                            }
-                                            // filter out policies created from casper remote - end
-                                            
-                                            // return if we have no policies to migrate - start
-                                            if computerPoliciesDict.count == 0 {
-                                                self.goButtonEnabled(button_status: true)
-                                                completion(["did not find any policies"])
-                                                return
-                                            }
-                                            // return if we have no policies to migrate - end
-                                            
-                                            self.availableObjsToMigDict = computerPoliciesDict
-                                            let nonRemotePolicies = computerPoliciesDict.count
-                                            var counter = 1
-                                            
-                                            self.delayInt = self.listDelay(itemCount: computerPoliciesDict.count)
-                                            for (l_xmlID, l_xmlName) in computerPoliciesDict {
-                                                if self.goSender == "goButton" {
-                                                    if !wipeData.on  {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
-//                                                        if self.currentEPs[l_xmlName] != nil {
-                                                        if self.currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-//                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                        } else {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                        }
-                                                    } else {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                        self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
-                                                    }   // if !wipeData.on else - end
-                                                    counter += 1
-                                                } else {
-                                                    // populate source server under the selective tab
-//                                                        print("adding \(l_xmlName) to array")
-//                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
-//                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
-                                                        self.sortQ.async {
-                                                            self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
-                                                            self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                            DispatchQueue.main.async {
-                                                                self.srcSrvTableView.reloadData()
-                                                            }
-                                                            // slight delay in building the list - visual effect
-                                                            usleep(self.delayInt)
+                                        if endpointCount > 0 {
 
-                                                            if counter == computerPoliciesDict.count {
-                                                                self.goButtonEnabled(button_status: true)
-                                                            }
-                                                            counter+=1
-                                                        }   // self.sortQ.async - end
-                                                    
-                                                }   // if self.goSender else - end
-                                            }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
-                                        }   // self.existingEndpoints - end
-                                    } else {
-                                        self.nodesMigrated+=1
-                                        if endpoint == self.objectsToMigrate.last {
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                            self.rmDELETE()
-//                                            self.resetAllCheckboxes()
-//                                            print("rmDelete 1")
-//                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                    }   // if endpointCount > 0
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-//                                    self.nodesMigrated+=1
-//                                    if endpoint == self.objectsToMigrate.last {
-//                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-//                                        self.rmDELETE()
-//                                        print("rmDelete 2")
-//                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                } else {   //if let endpointInfo = endpointJSON - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                }
-                                
-                            case "jamfusers", "jamfgroups":
-                                let accountsDict = endpointJSON as Dictionary<String, Any>
-                                let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
-                                
-                                if let endpointInfo = usersGroups[endpointParent] as? [Any] {
-                                    endpointCount = endpointInfo.count
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(node) found: \(endpointCount)\n") }
-                                    
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
-                                    
-                                    if endpointCount > 0 {
-                                        
-//                                        self.existingEndpoints(theDestEndpoint: "accounts")  {
-                                        self.existingEndpoints(theDestEndpoint: "ldapservers")  {
-                                            (result: String) in
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints-LDAP] Returned from existing ldapservers: \(result)\n") }
-                                            
-                                            self.existingEndpoints(theDestEndpoint: endpoint)  {
+                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                                 (result: String) in
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(node): \(result)\n") }
-                                            
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
+
                                                 for i in (0..<endpointCount) {
                                                     if i == 0 { self.availableObjsToMigDict.removeAll() }
-                                                    
+
                                                     let record = endpointInfo[i] as! [String : AnyObject]
-                                                    if !(endpoint == "jamfusers" && record["name"] as! String? == self.dest_user) {
-                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                                    }
-                                                    
+
+    //                                                if endpoint != "mobiledeviceapplications" {
+                                                        if record["name"] != nil {
+                                                            self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                        } else {
+                                                            self.availableObjsToMigDict[record["id"] as! Int] = ""
+                                                        }
+    //                                                } else {
+    //                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
+    //                                                }
+
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                                 }   // for i in (0..<endpointCount) end
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
-                                                
+
                                                 var counter = 1
                                                 if self.goSender == "goButton" {
                                                     for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                         if !wipeData.on  {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
-                                                            
-                                                            if self.currentEPs[l_xmlName] != nil {
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
+    //                                                        if self.currentEPs[l_xmlName] != nil {
+                                                            if self.currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
-                                                                //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+    //                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                             } else {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
                                                                 self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                             }
                                                         } else {
-                                                            if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                                self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
-                                                            }
-                                                            
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                            self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
                                                         }   // if !wipeData.on else - end
                                                         counter+=1
                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -2458,235 +2036,659 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             //print("adding \(l_xmlName) to array")
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
-
-                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                            DispatchQueue.main.async {
-                                                                self.srcSrvTableView.reloadData()
-                                                            }
+    //                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
+                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                DispatchQueue.main.async {
+                                                                    self.srcSrvTableView.reloadData()
+                                                                }
                                                             // slight delay in building the list - visual effect
                                                             usleep(self.delayInt)
-                                                            
+    //                                                            self.goButtonEnabled(button_status: true)
+    //                                                        }   //if self.availableIDsToMigDict.count - end
+    //                                                        DispatchQueue.main.async {
+    //                                                            self.srcSrvTableView.reloadData()
+    //                                                        }
                                                             if counter == self.availableObjsToMigDict.count {
                                                                 self.goButtonEnabled(button_status: true)
                                                             }
                                                             counter+=1
                                                         }   // self.sortQ.async - end
                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+
                                                 }   // if self.goSender else - end
                                             }   // self.existingEndpoints - end
+                                        } else {
+                                            self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints1")
+                                            if endpoint == self.objectsToMigrate.last {
+                                                self.rmDELETE()
+    //                                            self.resetAllCheckboxes()
+    //                                            self.goButtonEnabled(button_status: true)
+    //                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        }// if endpointCount > 0 - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    } else {   // end if let buildings, departments...
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    }
 
-                                            
+                                case "computergroups", "mobiledevicegroups", "usergroups":
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing device groups\n") }
+                                    if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
+
+                                        endpointCount = endpointInfo.count
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] groups found: \(endpointCount)\n") }
+
+                                        var smartGroupDict: [Int: String] = [:]
+                                        var staticGroupDict: [Int: String] = [:]
+
+                                        if endpointCount > 0 {
+                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
+                                                (result: String) in
+                                                // find number of groups
+                                                self.smartCount = 0
+                                                self.staticCount = 0
+                                                var excludeCount = 0
+                                                // split computergroups into smart and static - start
+                                                for i in (0..<endpointCount) {
+                                                    let record = endpointInfo[i] as! [String : AnyObject]
+
+                                                    let smart: Bool = (record["is_smart"] as! Bool)
+                                                    if smart {
+                                                        //self.smartCount += 1
+                                                        if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
+                                                            smartGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                                        }
+                                                    } else {
+                                                        //self.staticCount += 1
+                                                        staticGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                                    }
+                                                }
+
+                                                if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
+                                                    self.nodesMigrated+=1
+                                                }
+
+                                                // split devicegroups into smart and static - end
+                                                switch endpoint {
+                                                case "computergroups":
+                                                    if (self.smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                        excludeCount += smartGroupDict.count
+                                                    }
+                                                    if (self.static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                        excludeCount += staticGroupDict.count
+                                                    }
+                                                    if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 && groupType == "" {
+                                                        self.nodesMigrated-=1
+                                                    }
+                                                case "mobiledevicegroups":
+                                                    if (self.smart_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                        excludeCount += smartGroupDict.count
+                                                    }
+                                                    if (self.static_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                        excludeCount += staticGroupDict.count
+                                                    }
+                                                    if self.smart_ios_groups_button.state.rawValue == 1 && self.static_ios_groups_button.state.rawValue == 1 {
+                                                        self.nodesMigrated-=1
+                                                    }
+                                                case "usergroups":
+                                                    if (self.smartUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                        excludeCount += smartGroupDict.count
+                                                    }
+                                                    if (self.staticUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                        excludeCount += staticGroupDict.count
+                                                    }
+                                                    if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 && groupType == "" {
+                                                        self.nodesMigrated-=1
+                                                    }
+
+                                                default: break
+                                                }
+
+
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(smartGroupDict.count) smart groups\n") }
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(staticGroupDict.count) static groups\n") }
+                                                var currentGroupDict: [Int: String] = [:]
+                                                // verify we have some groups
+                                                for g in (0...1) {
+                                                    currentGroupDict.removeAll()
+                                                    var groupCount = 0
+                                                    var localEndpoint = endpoint
+                                                    switch endpoint {
+                                                    case "computergroups":
+                                                        if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "smartcomputergroups"
+    //                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "smartcomputergroups"
+                                                        }
+                                                        if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "staticcomputergroups"
+    //                                                        print("computergroups static - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "staticcomputergroups"
+                                                        }
+                                                    case "mobiledevicegroups":
+                                                        if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "smartcomputergroups"
+    //                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "smartmobiledevicegroups"
+                                                        }
+                                                        if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "staticcomputergroups"
+    //                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "staticmobiledevicegroups"
+                                                        }
+                                                    case "usergroups":
+                                                        if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "smartcomputergroups"
+    //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "smartusergroups"
+                                                        }
+                                                        if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "staticcomputergroups"
+    //                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "staticusergroups"
+                                                        }
+                                                    default: break
+                                                    }
+                                                    var counter = 1
+                                                    self.delayInt = self.listDelay(itemCount: currentGroupDict.count)
+                                                    for (l_xmlID, l_xmlName) in currentGroupDict {
+                                                        self.availableObjsToMigDict[l_xmlID] = l_xmlName
+                                                        if self.goSender == "goButton" {
+                                                            if !wipeData.on  {
+
+                                                                //need to call existingEndpoints here to keep proper order?
+                                                                if self.currentEPs[l_xmlName] != nil {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                                    self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                } else {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
+                                                                    self.endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                }
+
+                                                            } else {
+
+                                                                self.RemoveEndpoints(endpointType: localEndpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
+                                                            }   // if !wipeData.on else - end
+                                                            counter += 1
+                                                        } else {
+                                                            // populate source server under the selective tab
+                                                            self.sortQ.async {
+    //                                                            print("adding \(l_xmlName) to array")
+                                                                self.availableIDsToMigDict[l_xmlName] = l_xmlID
+                                                                self.sourceDataArray.append(l_xmlName)
+                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+
+                                                                DispatchQueue.main.async {
+                                                                    self.srcSrvTableView.reloadData()
+                                                                }
+                                                                // slight delay in building the list - visual effect
+                                                                usleep(self.delayInt)
+
+                                                                if counter == self.sourceDataArray.count {
+                                                                    self.goButtonEnabled(button_status: true)
+                                                                }
+
+                                                                counter += 1
+                                                            }   // self.sortQ.async - end
+                                                        }   // if self.goSender else - end
+
+                                                    }   // for (l_xmlID, l_xmlName) - end
+
+                                                    self.nodesMigrated+=1
+
+                                                }   //for g in (0...1) - end
+                                            }   // self.existingEndpoints(theDestEndpoint: "\(endpoint)") - end
+                                        } else {    //if endpointCount > 0 - end
+                                            self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
+                                            if endpoint == self.objectsToMigrate.last {
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                                self.rmDELETE()
+    //                                            self.resetAllCheckboxes()
+    //                                            self.goButtonEnabled(button_status: true)
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        }   // else if endpointCount > 0 - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                         }
-                                        
-                                    } else {
-                                        self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints4")
-                                        if endpoint == self.objectsToMigrate.last {
-                                            self.rmDELETE()
-//                                            self.resetAllCheckboxes()
-//                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                         }
-                                    }   // if endpointCount > 0 - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                } else {   // end if let buildings, departments...
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+
+                                case "policies":
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] processing \(endpoint)\n") }
+                                    if let endpointInfo = endpointJSON[endpoint] as? [Any] {
+                                        endpointCount = endpointInfo.count
+
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(endpoint) found: \(endpointCount)\n") }
+
+                                        var computerPoliciesDict: [Int: String] = [:]
+
+                                        if endpointCount > 0 {
+                                            // display migrateDependencies button
+                                            DispatchQueue.main.async {
+                                                self.migrateDependencies.isHidden = false
+                                            }
+
+                                            // create dictionary of existing policies
+                                            self.existingEndpoints(theDestEndpoint: "policies")  {
+                                                (result: String) in
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] returned from existing endpoints: \(result)\n") }
+
+                                                // filter out policies created from casper remote - start
+                                                for i in (0..<endpointCount) {
+                                                    let record = endpointInfo[i] as! [String : AnyObject]
+                                                    let nameCheck = record["name"] as! String
+                                                    if nameCheck.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
+                                                        computerPoliciesDict[record["id"] as! Int] = nameCheck
+                                                    }
+                                                }
+                                                // filter out policies created from casper remote - end
+
+                                                // return if we have no policies to migrate - start
+                                                if computerPoliciesDict.count == 0 {
+                                                    self.goButtonEnabled(button_status: true)
+                                                    completion(["did not find any policies"])
+                                                    return
+                                                }
+                                                // return if we have no policies to migrate - end
+
+                                                self.availableObjsToMigDict = computerPoliciesDict
+                                                let nonRemotePolicies = computerPoliciesDict.count
+                                                var counter = 1
+
+                                                self.delayInt = self.listDelay(itemCount: computerPoliciesDict.count)
+                                                for (l_xmlID, l_xmlName) in computerPoliciesDict {
+                                                    if self.goSender == "goButton" {
+                                                        if !wipeData.on  {
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
+    //                                                        if self.currentEPs[l_xmlName] != nil {
+                                                            if self.currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+    //                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                            } else {
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                            }
+                                                        } else {
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                            self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
+                                                        }   // if !wipeData.on else - end
+                                                        counter += 1
+                                                    } else {
+                                                        // populate source server under the selective tab
+    //                                                        print("adding \(l_xmlName) to array")
+    //                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
+    //                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
+                                                            self.sortQ.async {
+                                                                self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
+                                                                self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
+                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                DispatchQueue.main.async {
+                                                                    self.srcSrvTableView.reloadData()
+                                                                }
+                                                                // slight delay in building the list - visual effect
+                                                                usleep(self.delayInt)
+
+                                                                if counter == computerPoliciesDict.count {
+                                                                    self.goButtonEnabled(button_status: true)
+                                                                }
+                                                                counter+=1
+                                                            }   // self.sortQ.async - end
+
+                                                    }   // if self.goSender else - end
+                                                }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
+                                            }   // self.existingEndpoints - end
+                                        } else {
+                                            self.nodesMigrated+=1
+                                            if endpoint == self.objectsToMigrate.last {
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+                                                self.rmDELETE()
+    //                                            self.resetAllCheckboxes()
+    //                                            print("rmDelete 1")
+    //                                            self.goButtonEnabled(button_status: true)
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        }   // if endpointCount > 0
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+    //                                    self.nodesMigrated+=1
+    //                                    if endpoint == self.objectsToMigrate.last {
+    //                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Reached last object to migrate: \(endpoint)\n") }
+    //                                        self.rmDELETE()
+    //                                        print("rmDelete 2")
+    //                                    }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    } else {   //if let endpointInfo = endpointJSON - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                }
-                              
-                            case "computerconfigurations":
-                                if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
-                                    endpointCount = endpointInfo.count
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
-                                    
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
-                                    
-                                    if endpointCount > 0 {
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - start.\n") }
-                                        
-                                        self.nameIdDict(server: self.source_jp_server, endPoint: "computerconfigurations", id: "sourceId") {
-                                            (result: [String:Dictionary<String,Int>]) in
-                                            self.idDict.removeAll()
-                                            
-                                            self.nameIdDict(server: self.source_jp_server, endPoint: "packages", id: "sourceId") {
+
+                                case "jamfusers", "jamfgroups":
+                                    let accountsDict = endpointJSON as Dictionary<String, Any>
+                                    let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
+
+                                    if let endpointInfo = usersGroups[endpointParent] as? [Any] {
+                                        endpointCount = endpointInfo.count
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(node) found: \(endpointCount)\n") }
+
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+
+                                        if endpointCount > 0 {
+
+    //                                        self.existingEndpoints(theDestEndpoint: "accounts")  {
+                                            self.existingEndpoints(theDestEndpoint: "ldapservers")  {
+                                                (result: String) in
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints-LDAP] Returned from existing ldapservers: \(result)\n") }
+
+                                                self.existingEndpoints(theDestEndpoint: endpoint)  {
+                                                    (result: String) in
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(node): \(result)\n") }
+
+                                                    for i in (0..<endpointCount) {
+                                                        if i == 0 { self.availableObjsToMigDict.removeAll() }
+
+                                                        let record = endpointInfo[i] as! [String : AnyObject]
+                                                        if !(endpoint == "jamfusers" && record["name"] as! String? == self.dest_user) {
+                                                            self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                        }
+
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                    }   // for i in (0..<endpointCount) end
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+
+                                                    var counter = 1
+                                                    if self.goSender == "goButton" {
+                                                        for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                            if !wipeData.on  {
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
+
+                                                                if self.currentEPs[l_xmlName] != nil {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) already exists\n") }
+                                                                    //self.currentEndpointID = self.currentEPs[l_xmlName]!
+                                                                    self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                } else {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(l_xmlName) - create\n") }
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                    self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                }
+                                                            } else {
+                                                                if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == self.dest_user.lowercased()) {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                                    self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
+                                                                }
+
+                                                            }   // if !wipeData.on else - end
+                                                            counter+=1
+                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                    } else {
+                                                        // populate source server under the selective tab
+                                                        self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
+                                                        for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                            self.sortQ.async {
+                                                                //print("adding \(l_xmlName) to array")
+                                                                self.availableIDsToMigDict[l_xmlName] = l_xmlID
+                                                                self.sourceDataArray.append(l_xmlName)
+
+                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                DispatchQueue.main.async {
+                                                                    self.srcSrvTableView.reloadData()
+                                                                }
+                                                                // slight delay in building the list - visual effect
+                                                                usleep(self.delayInt)
+
+                                                                if counter == self.availableObjsToMigDict.count {
+                                                                    self.goButtonEnabled(button_status: true)
+                                                                }
+                                                                counter+=1
+                                                            }   // self.sortQ.async - end
+                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                    }   // if self.goSender else - end
+                                                }   // self.existingEndpoints - end
+
+
+                                            }
+
+                                        } else {
+                                            self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints4")
+                                            if endpoint == self.objectsToMigrate.last {
+                                                self.rmDELETE()
+    //                                            self.resetAllCheckboxes()
+    //                                            self.goButtonEnabled(button_status: true)
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        }   // if endpointCount > 0 - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    } else {   // end if let buildings, departments...
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    }
+
+                                case "computerconfigurations":
+                                    if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
+                                        endpointCount = endpointInfo.count
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
+
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+
+                                        if endpointCount > 0 {
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - start.\n") }
+
+                                            self.nameIdDict(server: self.source_jp_server, endPoint: "computerconfigurations", id: "sourceId") {
                                                 (result: [String:Dictionary<String,Int>]) in
-                                            
-                                                self.nameIdDict(server: self.dest_jp_server, endPoint: "packages", id: "destId") {
-                                                    (result: [String:Dictionary<String,Int>]) in
-                                                    self.packages_id_map = result
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] packages id map:\n\(self.packages_id_map)\n") }
-                                                    self.idDict.removeAll()
-                                                    
-                                                    self.nameIdDict(server: self.source_jp_server, endPoint: "scripts", id: "sourceId") {
-                                                        (result: [String:Dictionary<String,Int>]) in
-                                                        
-                                                        self.nameIdDict(server: self.dest_jp_server, endPoint: "scripts", id: "destId") {
-                                                            (result: [String:Dictionary<String,Int>]) in
-                                                            self.scripts_id_map = result
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] scripts id map:\n\(self.scripts_id_map)\n") }
-                                                            self.idDict.removeAll()
-                                                            
-                                                            self.nameIdDict(server: self.source_jp_server, endPoint: "printers", id: "sourceId") {
-                                                                (result: [String:Dictionary<String,Int>]) in
-                                                                
-                                                                self.nameIdDict(server: self.dest_jp_server, endPoint: "printers", id: "destId") {
-                                                                    (result: [String:Dictionary<String,Int>]) in
-                                                                    self.printers_id_map = result
-                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] printers id map:\n\(self.printers_id_map)\n")}
-                                                                    self.idDict.removeAll()
-                                                                    
-                                                                    self.nameIdDict(server: self.source_jp_server, endPoint: "directorybindings", id: "sourceId") {
-                                                                        (result: [String:Dictionary<String,Int>]) in
-                                                                        
-                                                                        self.nameIdDict(server: self.dest_jp_server, endPoint: "directorybindings", id: "destId") {
-                                                                            (result: [String:Dictionary<String,Int>]) in
-                                                                            self.bindings_id_map = result
-                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] bindings id map:\n\(self.bindings_id_map)\n")}
-                                                                            self.idDict.removeAll()
+                                                self.idDict.removeAll()
 
-                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - end.\n") }
-                                                                            
-                                                                            var orderedConfArray = [String]()
-                                                                            var movedParentArray = [String]()
-                                                                            self.orphanIds.removeAll()
-                                                                            //                                        var remainingConfigsArray = [String]()
-                                                                            
-                                                                            while self.configObjectsDict.count != movedParentArray.count {
-                                                                                for (key, _) in self.configObjectsDict {
-                                                                                    if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.firstIndex(of: key) == nil)) || ((movedParentArray.firstIndex(of: key) == nil) && (movedParentArray.firstIndex(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
-                                                                                        orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
-                                                                                        movedParentArray.append(key)
-                                                                                        // look for configs missing their parent
-                                                                                    } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.firstIndex(of: key) == nil) {
-                                                                                        WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
-                                                                                        WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
-                                                                                        orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
-                                                                                        movedParentArray.append(key)
-                                                                                        self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
+                                                self.nameIdDict(server: self.source_jp_server, endPoint: "packages", id: "sourceId") {
+                                                    (result: [String:Dictionary<String,Int>]) in
+
+                                                    self.nameIdDict(server: self.dest_jp_server, endPoint: "packages", id: "destId") {
+                                                        (result: [String:Dictionary<String,Int>]) in
+                                                        self.packages_id_map = result
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] packages id map:\n\(self.packages_id_map)\n") }
+                                                        self.idDict.removeAll()
+
+                                                        self.nameIdDict(server: self.source_jp_server, endPoint: "scripts", id: "sourceId") {
+                                                            (result: [String:Dictionary<String,Int>]) in
+
+                                                            self.nameIdDict(server: self.dest_jp_server, endPoint: "scripts", id: "destId") {
+                                                                (result: [String:Dictionary<String,Int>]) in
+                                                                self.scripts_id_map = result
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] scripts id map:\n\(self.scripts_id_map)\n") }
+                                                                self.idDict.removeAll()
+
+                                                                self.nameIdDict(server: self.source_jp_server, endPoint: "printers", id: "sourceId") {
+                                                                    (result: [String:Dictionary<String,Int>]) in
+
+                                                                    self.nameIdDict(server: self.dest_jp_server, endPoint: "printers", id: "destId") {
+                                                                        (result: [String:Dictionary<String,Int>]) in
+                                                                        self.printers_id_map = result
+                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] printers id map:\n\(self.printers_id_map)\n")}
+                                                                        self.idDict.removeAll()
+
+                                                                        self.nameIdDict(server: self.source_jp_server, endPoint: "directorybindings", id: "sourceId") {
+                                                                            (result: [String:Dictionary<String,Int>]) in
+
+                                                                            self.nameIdDict(server: self.dest_jp_server, endPoint: "directorybindings", id: "destId") {
+                                                                                (result: [String:Dictionary<String,Int>]) in
+                                                                                self.bindings_id_map = result
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] bindings id map:\n\(self.bindings_id_map)\n")}
+                                                                                self.idDict.removeAll()
+
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Create Id Mappings - end.\n") }
+
+                                                                                var orderedConfArray = [String]()
+                                                                                var movedParentArray = [String]()
+                                                                                self.orphanIds.removeAll()
+                                                                                //                                        var remainingConfigsArray = [String]()
+
+                                                                                while self.configObjectsDict.count != movedParentArray.count {
+                                                                                    for (key, _) in self.configObjectsDict {
+                                                                                        if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.firstIndex(of: key) == nil)) || ((movedParentArray.firstIndex(of: key) == nil) && (movedParentArray.firstIndex(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
+                                                                                            orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
+                                                                                            movedParentArray.append(key)
+                                                                                            // look for configs missing their parent
+                                                                                        } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.firstIndex(of: key) == nil) {
+                                                                                            WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
+                                                                                            WriteToLog().message(stringOfText: "[getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
+                                                                                            orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
+                                                                                            movedParentArray.append(key)
+                                                                                            self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
+                                                                                        }
                                                                                     }
                                                                                 }
-                                                                            }
-                                                                            if wipeData.on {
-                                                                                orderedConfArray.reverse()
-                                                                            }
-//                                                                            print("parent array: \(orderedConfArray)")
-                                                                            
-                                                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
-                                                                                (result: String) in
-                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
-                                                                                
-                                                                                var tmp_availableObjsToMigDict = [Int:String]()
-                                                                                
-                                                                                for i in (0..<endpointCount) {
-//                                                                                    if i == 0 { self.availableObjsToMigDict.removeAll() }
-                                                                                    
-                                                                                    let record = endpointInfo[i] as! [String : AnyObject]
-                                                                                    
-                                                                                    tmp_availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                                                                    
-                                                                                }   // for i in (0..<endpointCount) end
-                                                                                
-                                                                                self.availableObjsToMigDict.removeAll()
-                                                                                for orderedId in orderedConfArray {
-                                                                                    
-                                                                                    self.availableObjsToMigDict[Int(orderedId)!] = tmp_availableObjsToMigDict[Int(orderedId)!]
-                                                                                    
-                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
-                                                                                }   // for i in (0..<endpointCount) end
-                                                                                
-                                                                                
-                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
-                                                                                
-                                                                                var counter = 1
-                                                                                if self.goSender == "goButton" {
-//                                                                                  for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                                                    for orderedId in orderedConfArray {
-                                                                                        let l_xmlID = Int(orderedId)
-                                                                                        let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
-                                                                                        if (l_xmlID != nil) && (l_xmlName != nil) {
-                                                                                            if !wipeData.on  {
-                                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
-                                                                                                if self.currentEPs[l_xmlName!] != nil {
-                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) already exists\n") }
-                                                                                                    //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                                                                    self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!, destEpName: l_xmlName!)
-                                                                                                } else {
-                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) - create\n") }
-                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                                                    self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName!)
-                                                                                                }
-                                                                                            } else {
-                                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
-                                                                                                self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID!, endpointName: l_xmlName!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
-                                                                                            }   // if !wipeData.on else - end
-                                                                                        }
-                                                                                            counter+=1
-                                                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                                } else {
-                                                                                    // populate source server under the selective tab
-                                                                                    // for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                                                    self.delayInt = self.listDelay(itemCount: orderedConfArray.count)
-                                                                                    for orderedId in orderedConfArray {
-                                                                                        let l_xmlID = Int(orderedId)
-                                                                                        let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
-                                                                                        self.sortQ.async {
-                                                                                            //print("adding \(l_xmlName) to array")
-                                                                                            self.availableIDsToMigDict[l_xmlName!] = l_xmlID
-                                                                                            self.sourceDataArray.append(l_xmlName!)
-                                                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                                            DispatchQueue.main.async {
-                                                                                                self.srcSrvTableView.reloadData()
-                                                                                            }
-                                                                                            // slight delay in building the list - visual effect
-                                                                                            usleep(self.delayInt)
+                                                                                if wipeData.on {
+                                                                                    orderedConfArray.reverse()
+                                                                                }
+    //                                                                            print("parent array: \(orderedConfArray)")
 
-                                                                                            if counter == orderedConfArray.count {
-                                                                                                self.goButtonEnabled(button_status: true)
+                                                                                self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
+                                                                                    (result: String) in
+                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Returned from existing \(endpoint): \(result)\n") }
+
+                                                                                    var tmp_availableObjsToMigDict = [Int:String]()
+
+                                                                                    for i in (0..<endpointCount) {
+    //                                                                                    if i == 0 { self.availableObjsToMigDict.removeAll() }
+
+                                                                                        let record = endpointInfo[i] as! [String : AnyObject]
+
+                                                                                        tmp_availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+
+                                                                                    }   // for i in (0..<endpointCount) end
+
+                                                                                    self.availableObjsToMigDict.removeAll()
+                                                                                    for orderedId in orderedConfArray {
+
+                                                                                        self.availableObjsToMigDict[Int(orderedId)!] = tmp_availableObjsToMigDict[Int(orderedId)!]
+
+                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
+                                                                                    }   // for i in (0..<endpointCount) end
+
+
+                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+
+                                                                                    var counter = 1
+                                                                                    if self.goSender == "goButton" {
+    //                                                                                  for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                                        for orderedId in orderedConfArray {
+                                                                                            let l_xmlID = Int(orderedId)
+                                                                                            let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
+                                                                                            if (l_xmlID != nil) && (l_xmlName != nil) {
+                                                                                                if !wipeData.on  {
+                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
+                                                                                                    if self.currentEPs[l_xmlName!] != nil {
+                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) already exists\n") }
+                                                                                                        //self.currentEndpointID = self.currentEPs[l_xmlName]!
+                                                                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!, destEpName: l_xmlName!)
+                                                                                                    } else {
+                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] \(String(describing: l_xmlName)) - create\n") }
+                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName!)
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
+                                                                                                    self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID!, endpointName: l_xmlName!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
+                                                                                                }   // if !wipeData.on else - end
                                                                                             }
-                                                                                            counter+=1
-                                                                                        }   // DispatchQueue.main.async - end
-                                                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                                }   // if self.goSender else - end
-                                                                            }   // self.existingEndpoints - end
-                                            
-                                                                        }   // self.nameIdDict(server: self.dest_jp_server - bindings end
-                                                                    }   // self.nameIdDict(server: self.source_jp_server - bindings end
-                                                                }   // self.nameIdDict(server: self.dest_jp_server - printers end
-                                                            }   // self.nameIdDict(server: self.source_jp_server - printers end
-                                                        }   // self.nameIdDict(server: self.dest_jp_server - scripts end
-                                                    }   // self.nameIdDict(server: self.source_jp_server - scripts end
-                                                }   // self.nameIdDict(server: self.dest_jp_server - packages end
-                                            }   // self.nameIdDict(server: self.source_jp_server - packages end
-                                        }   // self.nameIdDict(server: self.source_jp_server - computerconfigurations end
-                            
-                                    } else {
-                                        self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints5")
-                                        if endpoint == self.objectsToMigrate.last {
-                                            self.rmDELETE()
-//                                            self.resetAllCheckboxes()
-//                                            self.goButtonEnabled(button_status: true)
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                                                                counter+=1
+                                                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                                    } else {
+                                                                                        // populate source server under the selective tab
+                                                                                        // for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                                        self.delayInt = self.listDelay(itemCount: orderedConfArray.count)
+                                                                                        for orderedId in orderedConfArray {
+                                                                                            let l_xmlID = Int(orderedId)
+                                                                                            let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
+                                                                                            self.sortQ.async {
+                                                                                                //print("adding \(l_xmlName) to array")
+                                                                                                self.availableIDsToMigDict[l_xmlName!] = l_xmlID
+                                                                                                self.sourceDataArray.append(l_xmlName!)
+                                                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                                DispatchQueue.main.async {
+                                                                                                    self.srcSrvTableView.reloadData()
+                                                                                                }
+                                                                                                // slight delay in building the list - visual effect
+                                                                                                usleep(self.delayInt)
+
+                                                                                                if counter == orderedConfArray.count {
+                                                                                                    self.goButtonEnabled(button_status: true)
+                                                                                                }
+                                                                                                counter+=1
+                                                                                            }   // DispatchQueue.main.async - end
+                                                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                                    }   // if self.goSender else - end
+                                                                                }   // self.existingEndpoints - end
+
+                                                                            }   // self.nameIdDict(server: self.dest_jp_server - bindings end
+                                                                        }   // self.nameIdDict(server: self.source_jp_server - bindings end
+                                                                    }   // self.nameIdDict(server: self.dest_jp_server - printers end
+                                                                }   // self.nameIdDict(server: self.source_jp_server - printers end
+                                                            }   // self.nameIdDict(server: self.dest_jp_server - scripts end
+                                                        }   // self.nameIdDict(server: self.source_jp_server - scripts end
+                                                    }   // self.nameIdDict(server: self.dest_jp_server - packages end
+                                                }   // self.nameIdDict(server: self.source_jp_server - packages end
+                                            }   // self.nameIdDict(server: self.source_jp_server - computerconfigurations end
+
+                                        } else {
+                                            self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints5")
+                                            if endpoint == self.objectsToMigrate.last {
+                                                self.rmDELETE()
+    //                                            self.resetAllCheckboxes()
+    //                                            self.goButtonEnabled(button_status: true)
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        }   // if endpointCount > 0 - end
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                         }
-                                    }   // if endpointCount > 0 - end
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                    } else {  // end if computerconfigurations
+                                        if nodeIndex < nodesToMigrate.count - 1 {
+                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                        }
+                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                } else {  // end if computerconfigurations
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
-                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                }
-                                
-                            default:
-                                break
-                            }   // switch - end
-                        }   // if let endpointJSON - end
+
+                                default:
+                                    break
+                                }   // switch - end
+                            }   // if let endpointJSON - end
+//                        }
+
                     }
                     
                 }   // if let httpResponse as? HTTPURLResponse - end
@@ -3210,8 +3212,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing ldapservers - verbose\n") }
             // remove password from XML, since it doesn't work on the new server
             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
-            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-            //print("\nXML: \(PostXML)")
+            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<password>changeM3!</password>")
             
         case "advancedcomputersearches":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
@@ -3224,17 +3225,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
             for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships"] {
-//                for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships", "remote_management"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             // remote management - fix to migrate computer that is managed
             let regexRemote = try! NSRegularExpression(pattern: "<remote_management>(.*?)</remote_management>", options:.caseInsensitive)
             if userDefaults.integer(forKey: "migrateAsManaged") == 1 {
+                var credentialsArray  = Creds2.retrieve(service: "migrator-mgmtAcct")
+                if credentialsArray.count != 2 {
+                    // set default management account credentials
+                    credentialsArray[0] = "jamfpro_manage"
+                    credentialsArray[1] = "changeM3!"
+                }
                 PostXML = regexRemote.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: """
             <remote_management>
                 <managed>true</managed>
-                <management_username>\(userDefaults.string(forKey: "prefMgmtAcct") ?? "jpmanage")</management_username>
-                <management_password>\(userDefaults.string(forKey: "prefMgmtPwd") ?? "changeM3!")</management_password>
+                <management_username>\(credentialsArray[0])</management_username>
+                <management_password>\(credentialsArray[1])</management_password>
             </remote_management>
 """)
             } else {
@@ -3244,9 +3250,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             </remote_management>
 """)
             }
-
-//            let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
-//            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
 
             // change serial number 'Not Available' to blank so machines will migrate
             PostXML = PostXML.replacingOccurrences(of: "<serial_number>Not Available</serial_number>", with: "<serial_number></serial_number>")
@@ -4848,21 +4851,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func fetchPassword(whichServer: String, url: String, theUser: String) {
 //        let regexKey        = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
 //        let credKey         = regexKey.stringByReplacingMatches(in: url, options: [], range: NSRange(0..<url.utf16.count), withTemplate: "")
-//        let credentailArray  = Creds2.retrieve(service: "migrator - "+credKey)
-        let credentailArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
+//        let credentialsArray  = Creds2.retrieve(service: "migrator - "+credKey)
+        let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
         
-        if credentailArray.count == 2 {
+        if credentialsArray.count == 2 {
             if whichServer == "source" {
                 if (url != "") {
-                    source_user_field.stringValue = credentailArray[0]
-                    source_pwd_field.stringValue = credentailArray[1]
-                    self.storedSourceUser = credentailArray[0]
+                    source_user_field.stringValue = credentialsArray[0]
+                    source_pwd_field.stringValue = credentialsArray[1]
+                    self.storedSourceUser = credentialsArray[0]
                 }
             } else {
                 if (url != "") {
-                    dest_user_field.stringValue = credentailArray[0]
-                    dest_pwd_field.stringValue = credentailArray[1]
-                    self.storedDestUser = credentailArray[0]
+                    dest_user_field.stringValue = credentialsArray[0]
+                    dest_pwd_field.stringValue = credentialsArray[1]
+                    self.storedDestUser = credentialsArray[0]
                 } else {
                     dest_pwd_field.stringValue = ""
                     if source_pwd_field.stringValue != "" {
