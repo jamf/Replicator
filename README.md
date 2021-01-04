@@ -24,7 +24,8 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 
 
 **Limitations/requirements to be aware of:**
-* Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP - credentials must be reset on the destination server.
+* Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A passwoord can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
+* Certificate used for LDAPS does not migrate.
 * Icons associated with Mac App Store apps are not migrated (can't be migrated).
 * Only AFP and SMB shares can be migrated.
 * Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.
@@ -32,7 +33,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 * Institutional disk encryptions that contain the private key cannot be migrated.
-* Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a failure in profile deployment.
+* Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a corrupt profle and failure in profile deployment.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
 
@@ -66,11 +67,11 @@ When importing XML files they must be organized into folders that, for the most 
 
 In addition, Policies can be copied in a disabled state.
 
-![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copy_migrator_prefs.png)
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copyPrefs.png)
 
 Options to export XML from the source server are also available.
 
-![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/export_migrator_prefs.png)
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/exportPrefs.png)
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
 * Save only saves the XML files and does not send them to the destination server.
@@ -79,13 +80,19 @@ Options to export XML from the source server are also available.
 
 Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
 
-![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/migrator2.5c.png)
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copyPrefs.png)
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
 The number of concurrent API operations (from 1 to 20) and number of log files to retain can be configured.
 
 ![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/appPrefs.png)
+
+Migrated computers can show as managed by setting the management account.
+
+Set a password for following migrated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
+
+Note, the same password will be applied if you have multiple binds, or ldap servers, or file shares coonfigured.  
 
 **Migration Summary:**
 

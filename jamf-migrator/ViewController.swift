@@ -3079,7 +3079,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "distributionpoints", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -3208,11 +3208,62 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
             
-        case "directorybindings", "ldapservers":
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing ldapservers - verbose\n") }
-            // remove password from XML, since it doesn't work on the new server
-            let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
-            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<password>changeM3!</password>")
+        case "directorybindings", "ldapservers","distributionpoints":
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing \(endpoint) - verbose\n") }
+            var credentialsArray = [String]()
+            var newPasswordXml   = ""
+
+            switch endpoint {
+            case "directorybindings", "ldapservers":
+                let regexPwd = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
+                if userDefaults.integer(forKey: "prefBindPwd") == 1 && endpoint == "directorybindings" {
+                    //setPassword = true
+                    credentialsArray  = Creds2.retrieve(service: "migrator-bind")
+                    if credentialsArray.count != 2 {
+                        // set password for bind account since one was not found in the keychain
+                        newPasswordXml =  "<password>changeM3!</password>"
+                    } else {
+                        newPasswordXml = "<password>\(credentialsArray[1])</password>"
+                    }
+                }
+                if userDefaults.integer(forKey: "prefLdapPwd") == 1 && endpoint == "ldapservers" {
+                    credentialsArray  = Creds2.retrieve(service: "migrator-ldap")
+                    if credentialsArray.count != 2 {
+                        // set password for LDAP account since one was not found in the keychain
+                        newPasswordXml =  "<password>changeM3!</password>"
+                    } else {
+                        newPasswordXml = "<password>\(credentialsArray[1])</password>"
+                    }
+                }
+                PostXML = regexPwd.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(newPasswordXml)")
+            case "distributionpoints":
+                var credentialsArray2 = [String]()
+                var newPasswordXml2   = ""
+                let regexRwPwd = try! NSRegularExpression(pattern: "<read_write_password_sha256 since=\"9.23\">(.*?)</read_write_password_sha256>", options:.caseInsensitive)
+                let regexRoPwd = try! NSRegularExpression(pattern: "<read_only_password_sha256 since=\"9.23\">(.*?)</read_only_password_sha256>", options:.caseInsensitive)
+                if userDefaults.integer(forKey: "prefFileSharePwd") == 1 && endpoint == "distributionpoints" {
+                    credentialsArray  = Creds2.retrieve(service: "migrator-fsrw")
+                    if credentialsArray.count != 2 {
+                        // set password for fileshare RW account since one was not found in the keychain
+                        newPasswordXml =  "<read_write_password>changeM3!</read_write_password>"
+                    } else {
+                        newPasswordXml = "<read_write_password>\(credentialsArray[1])</read_write_password>"
+                    }
+                    credentialsArray2  = Creds2.retrieve(service: "migrator-fsro")
+                    if credentialsArray2.count != 2 {
+                        // set password for fileshare RO account since one was not found in the keychain
+                        newPasswordXml2 =  "<read_only_password>changeM3!</read_only_password>"
+                    } else {
+                        newPasswordXml2 = "<read_only_password>\(credentialsArray2[1])</read_only_password>"
+                    }
+                }
+                PostXML = regexRwPwd.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(newPasswordXml)")
+                PostXML = regexRoPwd.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "\(newPasswordXml2)")
+            default:
+                break
+            }
+
+
             
         case "advancedcomputersearches":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing advancedcomputersearches - verbose\n") }
@@ -4858,14 +4909,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if whichServer == "source" {
                 if (url != "") {
                     source_user_field.stringValue = credentialsArray[0]
-                    source_pwd_field.stringValue = credentialsArray[1]
-                    self.storedSourceUser = credentialsArray[0]
+                    source_pwd_field.stringValue  = credentialsArray[1]
+                    self.storedSourceUser         = credentialsArray[0]
                 }
             } else {
                 if (url != "") {
                     dest_user_field.stringValue = credentialsArray[0]
-                    dest_pwd_field.stringValue = credentialsArray[1]
-                    self.storedDestUser = credentialsArray[0]
+                    dest_pwd_field.stringValue  = credentialsArray[1]
+                    self.storedDestUser         = credentialsArray[0]
                 } else {
                     dest_pwd_field.stringValue = ""
                     if source_pwd_field.stringValue != "" {

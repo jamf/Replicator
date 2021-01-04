@@ -382,14 +382,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
         }
         if self.title! == "Computer" {
+            credentialsArray.removeAll()
             prefMgmtAcct_textfield.delegate = self
             prefMgmtPwd_textfield.delegate  = self
-            migrateAsManaged_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
-            let credentialsArray  = Creds2.retrieve(service: "migrator-mgmtAcct")
+            migrateAsManaged_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
+            credentialsArray                = Creds2.retrieve(service: "migrator-mgmtAcct")
 
             if credentialsArray.count == 2 {
                 prefMgmtAcct_textfield.stringValue = credentialsArray[0]
-                prefMgmtPwd_textfield.stringValue = credentialsArray[1]
+                prefMgmtPwd_textfield.stringValue  = credentialsArray[1]
             } else {
                 prefMgmtAcct_textfield.stringValue = ""
                 prefMgmtPwd_textfield.stringValue = ""
@@ -403,11 +404,38 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefFsRwPwd_textfield.delegate = self
             prefFsRoPwd_textfield.delegate = self
 
-            prefBindPwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefBindPwd"))
-            prefLdapPwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefLdapPwd"))
+            prefBindPwd_button.state      = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefBindPwd"))
+            prefLdapPwd_button.state      = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefLdapPwd"))
             prefFileSharePwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefFileSharePwd"))
 
+            credentialsArray.removeAll()
             credentialsArray = Creds2.retrieve(service: "migrator-bind")
+            if credentialsArray.count == 2 {
+                prefBindPwd_textfield.stringValue  = credentialsArray[1]
+            } else {
+                prefBindPwd_textfield.stringValue = ""
+            }
+            credentialsArray.removeAll()
+            credentialsArray = Creds2.retrieve(service: "migrator-ldap")
+            if credentialsArray.count == 2 {
+                prefLdapPwd_textfield.stringValue  = credentialsArray[1]
+            } else {
+                prefLdapPwd_textfield.stringValue = ""
+            }
+            credentialsArray.removeAll()
+            credentialsArray = Creds2.retrieve(service: "migrator-fsrw")
+            if credentialsArray.count == 2 {
+                prefFsRwPwd_textfield.stringValue  = credentialsArray[1]
+            } else {
+                prefFsRwPwd_textfield.stringValue = ""
+            }
+            credentialsArray.removeAll()
+            credentialsArray = Creds2.retrieve(service: "migrator-fsro")
+            if credentialsArray.count == 2 {
+                prefFsRoPwd_textfield.stringValue  = credentialsArray[1]
+            } else {
+                prefFsRoPwd_textfield.stringValue = ""
+            }
 
             enableField_action("viewDidAppear")
 

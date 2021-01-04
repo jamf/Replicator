@@ -820,7 +820,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsrw" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xgj-Ze-Ke8">
-                                <rect key="frame" x="48" y="105" width="244" height="21"/>
+                                <rect key="frame" x="46" y="105" width="244" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="gOb-aU-H4h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -842,7 +842,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FAp-KF-ajE">
-                                <rect key="frame" x="46" y="132" width="190" height="16"/>
+                                <rect key="frame" x="44" y="132" width="190" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read/Write Account Password:" id="vdy-6x-HWL">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -871,7 +871,7 @@
                             <constraint firstItem="Xgj-Ze-Ke8" firstAttribute="top" secondItem="FAp-KF-ajE" secondAttribute="bottom" constant="6" id="QRr-I3-pcC"/>
                             <constraint firstItem="ZbO-yE-rVj" firstAttribute="top" secondItem="Xgj-Ze-Ke8" secondAttribute="bottom" constant="6" id="UNM-su-mEj"/>
                             <constraint firstItem="h4P-Oe-SQ6" firstAttribute="trailing" secondItem="OWG-1V-s0b" secondAttribute="trailing" id="ViS-cC-GT4"/>
-                            <constraint firstItem="5bY-os-nBB" firstAttribute="centerX" secondItem="Xgj-Ze-Ke8" secondAttribute="centerX" id="WIz-gS-VHI"/>
+                            <constraint firstItem="5bY-os-nBB" firstAttribute="centerX" secondItem="Xgj-Ze-Ke8" secondAttribute="centerX" constant="2" id="WIz-gS-VHI"/>
                             <constraint firstItem="OWG-1V-s0b" firstAttribute="top" secondItem="WAS-vF-dwo" secondAttribute="bottom" constant="7" id="X8O-6T-X5m"/>
                             <constraint firstItem="FAp-KF-ajE" firstAttribute="top" secondItem="5bY-os-nBB" secondAttribute="bottom" constant="5" id="YbC-tO-RMm"/>
                             <constraint firstItem="FAp-KF-ajE" firstAttribute="leading" secondItem="Xgj-Ze-Ke8" secondAttribute="leading" id="YfF-MN-jG9"/>
@@ -879,7 +879,7 @@
                             <constraint firstItem="ZbO-yE-rVj" firstAttribute="leading" secondItem="Lc5-qp-TxJ" secondAttribute="leading" id="cqy-bq-EvK"/>
                             <constraint firstItem="Lc5-qp-TxJ" firstAttribute="top" secondItem="ZbO-yE-rVj" secondAttribute="bottom" constant="7" id="gdc-NS-uCA"/>
                             <constraint firstItem="5bY-os-nBB" firstAttribute="top" secondItem="OWG-1V-s0b" secondAttribute="bottom" constant="12" id="iGh-LH-JZG"/>
-                            <constraint firstItem="FAp-KF-ajE" firstAttribute="leading" secondItem="kQ6-jr-Xhm" secondAttribute="leading" constant="48" id="x9u-yD-EMf"/>
+                            <constraint firstItem="FAp-KF-ajE" firstAttribute="leading" secondItem="kQ6-jr-Xhm" secondAttribute="leading" constant="46" id="x9u-yD-EMf"/>
                         </constraints>
                     </view>
                     <connections>
