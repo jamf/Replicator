@@ -77,7 +77,7 @@ Options to export XML from the source server are also available.
 
 Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
 
-![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/copyPrefs.png)
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/sitePrefs.png)
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
