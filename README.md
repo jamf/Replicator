@@ -1,9 +1,6 @@
 # Jamf Migrator
 
-Beta available: [JamfMigrator6](https://github.com/jamf/JamfMigrator/releases/tag/v6.0.0b1)
-<br>Supports groups of destination servers.
-
-Current release Download: [JamfMigrator v5.4.0](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/current/jamf-migrator.zip)
+Current release Download: [Jamf Migrator](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/current/jamf-migrator.zip)
 
 A tool to migrate data granularly between Jamf Pro servers
 
