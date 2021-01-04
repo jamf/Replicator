@@ -87,7 +87,11 @@ The number of concurrent API operations (from 1 to 20) and number of log files t
 
 Migrated computers can show as managed by setting the management account.
 
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/computerPrefs.png)
+
 Set a password for following migrated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
+
+![](https://github.com/jamfprofessionalservices/JamfMigrator/blob/master/jamf-migrator/images/passwordPrefs.png)
 
 Note, the same password will be applied if you have multiple binds, or ldap servers, or file shares coonfigured.  
 
@@ -130,6 +134,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v5.6.0**
+
+* Ability to move users to a particular site.
+* Ability to set computer management account.
+* Ability to set a password for service accounts associated with bind, ldap, and file share resources.
 
 **v5.4.0**
 
