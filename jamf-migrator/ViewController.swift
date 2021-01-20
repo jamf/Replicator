@@ -560,19 +560,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.dataFilesRoot = self.dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
         //                print("encoded dataFilesRoot: \(String(describing: dataFilesRoot))")
                         self.source_jp_server_field.stringValue = self.dataFilesRoot
-                        self.source_user_field.isHidden = true
-                        self.source_pwd_field.isHidden = true
-//                        self.source_user_field.stringValue = ""
-//                        self.source_user_field.isEnabled = false
-//                        self.source_pwd_field.stringValue = ""
-//                        self.source_pwd_field.isEnabled = false
-                        self.fileImport = true
+                        self.source_user_field.isHidden         = true
+                        self.source_pwd_field.isHidden          = true
+                        self.fileImport                         = true
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: self.dataFilesRoot))\n") }
                     } else {
                         self.source_jp_server_field.stringValue = ""
-                        self.source_user_field.isHidden = false
-                        self.source_pwd_field.isHidden = false
-                        self.fileImport = false
-                        self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
+                        self.source_user_field.isHidden         = false
+                        self.source_pwd_field.isHidden          = false
+                        self.fileImport                         = false
+                        self.importFiles_button.state           = NSControl.StateValue(rawValue: 0)
                     }
                 } // openPanel.begin - end
                 // if importFiles_button.state - end
@@ -599,58 +596,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            withOptionKey = true
             markAllNone(rawStateValue: sender.state.rawValue)
         }
-
-        //        platform = deviceType()
-//        if deviceType() == "macOS" {
-//            self.allNone_button.state = NSControl.StateValue(rawValue: (
-//                self.advcompsearch_button.state.rawValue == 1
-//                    && self.computers_button.state.rawValue == 1
-//                    && self.configurations_button.state.rawValue == 1
-//                    && self.directory_bindings_button.state.rawValue == 1
-//                    && self.disk_encryptions_button.state.rawValue == 1
-//                    && self.dock_items_button.state.rawValue == 1
-//                    && self.fileshares_button.state.rawValue == 1
-//                    && self.sus_button.state.rawValue == 1
-//                    && self.netboot_button.state.rawValue == 1
-//                    && self.osxconfigurationprofiles_button.state.rawValue == 1
-//                    //                    && self.patch_mgmt_button.state == 1
-//                    && self.patch_policies_button.state.rawValue == 1
-//                    && self.smart_comp_grps_button.state.rawValue == 1
-//                    && self.static_comp_grps_button.state.rawValue == 1
-//                    && self.ext_attribs_button.state.rawValue == 1
-//                    && self.scripts_button.state.rawValue == 1
-//                    && self.macapplications_button.state.rawValue == 1
-//                    && self.packages_button.state.rawValue == 1
-//                    && self.printers_button.state.rawValue == 1
-//                    && self.restrictedsoftware_button.state.rawValue == 1
-//                    && self.policies_button.state.rawValue == 1) ? 1 : 0);
-//        } else if deviceType() == "iOS" {
-//            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: (
-//                self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1
-//                    && self.mobiledevices_button.state.rawValue == 1
-//                    && self.smart_ios_groups_button.state.rawValue == 1
-//                    && self.static_ios_groups_button.state.rawValue == 1
-//                    && self.mobiledevicecApps_button.state.rawValue == 1
-//                    && self.mobiledeviceextensionattributes_button.state.rawValue == 1
-//                    && self.advancedmobiledevicesearches_button.state.rawValue == 1) ? 1 : 0);
-//        } else {
-//            // general
-//            self.allNone_general_button.state = NSControl.StateValue(rawValue: (
-//                self.building_button.state.rawValue == 1
-//                    && self.categories_button.state.rawValue == 1
-//                    && self.dept_button.state.rawValue == 1
-//                    && self.advusersearch_button.state.rawValue == 1
-//                    && self.userEA_button.state.rawValue == 1
-//                    && self.ldapservers_button.state.rawValue == 1
-//                    && self.sites_button.state.rawValue == 1
-//                    && self.networks_button.state.rawValue == 1
-//                    && self.jamfUserAccounts_button.state.rawValue == 1
-//                    && self.jamfGroupAccounts_button.state.rawValue == 1
-//                    && self.smartUserGrps_button.state.rawValue == 1
-//                    && self.staticUserGrps_button.state.rawValue == 1
-//                    && self.users_button.state.rawValue == 1) ? 1 : 0);
-//        }
-
 		  inactiveTabDisable(activeTab: "bulk")
     }
     
@@ -768,56 +713,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.users_button.state = NSControl.StateValue(rawValue: rawStateValue)
         }
     }
-
-//    @IBAction func allNone(_ sender: Any) {
-//    @IBAction func allNone(_ sender: NSButton) {
-//
-//        if deviceType() == "macOS" {
-//            self.advcompsearch_button.state = self.allNone_button.state
-//            self.computers_button.state = self.allNone_button.state
-//            self.configurations_button.state = self.allNone_button.state
-//            self.directory_bindings_button.state = self.allNone_button.state
-//            self.disk_encryptions_button.state = self.allNone_button.state
-//            self.dock_items_button.state = self.allNone_button.state
-//            self.fileshares_button.state = self.allNone_button.state
-//            self.sus_button.state = self.allNone_button.state
-//            self.netboot_button.state = self.allNone_button.state
-//            self.osxconfigurationprofiles_button.state = self.allNone_button.state
-////            self.patch_mgmt_button.state = self.allNone_button.state
-//            self.patch_policies_button.state = self.allNone_button.state
-//            self.smart_comp_grps_button.state = self.allNone_button.state
-//            self.static_comp_grps_button.state = self.allNone_button.state
-//            self.ext_attribs_button.state = self.allNone_button.state
-//            self.scripts_button.state = self.allNone_button.state
-//            self.macapplications_button.state = self.allNone_button.state
-//            self.packages_button.state = self.allNone_button.state
-//            self.printers_button.state = self.allNone_button.state
-//            self.restrictedsoftware_button.state = self.allNone_button.state
-//            self.policies_button.state = self.allNone_button.state
-//        } else if deviceType() == "iOS" {
-//            self.advancedmobiledevicesearches_button.state = self.allNone_iOS_button.state
-//            self.mobiledevices_button.state = self.allNone_iOS_button.state
-//            self.smart_ios_groups_button.state = self.allNone_iOS_button.state
-//            self.static_ios_groups_button.state = self.allNone_iOS_button.state
-//            self.mobiledevicecApps_button.state = self.allNone_iOS_button.state
-//            self.mobiledeviceextensionattributes_button.state = self.allNone_iOS_button.state
-//            self.mobiledeviceconfigurationprofiles_button.state = self.allNone_iOS_button.state
-//        } else {
-//            self.building_button.state = self.allNone_general_button.state
-//            self.categories_button.state = self.allNone_general_button.state
-//            self.dept_button.state = self.allNone_general_button.state
-//            self.advusersearch_button.state = self.allNone_general_button.state
-//            self.userEA_button.state = self.allNone_general_button.state
-//            self.ldapservers_button.state = self.allNone_general_button.state
-//            self.sites_button.state = self.allNone_general_button.state
-//            self.networks_button.state = self.allNone_general_button.state
-//            self.jamfUserAccounts_button.state = self.allNone_general_button.state
-//            self.jamfGroupAccounts_button.state = self.allNone_general_button.state
-//            self.smartUserGrps_button.state = self.allNone_general_button.state
-//            self.staticUserGrps_button.state = self.allNone_general_button.state
-//            self.users_button.state = self.allNone_general_button.state
-//        }
-//    }
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
 
@@ -1218,6 +1113,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if versionArray.count >= 2 {
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
                                                 jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Jamf Pro version: \(jamfProVersion.major).\(jamfProVersion.minor).\n") }
                                             }
                                         } else {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
@@ -1618,9 +1514,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Starting to process \(currentNode)\n") }
                 if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "getting endpoint: \(currentNode)\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[startMigrating] getting endpoint: \(currentNode)\n") }
                     
                     self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
+                    print("done with readNodes")
                     
                 } else {
                     // **************************************** selective migration - start ****************************************
@@ -1836,16 +1733,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
         }
-        if LogLevel.debug { WriteToLog().message(stringOfText: "getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
         if self.fileImport {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] reading files for: \(nodesToMigrate)\n") }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes]         nodeIndex: \(nodeIndex)\n") }
             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex) {
                 (result: String) in
-                if LogLevel.debug { WriteToLog().message(stringOfText: "processFiles result: \(result)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] processFiles result: \(result)\n") }
             }
         } else {
             self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
-                if LogLevel.debug { WriteToLog().message(stringOfText: "getEndpoints result: \(result)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] getEndpoints result: \(result)\n") }
             }
         }
         
@@ -2708,8 +2607,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Data files root: \(self.dataFilesRoot)\n") }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
-
         
         switch nodesToMigrate[nodeIndex] {
         case "computergroups":
@@ -2731,8 +2630,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
         }
-        
-            switch endpoint {
+
+        switch endpoint {
             case "computergroups":
                 if migrateSmartComputerGroups {
                     local_endpointArray.append("smartcomputergroups")
@@ -2765,7 +2664,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             default:
                 local_endpointArray = [endpoint]
-            }
+        }
         
         self.availableFilesToMigDict.removeAll()
         theOpQ.maxConcurrentOperationCount = 1
@@ -2785,6 +2684,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.alert_dialog(header: "Attention:", message: "No files found.")
                             completion("no files found for: \(endpoint)")
                         }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Found \(dataFilesCount) files for endpoint: \(endpoint)\n") }
                         for i in 1...dataFilesCount {
                             let dataFile = xmlFilePaths[i-1]
     //                        let dataFile = dataFiles[i-1]
@@ -2838,6 +2738,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         completion("fetched xml for: \(endpoint)")
                     }
                 } else {   // if fileCount - end
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] fileCount = 0.\n") }
                     self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
                     if nodeIndex < nodesToMigrate.count - 1 {
                         self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
@@ -5803,7 +5704,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func rmBlankLines(theXML: String) -> String {
-        if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
+//        if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")

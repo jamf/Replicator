@@ -24,8 +24,8 @@ class UapiCall: NSObject, URLSessionDelegate {
             path = "v2/\(endpoint)"
         }
 
-        var urlString = "\(serverUrl)/api/\(path)"
-        urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
+        var urlString = "\(serverUrl)/uapi/\(path)"
+        urlString     = urlString.replacingOccurrences(of: "//uapi", with: "/uapi")
         print("[UapiCall] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
