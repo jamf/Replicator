@@ -33,7 +33,7 @@ struct wipeData {
 
 struct History {
     static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    static var logFile = ""
+    static var logFile     = ""
     static var startTime   = Date()
     static var endTime     = Date()
 }
@@ -47,7 +47,7 @@ struct summaryHeader {
 }
 
 struct appInfo {
-    static let dict = Bundle.main.infoDictionary!
+    static let dict    = Bundle.main.infoDictionary!
     static let version = dict["CFBundleShortVersionString"] as! String
 }
 

@@ -564,6 +564,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.source_pwd_field.isHidden          = true
                         self.fileImport                         = true
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: self.dataFilesRoot))\n") }
+                        self.userDefaults.set("\(self.dataFilesRoot)", forKey: "dataFilesRoot")
+                        self.userDefaults.synchronize()
                     } else {
                         self.source_jp_server_field.stringValue = ""
                         self.source_user_field.isHidden         = false
@@ -1113,7 +1115,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if versionArray.count >= 2 {
                                                 jamfProVersion.major = Int("\(versionArray[0])") ?? 0
                                                 jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Jamf Pro version: \(jamfProVersion.major).\(jamfProVersion.minor).\n") }
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Jamf Pro Version: \(fullVersion)\n") }
                                             }
                                         } else {
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
@@ -2603,12 +2605,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func readDataFiles(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: String) -> Void) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] enter\n") }
+        dataFilesRoot = source_jp_server_field.stringValue
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] dataFilesRoot: \(dataFilesRoot)\n") }
         
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Data files root: \(self.dataFilesRoot)\n") }
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
         
         switch nodesToMigrate[nodeIndex] {
         case "computergroups":
@@ -2665,58 +2667,69 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             default:
                 local_endpointArray = [endpoint]
         }
-        
+
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]       Data files root: \(dataFilesRoot)\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]   local_endpointArray: \(local_endpointArray)\n") }
+
         self.availableFilesToMigDict.removeAll()
         theOpQ.maxConcurrentOperationCount = 1
 //        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
+            //
             for local_folder in local_endpointArray {
+//                var directoryPath = "\(String(describing: self.userDefaults.string(forKey: "dataFilesRoot")!))/\(local_folder)"
+                var directoryPath = "\(self.dataFilesRoot)/\(local_folder)"
+                directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n") }
                 do {
-                    let allFiles = FileManager.default.enumerator(atPath: self.dataFilesRoot + "/" + local_folder)
+                    let allFiles = FileManager.default.enumerator(atPath: "\(directoryPath)")
+
                     if let allFilePaths = allFiles?.allObjects {
                         let allFilePathsArray = allFilePaths as! [String]
                         let xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")} // filter for only files with xml extension
                         let dataFilesCount = xmlFilePaths.count
                     
-//                        print("dataFilesCount: \(dataFilesCount)")
-                    
                         if dataFilesCount < 1 {
-                            self.alert_dialog(header: "Attention:", message: "No files found.")
-                            completion("no files found for: \(endpoint)")
-                        }
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Found \(dataFilesCount) files for endpoint: \(endpoint)\n") }
-                        for i in 1...dataFilesCount {
-                            let dataFile = xmlFilePaths[i-1]
-    //                        let dataFile = dataFiles[i-1]
-                            let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                            do {
-                                let fileContents = try String(contentsOf: fileUrl!)
-                                switch endpoint {
-                                case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
-                                    local_general = fileContents
-                                    for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
-                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                    }
-                                case "buildings", "departments", "sites", "directorybindings":
-                                    local_general = fileContents
-                                default:
-                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
-                                    for xmlTag in ["site", "category", "payloads"] {
-                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                    }
-                                }
-                                
-                                let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
-                                let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
-                                
-                                self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
-                            } catch {
-                                //                    print("unable to read \(dataFile)")
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                            DispatchQueue.main.async {
+                                self.alert_dialog(header: "Attention:", message: "No files found.  If the folder exists outside the Downloads directory, reselect it and try again.")
                             }
-                            self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
-                        }   // for i in 1...dataFilesCount - end
+                            completion("no files found for: \(endpoint)")
+                        } else {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Found \(dataFilesCount) files for endpoint: \(endpoint)\n") }
+                            for i in 1...dataFilesCount {
+                                let dataFile = xmlFilePaths[i-1]
+        //                        let dataFile = dataFiles[i-1]
+                                let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                                do {
+                                    let fileContents = try String(contentsOf: fileUrl!)
+                                    switch endpoint {
+                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
+                                        local_general = fileContents
+                                        for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
+                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                        }
+                                    case "buildings", "departments", "sites", "directorybindings":
+                                        local_general = fileContents
+                                    default:
+                                        local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
+                                        for xmlTag in ["site", "category", "payloads"] {
+                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                        }
+                                    }
+
+                                    let id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
+                                    let name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
+
+                                    self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
+                                } catch {
+                                    //                    print("unable to read \(dataFile)")
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                                }
+                                self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
+                            }   // for i in 1...dataFilesCount - end
+                        }
                     }   // if let allFilePaths - end
                 } catch {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
@@ -3451,30 +3464,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
 
-//        if counters[endpointType] == nil {
-//            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-//        } else {
-//            counters[endpointType]!["total"] = endpointCount
-//        }
+        if counters[endpointType] == nil {
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+        } else {
+            counters[endpointType]!["total"] = endpointCount
+        }
 
-        if counters[endpointType]!["create"] == nil {
-            self.counters[endpointType]!["create"] = 0
-            self.summaryDict[endpointType]!["create"] = []
-        }
-        if counters[endpointType]!["update"] == nil {
-            self.counters[endpointType]!["update"] = 0
-            self.summaryDict[endpointType]!["update"] = []
-        }
-        if counters[endpointType]!["fail"] == nil {
-            self.counters[endpointType]!["fail"] = 0
-            self.summaryDict[endpointType]!["fail"] = []
-        }
-        if counters[endpointType]!["total"] == nil {
-            self.counters[endpointType]!["total"] = 0
-            self.summaryDict[endpointType]!["total"] = []
-        }
-        counters[endpointType]!["total"] = endpointCount
+        // disabled 21-01-21
+//        if counters[endpointType]!["create"] == nil {
+//            self.counters[endpointType]!["create"] = 0
+//            self.summaryDict[endpointType]!["create"] = []
+//        }
+//        if counters[endpointType]!["update"] == nil {
+//            self.counters[endpointType]!["update"] = 0
+//            self.summaryDict[endpointType]!["update"] = []
+//        }
+//        if counters[endpointType]!["fail"] == nil {
+//            self.counters[endpointType]!["fail"] = 0
+//            self.summaryDict[endpointType]!["fail"] = []
+//        }
+//        if counters[endpointType]!["total"] == nil {
+//            self.counters[endpointType]!["total"] = 0
+//            self.summaryDict[endpointType]!["total"] = []
+//        }
+//        counters[endpointType]!["total"] = endpointCount
 
         
         var destinationEpId = destEpId
@@ -5704,7 +5718,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func rmBlankLines(theXML: String) -> String {
-//        if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
@@ -5725,7 +5739,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (theTag == "script_contents_encoded") || (theTag == "id") {
             newXML_trimmed = newXML
         } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
+//            if LogLevel.debug { WriteToLog().message(stringOfText: "Removing blank lines.\n") }
             newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "\n")
             newXML_trimmed = newXML.replacingOccurrences(of: "\r\r", with: "\r")
         }
