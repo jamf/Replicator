@@ -31,7 +31,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
         }
 
         if (pwc != nil) {
-            if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site")) {
+            if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site") || vc.windowIsVisible(windowName: "App") || vc.windowIsVisible(windowName: "Computer") || vc.windowIsVisible(windowName: "Password")) {
                 pwc?.window?.setIsVisible(true)
                 
             } else {

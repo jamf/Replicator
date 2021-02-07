@@ -53,7 +53,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     // Show Preferences Window
-    var prefWindowController2: PrefsWindowController?
+//    var prefWindowController2: PrefsWindowController? removed lnh 2021-02-06
     @IBAction func showPrefsWindow(_ sender: Any) {
         PrefsWindowController().show()
 //        let myPrefs = PrefsWindowController().window
@@ -1519,7 +1519,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[startMigrating] getting endpoint: \(currentNode)\n") }
                     
                     self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
-                    print("done with readNodes")
+//                    print("done with readNodes")
                     
                 } else {
                     // **************************************** selective migration - start ****************************************

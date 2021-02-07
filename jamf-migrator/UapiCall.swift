@@ -26,7 +26,7 @@ class UapiCall: NSObject, URLSessionDelegate {
 
         var urlString = "\(serverUrl)/uapi/\(path)"
         urlString     = urlString.replacingOccurrences(of: "//uapi", with: "/uapi")
-        print("[UapiCall] urlString: \(urlString)")
+//        print("[UapiCall] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.default
@@ -34,7 +34,7 @@ class UapiCall: NSObject, URLSessionDelegate {
         request.httpMethod = method
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.action] Attempting \(method) on \(urlString).\n") }
-        print("[UapiCall.action] Attempting \(method) on \(urlString).")
+//        print("[UapiCall.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
