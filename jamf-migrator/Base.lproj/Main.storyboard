@@ -2081,7 +2081,7 @@
                                                                         <menuItem title="Extension Attributes" id="Amv-Lr-jUK" userLabel="Extension Attributes">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
-                                                                        <menuItem title="Prestages" id="vLO-yr-149" userLabel="Prestages">
+                                                                        <menuItem title="Prestages" hidden="YES" id="vLO-yr-149" userLabel="Prestages">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                     </items>
@@ -2144,7 +2144,7 @@
                                                                         <menuItem title="Netboot Servers" id="e78-AX-SO6"/>
                                                                         <menuItem title="Packages" id="gPQ-gf-J3z"/>
                                                                         <menuItem title="Policies" id="jwH-Jm-D0E"/>
-                                                                        <menuItem title="Prestages" id="XWe-5m-1Pa">
+                                                                        <menuItem title="Prestages" hidden="YES" id="XWe-5m-1Pa">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                         <menuItem title="Printers" id="DYb-Mc-wvX"/>

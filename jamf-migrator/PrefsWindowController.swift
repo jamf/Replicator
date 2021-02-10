@@ -24,7 +24,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
 
         var prefsVisible = false
         let tabs = ["Copy", "Export", "Site", "App", "Computer", "Password"]
-        let vc = ViewController()
+//        let vc = ViewController()
         var pwc: NSWindowController?
         
         if !(pwc != nil) {

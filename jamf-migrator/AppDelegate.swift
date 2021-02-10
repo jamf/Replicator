@@ -15,6 +15,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var prefWindowController: NSWindowController?
 
+    // allow access to previously selected folder - start
+    var folderPath: URL? {
+        didSet {
+            do {
+                let bookmark = try folderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
+                UserDefaults.standard.set(bookmark, forKey: "bookmark")
+            } catch let error as NSError {
+                WriteToLog().message(stringOfText: "Set Bookmark Fails: \(error.description)")
+            }
+        }
+    }
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+       if let bookmarkData = UserDefaults.standard.object(forKey: "bookmark") as? Data {
+           do {
+               var bookmarkIsStale = false
+               let url = try URL.init(resolvingBookmarkData: bookmarkData as Data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &bookmarkIsStale)
+               url.startAccessingSecurityScopedResource()
+           } catch let error as NSError {
+            WriteToLog().message(stringOfText: "Bookmark Access Fails: \(error.description)")
+           }
+       }
+    }
+    // allow access to previously selected folder - end
+
     @IBAction func checkForUpdates(_ sender: AnyObject) {
         let verCheck = VersionCheck()
         
