@@ -3189,7 +3189,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "computers":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
-            for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships"] {
+            for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships", "device_aad_infos"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             // remote management - fix to migrate computer that is managed
