@@ -46,6 +46,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var prefMgmtAcct_textfield: NSTextField!
     @IBOutlet weak var prefMgmtPwd_label: NSTextField!
     @IBOutlet weak var prefMgmtPwd_textfield: NSSecureTextField!
+    @IBOutlet weak var removeCA_ID_button: NSButton!
 
     // passwords prefs
     @IBOutlet weak var prefBindPwd_button: NSButton!
@@ -67,6 +68,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         prefMgmtPwd_label.isHidden      = !convertToBool(state: migrateAsManaged_button.state.rawValue)
         prefMgmtPwd_textfield.isHidden  = !convertToBool(state: migrateAsManaged_button.state.rawValue)
 
+    }
+
+    @IBAction func removeCA_ID_action(_ sender: Any) {
+        if "\(sender as AnyObject)" != "viewDidAppear" {
+            userDefaults.set(removeCA_ID_button.state.rawValue, forKey: "removeCA_ID")
+            userDefaults.synchronize()
+        }
     }
 
     @IBAction func enableField_action(_ sender: Any) {
@@ -387,6 +395,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefMgmtPwd_textfield.delegate  = self
             migrateAsManaged_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
             credentialsArray                = Creds2.retrieve(service: "migrator-mgmtAcct")
+            removeCA_ID_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "removeCA_ID"))
 
             if credentialsArray.count == 2 {
                 prefMgmtAcct_textfield.stringValue = credentialsArray[0]

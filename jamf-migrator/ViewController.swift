@@ -3189,11 +3189,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "computers":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing computers - verbose\n") }
             // clean up some data from XML
-            for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships", "device_aad_infos"] {
+            for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
-            // remote management - fix to migrate computer that is managed
-            let regexRemote = try! NSRegularExpression(pattern: "<remote_management>(.*?)</remote_management>", options:.caseInsensitive)
+            // remove Conditional Access ID from record, if selected
+            if userDefaults.integer(forKey: "removeCA_ID") == 1 {
+                PostXML = self.rmXmlData(theXML: PostXML, theTag: "device_aad_infos", keepTags: false)
+            }
+            // remote management
+            let regexRemote = try! NSRegularExpression(pattern: "<remote_management>(.|\n|\r)*?</remote_management>", options:.caseInsensitive)
             if userDefaults.integer(forKey: "migrateAsManaged") == 1 {
                 var credentialsArray  = Creds2.retrieve(service: "migrator-mgmtAcct")
                 if credentialsArray.count != 2 {
@@ -3215,6 +3219,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             </remote_management>
 """)
             }
+            print("migrate as managed: \(userDefaults.integer(forKey: "migrateAsManaged"))")
+            print("\(PostXML)")
+
+
 
             // change serial number 'Not Available' to blank so machines will migrate
             PostXML = PostXML.replacingOccurrences(of: "<serial_number>Not Available</serial_number>", with: "<serial_number></serial_number>")
@@ -3525,7 +3533,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        var createDestUrl = createDestUrlBase
         //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         
-        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads()
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
@@ -3860,7 +3868,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalFailed    = 0
         var totalCompleted = 0
         
-        concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
+        concurrentThreads = setConcurrentThreads()
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
@@ -6078,7 +6086,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     func setConcurrentThreads() -> Int {
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads")
-        concurrent = (concurrent > 20) ? 5:concurrent
+        concurrent = (concurrent > 10) ? 5:concurrent
         return concurrent
     }
     

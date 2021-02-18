@@ -63,6 +63,7 @@ struct pref {
     static var migrateAsManaged = 0
     static var mgmtAcct         = ""
     static var mgmtPwd          = ""
+    static var removeCA_ID      = 0
 }
 
 struct setting {
