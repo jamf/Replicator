@@ -135,6 +135,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.6.2**
+
+* Resolve crash when importing files located outside the ~/Downloads folder.
+* Resolved issue related to migrating the computer as managed.
+* Added option to remove conditional acccess ID from computer reccord.
+* Better handling of preferences window when it is in the backcground.
+
 **v5.6.0**
 
 * Ability to move users to a particular site.
