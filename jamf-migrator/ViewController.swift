@@ -3366,7 +3366,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexComp = try! NSRegularExpression(pattern: "<self_service_icon>(.*?)</self_service_icon>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<self_service_icon/>")
             // remove photo reference from XML
-            for xmlTag in ["enable_custom_photo_url", "custom_photo_url", "links"] {
+            for xmlTag in ["enable_custom_photo_url", "custom_photo_url", "links", "ldap_server"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             if itemToSite && destinationSite != "" {
@@ -6285,6 +6285,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         source_pwd_field.nextKeyView        = dest_jp_server_field
         dest_jp_server_field.nextKeyView    = dest_user_field
         dest_user_field.nextKeyView         = dest_pwd_field
+
+//        source_jp_server_field.drawsBackground = true
+//        source_jp_server_field.bac
         
         // v1 colors
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
