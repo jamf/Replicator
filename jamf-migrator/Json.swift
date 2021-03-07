@@ -41,7 +41,7 @@ class Json: NSObject, URLSessionDelegate {
 //        getRecordQ.async {
             
             jsonRequest.httpMethod = "GET"
-            let destConf = URLSessionConfiguration.default
+            let destConf = URLSessionConfiguration.ephemeral
             destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {

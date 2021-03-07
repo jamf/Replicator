@@ -232,9 +232,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //    @IBOutlet weak var get_completed_field: NSTextField!
 //    @IBOutlet weak var get_found_field: NSTextField!
     @IBOutlet weak var getSummary_label: NSTextField!
-    @IBOutlet weak var get_levelIndicator: NSLevelIndicatorCell!
+    @IBOutlet weak var get_levelIndicator: NSLevelIndicator!
+    //    @IBOutlet weak var get_levelIndicator: NSLevelIndicatorCell!
 
-    @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
+    @IBOutlet weak var put_name_field: NSTextField!  // object being migrated
 //    @IBOutlet weak var objects_completed_field: NSTextField!
 //    @IBOutlet weak var objects_found_field: NSTextField!
     @IBOutlet weak var putSummary_label: NSTextField!
@@ -1063,7 +1064,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
                 request.httpMethod = "GET"
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(f_credentials)", "Accept" : "application/json"]
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -1866,7 +1867,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let encodedURL = URL(string: myURL)
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
-            let configuration = URLSessionConfiguration.default
+            let configuration = URLSessionConfiguration.ephemeral
             configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -2870,7 +2871,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let encodedURL = URL(string: myURL)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "GET"
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -3224,8 +3225,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             </remote_management>
 """)
             }
-            print("migrate as managed: \(userDefaults.integer(forKey: "migrateAsManaged"))")
-            print("\(PostXML)")
+//            print("migrate as managed: \(userDefaults.integer(forKey: "migrateAsManaged"))")
+//            print("\(PostXML)")
 
 
 
@@ -3623,7 +3624,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 } else {
                     request.httpMethod = "PUT"
                 }
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -3799,7 +3800,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             // update counter
                             //                        DispatchQueue.main.async {
-                            self.object_name_field.stringValue = "\(endpointType)"
+                            self.put_name_field.stringValue = "\(endpointType)"
                             //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
                             //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
     //                        if totalCompleted > currentCompleted {
@@ -3931,7 +3932,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let encodedURL = URL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "DELETE"
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 //request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -3994,7 +3995,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         totalCompleted = totalDeleted + totalFailed
 
                         DispatchQueue.main.async {
-                            self.object_name_field.stringValue       = "\(endpointType)"
+                            self.put_name_field.stringValue       = "\(endpointType)"
                             //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
 //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                             if totalCompleted > 0 {
@@ -4181,7 +4182,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
                         destRequest.httpMethod = "GET"
-                        let destConf = URLSessionConfiguration.default
+                        let destConf = URLSessionConfiguration.ephemeral
                         destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
@@ -4515,7 +4516,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var endpointCount = 0
         
         var serverCreds = ""
-        let serverConf = URLSessionConfiguration.default
+        let serverConf = URLSessionConfiguration.ephemeral
         if id == "sourceId" {
             serverCreds = self.sourceBase64Creds
         } else {
@@ -4605,7 +4606,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         idMapQ.async {
             
             serverRequest.httpMethod = "GET"
-            let serverConf = URLSessionConfiguration.default
+            let serverConf = URLSessionConfiguration.ephemeral
             serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
             let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
@@ -4735,7 +4736,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     completion(false)
                     return
                 }
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] --- checking healthCheck page.\n") }
                 var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
@@ -4769,15 +4770,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.get_name_field.stringValue             = ""
 //            self.get_completed_field.stringValue        = ""
 //            self.get_found_field.stringValue            = ""
-            self.object_name_field.stringValue          = ""
+            self.put_name_field.stringValue          = ""
 //            self.objects_completed_field.stringValue    = ""
 //            self.objects_found_field.stringValue        = ""
 
+            self.getSummary_label.stringValue  = ""
             self.get_levelIndicator.floatValue = 0.0
-            self.get_levelIndicator.isEnabled = false
+            self.get_levelIndicator.isEnabled  = false
 
+            self.putSummary_label.stringValue  = ""
             self.put_levelIndicator.floatValue = 0.0
-            self.put_levelIndicator.isEnabled = false
+            self.put_levelIndicator.isEnabled  = false
 
         }
     }
@@ -5329,7 +5332,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     let serverURL = URL(string: createDestUrl)!
                     
-                    let sessionConfig = URLSessionConfiguration.default
+                    let sessionConfig = URLSessionConfiguration.ephemeral
                     let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                     
                     var request = URLRequest(url:serverURL)
@@ -5435,7 +5438,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                 request.httpMethod = action
                
-                let configuration = URLSessionConfiguration.default
+                let configuration = URLSessionConfiguration.ephemeral
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -6071,7 +6074,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            let request = NSMutableURLRequest(url: encodedURL! as URL)
 //            request.httpMethod = "GET"
 //
-//            let configuration = URLSessionConfiguration.default
+//            let configuration = URLSessionConfiguration.ephemeral
 ////            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
 ////            request.httpBody = encodedXML!
 //            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -6332,7 +6335,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // light mode settings
             let bkgndAlpha:CGFloat = 0.95
             get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-            object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+            put_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
 //            get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
 //            get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
 //            objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
@@ -6594,7 +6597,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // read command line arguments - start
         var numberOfArgs = 0
         
@@ -6746,7 +6749,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                         self.migrateOrRemove_TextField.stringValue = "Migrate"
                         self.migrateOrRemove_TextField.textColor = self.whiteText
-                        self.destinationMethod_TextField.stringValue = "POST/PUT:"
+                        self.destinationMethod_TextField.stringValue = "SEND:"
                         self.destinationMethod_TextField.textColor = self.whiteText
                         isRed = false
                     }

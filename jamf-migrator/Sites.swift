@@ -52,7 +52,7 @@ class Sites: NSObject, URLSessionDelegate {
         let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
         //        print("serverRequest: \(serverRequest)")
         serverRequest.httpMethod = "GET"
-        let serverConf = URLSessionConfiguration.default
+        let serverConf = URLSessionConfiguration.ephemeral
         serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {

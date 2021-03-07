@@ -29,7 +29,7 @@ class UapiCall: NSObject, URLSessionDelegate {
 //        print("[UapiCall] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
-        let configuration  = URLSessionConfiguration.default
+        let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: url!)
         request.httpMethod = method
 
@@ -79,7 +79,7 @@ class UapiCall: NSObject, URLSessionDelegate {
 //        print("\(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
-        let configuration  = URLSessionConfiguration.default
+        let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         

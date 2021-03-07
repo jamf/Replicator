@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -13,7 +13,7 @@
                     <window key="window" title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="sxJ-f1-yLB">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="951" y="1113" width="480" height="270"/>
+                        <rect key="contentRect" x="951" y="1113" width="500" height="270"/>
                         <rect key="screenRect" x="657" y="800" width="1920" height="1057"/>
                         <connections>
                             <outlet property="delegate" destination="416-qt-7e7" id="Ljz-dF-S3g"/>
@@ -41,7 +41,7 @@
                     </tabViewItems>
                     <viewControllerTransitionOptions key="transitionOptions" allowUserInteraction="YES"/>
                     <tabView key="tabView" type="noTabsNoBorder" id="VZi-S2-Oid">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="500" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <font key="font" metaFont="system"/>
                         <connections>
@@ -60,14 +60,14 @@
                 </tabViewController>
                 <customObject id="VJS-aQ-7Am" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="8" y="496"/>
+            <point key="canvasLocation" x="53" y="496"/>
         </scene>
         <!--Copy-->
         <scene sceneID="geR-qQ-7PU">
             <objects>
                 <viewController title="Copy" id="Lwu-vt-54h" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="RHL-Es-p2H">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="238"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="238"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LRe-g2-dkk">
@@ -316,7 +316,7 @@
             <objects>
                 <viewController title="Export" id="zJe-p7-yg6" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="RGC-fn-yqI">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="238"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="238"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2cl-bV-bJO">
@@ -355,7 +355,7 @@
                                 </textFieldCell>
                             </textField>
                             <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ygP-ng-L4v">
-                                <rect key="frame" x="169" y="182" width="22" height="18"/>
+                                <rect key="frame" x="169" y="182" width="18" height="18"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" focusRingType="none" inset="2" id="zw6-9Y-XS7">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -395,7 +395,7 @@
                                 </connections>
                             </button>
                             <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lUE-WG-wQ1">
-                                <rect key="frame" x="217" y="182" width="22" height="18"/>
+                                <rect key="frame" x="213" y="182" width="18" height="18"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="yqx-oD-YTV">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -415,7 +415,7 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Y9D-2c-3zZ">
-                                <rect key="frame" x="205" y="206" width="43" height="17"/>
+                                <rect key="frame" x="264" y="206" width="43" height="17"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Scope" id="fp6-xj-Gbq">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -486,7 +486,7 @@
             <objects>
                 <viewController title="Site" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="btl-X1-946">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="248"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="248"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z9p-7n-bVG">
@@ -595,11 +595,11 @@
             <objects>
                 <viewController title="App" id="Ojm-Op-AKi" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Rdg-70-UCl" userLabel="app View">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="248"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="248"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y1Q-0c-cgq">
-                                <rect key="frame" x="32" y="184" width="192" height="16"/>
+                                <rect key="frame" x="32" y="183" width="191" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Maximum Concurrent Threads:" id="xZm-Lh-vjC">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -607,7 +607,7 @@
                                 </textFieldCell>
                             </textField>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
-                                <rect key="frame" x="32" y="159" width="192" height="24"/>
+                                <rect key="frame" x="32" y="154" width="191" height="28"/>
                                 <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="10" doubleValue="5" tickMarkPosition="below" numberOfTickMarks="10" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
                                 <connections>
                                     <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
@@ -670,7 +670,7 @@
             <objects>
                 <viewController title="Computer" id="QIN-ev-Ami" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="pA7-Le-xOX" userLabel="computer View">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="q1O-r0-0ov">
@@ -682,7 +682,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hzQ-6I-RWA">
-                                <rect key="frame" x="11" y="228" width="207" height="18"/>
+                                <rect key="frame" x="11" y="227" width="211" height="18"/>
                                 <buttonCell key="cell" type="check" title="Migrate computer as managed" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Znv-DC-QZf">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -692,7 +692,7 @@
                                 </connections>
                             </button>
                             <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dz3-ly-Vnb">
-                                <rect key="frame" x="30" y="203" width="141" height="16"/>
+                                <rect key="frame" x="30" y="201" width="141" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Management Account:" id="wMX-gO-1Uz">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -700,7 +700,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField identifier="prefMgmtAcct" hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3a7-DQ-lyy">
-                                <rect key="frame" x="56" y="178" width="272" height="21"/>
+                                <rect key="frame" x="56" y="176" width="331" height="21"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="ypS-VH-Gln">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -708,7 +708,7 @@
                                 </textFieldCell>
                             </textField>
                             <secureTextField identifier="prefMgmtPwd" hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JhD-pI-Jwl">
-                                <rect key="frame" x="56" y="129" width="272" height="21"/>
+                                <rect key="frame" x="56" y="127" width="331" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="uKe-e3-GvM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -719,7 +719,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wnn-L0-Q8w">
-                                <rect key="frame" x="30" y="154" width="66" height="16"/>
+                                <rect key="frame" x="30" y="152" width="66" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Password:" id="Tw9-lc-2Pl">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -773,11 +773,11 @@
             <objects>
                 <viewController title="Passwords" id="r9d-Hx-eFt" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="kQ6-jr-Xhm" userLabel="passwords View">
-                        <rect key="frame" x="0.0" y="0.0" width="341" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button identifier="bind" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UOr-4y-ts0">
-                                <rect key="frame" x="24" y="258" width="213" height="18"/>
+                                <rect key="frame" x="24" y="257" width="217" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set Directory Binding Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aiw-dO-7Ta">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -787,7 +787,7 @@
                                 </connections>
                             </button>
                             <button identifier="ldap" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WAS-vF-dwo">
-                                <rect key="frame" x="24" y="205" width="141" height="18"/>
+                                <rect key="frame" x="24" y="202" width="145" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set LDAP Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mxu-KS-PMy">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -797,7 +797,7 @@
                                 </connections>
                             </button>
                             <button identifier="fileshare" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5bY-os-nBB">
-                                <rect key="frame" x="24" y="151" width="292" height="18"/>
+                                <rect key="frame" x="24" y="146" width="296" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set Passwords for Local Distribution Point(s)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WPR-Cu-AGt">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -807,7 +807,7 @@
                                 </connections>
                             </button>
                             <secureTextField identifier="bind" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="h4P-Oe-SQ6">
-                                <rect key="frame" x="46" y="232" width="243" height="21"/>
+                                <rect key="frame" x="46" y="230" width="243" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="243" id="zLg-fo-BpM"/>
                                 </constraints>
@@ -821,7 +821,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="ldap" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OWG-1V-s0b">
-                                <rect key="frame" x="46" y="179" width="243" height="21"/>
+                                <rect key="frame" x="46" y="175" width="243" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2lp-yr-f8s">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -832,7 +832,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsrw" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xgj-Ze-Ke8">
-                                <rect key="frame" x="46" y="105" width="244" height="21"/>
+                                <rect key="frame" x="46" y="99" width="250" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="gOb-aU-H4h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -843,7 +843,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsro" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Lc5-qp-TxJ">
-                                <rect key="frame" x="46" y="55" width="243" height="21"/>
+                                <rect key="frame" x="46" y="49" width="243" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="hsP-WO-Ouc">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -854,7 +854,7 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FAp-KF-ajE">
-                                <rect key="frame" x="44" y="132" width="190" height="16"/>
+                                <rect key="frame" x="44" y="126" width="190" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read/Write Account Password:" id="vdy-6x-HWL">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -862,7 +862,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZbO-yE-rVj">
-                                <rect key="frame" x="44" y="83" width="185" height="16"/>
+                                <rect key="frame" x="44" y="77" width="185" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read-only Account Password:" id="3T8-sJ-ea4">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>

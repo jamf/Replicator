@@ -37,7 +37,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     getRecordQ.addOperation {
                         
                         xmlRequest.httpMethod = "\(method.uppercased())"
-                        let destConf = URLSessionConfiguration.default
+                        let destConf = URLSessionConfiguration.ephemeral
                         destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: xmlRequest as URLRequest, completionHandler: {

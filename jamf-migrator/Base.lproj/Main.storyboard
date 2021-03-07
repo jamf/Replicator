@@ -931,15 +931,6 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="a2p-Bb-YNK">
-                                <rect key="frame" x="40" y="358" width="78" height="27"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Processing" id="C66-wG-Si3">
-                                    <font key="font" size="14" name="ArialMT"/>
-                                    <color key="textColor" red="0.9999235272" green="1" blue="0.99988299609999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ynJ-S6-o1y">
                                 <rect key="frame" x="465" y="317" width="358" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -947,15 +938,6 @@
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" red="0.42465187789937109" green="0.5061807050176218" blue="0.5880831513997804" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wuf-zx-zv7">
-                                <rect key="frame" x="41" y="334" width="76" height="27"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Completed" id="Gma-Gk-Nnu">
-                                    <font key="font" size="14" name="ArialMT"/>
-                                    <color key="textColor" red="0.9999235272" green="1" blue="0.99988299609999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UMW-p7-6qE">
@@ -979,7 +961,7 @@
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B8I-Gu-YOQ">
                                 <rect key="frame" x="16" y="332" width="358" height="22"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="GET:" id="l5a-f3-oQs">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="GET:" allowsEditingTextAttributes="YES" id="l5a-f3-oQs">
                                     <font key="font" size="14" name="ArialMT"/>
                                     <color key="textColor" red="0.9999235272" green="1" blue="0.99988299609999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -2381,19 +2363,11 @@
                                     <action selector="selectTab_fn:" target="XfG-lQ-9wD" id="zPx-Sf-UgR"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XYJ-PI-8wf">
-                                <rect key="frame" x="694" y="439" width="111" height="18"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Migrate to Site" bezelStyle="regularSquare" imagePosition="left" inset="2" id="hrc-Cb-INr">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="migrateToSite:" target="XfG-lQ-9wD" id="nKz-4u-Lku"/>
-                                </connections>
-                            </button>
                             <popUpButton verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9W-KL-Gg4">
-                                <rect key="frame" x="563" y="436" width="39" height="25"/>
+                                <rect key="frame" x="558" y="436" width="62" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="55" id="wqV-57-N8h"/>
+                                </constraints>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" enabled="NO" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="aag-xc-usP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -2412,7 +2386,7 @@
                                 </connections>
                             </button>
                             <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="6Q2-dI-sxu">
-                                <rect key="frame" x="733" y="430" width="32" height="32"/>
+                                <rect key="frame" x="776" y="432" width="32" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </progressIndicator>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bKr-H7-03S">
@@ -2458,19 +2432,32 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XYJ-PI-8wf">
+                                <rect key="frame" x="758" y="440" width="50" height="18"/>
+                                <buttonCell key="cell" type="check" title="Site" bezelStyle="regularSquare" imagePosition="left" inset="2" id="hrc-Cb-INr">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="migrateToSite:" target="XfG-lQ-9wD" id="nKz-4u-Lku"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="XYJ-PI-8wf" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="b9W-KL-Gg4" secondAttribute="trailing" constant="8" id="1fD-ld-9Q9"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="314" id="AnC-CN-Y4x"/>
-                            <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="1dY-rP-xsl" secondAttribute="trailing" constant="45" id="Ehx-eM-jFz"/>
+                            <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="1dY-rP-xsl" secondAttribute="trailing" constant="40" id="Ehx-eM-jFz"/>
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="HZb-g7-6Hc"/>
                             <constraint firstItem="FmU-Bg-tM4" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="28" id="R6T-gK-IeW"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="10" id="U9p-em-ymG"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="top" secondItem="FmU-Bg-tM4" secondAttribute="bottom" constant="1" id="X5L-TE-D0q"/>
+                            <constraint firstItem="XYJ-PI-8wf" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="31" id="doc-EA-RgX"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="42" id="gPZ-OV-3fp"/>
-                            <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="Uw9-pw-Waq" secondAttribute="trailing" constant="9" id="j5D-Kk-mku"/>
+                            <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="Uw9-pw-Waq" secondAttribute="trailing" constant="4" id="j5D-Kk-mku"/>
                             <constraint firstItem="Uw9-pw-Waq" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="28" id="pw4-Ua-JGB"/>
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="top" secondItem="FmU-Bg-tM4" secondAttribute="bottom" constant="2" id="rQz-S3-LFn"/>
                             <constraint firstItem="FmU-Bg-tM4" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="314" id="rcc-t5-Xu9"/>
+                            <constraint firstAttribute="trailing" secondItem="XYJ-PI-8wf" secondAttribute="trailing" constant="40" id="vmb-VO-Ify"/>
                         </constraints>
                     </view>
                     <connections>
@@ -2519,7 +2506,7 @@
                         <outlet property="generalTab_NSButton" destination="514-dK-Ce9" id="9Yd-7F-WM7"/>
                         <outlet property="general_tabViewItem" destination="88A-Nu-WEM" id="paL-qP-o9T"/>
                         <outlet property="getSummary_label" destination="ih0-OH-DT1" id="Bos-Mz-g6N"/>
-                        <outlet property="get_levelIndicator" destination="ruT-VI-8Tm" id="jqd-RU-27N"/>
+                        <outlet property="get_levelIndicator" destination="xlC-Th-zKf" id="Kk8-bw-0fc"/>
                         <outlet property="get_name_field" destination="UMW-p7-6qE" id="bmd-dO-7L7"/>
                         <outlet property="go_button" destination="fkz-qQ-OTe" id="1AO-FD-YR8"/>
                         <outlet property="iOS_tabViewItem" destination="ECI-6E-ufR" id="hDg-OB-fcs"/>
@@ -2557,7 +2544,6 @@
                         <outlet property="netboot_label_field" destination="gyq-nN-Llg" id="9wM-Bm-ZAd"/>
                         <outlet property="network_segments_label_field" destination="2kz-HF-tp3" id="JHd-Fb-5z5"/>
                         <outlet property="networks_button" destination="veK-Df-07g" id="unP-Gb-VyZ"/>
-                        <outlet property="object_name_field" destination="ynJ-S6-o1y" id="G86-5K-2Bo"/>
                         <outlet property="objectsToSelect" destination="LkZ-VI-6p8" id="KHQ-eO-DIJ"/>
                         <outlet property="osxconfigurationprofiles_button" destination="4Qx-cz-EYa" id="mkz-I3-tXt"/>
                         <outlet property="osxconfigurationprofiles_label_field" destination="uAi-xC-0ej" id="1RJ-4N-Mgy"/>
@@ -2571,6 +2557,7 @@
                         <outlet property="printers_label_field" destination="VB2-eO-067" id="xMU-HY-HXq"/>
                         <outlet property="putSummary_label" destination="hv1-dW-eem" id="cAU-DO-qdx"/>
                         <outlet property="put_levelIndicator" destination="v1E-Y8-MAn" id="eMZ-h1-azd"/>
+                        <outlet property="put_name_field" destination="ynJ-S6-o1y" id="3Kt-KZ-enF"/>
                         <outlet property="quit_button" destination="lc3-4c-kgf" id="DBl-Xk-l14"/>
                         <outlet property="restrictedsoftware_button" destination="TsB-ot-L5w" id="Dbb-g5-xYa"/>
                         <outlet property="restrictedsoftware_label_field" destination="2tr-YW-IQ0" id="kE8-m5-Dpw"/>
@@ -2618,7 +2605,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="0" width="72" height="72"/>
+        <image name="0" width="74" height="74"/>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="general" width="82" height="25"/>
         <image name="general_active" width="82" height="25"/>

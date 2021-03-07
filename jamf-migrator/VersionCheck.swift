@@ -18,9 +18,10 @@ class VersionCheck: NSObject, URLSessionDelegate {
         let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: appInfo.version)
         
         var updateAvailable = false
+        var versionTest     = true
         
         let versionUrl = URL(string: "https://api.github.com/repos/jamf/JamfMigrator/releases")
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
         var request = URLRequest(url: versionUrl!)
         request.httpMethod = "GET"
         
@@ -38,13 +39,22 @@ class VersionCheck: NSObject, URLSessionDelegate {
                             let releaseInfo = statusInfo as Dictionary<String, Any>
                             let tmpArray = "\(releaseInfo["name"]!)".components(separatedBy: " ")
                             let fullVersion = (tmpArray[1] as String).replacingOccurrences(of: "v", with: "")
-                            
-                            let versionTest = self.compareVersions(currMajor: currMajor,
-                                                                   currMinor: currMinor,
-                                                                   currPatch: currPatch,
-                                                                   runningBeta: runningBeta,
-                                                                   currBeta: currBeta,
-                                                                   available: fullVersion)
+
+                            if !runningBeta && fullVersion.firstIndex(of: "b") == nil {
+                                versionTest = self.compareVersions(currMajor: currMajor,
+                                                                       currMinor: currMinor,
+                                                                       currPatch: currPatch,
+                                                                       runningBeta: runningBeta,
+                                                                       currBeta: currBeta,
+                                                                       available: fullVersion)
+                            } else if runningBeta && fullVersion.firstIndex(of: "b") != nil {
+                                versionTest = self.compareVersions(currMajor: currMajor,
+                                                                       currMinor: currMinor,
+                                                                       currPatch: currPatch,
+                                                                       runningBeta: runningBeta,
+                                                                       currBeta: currBeta,
+                                                                       available: fullVersion)
+                            }
                             if !versionTest {
                                 updateAvailable = true
                             }
@@ -75,12 +85,15 @@ class VersionCheck: NSObject, URLSessionDelegate {
         if available != "\(currMajor).\(currMinor).\(currPatch)\(betaVer)" {
             let (availMajor, availMinor, availPatch, availBeta, availBetaVer) = versionDetails(theVersion: available)
             if availMajor > currMajor {
+                print("availMajor: \(availMajor) \t currMajor: \(currMajor)")
                 runningCurrent = false
             } else if availMajor == currMajor {
                 if availMinor > currMinor {
+                    print("availMajor: \(availMinor) \t currMinor: \(currMinor)")
                     runningCurrent = false
                 } else if availMinor == currMinor {
                     if availPatch > currPatch {
+                        print("availPatch: \(availPatch) \t currPatch: \(currPatch)")
                         runningCurrent = false
                     } else if availPatch == currPatch && ((runningBeta && availBeta) || (runningBeta && !availBeta))  {
                         if availBetaVer > currBeta {
