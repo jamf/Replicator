@@ -11,9 +11,17 @@ import Cocoa
 class Json: NSObject, URLSessionDelegate {
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
 
+//        let getRecordQ = DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
+//        var getRecordQ = OperationQueue() // create operation queue for API GET calls
+
+//        if pref.stopMigration {
+//            getRecordQ.cancelAllOperations()
+//            completion([:])
+//            return
+//        }
+
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
-        let getRecordQ = DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
     
         URLCache.shared.removeAllCachedResponses()
         var existingDestUrl = ""
@@ -25,9 +33,12 @@ class Json: NSObject, URLSessionDelegate {
 //      print("existing endpoints URL: \(existingDestUrl)")
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
+
+        q.getRecord.maxConcurrentOperationCount = ViewController().setConcurrentThreads()
         
-        let semaphore = DispatchSemaphore(value: 1)
-        getRecordQ.async {
+        let semaphore = DispatchSemaphore(value: 0)
+        q.getRecord.addOperation {
+//        getRecordQ.async {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.default
@@ -62,6 +73,7 @@ class Json: NSObject, URLSessionDelegate {
             })  // let task = destSession - end
             //print("GET")
             task.resume()
+            semaphore.wait()
         }   // getRecordQ - end
     }
     

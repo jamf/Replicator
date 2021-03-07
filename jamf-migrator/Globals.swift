@@ -60,10 +60,16 @@ struct export {
 }
 
 struct pref {
-    static var migrateAsManaged = 0
-    static var mgmtAcct         = ""
-    static var mgmtPwd          = ""
-    static var removeCA_ID      = 0
+    static var migrateAsManaged  = 0
+    static var mgmtAcct          = ""
+    static var mgmtPwd           = ""
+    static var removeCA_ID       = 0
+    static var stopMigration     = false
+    static var concurrentThreads = 5
+}
+
+struct q {
+    static var getRecord = OperationQueue() // create operation queue for API GET calls
 }
 
 struct setting {

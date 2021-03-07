@@ -228,14 +228,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var destServerPopup_button: NSPopUpButton!
     
     // GET and POST/PUT (DELETE) fields
-    @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
-    @IBOutlet weak var objects_completed_field: NSTextField!
-    @IBOutlet weak var objects_found_field: NSTextField!
-    
     @IBOutlet weak var get_name_field: NSTextField!
-    @IBOutlet weak var get_completed_field: NSTextField!
-    @IBOutlet weak var get_found_field: NSTextField!
-    
+//    @IBOutlet weak var get_completed_field: NSTextField!
+//    @IBOutlet weak var get_found_field: NSTextField!
+    @IBOutlet weak var getSummary_label: NSTextField!
+    @IBOutlet weak var get_levelIndicator: NSLevelIndicatorCell!
+
+    @IBOutlet weak var object_name_field: NSTextField!  // object being migrated
+//    @IBOutlet weak var objects_completed_field: NSTextField!
+//    @IBOutlet weak var objects_found_field: NSTextField!
+    @IBOutlet weak var putSummary_label: NSTextField!
+
+    @IBOutlet weak var put_levelIndicator: NSLevelIndicator!
+
     // selective migration items - start
     // source / destination tables
     @IBOutlet weak var srcSrvTableView: NSTableView!
@@ -3799,9 +3804,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
     //                        if totalCompleted > currentCompleted {
                             if totalCompleted > 0 {
-                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+                                self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
                             }
-                            self.objects_found_field.stringValue = "\(String(describing: self.counters[endpointType]!["total"]!))"
+//                            self.objects_found_field.stringValue = "\(String(describing: self.counters[endpointType]!["total"]!))"
     //                            self.objects_found_field.stringValue     = "\(endpointCount)"
     //                        }   // DispatchQueue.main.async - end
                             
@@ -3991,9 +3998,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
 //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                             if totalCompleted > 0 {
-                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(endpointCount)
+                                self.putSummary_label.stringValue = "\(totalCompleted) of \(endpointCount)"
                             }
-                            self.objects_found_field.stringValue     = "\(endpointCount)"
+//                            self.objects_found_field.stringValue     = "\(endpointCount)"
                             
                             if totalDeleted == endpointCount && self.changeColor {
                                 self.labelColor(endpoint: endpointType, theColor: self.greenText)
@@ -4758,11 +4767,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func clearProcessingFields() {
         DispatchQueue.main.async {
             self.get_name_field.stringValue             = ""
-            self.get_completed_field.stringValue        = ""
-            self.get_found_field.stringValue            = ""
+//            self.get_completed_field.stringValue        = ""
+//            self.get_found_field.stringValue            = ""
             self.object_name_field.stringValue          = ""
-            self.objects_completed_field.stringValue    = ""
-            self.objects_found_field.stringValue        = ""
+//            self.objects_completed_field.stringValue    = ""
+//            self.objects_found_field.stringValue        = ""
+
+            self.get_levelIndicator.floatValue = 0.0
+            self.get_levelIndicator.isEnabled = false
+
+            self.put_levelIndicator.floatValue = 0.0
+            self.put_levelIndicator.isEnabled = false
+
         }
     }
     
@@ -4928,9 +4944,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func stopButton(_ sender: Any) {
         WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
+//        pref.stopMigration = true
+        q.getRecord.cancelAllOperations()
         readFilesQ.cancelAllOperations()
         theOpQ.cancelAllOperations()
         theCreateQ.cancelAllOperations()
+
+        objectsToMigrate.removeAll()
+        sourceDataArray.removeAll()
+        srcSrvTableView.reloadData()
+        targetDataArray.removeAll()
         goButtonEnabled(button_status: true)
     }
     
@@ -5000,9 +5023,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         DispatchQueue.main.async {
             self.get_name_field.stringValue = adjEndpoint
             if current > 0 {
-                self.get_completed_field.stringValue = "\(current)"
+//                self.get_completed_field.stringValue = "\(current)"
+                self.get_levelIndicator.floatValue = Float(current)/Float(total)
+                self.getSummary_label.stringValue = "\(current) of \(total)"
             }
-            self.get_found_field.stringValue = "\(total)"
+//            self.get_found_field.stringValue = "\(total)"
         }
     }
     
@@ -6308,10 +6333,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let bkgndAlpha:CGFloat = 0.95
             get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
             object_name_field.backgroundColor         = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-            get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-            get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-            objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
-            objects_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+//            get_completed_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+//            get_found_field.backgroundColor           = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+//            objects_completed_field.backgroundColor   = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
+//            objects_found_field.backgroundColor       = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
         } else {
             // dark mode settings
             //            [NSColor colorWithCalibratedRed:0x85/255.0 green:0x9C/255.0 blue:0xB0/255.0 alpha:0xFF/255.0]/* 859CB0FF */
@@ -6721,7 +6746,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                         self.migrateOrRemove_TextField.stringValue = "Migrate"
                         self.migrateOrRemove_TextField.textColor = self.whiteText
-                        self.destinationMethod_TextField.stringValue = "POST/PUT"
+                        self.destinationMethod_TextField.stringValue = "POST/PUT:"
                         self.destinationMethod_TextField.textColor = self.whiteText
                         isRed = false
                     }
