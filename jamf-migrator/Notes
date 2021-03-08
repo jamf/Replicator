@@ -1,0 +1,7 @@
+let font = NSFont(name: "HelveticaNeue", size: CGFloat(14))
+let color = NSColor.white
+let paragraph = NSMutableParagraphStyle()
+paragraph.alignment = .center
+let attribText = NSAttributedString(string: "SEND", attributes: [NSAttributedString.Key.paragraphStyle : paragraph, NSAttributedString.Key.font : font!, NSAttributedString.Key.foregroundColor : color, NSAttributedString.Key.underlineStyle : NSUnderlineStyle.single.rawValue])
+self.destinationMethod_TextField.attributedStringValue = attribText
+

@@ -40,6 +40,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if !windowIsVisible(windowName: "Help") {
             helpWindowController.window?.hidesOnDeactivate = false
             helpWindowController.showWindow(self)
+        } else {
+            let windowsCount = NSApp.windows.count
+            for i in (0..<windowsCount) {
+                if NSApp.windows[i].title == "Help" {
+                    NSApp.windows[i].makeKeyAndOrderFront(self)
+                    break
+                }
+            }
         }
         
 //        if let helpWindow = helpWindowController.window {

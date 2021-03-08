@@ -21,6 +21,7 @@
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
+		B54438DC25F6224A00465FA5 /* Notes in Resources */ = {isa = PBXBuildFile; fileRef = B54438DB25F6224A00465FA5 /* Notes */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
 		B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55BB46D23A9BC7C0024B357 /* UapiCall.swift */; };
@@ -69,6 +70,7 @@
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
+		B54438DB25F6224A00465FA5 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B55BB46D23A9BC7C0024B357 /* UapiCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UapiCall.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				9BC01C681DFB0C07007E634E /* Info.plist */,
 				9BC01C6E1DFBC564007E634E /* settings.plist */,
 				B5E179EF1F1FDACF00A20AAA /* help */,
+				B54438DB25F6224A00465FA5 /* Notes */,
 			);
 			path = "jamf-migrator";
 			sourceTree = "<group>";
@@ -317,6 +320,7 @@
 				B5E179F31F1FDAFA00A20AAA /* index.html in Resources */,
 				B5C042491EB11CF400C6E872 /* 1.png in Resources */,
 				B5E1912F21AAEFD400A1A9CA /* export.png in Resources */,
+				B54438DC25F6224A00465FA5 /* Notes in Resources */,
 				B57B1F0721D7A0300098326E /* ios_active.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
