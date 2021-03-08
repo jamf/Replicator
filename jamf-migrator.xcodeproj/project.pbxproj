@@ -272,10 +272,9 @@
 			};
 			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "jamf-migrator" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 			);

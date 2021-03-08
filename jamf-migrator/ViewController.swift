@@ -425,10 +425,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     let fm         = FileManager()
     var theOpQ     = OperationQueue() // create operation queue for API calls
+    var getEndpointsQ     = OperationQueue() // create operation queue for API calls
     var theCreateQ = OperationQueue() // create operation queue for API POST/PUT calls
     var readFilesQ = OperationQueue() // for reading in data files
 //    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
-    var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
+//    var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
+    var readNodesQ = OperationQueue()   // for reading in API endpoints
     let theIconsQ  = OperationQueue() // que to upload/download icons
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
@@ -1182,6 +1184,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func startMigrating() {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[startMigrating] enter\n") }
+        pref.stopMigration = false
         
         // make sure the labels can change color when we start
                   changeColor = true
@@ -1525,7 +1528,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "migrating/removing \(self.objectsToMigrate.count) sections\n") }
 //            var arrayIndex = 0
             // loop through process of migrating or removing - start
-            self.readNodesQ.sync {
+//            self.readNodesQ.sync {
+            self.readNodesQ.addOperation {
                 let currentNode = self.objectsToMigrate[0]
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Starting to process \(currentNode)\n") }
@@ -1725,6 +1729,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
+
+        if pref.stopMigration {
+//            print("[readNodes] stopMigration")
+            return
+        }
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readNodes] enter\n") }
         
@@ -1771,6 +1780,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints] enter\n") }
+
+        if pref.stopMigration {
+//            print("[getEndpoints] stopMigration")
+            completion([])
+            return
+        }
         
         URLCache.shared.removeAllCachedResponses()
         var endpoint       = nodesToMigrate[nodeIndex]
@@ -1868,7 +1883,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.sourceDataArray.removeAll()
         self.availableIDsToMigDict.removeAll()
         
-        theOpQ.addOperation {
+        getEndpointsQ.addOperation {
 
 //            print("NSURL line 2")
 //            if "\(myURL)" == "" { myURL = "https://localhost" }
@@ -2922,6 +2937,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func cleanupXml(endpoint: String, Xml: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] enter\n") }
+
+        if pref.stopMigration {
+//            print("[cleanupXml] stopMigration")
+            completion("")
+            return
+        }
         
         if !fileImport {
             completion("")
@@ -3479,6 +3500,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+
+        if pref.stopMigration {
+//            print("[CreateEndpoints] stopMigration")
+            completion("stop")
+            return
+        }
 
         if endpointCurrent == 1 && !retry {
             migrationComplete.isDone = false
@@ -4903,7 +4930,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if theImageNo > 2 {
                                 theImageNo = 0
                             }
-                            if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
+                            if pref.stopMigration {
+                                self.objectsToMigrate.removeAll()
+                                self.AllEndpointsArray.removeAll()
+                                self.availableObjsToMigDict.removeAll()
+                                self.sourceDataArray.removeAll()
+                                self.srcSrvTableView.reloadData()
+                                self.targetDataArray.removeAll()
+
+                                self.getEndpointsQ.cancelAllOperations()
+                                q.getRecord.cancelAllOperations()
+                                self.readFilesQ.cancelAllOperations()
+                                self.readNodesQ.cancelAllOperations()
+                                self.theOpQ.cancelAllOperations()
+                                self.theCreateQ.cancelAllOperations()
+//                                self.stopButton(self)
+                            }
+                            if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
 
                                 History.endTime = Date()
 
@@ -4911,8 +4954,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                 let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
                                 WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
-
-//                            if migrationComplete.isDone && self.theIconsQ.operationCount == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0  {
 
                                 self.resetAllCheckboxes()
 
@@ -4955,16 +4996,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func stopButton(_ sender: Any) {
         WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
-//        pref.stopMigration = true
-        q.getRecord.cancelAllOperations()
-        readFilesQ.cancelAllOperations()
-        theOpQ.cancelAllOperations()
-        theCreateQ.cancelAllOperations()
+        pref.stopMigration = true
+//        objectsToMigrate.removeAll()
+//        AllEndpointsArray.removeAll()
+//        availableObjsToMigDict.removeAll()
+//        sourceDataArray.removeAll()
+//        srcSrvTableView.reloadData()
+//        targetDataArray.removeAll()
+//
+//        nodesMigrated = 1000
+//
+//        getEndpointsQ.cancelAllOperations()
+//        q.getRecord.cancelAllOperations()
+//        readFilesQ.cancelAllOperations()
+//        readNodesQ.cancelAllOperations()
+//        theOpQ.cancelAllOperations()
+//        theCreateQ.cancelAllOperations()
 
-        objectsToMigrate.removeAll()
-        sourceDataArray.removeAll()
-        srcSrvTableView.reloadData()
-        targetDataArray.removeAll()
         goButtonEnabled(button_status: true)
     }
     
