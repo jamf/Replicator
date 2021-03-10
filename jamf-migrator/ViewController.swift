@@ -2634,7 +2634,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func readDataFiles(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: String) -> Void) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] enter\n") }
-        dataFilesRoot = source_jp_server_field.stringValue
+        DispatchQueue.main.async {
+            self.dataFilesRoot = source_jp_server_field.stringValue
+        }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] dataFilesRoot: \(dataFilesRoot)\n") }
         
         var local_endpointArray = [String]()
