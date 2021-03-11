@@ -1063,7 +1063,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "--- checking authentication to \(whichServer) server: \(f_sourceURL)\n") }
         
         if (whichServer == "source" && (!wipeData.on && !fileImport)) || (whichServer == "dest" && !export.saveOnly) {
-            var myURL = "\(f_sourceURL)/JSSResource/buildings"
+//            var myURL = "\(f_sourceURL)/JSSResource/buildings"
+            var myURL = "\(f_sourceURL)/JSSResource/restrictedsoftware"
             myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
