@@ -2635,7 +2635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] enter\n") }
         DispatchQueue.main.async {
-            self.dataFilesRoot = source_jp_server_field.stringValue
+            self.dataFilesRoot = self.source_jp_server_field.stringValue
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] dataFilesRoot: \(dataFilesRoot)\n") }
         
