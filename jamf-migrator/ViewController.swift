@@ -10,7 +10,33 @@ import AppKit
 import Cocoa
 import Foundation
 
-class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource {
+class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
+    
+    @IBOutlet weak var selectiveFilter_TextField: NSTextField!
+    
+    func controlTextDidChange(_ obj: Notification) {
+//        print("staticSourceDataArray: \(staticSourceDataArray)")
+        sourceDataArray = staticSourceDataArray
+        if let textField = obj.object as? NSTextField {
+            if textField.identifier!.rawValue == "search" {
+                let filter = selectiveFilter_TextField.stringValue
+//                print("filter: \(filter)")
+                if filter != "" {
+                    sourceDataArray = sourceDataArray.filter { $0.range(of: filter, options: .caseInsensitive) != nil }
+//                    print("sourceDataArray: \(sourceDataArray)")
+                    self.srcSrvTableView.deselectAll(self)
+                        self.srcSrvTableView.reloadData()
+                } else {
+                    self.srcSrvTableView.deselectAll(self)
+                    self.srcSrvTableView.reloadData()
+                }
+                self.selectiveListCleared = true
+//                print("sourceDataArray (filtered): \(sourceDataArray)")
+            }
+//            print("sourceDataArray: \(sourceDataArray)")
+        }
+    }
+    
     
     // Main Window
     @IBOutlet var migrator_window: NSView!
@@ -256,8 +282,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var migrateDependencies: NSButton!
     
     // source / destination array / dictionary of items
-    var sourceDataArray:[String]            = []
-    var targetDataArray:[String]            = []
+    var sourceDataArray            = [String]()
+    var staticSourceDataArray      = [String]()
+    var targetDataArray            = [String]()
     var availableIDsToMigDict:[String:Int]  = [:]   // something like xmlName, xmlID
     var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
     var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
@@ -773,6 +800,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 iOSsectionToMigrate_button.selectItem(at: 0)
                 sectionToMigrate_button.selectItem(at: 0)
             }
+            selectiveFilter_TextField.stringValue = ""
             objectsToMigrate.removeAll()
             sourceDataArray.removeAll()
             srcSrvTableView.reloadData()
@@ -1969,6 +1997,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             self.sourceDataArray.append(l_xmlName)
     //                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            
+                                                            self.staticSourceDataArray = self.sourceDataArray
+                                                            
                                                                 DispatchQueue.main.async {
                                                                     self.srcSrvTableView.reloadData()
                                                                 }
@@ -2167,6 +2198,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                                 self.sourceDataArray.append(l_xmlName)
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                
+                                                                self.staticSourceDataArray = self.sourceDataArray
 
                                                                 DispatchQueue.main.async {
                                                                     self.srcSrvTableView.reloadData()
@@ -2281,6 +2314,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
                                                                 self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                
+                                                                self.staticSourceDataArray = self.sourceDataArray
+                                                                
                                                                 DispatchQueue.main.async {
                                                                     self.srcSrvTableView.reloadData()
                                                                 }
@@ -2391,6 +2427,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.sourceDataArray.append(l_xmlName)
 
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                
+                                                                self.staticSourceDataArray = self.sourceDataArray
+                                                                
                                                                 DispatchQueue.main.async {
                                                                     self.srcSrvTableView.reloadData()
                                                                 }
@@ -2569,6 +2608,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                                 self.availableIDsToMigDict[l_xmlName!] = l_xmlID
                                                                                                 self.sourceDataArray.append(l_xmlName!)
                                                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                                
+                                                                                                self.staticSourceDataArray = self.sourceDataArray
+                                                                                                
                                                                                                 DispatchQueue.main.async {
                                                                                                     self.srcSrvTableView.reloadData()
                                                                                                 }
@@ -6345,21 +6387,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return numberOfRows
     }
     
-        func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-//    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-        //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
+    //    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
+    //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
         if (tableView == srcSrvTableView)
         {
             newString = sourceDataArray[row]
         }
-        
+
         //            // [NSColor colorWithCalibratedRed:0x6F/255.0 green:0x8E/255.0 blue:0x9D/255.0 alpha:0xFF/255.0]/* 6F8E9DFF */
         //            //[NSColor colorWithCalibratedRed:0x8C/255.0 green:0xB5/255.0 blue:0xC8/255.0 alpha:0xFF/255.0]/* 8CB5C8FF */
-//        rowView.backgroundColor = (row % 2 == 0)
-//            ? NSColor(calibratedRed: 0x6F/255.0, green: 0x8E/255.0, blue: 0x9D/255.0, alpha: 0xFF/255.0)
-//            : NSColor(calibratedRed: 0x8C/255.0, green: 0xB5/255.0, blue: 0xC8/255.0, alpha: 0xFF/255.0)
-        
+        //        rowView.backgroundColor = (row % 2 == 0)
+        //            ? NSColor(calibratedRed: 0x6F/255.0, green: 0x8E/255.0, blue: 0x9D/255.0, alpha: 0xFF/255.0)
+        //            : NSColor(calibratedRed: 0x8C/255.0, green: 0xB5/255.0, blue: 0xC8/255.0, alpha: 0xFF/255.0)
+
         return newString;
     }
     // selective migration functions - end
@@ -6656,12 +6698,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // read command line arguments - start
-        var numberOfArgs = 0
         
+        selectiveFilter_TextField.delegate   = self
+        selectiveFilter_TextField.wantsLayer = true
+        selectiveFilter_TextField.isBordered = true
+        selectiveFilter_TextField.layer?.borderWidth = 0.4
+        selectiveFilter_TextField.layer?.cornerRadius = 4.0
+        selectiveFilter_TextField.layer?.borderColor = .black
+
 //        debug = true
         
+        // read command line arguments - start
+        var numberOfArgs = 0
         // read commandline args
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
 //        print("all arguments: \(CommandLine.arguments)")

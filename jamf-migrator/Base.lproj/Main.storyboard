@@ -2006,7 +2006,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="osE-m4-tRQ">
-                                                            <rect key="frame" x="13" y="82" width="67" height="17"/>
+                                                            <rect key="frame" x="13" y="78" width="67" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS / tvOS" id="uMo-rK-X7M">
                                                                 <font key="font" metaFont="system"/>
@@ -2015,7 +2015,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <popUpButton identifier="iOS" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="K3i-ud-Xoc" userLabel="iOS Migration Button">
-                                                            <rect key="frame" x="10" y="55" width="200" height="26"/>
+                                                            <rect key="frame" x="10" y="51" width="200" height="26"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" arrowPosition="arrowAtCenter" selectedItem="b71-Wg-pUb" id="f1r-OC-0rm">
                                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2057,7 +2057,7 @@
                                                             </connections>
                                                         </popUpButton>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qgQ-DV-Jc8">
-                                                            <rect key="frame" x="13" y="127" width="48" height="17"/>
+                                                            <rect key="frame" x="13" y="125" width="48" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS" id="Bhi-pK-ygK">
                                                                 <font key="font" metaFont="system"/>
@@ -2066,7 +2066,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <popUpButton identifier="macOS" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tpb-Lh-nzm" userLabel="macOS Migrate button">
-                                                            <rect key="frame" x="9" y="100" width="200" height="26"/>
+                                                            <rect key="frame" x="9" y="98" width="200" height="26"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" arrowPosition="arrowAtCenter" selectedItem="7S1-RF-4MV" id="Rxx-cC-yQC">
                                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2244,36 +2244,24 @@
                                                                 <font key="font" metaFont="system"/>
                                                             </buttonCell>
                                                         </button>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AYO-J6-mPp">
-                                                            <rect key="frame" x="13" y="35" width="57" height="16"/>
+                                                        <textField identifier="search" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UR4-sI-Ky5" userLabel="search">
+                                                            <rect key="frame" x="12" y="7" width="193" height="21"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Filter by:" id="8Hx-4E-nNc">
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="left" drawsBackground="YES" id="dOZ-Xf-gte">
                                                                 <font key="font" metaFont="system"/>
-                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" red="0.50504577559999997" green="0.63941957230000002" blue="0.75756866339999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                             </textFieldCell>
                                                         </textField>
-                                                        <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="be2-pD-7Os">
-                                                            <rect key="frame" x="73" y="28" width="136" height="25"/>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pPE-fz-arC">
+                                                            <rect key="frame" x="13" y="29" width="48" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="BO6-xk-4KC" id="T65-HL-hiP">
-                                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                                <font key="font" metaFont="menu"/>
-                                                                <menu key="menu" id="26b-uN-3ib">
-                                                                    <items>
-                                                                        <menuItem id="BO6-xk-4KC">
-                                                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                                                        </menuItem>
-                                                                        <menuItem title="Name" id="5AR-wv-TwD" userLabel="Name">
-                                                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                                                        </menuItem>
-                                                                        <menuItem title="Site" id="ii8-e5-Z4B" userLabel="Site">
-                                                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                                                        </menuItem>
-                                                                    </items>
-                                                                </menu>
-                                                            </popUpButtonCell>
-                                                        </popUpButton>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filter" id="UMr-xx-Oo8">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                        </textField>
                                                     </subviews>
                                                 </view>
                                             </subviews>
@@ -2594,6 +2582,7 @@
                         <outlet property="scripts_button" destination="tIV-9V-gpi" id="dT1-Rm-sdD"/>
                         <outlet property="scripts_label_field" destination="kMV-ND-9Kx" id="273-mW-H5M"/>
                         <outlet property="sectionToMigrate_button" destination="tpb-Lh-nzm" id="kLi-3f-CgI"/>
+                        <outlet property="selectiveFilter_TextField" destination="UR4-sI-Ky5" id="L58-lD-QEK"/>
                         <outlet property="selectiveTab_NSButton" destination="pZE-bV-fJk" id="p7c-mM-4gw"/>
                         <outlet property="selective_tabViewItem" destination="Fo1-1P-mP5" id="LUA-Dx-kTy"/>
                         <outlet property="siteMigrate" destination="XYJ-PI-8wf" id="ggX-rd-eUY"/>
