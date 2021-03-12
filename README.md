@@ -137,6 +137,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.8.0**
+
+* Chasing down miscellaneous crashes.
+* Test authentication against the restrictedsoftware API endpoint (instead of buildings), allowing site admins to use the app.
+* Add ability to filter objects listed when doing a selective migration.
+
 **v5.7.0**
 
 * Better handling of Help window.
