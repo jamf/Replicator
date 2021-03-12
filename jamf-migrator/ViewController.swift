@@ -2783,6 +2783,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
                                             local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
                                         }
+                                    case "advancedusersearches":
+                                        local_general = fileContents
+                                        for xmlTag in ["criteria", "users", "display_fields", "site"] {
+                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                        }
                                     case "buildings", "departments", "sites", "directorybindings":
                                         local_general = fileContents
                                     default:
@@ -2815,6 +2820,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
             
                 if fileCount > 0 {
+//                    print("self.availableFilesToMigDict: \(self.availableFilesToMigDict)")
                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
                         (result: String) in
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
@@ -2879,6 +2885,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                         }   // if !wipeData.on - end
                     } else {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] [\(endpoint)]: trouble with \(objectInfo)\n") }
                         print("trouble with \(objectInfo)")
                     }
                     l_index+=1
@@ -3332,16 +3339,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 //                }
             // clear JCDS url from network segments xml - end
-            // if not migrating netboot server remove then from network segments xml - start
-            if self.netboot_button.state.rawValue == 0 {
-                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-            }
-            // if not migrating netboot server remove then from network segments xml - end
-            // if not migrating software update server remove then from network segments xml - start
-            if self.sus_button.state.rawValue == 0 {
-                PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
-//                }
-            // if not migrating software update server remove then from network segments xml - end
+            DispatchQueue.main.sync {
+                // if not migrating netboot server remove then from network segments xml - start
+                if self.netboot_button.state.rawValue == 0 {
+                    PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
+                }
+                // if not migrating netboot server remove then from network segments xml - end
+                // if not migrating software update server remove then from network segments xml - start
+                if self.sus_button.state.rawValue == 0 {
+                    PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
+    //                }
+                // if not migrating software update server remove then from network segments xml - end
+                }
             }
             
             //print("\nXML: \(PostXML)")
@@ -3886,6 +3895,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                        if totalCompleted > currentCompleted {
                             if totalCompleted > 0 {
 //                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
                                 self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
                                 self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
                             }
@@ -4024,14 +4034,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             // remove items from the list as they are removed from the server
                             if self.activeTab() == "selective" {
+                                print("endPointID: \(endPointID)")
                                 let lineNumber = self.availableIdsToDelArray.firstIndex(of: endPointID)!
+                                self.availableIdsToDelArray.remove(at: lineNumber)
+                                self.sourceDataArray.remove(at: lineNumber)
                                 
                                 DispatchQueue.main.async {
                                     self.srcSrvTableView.beginUpdates()
                                     self.srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
                                     self.srcSrvTableView.endUpdates()
-                                    self.availableIdsToDelArray.remove(at: lineNumber)
-                                    self.sourceDataArray.remove(at: lineNumber)
+//                                    self.availableIdsToDelArray.remove(at: lineNumber)
+//                                    self.sourceDataArray.remove(at: lineNumber)
                                     self.srcSrvTableView.isEnabled = false
                                 }
                             }
@@ -6391,9 +6404,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
     //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
-        if (tableView == srcSrvTableView)
+        if (tableView == srcSrvTableView) && row < sourceDataArray.count
         {
-            newString = sourceDataArray[row]
+            if row < sourceDataArray.count {
+                newString = sourceDataArray[row]
+            } else {
+                newString = sourceDataArray.last ?? ""
+            }
         }
 
         //            // [NSColor colorWithCalibratedRed:0x6F/255.0 green:0x8E/255.0 blue:0x9D/255.0 alpha:0xFF/255.0]/* 6F8E9DFF */
