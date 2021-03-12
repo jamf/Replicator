@@ -3339,18 +3339,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 //                }
             // clear JCDS url from network segments xml - end
-            DispatchQueue.main.sync {
-                // if not migrating netboot server remove then from network segments xml - start
-                if self.netboot_button.state.rawValue == 0 {
-                    PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-                }
-                // if not migrating netboot server remove then from network segments xml - end
-                // if not migrating software update server remove then from network segments xml - start
-                if self.sus_button.state.rawValue == 0 {
-                    PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
-    //                }
-                // if not migrating software update server remove then from network segments xml - end
-                }
+            // if not migrating netboot server remove then from network segments xml - start
+            if self.objectsToMigrate.firstIndex(of: "netbootservers") == 0 {
+                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
+            }
+            // if not migrating netboot server remove then from network segments xml - end
+            // if not migrating software update server remove then from network segments xml - start
+            if self.objectsToMigrate.firstIndex(of: "softwareupdateservers") == 0 {
+                PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
+//                }
+            // if not migrating software update server remove then from network segments xml - end
             }
             
             //print("\nXML: \(PostXML)")
