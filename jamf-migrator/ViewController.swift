@@ -14,6 +14,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
+    // selective list filter
     func controlTextDidChange(_ obj: Notification) {
 //        print("staticSourceDataArray: \(staticSourceDataArray)")
         sourceDataArray = staticSourceDataArray
@@ -35,6 +36,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 //            print("sourceDataArray: \(sourceDataArray)")
         }
+    }
+    
+    @IBAction func clearFilter_Button(_ sender: Any) {
+        selectiveFilter_TextField.stringValue = ""
+        sourceDataArray = staticSourceDataArray
+        self.srcSrvTableView.reloadData()
     }
     
     
@@ -6717,9 +6724,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         selectiveFilter_TextField.delegate   = self
         selectiveFilter_TextField.wantsLayer = true
         selectiveFilter_TextField.isBordered = true
-        selectiveFilter_TextField.layer?.borderWidth = 0.4
-        selectiveFilter_TextField.layer?.cornerRadius = 4.0
-        selectiveFilter_TextField.layer?.borderColor = .black
+        selectiveFilter_TextField.layer?.borderWidth  = 0.5
+        selectiveFilter_TextField.layer?.cornerRadius = 0.0
+        selectiveFilter_TextField.layer?.borderColor  = .black
 
 //        debug = true
         
