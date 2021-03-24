@@ -55,6 +55,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // Import file variables
     @IBOutlet weak var importFiles_button: NSButton!
     var exportedFilesUrl                          = URL(string: "")
+    var xportFolderPath: URL? {
+        didSet {
+            do {
+                let bookmark = try xportFolderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
+                self.userDefaults.set(bookmark, forKey: "bookmark")
+            } catch let error as NSError {
+                print("Set Bookmark Fails: \(error.description)")
+            }
+        }
+    }
     var availableFilesToMigDict:[String:[String]] = [:]   // something like xmlID, xmlName
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
@@ -457,15 +467,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     
-    let fm         = FileManager()
-    var theOpQ     = OperationQueue() // create operation queue for API calls
-    var getEndpointsQ     = OperationQueue() // create operation queue for API calls
-    var theCreateQ = OperationQueue() // create operation queue for API POST/PUT calls
-    var readFilesQ = OperationQueue() // for reading in data files
+    let fm            = FileManager()
+    var theOpQ        = OperationQueue() // create operation queue for API calls
+    var getEndpointsQ = OperationQueue() // create operation queue for API calls
+    var theCreateQ    = OperationQueue() // create operation queue for API POST/PUT calls
+    var readFilesQ    = OperationQueue() // for reading in data files
 //    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
 //    var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
-    var readNodesQ = OperationQueue()   // for reading in API endpoints
-    let theIconsQ  = OperationQueue() // que to upload/download icons
+    var readNodesQ    = OperationQueue()   // for reading in API endpoints
+    let theIconsQ     = OperationQueue() // que to upload/download icons
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
     var theModeQ    = DispatchQueue(label: "com.jamf.addRemove")
@@ -615,6 +625,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.fileImport                         = true
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: self.dataFilesRoot))\n") }
                         self.userDefaults.set("\(self.dataFilesRoot)", forKey: "dataFilesRoot")
+                        
+                        self.xportFolderPath = openPanel.url
+                        
                         self.userDefaults.synchronize()
                     } else {
                         self.source_jp_server_field.stringValue = ""
@@ -4048,17 +4061,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.srcSrvTableView.beginUpdates()
                                     self.srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
                                     self.srcSrvTableView.endUpdates()
-//                                    self.availableIdsToDelArray.remove(at: lineNumber)
-//                                    self.sourceDataArray.remove(at: lineNumber)
                                     self.srcSrvTableView.isEnabled = false
                                 }
                             }
                             
                             WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] \(endpointName)\n")
                             self.POSTsuccessCount += 1
-//                            if endpointCount == endpointCurrent && self.changeColor {
-//                                self.labelColor(endpoint: endpointType, theColor: self.greenText)
-//                            }
                         } else {
                             methodResult = "fail"
                             self.labelColor(endpoint: endpointType, theColor: self.yellowText)
