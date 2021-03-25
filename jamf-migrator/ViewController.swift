@@ -54,7 +54,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Import file variables
     @IBOutlet weak var importFiles_button: NSButton!
-    var exportedFilesUrl                          = URL(string: "")
+    @IBOutlet weak var browseFiles_button: NSButton!
+    var exportedFilesUrl = URL(string: "")
     var xportFolderPath: URL? {
         didSet {
             do {
@@ -605,8 +606,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    @IBAction func fileImport(_ sender: Any) {
+    @IBAction func fileImport(_ sender: NSButton) {
         if importFiles_button.state.rawValue == 1 {
+            let toggleFileImport = (sender.title == "Browse") ? false:true
+            
             DispatchQueue.main.async {
                 let openPanel = NSOpenPanel()
             
@@ -623,18 +626,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.source_user_field.isHidden         = true
                         self.source_pwd_field.isHidden          = true
                         self.fileImport                         = true
+                        
+                        self.source_user_field.stringValue      = ""
+                        self.source_pwd_field.stringValue       = ""
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: self.dataFilesRoot))\n") }
                         self.userDefaults.set("\(self.dataFilesRoot)", forKey: "dataFilesRoot")
                         
                         self.xportFolderPath = openPanel.url
                         
                         self.userDefaults.synchronize()
+                        self.browseFiles_button.isHidden        = false
                     } else {
-                        self.source_jp_server_field.stringValue = ""
-                        self.source_user_field.isHidden         = false
-                        self.source_pwd_field.isHidden          = false
-                        self.fileImport                         = false
-                        self.importFiles_button.state           = NSControl.StateValue(rawValue: 0)
+                        if toggleFileImport {
+//                            self.source_jp_server_field.stringValue = ""
+                            self.source_user_field.isHidden         = false
+                            self.source_pwd_field.isHidden          = false
+                            self.fileImport                         = false
+                            self.importFiles_button.state           = NSControl.StateValue(rawValue: 0)
+                        }
                     }
                 } // openPanel.begin - end
                 // if importFiles_button.state - end
@@ -646,6 +655,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.source_pwd_field.isHidden = false
                 self.fileImport = false
                 self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
+                self.browseFiles_button.isHidden        = true
             }
         }
     }   // @IBAction func fileImport - end
@@ -6529,7 +6539,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if plistData["source_jp_server"] != nil {
             source_jp_server = plistData["source_jp_server"] as! String
             source_jp_server_field.stringValue = source_jp_server
+            self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
+        } else {
+            self.browseFiles_button.isHidden   = true
         }
+        
+        
         if plistData["source_user"] != nil {
             source_user = plistData["source_user"] as! String
             source_user_field.stringValue = source_user
