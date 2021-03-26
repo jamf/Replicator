@@ -137,6 +137,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.8.2**
+
+* Change filter, add button to clear filter
+* Remember permissions on folder selected for file imports.
+* Add browse button for selecting folder of import files.
+* Resolve crashes when application is first run on a machine.
+
 **v5.8.0**
 
 * Chasing down miscellaneous crashes.
