@@ -26,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
        if let bookmarkData = UserDefaults.standard.object(forKey: "bookmark") as? Data {
            do {
@@ -37,7 +38,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
            }
        }
     }
-    // allow access to previously selected folder - end
 
     @IBAction func checkForUpdates(_ sender: AnyObject) {
         let verCheck = VersionCheck()

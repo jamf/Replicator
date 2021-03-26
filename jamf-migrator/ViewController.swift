@@ -183,7 +183,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
-    @IBOutlet weak var siteMigrate: NSButton!
+    @IBOutlet weak var siteMigrate_button: NSButton!
     @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
     
     var itemToSite      = false
@@ -895,7 +895,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             if !export.saveOnly {
                 // verify source and destination are not the same - start
-                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate.state.rawValue == 0 {
+                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate_button.state.rawValue == 0 {
                     alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
                     self.goButtonEnabled(button_status: true)
                     return
@@ -986,7 +986,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // set site, if option selected - start
-        if siteMigrate.state.rawValue == 1 {
+        if siteMigrate_button.state.rawValue == 1 {
             destinationSite = availableSites_button.selectedItem!.title
             itemToSite = true
         } else {
@@ -3128,7 +3128,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
                 if itemToSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
-//                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -3140,7 +3139,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
                 // migrating to another site
                 if itemToSite && destinationSite != "" {
-//                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -3397,7 +3395,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // migrating to another site
 //            DispatchQueue.main.async {
             if itemToSite && destinationSite != "" {
-//                if siteMigrate.state.rawValue == 1 && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
 //            }
@@ -3472,7 +3469,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // migrating to another site
 //            DispatchQueue.main.async {
             if itemToSite && destinationSite != "" && endpoint == "policies" {
-//                if siteMigrate.state.rawValue == 1 && destinationSite != "" && endpoint == "policies" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
 //            }
@@ -3923,20 +3919,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                        if totalCompleted > currentCompleted {
                             if totalCompleted > 0 {
 //                                self.objects_completed_field.stringValue = "\(totalCompleted)"
-                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
+//                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
                                 self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
                                 self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
                             }
-//                            self.objects_found_field.stringValue = "\(String(describing: self.counters[endpointType]!["total"]!))"
-    //                            self.objects_found_field.stringValue     = "\(endpointCount)"
-    //                        }   // DispatchQueue.main.async - end
                             
-                            // move to the next dependency
-    //                        print("[CreateEndpoints] [\(localEndPointType)] process complete: \(self.getName(endpoint: endpointType, objectXML: endPointXML))")
-    //                        print("[CreateEndpoints] [\(localEndPointType)] dependency \(endpointCurrent): completed \(totalCompleted) of \(endpointCount)")
                             if totalCompleted == endpointCount {
-
-
                                 migrationComplete.isDone = true
 
                                 if totalFailed == 0 {   // removed  && self.changeColor from if condition
@@ -3961,7 +3949,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
     //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
                     if endpointCurrent == endpointCount {
-    //                if totalCompleted == endpointCount {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.\n") }
                         self.nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
     //                    print("nodes complete: \(self.nodesMigrated)")
@@ -4764,12 +4751,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func migrateToSite(_ sender: Any) {
-        if siteMigrate.state.rawValue == 1 {
+        if siteMigrate_button.state.rawValue == 1 {
             itemToSite = true
             availableSites_button.removeAllItems()
 
             DispatchQueue.main.async {
-                self.siteMigrate.isEnabled = false
+                self.siteMigrate_button.isEnabled = false
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
             
@@ -4780,10 +4767,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     // no sites found - allow migration from a site to none
                     self.availableSites_button.addItems(withTitles: ["None"])
                     self.availableSites_button.isEnabled = true
-//                    self.alert_dialog(header: "Attention", message: "No sites were found or the server cound not be queried.")
-//                    self.siteMigrate.state = NSControl.StateValue(rawValue: 0) // or convertToNSControlStateValue(0)
-//                    self.itemToSite = false
-//                    return
                 }
                     self.destinationLabel_TextField.stringValue = "Site Name"
                     self.availableSites_button.addItems(withTitles: ["None"])
@@ -4794,7 +4777,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     DispatchQueue.main.async {
                         self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                        self.siteMigrate.isEnabled = true
+                        self.siteMigrate_button.isEnabled = true
                     }
             }
             
@@ -4805,7 +4788,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             itemToSite = false
             DispatchQueue.main.async {
                 self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                self.siteMigrate.isEnabled = true
+                self.siteMigrate_button.isEnabled = true
             }
         }
         
@@ -6349,8 +6332,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)
             // reset list of available sites
-            if siteMigrate.state.rawValue == 1 {
-                siteMigrate.state = NSControl.StateValue(rawValue: 0)
+            if siteMigrate_button.state.rawValue == 1 {
+                siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
                 availableSites_button.isEnabled = false
                 availableSites_button.removeAllItems()
                 destinationLabel_TextField.stringValue = "Destination"
@@ -6468,11 +6451,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // OS version info
         let os = ProcessInfo().operatingSystemVersion
-        if os.minorVersion < 14 {
+        if  (os.majorVersion == 10 && os.minorVersion < 14) {
             sourceServerPopup_button.isTransparent = false
             destServerPopup_button.isTransparent   = false
         }
-        if !isDarkMode || os.minorVersion < 14 {
+        if !isDarkMode || (os.majorVersion == 10 && os.minorVersion < 14) {
             // light mode settings
             let bkgndAlpha:CGFloat = 0.95
             get_name_field.backgroundColor            = NSColor(calibratedRed: 0xE8/255.0, green: 0xE8/255.0, blue: 0xE8/255.0, alpha: bkgndAlpha)
@@ -6522,45 +6505,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // check for file that allows deleting data from destination server, delete if found
         self.rmDELETE()
-
-       // read settings from userDefaults - start
-        if userDefaults.object(forKey: "activeTab") as? String != nil {
-            let setActiveTab = userDefaults.object(forKey: "activeTab") as? String
-            setTab_fn(selectedTab: setActiveTab!)
-        } else {
-            userDefaults.set("General", forKey: "activeTab")
-            setTab_fn(selectedTab: "generalTab")
-        }
-        // read settings from userDefaults - start
         
         // read environment settings from plist - start
         plistData = readSettings()
 
-        if plistData["source_jp_server"] != nil {
+        if plistData["source_jp_server"] as! String != "" {
+            WriteToLog().message(stringOfText: "[if plistData[\"source_jp_server\"] != nil]\n")
             source_jp_server = plistData["source_jp_server"] as! String
             source_jp_server_field.stringValue = source_jp_server
-            self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
+            if source_jp_server.count > 0 {
+                self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
+            }
         } else {
             self.browseFiles_button.isHidden   = true
         }
-        
         
         if plistData["source_user"] != nil {
             source_user = plistData["source_user"] as! String
             source_user_field.stringValue = source_user
             storedSourceUser = source_user
         }
+        
         if plistData["dest_jp_server"] != nil {
             dest_jp_server = plistData["dest_jp_server"] as! String
             dest_jp_server_field.stringValue = dest_jp_server
         }
+        
         if plistData["dest_user"] != nil {
             dest_user = plistData["dest_user"] as! String
             dest_user_field.stringValue = dest_user
         }
-//        if plistData["maxHistory"] != nil {
-//            maxHistory = plistData["maxHistory"] as! Int
-//        }
+        
         if plistData["source_server_array"] != nil {
             sourceServerArray = plistData["source_server_array"] as! [String]
             for theServer in sourceServerArray {
@@ -6750,6 +6725,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         selectiveFilter_TextField.layer?.borderWidth  = 0.5
         selectiveFilter_TextField.layer?.cornerRadius = 0.0
         selectiveFilter_TextField.layer?.borderColor  = .black
+        
+        siteMigrate_button.attributedTitle = NSMutableAttributedString(string: "Site", attributes: [NSAttributedString.Key.foregroundColor: NSColor.white, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 14)])
+
+        let whichTab = userDefaults.object(forKey: "activeTab") as? String ?? "generalTab"
+        setTab_fn(selectedTab: whichTab)
 
 //        debug = true
         

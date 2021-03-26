@@ -2519,7 +2519,7 @@
                                     <action selector="migrateToSite:" target="XfG-lQ-9wD" id="nKz-4u-Lku"/>
                                 </connections>
                             </button>
-                            <button identifier="xmlFilesFolder" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dKE-kP-Pu7">
+                            <button identifier="xmlFilesFolder" hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dKE-kP-Pu7">
                                 <rect key="frame" x="27" y="359" width="80" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Browse" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="aIu-E4-CVv">
@@ -2663,7 +2663,7 @@
                         <outlet property="selectiveFilter_TextField" destination="UR4-sI-Ky5" id="L58-lD-QEK"/>
                         <outlet property="selectiveTab_NSButton" destination="pZE-bV-fJk" id="p7c-mM-4gw"/>
                         <outlet property="selective_tabViewItem" destination="Fo1-1P-mP5" id="LUA-Dx-kTy"/>
-                        <outlet property="siteMigrate" destination="XYJ-PI-8wf" id="ggX-rd-eUY"/>
+                        <outlet property="siteMigrate_button" destination="XYJ-PI-8wf" id="K47-WY-0BG"/>
                         <outlet property="sitesSpinner_ProgressIndicator" destination="6Q2-dI-sxu" id="boH-sF-D64"/>
                         <outlet property="sites_button" destination="AFT-cj-oMR" id="BOd-zQ-Rx3"/>
                         <outlet property="sites_label_field" destination="rhD-Q3-KDx" id="sCb-XG-r5l"/>
