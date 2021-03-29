@@ -33,6 +33,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a corrupt profle and failure in profile deployment.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
+* Packages - Only package metadata (display name, file name, size, ...) are migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)
 
 <hr>
 
