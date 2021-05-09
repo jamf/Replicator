@@ -138,6 +138,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.8.3**
+
+* Fix animation not stopping under certain conditions when no objects are found to migrate.
+* Fix issue where policies would list multiple times in selective mode.
+
 **v5.8.2**
 
 * Change filter, add button to clear filter
