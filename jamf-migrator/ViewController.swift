@@ -401,6 +401,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var fileImport      = false
     var dataFilesRoot   = ""
     
+    // command line only
+    var ldapId = -1
+    var hardSetLdapId = false
+
+    
     var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     let ordered_dependency_array = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
     var xmlName             = ""
@@ -3509,8 +3514,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if tagValue(xmlString: PostXML, xmlTag: "ldap_server") != "" {
                 let ldapServerInfo = tagValue(xmlString: PostXML, xmlTag: "ldap_server")
                 let ldapServerName = tagValue(xmlString: ldapServerInfo, xmlTag: "name")
-                    let regexLDAP = try! NSRegularExpression(pattern: "<ldap_server>(.*?)</ldap_server>", options:.caseInsensitive)
-                let ldapId = currentLDAPServers[ldapServerName] ?? -1
+                let regexLDAP      = try! NSRegularExpression(pattern: "<ldap_server>(.|\n|\r)*?</ldap_server>", options:.caseInsensitive)
+                if !hardSetLdapId {
+                    ldapId         = currentLDAPServers[ldapServerName] ?? -1
+                }
                 PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(ldapId)</id></ldap_server>")
             }
 //            print("PostXML: \(PostXML)")
@@ -6748,21 +6755,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         let whichTab = userDefaults.object(forKey: "activeTab") as? String ?? "generalTab"
         setTab_fn(selectedTab: whichTab)
+        
+//        hardSetLdapId = false
 
 //        debug = true
         
         // read command line arguments - start
         var numberOfArgs = 0
+        var startPos     = 1
         // read commandline args
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
-//        print("all arguments: \(CommandLine.arguments)")
+        print("all arguments: \(CommandLine.arguments)")
         if CommandLine.arguments.contains("-debug") {
             numberOfArgs -= 1
+            startPos+=1
             LogLevel.debug = true
         }
         if numberOfArgs >= 0 {
-            for i in stride(from: 1, through: numberOfArgs+1, by: 2) {
-//                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
+            for i in stride(from: startPos, through: numberOfArgs+1, by: 2) {
+                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
                 switch CommandLine.arguments[i]{
                 case "-saveRawXml":
                     export.saveRawXml = true
@@ -6770,6 +6781,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     export.saveTrimmedXml = true
                 case "-export.saveOnly":
                     export.saveOnly = true
+                case "-ldapId":
+                    ldapId = Int(CommandLine.arguments[i+1]) ?? -1
+                    if ldapId > 0 {
+                        hardSetLdapId = true
+                    }
                 case "-sourceServer":
                     source_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-destServer":

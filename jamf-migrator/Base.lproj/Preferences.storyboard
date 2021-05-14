@@ -766,7 +766,7 @@
                 </viewController>
                 <customObject id="haM-bS-cWw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="391" y="1099"/>
+            <point key="canvasLocation" x="443" y="1099"/>
         </scene>
         <!--Passwords-->
         <scene sceneID="MUT-R8-cAw">
