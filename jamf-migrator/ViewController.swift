@@ -404,6 +404,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // command line only
     var ldapId = -1
     var hardSetLdapId = false
+    var forceLdapId = false
 
     
     var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
@@ -934,6 +935,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             migrationMode = "selective"
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Migration Mode (Go): \(migrationMode)\n") }
+        
+        if fileImport && migrationMode == "selective" {
+            alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
+            return
+        }
         
         //self.go_button.isEnabled = false
         nodesMigrated = -1
@@ -3519,6 +3525,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     ldapId         = currentLDAPServers[ldapServerName] ?? -1
                 }
                 PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(ldapId)</id></ldap_server>")
+            } else if forceLdapId && ldapId > 0 {
+                let regexNoLdap      = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
+                PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(ldapId)</id></ldap_server>")
             }
 //            print("PostXML: \(PostXML)")
             // check for LDAP account/group, make adjustment for v10.17+ which needs id rather than name - end
@@ -6774,25 +6783,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if numberOfArgs >= 0 {
             for i in stride(from: startPos, through: numberOfArgs+1, by: 2) {
                 print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
-                switch CommandLine.arguments[i]{
-                case "-saveRawXml":
+                switch CommandLine.arguments[i].lowercased() {
+                case "-saverawxml":
                     export.saveRawXml = true
-                case "-saveTrimmedXml":
+                case "-savetrimmedxml":
                     export.saveTrimmedXml = true
-                case "-export.saveOnly":
+                case "-export.saveonly":
                     export.saveOnly = true
-                case "-ldapId":
+                case "-forceldapid":
+                    forceLdapId =  Bool(CommandLine.arguments[i+1]) ?? false
+                case "-ldapid":
                     ldapId = Int(CommandLine.arguments[i+1]) ?? -1
                     if ldapId > 0 {
                         hardSetLdapId = true
                     }
-                case "-sourceServer":
+                case "-sourceserver":
                     source_jp_server = "\(CommandLine.arguments[i+1])"
-                case "-destServer":
+                case "-destserver":
                     dest_jp_server = "\(CommandLine.arguments[i+1])"
                 case "-hidden":
                     hideGui = true
-                case "-NSDocumentRevisionsDebugMode","YES":
+                case "-nsdocumentrevisionsdebugmode","YES":
                     continue
                 default:
                     print("unknown switch passed: \(CommandLine.arguments[i])")
