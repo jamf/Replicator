@@ -1,3 +1,12 @@
+Need to fix for importing other than default download folder
+            if fileImport {
+                action       = "SKIP"
+                iconToUpload = "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+            } else {
+                iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
+            }
+
+
 let font = NSFont(name: "HelveticaNeue", size: CGFloat(14))
 let color = NSColor.white
 let paragraph = NSMutableParagraphStyle()

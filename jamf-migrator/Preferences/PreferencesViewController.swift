@@ -23,11 +23,14 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var copyScopeSig_button: NSButton!       // static ios groups
     @IBOutlet weak var copyScopeUsers_button: NSButton!     // static user groups
     
+    // export prefs
     @IBOutlet weak var saveRawXml_button: NSButton!
     @IBOutlet weak var saveTrimmedXml_button: NSButton!
     @IBOutlet weak var saveOnly_button: NSButton!
     @IBOutlet weak var saveRawXmlScope_button: NSButton!
     @IBOutlet weak var saveTrimmedXmlScope_button: NSButton!
+    @IBOutlet weak var showSaveLocation_button: NSButton!
+    
     
     @IBOutlet var site_View: NSView!
     
@@ -124,6 +127,16 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     var saveTrimmedXmlScope:    Bool = true
 
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
+    var saveFolderPath: URL? {
+        didSet {
+            do {
+                let bookmark = try saveFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+                self.userDefaults.set(bookmark, forKey: "bookmark")
+            } catch let error as NSError {
+                print("Set Bookmark Fails: \(error.description)")
+            }
+        }
+    }
 
     @IBAction func concurrentThreads_action(_ sender: Any) {
         concurrentThreads_textfield.stringValue = concurrentThreads_slider.stringValue
@@ -159,7 +172,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         vc.savePrefs(prefs: plistData)
     }
     
-    @IBAction func updateExportPrefs_button(_ sender: Any) {
+    @IBAction func updateExportPrefs_button(_ sender: NSButton) {
                 plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
                                     "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
                                     "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
@@ -182,11 +195,18 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         return boolValue
     }
     
+    @IBAction func selectExportFolder(_ sender: Any) {
+        saveLocation()
+    }
+    
+    
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
-        let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-//        print("exportFilePath: \(String(describing: exportFilePath!))")
+        var exportFilePath:String? = self.userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+//        let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        exportFilePath = exportFilePath?.pathToString
+        print("exportFilePath: \(String(describing: exportFilePath!))")
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
 //            print("open exportFilePath: \(exportFilePath!)")
@@ -209,11 +229,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //                }
             case "Passwords":
                 switch "\(textField.identifier!.rawValue)" {
-                case "bind":
+                case "bind_textfield":
                     if prefBindPwd_textfield.stringValue != "" {
                         Creds2.save(service: "migrator-bind", account: "bind", data: prefBindPwd_textfield.stringValue)
                     }
-                case "ldap":
+                case "ldap_textfield":
                     if prefLdapPwd_textfield.stringValue != "" {
                         Creds2.save(service: "migrator-ldap", account: "ldap", data: prefLdapPwd_textfield.stringValue)
                     }
@@ -232,6 +252,30 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 break
             }
             userDefaults.synchronize()
+        }
+    }
+    
+    func saveLocation() {
+        DispatchQueue.main.async {
+            let openPanel = NSOpenPanel()
+        
+            openPanel.canCreateDirectories = true
+            openPanel.canChooseDirectories = true
+            openPanel.canChooseFiles       = false
+            openPanel.allowsMultipleSelection = false
+            
+            openPanel.begin { (result) in
+                if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+
+                    self.userDefaults.set(openPanel.url!.absoluteString, forKey: "saveLocation")
+                    self.userDefaults.synchronize()
+                    
+                    self.saveFolderPath = openPanel.url
+                    
+                    self.showSaveLocation_button.toolTip = "\(openPanel.url!.absoluteString.pathToString)"
+                    
+                }
+            } // openPanel.begin - end
         }
     }
     
@@ -388,6 +432,10 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveOnly_button.state            = boolToState(TF: saveOnly)
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
+            var saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            saveLocation = saveLocation.pathToString
+
+            showSaveLocation_button.toolTip = "\(saveLocation)"
         }
         if self.title! == "Computer" {
             credentialsArray.removeAll()

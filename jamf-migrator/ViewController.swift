@@ -6213,59 +6213,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
         }
     }
-    
-// functions used to get existing self service icons to new server - start
-    // using curl to deal with self service icons
-//    func selfServiceIconGet(newPolicyId: String, ssIconName: String, ssIconUri: String) {
-//        theCreateQ.maxConcurrentOperationCount = 1
-//        let semaphore = DispatchSemaphore(value: 0)
-//
-////        var responseData = ""
-//
-//        theCreateQ.addOperation {
-//            if LogLevel.debug { WriteToLog().message(stringOfText: "Getting icon \(ssIconName) from \(ssIconUri)\n") }
-//
-//            let encodedURL = NSURL(string: ssIconUri)
-//            let request = NSMutableURLRequest(url: encodedURL! as URL)
-//            request.httpMethod = "GET"
-//
-//            let configuration = URLSessionConfiguration.ephemeral
-////            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-////            request.httpBody = encodedXML!
-//            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-//            let task = session.dataTask(with: request as URLRequest, completionHandler: {
-//                (data, response, error) -> Void in
-//                if let httpResponse = response as? HTTPURLResponse {
-//                    
-//                    if let _ = String(data: data!, encoding: .unicode) {
-//                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-//                            WriteToLog().message(stringOfText: "icon get succeeded: \(ssIconName)\n")
-//                            self.selfServiceIconPost(newPolicyId: newPolicyId, ssIconName: ssIconName, ssIcon: data!)
-//                            
-//                        } else {
-//                            WriteToLog().message(stringOfText: "icon get failed: \(ssIconName)\n")
-//                        }
-////                        responseData = String(data: data!, encoding: .unicode)!
-//                        //                        if LogLevel.debug { WriteToLog().message(stringOfText: "\n\nfull response from create:\n\(responseData)") }
-////                        print("create data response: \(responseData)")
-//                    } else {
-//                        if LogLevel.debug { WriteToLog().message(stringOfText: "\n\nNo data was returned from icon GET.\n") }
-//                    }
-//                }
-//                
-//                semaphore.signal()
-//                if error != nil {
-//                }
-//            })
-//            task.resume()
-//            semaphore.wait()
-//            
-//        }   // theCreateQ.addOperation - end
-//    }
-//    func selfServiceIconPost(newPolicyId: String, ssIconName: String, ssIcon: Data) {
-//    
-//    }
-    // functions used to get existing self service icons to new server - end
 
     func setConcurrentThreads() -> Int {
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads")
@@ -6541,6 +6488,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allows deleting data from destination server, delete if found
         self.rmDELETE()
         
+        if userDefaults.string(forKey: "saveLocation") == nil {
+            print("set default save loc")
+            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
+        }
+        
         // read environment settings from plist - start
         plistData = readSettings()
 
@@ -6774,7 +6726,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var startPos     = 1
         // read commandline args
         numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
-        print("all arguments: \(CommandLine.arguments)")
+//        print("all arguments: \(CommandLine.arguments)")
         if CommandLine.arguments.contains("-debug") {
             numberOfArgs -= 1
             startPos+=1
@@ -6782,7 +6734,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         if numberOfArgs >= 0 {
             for i in stride(from: startPos, through: numberOfArgs+1, by: 2) {
-                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
+//                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
                 switch CommandLine.arguments[i].lowercased() {
                 case "-saverawxml":
                     export.saveRawXml = true
@@ -7132,6 +7084,14 @@ extension String {
                 fqdn = fqdnArray[0]
             }
             return fqdn
+        }
+    }
+    var pathToString: String {
+        get {
+            var newPath = ""
+            newPath = self.replacingOccurrences(of: "file://", with: "")
+            newPath = newPath.replacingOccurrences(of: "%20", with: " ")
+            return newPath
         }
     }
 }

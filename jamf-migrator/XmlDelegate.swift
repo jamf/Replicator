@@ -11,8 +11,10 @@ import Foundation
 
 class XmlDelegate: NSObject, URLSessionDelegate {
 
-    let fm = FileManager()
-    let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
+    let fm           = FileManager()
+    let userDefaults = UserDefaults.standard
+//    let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
+    var baseXmlFolder = ""
     var saveXmlFolder = ""
     var endpointPath  = ""
 
@@ -80,7 +82,21 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
-        saveXmlFolder = baseXmlFolder+"/"+format+"/"
+//        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil
+        print("[XmlDelegate.saveLocation]: \(String(describing: userDefaults.string(forKey: "saveLocation")))")
+        baseXmlFolder = userDefaults.string(forKey: "saveLocation") ?? ""
+        if baseXmlFolder == "" {
+            baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        } else {
+            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "file://", with: "")
+            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "%20", with: " ")
+        }
+//        baseXmlFolder = baseXmlFolder + "/"
+            
+        saveXmlFolder = baseXmlFolder+format+"/"
+//        saveXmlFolder = saveXmlFolder.replacingOccurrences(of: "//\(format)/", with: "/\(format)/")
+        print(NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        print("saveXmlFolder: \(saveXmlFolder)")
         if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
