@@ -132,11 +132,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
     // Buttons
     // macOS tab
-    @IBOutlet weak var allNone_button: NSButton!
     @IBOutlet weak var advcompsearch_button: NSButton!
     @IBOutlet weak var macapplications_button: NSButton!
     @IBOutlet weak var computers_button: NSButton!
-    @IBOutlet weak var configurations_button: NSButton!
     @IBOutlet weak var directory_bindings_button: NSButton!
     @IBOutlet weak var disk_encryptions_button: NSButton!
     @IBOutlet weak var dock_items_button: NSButton!
@@ -220,7 +218,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var advcompsearch_label_field: NSTextField!
     @IBOutlet weak var macapplications_label_field: NSTextField!
     @IBOutlet weak var computers_label_field: NSTextField!
-    @IBOutlet weak var configurations_label_field: NSTextField!
     @IBOutlet weak var directory_bindings_field: NSTextField!
     @IBOutlet weak var disk_encryptions_field: NSTextField!
     @IBOutlet weak var dock_items_field: NSTextField!
@@ -407,7 +404,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var forceLdapId = false
 
     
-    var endpointDefDict = ["computergroups":"computer_groups", "computerconfigurations":"computer_configurations", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
+    var endpointDefDict = ["computergroups":"computer_groups", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     let ordered_dependency_array = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
     var xmlName             = ""
     var destEPs             = [String:Int]()
@@ -427,7 +424,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "computerconfigurations", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
@@ -685,7 +682,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if deviceType() != "macOS" {
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
             self.computers_button.state = NSControl.StateValue(rawValue: 0)
-            self.configurations_button.state = NSControl.StateValue(rawValue: 0)
             self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
             self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
             self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
@@ -749,7 +745,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if deviceType() == "macOS" {
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.computers_button.state = NSControl.StateValue(rawValue: rawStateValue)
-            self.configurations_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.directory_bindings_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.disk_encryptions_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.dock_items_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -1357,10 +1352,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.objectsToMigrate += ["advancedcomputersearches"]
                         }
                         
-                        if self.configurations_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["computerconfigurations"]
-                        }
-                        
                         if self.policies_button.state.rawValue == 1 {
                             self.objectsToMigrate += ["policies"]
                         }
@@ -1879,8 +1870,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // macOS items
         case "advancedcomputersearches":
             endpointParent = "advanced_computer_searches"
-        case "computerconfigurations":
-            endpointParent = "computer_configurations"
         case "computerextensionattributes":
             endpointParent = "computer_extension_attributes"
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
@@ -2515,6 +2504,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
 
+                                /*
                                 case "computerconfigurations":
                                     if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
                                         endpointCount = endpointInfo.count
@@ -2702,6 +2692,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
+                            */
 
                                 default:
                                     break
@@ -3078,16 +3069,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // strip out <id> tag from XML
-        switch endpoint {
-        case "computerconfigurations":
-            // parent computerconfigurations reference child configurations by id not name
-            let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
-            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
-        default:
+//        switch endpoint {
+//        case "computerconfigurations":
+//            // parent computerconfigurations reference child configurations by id not name
+//            let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
+//            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
+//        default:
             for xmlTag in ["id"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
-        }
+//        }
         
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
         switch endpoint {
@@ -3129,7 +3120,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "netbootservers", "softwareupdateservers", "computerconfigurations", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "netbootservers", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -3175,7 +3166,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 for xmlTag in ["full_name", "phone_number", "email_address"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
-                
+             /*
             case "computerconfigurations":
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] cleaning up computerconfigurations - verbose\n") }
                 // remove password from XML, since it doesn't work on the new server
@@ -3215,7 +3206,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 for xmlTag in ["script_contents", "script_contents_encoded", "ppd_contents"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
-                
+            */
             case "scripts":
                 for xmlTag in ["script_contents_encoded"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
@@ -4233,8 +4224,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointParent = "computer_extension_attributes"
             case "computergroups":
                 endpointParent = "computer_groups"
-            case "computerconfigurations":
-                endpointParent = "computer_configurations"
+//            case "computerconfigurations":
+//                endpointParent = "computer_configurations"
             case "diskencryptionconfigurations":
                 endpointParent = "disk_encryption_configurations"
             case "distributionpoints":
@@ -4687,13 +4678,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     let recordId = (record["id"] != nil) ? record["id"] as? Int:0
 //                                    print("[nameIdDict] record: \(record ) \t recordId: \(recordId!)")
                                     
-                                    if endPoint == "computerconfigurations" {
-                                        self.configInfo(server: "\(server)", endPoint: "computerconfigurations", recordId: recordId!) {
-                                            (result: Dictionary<String,Dictionary<String,String>>) in
-                                            //                                            print("ordered config IDs: \(result)")
-                                        }
-                                        
-                                    } else {
+//                                    if endPoint == "computerconfigurations" {
+//                                        self.configInfo(server: "\(server)", endPoint: "computerconfigurations", recordId: recordId!) {
+//                                            (result: Dictionary<String,Dictionary<String,String>>) in
+//                                            //                                            print("ordered config IDs: \(result)")
+//                                        }
+//                                        
+//                                    } else {
                                         recordName = record["name"] as! String
                                         if self.idDict[recordName]?.count == nil || recordId == 0 {
                                             self.idDict[recordName] = ["sourceId":0, "destId":0]
@@ -4703,10 +4694,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if LogLevel.debug {
                                             WriteToLog().message(stringOfText: "[nameIdDict] \(String(describing: recordName)): existing object.\n")
                                             WriteToLog().message(stringOfText: "[nameIdDict] \(String(describing: self.idDict[recordName]!)) ID matching dictionary :\n")
-                                    }
+                                        }
 
-                                }   // for i in (0..<endpointCount) end
-                                }
+//                                    }
+                                }  // for i in (0..<endpointCount) end
                                 
                             }   //if endpointCount > 0 - end
                         }   // if let endpointInfo = endpointJSON - end
@@ -5729,8 +5720,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.advcompsearch_label_field.textColor = theColor
             case "computers":
                 self.computers_label_field.textColor = theColor
-            case "computerconfigurations":
-                self.configurations_label_field.textColor = theColor
             case "directorybindings":
                 self.directory_bindings_field.textColor = theColor
             case "diskencryptionconfigurations":
@@ -6163,11 +6152,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         DispatchQueue.main.async {
         // Sellect all items to be migrated
             // macOS tab
-            self.allNone_button.state = NSControl.StateValue(rawValue: 0)
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
             self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
             self.computers_button.state = NSControl.StateValue(rawValue: 0)
-            self.configurations_button.state = NSControl.StateValue(rawValue: 0)
             self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
             self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
             self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
@@ -6489,8 +6476,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         self.rmDELETE()
         
         if userDefaults.string(forKey: "saveLocation") == nil {
-            print("set default save loc")
             userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
+            userDefaults.synchronize()
         }
         
         // read environment settings from plist - start

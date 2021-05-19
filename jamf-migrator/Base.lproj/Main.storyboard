@@ -1455,7 +1455,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V21-1X-tzz">
-                                                                        <rect key="frame" x="567" y="74" width="74" height="17"/>
+                                                                        <rect key="frame" x="567" y="94" width="74" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Policies" id="BFj-tq-ijr">
                                                                             <font key="font" metaFont="system"/>
@@ -1464,7 +1464,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iW5-vh-2hL" userLabel="Policies">
-                                                                        <rect key="frame" x="547" y="72" width="79" height="20"/>
+                                                                        <rect key="frame" x="547" y="92" width="79" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="h6T-XB-xw7">
                                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1634,26 +1634,6 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="9XO-hZ-EaL"/>
                                                                         </connections>
                                                                     </button>
-                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="25Y-OQ-cdE" userLabel="Configurations fld">
-                                                                        <rect key="frame" x="568" y="94" width="111" height="17"/>
-                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Configurations" id="E8z-4Z-5Mp" userLabel="Configurations">
-                                                                            <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                        </textFieldCell>
-                                                                    </textField>
-                                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4gP-s6-YWE" userLabel="Configurations btn">
-                                                                        <rect key="frame" x="547" y="92" width="118" height="20"/>
-                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                        <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="dss-cy-gJ7">
-                                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                                            <font key="font" size="14" name="Helvetica"/>
-                                                                        </buttonCell>
-                                                                        <connections>
-                                                                            <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="zpm-63-oln"/>
-                                                                        </connections>
-                                                                    </button>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2tr-YW-IQ0" userLabel="Restricted Software fld">
                                                                         <rect key="frame" x="402" y="94" width="141" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1675,7 +1655,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TwK-8j-8nD" userLabel="Patch Policies fld">
-                                                                        <rect key="frame" x="567" y="33" width="106" height="17"/>
+                                                                        <rect key="frame" x="567" y="53" width="106" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Patch Policies" id="GJT-As-0Ty">
                                                                             <font key="font" metaFont="system"/>
@@ -1684,7 +1664,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
-                                                                        <rect key="frame" x="547" y="31" width="113" height="20"/>
+                                                                        <rect key="frame" x="547" y="51" width="113" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="oQh-Ig-MX4">
                                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1735,7 +1715,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8U0-Qe-paa" userLabel="Prestages">
-                                                                        <rect key="frame" x="567" y="54" width="74" height="17"/>
+                                                                        <rect key="frame" x="567" y="74" width="74" height="17"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Prestages" id="txW-rc-axB">
                                                                             <font key="font" metaFont="system"/>
@@ -1744,7 +1724,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdm-q1-rol" userLabel="Prestages">
-                                                                        <rect key="frame" x="547" y="52" width="79" height="20"/>
+                                                                        <rect key="frame" x="547" y="72" width="79" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aj0-i2-NDK">
                                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2095,9 +2075,6 @@
                                                                         </menuItem>
                                                                         <menuItem title="Computers" id="ry3-B0-mRx" userLabel="Computers"/>
                                                                         <menuItem title="Configuration Profiles" id="Hhd-E2-H4G" userLabel="Config. Profiles">
-                                                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                                                        </menuItem>
-                                                                        <menuItem title="Configurations" id="Cs2-Fx-YL9">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
                                                                         <menuItem title="Directory Bindings" id="0Kb-4Y-MlD">
@@ -2563,7 +2540,6 @@
                         <outlet property="advcompsearch_label_field" destination="vHg-RG-3pb" id="ftk-7a-Rx1"/>
                         <outlet property="advusersearch_button" destination="L2Y-Hp-rHS" id="j2i-F8-JTW"/>
                         <outlet property="advusersearch_label_field" destination="Qck-dJ-qag" id="Jh8-fL-FdM"/>
-                        <outlet property="allNone_button" destination="vJA-rz-FWc" id="eCb-jb-Ayy"/>
                         <outlet property="allNone_general_button" destination="QJL-w2-5jw" id="hxI-ni-Hyc"/>
                         <outlet property="allNone_iOS_button" destination="14Q-PR-ssk" id="4hq-CS-pwp"/>
                         <outlet property="appVersion_TextField" destination="bKr-H7-03S" id="iCj-zQ-ZAi"/>
@@ -2577,8 +2553,6 @@
                         <outlet property="categories_label_field" destination="ZRd-jK-zIk" id="Pdf-w6-rLf"/>
                         <outlet property="computers_button" destination="llc-Ji-GYb" id="NP4-Rg-WBz"/>
                         <outlet property="computers_label_field" destination="WHx-8J-iwK" id="JUS-q6-f9e"/>
-                        <outlet property="configurations_button" destination="4gP-s6-YWE" id="oJ7-uZ-dbK"/>
-                        <outlet property="configurations_label_field" destination="25Y-OQ-cdE" id="ku3-Dc-zd5"/>
                         <outlet property="departments_label_field" destination="Ujv-CO-BGg" id="U7t-Vm-vOG"/>
                         <outlet property="dept_button" destination="1gD-S5-cVs" id="1q3-K8-9aV"/>
                         <outlet property="destServerList_button" destination="Kb9-jI-pZI" id="Nhg-fD-g1q"/>
