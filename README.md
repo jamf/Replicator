@@ -21,6 +21,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 
 
 **Limitations/requirements to be aware of:**
+
 * Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A passwoord can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
 * Certificate used for LDAPS does not migrate.
 * Icons associated with Mac App Store apps are not migrated (can't be migrated).
@@ -52,7 +53,16 @@ When importing XML files they must be organized into folders that, for the most 
   
 **Important:** Trimmed XML files cannot be used as they are missing data required for the migration. 
 
+**Command Line Options:**
+
+Options for setting an ldap id on jamf user accounts and/or converting standard accounts to ldap accounts can be accomplished by launching jamf-migrator from Terminal.  For example to set an ldap id of 3 and force that id (even on local accounts) use the following:
+```
+~/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true
+```
+
+
 **Preferences:**
+
 * macOS Configuration Profiles 
 * macOS Applications 
 * Restrictions 
@@ -70,6 +80,7 @@ In addition, Policies can be copied in a disabled state.
 Options to export XML from the source server are also available.
 
 ![](./jamf-migrator/images/exportPrefs.png)
+
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
 * Save only saves the XML files and does not send them to the destination server.
@@ -137,6 +148,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+
+**v5.9.0**
+
+* With great sadness (computer) configurations have been removed as an object that can be migrated.
+* Added ability to select the location of exported files.
+* Fixed crash that would occur when importing files while on the Selective tab.
+* Add command line options for setting an ldap id on jamf user accounts and converting standard jamf accounts to ldap accounts.
 
 **v5.8.3**
 

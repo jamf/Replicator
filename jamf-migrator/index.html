@@ -179,6 +179,14 @@ body
     <strong>Important:</strong> Trimmed XML files cannot be used as they are missing data required for the migration.
 </div>
 
+<strong>Command Line Options:</strong><br>
+<div>
+    Options for setting an ldap id on jamf user accounts and/or converting standard accounts to ldap accounts can be accomplished by launching jamf-migrator from Terminal.  For example to set an ldap id of 3 and force that id (even on local accounts) use the following:
+    <ul style="margin-left:28px; list-style-type: none;">
+        <li><span style="font-family:'Courier New';">~/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true</span></li>
+    </ul>
+</div>
+
 <strong>Preferences:</strong>
 <div>You can modify how some items are copied.  The following items can be copied without any scope defined, leaving the existing scope on the destination server unchanged (if the item exists there already).
     <ul style="margin-left:17px;">
@@ -342,7 +350,6 @@ If you have used jamf-migrator and saved passwords you will see the following af
         <li>Applications</li>
 		<li>Packages</li>
         <li>Advanced Searches</li>
-		<li>Configurations</li>
 		<li>Policies</li>
 	</ul>
 	</div>
@@ -386,7 +393,6 @@ If you have used jamf-migrator and saved passwords you will see the following af
     <ul style="margin-left:0px;">
         <li><span style='text-decoration: underline;'>Mac App Store Apps</span>: Computers, Users, Groups, Buildings, Departments, Network Segments</li>
 <li><span style='text-decoration: underline;'>Computers</span>: Users, File Shares, Netboot Servers, Software Update Servers, Sites, location attributes (cleared), peripherals, Extension Attributes, Computer Group Membership (cleared), iphones (cleared), configuration profiles (cleared)</li>
-<li><span style='text-decoration: underline;'>Computer Configurations</span>: Scripts, Printers, Packages, Bindings, parent configuration (if a smart config)</li>
 <li><span style='text-decoration: underline;'>Configuration Profiles</span>: Sites, Categories, Computers, Buildings, Departments, Computer Groups, Jamf Users, Users, User Groups, Network Segments, iBeacons</li>
 <li><span style='text-decoration: underline;'>Policies</span>: Categories, Network Segments, iBeacons, Distribution Points, Software Update Servers, Netboot Servers, Sites, Buildings, Departments, Users, User Groups, Computers, Computer Groups, Self Service Icon (cleared), Packages, Scripts, Printers, Dock Items, Directory Bindings</li>
 <li><span style='text-decoration: underline;'>Advanced Computer Searches</span>: Extension Attributes, Sites, Computers (cleared)</li>

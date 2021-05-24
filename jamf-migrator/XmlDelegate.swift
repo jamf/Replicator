@@ -83,7 +83,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
 //        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil
-        print("[XmlDelegate.saveLocation]: \(String(describing: userDefaults.string(forKey: "saveLocation")))")
         baseXmlFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseXmlFolder == "" {
             baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
@@ -95,8 +94,8 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             
         saveXmlFolder = baseXmlFolder+format+"/"
 //        saveXmlFolder = saveXmlFolder.replacingOccurrences(of: "//\(format)/", with: "/\(format)/")
-        print(NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-        print("saveXmlFolder: \(saveXmlFolder)")
+//        print(NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+//        print("saveXmlFolder: \(saveXmlFolder)")
         if !(fm.fileExists(atPath: saveXmlFolder)) {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)

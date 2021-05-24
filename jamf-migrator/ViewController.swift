@@ -3517,8 +3517,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(ldapId)</id></ldap_server>")
             } else if forceLdapId && ldapId > 0 {
-                let regexNoLdap      = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
-                PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(ldapId)</id></ldap_server>")
+                let ldapObjectUsername = tagValue(xmlString: PostXML, xmlTag: "name").lowercased()
+                // make sure we don't change the account we're authenticated to the destination server with
+                if ldapObjectUsername != dest_user.lowercased() {
+                    let regexNoLdap      = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
+                    PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(ldapId)</id></ldap_server>")
+                }
             }
 //            print("PostXML: \(PostXML)")
             // check for LDAP account/group, make adjustment for v10.17+ which needs id rather than name - end
