@@ -272,7 +272,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                     
                     self.saveFolderPath = openPanel.url
                     
-                    self.showSaveLocation_button.toolTip = "\(openPanel.url!.absoluteString.pathToString)"
+                    var theTooltip = "\(openPanel.url!.absoluteString.pathToString)"
+                    let homePathArray = NSHomeDirectory().split(separator: "/")
+                    if homePathArray.count > 1 {
+                        theTooltip = theTooltip.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
+                    }
+                    
+                    self.showSaveLocation_button.toolTip = "\(theTooltip)"
                     
                 }
             } // openPanel.begin - end
@@ -434,7 +440,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
             var saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
             saveLocation = saveLocation.pathToString
-
+            
+            let homePathArray = NSHomeDirectory().split(separator: "/")
+            if homePathArray.count > 1 {
+                saveLocation = saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
+            }
+            
             showSaveLocation_button.toolTip = "\(saveLocation)"
         }
         if self.title! == "Computer" {

@@ -198,7 +198,7 @@ body
 </div>
 <div>Options to export XML from the source server are also available.</div>
 <div>
-    <img src="images/exportPrefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
+    <img src="images/exportPrefs.png" alt="" style="position:relative; left: 100px; width:360px;height:286px;">
 </div>
 <ul style="margin-left:17px;">
    <li>Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).</li>
@@ -207,7 +207,7 @@ body
    <li>Save the object XML either with or without its scope.  Unchecked removes the scope.</li>
    <li>Note: Neither Raw Source XML nor Save Only should be selected when File Import is selected.</li>
 </ul>
-<div>Files are saved to ~/Downloads/Jamf Migrator/, then within folders for the endpoint type.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.</div>
+<div>By default files are saved to ~/Downloads/Jamf Migrator/ but can be changed.  The current save location can be displayed by hovering over the Show button.  Within the Jamf Migrator folder a folder called raw and or trimmed will be created to store the objects.  The will be saved with a folder named after the API endpoint they were exported from.  The name of an individual file is formated as &lt;name&gt;-&lt;id&gt;.xml.</div>
 <div>
     <img src="images/xmlFiles.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
 </div>
@@ -294,7 +294,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
     <div style="font-family:Arial;font-size:13px;line-height:15px;color:#000000;">
         You can export object XML data before deleting it by selecting raw source XML from the export preferences.  Be aware some data, in particular security related data, like passwords for distribution points or passwords for LDAP connections, will not be exported.  However passwords used in configuration profiles, WiFi passwords for example, will  be exported and be displayed in plain text within the XML file.
     <div>
-    <img src="images/export_migrator_prefs.png" alt="" style="position:relative; left: 100px; width:360px;height:344px;">
+    <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width:360px;height:286px;">
 </div>
     </div>
 </div>
