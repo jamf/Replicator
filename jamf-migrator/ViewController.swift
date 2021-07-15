@@ -489,7 +489,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
     var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
     
-    var concurrentThreads = 5
+    var concurrentThreads = 2
     
     var migrateOrWipe: String = ""
     var httpStatusCode: Int = 0
@@ -6222,8 +6222,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
 
     func setConcurrentThreads() -> Int {
-        var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads")
-        concurrent = (concurrent > 10) ? 5:concurrent
+        var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
+        concurrent = (concurrent > 5) ? 2:concurrent
         return concurrent
     }
     

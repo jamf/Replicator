@@ -65,7 +65,7 @@ struct pref {
     static var mgmtPwd           = ""
     static var removeCA_ID       = 0
     static var stopMigration     = false
-    static var concurrentThreads = 5
+    static var concurrentThreads = 2
 }
 
 struct q {

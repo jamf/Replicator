@@ -323,7 +323,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
 
         if self.title! == "App" {
-            concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 5:userDefaults.integer(forKey: "concurrentThreads"))"
+            concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads"))"
             concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
             userDefaults.synchronize()

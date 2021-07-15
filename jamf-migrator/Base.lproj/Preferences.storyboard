@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -626,7 +626,7 @@ DQ
                             </textField>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
                                 <rect key="frame" x="32" y="154" width="191" height="28"/>
-                                <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="10" doubleValue="5" tickMarkPosition="below" numberOfTickMarks="10" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
+                                <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="2" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
                                 <connections>
                                     <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
                                 </connections>
