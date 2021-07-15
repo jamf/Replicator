@@ -27,7 +27,8 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     var existingDestUrl = ""
                     
                     existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)"
-                    existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            existingDestUrl = existingDestUrl.urlFix
+//            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.apiAction] Looking up: \(existingDestUrl)\n") }
 //                    if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }

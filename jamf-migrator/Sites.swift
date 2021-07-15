@@ -31,7 +31,9 @@ class Sites: NSObject, URLSessionDelegate {
         }
         
         resourcePath = "\(server)/JSSResource/sites"
-        resourcePath = resourcePath.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        resourcePath = resourcePath.urlFix
+//        resourcePath = resourcePath.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+//        resourcePath = resourcePath.replacingOccurrences(of: "/?failover", with: "")
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
         getSites() {

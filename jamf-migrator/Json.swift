@@ -11,15 +11,6 @@ import Cocoa
 class Json: NSObject, URLSessionDelegate {
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
 
-//        let getRecordQ = DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
-//        var getRecordQ = OperationQueue() // create operation queue for API GET calls
-
-//        if pref.stopMigration {
-//            getRecordQ.cancelAllOperations()
-//            completion([:])
-//            return
-//        }
-
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
     
@@ -27,7 +18,9 @@ class Json: NSObject, URLSessionDelegate {
         var existingDestUrl = ""
         
         existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
-        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        existingDestUrl = existingDestUrl.urlFix
+//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "/?failover", with: "")
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)\n") }
 //      print("existing endpoints URL: \(existingDestUrl)")

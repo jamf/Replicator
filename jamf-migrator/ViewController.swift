@@ -635,6 +635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: self.dataFilesRoot))\n") }
                         self.userDefaults.set("\(self.dataFilesRoot)", forKey: "dataFilesRoot")
                         
+                        // Note, merge this with xportFilesURL
                         self.xportFolderPath = openPanel.url
                         
                         self.userDefaults.synchronize()
@@ -1129,7 +1130,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (whichServer == "source" && (!wipeData.on && !fileImport)) || (whichServer == "dest" && !export.saveOnly) {
 //            var myURL = "\(f_sourceURL)/JSSResource/buildings"
             var myURL = "\(f_sourceURL)/JSSResource/restrictedsoftware"
-            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            myURL = myURL.urlFix
+//            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
                 
@@ -1933,7 +1935,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
         (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
-        myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        myURL = myURL.urlFix
+//        myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)\n") }
         
         concurrentThreads = setConcurrentThreads() //(concurrentThreads > 20) ? 5:concurrentThreads
@@ -2974,7 +2977,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
             var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
-            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            myURL = myURL.urlFix
+//            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
             myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
             myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
@@ -3701,7 +3705,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
-        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        createDestUrl = createDestUrl.urlFix
+//        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
         
@@ -4022,7 +4027,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             removeDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
             if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
-            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            removeDestUrl = removeDestUrl.urlFix
+//            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
@@ -4301,7 +4307,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         waiting = true
                         existingEndpointNode = endpointDependendyArray[completed]
                         existingDestUrl = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
-                        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+                        existingDestUrl = existingDestUrl.urlFix
+//                        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 //                        print("existing endpoints URL: \(existingDestUrl)")
 //print("NSURL line 6")
 //if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
@@ -4644,7 +4651,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "[nameIdDict] start matching \(endPoint) (by name) that exist on both servers\n") }
         URLCache.shared.removeAllCachedResponses()
         var serverUrl     = "\(server)/JSSResource/\(endPoint)"
-        serverUrl         = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        serverUrl         = serverUrl.urlFix
+//        serverUrl         = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         var recordName    = ""
         var endpointCount = 0
         
@@ -4728,7 +4736,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         URLCache.shared.removeAllCachedResponses()
         
         var serverUrl = "\(server)/JSSResource/\(endPoint)/id/\(recordId)"
-        serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        serverUrl = serverUrl.urlFix
+//        serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 
 //        print("NSURL line 8")
 //        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
@@ -5209,7 +5218,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //          print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
 //          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-            createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            createDestUrl = createDestUrl.urlFix
+//            createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 
             if fileImport {
                 action       = "SKIP"
@@ -5232,6 +5242,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // download the icon - action = "GET"
                 iconMigrate(action: action, ssIconUri: ssIconUri, ssIconId: ssIconId, ssIconName: ssIconName, iconToUpload: "", createDestUrl: "") {
                     (result: Int) in
+                    print("action: \(action)")
+                    print("Icon url: \(ssIconUri)")
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after icon download.\n") }
                     
                     if result > 199 && result < 300 {
@@ -5546,10 +5558,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
 
                         let endTime = Date()
-                        let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
+                        let components = Calendar.current.dateComponents([.second], from: startTime, to: endTime)
+//                        let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
 
-                        let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(timeDifference) seconds\n")
+                        let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
+                        let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+                        let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+//                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(timeDifference) seconds\n")
+                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(h):\(m):\(s) (h:m:s)\n")
                         
                         completion(newPolicyId)
                         // upload checksum - end
@@ -7083,6 +7099,13 @@ extension String {
             newPath = self.replacingOccurrences(of: "file://", with: "")
             newPath = newPath.replacingOccurrences(of: "%20", with: " ")
             return newPath
+        }
+    }
+    var urlFix: String {
+        get {
+            var fixedUrl = self.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            fixedUrl = fixedUrl.replacingOccurrences(of: "/?failover", with: "")
+            return fixedUrl
         }
     }
 }
