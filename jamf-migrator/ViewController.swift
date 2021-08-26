@@ -3624,26 +3624,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             counters[endpointType]!["total"] = endpointCount
         }
 
-        // disabled 21-01-21
-//        if counters[endpointType]!["create"] == nil {
-//            self.counters[endpointType]!["create"] = 0
-//            self.summaryDict[endpointType]!["create"] = []
-//        }
-//        if counters[endpointType]!["update"] == nil {
-//            self.counters[endpointType]!["update"] = 0
-//            self.summaryDict[endpointType]!["update"] = []
-//        }
-//        if counters[endpointType]!["fail"] == nil {
-//            self.counters[endpointType]!["fail"] = 0
-//            self.summaryDict[endpointType]!["fail"] = []
-//        }
-//        if counters[endpointType]!["total"] == nil {
-//            self.counters[endpointType]!["total"] = 0
-//            self.summaryDict[endpointType]!["total"] = []
-//        }
-//        counters[endpointType]!["total"] = endpointCount
-
-        
         var destinationEpId = destEpId
         var apiAction       = action
         var sourcePolicyId  = ""
@@ -3653,13 +3633,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var totalUpdated   = 0
         var totalFailed    = 0
         var totalCompleted = 0
-
-        // moved a few lines up 201222
-//        if counters[endpointType] == nil {
-//            counters[endpointType] = ["total":endpointCount]
-//        } else {
-//            counters[endpointType]!["total"] = endpointCount
-//        }
         
         // if working a site migrations within a single server force create when copying an item
         if self.itemToSite && sitePref == "Copy" {
@@ -3684,7 +3657,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
         var whichError        = ""
-//        var curlResult        = ""
         
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -4001,7 +3973,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // whether the operation was successful or not, either delete or fail
         var methodResult = "create"
-//        var methodResult = "delete"
         
         // counters for completed objects
         var totalDeleted   = 0
@@ -5100,50 +5071,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBAction func stopButton(_ sender: Any) {
         WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
         pref.stopMigration = true
-//        objectsToMigrate.removeAll()
-//        AllEndpointsArray.removeAll()
-//        availableObjsToMigDict.removeAll()
-//        sourceDataArray.removeAll()
-//        srcSrvTableView.reloadData()
-//        targetDataArray.removeAll()
-//
-//        nodesMigrated = 1000
-//
-//        getEndpointsQ.cancelAllOperations()
-//        q.getRecord.cancelAllOperations()
-//        readFilesQ.cancelAllOperations()
-//        readNodesQ.cancelAllOperations()
-//        theOpQ.cancelAllOperations()
-//        theCreateQ.cancelAllOperations()
 
         goButtonEnabled(button_status: true)
     }
-    
-    // Moved to TimeDelegate
-//    func getCurrentTime() -> String {
-//        let current = Date()
-//        let localCalendar = Calendar.current
-//        let dateObjects: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
-//        let dateTime = localCalendar.dateComponents(dateObjects, from: current)
-//        let currentMonth  = leadingZero(value: dateTime.month!)
-//        let currentDay    = leadingZero(value: dateTime.day!)
-//        let currentHour   = leadingZero(value: dateTime.hour!)
-//        let currentMinute = leadingZero(value: dateTime.minute!)
-//        let currentSecond = leadingZero(value: dateTime.second!)
-//        let stringDate = "\(dateTime.year!)\(currentMonth)\(currentDay)_\(currentHour)\(currentMinute)\(currentSecond)"
-//        return stringDate
-//    }
-//
-//    // add leading zero to single digit integers
-//    func leadingZero(value: Int) -> String {
-//        var formattedValue = ""
-//        if value < 10 {
-//            formattedValue = "0\(value)"
-//        } else {
-//            formattedValue = "\(value)"
-//        }
-//        return formattedValue
-//    }
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
