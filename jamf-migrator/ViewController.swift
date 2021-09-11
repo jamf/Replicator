@@ -3008,7 +3008,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                 let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
                                 WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
-                                XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: endpointID, format: "raw")
+                                XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: "\(endpointID)", format: "raw")
                             }
                         }
                         // save source XML - end
@@ -3048,7 +3048,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         var iconName        = ""
         var iconId_string   = ""
-        var iconId          = 0
+        var iconId          = "0"
         var iconUri         = ""
         
 //        var localEndPointType = ""    // disabled lnh 191223
@@ -3428,17 +3428,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // check for a self service icon and grab name and id if present - start
             if PostXML.range(of: "</self_service_icon>") != nil {
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
-                iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
+                iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                 if let index = iconUri.firstIndex(of: "=") {
                     iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
                     if endpoint != "policies" {
                         if let index = iconId_string.firstIndex(of: "&") {
-                            iconId = Int(iconId_string.prefix(upTo: index))!
+//                            iconId = Int(iconId_string.prefix(upTo: index))!
+                            iconId = String(iconId_string.prefix(upTo: index))
                         }
                     } else {
-                        iconId = Int(iconId_string)!
+//                        iconId = Int(iconId_string)!
+                        iconId = String(iconId_string.prefix(upTo: index))
                     }
+                } else {
+                    print("there")
+                    print("selfServiceIconXml: \(selfServiceIconXml)")
+//                    iconId = Int(self.tagValue(xmlString: selfServiceIconXml, xmlTag: "id")) ?? 0
+                    let iconUriArray = iconUri.split(separator: "/")
+                    iconId = String("\(iconUriArray.last!)")
+                    print("iconId: \(iconId)")
                 }
             }
             // check for a self service icon and grab name and id if present - end
@@ -3603,7 +3612,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: Int, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
 
         if pref.stopMigration {
 //            print("[CreateEndpoints] stopMigration")
@@ -3691,7 +3700,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope", keepTags: false)
                     WriteToLog().message(stringOfText: "[endPointByID] Exporting trimmed XML for \(endpointType) - \(endpointName).\n")
-                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: sourceEpId, format: "trimmed")
+                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
                 
             }
@@ -5123,7 +5132,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: Int, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
+    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: String, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
@@ -5312,7 +5321,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
-    func iconMigrate(action: String, ssIconUri: String, ssIconId: Int, ssIconName: String, iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
+    func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
 
 //        var apiAction    = action
         var curlResult   = 0
@@ -5597,8 +5606,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        print("icon id \(iconId) is ready")
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {
-                                if let endpointType = iconDict["endpointType"], let action = iconDict["action"], let ssIconName = iconDict["ssIconName"], let ssIconId = Int(iconId), let ssIconUri  = iconDict["ssIconUri"], let f_createDestUrl = iconDict["f_createDestUrl"], let responseData = iconDict["responseData"], let sourcePolicyId = iconDict["sourcePolicyId"] {
+                                if let endpointType = iconDict["endpointType"], let action = iconDict["action"], let ssIconName = iconDict["ssIconName"], let ssIconUri = iconDict["ssIconUri"], let f_createDestUrl = iconDict["f_createDestUrl"], let responseData = iconDict["responseData"], let sourcePolicyId = iconDict["sourcePolicyId"] {
                                     print("[iconMigrationHold] iconDict: \(iconDict)")
+                                    let ssIconUriArray = ssIconUri.split(separator: "/")
+                                    let ssIconId = String("\(ssIconUriArray.last)")
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
                             }
