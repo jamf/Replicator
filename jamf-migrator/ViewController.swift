@@ -5124,13 +5124,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func icons(endpointType: String, action: String, ssIconName: String, ssIconId: Int, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
-//        var curlResult    = ""
-//        var curlResult2   = ""
-        var createDestUrl = f_createDestUrl
-        var iconToUpload  = ""
-        var action        = "GET"
+
+        var createDestUrl        = f_createDestUrl
+        var iconToUpload         = ""
+        var action               = "GET"
         var newSelfServiceIconId = ""
-        var iconXml       = ""
+        var iconXml              = ""
         
         if (ssIconName != "") && (ssIconUri != "") {
             var iconNode     = "policies"
@@ -5149,7 +5148,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
             createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
             createDestUrl = createDestUrl.urlFix
-//            createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 
             if fileImport {
                 action       = "SKIP"
@@ -5249,10 +5247,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     var policyIconDict = iconfiles.policyDict
                                     Json().getRecord(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
-//                                            print("result: \(result)")
+                                        print("[icons] result of Json().getRecord: \(result)")
                                         
                                         let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
-//                                            print("selfServiceInfoDict: \(selfServiceInfoDict)")
+                                        print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
                                         let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
                                         newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
                                         print("new self service icon id: \(newSelfServiceIconId)")
@@ -5304,11 +5302,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }   // iconMigrate - end
 
                 
-            } else {
-                // hold processing already used icon until it's been uploaded to the new server
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed\n") }
-                iconMigrationHold(ssIconId: "\(ssIconId)", newIconDict: ["endpointType": endpointType, "action": action, "ssIconId": "\(ssIconId)", "ssIconName": ssIconName, "ssIconUri": ssIconUri, "f_createDestUrl": f_createDestUrl, "responseData": responseData, "sourcePolicyId": sourcePolicyId])
-            }//                }   // if !(iconfiles.policyDict["\(ssIconId)"]?["policyId"] - end
+                } else {
+                    // hold processing already used icon until it's been uploaded to the new server
+                    if !export.saveOnly {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed\n") }
+                        iconMigrationHold(ssIconId: "\(ssIconId)", newIconDict: ["endpointType": endpointType, "action": action, "ssIconId": "\(ssIconId)", "ssIconName": ssIconName, "ssIconUri": ssIconUri, "f_createDestUrl": f_createDestUrl, "responseData": responseData, "sourcePolicyId": sourcePolicyId])
+                    }
+                }//                }   // if !(iconfiles.policyDict["\(ssIconId)"]?["policyId"] - end
             }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
@@ -5330,7 +5330,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                iconfiles.pendingDict["\(ssIconId)"] = true
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                 print("icon id \(ssIconId) is marked for download/cache")
-                WriteToLog().message(stringOfText: "[iconMigrate.GET] fetching icon: \(ssIconUri).\n")
+                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fetching icon: \(ssIconUri).\n")
                 // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
                 let url = URL(string: "\(ssIconUri)")!
                             
@@ -5349,34 +5349,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         savedURL = documentsURL.appendingPathComponent("Caches/icons/\(ssIconId)/")
                         
                         if !(self.fm.fileExists(atPath: savedURL.path)) {
-                            do {if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] creating \(savedURL.path) folder to cache icon\n") }
+                            do {if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] creating \(savedURL.path) folder to cache icon\n") }
                                 try self.fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
 //                                usleep(1000)
                             } catch {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] problem creating \(savedURL.path) folder: Error \(error)\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] problem creating \(savedURL.path) folder: Error \(error)\n") }
                                 moveIcon = false
                             }
                         }
                     } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] failed to set cache location: Error \(error)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] failed to set cache location: Error \(error)\n") }
                     }
                     
                     guard let fileURL = urlOrNil else { return }
                     do {
                         if moveIcon {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] saving icon to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] saving icon to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
                             try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
                             
                             // Mark the icon as cached
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] icon id \(ssIconId) is downloaded/cached to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon id \(ssIconId) is downloaded/cached to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
 //                            usleep(100)
                         }
                     } catch {
-                        WriteToLog().message(stringOfText: "[iconMigrate.GET] Problem moving icon: Error \(error)\n")
+                        WriteToLog().message(stringOfText: "[iconMigrate.\(action)] Problem moving icon: Error \(error)\n")
                     }
                     let curlResponse = responseOrNil as! HTTPURLResponse
                     curlResult = curlResponse.statusCode
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.GET] result of Swift icon GET: \(curlResult).\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] result of Swift icon GET: \(curlResult).\n") }
                     completion(curlResult)
                 }
                 downloadTask.resume()
@@ -5394,7 +5394,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
         case "POST":
             // upload icon to fileuploads endpoint
-            WriteToLog().message(stringOfText: "[iconMigrate.POST] sending icon: \(ssIconName)\n")
+            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)\n")
            
             var fileURL: URL!
             var newPolicyId = 0
@@ -5412,17 +5412,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 self.theIconsQ.addOperation {
 
-                    WriteToLog().message(stringOfText: "[iconMigrate.POST] uploading icon: \(iconToUpload)\n")
+                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading icon: \(iconToUpload)\n")
                     //        var theFileSize = 0.0
                     let startTime = Date()
                     var postData = Data()
                     
 //                    WriteToLog().message(stringOfText: "[ViewController.uploadPackages] package: \(self.packagePath)Packages/\(package)\n")
-                    WriteToLog().message(stringOfText: "[iconMigrate.POST] fileURL: \(String(describing: fileURL!))\n")
+                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
                 
-                    WriteToLog().message(stringOfText: "[iconMigrate.POST] uploading \(ssIconName)\n")
+                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading \(ssIconName)\n")
                     
                     let serverURL = URL(string: createDestUrl)!
+                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading to: \(createDestUrl)\n")
                     
                     let sessionConfig = URLSessionConfiguration.ephemeral
                     let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
@@ -5442,12 +5443,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let closingBoundary = "\r\n--\(boundary)--\r\n"
                         if let d = closingBoundary.data(using: .utf8) {
                             postData.append(d)
-                            WriteToLog().message(stringOfText: "[iconMigrate.POST] loaded \(ssIconName) to data.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] loaded \(ssIconName) to data.\n")
                         }
                         
                     }
                     catch {
-                        WriteToLog().message(stringOfText: "[iconMigrate.POST] unable to get file\n")
+                        WriteToLog().message(stringOfText: "[iconMigrate.\(action)] unable to get file\n")
                     }
 
                     request.httpBody   = postData
@@ -5461,30 +5462,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if let _ = (response as? HTTPURLResponse)?.statusCode {
                             httpResponse = response as? HTTPURLResponse
                             statusCode = httpResponse!.statusCode
-                            WriteToLog().message(stringOfText: "[iconMigrate.POST] Response from server - Status code: \(statusCode)\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] Response from server - Status code: \(statusCode)\n")
     //                        WriteToLog().message(stringOfText: "Response (package) data string: \(String(data: data!, encoding: .utf8)!)\n")
                         } else {
-                            WriteToLog().message(stringOfText: "[iconMigrate.POST] No response from the server.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] No response from the server.\n")
                             
                             completion(statusCode)
                         }
 
                         switch statusCode {
                         case 200, 201:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.POST] file successfully uploaded.\n")
+                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] file successfully uploaded.\n")
                             if let dataResponse = String(data: data!, encoding: .utf8) {
                                 newPolicyId = Int(self.tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
                             }
-//                            if iconfiles.pendingDict["\(ssIconId)"] == "pending" {
-                                iconfiles.pendingDict["\(ssIconId)"] = "ready"
-//                            }
+                            iconfiles.pendingDict["\(ssIconId)"] = "ready"
                         case 401:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.POST] Authentication failed.\n")
+                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] Authentication failed.\n")
                         case 404:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.POST] server / file not found.\n")
+                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] server / file not found.\n")
                         default:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.POST] unknown error occured.\n")
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.POST] Error took place while uploading a file.\n")
+                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] unknown error occured.\n")
+                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] Error took place while uploading a file.\n")
                         }
 
                         let endTime = Date()
@@ -5495,7 +5494,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
                         let (m,s) = r.quotientAndRemainder(dividingBy: 60)
 //                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(timeDifference) seconds\n")
-                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(h):\(m):\(s) (h:m:s)\n")
+                        WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(h):\(m):\(s) (h:m:s)\n")
                         
                         completion(newPolicyId)
                         // upload checksum - end
@@ -5516,7 +5515,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
         case "PUT":
         
-            WriteToLog().message(stringOfText: "[iconMigrate.PUT] setting icon for policy \(createDestUrl).\n")
+            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] setting icon for policy \(createDestUrl).\n")
             
             theIconsQ.maxConcurrentOperationCount = 2
             let semaphore    = DispatchSemaphore(value: 0)
@@ -5545,21 +5544,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            DispatchQueue.main.async {
                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                WriteToLog().message(stringOfText: "[iconMigrate.PUT] icon updated on \(createDestUrl)\n")
-                                WriteToLog().message(stringOfText: "[iconMigrate.PUT] posted xml: \(iconToUpload)\n")
+                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon updated on \(createDestUrl)\n")
+                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                             } else {
-                                WriteToLog().message(stringOfText: "[iconMigrate.PUT] error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
-                                WriteToLog().message(stringOfText: "[iconMigrate.PUT] posted xml: \(iconToUpload)\n")
+                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
+                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                                 
                             }
 //                            }
                         completion(httpResponse.statusCode)
                     } else {   // if let httpResponse = response - end
-                        WriteToLog().message(stringOfText: "[iconMigrate.PUT] no response from server\n")
+                        WriteToLog().message(stringOfText: "[iconMigrate.\(action)] no response from server\n")
                         completion(0)
                     }
                     
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.PUT] POST or PUT Operation: \(request.httpMethod)\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] POST or PUT Operation: \(request.httpMethod)\n") }
                     
                     semaphore.signal()
                 })
@@ -5571,7 +5570,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                         
         default:
-            WriteToLog().message(stringOfText: "[iconMigrate.PUT] skipping icon: \(ssIconName).\n")
+            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] skipping icon: \(ssIconName).\n")
             completion(200)
         }
      
@@ -5592,14 +5591,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            while self.iconDictArray["\(ssIconId)"]!.count > 0 {
                 sleep(1)
                 for (iconId, state) in iconfiles.pendingDict {
-//                    print("iconfiles.pendingDict: \(iconfiles.pendingDict)")
-//                    print("iconId: \(iconId)    state: \(state)")
+                    print("[iconMigrationHold] iconfiles.pendingDict: \(iconfiles.pendingDict)")
+                    print("[iconMigrationHold] iconId: \(iconId)    state: \(state)")
                     if (state == "ready") {
 //                        print("icon id \(iconId) is ready")
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {
                                 if let endpointType = iconDict["endpointType"], let action = iconDict["action"], let ssIconName = iconDict["ssIconName"], let ssIconId = Int(iconId), let ssIconUri  = iconDict["ssIconUri"], let f_createDestUrl = iconDict["f_createDestUrl"], let responseData = iconDict["responseData"], let sourcePolicyId = iconDict["sourcePolicyId"] {
-//                                    print("iconDict: \(iconDict)")
+                                    print("[iconMigrationHold] iconDict: \(iconDict)")
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
                             }
