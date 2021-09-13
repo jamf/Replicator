@@ -2353,7 +2353,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                 
                                                                 self.staticSourceDataArray = self.sourceDataArray
-                                                                print("[ViewController.getEndpoints] adding policy \(l_xmlName) (\(l_xmlID)) to selective list")
+//                                                                print("[ViewController.getEndpoints] adding policy \(l_xmlName) (\(l_xmlID)) to selective list")
                                                                 
                                                                 DispatchQueue.main.async {
                                                                     self.srcSrvTableView.reloadData()
@@ -3442,12 +3442,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         iconId = String(iconId_string.prefix(upTo: index))
                     }
                 } else {
-                    print("there")
-                    print("selfServiceIconXml: \(selfServiceIconXml)")
 //                    iconId = Int(self.tagValue(xmlString: selfServiceIconXml, xmlTag: "id")) ?? 0
                     let iconUriArray = iconUri.split(separator: "/")
                     iconId = String("\(iconUriArray.last!)")
-                    print("iconId: \(iconId)")
                 }
             }
             // check for a self service icon and grab name and id if present - end
@@ -5171,7 +5168,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if iconfiles.pendingDict["\(ssIconId)"] != "pending" {
                 if iconfiles.pendingDict["\(ssIconId)"] != "ready" {
                     iconfiles.pendingDict["\(ssIconId)"] = "pending"
-                    print("marking icon for policy id \(sourcePolicyId) as pending")
+                    WriteToLog().message(stringOfText: "[CreateEndpoints.icon] marking icon for policy id \(sourcePolicyId) as pending\n")
                 } else {
                     action = "SKIP"
                 }
@@ -5179,8 +5176,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // download the icon - action = "GET"
                 iconMigrate(action: action, ssIconUri: ssIconUri, ssIconId: ssIconId, ssIconName: ssIconName, iconToUpload: "", createDestUrl: "") {
                     (result: Int) in
-                    print("action: \(action)")
-                    print("Icon url: \(ssIconUri)")
+//                    print("action: \(action)")
+//                    print("Icon url: \(ssIconUri)")
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after icon download.\n") }
                     
                     if result > 199 && result < 300 {
@@ -5338,8 +5335,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            if iconfiles.policyDict["\(ssIconId)"] == nil {
 //                iconfiles.pendingDict["\(ssIconId)"] = true
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
-                print("icon id \(ssIconId) is marked for download/cache")
-                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fetching icon: \(ssIconUri).\n")
+//                print("icon id \(ssIconId) is marked for download/cache")
+                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fetching icon: \(ssIconUri)\n")
                 // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
                 let url = URL(string: "\(ssIconUri)")!
                             
@@ -5374,7 +5371,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     do {
                         if moveIcon {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] saving icon to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
-                            try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
+                            if !FileManager.default.fileExists(atPath: savedURL.appendingPathComponent("\(ssIconName)").path) {
+                                try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
+                            }
                             
                             // Mark the icon as cached
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon id \(ssIconId) is downloaded/cached to \(savedURL.appendingPathComponent("\(ssIconName)"))\n") }
@@ -5410,7 +5409,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             fileURL = URL(fileURLWithPath: iconToUpload)
 
-            let boundary = "------WebKitFormBoundary\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
+            let boundary = "----WebKitFormBoundary\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
 
             var httpResponse:HTTPURLResponse?
             var statusCode = 0
@@ -5428,6 +5427,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
 //                    WriteToLog().message(stringOfText: "[ViewController.uploadPackages] package: \(self.packagePath)Packages/\(package)\n")
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
+                    let fileType = NSURL(fileURLWithPath: "\(String(describing: fileURL!))").pathExtension
                 
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading \(ssIconName)\n")
                     
@@ -5438,14 +5438,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                     
                     var request = URLRequest(url:serverURL)
+                    // add headers for basic authentication
                     request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
                     request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
                     
                     // prep the data for uploading
                     do {
-                        postData.append("--\(boundary)\r\n".data(using: .utf8)!)
+                        postData.append("------\(boundary)\r\n".data(using: .utf8)!)
                         postData.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(ssIconName)\"\r\n".data(using: .utf8)!)
-                        postData.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
+//                        postData.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
+                        postData.append("Content-Type: image/\(fileType ?? "png")\r\n\r\n".data(using: .utf8)!)
                         let fileData = try Data(contentsOf:fileURL, options:[])
                         postData.append(fileData)
 
@@ -5454,6 +5456,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             postData.append(d)
                             WriteToLog().message(stringOfText: "[iconMigrate.\(action)] loaded \(ssIconName) to data.\n")
                         }
+                        let dataLen = postData.count
+                        request.addValue("\(dataLen)", forHTTPHeaderField: "Content-Length")
                         
                     }
                     catch {
@@ -5461,6 +5465,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
 
                     request.httpBody   = postData
+//                    request.httpBodyStream = InputStream(data: postData)
                     request.httpMethod = action
                     
                     // start upload process
@@ -5471,10 +5476,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if let _ = (response as? HTTPURLResponse)?.statusCode {
                             httpResponse = response as? HTTPURLResponse
                             statusCode = httpResponse!.statusCode
-                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] Response from server - Status code: \(statusCode)\n")
-    //                        WriteToLog().message(stringOfText: "Response (package) data string: \(String(data: data!, encoding: .utf8)!)\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] \(ssIconName) - Response from server - Status code: \(statusCode)\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] Response data string: \(String(data: data!, encoding: .utf8)!)\n")
                         } else {
-                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] No response from the server.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] \(ssIconName) - No response from the server.\n")
                             
                             completion(statusCode)
                         }
