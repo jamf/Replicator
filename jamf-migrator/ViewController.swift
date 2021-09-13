@@ -5389,16 +5389,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 downloadTask.resume()
                 // swift file download - end
-//            } else {
-                // icon already downloaded/cached
-//                print("icon \(ssIconId) iconfiles.pendingDict: \(String(describing: iconfiles.pendingDict[ssIconId]))")
-//                while iconfiles.pendingDict["\(ssIconId)"]! {
-//                    print("waiting for icon id \(ssIconId)")
-//                    sleep(1)
-//                }
-//                print("icon id \(ssIconId) is already downloaded/cached")
-//                completion(200)
-//            }
             
         case "POST":
             // upload icon to fileuploads endpoint
@@ -5446,7 +5436,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     do {
                         postData.append("------\(boundary)\r\n".data(using: .utf8)!)
                         postData.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(ssIconName)\"\r\n".data(using: .utf8)!)
-//                        postData.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
                         postData.append("Content-Type: image/\(fileType ?? "png")\r\n\r\n".data(using: .utf8)!)
                         let fileData = try Data(contentsOf:fileURL, options:[])
                         postData.append(fileData)
@@ -5465,7 +5454,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
 
                     request.httpBody   = postData
-//                    request.httpBodyStream = InputStream(data: postData)
                     request.httpMethod = action
                     
                     // start upload process

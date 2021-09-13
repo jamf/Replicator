@@ -149,6 +149,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 
+**v5.9.1**
+
+* Fixed issue self service icon migrations.
+
 **v5.9.0**
 
 * With great sadness (computer) configurations have been removed as an object that can be migrated.
