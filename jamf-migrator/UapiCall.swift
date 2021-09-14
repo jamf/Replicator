@@ -74,8 +74,8 @@ class UapiCall: NSObject, URLSessionDelegate {
         
         var token          = ""
         
-        var tokenUrlString = "\(serverUrl)/uapi/auth/tokens"
-        tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//uapi", with: "/uapi")
+        var tokenUrlString = "\(serverUrl)/api/v1/auth/tokens"
+        tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
 //        print("\(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
@@ -94,7 +94,8 @@ class UapiCall: NSObject, URLSessionDelegate {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json! as? Dictionary<String, Any>, let _ = endpointJSON["token"] {
                         token = endpointJSON["token"] as! String
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.getToken] Retrieved token.\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.getToken] Retrieved token: \(token)\n") }
+                        print("token: \(token)")
                         completion(token)
                         return
                     } else {    // if let endpointJSON error

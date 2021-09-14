@@ -5413,9 +5413,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading icon: \(iconToUpload)\n")
                     //        var theFileSize = 0.0
                     let startTime = Date()
-                    var postData = Data()
+                    var postData  = Data()
                     
-//                    WriteToLog().message(stringOfText: "[ViewController.uploadPackages] package: \(self.packagePath)Packages/\(package)\n")
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
                     let fileType = NSURL(fileURLWithPath: "\(String(describing: fileURL!))").pathExtension
                 
@@ -5457,7 +5456,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     request.httpMethod = action
                     
                     // start upload process
-
                     URLCache.shared.removeAllCachedResponses()
                     let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
         //                if let httpResponse = response as? HTTPURLResponse {
@@ -5522,14 +5520,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             theIconsQ.maxConcurrentOperationCount = 2
             let semaphore    = DispatchSemaphore(value: 0)
             let encodedXML   = iconToUpload.data(using: String.Encoding.utf8)
-//                var responseData = ""
-            
-//                        print("uploading package: \(package) with id: \(newPackageId)")
                 
             self.theIconsQ.addOperation {
             
-    //            print("NSURL line 4")
-    //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
                 let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
 
@@ -5542,8 +5535,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
                     if let httpResponse = response as? HTTPURLResponse {
-//
-//                            DispatchQueue.main.async {
                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon updated on \(createDestUrl)\n")
@@ -5553,7 +5544,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                                 
                             }
-//                            }
                         completion(httpResponse.statusCode)
                     } else {   // if let httpResponse = response - end
                         WriteToLog().message(stringOfText: "[iconMigrate.\(action)] no response from server\n")
@@ -5568,7 +5558,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 semaphore.wait()
 
             }   // theUploadQ.addOperation - end
-                    // end upload procdess
+            // end upload procdess
                     
                         
         default:
@@ -5634,8 +5624,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 logArray.sort()
                 logCount = logArray.count
                 // remove old history files
-//                if logCount-1 >= maxHistory {
-//                    for i in (0..<logCount-maxHistory) {
                 if logCount-1 >= maxLogFileCount {
                     for i in (0..<logCount-maxLogFileCount) {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
