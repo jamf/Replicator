@@ -3430,8 +3430,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
+                print("iconUri: \(iconUri)")
                 if let index = iconUri.firstIndex(of: "=") {
                     iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
+                    print("iconId_string: \(iconId_string)")
                     if endpoint != "policies" {
                         if let index = iconId_string.firstIndex(of: "&") {
 //                            iconId = Int(iconId_string.prefix(upTo: index))!
@@ -3439,7 +3441,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                     } else {
 //                        iconId = Int(iconId_string)!
-                        iconId = String(iconId_string.prefix(upTo: index))
+                        iconId = String(iconId_string)
                     }
                 } else {
 //                    iconId = Int(self.tagValue(xmlString: selfServiceIconXml, xmlTag: "id")) ?? 0
@@ -3490,11 +3492,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
             // migrating to another site
-//            DispatchQueue.main.async {
             if itemToSite && destinationSite != "" && endpoint == "policies" {
-                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
-                }
-//            }
+                PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+            }
             
         case "users":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing users - verbose\n") }
@@ -3508,7 +3508,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if itemToSite && destinationSite != "" {
                 PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
             }
-            //print("\nXML: \(PostXML)")
             
         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] processing jamf users/groups (\(endpoint)) - verbose\n") }
@@ -3742,7 +3741,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 } else {
                     request.httpMethod = "PUT"
                 }
-                let configuration = URLSessionConfiguration.ephemeral
+                let configuration = URLSessionConfiguration.default
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -5423,7 +5422,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let serverURL = URL(string: createDestUrl)!
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading to: \(createDestUrl)\n")
                     
-                    let sessionConfig = URLSessionConfiguration.ephemeral
+                    let sessionConfig = URLSessionConfiguration.default
                     let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                     
                     var request = URLRequest(url:serverURL)
@@ -5528,7 +5527,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                 request.httpMethod = action
                
-                let configuration = URLSessionConfiguration.ephemeral
+                let configuration = URLSessionConfiguration.default
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
