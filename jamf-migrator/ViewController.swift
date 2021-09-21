@@ -5471,18 +5471,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                         switch statusCode {
                         case 200, 201:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] file successfully uploaded.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] file successfully uploaded.\n")
                             if let dataResponse = String(data: data!, encoding: .utf8) {
                                 newPolicyId = Int(self.tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
                             }
                             iconfiles.pendingDict["\(ssIconId)"] = "ready"
                         case 401:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] Authentication failed.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** Authentication failed.\n")
                         case 404:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] server / file not found.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** server / file not found.\n")
                         default:
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] unknown error occured.\n")
-                            WriteToLog().message(stringOfText: "\t [iconMigrate.\(action)] Error took place while uploading a file.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** unknown error occured.\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** Error took place while uploading a file.\n")
                         }
 
                         let endTime = Date()
@@ -5539,7 +5539,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon updated on \(createDestUrl)\n")
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                             } else {
-                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
+                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                                 
                             }
