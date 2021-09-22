@@ -3430,10 +3430,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
-                print("iconUri: \(iconUri)")
+//                print("iconUri: \(iconUri)")
                 if let index = iconUri.firstIndex(of: "=") {
                     iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
-                    print("iconId_string: \(iconId_string)")
+//                    print("iconId_string: \(iconId_string)")
                     if endpoint != "policies" {
                         if let index = iconId_string.firstIndex(of: "&") {
 //                            iconId = Int(iconId_string.prefix(upTo: index))!
@@ -5582,14 +5582,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            while self.iconDictArray["\(ssIconId)"]!.count > 0 {
                 sleep(1)
                 for (iconId, state) in iconfiles.pendingDict {
-                    print("[iconMigrationHold] iconfiles.pendingDict: \(iconfiles.pendingDict)")
-                    print("[iconMigrationHold] iconId: \(iconId)    state: \(state)")
+//                    print("[iconMigrationHold] iconfiles.pendingDict: \(iconfiles.pendingDict)")
+//                    print("[iconMigrationHold] iconId: \(iconId)    state: \(state)")
                     if (state == "ready") {
 //                        print("icon id \(iconId) is ready")
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {
                                 if let endpointType = iconDict["endpointType"], let action = iconDict["action"], let ssIconName = iconDict["ssIconName"], let ssIconUri = iconDict["ssIconUri"], let f_createDestUrl = iconDict["f_createDestUrl"], let responseData = iconDict["responseData"], let sourcePolicyId = iconDict["sourcePolicyId"] {
-                                    print("[iconMigrationHold] iconDict: \(iconDict)")
+//                                    print("[iconMigrationHold] iconDict: \(iconDict)")
                                     let ssIconUriArray = ssIconUri.split(separator: "/")
                                     let ssIconId = String("\(ssIconUriArray.last)")
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
@@ -5599,7 +5599,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.iconDictArray.removeValue(forKey: iconId)
                         }
                     } else {
-                        print("waiting for icon id \(iconId) to become ready (uploaded to destination server)")
+//                        print("waiting for icon id \(iconId) to become ready (uploaded to destination server)")
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.iconMigration] waiting for icon id \(iconId) to become ready (uploaded to destination server)\n") }
                     }
                 }   // for (pending, state) - end

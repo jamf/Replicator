@@ -83,5 +83,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         PrefsWindowController().show()
     }
     
+    // quit the app if the window is closed
+    func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
+        return true
+    }
+    
 }
 

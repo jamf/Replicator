@@ -148,6 +148,9 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+**v5.9.2**
+
+* Fixed issue self service icons when cloud services connector is not referenced.
 
 **v5.9.1**
 
