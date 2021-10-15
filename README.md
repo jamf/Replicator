@@ -22,7 +22,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 
 **Limitations/requirements to be aware of:**
 
-* Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A passwoord can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
+* Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A password can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
 * Certificate used for LDAPS does not migrate.
 * Icons associated with Mac App Store apps are not migrated (can't be migrated).
 * Only AFP and SMB shares can be migrated.
