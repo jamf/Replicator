@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -14,7 +14,7 @@
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="951" y="1113" width="500" height="270"/>
-                        <rect key="screenRect" x="657" y="800" width="1920" height="1057"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
                         <connections>
                             <outlet property="delegate" destination="416-qt-7e7" id="Ljz-dF-S3g"/>
                         </connections>
@@ -60,7 +60,7 @@
                 </tabViewController>
                 <customObject id="VJS-aQ-7Am" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="496"/>
+            <point key="canvasLocation" x="175" y="496"/>
         </scene>
         <!--Copy-->
         <scene sceneID="geR-qQ-7PU">
@@ -681,7 +681,7 @@ DQ
                 </viewController>
                 <customObject id="Lin-gh-6s5" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="15" y="1073"/>
+            <point key="canvasLocation" x="257" y="960"/>
         </scene>
         <!--Computer-->
         <scene sceneID="lJ7-RC-Kt4">
@@ -784,7 +784,7 @@ DQ
                 </viewController>
                 <customObject id="haM-bS-cWw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="443" y="1099"/>
+            <point key="canvasLocation" x="702" y="986"/>
         </scene>
         <!--Passwords-->
         <scene sceneID="MUT-R8-cAw">
@@ -924,7 +924,7 @@ DQ
                 </viewController>
                 <customObject id="xD4-Cj-XQT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-868" y="496"/>
+            <point key="canvasLocation" x="702" y="496"/>
         </scene>
     </scenes>
     <resources>

@@ -74,7 +74,7 @@ class UapiCall: NSObject, URLSessionDelegate {
         
         var token          = ""
         
-        var tokenUrlString = "\(serverUrl)/api/v1/auth/tokens"
+        var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
 //        print("\(tokenUrlString)")
         

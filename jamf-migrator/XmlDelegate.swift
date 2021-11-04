@@ -79,8 +79,9 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     }
         
     
-    func save(node: String, xml: String, name: String, id: String, format: String) {
-                
+    func save(node: String, xml: String, rawName: String, id: String, format: String) {
+        
+        let name = rawName.replacingOccurrences(of: ":", with: ";")
         if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
 //        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil

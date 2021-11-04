@@ -3008,7 +3008,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                 let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
                                 WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
-                                XmlDelegate().save(node: endpoint, xml: exportRawXml, name: destEpName, id: "\(endpointID)", format: "raw")
+                                XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
                             }
                         }
                         // save source XML - end
@@ -3696,7 +3696,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope", keepTags: false)
                     WriteToLog().message(stringOfText: "[endPointByID] Exporting trimmed XML for \(endpointType) - \(endpointName).\n")
-                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, name: endpointName, id: "\(sourceEpId)", format: "trimmed")
+                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
                 
             }
@@ -5188,7 +5188,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             let saveFormat = export.saveRawXml ? "raw":"trimmed"
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icons] saving icon: \(ssIconName) for \(iconNode).\n") }
                             DispatchQueue.main.async {
-                                XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", name: ssIconName, id: ssIconId, format: "\(saveFormat)")
+                                XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
                         }   // if export.saveRawXml - end
                         // upload icon if not in save only mode
