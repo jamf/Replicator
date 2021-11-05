@@ -6775,7 +6775,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.migrateOrRemove_TextField.stringValue = "--- Removing ---"
                             self.migrateOrRemove_TextField.textColor = self.redText
                             // Set the text for destination method
-                            self.destinationMethod_TextField.stringValue = "DELETE"
+                            self.destinationMethod_TextField.stringValue = "DELETE:"
                             self.destinationMethod_TextField.textColor = self.yellowText
                             isRed = true
                         } else {
@@ -6784,7 +6784,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             isRed = false
                         }
                         // Set the text for destination method
-                        self.destinationMethod_TextField.stringValue = "DELETE"
+                        self.destinationMethod_TextField.stringValue = "DELETE:"
                         if self.fileImport {
                             self.fileImport = false
                             self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
