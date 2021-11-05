@@ -293,8 +293,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     // selective migration items - start
     // source / destination tables
-    @IBOutlet weak var srcSrvTableView: NSTableView!
+    
+
+    @IBOutlet var selectiveTabelHeader_textview: NSTextField!
     @IBOutlet weak var migrateDependencies: NSButton!
+    @IBOutlet weak var srcSrvTableView: NSTableView!
     
     // source / destination array / dictionary of items
     var sourceDataArray            = [String]()
@@ -516,17 +519,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             catch let error as NSError {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
             }
+            DispatchQueue.main.async {
+                self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
+            }
             wipeData.on = false
         } else {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
-            do {
-                try self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
-            }
-            catch let error as NSError {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
-            }
+            //do {
+//                try self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
+//            }
+//            catch let error as NSError {
+//                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
+//            }
+            self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
             DispatchQueue.main.async {
                 wipeData.on = true
+                self.selectiveTabelHeader_textview.stringValue = "Select object(s) to remove from the destination"
                 self.migrateDependencies.state = NSControl.StateValue(rawValue: 0)
                 self.migrateDependencies.isHidden = true
                 if self.srcSrvTableView.isEnabled {
@@ -2292,7 +2300,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if endpointCount > 0 {
                                             // display migrateDependencies button
                                             DispatchQueue.main.async {
-                                                self.migrateDependencies.isHidden = false
+                                                if !wipeData.on {
+                                                    self.migrateDependencies.isHidden = false
+                                                }
                                             }
 
                                             // create dictionary of existing policies
@@ -5820,13 +5830,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return updatedScript
     }
     
-    
     func rmDELETE() {
         var isDir: ObjCBool = false
         if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
                 _ = serverOrFiles()
+                DispatchQueue.main.async {
+                    self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
+                }
                 // re-enable source server, username, and password fields (to finish later)
 //                source_jp_server_field.isEnabled = true
 //                sourceServerList_button.isEnabled = true
@@ -6746,15 +6758,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     // clear selective list of items when changing from migration to delete mode
                     DispatchQueue.main.async {
                         self.clearSelectiveList()
-//                        if !self.selectiveListCleared && self.srcSrvTableView.isEnabled == true {
-//                            self.sourceDataArray.removeAll()
-//                            self.srcSrvTableView.stringValue = ""
-//                            self.srcSrvTableView.reloadData()
-//                            self.selectiveListCleared = true
-//                        } else {
-//                            self.selectiveListCleared = true
-//                            self.srcSrvTableView.isEnabled = true
-//                        }
                     }
                     
                     DispatchQueue.main.async {

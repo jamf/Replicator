@@ -35,6 +35,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
 * Packages - Only package metadata (display name, file name, size, ...) are migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)
+* Saving of objects whos name contains a : (colon) will be saved using a ; (semi-colon).
 
 <hr>
 
@@ -148,9 +149,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D.
 
 ## History
+**v5.9.3**
+
+* Fixed issue saving files with names that contain a / (forward slash). Noted the : (colon) is a reserved character and cannot be used in a file name, ; (semi-colon) will be subtituted for it.  This does not impact the name that appears in Jamf Pro.
+
 **v5.9.2**
 
-* Fixed issue self service icons when cloud services connector is not referenced.
+* Fixed issue with self service icons when cloud services connector is not referenced.
 
 **v5.9.1**
 
