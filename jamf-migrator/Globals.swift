@@ -74,4 +74,6 @@ struct q {
 
 struct setting {
     static var uapiToken = ""
+    static var jpapiSourceToken      = ""
+    static var jpapiDestinationToken = ""
 }

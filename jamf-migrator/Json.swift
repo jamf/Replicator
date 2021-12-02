@@ -53,7 +53,7 @@ class Json: NSObject, URLSessionDelegate {
                             }
                         }
                     } else {
-                        WriteToLog().message(stringOfText: "[Json.getRecord] error HTTP Status Code: \(httpResponse.statusCode)\n")
+                        WriteToLog().message(stringOfText: "[Json.getRecord] error getting \(theEndpoint), HTTP Status Code: \(httpResponse.statusCode)\n")
                         completion([:])
                     }
                 } else {

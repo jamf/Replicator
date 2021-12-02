@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let bookmark = try folderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
                 UserDefaults.standard.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
-                WriteToLog().message(stringOfText: "Set Bookmark Fails: \(error.description)")
+                WriteToLog().message(stringOfText: "[AppDelegate] Set Bookmark Fails: \(error.description)")
             }
         }
     }

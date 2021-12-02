@@ -95,7 +95,7 @@ class UapiCall: NSObject, URLSessionDelegate {
                     if let endpointJSON = json! as? Dictionary<String, Any>, let _ = endpointJSON["token"] {
                         token = endpointJSON["token"] as! String
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[UapiCall.getToken] Retrieved token: \(token)\n") }
-                        print("token: \(token)")
+                        print("[UapiCall] token: \(token)")
                         completion(token)
                         return
                     } else {    // if let endpointJSON error

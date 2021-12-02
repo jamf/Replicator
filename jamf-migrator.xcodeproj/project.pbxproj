@@ -51,6 +51,7 @@
 		B5E1912B21AAD5AC00A1A9CA /* copy.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912A21AAD5AB00A1A9CA /* copy.png */; };
 		B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */; };
 		B5E1912F21AAEFD400A1A9CA /* export.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912E21AAEFD400A1A9CA /* export.png */; };
+		B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DAD27434B890044C321 /* Jpapi.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +102,7 @@
 		B5E1912A21AAD5AB00A1A9CA /* copy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copy.png; sourceTree = "<group>"; };
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
+		B5FD9DAD27434B890044C321 /* Jpapi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jpapi.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
+				B5FD9DAD27434B890044C321 /* Jpapi.swift */,
 				B53ECDFB2394474B005EE6E5 /* Json.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
@@ -341,6 +344,7 @@
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
+				B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */,

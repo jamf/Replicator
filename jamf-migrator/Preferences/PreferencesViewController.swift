@@ -133,7 +133,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 let bookmark = try saveFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
                 self.userDefaults.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
-                print("Set Bookmark Fails: \(error.description)")
+                print("[PreferencesViewController] Set Bookmark Fails: \(error.description)")
             }
         }
     }

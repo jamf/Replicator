@@ -62,7 +62,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let bookmark = try xportFolderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
                 self.userDefaults.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
-                print("Set Bookmark Fails: \(error.description)")
+                print("[ViewController] Set Bookmark Fails: \(error.description)")
             }
         }
     }
@@ -1979,7 +1979,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] endpointJSON: \(endpointJSON))\n") }
 
                                 switch endpoint {
-                                case "advancedcomputersearches", "macapplications", "buildings", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                case "buildings":
+                                    // get token from JPAPI
+                                    Jpapi().getToken(serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds) {
+                                        (result: String) in
+                                        setting.jpapiSourceToken = result
+                                        print("buildings")
+                                        Jpapi().action(serverUrl: self.source_jp_server, endpoint: endpoint, token: setting.jpapiSourceToken, method: "GET") {
+                                            (result: [String: Any]) in
+                                            print("results: \(result)")
+                                            print("buildings: \(String(describing: result["results"]))")
+                                            if result["totalCount"] as! Int > 0 {
+                                                
+                                            }
+                                        }
+                                    }
+                                case "advancedcomputersearches", "macapplications", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                     if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -2995,48 +3010,48 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             theOpQ.addOperation {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
-//                print("NSURL line 3")
-//                if "\(myURL)" == "" { myURL = "https://localhost" }
-                let encodedURL = URL(string: myURL)
-                let request = NSMutableURLRequest(url: encodedURL! as URL)
-                request.httpMethod = "GET"
-                let configuration = URLSessionConfiguration.ephemeral
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                    (data, response, error) -> Void in
-                    
-                    if let httpResponse = response as? HTTPURLResponse {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
-                        let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+    //                print("NSURL line 3")
+    //                if "\(myURL)" == "" { myURL = "https://localhost" }
+                    let encodedURL = URL(string: myURL)
+                    let request = NSMutableURLRequest(url: encodedURL! as URL)
+                    request.httpMethod = "GET"
+                    let configuration = URLSessionConfiguration.ephemeral
+                    configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                    let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                    let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                        (data, response, error) -> Void in
                         
-                        // save source XML - start
-                        if export.saveRawXml {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                            DispatchQueue.main.async {
-                                // added option to remove scope
-//                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
-                                let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
-                                XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
+                        if let httpResponse = response as? HTTPURLResponse {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                            
+                            // save source XML - start
+                            if export.saveRawXml {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                                DispatchQueue.main.async {
+                                    // added option to remove scope
+    //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+                                    let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
+                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
+                                }
                             }
+                            // save source XML - end
+                            
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
+                            self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                (result: String) in
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                            }
+                        }   // if let httpResponse - end
+                        semaphore.signal()
+                        if error != nil {
                         }
-                        // save source XML - end
-                        
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
-                        self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                            (result: String) in
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
-                        }
-                    }   // if let httpResponse - end
-                    semaphore.signal()
-                    if error != nil {
-                    }
-                })  // let task = session - end
-                //print("GET")
-                task.resume()
-                semaphore.wait()
-            }   // theOpQ - end
+                    })  // let task = session - end
+                    //print("GET")
+                    task.resume()
+                    semaphore.wait()
+                }   // theOpQ - end
         }
     }
     
@@ -3335,6 +3350,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if userDefaults.integer(forKey: "removeCA_ID") == 1 {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "device_aad_infos", keepTags: false)
             }
+            
+            if itemToSite && destinationSite != "" {
+                PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+            }
+            
             // remote management
             let regexRemote = try! NSRegularExpression(pattern: "<remote_management>(.|\n|\r)*?</remote_management>", options:.caseInsensitive)
             if userDefaults.integer(forKey: "migrateAsManaged") == 1 {
@@ -5264,19 +5284,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         (result: [String:AnyObject]) in
                                         print("[icons] result of Json().getRecord: \(result)")
                                         
-                                        let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
-                                        print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
-                                        let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
-                                        newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
-                                        print("new self service icon id: \(newSelfServiceIconId)")
+                                        if result.count > 0 {
+                                            let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
+                                            print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
+                                            let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
+                                            newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
+                                            print("new self service icon id: \(newSelfServiceIconId)")
 //                                        print("icon \(ssIconId) policyIconDict: \(String(describing: policyIconDict["\(ssIconId)"]?["destinationIconId"]))")
 //                                        print("icon \(ssIconId) iconfiles.policyDict: \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"]))")
-                                        policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                        iconfiles.policyDict = policyIconDict
-//                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)\n") }
-                                                                                
-                                        iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+                                            policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
+                                            iconfiles.policyDict = policyIconDict
+    //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)\n") }
+                                                                                    
+                                            iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+                                        } else {
+                                            iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
+                                            
+                                        }
 //                                            print("iconXml: \(iconXml)")
                                         
                                         self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
@@ -5952,6 +5977,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
             sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
             
+        case "computers":
+            sitePref = "Move"
+            
         default:
             sitePref = "Copy"
         }
@@ -5976,7 +6004,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // update site
         //WriteToLog().message(stringOfText: "[siteSet] endpoint \(endpoint) to site \(siteEncoded)\n")
-        if endpoint != "users"{
+        if endpoint != "users" {
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
             rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
@@ -5999,7 +6027,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             rawValue = regexComp.stringByReplacingMatches(in: rawValue, options: [], range: NSRange(0..<rawValue.utf16.count), withTemplate: "<redeploy_on_update>Newly Assigned</redeploy_on_update>")
         }
         
-        if sitePref == "Copy" && endpoint != "users" {
+        if sitePref == "Copy" && endpoint != "users" && endpoint != "computers" {
             // update item Name - ...<name>currentName - site</name>
             rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
 //            print("[setSite]  rawValue: \(rawValue)\n")
