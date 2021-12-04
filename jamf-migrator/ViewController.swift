@@ -1691,17 +1691,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
                                     if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
                                         advancedMigrateDict = self.getDependencies(object: "policy", json: result)
-//                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
+                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
                                     } else {
                                         advancedMigrateDict = [:]
                                     }
-//                                    switch selectedEndpoint {
-//                                    case "policies":
-//                                        advancedMigrateDict = self.getDependencies(object: "policy", json: result)
-//                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
-//                                    default:
-//                                        advancedMigrateDict = [:]
-//                                    }
+                                    
                                     let objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
 
                                     if !wipeData.on  {
@@ -1711,7 +1705,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 let full_ordered_dependency_array = self.ordered_dependency_array + ["policies"]
                                                 advancedMigrateDict["policies"] = [String:String]()
                                                 advancedMigrateDict["policies"]![selectedObject] = "\(objToMigrateID)"  //[name of policy:id of policy]
-//                                                print("advancedMigrateDict: \(advancedMigrateDict)")
+                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
 
 
                                                 dependency.wait = false
@@ -1748,6 +1742,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                     //self.currentEndpointID = self.currentEPs[xmlName]!
                                                                     self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencyCount, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
                                                                 } else {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) needs to be created\n") }
                                                                     self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencyCount, action: "create", destEpId: 0, destEpName: selectedObject)
                                                                 }
                                                             }   // for (name, id) in advancedMigrateDict[object]! - end
@@ -1979,6 +1974,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] endpointJSON: \(endpointJSON))\n") }
 
                                 switch endpoint {
+                                /*
                                 case "buildings":
                                     // get token from JPAPI
                                     Jpapi().getToken(serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds) {
@@ -1988,13 +1984,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         Jpapi().action(serverUrl: self.source_jp_server, endpoint: endpoint, token: setting.jpapiSourceToken, method: "GET") {
                                             (result: [String: Any]) in
                                             print("results: \(result)")
-                                            print("buildings: \(String(describing: result["results"]))")
-                                            if result["totalCount"] as! Int > 0 {
-                                                
+//                                            print("buildings: \(String(describing: result["results"]))")
+                                            if let buildingsArray = result["results"] {
+                                                for building in buildingsArray as! [[String:Any]] {
+                                                    print("building: \(building)")
+                                                }
                                             }
                                         }
                                     }
-                                case "advancedcomputersearches", "macapplications", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                */
+                                case "buildings", "advancedcomputersearches", "macapplications", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                     if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -3844,7 +3843,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
                                 var localErrorMsg = ""
 
-                                errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: unknown")
+                                errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(self.tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
                                 
                                 // Write xml for degugging - end
                                 
@@ -4510,7 +4509,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func getDependencies(object: String, json: [String:AnyObject]) -> Dictionary<String, [String:String]> {
         if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] enter\n") }
         var objectDict         = [String:Any]()
-        var fullDependencyDict = Dictionary<String, [String:String]>()
+        var fullDependencyDict = [String: [String:String]]()    // full list of dependencies of a single policy
+//        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
         var dependencyArray    = [String:String]()
         var dependencyNode     = ""
         
@@ -4614,11 +4614,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                         let local_name = scope_item["name"]
                         let local_id   = scope_item["id"]
-//                        for theObject in scope_item {
-//                            let local_name = (theObject as! [String:Any])["name"]
-//                            let local_id   = (theObject as! [String:Any])["id"]
-                            dependencyArray["\(local_name!)"] = "\(local_id!)"
-//                        }
+                        dependencyArray["\(local_name!)"] = "\(local_id!)"
                     }
                 }
                     
@@ -4642,8 +4638,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
                 fullDependencyDict[the_dependency] = dependencyArray
-//              print("fullDependencyDict[\(the_dependency)]: \(fullDependencyDict[the_dependency]!)")
+//                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
             }
+          print("fullDependencyDict: \(fullDependencyDict)")
 
         default:
             if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] not implemented for \(object).\n") }
