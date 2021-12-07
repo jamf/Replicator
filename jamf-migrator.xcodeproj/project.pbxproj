@@ -40,6 +40,7 @@
 		B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
+		B5BB33B1275C452800EC7688 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BB33B0275C452800EC7688 /* TokenDelegate.swift */; };
 		B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BD6ADA233510F6001D244A /* Credentials2.swift */; };
 		B5C042481EB11CF400C6E872 /* 0.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423C1EB11CF400C6E872 /* 0.png */; };
 		B5C042491EB11CF400C6E872 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423D1EB11CF400C6E872 /* 1.png */; };
@@ -91,6 +92,7 @@
 		B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
+		B5BB33B0275C452800EC7688 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenDelegate.swift; path = ../../JPAPI_refresh/JPAPI_refresh/TokenDelegate.swift; sourceTree = "<group>"; };
 		B5BD6ADA233510F6001D244A /* Credentials2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials2.swift; sourceTree = "<group>"; };
 		B5C0423C1EB11CF400C6E872 /* 0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 0.png; sourceTree = "<group>"; };
 		B5C0423D1EB11CF400C6E872 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
+				B5BB33B0275C452800EC7688 /* TokenDelegate.swift */,
 				B55BB46D23A9BC7C0024B357 /* UapiCall.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
@@ -342,6 +345,7 @@
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
+				B5BB33B1275C452800EC7688 /* TokenDelegate.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */,

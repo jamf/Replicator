@@ -1044,68 +1044,75 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if !wipeData.on {
                         self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                     }
-                    self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
-                        (result: Bool) in
-                        if !result {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.") }
-                            return
-                        } else {
-                            if !export.saveOnly {
-                                self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
-                            }
-                            // verify source server URL - start
-                            if !self.fileImport && !wipeData.on {
-                                sourceURL = URL(string: self.source_jp_server_field.stringValue)
+                    TokenDelegate().get(serverUrl: self.source_jp_server, whichServer: "source", base64creds: self.sourceBase64Creds) {
+                        (tokenResult: String) in
+                        self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
+                            (result: Bool) in
+                            if !result {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.") }
+                                return
                             } else {
-                                sourceURL = URL(string: "https://www.jamf.com")
-                            }
-                            URLCache.shared.removeAllCachedResponses()
-                            let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
-                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
-                                    //print(HTTPURLResponse.statusCode)
-                                    //===== change to go to function to check dest. server, which forwards to migrate if all is well
-                                    // verify destination server URL - start
-                                    DispatchQueue.main.async {
-                                        if !export.saveOnly {
-                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
-                                        } else {
-                                            destinationURL = URL(string: "https://www.jamf.com")
-                                        }
-                                        URLCache.shared.removeAllCachedResponses()
-                                        let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
-                                                // print("Destination server response: \(response)")
-                                                if(!self.theOpQ.isSuspended) {
-                                                    //====================================    Start Migrating/Removing    ====================================//
-                                                    self.startMigrating()
+                                TokenDelegate().get(serverUrl: self.dest_jp_server, whichServer: "dest", base64creds: self.destBase64Creds) {
+                                    (tokenResult: String) in
+                                    
+                                    if !export.saveOnly {
+                                        self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
+                                    }
+                                    // verify source server URL - start
+                                    if !self.fileImport && !wipeData.on {
+                                        sourceURL = URL(string: self.source_jp_server_field.stringValue)
+                                    } else {
+                                        sourceURL = URL(string: "https://www.jamf.com")
+                                    }
+                                    URLCache.shared.removeAllCachedResponses()
+                                    let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
+                                        if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
+                                            //print(HTTPURLResponse.statusCode)
+                                            //===== change to go to function to check dest. server, which forwards to migrate if all is well
+                                            // verify destination server URL - start
+                                            DispatchQueue.main.async {
+                                                if !export.saveOnly {
+                                                    destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                                } else {
+                                                    destinationURL = URL(string: "https://www.jamf.com")
                                                 }
-                                            } else {
-//                                                DispatchQueue.main.async {
-                                                    //print("Destination server response: \(response)")
-                                                self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
-//                                                }
-                                                
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.") }
-                                                self.goButtonEnabled(button_status: true)
-                                                return
+                                                URLCache.shared.removeAllCachedResponses()
+                                                let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
+                                                    if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
+                                                        // print("Destination server response: \(response)")
+                                                        if(!self.theOpQ.isSuspended) {
+                                                            //====================================    Start Migrating/Removing    ====================================//
+                                                            self.startMigrating()
+                                                        }
+                                                    } else {
+        //                                                DispatchQueue.main.async {
+                                                            //print("Destination server response: \(response)")
+                                                        self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
+        //                                                }
+                                                        
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.") }
+                                                        self.goButtonEnabled(button_status: true)
+                                                        return
+                                                    }
+                                                }   // let task for destinationURL - end
+                                            
+                                                task_destinationURL.resume()
                                             }
-                                        }   // let task for destinationURL - end
-                                    
-                                        task_destinationURL.resume()
-                                    }
-                                    // verify source destination URL - end
-                                    
-                                } else {
-                                    DispatchQueue.main.async {
-                                        self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
-                                    }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.") }
-                                    self.goButtonEnabled(button_status: true)
-                                    return
+                                            // verify source destination URL - end
+                                            
+                                        } else {
+                                            DispatchQueue.main.async {
+                                                self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
+                                            }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.") }
+                                            self.goButtonEnabled(button_status: true)
+                                            return
+                                        }
+                                    }   // let task for soureURL - end
+                                    task_sourceURL.resume()
+                                    // verify source server URL - end
                                 }
-                            }   // let task for soureURL - end
-                            task_sourceURL.resume()
-                            // verify source server URL - end
+                                }
                         }
                     }
                 }   // else check dest URL auth - end
@@ -1139,7 +1146,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            var myURL = "\(f_sourceURL)/JSSResource/buildings"
             var myURL = "\(f_sourceURL)/JSSResource/restrictedsoftware"
             myURL = myURL.urlFix
-//            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
                 
@@ -2999,60 +3005,132 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             localEndPointType = endpoint
         }
 
-        if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
-            var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
-            myURL = myURL.urlFix
-//            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-            myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-            myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-            myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
-            
-            theOpQ.addOperation {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
-    //                print("NSURL line 3")
-    //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                    let encodedURL = URL(string: myURL)
-                    let request = NSMutableURLRequest(url: encodedURL! as URL)
-                    request.httpMethod = "GET"
-                    let configuration = URLSessionConfiguration.ephemeral
-                    configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                    let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                    let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                        (data, response, error) -> Void in
-                        
-                        if let httpResponse = response as? HTTPURLResponse {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
-                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+        // split queries between classic and Jamf Pro API
+        switch localEndPointType {
+        case "buildings":
+            // Jamf Pro API
+            if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
+                theOpQ.addOperation {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
+                    Jpapi().action(serverUrl: self.source_jp_server, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: token.sourceServer, method: "GET" ) {
+                            (returnedJSON: [String:Any]) in
+                            print("returnedJSON: \(returnedJSON)")
+                        if returnedJSON.count > 0 {
                             
-                            // save source XML - start
+                            // save source JSON - start
                             if export.saveRawXml {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw JSON for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async {
-                                    // added option to remove scope
-    //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
-                                    let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
+                                    let exportRawXml = (export.rawXmlScope) ? "\(returnedJSON)":self.rmXmlData(theXML: "\(returnedJSON)", theTag: "scope", keepTags: false)
+                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName).\n")
                                     XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
                                 }
                             }
-                            // save source XML - end
-                            
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
-                            self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                (result: String) in
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                            // save source JSON - end
+                            self.cleanupJSON(endpoint: endpoint, JSON: returnedJSON, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                (cleanJSON: String) in
+                                print("cleanJSON: \(cleanJSON)")
                             }
-                        }   // if let httpResponse - end
-                        semaphore.signal()
-                        if error != nil {
+                            
                         }
-                    })  // let task = session - end
-                    //print("GET")
-                    task.resume()
-                    semaphore.wait()
+                    }
                 }   // theOpQ - end
+            }
+        default:
+            // classic API
+            if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
+                var myURL = "\(self.source_jp_server)/JSSResource/\(localEndPointType)/id/\(endpointID)"
+                myURL = myURL.urlFix
+    //            myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
+                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
+                myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
+                
+                theOpQ.addOperation {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
+        //                print("NSURL line 3")
+        //                if "\(myURL)" == "" { myURL = "https://localhost" }
+                        let encodedURL = URL(string: myURL)
+                        let request = NSMutableURLRequest(url: encodedURL! as URL)
+                        request.httpMethod = "GET"
+                        let configuration = URLSessionConfiguration.ephemeral
+                        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                        let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                            (data, response, error) -> Void in
+                            
+                            if let httpResponse = response as? HTTPURLResponse {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                                let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                                
+                                // save source XML - start
+                                if export.saveRawXml {
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                                    DispatchQueue.main.async {
+                                        // added option to remove scope
+        //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+                                        let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                        WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
+                                        XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
+                                    }
+                                }
+                                // save source XML - end
+                                
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
+                                self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                    (result: String) in
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                                }
+                            }   // if let httpResponse - end
+                            semaphore.signal()
+                            if error != nil {
+                            }
+                        })  // let task = session - end
+                        //print("GET")
+                        task.resume()
+                        semaphore.wait()
+                    }   // theOpQ - end
+            }
         }
     }
+    
+    func cleanupJSON(endpoint: String, JSON: [String:Any], endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
+        
+        var theEndpoint       = endpoint
+        
+        switch endpoint {
+        case "accounts/userid":
+            theEndpoint = "jamfusers"
+        case "accounts/groupid":
+            theEndpoint = "jamfgroups"
+        default:
+            theEndpoint = endpoint
+        }
+        
+        var JSONData   = JSON
+        JSONData["id"] = nil
+        
+        for (key, value) in JSONData {
+            if "\(value)" == "<null>" {
+                JSONData[key] = nil
+            } else {
+                JSONData[key] = "\(value)"
+            }
+        }
+        print("cleanJSON: \(JSONData)")
+        
+        self.CreateEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+            (result: String) in
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+            if endpointCurrent == endpointCount {
+                completion("last")
+            } else {
+                completion("")
+            }
+        }
+        
+    }
+        
     
     func cleanupXml(endpoint: String, Xml: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
@@ -3994,6 +4072,356 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // theCreateQ.addOperation - end
 //        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     }   // func createEndpoints - end
+    
+    
+    func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+        
+        
+        if pref.stopMigration {
+//            print("[CreateEndpoints] stopMigration")
+            completion("stop")
+            return
+        }
+
+        if endpointCurrent == 1 && !retry {
+            migrationComplete.isDone = false
+        }
+
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] enter\n") }
+
+        if counters[endpointType] == nil {
+            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+        } else {
+            counters[endpointType]!["total"] = endpointCount
+        }
+
+        var destinationEpId = destEpId
+        var apiAction       = action
+        var sourcePolicyId  = ""
+        
+        // counterts for completed endpoints
+        var totalCreated   = 0
+        var totalUpdated   = 0
+        var totalFailed    = 0
+        var totalCompleted = 0
+        
+//        if apiAction == "create" {
+//            apiAction = "POST"
+//        } else {
+//            apiAction = "PUT"
+//        }
+        // if working a site migrations within a single server force create/POST when copying an item
+        if self.itemToSite && sitePref == "Copy" {
+            if endpointType != "users" {
+                destinationEpId = 0
+                apiAction       = "create"
+            }
+        }
+        
+        
+        // this is where we create the new endpoint
+        if !export.saveOnly {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)\n") }
+        } else {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
+        }
+        //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
+        
+        concurrentThreads = setConcurrentThreads()
+        theCreateQ.maxConcurrentOperationCount = concurrentThreads
+
+        var localEndPointType = ""
+        var whichError        = ""
+        
+        switch endpointType {
+        case "smartcomputergroups", "staticcomputergroups":
+            localEndPointType = "computergroups"
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
+            localEndPointType = "mobiledevicegroups"
+        case "smartusergroups", "staticusergroups":
+            localEndPointType = "usergroups"
+        default:
+            localEndPointType = endpointType
+        }
+        var responseData = ""
+        
+        if self.itemToSite {
+            
+        }
+                
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrlBase)\n") }
+       
+        theCreateQ.addOperation { [self] in
+            
+            // save trimmed XML - start
+            /*
+            if export.saveTrimmedXml {
+                let endpointName = self.getName(endpoint: endpointType, objectXML: endPointXML)
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).\n") }
+                DispatchQueue.main.async {
+                    let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:self.rmXmlData(theXML: endPointXML, theTag: "scope", keepTags: false)
+                    WriteToLog().message(stringOfText: "[endPointByID] Exporting trimmed XML for \(endpointType) - \(endpointName).\n")
+                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
+                }
+                
+            }
+            // save trimmed XML - end
+            
+            if export.saveOnly {
+                if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
+                    //self.go_button.isEnabled = true
+                    self.rmDELETE()
+//                    self.resetAllCheckboxes()
+                    self.goButtonEnabled(button_status: true)
+//                    print("Done - CreateEndpoints")
+                }
+                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                }
+                return
+            }
+             */
+            
+            // don't create object if we're removing objects
+            if !wipeData.on {
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Object JSON: \(endPointJSON)\n") }
+    //            print("[CreateEndpoints] [\(localEndPointType)] process start: \(self.getName(endpoint: endpointType, objectXML: endPointXML))")
+                
+                if endpointCurrent == 1 {
+                    if !retry {
+                        self.postCount = 1
+                    }
+                } else {
+                    if !retry {
+                        self.postCount += 1
+                    }
+                }
+                
+                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: token.destServer, method: apiAction) {
+                    (jpapiResonse: [String:Any]) in
+//                    if let httpResponse = response as? HTTPURLResponse {
+                    
+                    print("jpapiResponse: \(jpapiResonse)")
+                        /*
+                        if let _ = String(data: data!, encoding: .utf8) {
+                            responseData = String(data: data!, encoding: .utf8)!
+    //                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
+    //                        print("create data response: \(responseData)")
+                        } else {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n[CreateEndpoints] No data was returned from post/put.\n") }
+                        }
+                        */
+                        // look to see if we are processing the next endpointType - start
+                        if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
+                            WriteToLog().message(stringOfText: "[CreateEndpoints] Migrating \(endpointType)\n")
+                            self.endpointInProgress = endpointType
+                            self.POSTsuccessCount = 0
+                        }   // look to see if we are processing the next localEndPointType - end
+                        
+                        DispatchQueue.main.async {
+                        
+                            // ? remove creation of counters dict defined earlier ?
+                            if self.counters[endpointType] == nil {
+                                self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                                self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                            }
+                            
+                            
+//                            if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
+                            WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown"))\n")
+                                
+                                self.POSTsuccessCount += 1
+                                
+    //                            print("endpointType: \(endpointType)")
+    //                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
+                                
+                                if let _ = self.progressCountArray["\(endpointType)"] {
+                                    self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
+    //                                if endpointCount == endpointCurrent && self.progressCountArray["\(endpointType)"] == endpointCount {
+    //                                    self.labelColor(endpoint: endpointType, theColor: self.greenText)
+    //                                }
+                                    
+                                }
+                                
+                                let localTmp = (self.counters[endpointType]?["\(apiAction)"])!
+        //                        print("localTmp: \(localTmp)")
+                                self.counters[endpointType]?["\(apiAction)"] = localTmp + 1
+                                
+                                /*
+                                if var summaryArray = self.summaryDict[endpointType]?["\(apiAction)"] {
+                                    summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
+                                    self.summaryDict[endpointType]?["\(apiAction)"] = summaryArray
+                                }
+                                
+                                // currently there is no way to upload mac app store icons; no api endpoint
+                                // removed check for those -  || (endpointType == "macapplications")
+                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                }
+                                */
+//                            }
+                            /*
+                            else {
+                                // create failed
+
+                                self.labelColor(endpoint: endpointType, theColor: self.yellowText)
+                            
+                                // Write xml for degugging - start
+                                let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
+                                var localErrorMsg = ""
+
+                                errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(self.tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
+                                
+                                // Write xml for degugging - end
+                                
+                                if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
+                                    whichError = "category"
+                                } else {
+                                    whichError = errorMsg
+                                }
+                                
+                                // retry computers with dublicate serial or MAC - start
+                                switch whichError {
+                                case "Duplicate serial number", "Duplicate MAC address":
+                                    if !retry {
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
+                                            tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                        }
+                                        self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                                        }
+                                    } else {
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
+                                    }
+                                case "category":
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["category"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                    }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                    }
+                                //    self.postCount -= 1
+                               //     return
+                                case "Problem with department in location":
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["department"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                    }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                    }
+                                //    self.postCount -= 1
+                                //    return
+                                case "Problem with building in location":
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["building"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                    }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                                    }
+
+                                // retry network segment without distribution point
+                                case "Problem in assignment to distribution point":
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point.\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["distribution_point", "url"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
+                                    }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                                    }
+
+                                default:
+                                    WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                                    
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(endPointXML)\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \n\(responseData)\n") }
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n\n") }
+                                    // 400 - likely the format of the xml is incorrect or wrong endpoint
+                                    // 401 - wrong username and/or password
+                                    // 409 - unable to create object; already exists or data missing or xml error
+                                    
+                                    // update global counters
+                                    let localTmp = (self.counters[endpointType]?["fail"])!
+                                    self.counters[endpointType]?["fail"] = localTmp + 1
+                                    if var summaryArray = self.summaryDict[endpointType]?["fail"] {
+                                        summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
+                                        self.summaryDict[endpointType]?["fail"] = summaryArray
+                                    }
+                                }
+                            }   // create failed - end
+                            */
+
+                            totalCreated   = self.counters[endpointType]?["create"] ?? 0
+                            totalUpdated   = self.counters[endpointType]?["update"] ?? 0
+                            totalFailed    = self.counters[endpointType]?["fail"] ?? 0
+                            totalCompleted = totalCreated + totalUpdated + totalFailed
+                            
+                            // update counter
+                            //                        DispatchQueue.main.async {
+                            self.put_name_field.stringValue = "\(endpointType)"
+                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
+                            //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
+    //                        if totalCompleted > currentCompleted {
+                            if totalCompleted > 0 {
+//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
+//                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
+                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+                                self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                            }
+                            
+                            if totalCompleted == endpointCount {
+                                migrationComplete.isDone = true
+
+                                if totalFailed == 0 {   // removed  && self.changeColor from if condition
+                                    self.labelColor(endpoint: endpointType, theColor: self.greenText)
+                                } else if totalFailed == endpointCount {
+                                    self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                }
+    //                            print("[CreateEndpoints] set dependency.wait = false")
+                                dependency.wait = false
+                            }
+                        }
+                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+//                    }   // if let httpResponse = response - end
+                    
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation: \(apiAction)\n") }
+                    
+                    if endpointCurrent > 0 {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t No Failures: \(self.changeColor)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))\n") }
+                    }
+                    
+    //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
+                    if endpointCurrent == endpointCount {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.\n") }
+                        self.nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
+    //                    print("nodes complete: \(self.nodesMigrated)")
+                    }
+                }
+            }   // if !wipeData.on - end
+            
+        }   // theCreateQ.addOperation - end
+//        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+    }
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] enter\n") }

@@ -8,27 +8,22 @@
 
 import Foundation
 
-struct jamfProVersion {
-    static var major = 0
-    static var minor = 0
-    static var patch = 0
+
+struct appInfo {
+    static let dict    = Bundle.main.infoDictionary!
+    static let version = dict["CFBundleShortVersionString"] as! String
 }
 
 struct dependency {
     static var wait = true
 }
 
-struct iconfiles {
-    static public var policyDict  = [String:[String:String]]()
-    static var pendingDict        = [String:String]()
-}
-
-struct migrationComplete {
-    static var isDone = false
-}
-
-struct wipeData {
-    static var on = false
+struct export {
+    static var saveRawXml      = false
+    static var saveTrimmedXml  = false
+    static var saveOnly        = false
+    static var rawXmlScope     = true
+    static var trimmedXmlScope = true
 }
 
 struct History {
@@ -38,25 +33,23 @@ struct History {
     static var endTime     = Date()
 }
 
+struct iconfiles {
+    static public var policyDict  = [String:[String:String]]()
+    static var pendingDict        = [String:String]()
+}
+
+struct jamfProVersion {
+    static var major = 0
+    static var minor = 0
+    static var patch = 0
+}
+
 struct LogLevel {
     static var debug = false
 }
 
-struct summaryHeader {
-    static var createDelete = "create"
-}
-
-struct appInfo {
-    static let dict    = Bundle.main.infoDictionary!
-    static let version = dict["CFBundleShortVersionString"] as! String
-}
-
-struct export {
-    static var saveRawXml      = false
-    static var saveTrimmedXml  = false
-    static var saveOnly        = false
-    static var rawXmlScope     = true
-    static var trimmedXmlScope = true
+struct migrationComplete {
+    static var isDone = false
 }
 
 struct pref {
@@ -76,4 +69,20 @@ struct setting {
     static var uapiToken = ""
     static var jpapiSourceToken      = ""
     static var jpapiDestinationToken = ""
+}
+
+struct summaryHeader {
+    static var createDelete = "create"
+}
+
+struct token {
+    static var refreshInterval:UInt32 = 20*60  // 20 minutes
+    static var sourceServer  = ""
+    static var destServer    = ""
+    static var sourceExpires = ""
+    static var destExpires   = ""
+}
+
+struct wipeData {
+    static var on = false
 }

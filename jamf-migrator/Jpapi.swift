@@ -12,7 +12,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     var theUapiQ = OperationQueue() // create operation queue for API calls
     
-    func action(serverUrl: String, endpoint: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
+    func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
         URLCache.shared.removeAllCachedResponses()
         var path = ""
@@ -26,13 +26,31 @@ class Jpapi: NSObject, URLSessionDelegate {
 
         var urlString = "\(serverUrl)/api/\(path)"
         urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
+        if id != "" && id != "0" {
+            urlString = urlString + "/\(id)"
+        }
 //        print("[Jpapi] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: url!)
-        request.httpMethod = method
-
+        switch method.lowercased() {
+        case "get":
+            request.httpMethod = "GET"
+        case "create", "post":
+            request.httpMethod = "POST"
+        default:
+            request.httpMethod = "PUT"
+        }
+        
+        if apiData.count > 0 {
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+        
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).\n") }
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
@@ -44,17 +62,17 @@ class Jpapi: NSObject, URLSessionDelegate {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json! as? [String:Any] {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Token retrieved from \(urlString).\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).\n") }
                         completion(endpointJSON)
                         return
                     } else {    // if let endpointJSON error
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] JSON error.\n") }
-                        completion([:])
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))\n") }
+                        completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).\n") }
-                    completion([:])
+                    completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     return
                 }
             } else {
