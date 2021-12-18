@@ -69,6 +69,7 @@ struct setting {
     static var uapiToken = ""
     static var jpapiSourceToken      = ""
     static var jpapiDestinationToken = ""
+    static var waitingForPackages    = false
 }
 
 struct summaryHeader {

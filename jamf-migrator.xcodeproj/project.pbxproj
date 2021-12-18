@@ -25,6 +25,7 @@
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
 		B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55BB46D23A9BC7C0024B357 /* UapiCall.swift */; };
+		B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
 		B57B1EFC21D7999F0098326E /* selective_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EFA21D7999E0098326E /* selective_active.png */; };
 		B57B1F0721D7A0300098326E /* ios_active.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1F0521D7A02F0098326E /* ios_active.png */; };
@@ -77,6 +78,7 @@
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B55BB46D23A9BC7C0024B357 /* UapiCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UapiCall.swift; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
+		B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackagesDelegate.swift; sourceTree = "<group>"; };
 		B57B1EF921D7999E0098326E /* selective.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = selective.png; sourceTree = "<group>"; };
 		B57B1EFA21D7999E0098326E /* selective_active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = selective_active.png; sourceTree = "<group>"; };
 		B57B1F0521D7A02F0098326E /* ios_active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios_active.png; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
 				B5FD9DAD27434B890044C321 /* Jpapi.swift */,
 				B53ECDFB2394474B005EE6E5 /* Json.swift */,
+				B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
@@ -340,6 +343,7 @@
 				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
 				B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */,
+				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
@@ -502,7 +506,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 5.9.5;
+				MARKETING_VERSION = 5.9.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -523,7 +527,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 5.9.5;
+				MARKETING_VERSION = 5.9.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

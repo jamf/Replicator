@@ -108,13 +108,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //    var prefWindowController2: PrefsWindowController? removed lnh 2021-02-06
     @IBAction func showPrefsWindow(_ sender: Any) {
         PrefsWindowController().show()
-//        let myPrefs = PrefsWindowController().window
-//        myPrefs?.makeKeyAndOrderFront(self)
-//        PrefsWindowController().window?.orderFrontRegardless()
-//        PrefsWindowController().window?.makeKeyAndOrderFront(self)
-//        
-//        self.view.window?.orderFront(self)
-//        self.view.window?.makeKeyAndOrderFront(self)
     }
 
         
@@ -1642,7 +1635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             // create targetDataArray, list of objects to migrate/remove - start
                             for k in (0..<self.sourceDataArray.count) {
                                 if self.srcSrvTableView.isRowSelected(k) {
-                                    // prevent the removal of the account we're using
+                                    // prevent the modification/removal of the account we're using with the destination server
                                     if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
                                         self.targetDataArray.append(self.sourceDataArray[k])
                                     }
@@ -1734,10 +1727,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         if dependencyCount > 0 {
                                                             var dependencyCounter = 0
                                                             
-//                                                            print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
+                                                            print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
                                                             
+                                                            print("self.currentEPDict: \(self.currentEPDict[object]!)")
                                                             for (name, id) in advancedMigrateDict[object]! {
-//                                                                print("object name: \(String(describing: name))")
+                                                                print("object name: \(String(describing: name))")
                                                                 dependencyCounter += 1
                                                                 if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(name)\n") }
     //                                                            print("export.saveOnly: \(export.saveOnly)")
@@ -1746,9 +1740,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 if nil != self.currentEPDict[object]![name] && !export.saveOnly {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
                                                                     //self.currentEndpointID = self.currentEPs[xmlName]!
+                                                                    print("update \(object): \(name)")
                                                                     self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencyCount, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) needs to be created\n") }
+                                                                    print("update \(object): \(name)")
                                                                     self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencyCount, action: "create", destEpId: 0, destEpName: selectedObject)
                                                                 }
                                                             }   // for (name, id) in advancedMigrateDict[object]! - end
@@ -1862,6 +1858,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             return
         }
         
+        var duplicatePackages      = false
+        var duplicatePackagesDict  = [String:[String]]()
+        
         URLCache.shared.removeAllCachedResponses()
         var endpoint       = nodesToMigrate[nodeIndex]
         var endpointParent = ""
@@ -1869,7 +1868,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var endpointCount  = 0
         var groupType      = ""
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Getting \(endpoint)\n") }
-        
         
         if endpoint.contains("smart") {
             groupType = "smart"
@@ -1999,7 +1997,135 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }
                                     }
                                 */
-                                case "buildings", "advancedcomputersearches", "macapplications", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "packages", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                case "packages":
+                                    //get packages
+                                    
+                                    var lookupCount    = 0
+                                    var uniquePackages = [String]()
+                                    
+                                    if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
+                                        endpointCount = endpointInfo.count
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
+
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
+
+                                        if endpointCount > 0 {
+                                            
+                                            print("[ViewController.getEndpoints] self.source_jp_server: \(self.source_jp_server)")
+
+                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
+                                                (result: String) in
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)\n") }
+                                                print("[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)")
+//
+
+                                                for i in (0..<endpointCount) {
+                                                    if i == 0 { self.availableObjsToMigDict.removeAll() }
+
+                                                    let record      = endpointInfo[i] as! [String : AnyObject]
+                                                    let packageID   = record["id"] as! Int
+                                                    let displayName = record["name"] as! String
+                                                    
+                                                    
+                                                    PackagesDelegate().getFilename(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on) {
+                                                        (result: (Int,String)) in
+                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
+                                                        print("[ViewController.getEndpoints] result: \(result)")
+                                                        lookupCount += 1
+                                                        if packageFilename != "" && uniquePackages.firstIndex(of: packageFilename) == nil {
+                                                            print("[ViewController.getEndpoints] add \(packageFilename) to package dict")
+                                                            uniquePackages.append(packageFilename)
+                                                            self.availableObjsToMigDict[packageID] = packageFilename
+                                                            duplicatePackagesDict[packageFilename] = [displayName]
+                                                        }  else {
+                                                            print("[ViewController.existingEndpoints] Duplicate package filename found on \(self.source_jp_server): \(packageFilename), id: \(packageID)\n")
+                                                            duplicatePackages = true
+                                                            duplicatePackagesDict[packageFilename]!.append(displayName)
+                                                        }
+                                                        if lookupCount == endpointCount {
+                                                            print("[ViewController.getEndpoints] done looking up packages")
+                                                            if duplicatePackages {
+                                                                var message = "\tFilename : Display Name\n"
+                                                                for (pkgFilename, displayNames) in duplicatePackagesDict {
+                                                                    if displayNames.count > 1 {
+                                                                        for dup in displayNames {
+                                                                            message = "\(message)\t\(pkgFilename) : \(dup)\n"
+                                                                        }
+                                                                    }
+                                                                }
+                                                                WriteToLog().message(stringOfText: "[ViewController.existingEndpoints] Duplicate references to the same package were found on \(self.source_jp_server)\n\(message)\n")
+                                                                self.alert_dialog(header: "Warning:", message: "Several packages on \(self.source_jp_server), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.")
+                                                            }
+            //                                                            self.currentEPDict[destEndpoint] = self.currentEPs
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing packages endpoints: \(self.availableObjsToMigDict)\n") }
+                                                            
+//                                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//                                                            return
+                                                            // make into a func - start
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
+
+                                                            var counter = 1
+                                                            if self.goSender == "goButton" {
+                                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                    if !wipeData.on  {
+                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
+                    //                                                        if self.currentEPs[l_xmlName] != nil {
+                                                                        if self.currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
+                    //                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                        } else {
+                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
+                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                            self.endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        }
+                                                                    } else {
+                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                                        self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
+                                                                    }   // if !wipeData.on else - end
+                                                                    counter+=1
+                                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                            } else {
+                                                                // populate source server under the selective tab
+                                                                print("-populate (\(endpoint)) source server under the selective tab")
+                                                                self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
+                                                                for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
+                                                                    self.sortQ.async {
+                    //                                                            print("adding \(l_xmlName) to array")
+                                                                        self.availableIDsToMigDict[l_xmlName] = l_xmlID
+                                                                        self.sourceDataArray.append(l_xmlName)
+                    //                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
+                                                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                        
+                                                                        self.staticSourceDataArray = self.sourceDataArray
+                                                                        
+                                                                            DispatchQueue.main.async {
+                                                                                self.srcSrvTableView.reloadData()
+                                                                            }
+                                                                        // slight delay in building the list - visual effect
+                                                                        usleep(self.delayInt)
+                    //                                                            self.goButtonEnabled(button_status: true)
+                    //                                                        }   //if self.availableIDsToMigDict.count - end
+                    //                                                        DispatchQueue.main.async {
+                    //                                                            self.srcSrvTableView.reloadData()
+                    //                                                        }
+                                                                        if counter == self.availableObjsToMigDict.count {
+                                                                            self.goButtonEnabled(button_status: true)
+                                                                        }
+                                                                        counter+=1
+                                                                    }   // self.sortQ.async - end
+                                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+
+                                                            }   // if self.goSender else - end
+                                                            // make into a func - end
+                                                        }
+                                                    }
+                                                } // for i - end
+                                            } // self.existingEndpoints(theDestEndpoint - end
+                                        }   // if endpointCount > 0 - end
+                                    }   // if let endpointInfo - end
+                                    
+                                case "buildings", "advancedcomputersearches", "macapplications", "categories", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                     if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -2027,7 +2153,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                                                        self.availableObjsToMigDict[record["id"] as! Int] = record["bundle_id"] as! String?
     //                                                }
 
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
                                                 }   // for i in (0..<endpointCount) end
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
 
@@ -2054,6 +2179,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                 } else {
                                                     // populate source server under the selective tab
+                                                    print("populate (\(endpoint)) source server under the selective tab")
                                                     self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
                                                     for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                         self.sortQ.async {
@@ -3725,6 +3851,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         if endpointCurrent == 1 && !retry {
             migrationComplete.isDone = false
+            self.put_levelIndicator.fillColor = .systemGreen
         }
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
@@ -3916,6 +4043,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // create failed
 
                                 self.labelColor(endpoint: endpointType, theColor: self.yellowText)
+                                self.put_levelIndicator.fillColor = .systemYellow
                             
                                 // Write xml for degugging - start
                                 let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
@@ -4042,6 +4170,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.labelColor(endpoint: endpointType, theColor: self.greenText)
                                 } else if totalFailed == endpointCount {
                                     self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                    self.put_levelIndicator.fillColor = .systemRed
                                 }
     //                            print("[CreateEndpoints] set dependency.wait = false")
                                 dependency.wait = false
@@ -4637,6 +4766,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             var destXmlID:Int?
             var existingEndpointNode = ""
             var een                  = ""
+            
+            var duplicatePackages      = false
+            var duplicatePackagesDict  = [String:[String]]()
 
             switch destEndpoint {
             case "smartusergroups", "staticusergroups":
@@ -4746,7 +4878,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //print("NSURL line 6")
 //if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
                         let destEncodedURL = URL(string: existingDestUrl)
-                        let destRequest = NSMutableURLRequest(url: destEncodedURL! as URL)
+                        let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
                         destRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.ephemeral
@@ -4764,6 +4896,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
                                         switch destEndpoint {
                                             
+                                        /*
                                         // need to revisit as name isn't the best indicatory on whether or not a computer exists
                                         case "-computers":
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current computers\n") }
@@ -4788,6 +4921,77 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }
                                                 }   // if destEndpointCount > 0
                                             }   //if let destEndpointInfo = destEndpointJSON - end
+                                            */
+                                        case "packages":
+                                            var destRecord      = [String:AnyObject]()
+                                            var packageIDsNames = [Int:String]()
+                                            setting.waitingForPackages = true
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current packages\n") }
+                                            if let destEndpointInfo = destEndpointJSON["packages"] as? [Any] {
+                                                let destEndpointCount: Int = destEndpointInfo.count
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)\n") }
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)\n") }
+                                                
+                                                if destEndpointCount > 0 {
+                                                    for i in (0..<destEndpointCount) {
+                                                        destRecord = destEndpointInfo[i] as! [String : AnyObject]
+//                                                        packageIDs.append(destRecord["id"] as! Int)
+                                                        packageIDsNames[destRecord["id"] as! Int] = destRecord["name"] as? String
+                                                        //print("package ID: \(destRecord["id"] as! Int)")
+                                                    }
+                                                }   // if destEndpointCount > 0
+                                                var lookupCount = 0
+                                                for (packageID, packageName) in packageIDsNames {
+                                                    PackagesDelegate().getFilename(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) {
+                                                        (result: (Int,String)) in
+                                                        print("[ViewController.existingEndpoints] destRecord: \(String(describing: destRecord))")
+                                                        let (_,packageFilename) = result
+//                                                        let (_,packageFilename) = wipeData.on ? (packageID, packageName):result
+                                                        lookupCount += 1
+                                                        if packageFilename != "" && self.currentEPs[packageFilename] == nil {
+                                                            print("[ViewController.existingEndpoints] add \(packageFilename) to package dict")
+                                                            self.currentEPs[packageFilename] = packageID
+                                                            duplicatePackagesDict[packageFilename] = [packageName]
+                                                        } else {
+                                                            duplicatePackages = true
+                                                            duplicatePackagesDict[packageFilename]!.append(packageName)
+
+                                                            print("[ViewController.existingEndpoints] Duplicate package filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
+//                                                            WriteToLog().message(stringOfText: "[ViewController.existingEndpoints] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
+                                                            if wipeData.on {
+                                                                self.currentEPs[packageName] = packageID
+                                                            }
+                                                        }
+                                                        if lookupCount == packageIDsNames.count {
+                                                            print("[ViewController.existingEndpoints] done looking up packages")
+                                                            
+                                                            if duplicatePackages {
+                                                                var message = "\tFilename : Display Name\n"
+                                                                for (pkgFilename, displayNames) in duplicatePackagesDict {
+                                                                    if displayNames.count > 1 {
+                                                                        for dup in displayNames {
+                                                                            message = "\(message)\t\(pkgFilename) : \(dup)\n"
+                                                                        }
+                                                                    }
+                                                                }
+                                                                WriteToLog().message(stringOfText: "[ViewController.existingEndpoints] Duplicate references to the same package were found on \(self.dest_jp_server)\n\(message)\n")
+                                                                self.alert_dialog(header: "Warning:", message: "Several packages on \(self.dest_jp_server), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.")
+                                                            }
+                                                            
+                                                            
+//                                                            self.currentEPDict[destEndpoint] = self.currentEPs
+                                                            setting.waitingForPackages = false
+                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
+                                //                            print("returning existing endpoints: \(self.currentEPs)")
+                                                            
+                                                            completion("[ViewController.existingEndpoints] Current endpoints - \(self.currentEPs)\n")
+                                                            return
+                                                        }
+                                                    }
+                                                }
+                                            } else {  //if let destEndpointInfo = destEndpointJSON - end
+                                                WriteToLog().message(stringOfText: "[existingEndpoints] failed to get packages\n")
+                                            }
                                             
                                         default:
                                             if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
@@ -4842,6 +5046,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //                                                    }
                                                             if destXmlName != "" {
                                                                 if "\(String(describing: destXmlID))" != "" {
+                                                                    print("[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.")
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.\n") }
                                                                     
                                                                     // filter out policies created from casper remote - start
@@ -4890,32 +5095,40 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 waiting = (completed < endpointDependendyArray.count) ? false:true
 //                                print("completed: \(completed) of \(endpointDependendyArray.count) (\(existingEndpointNode))")
                                 
-                                if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-//                                    print(httpResponse.statusCode)
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
-        //                            print("returning existing endpoints: \(self.currentEPs)")
-                                    if completed == endpointDependendyArray.count {
-                                        if endpointParent == "ldap_servers" {
-                                            self.currentLDAPServers = self.currentEPDict[destEndpoint]!
-//                                            print("[existingEndpoints-LDAP] currentLDAPServers: \(String(describing: self.currentLDAPServers))")
-                                        }
-//                                        print("[existingEndpoints] currentEPDict[]: \(String(describing: self.currentEPDict))")
-                                        self.currentEPs = self.currentEPDict[destEndpoint]!
-                                        completion("[existingEndpoints] Current endpoints - \(self.currentEPs)\n")
-                                    }
-                                } else {
-                                    // something went wrong
-                                    if completed == endpointDependendyArray.count {
-//                                        print("status code: \(httpResponse.statusCode)")
-//                                        print("currentEPDict[] - error: \(String(describing: self.currentEPDict))")
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] endpoint: \(destEndpoint)\n") }
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] error - status code: \(httpResponse.statusCode)\n") }
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] xml: \(String(describing: self.currentEPDict))\n") }
-                                        self.currentEPs = self.currentEPDict[destEndpoint]!
-                                        completion("\ndestination count error")
-                                    }
+//                                DispatchQueue.global(qos: .background).sync {
+//                                    while setting.waitingForPackages {
+//                                        sleep(1)
+//                                    }
+                                if destEndpoint != "packages" {
                                     
-                                }   // if httpResponse/else - end
+                                    if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
+    //                                    print(httpResponse.statusCode)
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode) endpoints: \(self.currentEPs)\n") }
+            //                            print("returning existing endpoints: \(self.currentEPs)")
+                                        if completed == endpointDependendyArray.count {
+                                            if endpointParent == "ldap_servers" {
+                                                self.currentLDAPServers = self.currentEPDict[destEndpoint]!
+    //                                            print("[existingEndpoints-LDAP] currentLDAPServers: \(String(describing: self.currentLDAPServers))")
+                                            }
+    //                                        print("[existingEndpoints] currentEPDict[]: \(String(describing: self.currentEPDict))")
+                                            self.currentEPs = self.currentEPDict[destEndpoint]!
+                                            completion("[existingEndpoints] Current endpoints - \(self.currentEPs)\n")
+                                        }
+                                    } else {
+                                        // something went wrong
+                                        if completed == endpointDependendyArray.count {
+    //                                        print("status code: \(httpResponse.statusCode)")
+    //                                        print("currentEPDict[] - error: \(String(describing: self.currentEPDict))")
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] endpoint: \(destEndpoint)\n") }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] error - status code: \(httpResponse.statusCode)\n") }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] xml: \(String(describing: self.currentEPDict))\n") }
+                                            self.currentEPs = self.currentEPDict[destEndpoint]!
+                                            completion("\ndestination count error")
+                                        }
+                                        
+                                    }   // if httpResponse/else - end
+                                    
+                                }
                                 
                             }   // if let httpResponse - end
                             semaphore.signal()
@@ -4924,8 +5137,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         })  // let task = destSession - end
                         //print("GET")
                         task.resume()
-                    }   //for currentDependency in endpointDependendyArray - end
-                }
+                    }   //if !waiting - end
+                }   // while (completed < endpointDependendyArray.count)
 //                print("[\(endpointParent)] completed \(completed) of \(endpointDependendyArray.count)")
             }   // destEPQ - end
         } else {
