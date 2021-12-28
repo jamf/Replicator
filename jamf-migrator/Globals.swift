@@ -59,6 +59,7 @@ struct pref {
     static var removeCA_ID       = 0
     static var stopMigration     = false
     static var concurrentThreads = 2
+    static let httpSuccess       = 200...299
 }
 
 struct q {
