@@ -14,6 +14,12 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
+        if method.lowercased() == "skip" {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
+            completion(["JPAPI_result":"failed", "JPAPI_response":000])
+            return
+        }
+        
         URLCache.shared.removeAllCachedResponses()
         var path = ""
 

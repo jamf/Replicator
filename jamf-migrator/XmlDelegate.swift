@@ -139,8 +139,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 do {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing currently saved icon: \(iconDest)\n") }
                     try FileManager.default.removeItem(at: URL(fileURLWithPath: iconDest))
-                }
-                catch let error as NSError {
+                } catch let error as NSError {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
                     copyIcon = false
                 }
@@ -153,14 +152,12 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                         do {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] removing cached icon: \(iconSource)/\n") }
                             try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(iconSource)/"))
-                        }
-                        catch let error as NSError {
+                        } catch let error as NSError {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to delete \(iconSource)/.  Error \(error)\n") }
                         }
                     }
                     
-                }
-                catch let error as NSError {
+                } catch let error as NSError {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] unable to save icon: \(iconDest).  Error \(error).\n") }
                     copyIcon = false
                 }

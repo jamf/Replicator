@@ -30,7 +30,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var saveRawXmlScope_button: NSButton!
     @IBOutlet weak var saveTrimmedXmlScope_button: NSButton!
     @IBOutlet weak var showSaveLocation_button: NSButton!
-    
+    @IBOutlet var saveLocation_textfield: NSTextField!
     
     @IBOutlet var site_View: NSView!
     
@@ -267,7 +267,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             openPanel.begin { (result) in
                 if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
 
-                    self.userDefaults.set(openPanel.url!.absoluteString, forKey: "saveLocation")
+                    self.userDefaults.set(openPanel.url!.absoluteString.pathToString, forKey: "saveLocation")
                     self.userDefaults.synchronize()
                     
                     self.saveFolderPath = openPanel.url
@@ -278,7 +278,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                         theTooltip = theTooltip.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
                     }
                     
-                    self.showSaveLocation_button.toolTip = "\(theTooltip)"
+                    self.showSaveLocation_button.toolTip    = "\(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+                    self.saveLocation_textfield.stringValue = "Export to: \(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
                     
                 }
             } // openPanel.begin - end
@@ -433,12 +434,20 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             copyScopeUsers_button.state  = boolToState(TF: scopeUsersCopy)
         }
         if self.title! == "Export" {
+            var isDir: ObjCBool = true
             saveRawXml_button.state          = boolToState(TF: saveRawXml)
             saveTrimmedXml_button.state      = boolToState(TF: saveTrimmedXml)
             saveOnly_button.state            = boolToState(TF: saveOnly)
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
+            
             var saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            if !(FileManager().fileExists(atPath: saveLocation, isDirectory: &isDir)) {
+                saveLocation = NSHomeDirectory() + "/Downloads/Jamf Migrator/"
+                self.userDefaults.set("\(saveLocation)", forKey: "saveLocation")
+                self.userDefaults.synchronize()
+            }
+            
             saveLocation = saveLocation.pathToString
             
             let homePathArray = NSHomeDirectory().split(separator: "/")
@@ -446,7 +455,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 saveLocation = saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
             }
             
-            showSaveLocation_button.toolTip = "\(saveLocation)"
+            showSaveLocation_button.toolTip    = "\(saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+            saveLocation_textfield.stringValue = "Export to: \(saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
         }
         if self.title! == "Computer" {
             credentialsArray.removeAll()
@@ -454,14 +464,14 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefMgmtPwd_textfield.delegate  = self
             migrateAsManaged_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
             credentialsArray                = Creds2.retrieve(service: "migrator-mgmtAcct")
-            removeCA_ID_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "removeCA_ID"))
+            removeCA_ID_button.state        = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "removeCA_ID"))
 
             if credentialsArray.count == 2 {
                 prefMgmtAcct_textfield.stringValue = credentialsArray[0]
                 prefMgmtPwd_textfield.stringValue  = credentialsArray[1]
             } else {
                 prefMgmtAcct_textfield.stringValue = ""
-                prefMgmtPwd_textfield.stringValue = ""
+                prefMgmtPwd_textfield.stringValue  = ""
             }
             migrateAsManaged_action("viewDidAppear")
         }

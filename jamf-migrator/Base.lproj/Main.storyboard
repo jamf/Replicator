@@ -782,7 +782,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="175" y="113" width="91" height="19"/>
+                                                    <rect key="frame" x="175" y="114" width="91" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -802,7 +802,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="18" y="53" width="79" height="19"/>
+                                                    <rect key="frame" x="18" y="54" width="79" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -822,7 +822,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="73" width="62" height="19"/>
+                                                    <rect key="frame" x="18" y="74" width="62" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="asM-hy-xl0">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -842,7 +842,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
-                                                    <rect key="frame" x="18" y="133" width="58" height="19"/>
+                                                    <rect key="frame" x="18" y="134" width="58" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ePN-1b-ca5">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -862,7 +862,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="175" y="53" width="142" height="19"/>
+                                                    <rect key="frame" x="175" y="54" width="142" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -882,7 +882,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="175" y="133" width="104" height="19"/>
+                                                    <rect key="frame" x="175" y="134" width="104" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -902,7 +902,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="93" width="114" height="19"/>
+                                                    <rect key="frame" x="18" y="94" width="114" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -942,7 +942,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="113" width="82" height="19"/>
+                                                    <rect key="frame" x="18" y="114" width="82" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hN0-Fe-gk1">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -962,7 +962,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Users">
-                                                    <rect key="frame" x="332" y="133" width="141" height="19"/>
+                                                    <rect key="frame" x="332" y="134" width="141" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -982,7 +982,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="175" y="93" width="97" height="19"/>
+                                                    <rect key="frame" x="175" y="94" width="97" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1002,7 +1002,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="175" y="73" width="97" height="19"/>
+                                                    <rect key="frame" x="175" y="74" width="97" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2093,7 +2093,7 @@
                                 </textFieldCell>
                             </textField>
                             <button identifier="selectiveTab" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pZE-bV-fJk" userLabel="selective tab Button">
-                                <rect key="frame" x="501" y="253" width="82" height="25"/>
+                                <rect key="frame" x="501" y="252" width="82" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="82" id="DEb-Ev-jZx"/>
                                     <constraint firstAttribute="height" constant="25" id="jfN-bt-6s0"/>
@@ -2108,7 +2108,7 @@
                                 </connections>
                             </button>
                             <button identifier="iosTab" translatesAutoresizingMaskIntoConstraints="NO" id="nNc-Ty-fZF" userLabel="ios tab Button">
-                                <rect key="frame" x="420" y="253" width="82" height="25"/>
+                                <rect key="frame" x="420" y="252" width="82" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="82" id="lfC-I1-gq7"/>
                                     <constraint firstAttribute="height" constant="25" id="zTY-iY-K7t"/>
@@ -2123,7 +2123,7 @@
                                 </connections>
                             </button>
                             <button identifier="macosTab" translatesAutoresizingMaskIntoConstraints="NO" id="AT7-Qd-mL1" userLabel="macos tab Button">
-                                <rect key="frame" x="339" y="253" width="82" height="25"/>
+                                <rect key="frame" x="339" y="252" width="82" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="82" id="9ns-h4-jvm"/>
                                     <constraint firstAttribute="height" constant="25" id="d9v-dh-Xaf"/>
@@ -2138,7 +2138,7 @@
                                 </connections>
                             </button>
                             <button identifier="generalTab" translatesAutoresizingMaskIntoConstraints="NO" id="514-dK-Ce9" userLabel="general tab Button">
-                                <rect key="frame" x="258" y="253" width="82" height="25"/>
+                                <rect key="frame" x="258" y="252" width="82" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="25" id="9vs-Eb-zfA"/>
                                     <constraint firstAttribute="width" constant="82" id="hhA-Ko-uN0"/>
@@ -2314,7 +2314,6 @@
                             <constraint firstItem="B8I-Gu-YOQ" firstAttribute="leading" secondItem="DjG-yq-DnX" secondAttribute="leading" constant="18" id="QXt-xa-lMc"/>
                             <constraint firstAttribute="bottom" secondItem="DjG-yq-DnX" secondAttribute="bottom" constant="14" id="QbP-3p-ALx"/>
                             <constraint firstItem="GTJ-yW-OOe" firstAttribute="firstBaseline" secondItem="2FL-Bn-T2a" secondAttribute="firstBaseline" id="RYZ-fO-i25"/>
-                            <constraint firstItem="514-dK-Ce9" firstAttribute="top" secondItem="ih0-OH-DT1" secondAttribute="bottom" constant="21" id="S5e-dF-jsw"/>
                             <constraint firstItem="vfR-O9-7xw" firstAttribute="firstBaseline" secondItem="U40-E2-DvW" secondAttribute="firstBaseline" id="UBg-g9-WoE"/>
                             <constraint firstItem="2FL-Bn-T2a" firstAttribute="leading" secondItem="7oa-bJ-2d1" secondAttribute="leading" constant="-2" id="UDm-GX-Vtq"/>
                             <constraint firstAttribute="trailing" secondItem="NrN-I8-3SR" secondAttribute="trailing" constant="15" id="UUk-Bx-UGG"/>
@@ -2327,9 +2326,11 @@
                             <constraint firstItem="Kb9-jI-pZI" firstAttribute="leading" secondItem="0Aq-h1-aGw" secondAttribute="trailing" constant="7" id="bF8-MV-rZQ"/>
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="top" secondItem="FmU-Bg-tM4" secondAttribute="bottom" constant="2" id="bRD-yb-xOz"/>
                             <constraint firstItem="bKr-H7-03S" firstAttribute="leading" secondItem="DjG-yq-DnX" secondAttribute="trailing" constant="-28" id="cLe-NE-V0i"/>
+                            <constraint firstItem="nNc-Ty-fZF" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="222" id="cqO-NZ-BEa"/>
                             <constraint firstItem="ih0-OH-DT1" firstAttribute="top" secondItem="xlC-Th-zKf" secondAttribute="bottom" id="dNz-7N-DZN"/>
                             <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="Uw9-pw-Waq" secondAttribute="trailing" constant="2" id="dme-8H-Ww5"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="bottom" secondItem="Kb9-jI-pZI" secondAttribute="bottom" id="e2J-6r-Ld8"/>
+                            <constraint firstItem="514-dK-Ce9" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="222" id="e6a-kw-giB"/>
                             <constraint firstItem="hv1-dW-eem" firstAttribute="top" secondItem="v1E-Y8-MAn" secondAttribute="bottom" id="eqx-VW-BT7"/>
                             <constraint firstItem="o5b-UU-ZL9" firstAttribute="top" secondItem="Uw9-pw-Waq" secondAttribute="bottom" constant="2" id="g3x-d2-gkl"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="leading" secondItem="FmU-Bg-tM4" secondAttribute="leading" constant="5" id="gMg-jj-guO"/>
@@ -2338,12 +2339,14 @@
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="leading" secondItem="jUj-qp-uuH" secondAttribute="leading" id="gqb-9s-dNI"/>
                             <constraint firstItem="yF6-Ie-7cn" firstAttribute="top" secondItem="6Q2-dI-sxu" secondAttribute="bottom" constant="3" id="h3e-8M-juO"/>
                             <constraint firstItem="UMW-p7-6qE" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="hOq-vF-War"/>
+                            <constraint firstItem="AT7-Qd-mL1" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="222" id="hdL-WA-8zY"/>
                             <constraint firstItem="0Aq-h1-aGw" firstAttribute="leading" secondItem="XlU-vN-bbJ" secondAttribute="trailing" constant="6" id="hoE-qQ-mn7"/>
                             <constraint firstItem="nNc-Ty-fZF" firstAttribute="leading" secondItem="514-dK-Ce9" secondAttribute="trailing" constant="80" id="i2T-WU-quM"/>
                             <constraint firstItem="Uw9-pw-Waq" firstAttribute="leading" secondItem="FmU-Bg-tM4" secondAttribute="trailing" constant="97" id="izt-Ff-mGe"/>
                             <constraint firstItem="0Aq-h1-aGw" firstAttribute="centerX" secondItem="EQj-HF-Ysz" secondAttribute="centerX" id="lIE-jP-fTl"/>
                             <constraint firstItem="U40-E2-DvW" firstAttribute="trailing" secondItem="2FL-Bn-T2a" secondAttribute="trailing" id="mTF-x2-SoJ"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="42" id="mU1-SE-Im2"/>
+                            <constraint firstItem="pZE-bV-fJk" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="222" id="mYM-mJ-5v0"/>
                             <constraint firstItem="U40-E2-DvW" firstAttribute="leading" secondItem="2FL-Bn-T2a" secondAttribute="leading" id="mxE-fG-Swf"/>
                             <constraint firstItem="XYJ-PI-8wf" firstAttribute="trailing" secondItem="6Q2-dI-sxu" secondAttribute="trailing" id="n23-iv-CqU"/>
                             <constraint firstItem="AT7-Qd-mL1" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="339" id="nqL-UC-DFm"/>
@@ -2365,12 +2368,10 @@
                             <constraint firstItem="v1E-Y8-MAn" firstAttribute="trailing" secondItem="hv1-dW-eem" secondAttribute="trailing" constant="2" id="tcS-Vx-HJm"/>
                             <constraint firstItem="78k-uN-8tn" firstAttribute="top" secondItem="XlU-vN-bbJ" secondAttribute="bottom" constant="6" id="u8D-Nt-PsB"/>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="top" secondItem="UMW-p7-6qE" secondAttribute="bottom" constant="-1" id="ulZ-TB-vEu"/>
-                            <constraint firstItem="nNc-Ty-fZF" firstAttribute="top" secondItem="hv1-dW-eem" secondAttribute="bottom" constant="21" id="vX0-bJ-Ujk"/>
                             <constraint firstItem="o5b-UU-ZL9" firstAttribute="leading" secondItem="0Aq-h1-aGw" secondAttribute="trailing" constant="23" id="vZh-Ch-rIT"/>
                             <constraint firstAttribute="trailing" secondItem="nNc-Ty-fZF" secondAttribute="trailing" constant="346" id="vxr-Tv-sXw"/>
                             <constraint firstItem="pb3-n5-8xc" firstAttribute="centerY" secondItem="v1E-Y8-MAn" secondAttribute="centerY" id="vzO-iM-Cs0"/>
                             <constraint firstItem="EQj-HF-Ysz" firstAttribute="trailing" secondItem="Mlu-A0-fD7" secondAttribute="trailing" id="wK8-zS-Fne"/>
-                            <constraint firstItem="pZE-bV-fJk" firstAttribute="top" secondItem="hv1-dW-eem" secondAttribute="bottom" constant="21" id="wnJ-sH-sgs"/>
                             <constraint firstItem="o5b-UU-ZL9" firstAttribute="centerY" secondItem="yF6-Ie-7cn" secondAttribute="centerY" constant="-2.5" id="wue-kr-ZK5"/>
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="x4O-u2-eZM"/>
                             <constraint firstItem="dKE-kP-Pu7" firstAttribute="centerX" secondItem="bKr-H7-03S" secondAttribute="centerX" constant="32.5" id="x54-WX-SHW"/>
@@ -2378,7 +2379,6 @@
                             <constraint firstItem="ynJ-S6-o1y" firstAttribute="leading" secondItem="v1E-Y8-MAn" secondAttribute="leading" constant="2" id="xpf-tS-s27"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="top" secondItem="0Aq-h1-aGw" secondAttribute="top" constant="-3" id="yRz-Mf-Z46"/>
                             <constraint firstItem="vfR-O9-7xw" firstAttribute="top" secondItem="XlU-vN-bbJ" secondAttribute="bottom" constant="7" id="yis-jh-hy2"/>
-                            <constraint firstItem="AT7-Qd-mL1" firstAttribute="top" secondItem="ih0-OH-DT1" secondAttribute="bottom" constant="21" id="zW8-r5-tW2"/>
                         </constraints>
                     </view>
                     <connections>
