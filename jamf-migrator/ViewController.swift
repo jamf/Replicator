@@ -518,12 +518,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             wipeData.on = false
         } else {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
-            //do {
-//                try self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
-//            }
-//            catch let error as NSError {
-//                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to create delete file! Something went wrong: \(error)\n") }
-//            }
+            
             self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
             DispatchQueue.main.async {
                 wipeData.on = true
@@ -1657,18 +1652,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }
                         
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Item(s) chosen from selective: \(self.targetDataArray)\n") }
-                            var advancedMigrateDict = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - category:dictionary of dependencies
-//                            var advancedMigrateDict = [String:[String:String]]()    // dictionary of dependencies for the object we're migrating - category:dictionary of dependencies
-                            
-//                            if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
-                                var migratedDependencies = [String:[Int]]()
-//                            }
-                            
+                            var advancedMigrateDict = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - id:category:dictionary of dependencies
+//
+                            var migratedDependencies = [String:[Int]]()
                             
                             for j in (0..<self.targetDataArray.count) {
                                 let primaryObjToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
-                                // why use the above?
-//                                let objToMigrateID        = self.availableIDsToMigDict[self.targetDataArray[j]]!
                                 
                                 switch selectedEndpoint {
                                 case "accounts/userid", "accounts/groupid":
@@ -1705,51 +1694,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
                                             if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
                                                 // migrate dependencies - start
-                                                let full_ordered_dependency_array = self.ordered_dependency_array + ["policies"]
-//                                                advancedMigrateDict[primaryObjToMigrateID]!["policies"]                  = [String:String]()
-//                                                advancedMigrateDict[primaryObjToMigrateID]!["policies"]![selectedObject] = "\(objToMigrateID)"  //[name of policy:id of policy]
-//                                                advancedMigrateDict["policies"] = [String:String]()
-//                                                advancedMigrateDict["policies"]![selectedObject] = "\(objToMigrateID)"  //[name of policy:id of policy]
-                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
+//                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
 
-//                                                dependency.wait = false
                                                 var objectIndex = 0
                                                 self.destEPQ.async {
                                                     while advancedMigrateDict.count != 0 {
                                                         let (tmp_id, _) = advancedMigrateDict.first!
-//                                                    while true {
-    //                                                for object in full_ordered_dependency_array {
+                                                        
                                                         for (object, arrayOfDependencies) in advancedMigrateDict[tmp_id]! {
-//                                                        if !dependency.wait {
-//                                                            print("check item (objectIndex) \(objectIndex) of \(full_ordered_dependency_array.count)")
-//                                                            if objectIndex >= advancedMigrateDict[primaryObjToMigrateID]!.count { break }
-//                                                            if objectIndex >= self.ordered_dependency_array.count { break }
-                                                            print("check item (objectIndex) \(objectIndex) of \(advancedMigrateDict[tmp_id]!.count)")
-//                                                            print("check item (objectIndex) \(objectIndex) of \(self.ordered_dependency_array.count)")
-//                                                            if objectIndex >= full_ordered_dependency_array.count { break }
-    //                                                        print("[ViewController.startMigrating] set dependency.wait = true")
-//                                                            dependency.wait = true
-
-//                                                            let object = advancedMigrateDict[primaryObjToMigrateID]![object]![objectIndex]
-//                                                            let object = self.ordered_dependency_array[objectIndex]
-//                                                            let object = full_ordered_dependency_array[objectIndex]
                                                             objectIndex+=1
     //                                                        print("object: \(object)")
         //                                                    print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
 
                                                             let dependencyCount = advancedMigrateDict[tmp_id]![object]!.count
-//                                                            let dependencyCount = advancedMigrateDict[object]!.count
                                                             if dependencyCount > 0 {
                                                                 var dependencyCounter = 0
                                                                 
-                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[tmp_id]![object]!))")
+//                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[tmp_id]![object]!))")
 //                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
                                                                 
     //                                                            print("self.currentEPDict: \(self.currentEPDict[object]!)")
                                                                 for (name, id) in arrayOfDependencies {
                                                                     let dependencySubcount = arrayOfDependencies[name]?.count
-//                                                                for (name, id) in advancedMigrateDict[object]! {
-                                                                    print("object name: \(String(describing: name))")
+//
                                                                     dependencyCounter += 1
                                                                     if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing \(object): \(name)\n") }
         //                                                            print("export.saveOnly: \(export.saveOnly)")
@@ -1761,11 +1728,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                         if nil != self.currentEPDict[object]![name] && !export.saveOnly {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
                                                                             //self.currentEndpointID = self.currentEPs[xmlName]!
-                                                                            print("update \(object): \(name)")
+//                                                                            print("update \(object): \(name)")
                                                                             self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
                                                                         } else {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) needs to be created\n") }
-                                                                            print("create \(object): \(name)")
+//                                                                            print("create \(object): \(name)")
                                                                             self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "create", destEpId: 0, destEpName: selectedObject)
                                                                         }
                                                                         if migratedDependencies[object] != nil {
@@ -1775,22 +1742,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                         }
                                                                     }
                                                                 }   // for (name, id) in advancedMigrateDict[object]! - end
-                                                            } //else {   // if dependencyCount - end
-                                                                // object had no dependencies
-                                                                //dependency.wait = false
-                                                            //}
+                                                            }
                                                             self.getCounters[object]         = ["get":0]
                                                             self.counters[object]?["create"] = 0
                                                             self.counters[object]?["update"] = 0
                                                             self.counters[object]?["fail"]   = 0
-                                                        } //else {  // for object in full_ordered_dependency_array - end
-                                                            //sleep(1)
-                                                        //}
-                                                        print("[dependencies] remove \(String(describing: advancedMigrateDict[tmp_id]))")
+                                                        }
+//                                                        print("[dependencies] remove \(String(describing: advancedMigrateDict[tmp_id]))")
                                                         advancedMigrateDict[tmp_id] = nil
                                                     }   // while true - end
                                                     
-                                                    // new 20211231 lnh
                                                         if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
                                                         if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "\(selectedObject) already exists\n") }
@@ -1820,13 +1781,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "remove - endpoint: \(self.targetDataArray[j])\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetDataArray[j])\n") }
                                         
                                         self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: objToMigrateID, endpointName: self.targetDataArray[j], endpointCurrent: (j+1), endpointCount: self.targetDataArray.count)
-                                        
                                     }   // if !wipeData.on else - end
-                                    
                                 }   // Json().getRecord - end
-                                
                             }   // for j in  - end
-                            
                         }   // DispatchQueue.main.async - end
                     }
                 }   //for i in - else - end
@@ -4312,17 +4269,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             totalCompleted = totalCreated + totalUpdated + totalFailed
                             
-                            // update counter
-                            //                        DispatchQueue.main.async {
-                            self.put_name_field.stringValue = "\(endpointType)"
-                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-                            //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
-    //                        if totalCompleted > currentCompleted {
                             if totalCompleted > 0 {
-//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
-//                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
-                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-                                self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                if self.migrateDependencies.state == NSControl.StateValue(rawValue: 0) || endpointType == "policies" {
+                                    self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+                                    self.putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                    self.put_name_field.stringValue = "\(endpointType)"
+                                }
                             }
                             
                             if totalCompleted == endpointCount {
@@ -4334,8 +4286,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.labelColor(endpoint: endpointType, theColor: self.redText)
                                     self.put_levelIndicator.fillColor = .systemRed
                                 }
-    //                            print("[CreateEndpoints] set dependency.wait = false")
-//                                dependency.wait = false
                             }
                         }
                         completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
@@ -4678,17 +4628,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             totalCompleted = totalCreated + totalUpdated + totalFailed
                             
-                            // update counter
-                            //                        DispatchQueue.main.async {
-                            self.put_name_field.stringValue = "\(endpointType)"
-                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-                            //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
-    //                        if totalCompleted > currentCompleted {
+                            // update counters
                             if totalCompleted > 0 {
-//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
-//                                print("self.counters[endpointType]: \(self.counters[endpointType] ?? ["\(endpointType)":0])")
-                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-                                self.putSummary_label.stringValue = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                if self.migrateDependencies.state == NSControl.StateValue(rawValue: 0) || endpointType == "policies" {
+                                    self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+                                    self.putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                    self.put_name_field.stringValue = "\(endpointType)"
+                                }
                             }
                             
                             if totalCompleted == endpointCount {
@@ -4875,9 +4821,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
 //                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
                             if totalCompleted > 0 {
-//                                self.objects_completed_field.stringValue = "\(totalCompleted)"
                                 self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(endpointCount)
-                                self.putSummary_label.stringValue = "\(totalCompleted) of \(endpointCount)"
+                                self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
                             }
 //                            self.objects_found_field.stringValue     = "\(endpointCount)"
                             
@@ -5067,16 +5012,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if !waiting {
                         URLCache.shared.removeAllCachedResponses()
                         waiting = true
-                        
-                        // fix endpointDependencyArray for bulk - don't look for dependencies
-                        
+                                                
                         existingEndpointNode = endpointDependencyArray[completed]
                         existingDestUrl      = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl      = existingDestUrl.urlFix
-//                        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//                        print("existing endpoints URL: \(existingDestUrl)")
-//print("NSURL line 6")
-//if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
+                        
                         let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
@@ -6021,10 +5961,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         DispatchQueue.main.async {
-            self.get_name_field.stringValue = adjEndpoint
             if self.getCounters[adjEndpoint]!["get"]! > 0 {
-                self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(total)
-                self.getSummary_label.stringValue = "\(self.getCounters[adjEndpoint]!["get"]!) of \(total)"
+                if self.migrateDependencies.state == NSControl.StateValue(rawValue: 0) || adjEndpoint == "policies" {
+                    self.get_name_field.stringValue = adjEndpoint
+                    self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(total)
+                    self.getSummary_label.stringValue = "\(self.getCounters[adjEndpoint]!["get"]!) of \(total)"
+                }
             }
         }
     }
