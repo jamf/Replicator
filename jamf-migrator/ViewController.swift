@@ -1585,9 +1585,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // get scope preference settings - end
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] migrating/removing \(self.objectsToMigrate.count) sections\n") }
-//            var arrayIndex = 0
             // loop through process of migrating or removing - start
-//            self.readNodesQ.sync {
             self.readNodesQ.addOperation {
                 let currentNode = self.objectsToMigrate[0]
 
@@ -1619,7 +1617,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: String) in
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Returned from existing endpoints: \(result)\n") }
-//                        var objToMigrateID = 0 removed 210501 lnh
                         // clear targetDataArray - needed to handle switching tabs
                         self.targetDataArray.removeAll()
                         
@@ -1680,101 +1677,98 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
                                     (result: [String:AnyObject]) in
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
-                                    if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
-                                        advancedMigrateDict[primaryObjToMigrateID] = self.getDependencies(object: "policy", json: result)
-//                                        advancedMigrateDict = self.getDependencies(object: "policy", objectId: primaryObjToMigrateID, json: result)
-                                        print("[ViewController] advancedMigrateDict: \(advancedMigrateDict)")
-                                    } else {
-                                        advancedMigrateDict = [:]
-                                    }
                                     
                                     let objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[j]]!
 
                                     if !wipeData.on  {
-                                        if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
-                                            if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
-                                                // migrate dependencies - start
-//                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
+                                        
+                                        self.getDependencies(object: "\(selectedEndpoint)", json: result) {
+                                            (returnedDependencies: [String:[String:String]]) in
+                                            print("returned from getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
+                                            if returnedDependencies.count > 0 {
+                                                advancedMigrateDict[primaryObjToMigrateID] = returnedDependencies
+                                            } else {
+                                                advancedMigrateDict = [:]
+                                            }
+                                            
+                                            if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
+//                                                if selectedEndpoint == "policies" && self.migrateDependencies.state.rawValue == 1 {
+                                                    // migrate dependencies - start
+    //                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
 
-                                                var objectIndex = 0
-                                                self.destEPQ.async {
-                                                    while advancedMigrateDict.count != 0 {
-                                                        let (tmp_id, _) = advancedMigrateDict.first!
-                                                        
-                                                        for (object, arrayOfDependencies) in advancedMigrateDict[tmp_id]! {
-                                                            objectIndex+=1
-    //                                                        print("object: \(object)")
-        //                                                    print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
+                                                    var objectIndex = 0
+                                                    self.destEPQ.async {
+                                                        while advancedMigrateDict.count != 0 {
+                                                            let (tmp_id, _) = advancedMigrateDict.first!
+                                                            
+                                                            for (object, arrayOfDependencies) in advancedMigrateDict[tmp_id]! {
+                                                                objectIndex+=1
+        //                                                        print("object: \(object)")
+            //                                                    print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
 
-                                                            let dependencyCount = advancedMigrateDict[tmp_id]![object]!.count
-                                                            if dependencyCount > 0 {
-                                                                var dependencyCounter = 0
-                                                                
-//                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[tmp_id]![object]!))")
-//                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
-                                                                
-    //                                                            print("self.currentEPDict: \(self.currentEPDict[object]!)")
-                                                                for (name, id) in arrayOfDependencies {
-                                                                    let dependencySubcount = arrayOfDependencies[name]?.count
-//
-                                                                    dependencyCounter += 1
-                                                                    if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing \(object): \(name)\n") }
-        //                                                            print("export.saveOnly: \(export.saveOnly)")
-        //                                                            print("object: \(object) - name: \(name)")
-    //                                                                print("create or update \(object): \(name)")
-                                                                    if let _ = migratedDependencies[object]?.firstIndex(of: Int(id)!) {
-                                                                        print("[dependencies] \(object) \(name) has already been migrated")
-                                                                    } else {
-                                                                        if nil != self.currentEPDict[object]![name] && !export.saveOnly {
-                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
-                                                                            //self.currentEndpointID = self.currentEPs[xmlName]!
-//                                                                            print("update \(object): \(name)")
-                                                                            self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
+                                                                let dependencyCount = advancedMigrateDict[tmp_id]![object]!.count
+                                                                if dependencyCount > 0 {
+                                                                    var dependencyCounter = 0
+                                                                    
+    //                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[tmp_id]![object]!))")
+    //                                                                print("advancedMigrateDict[\(object)]: \(String(describing: advancedMigrateDict[object]!))")
+                                                                    
+        //                                                            print("self.currentEPDict: \(self.currentEPDict[object]!)")
+                                                                    for (name, id) in arrayOfDependencies {
+                                                                        let dependencySubcount = arrayOfDependencies[name]?.count
+    //
+                                                                        dependencyCounter += 1
+                                                                        if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing \(object): \(name)\n") }
+            //                                                            print("export.saveOnly: \(export.saveOnly)")
+            //                                                            print("object: \(object) - name: \(name)")
+        //                                                                print("create or update \(object): \(name)")
+                                                                        if let _ = migratedDependencies[object]?.firstIndex(of: Int(id)!) {
+                                                                            print("[dependencies] \(object) \(name) has already been migrated")
                                                                         } else {
-                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) needs to be created\n") }
-//                                                                            print("create \(object): \(name)")
-                                                                            self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "create", destEpId: 0, destEpName: selectedObject)
+                                                                            if nil != self.currentEPDict[object]![name] && !export.saveOnly {
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) already exists\n") }
+    //                                                                            print("update \(object): \(name)")
+                                                                                self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "update", destEpId: Int(self.currentEPDict[object]![name]!), destEpName: selectedObject)
+                                                                            } else {
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "\(object): \(name) needs to be created\n") }
+    //                                                                            print("create \(object): \(name)")
+                                                                                self.endPointByID(endpoint: object, endpointID: Int(id)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: "create", destEpId: 0, destEpName: selectedObject)
+                                                                            }
+                                                                            if migratedDependencies[object] != nil {
+                                                                                migratedDependencies[object]!.append(Int(id)!)
+                                                                            } else {
+                                                                                migratedDependencies[object] = [Int(id)!]
+                                                                            }
                                                                         }
-                                                                        if migratedDependencies[object] != nil {
-                                                                            migratedDependencies[object]!.append(Int(id)!)
-                                                                        } else {
-                                                                            migratedDependencies[object] = [Int(id)!]
-                                                                        }
-                                                                    }
-                                                                }   // for (name, id) in advancedMigrateDict[object]! - end
+                                                                    }   // for (name, id) in advancedMigrateDict[object]! - end
+                                                                }
+                                                                self.getCounters[object]         = ["get":0]
+                                                                self.counters[object]?["create"] = 0
+                                                                self.counters[object]?["update"] = 0
+                                                                self.counters[object]?["fail"]   = 0
                                                             }
-                                                            self.getCounters[object]         = ["get":0]
-                                                            self.counters[object]?["create"] = 0
-                                                            self.counters[object]?["update"] = 0
-                                                            self.counters[object]?["fail"]   = 0
-                                                        }
-//                                                        print("[dependencies] remove \(String(describing: advancedMigrateDict[tmp_id]))")
-                                                        advancedMigrateDict[tmp_id] = nil
-                                                    }   // while true - end
-                                                    
+    //                                                        print("[dependencies] remove \(String(describing: advancedMigrateDict[tmp_id]))")
+                                                            advancedMigrateDict[tmp_id] = nil
+                                                        }   // while true - end
+                                                        
+                                                        // migrate the policy or selected object now the dependencies are done
+//                                                        print("[selective migration] self.currentEPs: \(self.currentEPs)")
+//                                                        print("[selective migration] self.currentEPDict: \(self.currentEPDict)")
                                                         if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                                        if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
+                                                        if nil != self.currentEPDict[rawEndpoint]?[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
+//                                                        if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "\(selectedObject) already exists\n") }
                                                             //self.currentEndpointID = self.currentEPs[xmlName]!
-                                                            self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
+                                                            self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: (self.currentEPDict[rawEndpoint]?[self.availableObjsToMigDict[objToMigrateID]!])!, destEpName: selectedObject)
                                                         } else {
                                                             self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
                                                         }
-                                                    
-                                                }
-                                                // migrate dependencies - end
-                                                
-                                            } else {
-                                            
-                                                if LogLevel.debug && !export.saveOnly { WriteToLog().message(stringOfText: "check for existing object: \(selectedObject)\n") }
-                                                if nil != self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\(selectedObject) already exists\n") }
-                                                    //self.currentEndpointID = self.currentEPs[xmlName]!
-                                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "update", destEpId: self.currentEPs[self.availableObjsToMigDict[objToMigrateID]!]!, destEpName: selectedObject)
-                                                } else {
-                                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (j+1), endpointCount: self.targetDataArray.count, action: "create", destEpId: 0, destEpName: selectedObject)
-                                                }
+                                                        
+                                                    }
+                                                    // migrate dependencies - end
+//                                                }
                                             }
+                                            
                                         }
                                     } else {
                                         // selective removal
@@ -1803,7 +1797,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] enter search for \(nodesToMigrate[nodeIndex])\n") }
         
-//        print("nodesToMigrate: \(nodesToMigrate[nodeIndex])")
+        print("nodesToMigrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             self.progressCountArray["smartcomputergroups"]  = 0
@@ -1836,6 +1830,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
+//                print("[ViewController.readNodes] getEndpoints result: \(result)")
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
                 if self.activeTab() == "selective" && result[1] == "0" {
@@ -1869,6 +1864,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var endpointCount  = 0
         var groupType      = ""
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Getting \(endpoint)\n") }
+//        print("[ViewController.getEndpoints] Getting \(endpoint), index \(nodeIndex)")
         
         if endpoint.contains("smart") {
             groupType = "smart"
@@ -2008,12 +2004,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                         if endpointCount > 0 {
                                             
-                                            print("[ViewController.getEndpoints] self.source_jp_server: \(self.source_jp_server)")
+//                                            print("[ViewController.getEndpoints] self.source_jp_server: \(self.source_jp_server)")
 
                                             self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                                 (result: String) in
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)\n") }
-                                                print("[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)")
+//                                                print("[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)")
 //
 
                                                 for i in (0..<endpointCount) {
@@ -2041,7 +2037,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             duplicatePackagesDict[packageFilename]!.append(displayName)
                                                         }
                                                         if lookupCount == endpointCount {
-                                                            print("[ViewController.getEndpoints] done looking up packages on \(self.source_jp_server)")
+//                                                            print("[ViewController.getEndpoints] done looking up packages on \(self.source_jp_server)")
                                                             if duplicatePackages {
                                                                 var message = "\tFilename : Display Name\n"
                                                                 for (pkgFilename, displayNames) in duplicatePackagesDict {
@@ -2066,8 +2062,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
 
                                                             var counter = 1
-                                                            print("[ViewController.getEndpoints] self.availableObjsToMigDict: \(self.availableObjsToMigDict)")
-                                                            print("[ViewController.getEndpoints] self.currentEPDict[endpoint]: \(String(describing: self.currentEPDict[endpoint]))")
+                                                            
                                                             if self.goSender == "goButton" {
                                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                                     if !wipeData.on  {
@@ -2209,7 +2204,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                             self.sourceDataArray.append(l_xmlName)
     //                                                        if self.availableIDsToMigDict.count == self.sourceDataArray.count {
-                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                             
                                                             self.staticSourceDataArray = self.sourceDataArray
                                                             
@@ -2454,6 +2449,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
 
                                 case "policies":
+                                    print("[ViewController.getEndpoints] processing policies")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] processing policies\n") }
                                     if let endpointInfo = endpointJSON[endpoint] as? [Any] {
                                         endpointCount = endpointInfo.count
@@ -2498,6 +2494,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 var counter = 1
 
                                                 self.delayInt = self.listDelay(itemCount: computerPoliciesDict.count)
+                                                print("[ViewController.getEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
                                                 for (l_xmlID, l_xmlName) in computerPoliciesDict {
                                                     if self.goSender == "goButton" {
                                                         if !wipeData.on  {
@@ -2518,28 +2515,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         }   // if !wipeData.on else - end
                                                         counter += 1
                                                     } else {
-                                                        // populate source server under the selective tab
-    //                                                        print("adding \(l_xmlName) to array")
-    //                                                    if self.sourceDataArray.count == computerPoliciesDict.count {
-    //                                                        if self.availableIDsToMigDict.count == computerPoliciesDict.count {
-                                                            self.sortQ.async {
-                                                                self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
-                                                                self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                
-                                                                self.staticSourceDataArray = self.sourceDataArray
-                                                                
-                                                                DispatchQueue.main.async {
-                                                                    self.srcSrvTableView.reloadData()
-                                                                }
-                                                                // slight delay in building the list - visual effect
-                                                                usleep(self.delayInt)
+                                                    // populate source server under the selective tab
+                                                        print("[ViewController.getEndpoints] [policies] adding \(l_xmlName) to array")
+                                                        self.sortQ.async {
+                                                            self.availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
+                                                            self.sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
+                                                            self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            
+                                                            self.staticSourceDataArray = self.sourceDataArray
+                                                            
+                                                            DispatchQueue.main.async {
+                                                                self.srcSrvTableView.reloadData()
+                                                            }
+                                                            // slight delay in building the list - visual effect
+                                                            usleep(self.delayInt)
 
-                                                                if counter == computerPoliciesDict.count {
-                                                                    self.goButtonEnabled(button_status: true)
-                                                                }
-                                                                counter+=1
-                                                            }   // self.sortQ.async - end
+                                                            if counter == computerPoliciesDict.count {
+                                                                self.goButtonEnabled(button_status: true)
+                                                            }
+                                                            counter+=1
+                                                        }   // self.sortQ.async - end
 
                                                     }   // if self.goSender else - end
                                                 }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
@@ -2559,12 +2554,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])\n") }
                                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                         }
-    //                                    self.nodesMigrated+=1
-    //                                    if endpoint == self.objectsToMigrate.last {
-    //                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-    //                                        self.rmDELETE()
-    //                                        print("rmDelete 2")
-    //                                    }
+                                        print("[ViewController.getEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     } else {   //if let endpointInfo = endpointJSON - end
                                         if nodeIndex < nodesToMigrate.count - 1 {
@@ -4998,7 +4988,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 endpointDependencyArray = ["\(existingEndpointNode)"]
             }
             */
-            if self.activeTab() == "selective" && endpointParent == "policies" {
+            if self.activeTab() == "selective" && endpointParent == "policies" && migrateDependencies.state.rawValue == 1 {
                 endpointDependencyArray.append(existingEndpointNode)
             } else {
                 endpointDependencyArray = ["\(existingEndpointNode)"]
@@ -5007,15 +4997,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let semaphore = DispatchSemaphore(value: 1)
             destEPQ.async {
                 while (completed < endpointDependencyArray.count) {
-//                    print("[\(endpointParent)] completed \(completed) of \(endpointDependencyArray.count)")
+                    
+                    
                     usleep(10)
                     if !waiting {
+                        
                         URLCache.shared.removeAllCachedResponses()
                         waiting = true
                                                 
-                        existingEndpointNode = endpointDependencyArray[completed]
+                        existingEndpointNode = endpointDependencyArray[completed]   // endpoint to look up
                         existingDestUrl      = "\(self.dest_jp_server)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl      = existingDestUrl.urlFix
+                        
+                        print("[\(endpointParent)] endpointDependencyArray \(endpointDependencyArray)")
+                        print("[\(endpointParent).\(existingEndpointNode)] completed \(completed) of \(endpointDependencyArray.count)")
                         
                         let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -5034,7 +5029,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                        print("destEndpointJSON: \(destEndpointJSON)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------\n") }
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))\n") }
-                                        switch destEndpoint {
+                                        switch existingEndpointNode {
+//                                        switch destEndpoint {
                                             
                                         /*
                                         // need to revisit as name isn't the best indicatory on whether or not a computer exists
@@ -5082,23 +5078,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }
                                                     
                                                     PackagesDelegate().filenameIdDict(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
-                                                        (result: [String:Int]) in
-                                                        self.currentEPs = result
+                                                        (currentDestinationPackages: [String:Int]) in
+//                                                        self.currentEPs = currentDestinationPackages
                                                         setting.waitingForPackages = false
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing \(existingEndpointNode): \(self.currentEPs)\n") }
-                                                        print("returning existing \(existingEndpointNode): \(self.currentEPs)")
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing packages: \(currentDestinationPackages)\n") }
+                                                        print("[existingEndpoints.packages] returning existing packages: \(currentDestinationPackages)")
                                                         
                                                         
                                                         completed += 1
                                                         waiting = (completed < endpointDependencyArray.count) ? false:true
-                                                        print("1-completed: \(completed) of \(endpointDependencyArray.count) (\(existingEndpointNode))")
+                                                        
+                                                        print("1-completed: \(completed) of \(endpointDependencyArray.count) (packages)")
                                                         
                                                         if !pref.stopMigration {
-                                                            self.currentEPDict["packages"] = self.currentEPs
-                                                            completion("[ViewController.existingEndpoints] Current packages on \(self.dest_jp_server) - \(self.currentEPs)\n")
+                                                            self.currentEPDict["packages"] = currentDestinationPackages
+//                                                            self.currentEPDict["packages"] = self.currentEPs
+//                                                            self.currentEPs.removeAll()
+                                                            if endpointParent != "policies" {
+                                                                completion("[ViewController.existingEndpoints] Current packages on \(self.dest_jp_server) - \(currentDestinationPackages)\n")
+                                                            }
                                                         } else {
                                                             self.currentEPDict["packages"] = [:]
-                                                            completion("[ViewController.existingEndpoints] Migration process was stopped\n")
+                                                            if endpointParent != "policies" {
+                                                                completion("[ViewController.existingEndpoints] Migration process was stopped\n")
+                                                            }
                                                             self.stopButton(self)
                                                         }
                                                         
@@ -5165,11 +5168,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             }
                                                             if destXmlName != "" {
                                                                 if "\(String(describing: destXmlID))" != "" {
-                                                                    print("[ViewControler.existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.")
-                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.\n") }
                                                                     
                                                                     // filter out policies created from casper remote - start
                                                                         if destXmlName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && destXmlName != "Update Inventory" {
+                                                                            print("[ViewController.existingEndpoints] [\(existingEndpointNode)] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.")
+                                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.\n") }
                                                                             self.currentEPs[destXmlName] = destXmlID
                                                                         }
                                                                     // filter out policies created from casper remote - end
@@ -5187,7 +5190,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     self.currentEPs.removeAll()
                                                 }
                                                 
-//                                                print("\n[existingEndpoints] endpointParent: \(endpointParent)\n")
+                                                print("\n[existingEndpoints] endpointParent: \(endpointParent) \t existingEndpointNode: \(existingEndpointNode) \t destEndpoint: \(destEndpoint)\ncurrentEPs: \(self.currentEPs)")
                                                 switch endpointParent {
                                                 case "policies":
                                                     self.currentEPDict[existingEndpointNode] = self.currentEPs
@@ -5197,6 +5200,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                    print("[ViewControler.existingEndpoints] currentEPDict[\(destEndpoint)]: \(self.currentEPDict[destEndpoint]!)")
                                                 }
                                                 self.currentEPs.removeAll()
+                                                
                                             }   // if let destEndpointInfo - end
                                         }   // switch - end
                                     } else {
@@ -5209,7 +5213,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     
                                 }   // end do/catch
                                 
-                                if destEndpoint != "packages" {
+                                if existingEndpointNode != "packages" {
+//                                if destEndpoint != "packages" {
                                     
                                     completed += 1
                                     waiting = (completed < endpointDependencyArray.count) ? false:true
@@ -5224,7 +5229,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 self.currentLDAPServers = self.currentEPDict[destEndpoint]!
     //                                            print("[existingEndpoints-LDAP] currentLDAPServers: \(String(describing: self.currentLDAPServers))")
                                             }
-                                            print("[ViewContrller.existingEndpoints] currentEPDict: \(String(describing: self.currentEPDict))")
+                                            print("[ViewController.existingEndpoints] currentEPDict: \(String(describing: self.currentEPDict))")
                                             self.currentEPs = self.currentEPDict[destEndpoint]!
                                             completion("[existingEndpoints] Current \(destEndpoint) - \(self.currentEPs)\n")
                                         }
@@ -5253,159 +5258,196 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         //print("GET")
                         task.resume()
                     }   //if !waiting - end
+                    
+                    // single completion after waiting...
+                    
                 }   // while (completed < endpointDependencyArray.count)
+                
+                
 //                print("[\(endpointParent)] completed \(completed) of \(endpointDependencyArray.count)")
             }   // destEPQ - end
         } else {
             self.currentEPs["_"] = 0
             completion(" Current endpoints - export.saveOnly, not needed.")
         }
-    }
+    }   // func existingEndpoints - end
 
-    func getDependencies(object: String, json: [String:AnyObject]) -> [String:[String:String]] {
+    func getDependencies(object: String, json: [String:AnyObject], completion: @escaping (_ returnedDependencies: [String:[String:String]]) -> Void) {
         if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] enter\n") }
-        var objectDict         = [String:Any]()
-        var fullDependencyDict = [String: [String:String]]()    // full list of dependencies of a single policy
+        var objectDict           = [String:Any]()
+        var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
 //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
-        var dependencyArray    = [String:String]()
-        var dependencyNode     = ""
+        var dependencyArray      = [String:String]()
+        var waitForPackageLookup = false
         
-        switch object {
-        case "policy":
-            objectDict      = json[object] as! [String:Any]
-            let general     = objectDict["general"] as! [String:Any]
-            let bindings    = objectDict["account_maintenance"] as! [String:Any]
-            let scope       = objectDict["scope"] as! [String:Any]
-            let scripts     = objectDict["scripts"] as! [[String:Any]]
-            let packages    = objectDict["package_configuration"] as! [String:Any]
-            let exclusions  = scope["exclusions"] as! [String:Any]
-            let limitations = scope["limitations"] as! [String:Any]
+        if self.migrateDependencies.state.rawValue == 1 {
+            var dependencyNode     = ""
             
-            for the_dependency in ordered_dependency_array {
-
-                switch the_dependency {
-                case "cagtegories":
-                    dependencyNode = "category"
-                case "computergroups":
-                    dependencyNode = "computer_groups"
-                case "directorybindings":
-                    dependencyNode = "directory_bindings"
-                case "diskencryption":
-                    dependencyNode = "disk_encryption"
-                case "dockitems":
-                    dependencyNode = "dock_items"
-                case "networksegments":
-                    dependencyNode = "network_segments"
-                case "sites":
-                    dependencyNode = "site"
-                default:
-                    dependencyNode = the_dependency
-                }
+            print("look up dependencies for \(object)")
+            
+            switch object {
+            case "policies":
+                objectDict      = json["policy"] as! [String:Any]
+                let general     = objectDict["general"] as! [String:Any]
+                let bindings    = objectDict["account_maintenance"] as! [String:Any]
+                let scope       = objectDict["scope"] as! [String:Any]
+                let scripts     = objectDict["scripts"] as! [[String:Any]]
+                let packages    = objectDict["package_configuration"] as! [String:Any]
+                let exclusions  = scope["exclusions"] as! [String:Any]
+                let limitations = scope["limitations"] as! [String:Any]
                 
-                dependencyArray.removeAll()
-                switch dependencyNode {
-                case "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
-                    if (self.scopePoliciesCopy && dependencyNode == "computer_groups") || (dependencyNode != "computer_groups") {
-                        if let _ = scope[dependencyNode] {
-                            let scope_dep = scope[dependencyNode] as! [AnyObject]
-                            for theObject in scope_dep {
-                                let local_name = (theObject as! [String:Any])["name"]
-                                let local_id   = (theObject as! [String:Any])["id"]
-                                dependencyArray["\(local_name!)"] = "\(local_id!)"
-                            }
-                        }
-                        
-                        if let _ = exclusions[dependencyNode] {
-                            let scope_excl_dep = exclusions[dependencyNode] as! [AnyObject]
-                            for theObject in scope_excl_dep {
-                                let local_name = (theObject as! [String:Any])["name"]
-                                let local_id   = (theObject as! [String:Any])["id"]
-                                dependencyArray["\(local_name!)"] = "\(local_id!)"
-                            }
-                        }
-                        
-                        if let _ = limitations[dependencyNode] {
-                            let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
-                            for theObject in scope_excl_dep {
-                                let local_name = (theObject as! [String:Any])["name"]
-                                let local_id   = (theObject as! [String:Any])["id"]
-                                dependencyArray["\(local_name!)"] = "\(local_id!)"
-                            }
-                        }
+                for the_dependency in ordered_dependency_array {
+
+                    switch the_dependency {
+                    case "cagtegories":
+                        dependencyNode = "category"
+                    case "computergroups":
+                        dependencyNode = "computer_groups"
+                    case "directorybindings":
+                        dependencyNode = "directory_bindings"
+                    case "diskencryption":
+                        dependencyNode = "disk_encryption"
+                    case "dockitems":
+                        dependencyNode = "dock_items"
+                    case "networksegments":
+                        dependencyNode = "network_segments"
+                    case "sites":
+                        dependencyNode = "site"
+                    default:
+                        dependencyNode = the_dependency
                     }
                     
-                case "directory_bindings":
-                if let _ = bindings[dependencyNode] {
-                    let scope_limit_dep = bindings[dependencyNode] as! [AnyObject]
-                    for theObject in scope_limit_dep {
-                        let local_name = (theObject as! [String:Any])["name"]
-                        let local_id   = (theObject as! [String:Any])["id"]
-                        dependencyArray["\(local_name!)"] = "\(local_id!)"
+                    dependencyArray.removeAll()
+                    switch dependencyNode {
+                    case "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
+                        if (self.scopePoliciesCopy && dependencyNode == "computer_groups") || (dependencyNode != "computer_groups") {
+                            if let _ = scope[dependencyNode] {
+                                let scope_dep = scope[dependencyNode] as! [AnyObject]
+                                for theObject in scope_dep {
+                                    let local_name = (theObject as! [String:Any])["name"]
+                                    let local_id   = (theObject as! [String:Any])["id"]
+                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                }
+                            }
+                            
+                            if let _ = exclusions[dependencyNode] {
+                                let scope_excl_dep = exclusions[dependencyNode] as! [AnyObject]
+                                for theObject in scope_excl_dep {
+                                    let local_name = (theObject as! [String:Any])["name"]
+                                    let local_id   = (theObject as! [String:Any])["id"]
+                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                }
+                            }
+                            
+                            if let _ = limitations[dependencyNode] {
+                                let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
+                                for theObject in scope_excl_dep {
+                                    let local_name = (theObject as! [String:Any])["name"]
+                                    let local_id   = (theObject as! [String:Any])["id"]
+                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                }
+                            }
+                        }
+                        
+                    case "directory_bindings":
+                    if let _ = bindings[dependencyNode] {
+                        let scope_limit_dep = bindings[dependencyNode] as! [AnyObject]
+                        for theObject in scope_limit_dep {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
                     }
-                }
 
-                case "dock_items", "disk_encryption":
-                if let _ = objectDict[dependencyNode] {
-                    let scope_item = objectDict[dependencyNode] as! [AnyObject]
-                    for theObject in scope_item {
-                        let local_name = (theObject as! [String:Any])["name"]
-                        let local_id   = (theObject as! [String:Any])["id"]
-                        dependencyArray["\(local_name!)"] = "\(local_id!)"
+                    case "dock_items", "disk_encryption":
+                    if let _ = objectDict[dependencyNode] {
+                        let scope_item = objectDict[dependencyNode] as! [AnyObject]
+                        for theObject in scope_item {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
                     }
-                }
-                     
-                 case "packages":
-                 if let _ = packages[dependencyNode] {
-                     let packages_dep = packages[dependencyNode] as! [AnyObject]
-                     for theObject in packages_dep {
-                         let local_name = (theObject as! [String:Any])["name"]
-                         let local_id   = (theObject as! [String:Any])["id"]
-                         dependencyArray["\(local_name!)"] = "\(local_id!)"
+                         
+                     case "packages":
+                     if let _ = packages[dependencyNode] {
+                         let packages_dep = packages[dependencyNode] as! [AnyObject]
+                         if packages_dep.count > 0 { waitForPackageLookup = true }
+                         var completedPackageLookups = 0
+                         for theObject in packages_dep {
+                             let local_name = (theObject as! [String:Any])["name"]
+                             print("lookup package filename for display name \(String(describing: local_name!))")
+                             let local_id   = (theObject as! [String:Any])["id"]
+                             PackagesDelegate().getFilename(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on) {
+                                 (result: (Int,String)) in
+                                 let (_,packageFilename) = result
+                                 dependencyArray["\(packageFilename)"] = "\(local_id!)"
+                                 completedPackageLookups += 1
+                                 if completedPackageLookups == packages_dep.count {
+                                     waitForPackageLookup = false
+                                     fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
+                                 }
+                             }
+                         }
                      }
-                 }
 
-                 case "printers":
-                 let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
-                 for i in 0..<jsonPrinterArray.count {
-                    if "\(jsonPrinterArray[i])" != "" {
-                        let scope_item = jsonPrinterArray[i] as! Dictionary<String,Any>
-
-                        let local_name = scope_item["name"]
-                        let local_id   = scope_item["id"]
-                        dependencyArray["\(local_name!)"] = "\(local_id!)"
-                    }
-                }
-                    
-                case "scripts":
-                    for theObject in scripts {
-                        let local_name = theObject["name"]
-                        let local_id   = theObject["id"]
-                        dependencyArray["\(local_name!)"] = "\(local_id!)"
-                    }
-
-                    
-                default:
-                    if let _ = general[dependencyNode] {
-                        let general_dep = general[dependencyNode]! as! [String:Any]
-                        let local_name = general_dep["name"] as! String
-                        let local_id   = general_dep["id"] as! Int
-                        if local_id != -1 {
-                            dependencyArray["\(local_name)"] = "\(local_id)"
+                     case "printers":
+                     let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
+                     for i in 0..<jsonPrinterArray.count {
+                        if "\(jsonPrinterArray[i])" != "" {
+                            let scope_item = jsonPrinterArray[i] as! [String:Any]
+                            let local_name = scope_item["name"]
+                            let local_id   = scope_item["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
                         }
                     }
-                }
-                
-                fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
-//                fullDependencyDict[the_dependency] = dependencyArray
-//                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
-            }
-          print("fullDependencyDict: \(fullDependencyDict)")
+                        
+                    case "scripts":
+                        for theObject in scripts {
+                            let local_name = theObject["name"]
+                            let local_id   = theObject["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
 
-        default:
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] not implemented for \(object).\n") }
+                        
+                    default:
+                        if let _ = general[dependencyNode] {
+                            let general_dep = general[dependencyNode]! as! [String:Any]
+                            let local_name = general_dep["name"] as! String
+                            let local_id   = general_dep["id"] as! Int
+                            if local_id != -1 {
+                                dependencyArray["\(local_name)"] = "\(local_id)"
+                            }
+                        }
+                    }
+                    if the_dependency != "buildings" {
+                        fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
+                    }
+    //                fullDependencyDict[the_dependency] = dependencyArray
+    //                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
+                }
+              print("fullDependencyDict: \(fullDependencyDict)")
+
+            default:
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] not implemented for \(object).\n") }
+                print("return empty fullDependencyDict")
+                completion([:])
+            }
+            
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] exit\n") }
-        return fullDependencyDict
+        var tmpCount = 1
+        DispatchQueue.global(qos: .utility).async {
+            while waitForPackageLookup && tmpCount <= 60 {
+                print("trying to resolve package filename(s), attempt \(tmpCount)")
+                sleep(1)
+                tmpCount += 1
+            }
+            
+//            return fullDependencyDict
+            print("return fullDependencyDict: \(fullDependencyDict)")
+            completion(fullDependencyDict)
+        }
     }
     
     func nameIdDict(server: String, endPoint: String, id: String, completion: @escaping (_ result: [String:Dictionary<String,Int>]) -> Void) {

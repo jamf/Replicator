@@ -10,7 +10,6 @@ import Foundation
 
 class PackagesDelegate: NSObject, URLSessionDelegate {
     // get the package filename, rather than display name
-    
     func getFilename(theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, completion: @escaping (_ result: (Int,String)) -> Void) {
 
 //        if skip {
@@ -54,6 +53,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //                                    print("[PackagesDelegate.getFilename] destEndpointJSON[name]: \(String(describing: destEndpointInfo["name"]!))")
                                     // adjust what is returned based on whether we're removing records
                                     let returnedName = skip ? "\(String(describing: destEndpointInfo["name"]!))":packageFilename
+//                                    print("[PackageDelegate.getFilename] packageFilename: \(packageFilename) (id: \(theEndpointID))")
                                     completion((httpResponse.statusCode,returnedName))
                                 }
                             }
@@ -148,7 +148,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //                                ViewController().stopButton(self)
                             }
 //                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
-//                            ViewController().alert_dialog(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.")
                         }
                         completion(existingNameId)
                     }
