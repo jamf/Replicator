@@ -80,7 +80,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     
     func filenameIdDict(theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
         
-        print("[PackageDelegate.filenameIdDict] lookup attempt \(currentTry) of \(maxTries)")
+//        print("[PackageDelegate.filenameIdDict] lookup attempt \(currentTry) of \(maxTries)")
         
         var packageIDsNames       = currentPackageIDsNames
         var existingNameId        = currentPackageNamesIDs
@@ -94,14 +94,14 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             PackagesDelegate().getFilename(theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
                 (result: (Int,String)) in
                 lookupCount += 1
-                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
+//                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
                 let (resultCode,packageFilename) = result
                 if pref.httpSuccess.contains(resultCode) {
                     
                     packageIDsNames[packageID] = nil
 //                                                        let (_,packageFilename) = wipeData.on ? (packageID, packageName):result
                     if packageFilename != "" && existingNameId[packageFilename] == nil {
-                        print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
+//                        print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
                         existingNameId[packageFilename] = packageID
                         duplicatePackagesDict[packageFilename] = [packageName]
                     } else {
@@ -111,19 +111,19 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup filename for \(packageName)\n")
                         }
 
-                        print("[PackageDelegate.filenameIdDict] Duplicate package filename found on \(theServer): \(packageFilename), id: \(packageID)\n")
+//                        print("[PackageDelegate.filenameIdDict] Duplicate package filename found on \(theServer): \(packageFilename), id: \(packageID)\n")
 //                                                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
                         if wipeData.on {
                             existingNameId[packageName] = packageID
                         }
                     }
                 } else {  // if pref.httpSuccess.contains(resultCode) - end
-                    print("[PackageDelegate.filenameIdDict] failed looking up \(packageName)")
+//                    print("[PackageDelegate.filenameIdDict] failed looking up \(packageName)")
                     WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup \(packageName).  Status code: \(resultCode)\n")
                 }
                 // looked up last package in list
                 if lookupCount == packageCount {
-                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
+//                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
                     
                     if currentTry < maxTries+1 && packageIDsNames.count > 0 {
                         filenameIdDict(theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
