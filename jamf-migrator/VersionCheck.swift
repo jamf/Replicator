@@ -89,7 +89,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
                 runningCurrent = false
             } else if availMajor == currMajor {
                 if availMinor > currMinor {
-                    print("availMajor: \(availMinor) \t currMinor: \(currMinor)")
+                    print("availMinor: \(availMinor) \t currMinor: \(currMinor)")
                     runningCurrent = false
                 } else if availMinor == currMinor {
                     if availPatch > currPatch {

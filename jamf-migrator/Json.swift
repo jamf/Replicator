@@ -10,7 +10,8 @@ import Cocoa
 
 class Json: NSObject, URLSessionDelegate {
     func getRecord(theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
-
+        
+        let userDefaults   = UserDefaults.standard
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
     
@@ -27,7 +28,7 @@ class Json: NSObject, URLSessionDelegate {
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
 
-        q.getRecord.maxConcurrentOperationCount = ViewController().setConcurrentThreads()
+        q.getRecord.maxConcurrentOperationCount = userDefaults.integer(forKey: "concurrentThreads")
         
         let semaphore = DispatchSemaphore(value: 0)
         q.getRecord.addOperation {

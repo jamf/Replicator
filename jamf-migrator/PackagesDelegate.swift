@@ -141,11 +141,13 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         if message != "" {
                             message = "\tFilename : Display Name\n\(message)"
                             
-                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
-                            let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
-                            if theButton == "Stop" {
-                                pref.stopMigration = true
-//                                ViewController().stopButton(self)
+                            if !wipeData.on {
+                                WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
+                                let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                if theButton == "Stop" {
+                                    pref.stopMigration = true
+    //                                ViewController().stopButton(self)
+                                }
                             }
 //                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
                         }

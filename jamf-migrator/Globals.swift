@@ -15,7 +15,7 @@ struct appInfo {
 }
 
 struct dependency {
-    static var wait = true
+    static var isRunning = false
 }
 
 struct export {
@@ -71,6 +71,7 @@ struct setting {
     static var jpapiSourceToken      = ""
     static var jpapiDestinationToken = ""
     static var waitingForPackages    = false
+    static var migrateDependencies   = false
 }
 
 struct summaryHeader {

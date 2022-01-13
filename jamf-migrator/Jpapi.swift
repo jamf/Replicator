@@ -119,7 +119,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     if let endpointJSON = json! as? Dictionary<String, Any>, let _ = endpointJSON["token"] {
                         token = endpointJSON["token"] as! String
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] Retrieved token: \(token)\n") }
-                        print("[Jpapi] token: \(token)")
+//                        print("[Jpapi] token: \(token)")
                         completion(token)
                         return
                     } else {    // if let endpointJSON error

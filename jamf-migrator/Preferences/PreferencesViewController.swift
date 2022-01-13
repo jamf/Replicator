@@ -204,14 +204,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         
         var isDir: ObjCBool = true
         var exportFilePath:String? = self.userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-//        let exportFilePath:String? = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+
         exportFilePath = exportFilePath?.pathToString
-        print("exportFilePath: \(String(describing: exportFilePath!))")
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
 //            print("open exportFilePath: \(exportFilePath!)")
-//            NSWorkspace.shared.openFile("exportFilePath!")
-            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "\(exportFilePath!)")
+            NSWorkspace.shared.openFile("\(exportFilePath!)")
+//            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "\(exportFilePath!)")
         } else {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
         }
