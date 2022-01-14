@@ -310,6 +310,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
     var selectiveListCleared                = false
     var delayInt: UInt32                    = 50000
+    var createRetryCount                    = [String:Int]()   // objectType-objectID:retryCount
     
     // destination TextFieldCells
     @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
@@ -808,6 +809,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         inactiveTabDisable(activeTab: "selective")
+        goSender = "selectToMigrateButton"
 
         let whichTab = sender.identifier!.rawValue
         
@@ -1272,6 +1274,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] enter\n") }
         pref.stopMigration = false
+        createRetryCount.removeAll()
         
         // make sure the labels can change color when we start
                   changeColor = true
@@ -1496,6 +1499,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            }
 //            let toMigrateArray = setting.migrateDependencies ? ordered_dependency_array.append("policies"):
             for currentNode in self.objectsToMigrate {
+                self.put_levelIndicatorFillColor[currentNode] = .systemGreen
                 switch currentNode {
                 case "computergroups":
                     if self.smart_comp_grps_button.state.rawValue == 1 {
@@ -1642,49 +1646,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Look for existing endpoints for: \(self.objectsToMigrate[0])\n") }
                     self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: (String,String)) in
+                        
                         let (resultMessage, resultEndpoint) = result
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Returned from existing endpoints: \(resultMessage)\n") }
 
                         // clear targetDataArray - needed to handle switching tabs
                         if !setting.migrateDependencies || resultEndpoint == "policies" {
                             self.targetDataArray.removeAll()
-                            
-                            // create targetDataArray, list of objects to migrate/remove - start
-                            for k in (0..<self.sourceDataArray.count) {
-                                if self.srcSrvTableView.isRowSelected(k) {
-                                    // prevent the modification/removal of the account we're using with the destination server
-                                    if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
-                                        self.targetDataArray.append(self.sourceDataArray[k])
-                                    }
-                                }   // if self.srcSrvTableView.isRowSelected(k) - end
-                            }   // for k in - end
-                            // create targetDataArray, list of objects to migrate/remove - end
-                        
-                            if self.targetDataArray.count == 0 {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] nothing selected to migrate/remove.\n") }
-                                self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
-                                self.goButtonEnabled(button_status: true)
-                                return
-                            }
-                            
-                            // Used if we remove items from the list as they are removed from the server
-                            if wipeData.on {
-                                self.availableIdsToDelArray.removeAll()
+                            DispatchQueue.main.async {
+                                // create targetDataArray, list of objects to migrate/remove - start
                                 for k in (0..<self.sourceDataArray.count) {
-                                    self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
-                                }
-//                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
-                            }
-                        
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Item(s) chosen from selective: \(self.targetDataArray)\n") }
-//                            var advancedMigrateDict = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - id:category:dictionary of dependencies
-                            self.advancedMigrateDict.removeAll()
-                            self.migratedDependencies.removeAll()
-                            self.migratedPkgDependencies.removeAll()
-                            self.waitForDependencies  = false
+                                    if self.srcSrvTableView.isRowSelected(k) {
+                                        // prevent the modification/removal of the account we're using with the destination server
+                                        if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
+                                            self.targetDataArray.append(self.sourceDataArray[k])
+                                        }
+                                    }   // if self.srcSrvTableView.isRowSelected(k) - end
+                                }   // for k in - end
+                                // create targetDataArray, list of objects to migrate/remove - end
                             
-                            self.startSelectiveMigration(objectIndex: 0, selectedEndpoint: selectedEndpoint)
+                                if self.targetDataArray.count == 0 {
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] nothing selected to migrate/remove.\n") }
+                                    self.alert_dialog(header: "Alert:", message: "Nothing was selected.")
+                                    self.goButtonEnabled(button_status: true)
+                                    return
+                                }
+                                
+                                // Used if we remove items from the list as they are removed from the server
+                                if wipeData.on {
+                                    self.availableIdsToDelArray.removeAll()
+                                    for k in (0..<self.sourceDataArray.count) {
+                                        self.availableIdsToDelArray.append(self.availableIDsToMigDict[self.sourceDataArray[k]]!)
+                                    }
+    //                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
+                                }
+                            
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Item(s) chosen from selective: \(self.targetDataArray)\n") }
+    //                            var advancedMigrateDict = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - id:category:dictionary of dependencies
+                                self.advancedMigrateDict.removeAll()
+                                self.migratedDependencies.removeAll()
+                                self.migratedPkgDependencies.removeAll()
+                                self.waitForDependencies  = false
+                                
+                                self.startSelectiveMigration(objectIndex: 0, selectedEndpoint: selectedEndpoint)
+                            }
                         }
+                            
                     }
                 }   //for i in - else - end
             // **************************************** selective migration - end ****************************************
@@ -1725,6 +1732,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
             (result: [String:AnyObject]) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
+            
+            if pref.stopMigration {
+    //            print("[ViewController.readNodes] stopMigration")
+                self.stopButton(self)
+                return
+            }
+            
+            self.put_levelIndicatorFillColor[selectedEndpoint] = .systemGreen
             
             let objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[objectIndex]]!
 
@@ -1836,8 +1851,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 // migrate the policy or selected object now the dependencies are done
                                 DispatchQueue.global(qos: .utility).async {
                                     var step = 0
-                                    while dependencyMigratedCount[dependencyParentId] != totalDependencies && theButton != "Stop" && setting.migrateDependencies {
-                                        if step % 10 == 0 { print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")}
+                                    while dependencyMigratedCount[dependencyParentId] != totalDependencies && theButton != "Stop" && setting.migrateDependencies && !export.saveOnly {
+                                        if theButton == "Stop" { setting.migrateDependencies = false }
+//                                        if step % 10 == 0 { print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")}
                                         usleep(10000)
                                         step += 1
                                     }
@@ -1941,7 +1957,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
     }
     
-    
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects form source server (query source server)
         
@@ -1964,7 +1979,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var endpointCount  = 0
         var groupType      = ""
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Getting \(endpoint)\n") }
-        print("[ViewController.getEndpoints] Getting \(endpoint), index \(nodeIndex)")
+//        print("[ViewController.getEndpoints] Getting \(endpoint), index \(nodeIndex)")
         
         if endpoint.contains("smart") {
             groupType = "smart"
@@ -2267,7 +2282,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     let record = endpointInfo[i] as! [String : AnyObject]
 
                                                     if record["name"] != nil {
-                                                        print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
+//                                                        print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
                                                         self.availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                     } else {
                                                         self.availableObjsToMigDict[record["id"] as! Int] = ""
@@ -4059,7 +4074,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             completion("stop")
             return
         }
-
+        
+        setting.createIsRunning = true
+        
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter\n") }
 
         if counters[endpointType] == nil {
@@ -4118,10 +4135,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         var responseData = ""
         
-        if self.itemToSite {
-            
-        }
-        
         var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
@@ -4173,8 +4186,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.postCount += 1
                     }
                 }
-    //            print("NSURL line 4")
-    //            if "\(createDestUrl)" == "" { createDestUrl = "https://localhost" }
+                if retry {
+                    DispatchQueue.main.async {
+                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] retrying: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
+                    }
+                }
+                
                 let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 if apiAction == "create" {
@@ -4234,6 +4251,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
                                 }
                                 
+                //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
+                                if localEndPointType != "policies" && dependency.isRunning {
+                                    self.dependencyMigratedCount[self.dependencyParentId]! += 1
+            //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(self.dependencyMigratedCount[self.dependencyParentId]!)")
+                                }
+                                
                                 let localTmp = (self.counters[endpointType]?["\(apiAction)"])!
         //                        print("localTmp: \(localTmp)")
                                 self.counters[endpointType]?["\(apiAction)"] = localTmp + 1
@@ -4271,24 +4294,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     whichError = errorMsg
                                 }
                                 
+                                if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
+                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
+                                    if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 { whichError = "" }
+                                } else {
+                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 1
+                                }
+                                
                                 // retry computers with dublicate serial or MAC - start
                                 switch whichError {
                                 case "Duplicate serial number", "Duplicate MAC address":
-                                    if !retry {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
-                                        var tmp_endPointXML = endPointXML
-                                        for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
-                                            tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                        }
-                                        self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                            (result: String) in
-                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
-                                        }
-                                    } else {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                    var tmp_endPointXML = endPointXML
+                                    for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
+                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                     }
+                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                        (result: String) in
+                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                                    }
+                                    
                                 case "category":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["category"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -4296,10 +4323,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                         (result: String) in
                                     }
-                                //    self.postCount -= 1
-                               //     return
+                                    
                                 case "Problem with department in location":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["department"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -4307,10 +4333,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                         (result: String) in
                                     }
-                                //    self.postCount -= 1
-                                //    return
+                                    
                                 case "Problem with building in location":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["building"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -4322,7 +4347,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                 // retry network segment without distribution point
                                 case "Problem in assignment to distribution point":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point.\n")
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
                                     var tmp_endPointXML = endPointXML
                                     for xmlTag in ["distribution_point", "url"] {
                                         tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
@@ -4333,6 +4358,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
 
                                 default:
+//                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
                                     WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                     
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
@@ -4346,6 +4372,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     // 400 - likely the format of the xml is incorrect or wrong endpoint
                                     // 401 - wrong username and/or password
                                     // 409 - unable to create object; already exists or data missing or xml error
+                    
+                    //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
+                                    if localEndPointType != "policies" && dependency.isRunning {
+                                        self.dependencyMigratedCount[self.dependencyParentId]! += 1
+                //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(self.dependencyMigratedCount[self.dependencyParentId]!)")
+                                    }
                                     
                                     // update global counters
                                     let localTmp = (self.counters[endpointType]?["fail"])!
@@ -4384,8 +4416,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }
                             }
-                        }
-                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                        }   // DispatchQueue.main.async - end
                     }   // if let httpResponse = response - end
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)\n") }
@@ -4396,14 +4428,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     semaphore.signal()
                     if error != nil {
                     }
-    //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
-                    if localEndPointType != "policies" && dependency.isRunning {
-                        self.dependencyMigratedCount[self.dependencyParentId]! += 1
-//                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(self.dependencyMigratedCount[self.dependencyParentId]!)")
-                    }
-                    
-//                    print("[CreateEndpoints] \(localEndPointType) - completed \(endpointCurrent) of \(endpointCount)")
-//                    if totalCompleted == endpointCount {
+
                     if endpointCurrent == endpointCount {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.\n") }
                         self.nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
@@ -4807,9 +4832,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if endpointCurrent == 1 {
 //            migrationComplete.isDone = false
             if !setting.migrateDependencies || endpointType == "policies" {
-                self.put_levelIndicatorFillColor[endpointType] = .systemGreen
-                self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
-//                self.put_levelIndicator.fillColor = .systemGreen
+                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemGreen)
+            }
+        } else {
+            if let _ = self.put_levelIndicatorFillColor[endpointType] {
+                self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: self.put_levelIndicatorFillColor[endpointType]!)
             }
         }
         
@@ -4950,23 +4977,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                         DispatchQueue.main.async {
                             self.put_name_field.stringValue       = "\(endpointType)"
-                            //let currentCompleted = Int(self.objects_completed_field!.stringValue) ?? 0
-//                            if endpointCurrent > currentCompleted || (endpointCurrent < 4 && endpointCurrent > 0) {
+                            
                             if totalCompleted > 0 {
                                 self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(endpointCount)
                                 self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
                             }
-//                            self.objects_found_field.stringValue     = "\(endpointCount)"
                             
                             if totalDeleted == endpointCount && self.changeColor {
                                 self.labelColor(endpoint: endpointType, theColor: self.greenText)
                             } else if totalFailed == endpointCount {
                                 self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
                             }
-                            
                         }
-                        
                     }
+                    
                     if self.activeTab(fn: "RemoveEndpoints") != "selective" {
 //                        print("localEndPointType: \(localEndPointType) \t count: \(endpointCount)")
                         if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
@@ -5538,12 +5563,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                          var completedPackageLookups = 0
                          for theObject in packages_dep {
                              let local_name = (theObject as! [String:Any])["name"]
-                             print("lookup package filename for display name \(String(describing: local_name!))")
+//                             print("lookup package filename for display name \(String(describing: local_name!))")
                              let local_id   = (theObject as! [String:Any])["id"]
                              PackagesDelegate().getFilename(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on) {
                                  (result: (Int,String)) in
                                  let (_,packageFilename) = result
-                                 print("                     found filename name \(String(describing: packageFilename))")
+//                                 print("                     found filename name \(String(describing: packageFilename))")
                                  dependencyArray["\(packageFilename)"] = "\(local_id!)"
                                  completedPackageLookups += 1
                                  if completedPackageLookups == packages_dep.count {
@@ -6046,22 +6071,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.theCreateQ.cancelAllOperations()
 //                                self.stopButton(self)
                             }
-                            if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning  {
+//                            if (self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning && migrationComplete.isDone  {
+//                                sleep(1)
+                                if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning {
+                                    
+                                    if !local_button_status {
+                                        History.endTime = Date()
 
-                                History.endTime = Date()
+                                        let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
 
-                                let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
+                                        let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+                                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
 
-                                let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-                                WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+                                        self.resetAllCheckboxes()
 
-                                self.resetAllCheckboxes()
-
-                                self.goButtonEnabled(button_status: true)
-                                local_button_status = true
-                                iconfiles.policyDict.removeAll()
-                                iconfiles.pendingDict.removeAll()
-//                                print("go button enabled")
+                                        self.goButtonEnabled(button_status: true)
+                                        local_button_status = true
+                                        iconfiles.policyDict.removeAll()
+                                        iconfiles.pendingDict.removeAll()
+        //                                print("go button enabled")
+                                    }
+//                                }
                             }
                         }
                         usleep(300000)  // sleep 0.3 seconds
@@ -7022,10 +7052,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
             DispatchQueue.main.async {
-                print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
+//                print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
                 self.put_levelIndicatorFillColor[endpointType] = fillColor
                 self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
-//                    self.put_levelIndicator.fillColor = .systemGreen
             }
     }
     

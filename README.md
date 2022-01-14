@@ -27,7 +27,6 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Icons associated with Mac App Store apps are not migrated (can't be migrated).
 * Only AFP and SMB shares can be migrated.
 * Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.
-* Buildings - the API only allows the name to be migrated.
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 * Institutional disk encryptions that contain the private key cannot be migrated.
@@ -99,7 +98,7 @@ Options for migrating object(s) (groups, policies, and configuration profiles) t
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
-The number of concurrent API operations (from 1 to 20) and number of log files to retain can be configured.
+The number of concurrent API operations (from 1 to 5) and number of log files to retain can be configured.
 
 ![](./jamf-migrator/images/appPrefs.png)
 
@@ -150,9 +149,19 @@ If you have used jamf-migrator and saved passwords you will see the following af
 touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete
 ```
 
-* You can also toggle the mode using &#8984;D.
+* You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.0.0**
+
+* Allow migration of computers to a site.  
+* Moved show summary under View in the menu bar.  Add ability to toggle delete mode under View in the menu bar.
+* Progress bar changes color as failurs occur.
+* Provide a warning if a single package filename is referenced by multiple package display names.  Will not create duplicate references on the destination server.
+* Buildings are migrated with full address information.
+* Selective migration of multiple policies with migrate dependencies selected is more reliable.
+* Handle netboot servers being removed from Jamf Pro.
+
 **v5.9.3**
 
 * Fixed issue saving files with names that contain a / (forward slash). Noted the : (colon) is a reserved character and cannot be used in a file name, ; (semi-colon) will be subtituted for it.  This does not impact the name that appears in Jamf Pro.

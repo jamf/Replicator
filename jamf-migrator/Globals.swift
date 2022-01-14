@@ -28,9 +28,9 @@ struct export {
 
 struct History {
     static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    static var logFile     = ""
-    static var startTime   = Date()
-    static var endTime     = Date()
+    static var logFile          = ""
+    static var startTime        = Date()
+    static var endTime          = Date()
 }
 
 struct iconfiles {
@@ -67,7 +67,8 @@ struct q {
 }
 
 struct setting {
-    static var uapiToken = ""
+    static var createIsRunning       = false
+    static var uapiToken             = ""
     static var jpapiSourceToken      = ""
     static var jpapiDestinationToken = ""
     static var waitingForPackages    = false
