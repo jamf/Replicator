@@ -152,7 +152,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
-**v6.0.0**
+**v6.0.1**
 
 * Allow migration of computers to a site.  
 * Moved show summary under View in the menu bar.  Add ability to toggle delete mode under View in the menu bar.
@@ -161,6 +161,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * Buildings are migrated with full address information.
 * Selective migration of multiple policies with migrate dependencies selected is more reliable.
 * Handle netboot servers being removed from Jamf Pro.
+* Fix issue with some buttons used with bulk migrations.
 
 **v5.9.3**
 
