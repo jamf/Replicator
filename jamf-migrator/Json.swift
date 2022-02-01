@@ -41,7 +41,7 @@ class Json: NSObject, URLSessionDelegate {
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
                 if let httpResponse = response as? HTTPURLResponse {
-//                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
+                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)

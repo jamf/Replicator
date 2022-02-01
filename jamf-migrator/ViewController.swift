@@ -6335,6 +6335,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     Json().getRecord(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
                                         print("[icons] result of Json().getRecord: \(result)")
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
                                         
                                         if result.count > 0 {
                                             let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
@@ -6358,7 +6359,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
                                         } else {
                                             iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
-                                            
                                         }
 //                                            print("iconXml: \(iconXml)")
                                         
@@ -7280,7 +7280,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     func setConcurrentThreads() -> Int {
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
+        print("[ViewController] ConcurrentThreads: \(concurrent)")
         concurrent = (concurrent > 5) ? 2:concurrent
+        self.userDefaults.set(concurrent, forKey: "concurrentThreads")
         userDefaults.synchronize()
         return concurrent
     }
