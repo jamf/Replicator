@@ -19,6 +19,8 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * Red - nothing transferred.
 * White - nothing to transfer.
 
+   You may see a difference between the color of the text and the progress bar.  This is an indication some dependency was missing.  For example a script migrated but the category it was associated with on the source server is missing on the destination server.
+
 
 **Limitations/requirements to be aware of:**
 
