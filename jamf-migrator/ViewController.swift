@@ -59,7 +59,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var xportFolderPath: URL? {
         didSet {
             do {
-                let bookmark = try xportFolderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
+                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
                 self.userDefaults.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
                 print("[ViewController] Set Bookmark Fails: \(error.description)")
@@ -1043,91 +1043,97 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             var destinationURL = URL(string: "")
             
             // check authentication - start
-            self.authCheck(whichServer: "source", f_sourceURL: self.source_jp_server, f_credentials: self.sourceBase64Creds)  {
-                (result: Bool) in
-                if !result && !wipeData.on {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "Source server authentication failure.") }
+            JamfPro().getVersion(whichServer: "source", jpURL: self.source_jp_server, basicCreds: self.sourceBase64Creds, localSource: self.fileImport) {
+                (authResult: (Int,String)) in
+                let (authStatusCode, _) = authResult
+                if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "Source server authentication failure.\n") }
                     return
                 } else {
-//                    if !self.fileImport {
-                    if !wipeData.on {
-                        self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
-                    }
-                    TokenDelegate().get(serverUrl: self.source_jp_server, whichServer: "source", base64creds: self.sourceBase64Creds) {
-                        (tokenResult: String) in
-                        self.authCheck(whichServer: "dest", f_sourceURL: self.dest_jp_server, f_credentials: self.destBase64Creds)  {
-                            (result: Bool) in
-                            if !result {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.") }
-                                return
-                            } else {
-                                TokenDelegate().get(serverUrl: self.dest_jp_server, whichServer: "dest", base64creds: self.destBase64Creds) {
-                                    (tokenResult: String) in
-                                    
-                                    if !export.saveOnly {
-                                        self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
-                                    }
-                                    // verify source server URL - start
-                                    if !self.fileImport && !wipeData.on {
-                                        sourceURL = URL(string: self.source_jp_server_field.stringValue)
-                                    } else {
-                                        sourceURL = URL(string: "https://www.jamf.com")
-                                    }
-                                    URLCache.shared.removeAllCachedResponses()
-                                    let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
-                                        if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
-                                            //print(HTTPURLResponse.statusCode)
-                                            //===== change to go to function to check dest. server, which forwards to migrate if all is well
-                                            // verify destination server URL - start
-                                            DispatchQueue.main.async {
-                                                if !export.saveOnly {
-                                                    destinationURL = URL(string: self.dest_jp_server_field.stringValue)
-                                                } else {
-                                                    destinationURL = URL(string: "https://www.jamf.com")
-                                                }
-                                                URLCache.shared.removeAllCachedResponses()
-                                                let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                                    if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
-                                                        // print("Destination server response: \(response)")
-                                                        if (!self.theOpQ.isSuspended) {
-                                                            //====================================    Start Migrating/Removing    ====================================//
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().") }
-                                                            self.startMigrating()
-                                                        }
-                                                    } else {
-        //                                                DispatchQueue.main.async {
-                                                            //print("Destination server response: \(response)")
-                                                        self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
-        //                                                }
-                                                        
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.") }
-                                                        self.goButtonEnabled(button_status: true)
-                                                        return
+                    self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
+                    
+                    JamfPro().getVersion(whichServer: "destination", jpURL: self.dest_jp_server, basicCreds: self.destBase64Creds, localSource: self.fileImport) {
+                        (authResult: (Int,String)) in
+                        let (authStatusCode, _) = authResult
+                        if !pref.httpSuccess.contains(authStatusCode) {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.\n") }
+                            return
+                        } else {
+                            // determine if the cloud services connection is enabled
+                            Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
+                                (returnedJSON: [String:Any]) in
+//                                        print("CSA: \(returnedJSON)")
+                                if let _ = returnedJSON["scopes"] {
+                                    setting.csa = true
+                                } else {
+                                    setting.csa = false
+                                }
+//                                print("csa: \(setting.csa)")
+                                
+                                if !export.saveOnly {
+                                    self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
+                                }
+                                // verify source server URL - start
+                                if !self.fileImport && !wipeData.on {
+                                    sourceURL = URL(string: self.source_jp_server_field.stringValue)
+                                } else {
+                                    sourceURL = URL(string: "https://www.jamf.com")
+                                }
+                                URLCache.shared.removeAllCachedResponses()
+                                let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
+                                    if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
+                                        //print(HTTPURLResponse.statusCode)
+                                        //===== change to go to function to check dest. server, which forwards to migrate if all is well
+                                        // verify destination server URL - start
+                                        DispatchQueue.main.async {
+                                            if !export.saveOnly {
+                                                destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                            } else {
+                                                destinationURL = URL(string: "https://www.jamf.com")
+                                            }
+                                            URLCache.shared.removeAllCachedResponses()
+                                            let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
+                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
+                                                    // print("Destination server response: \(response)")
+                                                    if (!self.theOpQ.isSuspended) {
+                                                        //====================================    Start Migrating/Removing    ====================================//
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
+                                                        self.startMigrating()
                                                     }
-                                                }   // let task for destinationURL - end
-                                            
-                                                task_destinationURL.resume()
-                                            }
-                                            // verify source destination URL - end
-                                            
-                                        } else {
-                                            DispatchQueue.main.async {
-                                                self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
-                                            }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.") }
-                                            self.goButtonEnabled(button_status: true)
-                                            return
+                                                } else {
+    //                                                DispatchQueue.main.async {
+                                                        //print("Destination server response: \(response)")
+                                                    self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
+    //                                                }
+                                                    
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
+                                                    self.goButtonEnabled(button_status: true)
+                                                    return
+                                                }
+                                            }   // let task for destinationURL - end
+                                        
+                                            task_destinationURL.resume()
                                         }
-                                    }   // let task for soureURL - end
-                                    task_sourceURL.resume()
-                                    // verify source server URL - end
-                                }
-                                }
-                        }
-                    }
+                                        // verify source destination URL - end
+                                        
+                                    } else {
+                                        DispatchQueue.main.async {
+                                            self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
+                                        }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
+                                        self.goButtonEnabled(button_status: true)
+                                        return
+                                    }
+                                }   // let task for soureURL - end
+                                task_sourceURL.resume()
+                                // verify source server URL - end
+                            }
+                        } // else dest auth
+                    }   // self.authCheck(whichServer: "dest" - end
                 }   // else check dest URL auth - end
-            }
-            // check authentication - end
+            }   // self.authCheck(whichServer: "source" - end
+
+    // check authentication - end
         }   // checkURL2 (destination server) - end
     }   // checkURL2 (source server) - end
     
@@ -1146,129 +1152,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     //================================= migration functions =================================//
-    
-    func authCheck(whichServer: String, f_sourceURL: String, f_credentials: String, completion: @escaping (Bool) -> Void) {
-        URLCache.shared.removeAllCachedResponses()
-        var validCredentials:Bool = false
-        if LogLevel.debug { WriteToLog().message(stringOfText: "--- checking authentication to \(whichServer) server: \(f_sourceURL)\n") }
-        
-        if (whichServer == "source" && (!wipeData.on && !fileImport)) || (whichServer == "dest" && !export.saveOnly) {
-//            var myURL = "\(f_sourceURL)/JSSResource/buildings"
-            var myURL = "\(f_sourceURL)/JSSResource/restrictedsoftware"
-            myURL = myURL.urlFix
-            authQ.sync {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "checking: \(myURL)\n") }
-                
-                let encodedURL = URL(string: myURL)
-                let request = NSMutableURLRequest(url: encodedURL! as URL)
-                //let request = NSMutableURLRequest(url: encodedURL as! URL, cachePolicy: NSURLRequest.CachePolicy(rawValue: 1)!, timeoutInterval: 10)
-                request.httpMethod = "GET"
-                let configuration = URLSessionConfiguration.ephemeral
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(f_credentials)", "Accept" : "application/json"]
-                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                    (data, response, error) -> Void in
-                    if let httpResponse = response as? HTTPURLResponse {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "\(myURL) auth check httpResponse: \(httpResponse.statusCode)\n") }
-                        
-                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] \(myURL) auth httpResponse, between 199 and 299: \(httpResponse.statusCode)\n") }
-                            
-                            if (!self.validCreds) || (self.source_user_field.stringValue != self.storedSourceUser) || (self.dest_user_field.stringValue != self.storedDestUser) {
-                                // save credentials to login keychain - start
-//                                let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-                                if f_sourceURL == self.source_jp_server && !wipeData.on {
-                                    if self.storeCredentials_button.state.rawValue == 1 {
-//                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-//                                        self.Creds2.save(service: "migrator - "+credKey, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
-                                        self.Creds2.save(service: "migrator - "+f_sourceURL.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
-                                        self.storedSourceUser = self.source_user_field.stringValue
-                                    }
-                                } else {
-                                    if self.storeCredentials_button.state.rawValue == 1 {
-//                                        let credKey = regexKey.stringByReplacingMatches(in: f_sourceURL, options: [], range: NSRange(0..<f_sourceURL.utf16.count), withTemplate: "")
-//                                        self.Creds2.save(service: "migrator - "+credKey, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
-                                        self.Creds2.save(service: "migrator - "+f_sourceURL.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
-                                        self.storedDestUser = self.dest_user_field.stringValue
-                                    }
-                                }
-                                // save credentials to login keychain - end
-                            }
-
-                            validCredentials = true
-                            
-                            if whichServer == "dest" {
-
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Query Jamf Pro API for token.\n") }
-                                
-                                UapiCall().getToken(serverUrl: f_sourceURL, base64creds: f_credentials) {
-                                    (returnedToken: String) in
-                                    if returnedToken == "" {
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get token.\n") }
-//                                        completion(false)
-                                        completion(validCredentials)
-                                        return
-                                    }
-//                                    print("token received.")
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Token received.  Query Jamf Pro API for version.\n") }
-
-                                    UapiCall().action(serverUrl: f_sourceURL, endpoint: "jamf-pro-version", token: returnedToken, method: "GET") {
-                                        (json: [String:Any] ) in
-//                                        print("json \(json)")
-                                        if let fullVersion = json["version"] {
-                                            let versionArray = "\(fullVersion)".split(separator: ".")
-                                            if versionArray.count >= 2 {
-                                                jamfProVersion.major = Int("\(versionArray[0])") ?? 0
-                                                jamfProVersion.minor = Int("\(versionArray[1])") ?? 0
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Jamf Pro Version: \(fullVersion)\n") }
-                                            }
-                                        } else {
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[\(whichServer) server] Unable to get server version for Jamf Pro API.\n") }
-                                        }
-                                        completion(validCredentials)
-                                    }
-                                    
-                                }
-                            } else {
-                                completion(validCredentials)
-                            }
-                            
-                        } else {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "---------- status code ----------\n") }
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "\(httpResponse.statusCode)\n") }
-                            self.httpStatusCode = httpResponse.statusCode
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "---------- status code ----------\n") }
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n---------- response ----------\n") }
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "\(httpResponse)\n") }
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "---------- response ----------\n\n") }
-                            self.theOpQ.cancelAllOperations()
-                            switch self.httpStatusCode {
-                            case 401:
-                                self.alert_dialog(header: "Authentication Failure", message: "Please verify username and password for:\n\(f_sourceURL)")
-                            case 503:
-                                self.alert_dialog(header: "Service Unavailable", message: "Verify you can manually log into the API:\n\(f_sourceURL)/api. \nError: \(self.httpStatusCode)")
-                            default:
-                                self.alert_dialog(header: "Error", message: "An unknown error (\(self.httpStatusCode)) occured trying to query the server:\n\(f_sourceURL)")
-                            }
-                            //                        401 - wrong username and/or password
-                            //                        409 - unable to create object; data missing or xml error
-                            self.goButtonEnabled(button_status: true)
-                            self.validCreds = false
-                            completion(validCredentials)
-                        }   // if httpResponse/else - end
-                    }   // if let httpResponse - end
-                    // server not reachable
-                    //                    if error != nil {
-                    //                    }
-                })  // let task = session - end
-                task.resume()
-            }   // authQ - end
-        } else {
-            completion(true)
-        }
-        
-    }   // func authCheck - end
     
     func startMigrating() {
         
@@ -1473,14 +1356,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if wipeData.on {
                     // reverse migration order for removal and set create / delete header for summary table
                     self.objectsToMigrate.reverse()
-//                    if self.objectsToMigrate.count > 0 {
-                        // set server and credentials used for wipe
-                        self.sourceBase64Creds = self.destBase64Creds
-                        self.source_jp_server = self.dest_jp_server
-//                    } else {
-//                        self.goButtonEnabled(button_status: true)
-//                        return
-//                    } end if objectsToMigrate - end
+                    // set server and credentials used for wipe
+                    self.sourceBase64Creds = self.destBase64Creds
+                    self.source_jp_server = self.dest_jp_server
+                    
+                    JamfProServer.authCreds["source"]   = JamfProServer.authCreds["destination"]
+                    JamfProServer.authExpires["source"] = JamfProServer.authExpires["destination"]
+                    JamfProServer.authType["source"]    = JamfProServer.authType["destination"]
+                        
                     summaryHeader.createDelete = "Delete"
                 } else {   // if wipeData.on - end
                     summaryHeader.createDelete = "Create"
@@ -1729,7 +1612,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 rawEndpoint = selectedEndpoint
         }
         
-        Json().getRecord(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
+        Json().getRecord(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
             (result: [String:AnyObject]) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
             
@@ -2074,7 +1957,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
-            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//             ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
@@ -2088,25 +1972,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] endpointJSON: \(endpointJSON))\n") }
 
                                 switch endpoint {
-                                /*
-                                case "buildings":
-                                    // get token from JPAPI
-                                    Jpapi().getToken(serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds) {
-                                        (result: String) in
-                                        setting.jpapiSourceToken = result
-                                        print("buildings")
-                                        Jpapi().action(serverUrl: self.source_jp_server, endpoint: endpoint, token: setting.jpapiSourceToken, method: "GET") {
-                                            (result: [String: Any]) in
-                                            print("results: \(result)")
-//                                            print("buildings: \(String(describing: result["results"]))")
-                                            if let buildingsArray = result["results"] {
-                                                for building in buildingsArray as! [[String:Any]] {
-                                                    print("building: \(building)")
-                                                }
-                                            }
-                                        }
-                                    }
-                                */
                                 case "packages":
                                     var lookupCount    = 0
                                     var uniquePackages = [String]()
@@ -3080,7 +2945,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         theOpQ.maxConcurrentOperationCount = 1
 //        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
-            print("[ViewController.files] nodesToMigrate: \(nodesToMigrate)")
+//            print("[ViewController.files] nodesToMigrate: \(nodesToMigrate)")
             for local_folder in local_endpointArray {
 //                var directoryPath = "\(String(describing: self.userDefaults.string(forKey: "dataFilesRoot")!))/\(local_folder)"
                 var directoryPath = "\(self.dataFilesRoot)/\(local_folder)"
@@ -3093,7 +2958,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let allFilePathsArray = allFilePaths as! [String]
                         var xmlFilePaths      = [String]()
                         
-                        print("[ViewController.files] looking for files in \(local_folder)")
+//                        print("[ViewController.files] looking for files in \(local_folder)")
                         switch local_folder {
                         case "buildings":
                             xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
@@ -3102,7 +2967,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         
                         let dataFilesCount = xmlFilePaths.count
-                        print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
+//                        print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
                     
                         if dataFilesCount < 1 {
                             DispatchQueue.main.async {
@@ -3182,11 +3047,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
             
                 if fileCount > 0 {
-                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+//                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
                         (result: String) in
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
-                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+//                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
                         self.availableFilesToMigDict.removeAll()
                         if nodeIndex < nodesToMigrate.count - 1 {
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
@@ -3222,7 +3087,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                self.readFilesQ.sync {
                 self.readFilesQ.addOperation {
                     let l_id   = Int(objectInfo[0])   // id of object
-                    let l_name = objectInfo[1]        // name of object
+                    let l_name = objectInfo[1].xmlDecode        // name of object, remove xml encoding
                     let l_xml  = objectInfo[2]        // xml of object
 
                     if l_id != nil && l_name != "" && l_xml != "" {
@@ -3378,7 +3243,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
                 theOpQ.addOperation {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
-                    Jpapi().action(serverUrl: self.source_jp_server, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: token.sourceServer, method: "GET" ) {
+                    Jpapi().action(serverUrl: self.source_jp_server, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) {
                         (returnedJSON: [String:Any]) in
 //                        print("returnedJSON: \(returnedJSON)")
                         if returnedJSON.count > 0 {
@@ -3411,48 +3276,49 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 theOpQ.addOperation {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
-        //                print("NSURL line 3")
-        //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                        let encodedURL = URL(string: myURL)
-                        let request = NSMutableURLRequest(url: encodedURL! as URL)
-                        request.httpMethod = "GET"
-                        let configuration = URLSessionConfiguration.ephemeral
-                        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                            (data, response, error) -> Void in
+    //                print("NSURL line 3")
+    //                if "\(myURL)" == "" { myURL = "https://localhost" }
+                    let encodedURL = URL(string: myURL)
+                    let request = NSMutableURLRequest(url: encodedURL! as URL)
+                    request.httpMethod = "GET"
+                    let configuration = URLSessionConfiguration.ephemeral
+//                        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                    configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                    let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                    let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                        (data, response, error) -> Void in
+                        
+                        if let httpResponse = response as? HTTPURLResponse {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                             
-                            if let httpResponse = response as? HTTPURLResponse {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
-                                let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
-                                
-                                // save source XML - start
-                                if export.saveRawXml {
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                                    DispatchQueue.main.async {
-                                        // added option to remove scope
-        //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
-                                        let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                        WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
-                                        XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
-                                    }
+                            // save source XML - start
+                            if export.saveRawXml {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                                DispatchQueue.main.async {
+                                    // added option to remove scope
+    //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+                                    let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
+                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
                                 }
-                                // save source XML - end
-                                
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
-                                self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                    (result: String) in
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
-                                }
-                            }   // if let httpResponse - end
-                            semaphore.signal()
-                            if error != nil {
                             }
-                        })  // let task = session - end
-                        //print("GET")
-                        task.resume()
-                        semaphore.wait()
-                    }   // theOpQ - end
+                            // save source XML - end
+                            
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
+                            self.cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                (result: String) in
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                            }
+                        }   // if let httpResponse - end
+                        semaphore.signal()
+                        if error != nil {
+                        }
+                    })  // let task = session - end
+                    //print("GET")
+                    task.resume()
+                    semaphore.wait()
+                }   // theOpQ - end
             }
         }
     }
@@ -3908,8 +3774,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 } else {
 //                    iconId = Int(self.tagValue(xmlString: selfServiceIconXml, xmlTag: "id")) ?? 0
-                    let iconUriArray = iconUri.split(separator: "/")
-                    iconId = String("\(iconUriArray.last!)")
+                    if iconUri != "" {
+                        let iconUriArray = iconUri.split(separator: "/")
+                        iconId = String("\(iconUriArray.last!)")
+                    } else {
+                        iconId = ""
+                    }
                 }
             }
             // check for a self service icon and grab name and id if present - end
@@ -3937,7 +3807,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let regexPolicyName = try! NSRegularExpression(pattern: "<name> ", options:.caseInsensitive)
             PostXML = regexPolicyName.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<name>&#xA0;")
             
-            for xmlTag in ["limit_to_users","self_service_icon","open_firmware_efi_password"] {
+            for xmlTag in ["limit_to_users","open_firmware_efi_password","self_service_icon"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
@@ -3979,7 +3849,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
             // check for LDAP account/group, make adjustment for v10.17+ which needs id rather than name - start
-            //   && jamfProVersion.major >= 10 && jamfProVersion.minor >= 17
             if tagValue(xmlString: PostXML, xmlTag: "ldap_server") != "" {
                 let ldapServerInfo = tagValue(xmlString: PostXML, xmlTag: "ldap_server")
                 let ldapServerName = tagValue(xmlString: ldapServerInfo, xmlTag: "name")
@@ -4069,7 +3938,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
 
         if pref.stopMigration {
-//            print("[CreateEndpoints] stopMigration")
             stopButton(self)
             completion("stop")
             return
@@ -4159,7 +4027,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // save trimmed XML - end
             
             if export.saveOnly {
-                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                 }
@@ -4175,7 +4043,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if !wipeData.on {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Action: \(apiAction)\t URL: \(createDestUrl)\t Object \(endpointCurrent) of \(endpointCount)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)\n") }
-    //            print("[CreateEndpoints] [\(localEndPointType)] process start: \(self.getName(endpoint: endpointType, objectXML: endPointXML))")
                 
                 if endpointCurrent == 1 {
                     if !retry {
@@ -4200,7 +4067,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     request.httpMethod = "PUT"
                 }
                 let configuration = URLSessionConfiguration.default
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+//                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -4232,7 +4100,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML))\n")
+                                WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
                                 
                                 if endpointCurrent == 1 && !retry {
                                     migrationComplete.isDone = false
@@ -4268,7 +4136,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 // currently there is no way to upload mac app store icons; no api endpoint
                                 // removed check for those -  || (endpointType == "macapplications")
-                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+//                                print("setting.csa: \(setting.csa)")
+                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
                                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
@@ -4565,7 +4434,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 }
                 
-                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: token.destServer, method: apiAction) {
+                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["destination"]!, method: apiAction) {
                     (jpapiResonse: [String:Any]) in
 //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                     var jpapiResult = "succeeded"
@@ -4911,7 +4780,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
                 request.httpMethod = "DELETE"
                 let configuration = URLSessionConfiguration.ephemeral
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+//                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 //request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -5189,7 +5059,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         destRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.ephemeral
-                        destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//                        destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+                        destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
                             (data, response, error) -> Void in
@@ -5649,11 +5520,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var endpointCount = 0
         
         var serverCreds = ""
+        var whichServer = ""
         let serverConf = URLSessionConfiguration.ephemeral
         if id == "sourceId" {
             serverCreds = self.sourceBase64Creds
+            whichServer = "source"
         } else {
             serverCreds = self.destBase64Creds
+            whichServer = "destination"
         }
 
 //        print("NSURL line 7")
@@ -5665,7 +5539,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         idMapQ.async {
             
             serverRequest.httpMethod = "GET"
-            serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(serverCreds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//             ["Authorization" : "Basic \(serverCreds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType[whichServer]!)) \(String(describing: JamfProServer.authCreds[whichServer]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
@@ -5741,7 +5616,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             serverRequest.httpMethod = "GET"
             let serverConf = URLSessionConfiguration.ephemeral
-            serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//             ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
@@ -5890,23 +5766,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
-
-                guard let encodedURL = URL(string: serverURL) else {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] --- Cannot cast to URL: \(serverURL)\n") }
+                
+                var healthCheckURL = "\(serverURL)/healthCheck.html)"
+                healthCheckURL = healthCheckURL.replacingOccurrences(of: "//healthCheck.html", with: "/healthCheck.html")
+                
+                guard let encodedURL = URL(string: healthCheckURL) else {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] --- Cannot cast to URL: \(healthCheckURL)\n") }
                     completion(false)
                     return
                 }
                 let configuration = URLSessionConfiguration.ephemeral
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] --- checking healthCheck page.\n") }
-                var request = URLRequest(url: encodedURL.appendingPathComponent("/healthCheck.html"))
+                var request = URLRequest(url: encodedURL)
                 request.httpMethod = "GET"
 
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
                     if let httpResponse = response as? HTTPURLResponse {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] Server check: \(serverURL), httpResponse: \(httpResponse.statusCode)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] Server check: \(healthCheckURL), httpResponse: \(httpResponse.statusCode)\n") }
                         
                         //                    print("response: \(response)")
                         if let responseData = String(data: data!, encoding: .utf8) {
@@ -6233,23 +6112,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 //          print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
 //          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
-            createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-            createDestUrl = createDestUrl.urlFix
 
+            // set icon source
             if fileImport {
                 action       = "SKIP"
-                iconToUpload = "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+                iconToUpload = "\(dataFilesRoot)\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             } else {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
             }
             
+            // set icon destination
+            if setting.csa {
+                // cloud connector
+                createDestUrl = "\(self.createDestUrlBase)/v1/icon"
+                createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource", with: "/api")
+            } else {
+                createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+            }
+            createDestUrl = createDestUrl.urlFix
+            
             // Get or skip icon from Jamf Pro
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] before icon download.\n") }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] before icon download.\n") }
 
             if iconfiles.pendingDict["\(ssIconId)"] != "pending" {
                 if iconfiles.pendingDict["\(ssIconId)"] != "ready" {
                     iconfiles.pendingDict["\(ssIconId)"] = "pending"
-                    WriteToLog().message(stringOfText: "[CreateEndpoints.icon] marking icon for policy id \(sourcePolicyId) as pending\n")
+                    WriteToLog().message(stringOfText: "[ViewController.icons] marking icon for policy id \(sourcePolicyId) as pending\n")
                 } else {
                     action = "SKIP"
                 }
@@ -6259,16 +6147,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     (result: Int) in
 //                    print("action: \(action)")
 //                    print("Icon url: \(ssIconUri)")
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after icon download.\n") }
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] after icon download.\n") }
                     
                     if result > 199 && result < 300 {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icons] retuned from icon id \(ssIconId) GET with result: \(result)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] retuned from icon id \(ssIconId) GET with result: \(result)\n") }
 //                        print("\ncreateDestUrl: \(createDestUrl)")
 //                            iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] retrieved icon from \(ssIconUri)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] retrieved icon from \(ssIconUri)\n") }
                         if export.saveRawXml || export.saveTrimmedXml {
                             let saveFormat = export.saveRawXml ? "raw":"trimmed"
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icons] saving icon: \(ssIconName) for \(iconNode).\n") }
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).\n") }
                             DispatchQueue.main.async {
                                 XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
@@ -6280,21 +6168,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                            print("iconfiles.policyDict value for icon id \(ssIconId): \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
                             if iconfiles.policyDict["\(ssIconId)"]?["policyId"] == nil || iconfiles.policyDict["\(ssIconId)"]?["policyId"] == "" {
                                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] upload icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
 //                                        print("createDestUrl: \(createDestUrl)")
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] [CreateEndpoints.icon] POST icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
                                 
                                     self.iconMigrate(action: "POST", ssIconUri: "", ssIconId: ssIconId, ssIconName: ssIconName, iconToUpload: "\(iconToUpload)", createDestUrl: createDestUrl) {
-                                                       (iconMigrateResult: Int) in
+                                        (iconMigrateResult: Int) in
 
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] result of icon POST: \(iconMigrateResult).\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] result of icon POST: \(iconMigrateResult).\n") }
                                         // verify icon uploaded successfully
                                         if iconMigrateResult != 0 {
                                             // associate self service icon to new policy id
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).\n") }
-//                                            let newPolicyId = self.tagValue2(xmlString: curlResult2, startTag: "<id>", endTag: "</id>")
-                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"\(iconMigrateResult)", "destinationIconId":""]
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id\n") }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).\n") }
+
+//                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"\(iconMigrateResult)", "destinationIconId":""]
+                                            iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
+                                            iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
+                                            
+                                            
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id\n") }
 //                                            print("iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]!))")
                                             
                                             usleep(100)
@@ -6302,16 +6194,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             // removed cached icon
                                             if self.fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
                                                 do {
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\n") }
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\n") }
                                                     try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/"))
                                                 }
                                                 catch let error as NSError {
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).\n") }
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).\n") }
                                                 }
+                                            }
+                                            
+                                            if setting.csa {
+                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
+                                                
+                                                let policyUrl = "\(self.createDestUrlBase)/policies/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+                                                self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                                (result: Int) in
+                                                
+                                                    if result > 199 && result < 300 {
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] successfully updated policy (id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)\n") }
+//                                                        print("successfully used new icon id \(newSelfServiceIconId)")
+                                                    }
+                                                }
+                                                
                                             }
                                         } else {
                                             // icon failed to upload
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] source icon (id=\(ssIconId)) failed to uploaded\n") }
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] source icon (id=\(ssIconId)) failed to upload\n") }
                                             iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                         }
 
@@ -6332,52 +6239,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]! == "" {
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))\n") }
                                     var policyIconDict = iconfiles.policyDict
-                                    Json().getRecord(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
+                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
                                         print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
                                         
-                                        if result.count > 0 {
-                                            let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
-                                            print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
-                                            let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
-                                            newSelfServiceIconId = selfServiceIconDict["id"] as? String ?? ""
-//                                            newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
-                                            print("new self service icon id: \(newSelfServiceIconId)")
-//                                        print("icon \(ssIconId) policyIconDict: \(String(describing: policyIconDict["\(ssIconId)"]?["destinationIconId"]))")
-//                                        print("icon \(ssIconId) iconfiles.policyDict: \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"]))")
-                                            if newSelfServiceIconId != "" {
-                                                policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                                iconfiles.policyDict = policyIconDict
-        //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)\n") }
-                                                                                        
-                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+//                                        if !setting.csa {
+                                            if result.count > 0 {
+                                                let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
+                                                print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
+                                                let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
+                                                newSelfServiceIconId = selfServiceIconDict["id"] as? String ?? ""
+    //                                            newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
+                                                print("new self service icon id: \(newSelfServiceIconId)")
+    //                                        print("icon \(ssIconId) policyIconDict: \(String(describing: policyIconDict["\(ssIconId)"]?["destinationIconId"]))")
+    //                                        print("icon \(ssIconId) iconfiles.policyDict: \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"]))")
+                                                if newSelfServiceIconId != "" {
+                                                    policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
+                                                    iconfiles.policyDict = policyIconDict
+            //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)\n") }
+                                                                                            
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+                                                } else {
+                                                    WriteToLog().message(stringOfText: "[ViewController.icons] Unable to locate icon on destination server for: policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))\n")
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
+                                                }
                                             } else {
-                                                WriteToLog().message(stringOfText: "[ViewController.icons] Unable to locate icon on destination server for: policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))\n")
                                                 iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
                                             }
-                                        } else {
-                                            iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
-                                        }
 //                                            print("iconXml: \(iconXml)")
                                         
-                                        self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
-                                        (result: Int) in
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after updating policy with icon id.\n") }
-                                        
-                                            if result > 199 && result < 300 {
-                                                print("successfully used new icon id \(newSelfServiceIconId)")
+                                            self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                            (result: Int) in
+                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] after updating policy with icon id.\n") }
+                                            
+                                                if result > 199 && result < 300 {
+                                                    print("successfully used new icon id \(newSelfServiceIconId)")
+                                                }
                                             }
-                                        }
+//                                        }
                                         
                                     }
                                 } else {
                                     print("using new icon id from destination server")
                                     newSelfServiceIconId = iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!
                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
-
-                                        iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
         //                                            print("iconXml: \(iconXml)")
                                         
                                         self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
@@ -6424,8 +6331,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "GET":
 
 //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
-//            if iconfiles.policyDict["\(ssIconId)"] == nil {
-//                iconfiles.pendingDict["\(ssIconId)"] = true
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
 //                print("icon id \(ssIconId) is marked for download/cache")
                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fetching icon: \(ssIconUri)\n")
@@ -6487,7 +6392,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             WriteToLog().message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)\n")
            
             var fileURL: URL!
-            var newPolicyId = 0
+            var newId = 0
             
             fileURL = URL(fileURLWithPath: iconToUpload)
 
@@ -6499,7 +6404,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             theIconsQ.maxConcurrentOperationCount = 2
             let semaphore = DispatchSemaphore(value: 0)
             
-                
                 self.theIconsQ.addOperation {
 
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading icon: \(iconToUpload)\n")
@@ -6520,7 +6424,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     var request = URLRequest(url:serverURL)
                     // add headers for basic authentication
-                    request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
+                    if setting.csa {
+                        request.addValue("Bearer \(JamfProServer.authCreds["destination"]!)", forHTTPHeaderField: "Authorization")
+                    } else {
+                        request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
+                    }
+                    
                     request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
                     
                     // prep the data for uploading
@@ -6566,7 +6475,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         case 200, 201:
                             WriteToLog().message(stringOfText: "[iconMigrate.\(action)] file successfully uploaded.\n")
                             if let dataResponse = String(data: data!, encoding: .utf8) {
-                                newPolicyId = Int(self.tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
+//                                print("[ViewController.iconMigrate] dataResponse: \(dataResponse)")
+                                if setting.csa {
+                                    let jsonResponse = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? [String:Any]
+                                    if let _ = jsonResponse?["id"] as? Int {
+                                        newId = jsonResponse?["id"] as? Int ?? 0
+                                    }
+                                } else {
+                                    newId = Int(self.tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
+                                }
                             }
                             iconfiles.pendingDict["\(ssIconId)"] = "ready"
                         case 401:
@@ -6588,7 +6505,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(timeDifference) seconds\n")
                         WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(h):\(m):\(s) (h:m:s)\n")
                         
-                        completion(newPolicyId)
+                        completion(newId)
                         // upload checksum - end
                         
                         semaphore.signal()
@@ -6621,7 +6538,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 request.httpMethod = action
                
                 let configuration = URLSessionConfiguration.default
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+//                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -6691,7 +6609,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
                             }
-//                          iconfiles.pendingDict.removeValue(forKey: iconId)
                             self.iconDictArray.removeValue(forKey: iconId)
                         }
                     } else {
@@ -7280,7 +7197,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     func setConcurrentThreads() -> Int {
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
-        print("[ViewController] ConcurrentThreads: \(concurrent)")
+//        print("[ViewController] ConcurrentThreads: \(concurrent)")
         concurrent = (concurrent > 5) ? 2:concurrent
         self.userDefaults.set(concurrent, forKey: "concurrentThreads")
         userDefaults.synchronize()
@@ -8159,6 +8076,16 @@ extension String {
             var fixedUrl = self.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             fixedUrl = fixedUrl.replacingOccurrences(of: "/?failover", with: "")
             return fixedUrl
+        }
+    }
+    var xmlDecode: String {
+        get {
+            let newString = self.replacingOccurrences(of: "&amp;", with: "&")
+                .replacingOccurrences(of: "&quot;", with: "\"")
+                .replacingOccurrences(of: "&apos;", with: "'")
+                .replacingOccurrences(of: "&lt;", with: "<")
+                .replacingOccurrences(of: "&gt;", with: ">")
+            return newString
         }
     }
 }

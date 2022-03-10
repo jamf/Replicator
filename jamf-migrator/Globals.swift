@@ -12,6 +12,9 @@ import Foundation
 struct appInfo {
     static let dict    = Bundle.main.infoDictionary!
     static let version = dict["CFBundleShortVersionString"] as! String
+    static let name    = dict["CFBundleExecutable"] as! String
+
+    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
 }
 
 struct dependency {
@@ -38,10 +41,14 @@ struct iconfiles {
     static var pendingDict        = [String:String]()
 }
 
-struct jamfProVersion {
-    static var major = 0
-    static var minor = 0
-    static var patch = 0
+struct JamfProServer {
+    static var majorVersion = 0
+    static var minorVersion = 0
+    static var patchVersion = 0
+    static var build        = ""
+    static var authCreds    = ["source":"", "destination":""]
+    static var authExpires  = ["source":"", "destination":""]
+    static var authType     = ["source":"Bearer", "destination":"Bearer"]
 }
 
 struct LogLevel {
@@ -68,11 +75,9 @@ struct q {
 
 struct setting {
     static var createIsRunning       = false
-    static var uapiToken             = ""
-    static var jpapiSourceToken      = ""
-    static var jpapiDestinationToken = ""
     static var waitingForPackages    = false
     static var migrateDependencies   = false
+    static var csa                   = true
 }
 
 struct summaryHeader {
@@ -81,10 +86,6 @@ struct summaryHeader {
 
 struct token {
     static var refreshInterval:UInt32 = 20*60  // 20 minutes
-    static var sourceServer  = ""
-    static var destServer    = ""
-    static var sourceExpires = ""
-    static var destExpires   = ""
 }
 
 struct wipeData {

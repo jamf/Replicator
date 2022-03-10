@@ -32,8 +32,7 @@ class Sites: NSObject, URLSessionDelegate {
         
         resourcePath = "\(server)/JSSResource/sites"
         resourcePath = resourcePath.urlFix
-//        resourcePath = resourcePath.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//        resourcePath = resourcePath.replacingOccurrences(of: "/?failover", with: "")
+        
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
         getSites() {
@@ -47,7 +46,7 @@ class Sites: NSObject, URLSessionDelegate {
     }
     
     func getSites(completion: @escaping ([String]) -> [String]) {
-//        var local_allSites = Dictionary<String, Int>()
+
         var destSiteArray = [String]()
         
         let serverEncodedURL = URL(string: resourcePath)
@@ -55,7 +54,8 @@ class Sites: NSObject, URLSessionDelegate {
         //        print("serverRequest: \(serverRequest)")
         serverRequest.httpMethod = "GET"
         let serverConf = URLSessionConfiguration.ephemeral
-        serverConf.httpAdditionalHeaders = ["Authorization" : "Basic \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//         ["Authorization" : "Basic \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
+        serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in
@@ -82,7 +82,7 @@ class Sites: NSObject, URLSessionDelegate {
                 }  // end do/catch
                 
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                    //print(httpResponse.statusCode)
+                    print(httpResponse.statusCode)
                     
                     //                        self.site_Button.isEnabled = true
                     destSiteArray = destSiteArray.sorted()

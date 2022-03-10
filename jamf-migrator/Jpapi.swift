@@ -24,7 +24,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         var path = ""
 
         switch endpoint {
-        case  "buildings", "jamf-pro-version":
+        case  "buildings", "csa/token", "icon", "jamf-pro-version":
             path = "v1/\(endpoint)"
         default:
             path = "v2/\(endpoint)"
@@ -90,56 +90,4 @@ class Jpapi: NSObject, URLSessionDelegate {
         task.resume()
         
     }   // func action - end
-
-    
-    func getToken(serverUrl: String, base64creds: String, completion: @escaping (_ returnedToken: String) -> Void) {
-        
-        URLCache.shared.removeAllCachedResponses()
-        
-        var token          = ""
-        
-        var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
-        tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
-//        print("\(tokenUrlString)")
-        
-        let tokenUrl       = URL(string: "\(tokenUrlString)")
-        let configuration  = URLSessionConfiguration.ephemeral
-        var request        = URLRequest(url: tokenUrl!)
-        request.httpMethod = "POST"
-        
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)).\n") }
-        
-        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-        let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-            (data, response, error) -> Void in
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json! as? Dictionary<String, Any>, let _ = endpointJSON["token"] {
-                        token = endpointJSON["token"] as! String
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] Retrieved token: \(token)\n") }
-//                        print("[Jpapi] token: \(token)")
-                        completion(token)
-                        return
-                    } else {    // if let endpointJSON error
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] JSON error.\n\(String(describing: json))\n") }
-                        completion("")
-                        return
-                    }
-                } else {    // if httpResponse.statusCode <200 or >299
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] response error: \(httpResponse.statusCode).\n") }
-                    completion("")
-                    return
-                }
-            } else {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.getToken] token response error.  Verify url and port.\n") }
-                completion("")
-                return
-            }
-        })
-        task.resume()
-        
-    }   // func token - end
-
 }

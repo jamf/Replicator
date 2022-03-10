@@ -1,12 +1,10 @@
 Migrate as managed, to site -> app crashed for Disney
 
-Need to fix for importing other than default download folder
-            if fileImport {
-                action       = "SKIP"
-                iconToUpload = "\(NSHomeDirectory())/Downloads/Jamf Migrator/raw/\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
-            } else {
-                iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
-            }
+2022-03-09 Done - Need to fix for importing other than default download folder
+2022-03-09 Done - filenames that get xml encoded (import files)
+2022-03-10 Done - Icon uploads.  If cloud servicers connection is enable self service icons will update
+2022-03-10 Done - Bearer authentication
+2022-03-10 Done - Fix permissions issue on importing files from previously selected folder
 
 
 let font = NSFont(name: "HelveticaNeue", size: CGFloat(14))

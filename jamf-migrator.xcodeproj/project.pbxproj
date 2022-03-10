@@ -25,7 +25,6 @@
 		B556A79E2773A100003CBEE9 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556A79D2773A100003CBEE9 /* Alert.swift */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
-		B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55BB46D23A9BC7C0024B357 /* UapiCall.swift */; };
 		B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CBA89277B939100F26E8C /* SaveDelegate.swift */; };
 		B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
@@ -43,10 +42,10 @@
 		B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
-		B5BB33B1275C452800EC7688 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BB33B0275C452800EC7688 /* TokenDelegate.swift */; };
 		B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BD6ADA233510F6001D244A /* Credentials2.swift */; };
 		B5C042481EB11CF400C6E872 /* 0.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423C1EB11CF400C6E872 /* 0.png */; };
 		B5C042491EB11CF400C6E872 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = B5C0423D1EB11CF400C6E872 /* 1.png */; };
+		B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C25B0627DA0499008E4B0F /* JamfPro.swift */; };
 		B5C993C0230E211100558040 /* Sites.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C993BF230E211100558040 /* Sites.swift */; };
 		B5E179F21F1FDAFA00A20AAA /* images in Resources */ = {isa = PBXBuildFile; fileRef = B5E179F01F1FDAFA00A20AAA /* images */; };
 		B5E179F31F1FDAFA00A20AAA /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = B5E179F11F1FDAFA00A20AAA /* index.html */; };
@@ -79,7 +78,6 @@
 		B556A79D2773A100003CBEE9 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
-		B55BB46D23A9BC7C0024B357 /* UapiCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UapiCall.swift; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
 		B56CBA89277B939100F26E8C /* SaveDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveDelegate.swift; sourceTree = "<group>"; };
 		B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackagesDelegate.swift; sourceTree = "<group>"; };
@@ -98,10 +96,10 @@
 		B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
-		B5BB33B0275C452800EC7688 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenDelegate.swift; path = ../../JPAPI_refresh/JPAPI_refresh/TokenDelegate.swift; sourceTree = "<group>"; };
 		B5BD6ADA233510F6001D244A /* Credentials2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials2.swift; sourceTree = "<group>"; };
 		B5C0423C1EB11CF400C6E872 /* 0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 0.png; sourceTree = "<group>"; };
 		B5C0423D1EB11CF400C6E872 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		B5C25B0627DA0499008E4B0F /* JamfPro.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JamfPro.swift; sourceTree = "<group>"; };
 		B5C993BF230E211100558040 /* Sites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sites.swift; sourceTree = "<group>"; };
 		B5E179F01F1FDAFA00A20AAA /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		B5E179F11F1FDAFA00A20AAA /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
@@ -147,10 +145,11 @@
 			children = (
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B556A79D2773A100003CBEE9 /* Alert.swift */,
-				B53ECDF72391F8FB005EE6E5 /* Globals.swift */,
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
+				B53ECDF72391F8FB005EE6E5 /* Globals.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
+				B5C25B0627DA0499008E4B0F /* JamfPro.swift */,
 				B5FD9DAD27434B890044C321 /* Jpapi.swift */,
 				B53ECDFB2394474B005EE6E5 /* Json.swift */,
 				B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */,
@@ -158,8 +157,6 @@
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
-				B5BB33B0275C452800EC7688 /* TokenDelegate.swift */,
-				B55BB46D23A9BC7C0024B357 /* UapiCall.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
 				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
@@ -348,7 +345,7 @@
 			files = (
 				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
-				B55BB46E23A9BC7C0024B357 /* UapiCall.swift in Sources */,
+				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
@@ -356,7 +353,6 @@
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
-				B5BB33B1275C452800EC7688 /* TokenDelegate.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */,
@@ -508,13 +504,13 @@
 				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 6.0.1;
+				MARKETING_VERSION = 6.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -529,13 +525,13 @@
 				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 6.0.1;
+				MARKETING_VERSION = 6.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

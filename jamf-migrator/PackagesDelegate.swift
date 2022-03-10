@@ -35,7 +35,8 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
-            destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(base64Creds)", "Accept" : "application/json"]
+//           = ["Authorization" : "Basic \(base64Creds)", "Accept" : "application/json"]
+            destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
@@ -91,7 +92,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         let packageCount = packageIDsNames.count
         
         for (packageID, packageName) in packageIDsNames {
-            PackagesDelegate().getFilename(theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
+            getFilename(theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
                 (result: (Int,String)) in
                 lookupCount += 1
 //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
@@ -99,7 +100,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                 if pref.httpSuccess.contains(resultCode) {
                     
                     packageIDsNames[packageID] = nil
-//                                                        let (_,packageFilename) = wipeData.on ? (packageID, packageName):result
+
                     if packageFilename != "" && existingNameId[packageFilename] == nil {
 //                        print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
                         existingNameId[packageFilename] = packageID
