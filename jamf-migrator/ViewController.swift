@@ -2000,8 +2000,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     let packageID   = record["id"] as! Int
                                                     let displayName = record["name"] as! String
                                                     
-                                                    
-                                                    PackagesDelegate().getFilename(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on) {
+                                                    PackagesDelegate().getFilename(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on) {
                                                         (result: (Int,String)) in
                                                         let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
 //                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
@@ -2179,7 +2178,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                 } else {
                                                     // populate source server under the selective tab
-                                                    print("populate (\(endpoint)) source server under the selective tab")
+//                                                    print("populate (\(endpoint)) source server under the selective tab")
                                                     self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
                                                     for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                         self.sortQ.async {
@@ -5120,7 +5119,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         //print("package ID: \(destRecord["id"] as! Int)")
                                                     }
                                                     
-                                                    PackagesDelegate().filenameIdDict(theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
+                                                    PackagesDelegate().filenameIdDict(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
                                                         (currentDestinationPackages: [String:Int]) in
 //                                                        self.currentEPs = currentDestinationPackages
                                                         setting.waitingForPackages = false
@@ -5436,7 +5435,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                              let local_name = (theObject as! [String:Any])["name"]
 //                             print("lookup package filename for display name \(String(describing: local_name!))")
                              let local_id   = (theObject as! [String:Any])["id"]
-                             PackagesDelegate().getFilename(theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on) {
+                             
+                             PackagesDelegate().getFilename(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on) {
                                  (result: (Int,String)) in
                                  let (_,packageFilename) = result
 //                                 print("                     found filename name \(String(describing: packageFilename))")

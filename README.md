@@ -152,6 +152,14 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.0**
+
+* Fix filenames that get characters xml encoded when importing files.
+* Improved icon handling, determine appropriate location for the upload.  If cloud servicers connection is enable self service icons will update within the policy.
+* Add support for Bearer authentication to the classic API.
+* Fix issues on importing files from previously selected folder.
+* Misc code cleanup.
+
 **v6.0.1**
 
 * Allow migration of computers to a site.  

@@ -10,7 +10,7 @@ import Foundation
 
 class PackagesDelegate: NSObject, URLSessionDelegate {
     // get the package filename, rather than display name
-    func getFilename(theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, completion: @escaping (_ result: (Int,String)) -> Void) {
+    func getFilename(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, completion: @escaping (_ result: (Int,String)) -> Void) {
 
 //        if skip {
 //            completion((theEndpointID,""))
@@ -36,13 +36,12 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
 //           = ["Authorization" : "Basic \(base64Creds)", "Accept" : "application/json"]
-            destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+            destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType[whichServer]!)) \(String(describing: JamfProServer.authCreds[whichServer]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
                 if let httpResponse = response as? HTTPURLResponse {
-//                    print("[PackagesDelegate.getFilename] httpResponse: \(String(describing: httpResponse))")
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
 //                                    do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
@@ -79,7 +78,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         }   // getRecordQ - end
     }
     
-    func filenameIdDict(theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
+    func filenameIdDict(whichServer: String, theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
         
 //        print("[PackageDelegate.filenameIdDict] lookup attempt \(currentTry) of \(maxTries)")
         
@@ -90,9 +89,9 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         var message = ""
         var lookupCount = 0
         let packageCount = packageIDsNames.count
-        
+            
         for (packageID, packageName) in packageIDsNames {
-            getFilename(theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
+            getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
                 (result: (Int,String)) in
                 lookupCount += 1
 //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
@@ -127,7 +126,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
                     
                     if currentTry < maxTries+1 && packageIDsNames.count > 0 {
-                        filenameIdDict(theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
+                        filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
                             (result: [String:Int]) in
                         }
                     } else {
