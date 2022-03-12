@@ -882,7 +882,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func Go(sender: AnyObject) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
-
+        if wipeData.on && export.saveOnly {
+            _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
+            return
+        }
+        
         History.startTime = Date()
 
         plistData           = readSettings()
@@ -995,8 +999,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // server is reachable - start
         // don't check if we're importing files
-        if !fileImport {
-            if !wipeData.on {
+//        if !fileImport {
+//            if !wipeData.on {
                 checkURL2(whichServer: "source", serverURL: self.source_jp_server)  {
                     (result: Bool) in
         //            print("checkURL2 returned result: \(result)")
@@ -1005,137 +1009,141 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.goButtonEnabled(button_status: true)
                         return
                     }
-                }
-            }
-        }
-        
-        // set site, if option selected - start
-        if siteMigrate_button.state.rawValue == 1 {
-            destinationSite = availableSites_button.selectedItem!.title
-            itemToSite = true
-        } else {
-            itemToSite = false
-        }
-        // set site, if option selected - end
-        
-        checkURL2(whichServer: "dest", serverURL: self.dest_jp_server)  {
-            (result: Bool) in
-//            print("checkURL2 returned result: \(result)")
-            if !result {
-                self.alert_dialog(header: "Attention:", message: "Unable to contact the destination server:\n\(self.dest_jp_server)")
-                self.goButtonEnabled(button_status: true)
-                return
-            }
-            // server is reachable - end
-            // don't set if we're importing files
-            if !self.fileImport {
-                self.sourceCreds = "\(self.source_user):\(self.source_pass)"
-            } else {
-                self.sourceCreds = ":"
-            }
-            self.sourceBase64Creds = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
-            
-            self.destCreds = "\(self.dest_user):\(self.dest_pass)"
-            self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
-            // set credentials - end
-            
-            var sourceURL      = URL(string: "")
-            var destinationURL = URL(string: "")
-            
-            // check authentication - start
-            JamfPro().getVersion(whichServer: "source", jpURL: self.source_jp_server, basicCreds: self.sourceBase64Creds, localSource: self.fileImport) {
-                (authResult: (Int,String)) in
-                let (authStatusCode, _) = authResult
-                if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "Source server authentication failure.\n") }
-                    return
-                } else {
-                    self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                     
-                    JamfPro().getVersion(whichServer: "destination", jpURL: self.dest_jp_server, basicCreds: self.destBase64Creds, localSource: self.fileImport) {
-                        (authResult: (Int,String)) in
-                        let (authStatusCode, _) = authResult
-                        if !pref.httpSuccess.contains(authStatusCode) {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.\n") }
+                    self.checkURL2(whichServer: "dest", serverURL: self.dest_jp_server)  { [self]
+                        (result: Bool) in
+            //            print("checkURL2 returned result: \(result)")
+                        if !result {
+                            self.alert_dialog(header: "Attention:", message: "Unable to contact the destination server:\n\(self.dest_jp_server)")
+                            self.goButtonEnabled(button_status: true)
                             return
+                        }
+                        // server is reachable - end
+                        
+                        // set site, if option selected - start
+                        if siteMigrate_button.state.rawValue == 1 {
+                            destinationSite = availableSites_button.selectedItem!.title
+                            itemToSite = true
                         } else {
-                            // determine if the cloud services connection is enabled
-                            Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
-                                (returnedJSON: [String:Any]) in
-//                                        print("CSA: \(returnedJSON)")
-                                if let _ = returnedJSON["scopes"] {
-                                    setting.csa = true
-                                } else {
-                                    setting.csa = false
-                                }
-//                                print("csa: \(setting.csa)")
+                            itemToSite = false
+                        }
+                        // set site, if option selected - end
+                        
+                        
+                        // don't set if we're importing files
+                        if !self.fileImport {
+                            self.sourceCreds = "\(self.source_user):\(self.source_pass)"
+                        } else {
+                            self.sourceCreds = ":"
+                        }
+                        self.sourceBase64Creds = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                        
+                        self.destCreds = "\(self.dest_user):\(self.dest_pass)"
+                        self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                        // set credentials - end
+                        
+                        var sourceURL      = URL(string: "")
+                        var destinationURL = URL(string: "")
+                        
+                        // check authentication - start
+                        JamfPro().getVersion(whichServer: "source", jpURL: self.source_jp_server, basicCreds: self.sourceBase64Creds, localSource: self.fileImport) {
+                            (authResult: (Int,String)) in
+                            let (authStatusCode, _) = authResult
+                            if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "Source server authentication failure.\n") }
+                                return
+                            } else {
+                                self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                                 
-                                if !export.saveOnly {
-                                    self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
-                                }
-                                // verify source server URL - start
-                                if !self.fileImport && !wipeData.on {
-                                    sourceURL = URL(string: self.source_jp_server_field.stringValue)
-                                } else {
-                                    sourceURL = URL(string: "https://www.jamf.com")
-                                }
-                                URLCache.shared.removeAllCachedResponses()
-                                let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
-                                    if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
-                                        //print(HTTPURLResponse.statusCode)
-                                        //===== change to go to function to check dest. server, which forwards to migrate if all is well
-                                        // verify destination server URL - start
-                                        DispatchQueue.main.async {
-                                            if !export.saveOnly {
-                                                destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                JamfPro().getVersion(whichServer: "destination", jpURL: self.dest_jp_server, basicCreds: self.destBase64Creds, localSource: self.fileImport) {
+                                    (authResult: (Int,String)) in
+                                    let (authStatusCode, _) = authResult
+                                    if !pref.httpSuccess.contains(authStatusCode) {
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.\n") }
+                                        return
+                                    } else {
+                                        // determine if the cloud services connection is enabled
+                                        Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
+                                            (returnedJSON: [String:Any]) in
+//                                                    print("CSA: \(returnedJSON)")
+                                            if let _ = returnedJSON["scopes"] {
+                                                setting.csa = true
                                             } else {
-                                                destinationURL = URL(string: "https://www.jamf.com")
+                                                setting.csa = false
+                                            }
+            //                                print("csa: \(setting.csa)")
+                                            
+                                            if !export.saveOnly {
+                                                self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
+                                            }
+                                            // verify source server URL - start
+                                            if !self.fileImport && !wipeData.on {
+                                                sourceURL = URL(string: self.source_jp_server_field.stringValue)
+                                            } else {
+                                                sourceURL = URL(string: "https://www.jamf.com")
                                             }
                                             URLCache.shared.removeAllCachedResponses()
-                                            let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
-                                                    // print("Destination server response: \(response)")
-                                                    if (!self.theOpQ.isSuspended) {
-                                                        //====================================    Start Migrating/Removing    ====================================//
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
-                                                        self.startMigrating()
-                                                    }
-                                                } else {
-    //                                                DispatchQueue.main.async {
-                                                        //print("Destination server response: \(response)")
-                                                    self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
-    //                                                }
+                                            let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
+                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
+                                                    //print(HTTPURLResponse.statusCode)
+                                                    //===== change to go to function to check dest. server, which forwards to migrate if all is well
+                                                    // verify destination server URL - start
+                                                    DispatchQueue.main.async {
+                                                        if !export.saveOnly {
+                                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+                                                        } else {
+                                                            destinationURL = URL(string: "https://www.jamf.com")
+                                                        }
+                                                        URLCache.shared.removeAllCachedResponses()
+                                                        let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
+                                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
+                                                                // print("Destination server response: \(response)")
+                                                                if (!self.theOpQ.isSuspended) {
+                                                                    //====================================    Start Migrating/Removing    ====================================//
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
+                                                                    self.startMigrating()
+                                                                }
+                                                            } else {
+                //                                                DispatchQueue.main.async {
+                                                                    //print("Destination server response: \(response)")
+                                                                self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
+                //                                                }
+                                                                
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
+                                                                self.goButtonEnabled(button_status: true)
+                                                                return
+                                                            }
+                                                        }   // let task for destinationURL - end
                                                     
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
+                                                        task_destinationURL.resume()
+                                                    }
+                                                    // verify source destination URL - end
+                                                    
+                                                } else {
+                                                    DispatchQueue.main.async {
+                                                        self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
+                                                    }
+                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
                                                     self.goButtonEnabled(button_status: true)
                                                     return
                                                 }
-                                            }   // let task for destinationURL - end
-                                        
-                                            task_destinationURL.resume()
+                                            }   // let task for soureURL - end
+                                            task_sourceURL.resume()
+                                            // verify source server URL - end
                                         }
-                                        // verify source destination URL - end
-                                        
-                                    } else {
-                                        DispatchQueue.main.async {
-                                            self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
-                                        }
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
-                                        self.goButtonEnabled(button_status: true)
-                                        return
-                                    }
-                                }   // let task for soureURL - end
-                                task_sourceURL.resume()
-                                // verify source server URL - end
-                            }
-                        } // else dest auth
-                    }   // self.authCheck(whichServer: "dest" - end
-                }   // else check dest URL auth - end
-            }   // self.authCheck(whichServer: "source" - end
+                                    } // else dest auth
+                                }   // self.authCheck(whichServer: "dest" - end
+                            }   // else check dest URL auth - end
+                        }   // self.authCheck(whichServer: "source" - end
 
-    // check authentication - end
-        }   // checkURL2 (destination server) - end
-    }   // checkURL2 (source server) - end
+                // check authentication - end
+                    }   // checkURL2 (destination server) - end
+
+                    
+                }
+//            }
+//        }
+    }   // @IBAction func Go - end
     
     
     @IBAction func QuitNow(sender: AnyObject) {
@@ -1358,7 +1366,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.objectsToMigrate.reverse()
                     // set server and credentials used for wipe
                     self.sourceBase64Creds = self.destBase64Creds
-                    self.source_jp_server = self.dest_jp_server
+                    self.source_jp_server  = self.dest_jp_server
                     
                     JamfProServer.authCreds["source"]   = JamfProServer.authCreds["destination"]
                     JamfProServer.authExpires["source"] = JamfProServer.authExpires["destination"]
@@ -5731,34 +5739,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //return true
     }   // func alert_dialog - end
     
-//    func alert_dialog2(header: String, message: String, secondButton: String) -> String {
-//        NSApplication.shared.activate(ignoringOtherApps: true)
-//        var selected = ""
-//        let dialog: NSAlert = NSAlert()
-//        dialog.messageText = header
-//        dialog.informativeText = message
-//        dialog.alertStyle = NSAlert.Style.warning
-//        let okButton = dialog.addButton(withTitle: "OK")
-//        if secondButton != "" {
-//            let otherButton = dialog.addButton(withTitle: secondButton)
-//            otherButton.keyEquivalent = "\r"
-//            okButton.keyEquivalent = "o"
-//        }
-//        dialog.runModal()
-//        
-//        let theButton = dialog.runModal()
-//        switch theButton {
-//        case .alertFirstButtonReturn:
-//            selected = "OK"
-//        default:
-//            selected = secondButton
-//        }
-//        return selected
-//    }   // func alert_dialog - end
-    
     func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
-        if (whichServer == "dest" && export.saveOnly) {
+        if (whichServer == "dest" && export.saveOnly) || (whichServer == "source" && (wipeData.on || fileImport)) {
             completion(true)
         } else {
             var available:Bool = false

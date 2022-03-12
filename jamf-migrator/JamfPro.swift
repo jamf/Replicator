@@ -15,7 +15,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     let userDefaults = UserDefaults.standard
     
     func getVersion(whichServer: String, jpURL: String, basicCreds: String, localSource: Bool, completion: @escaping (_ authResult: (Int,String)) -> Void) {
-        if (whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "destination" && !export.saveOnly) {
+        if ((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "destination" && !export.saveOnly)) {
             var versionString  = ""
             let semaphore      = DispatchSemaphore(value: 0)
             
@@ -80,6 +80,10 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func getToken(serverUrl: String, whichServer: String, base64creds: String, completion: @escaping (_ authResult: (Int,String)) -> Void) {
         
+        if wipeData.on && whichServer == "source" {
+            completion((200, "success"))
+        }
+        
 //        print("\(serverUrl.prefix(4))")
         if serverUrl.prefix(4) != "http" {
             completion((0, "skipped"))
@@ -122,7 +126,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         
                         JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
                         JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
-                        if wipeData.on {
+                        if wipeData.on && whichServer == "destination" {
                             JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
                             JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
                             JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
