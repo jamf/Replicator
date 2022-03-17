@@ -5339,7 +5339,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }   // func existingEndpoints - end
 
     func getDependencies(object: String, json: [String:AnyObject], completion: @escaping (_ returnedDependencies: [String:[String:String]]) -> Void) {
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] enter\n") }
+        WriteToLog().message(stringOfText: "[getDependencies] enter\n")
+        
         var objectDict           = [String:Any]()
         var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
 //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
@@ -5364,7 +5365,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 for the_dependency in ordered_dependency_array {
                     switch the_dependency {
-                    case "cagtegories":
+                    case "categories":
                         dependencyNode = "category"
                     case "computergroups":
                         dependencyNode = "computer_groups"
@@ -5447,7 +5448,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                              PackagesDelegate().getFilename(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on) {
                                  (result: (Int,String)) in
                                  let (_,packageFilename) = result
-//                                 print("                     found filename name \(String(describing: packageFilename))")
                                  dependencyArray["\(packageFilename)"] = "\(local_id!)"
                                  completedPackageLookups += 1
                                  if completedPackageLookups == packages_dep.count {
@@ -5502,7 +5502,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
         }
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] exit\n") }
+        print("[getDependencies] dependencies: \(fullDependencyDict)")
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] dependencies: \(fullDependencyDict)\n") }
+        WriteToLog().message(stringOfText: "[getDependencies] complete\n")
         var tmpCount = 1
         DispatchQueue.global(qos: .utility).async {
             while waitForPackageLookup && tmpCount <= 60 {

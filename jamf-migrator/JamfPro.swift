@@ -54,9 +54,6 @@ class JamfPro: NSObject, URLSessionDelegate {
                         }
     //                }
                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] Jamf Pro Version: \(versionString)\n")
-    //                if wipeData.on && whichServer == "source" {
-    //                    completion((200,"success"))
-    //                } else {
                         getToken(serverUrl: jpURL, whichServer: whichServer, base64creds: basicCreds) {
                             (authResult: (Int,String)) in
                             if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) {
@@ -67,7 +64,6 @@ class JamfPro: NSObject, URLSessionDelegate {
                             }
                             completion(authResult)
                         }
-    //                }
                     
                 })  // let task = session - end
                 task.resume()
@@ -126,6 +122,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         
                         JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
                         JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
+                        JamfProServer.authType[whichServer]    = "Bearer"
                         if wipeData.on && whichServer == "destination" {
                             JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
                             JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
