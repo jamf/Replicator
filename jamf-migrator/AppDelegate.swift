@@ -37,6 +37,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             WriteToLog().message(stringOfText: "Bookmark Access Fails: \(error.description)")
            }
        }
+        if !CommandLine.arguments.contains("silent") {
+            let storyboard = NSStoryboard(name: "Main", bundle: nil)
+            let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController
+            mainWindowController.window?.hidesOnDeactivate = false
+            mainWindowController.showWindow(self)
+        }
     }
 
     @IBAction func checkForUpdates(_ sender: AnyObject) {

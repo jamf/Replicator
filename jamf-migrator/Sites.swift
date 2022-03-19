@@ -59,6 +59,7 @@ class Sites: NSObject, URLSessionDelegate {
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in
+            serverSession.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 // print("httpResponse: \(String(describing: response))")
                 do {

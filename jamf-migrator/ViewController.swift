@@ -1970,6 +1970,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                session.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
 //                    print("httpResponse: \(httpResponse.statusCode)")
                     if httpResponse.statusCode > 199 && httpResponse.statusCode < 300 {
@@ -3294,6 +3295,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: {
                         (data, response, error) -> Void in
+                        session.finishTasksAndInvalidate()
                         
                         if let httpResponse = response as? HTTPURLResponse {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
@@ -4080,6 +4082,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         
                         if let _ = String(data: data!, encoding: .utf8) {
@@ -4793,6 +4796,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         //print(httpResponse.statusCode)
                         //print(httpResponse)
@@ -5071,6 +5075,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
                             (data, response, error) -> Void in
+                            destSession.finishTasksAndInvalidate()
                             if let httpResponse = response as? HTTPURLResponse {
 //                                print("httpResponse: \(String(describing: response))!")
                                 do {
@@ -5502,7 +5507,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
         }
-        print("[getDependencies] dependencies: \(fullDependencyDict)")
         if LogLevel.debug { WriteToLog().message(stringOfText: "[getDependencies] dependencies: \(fullDependencyDict)\n") }
         WriteToLog().message(stringOfText: "[getDependencies] complete\n")
         var tmpCount = 1
@@ -5554,6 +5558,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                serverSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json as? [String: Any] {
@@ -5631,6 +5636,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                serverSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json as? [String: Any] {
@@ -5769,6 +5775,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] Server check: \(healthCheckURL), httpResponse: \(httpResponse.statusCode)\n") }
                         
@@ -6444,6 +6451,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     // start upload process
                     URLCache.shared.removeAllCachedResponses()
                     let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+                        session.finishTasksAndInvalidate()
         //                if let httpResponse = response as? HTTPURLResponse {
                         if let _ = (response as? HTTPURLResponse)?.statusCode {
                             httpResponse = response as? HTTPURLResponse
@@ -6529,6 +6537,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
@@ -7675,7 +7684,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         selectiveFilter_TextField.delegate   = self
         selectiveFilter_TextField.wantsLayer = true
         selectiveFilter_TextField.isBordered = true

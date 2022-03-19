@@ -41,6 +41,7 @@ class Json: NSObject, URLSessionDelegate {
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                destSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
 //                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {

@@ -77,7 +77,8 @@ struct setting {
     static var createIsRunning       = false
     static var waitingForPackages    = false
     static var migrateDependencies   = false
-    static var csa                   = true
+    static var csa                   = true // cloud services connection
+    static var hideGui               = false
 }
 
 struct summaryHeader {

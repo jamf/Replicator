@@ -41,6 +41,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                destSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
 //                                    do {
