@@ -49,6 +49,9 @@ struct JamfProServer {
     static var authCreds    = ["source":"", "destination":""]
     static var authExpires  = ["source":"", "destination":""]
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
+    static var sourceServer = ""
+    static var sourceCreds  = ""
+    static var sourceToken  = ""
 }
 
 struct LogLevel {
@@ -86,7 +89,7 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 20*60  // 20 minutes
+    static var refreshInterval:UInt32 = 15*60  // 15 minutes
 }
 
 struct wipeData {

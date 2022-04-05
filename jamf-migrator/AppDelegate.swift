@@ -54,7 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         verCheck.versionCheck() {
             (result: Bool) in
             if result {
-                self.alert_dialog(header: "Running Jamf Migrator: \(version)", message: "A new versions is available.", updateAvail: result)
+                self.alert_dialog(header: "A new versions is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
             } else {
                 self.alert_dialog(header: "Running Jamf Migrator: \(version)", message: "No updates are currently available.", updateAvail: result)
             }

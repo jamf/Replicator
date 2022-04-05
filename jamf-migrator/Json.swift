@@ -11,6 +11,8 @@ import Cocoa
 class Json: NSObject, URLSessionDelegate {
     func getRecord(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
         
+        
+        
         let userDefaults   = UserDefaults.standard
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")

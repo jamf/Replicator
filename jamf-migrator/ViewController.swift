@@ -488,10 +488,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var getEndpointsQ = OperationQueue() // create operation queue for API calls
     var theCreateQ    = OperationQueue() // create operation queue for API POST/PUT calls
     var readFilesQ    = OperationQueue() // for reading in data files
-//    var readFilesQ = DispatchQueue(label: "com.jamf.readFilesQ", qos: DispatchQoS.background)   // for reading in data files
-//    var readNodesQ = DispatchQueue(label: "com.jamf.readNodesQ")   // for reading in API endpoints
     var readNodesQ    = OperationQueue()   // for reading in API endpoints
     let theIconsQ     = OperationQueue() // que to upload/download icons
+    
+    let theSortQ      = OperationQueue()
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
     var theModeQ    = DispatchQueue(label: "com.jamf.addRemove")
@@ -510,10 +510,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func deleteMode_fn(_ sender: Any) {
         var isDir: ObjCBool = false
-        // turn off all selected items - start
-//        print("[deleteMode_fn] endpoint: NA")
+
         resetAllCheckboxes()
-        // turn off all selected items - end
         
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
@@ -807,6 +805,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             alert_dialog(header: "Attention:", message: "Selective migration while importing files is not yet available.")
             return
         }
+        
+        
 
         inactiveTabDisable(activeTab: "selective")
         goSender = "selectToMigrateButton"
@@ -1062,6 +1062,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.\n") }
                                         return
                                     } else {
+                                        
                                         // determine if the cloud services connection is enabled
                                         Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
                                             (returnedJSON: [String:Any]) in
@@ -1138,8 +1139,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                 // check authentication - end
                     }   // checkURL2 (destination server) - end
-
-                    
                 }
 //            }
 //        }
@@ -1616,6 +1615,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 rawEndpoint = "computergroups"
             case "smartmobiledevicegroups", "staticmobiledevicegroups":
                 rawEndpoint = "mobiledevicegroups"
+            case "smartusergroups", "staticusergroups":
+                rawEndpoint = "usergroups"
             default:
                 rawEndpoint = selectedEndpoint
         }
@@ -2370,6 +2371,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     }
                                                     var counter = 1
                                                     self.delayInt = self.listDelay(itemCount: currentGroupDict.count)
+                                                    
                                                     for (l_xmlID, l_xmlName) in currentGroupDict {
                                                         self.availableObjsToMigDict[l_xmlID] = l_xmlName
                                                         if self.goSender == "goButton" {
@@ -2396,7 +2398,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                                                print("adding \(l_xmlName) to array")
                                                                 self.availableIDsToMigDict[l_xmlName] = l_xmlID
                                                                 self.sourceDataArray.append(l_xmlName)
-                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                 
                                                                 self.staticSourceDataArray = self.sourceDataArray
 
@@ -2407,7 +2408,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 usleep(self.delayInt)
 
                                                                 if counter == self.sourceDataArray.count {
-                                                                    self.goButtonEnabled(button_status: true)
+//                                                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                    self.sortList(theArray: self.sourceDataArray) {
+                                                                        (result: [String]) in
+                                                                        self.sourceDataArray = result
+                                                                        DispatchQueue.main.async {
+                                                                            self.srcSrvTableView.reloadData()
+                                                                        }
+                                                                        self.goButtonEnabled(button_status: true)
+                                                                    }
                                                                 }
 
                                                                 counter += 1
@@ -5830,10 +5839,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.srcSrvTableView.reloadData()
                 self.targetDataArray.removeAll()
                 self.srcSrvTableView.reloadData()
-
-//                self.sourceDataArray.removeAll()
-//                self.srcSrvTableView.stringValue = ""
-//                self.srcSrvTableView.reloadData()
+                
                 self.selectiveListCleared = true
             } else {
                 self.selectiveListCleared = true
@@ -6006,7 +6012,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func listDelay(itemCount: Int) -> UInt32 {
         let delayFactor = (itemCount < 10) ? 10:itemCount
         
-        let factor = (5000000/delayFactor)
+        let factor = (50000000/delayFactor/delayFactor)
         if factor > 50000 {
             return 50000
         } else {
@@ -8033,6 +8039,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return popUpBlock
     }
     // code for pop up window - end
+    
+    func sortList(theArray: [String], completion: @escaping ([String]) -> Void) {
+        let newArray = theArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+        completion(newArray)
+    }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
