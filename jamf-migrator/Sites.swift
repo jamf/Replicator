@@ -35,14 +35,23 @@ class Sites: NSObject, URLSessionDelegate {
         
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
-        getSites() {
-            (result: [String]) in
-            siteArray = result
+        JamfPro().getVersion(whichServer: "destination", jpURL: server, basicCreds: token, localSource: false) { [self]
+            (authResult: (Int,String)) in
+            let (authStatusCode, _) = authResult
 
-            completion(siteArray)
-            return siteArray
+            if pref.httpSuccess.contains(authStatusCode) {
+                getSites() {
+                    (result: [String]) in
+                    siteArray = result
+
+                    completion(siteArray)
+                    return siteArray
+                }
+            } else {
+                completion(siteArray)
+//                return siteArray
+            }
         }
-        
     }
     
     func getSites(completion: @escaping ([String]) -> [String]) {
@@ -62,34 +71,35 @@ class Sites: NSObject, URLSessionDelegate {
             serverSession.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 // print("httpResponse: \(String(describing: response))")
-                do {
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    //                    print("\(json)")
-                    if let endpointJSON = json as? [String: Any] {
-                        if let siteEndpoints = endpointJSON["sites"] as? [Any] {
-                            let siteCount = siteEndpoints.count
-                            if siteCount > 0 {
-                                for i in (0..<siteCount) {
-                                    // print("site \(i): \(siteEndpoints[i])")
-                                    let theSite = siteEndpoints[i] as! [String:Any]
-                                    // print("theSite: \(theSite))")
-                                    // print("site \(i) name: \(String(describing: theSite["name"]))")
-                                    destSiteArray.append(theSite["name"] as! String)
-                                }
-                            }
-                        }
-                    }   // if let serverEndpointJSON - end
-                    
-                }  // end do/catch
                 
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     print(httpResponse.statusCode)
                     
+                    do {
+                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                        //                    print("\(json)")
+                        if let endpointJSON = json as? [String: Any] {
+                            if let siteEndpoints = endpointJSON["sites"] as? [Any] {
+                                let siteCount = siteEndpoints.count
+                                if siteCount > 0 {
+                                    for i in (0..<siteCount) {
+                                        // print("site \(i): \(siteEndpoints[i])")
+                                        let theSite = siteEndpoints[i] as! [String:Any]
+                                        // print("theSite: \(theSite))")
+                                        // print("site \(i) name: \(String(describing: theSite["name"]))")
+                                        destSiteArray.append(theSite["name"] as! String)
+                                    }
+                                }
+                            }
+                        }   // if let serverEndpointJSON - end
+                        
+                    }  // end do/catch
                     //                        self.site_Button.isEnabled = true
                     destSiteArray = destSiteArray.sorted()
                     completion(destSiteArray)
                 } else {
                     // something went wrong
+                    print(httpResponse.statusCode)
                     WriteToLog().message(stringOfText: "[Sites] Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)\n")
                     self.vc.alert_dialog(header: "Alert", message: "Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
                     

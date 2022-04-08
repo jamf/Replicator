@@ -49,6 +49,7 @@ struct JamfProServer {
     static var authCreds    = ["source":"", "destination":""]
     static var authExpires  = ["source":"", "destination":""]
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
+    static var validToken   = ["source":false, "destination":false]
     static var sourceServer = ""
     static var sourceCreds  = ""
     static var sourceToken  = ""

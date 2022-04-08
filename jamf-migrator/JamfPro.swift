@@ -97,67 +97,77 @@ class JamfPro: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         
-        WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
-        
-        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-        let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-            (data, response, error) -> Void in
-            session.finishTasksAndInvalidate()
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
-                        /*
-                        switch whichServer {
-                        case "source":
-                            token.sourceServer  = endpointJSON["token"] as! String
-                            token.sourceExpires = "\(endpointJSON["expires"] ?? "")"
+        if !(JamfProServer.validToken[whichServer] ?? false) {
+            WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
+            
+            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
+            let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                (data, response, error) -> Void in
+                session.finishTasksAndInvalidate()
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
+                            /*
+                            switch whichServer {
+                            case "source":
+                                token.sourceServer  = endpointJSON["token"] as! String
+                                token.sourceExpires = "\(endpointJSON["expires"] ?? "")"
+                                
+    //                            print("\n[TokenDelegate] token for \(serverUrl): \(token.sourceServer)")
+                            default:
+                                token.destinationServer  = endpointJSON["token"] as! String
+                                token.destinationExpires = "\(endpointJSON["expires"] ?? "")"
+    //                            print("\n[TokenDelegate] token for \(serverUrl): \(token.destServer)")
+                            }
+                            */
+                            JamfProServer.validToken[whichServer]  = true
+                            JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
+                            JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
+                            JamfProServer.authType[whichServer]    = "Bearer"
+                            if wipeData.on && whichServer == "destination" {
+                                JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
+                                JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
+                                JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
+                            }
                             
-//                            print("\n[TokenDelegate] token for \(serverUrl): \(token.sourceServer)")
-                        default:
-                            token.destinationServer  = endpointJSON["token"] as! String
-                            token.destinationExpires = "\(endpointJSON["expires"] ?? "")"
-//                            print("\n[TokenDelegate] token for \(serverUrl): \(token.destServer)")
+    //                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
+    //                      print("[JamfPro] result of token request: \(endpointJSON)")
+                            WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(serverUrl)\n")
+                            if JamfProServer.authType[whichServer] == "Bearer" {
+                                self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: base64creds)
+                            }
+                            completion((200, "success"))
+                            return
+                        } else {    // if let endpointJSON error
+                            WriteToLog().message(stringOfText: "[JamfPro.getToken] JSON error.\n\(String(describing: json))\n")
+                            JamfProServer.validToken[whichServer]  = false
+                            completion((httpResponse.statusCode, "failed"))
+                            return
                         }
-                        */
-                        
-                        JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
-                        JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
-                        JamfProServer.authType[whichServer]    = "Bearer"
-                        if wipeData.on && whichServer == "destination" {
-                            JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
-                            JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
-                            JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
-                        }
-                        
-//                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
-//                      print("[JamfPro] result of token request: \(endpointJSON)")
-                        WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(serverUrl)\n")
-                        if JamfProServer.authType[whichServer] == "Bearer" {
-                            self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: base64creds)
-                        }
-                        completion((200, "success"))
-                        return
-                    } else {    // if let endpointJSON error
-                        WriteToLog().message(stringOfText: "[JamfPro.getToken] JSON error.\n\(String(describing: json))\n")
+                    } else {    // if httpResponse.statusCode <200 or >299
+                        _ = Alert().display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
+                        WriteToLog().message(stringOfText: "[JamfPro.getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode).\n")
+                        JamfProServer.validToken[whichServer]  = false
                         completion((httpResponse.statusCode, "failed"))
                         return
                     }
-                } else {    // if httpResponse.statusCode <200 or >299
-                    _ = Alert().display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
-                    WriteToLog().message(stringOfText: "[JamfPro.getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode).\n")
-                    completion((httpResponse.statusCode, "failed"))
+                } else {
+                    _ = Alert().display(header: "\(serverUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
+                    WriteToLog().message(stringOfText: "[JamfPro.getToken] token response error from \(serverUrl).  Verify url and port.\n")
+                    JamfProServer.validToken[whichServer]  = false
+                    completion((0, "failed"))
                     return
                 }
-            } else {
-                _ = Alert().display(header: "\(serverUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
-                WriteToLog().message(stringOfText: "[JamfPro.getToken] token response error from \(serverUrl).  Verify url and port.\n")
-                completion((0, "failed"))
-                return
-            }
-        })
-        task.resume()
+            })
+            task.resume()
+        } else {
+            WriteToLog().message(stringOfText: "[JamfPro.getToken] Use existing token from \(String(describing: tokenUrl!))\n")
+            completion((200, "success"))
+            return
+        }
+        
     }
     
     func refresh(server: String, whichServer: String, b64Creds: String) {

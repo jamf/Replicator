@@ -3496,6 +3496,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
+                if itemToSite && destinationSite != "" {
+                    PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
+                }
+                
             case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
                 // migrating to another site
                 if itemToSite && destinationSite != "" {
@@ -6991,7 +6995,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
             sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
             
-        case "computers":
+        case "computers","mobiledevices":
             sitePref = "Move"
             
         default:
@@ -7022,6 +7026,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
             rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            print("rawValue: \(rawValue)")
             if LogLevel.debug { WriteToLog().message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
         } else {
             // remove current sites info
