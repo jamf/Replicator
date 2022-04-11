@@ -67,7 +67,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                    print("[versionCheck] response error: \(httpResponse.statusCode)")
+                    WriteToLog().message(stringOfText: "[versionCheck] response error: \(httpResponse.statusCode)\n")
                     completion(false)
                     return
                 }
@@ -86,15 +86,15 @@ class VersionCheck: NSObject, URLSessionDelegate {
         if available != "\(currMajor).\(currMinor).\(currPatch)\(betaVer)" {
             let (availMajor, availMinor, availPatch, availBeta, availBetaVer) = versionDetails(theVersion: available)
             if availMajor > currMajor {
-                print("availMajor: \(availMajor) \t currMajor: \(currMajor)")
+//                print("availMajor: \(availMajor) \t currMajor: \(currMajor)")
                 runningCurrent = false
             } else if availMajor == currMajor {
                 if availMinor > currMinor {
-                    print("availMinor: \(availMinor) \t currMinor: \(currMinor)")
+//                    print("availMinor: \(availMinor) \t currMinor: \(currMinor)")
                     runningCurrent = false
                 } else if availMinor == currMinor {
                     if availPatch > currPatch {
-                        print("availPatch: \(availPatch) \t currPatch: \(currPatch)")
+//                        print("availPatch: \(availPatch) \t currPatch: \(currPatch)")
                         runningCurrent = false
                     } else if availPatch == currPatch && ((runningBeta && availBeta) || (runningBeta && !availBeta))  {
                         if availBetaVer > currBeta {

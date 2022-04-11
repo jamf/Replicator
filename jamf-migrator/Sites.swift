@@ -73,8 +73,6 @@ class Sites: NSObject, URLSessionDelegate {
                 // print("httpResponse: \(String(describing: response))")
                 
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                    print(httpResponse.statusCode)
-                    
                     do {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                         //                    print("\(json)")
@@ -99,7 +97,6 @@ class Sites: NSObject, URLSessionDelegate {
                     completion(destSiteArray)
                 } else {
                     // something went wrong
-                    print(httpResponse.statusCode)
                     WriteToLog().message(stringOfText: "[Sites] Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)\n")
                     self.vc.alert_dialog(header: "Alert", message: "Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
                     

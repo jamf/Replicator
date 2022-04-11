@@ -3131,12 +3131,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             WriteToLog().message(stringOfText: "[ViewController.processFiles] JSON file for \(l_name) successfully parsed.\n")
                                         } else {
                                             WriteToLog().message(stringOfText: "[ViewController.processFiles] JSON file \(objectInfo) failed to parse.\n")
-                                            print("issue with string format, not json")
+//                                            print("issue with string format, not json")
                                             action = "skip"
                                         }
                                     } catch let error as NSError {
                                         WriteToLog().message(stringOfText: "[ViewController.processFiles] file \(objectInfo) failed to parse.\n")
-                                        print(error)
+//                                        print(error)
                                         action = "skip"
                                     }
                                     
@@ -4706,7 +4706,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
                     if endpointCurrent == endpointCount {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.\n") }
-                        self.nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
+                        self.nodesMigrated+=1
+                        // print("added node: \(localEndPointType) - createEndpoints")
     //                    print("nodes complete: \(self.nodesMigrated)")
                     }
                 }
@@ -4925,7 +4926,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         if endpointCurrent == endpointCount {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
-            nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
+            nodesMigrated+=1
+            // print("added node: \(localEndPointType) - removeEndpoints")
             //            print("remove nodes complete: \(nodesMigrated)")
         }
     }   // func removeEndpoints - end
@@ -6243,17 +6245,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     var policyIconDict = iconfiles.policyDict
                                     Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
-                                        print("[icons] result of Json().getRecord: \(result)")
+//                                        print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
                                         
 //                                        if !setting.csa {
                                             if result.count > 0 {
                                                 let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
-                                                print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
+//                                                print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
                                                 let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
                                                 newSelfServiceIconId = selfServiceIconDict["id"] as? String ?? ""
     //                                            newSelfServiceIconId = "\(String(describing: selfServiceIconDict["id"]!))"
-                                                print("new self service icon id: \(newSelfServiceIconId)")
+//                                                print("new self service icon id: \(newSelfServiceIconId)")
     //                                        print("icon \(ssIconId) policyIconDict: \(String(describing: policyIconDict["\(ssIconId)"]?["destinationIconId"]))")
     //                                        print("icon \(ssIconId) iconfiles.policyDict: \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"]))")
                                                 if newSelfServiceIconId != "" {
@@ -6277,14 +6279,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] after updating policy with icon id.\n") }
                                             
                                                 if result > 199 && result < 300 {
-                                                    print("successfully used new icon id \(newSelfServiceIconId)")
+                                                    WriteToLog().message(stringOfText: "[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)\n")
                                                 }
                                             }
 //                                        }
                                         
                                     }
                                 } else {
-                                    print("using new icon id from destination server")
+                                    WriteToLog().message(stringOfText: "[ViewController.icons] using new icon id from destination server\n")
                                     newSelfServiceIconId = iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!
                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
         //                                            print("iconXml: \(iconXml)")
@@ -6294,7 +6296,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after updating policy with icon id.\n") }
                                         
                                             if result > 199 && result < 300 {
-                                                print("successfully used existing icon id")
+                                                WriteToLog().message(stringOfText: "[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)\n")
                                             }
                                         }
                                 }
@@ -7026,7 +7028,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
             rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
-            print("rawValue: \(rawValue)")
             if LogLevel.debug { WriteToLog().message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)\n") }
         } else {
             // remove current sites info
