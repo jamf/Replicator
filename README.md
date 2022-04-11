@@ -154,6 +154,13 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.1**
+
+* Fix site lookups (migrating to a site) when using bearer token.
+* Fix issue where categories were not created when need be during dependency migration (policies).
+* Update version check alert to focus on new version if available.
+* Add warning about not being able to use Save Only while in delete mode.
+
 **v6.2.0**
 
 * Fix filenames that get characters xml encoded when importing files.
