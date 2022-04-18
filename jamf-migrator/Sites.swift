@@ -12,22 +12,21 @@ class Sites: NSObject, URLSessionDelegate {
     
     let vc           = ViewController()
     var resourcePath = ""
-    var token        = ""
+    var base64Creds  = ""
 
-    func fetch(server: String, creds: String, completion: @escaping ([String]) -> Void) {
+    func fetch(server: String, creds: String, completion: @escaping ((Int,[String])) -> Void) {
         
         var siteArray = [String]()
 //        var siteDict  = Dictionary<String, Any>()
-        token         = Data("\(creds)".utf8).base64EncodedString()
+        base64Creds   = Data("\(creds)".utf8).base64EncodedString()
         
         if "\(server)" == "" {
             vc.alert_dialog(header: "Attention:", message: "Destination Jamf server is required.")
-            completion(siteArray)
+            completion((0,siteArray))
         }
-        
         if "\(creds)" == ":" {
             vc.alert_dialog(header: "Attention:", message: "Destination credentials are required.")
-            completion(siteArray)
+            completion((401,siteArray))
         }
         
         resourcePath = "\(server)/JSSResource/sites"
@@ -35,7 +34,7 @@ class Sites: NSObject, URLSessionDelegate {
         
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
-        JamfPro().getVersion(whichServer: "destination", jpURL: server, basicCreds: token, localSource: false) { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
             (authResult: (Int,String)) in
             let (authStatusCode, _) = authResult
 
@@ -43,13 +42,12 @@ class Sites: NSObject, URLSessionDelegate {
                 getSites() {
                     (result: [String]) in
                     siteArray = result
-
-                    completion(siteArray)
+                    completion((authStatusCode,siteArray))
                     return siteArray
                 }
             } else {
-                completion(siteArray)
-//                return siteArray
+                WriteToLog().message(stringOfText: "[Sites] Failed to authenticate to \(server), no sites returned\n")
+                completion((authStatusCode,siteArray))
             }
         }
     }

@@ -160,6 +160,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * Fix issue where categories were not created when need be during dependency migration (policies).
 * Update version check alert to focus on new version if available.
 * Add warning about not being able to use Save Only while in delete mode.
+* Add ability to migrate iOS devices to a site on the same server.
 
 **v6.2.0**
 

@@ -512,6 +512,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var isDir: ObjCBool = false
 
         resetAllCheckboxes()
+        clearProcessingFields()
+        self.generalSectionToMigrate_button.selectItem(at: 0)
+        self.sectionToMigrate_button.selectItem(at: 0)
+        self.iOSsectionToMigrate_button.selectItem(at: 0)
+        self.selectiveFilter_TextField.stringValue = ""
         
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
@@ -537,9 +542,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             DispatchQueue.main.async {
                 wipeData.on = true
                 self.selectiveTabelHeader_textview.stringValue = "Select object(s) to remove from the destination"
-                setting.migrateDependencies       = false
-                self.migrateDependencies.state    = NSControl.StateValue(rawValue: 0)
-                self.migrateDependencies.isHidden = true
+                setting.migrateDependencies        = false
+                self.migrateDependencies.state     = NSControl.StateValue(rawValue: 0)
+                self.migrateDependencies.isHidden  = true
                 if self.srcSrvTableView.isEnabled {
                     self.sourceDataArray.removeAll()
                     self.srcSrvTableView.stringValue = ""
@@ -1046,20 +1051,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         var destinationURL = URL(string: "")
                         
                         // check authentication - start
-                        JamfPro().getVersion(whichServer: "source", jpURL: self.source_jp_server, basicCreds: self.sourceBase64Creds, localSource: self.fileImport) {
+                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) {
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "Source server authentication failure.\n") }
+                                
+                                pref.stopMigration = true
+                                goButtonEnabled(button_status: true)
+                                
                                 return
                             } else {
                                 self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                                 
-                                JamfPro().getVersion(whichServer: "destination", jpURL: self.dest_jp_server, basicCreds: self.destBase64Creds, localSource: self.fileImport) {
+                                JamfPro().getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) {
                                     (authResult: (Int,String)) in
                                     let (authStatusCode, _) = authResult
                                     if !pref.httpSuccess.contains(authStatusCode) {
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "Destination server authentication failure.\n") }
+                                        
+                                        pref.stopMigration = true
+                                        goButtonEnabled(button_status: true)
+                                        
                                         return
                                     } else {
                                         
@@ -1133,9 +1146,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             // verify source server URL - end
                                         }
                                     } // else dest auth
-                                }   // self.authCheck(whichServer: "dest" - end
+                                }   // JamfPro().getToken(whichServer: "destination" - end
                             }   // else check dest URL auth - end
-                        }   // self.authCheck(whichServer: "source" - end
+                        }   // JamfPro().getToken(whichServer: "source" - end
 
                 // check authentication - end
                     }   // checkURL2 (destination server) - end
@@ -1967,6 +1980,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
 //             ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            
             configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -1993,16 +2007,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
 
                                         if endpointCount > 0 {
-                                            
-//                                            print("[ViewController.getEndpoints] self.source_jp_server: \(self.source_jp_server)")
 
                                             self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
                                                 (result: (String,String)) in
                                                 let (resultMessage, _) = result
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)\n") }
-//                                                print("[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)")
-//
-
+                                                
                                                 for i in (0..<endpointCount) {
                                                     if i == 0 { self.availableObjsToMigDict.removeAll() }
 
@@ -4909,6 +4919,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if endpointCount == endpointCurrent {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            JamfProServer.validToken["source"] = false
+                            JamfProServer.version["source"]    = ""
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)\n") }
 //                            print("[removeEndpoints] endpoint: \(endpointType)")
 //                            self.resetAllCheckboxes()
@@ -5702,14 +5714,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
             
-            Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") {
-                (result: [String]) in
-                let destSitesArray = result
-                if destSitesArray.count == 0 {self.destinationLabel_TextField.stringValue = "Site Name"
-                    // no sites found - allow migration from a site to none
-                    self.availableSites_button.addItems(withTitles: ["None"])
-                    self.availableSites_button.isEnabled = true
-                }
+            Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
+                (result: (Int,[String])) in
+                let (httpStatus, destSitesArray) = result
+                if pref.httpSuccess.contains(httpStatus) {
+                    if destSitesArray.count == 0 {destinationLabel_TextField.stringValue = "Site Name"
+                        // no sites found - allow migration from a site to none
+                        availableSites_button.addItems(withTitles: ["None"])
+                    }
                     self.destinationLabel_TextField.stringValue = "Site Name"
                     self.availableSites_button.addItems(withTitles: ["None"])
                     for theSite in destSitesArray {
@@ -5721,11 +5733,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.sitesSpinner_ProgressIndicator.stopAnimation(self)
                         self.siteMigrate_button.isEnabled = true
                     }
+                } else {
+                    self.destinationLabel_TextField.stringValue = "Destination"
+                    self.availableSites_button.isEnabled = false
+                    self.destinationSite = ""
+                    itemToSite = false
+                    DispatchQueue.main.async {
+                        self.sitesSpinner_ProgressIndicator.stopAnimation(self)
+                        self.siteMigrate_button.isEnabled = true
+                        self.siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
+                    }
+                }
             }
             
         } else {
             destinationLabel_TextField.stringValue = "Destination"
             self.availableSites_button.isEnabled = false
+            self.availableSites_button.removeAllItems()
             destinationSite = ""
             itemToSite = false
             DispatchQueue.main.async {
@@ -5813,12 +5837,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     func clearProcessingFields() {
         DispatchQueue.main.async {
-            self.get_name_field.stringValue             = ""
-//            self.get_completed_field.stringValue        = ""
-//            self.get_found_field.stringValue            = ""
-            self.put_name_field.stringValue          = ""
-//            self.objects_completed_field.stringValue    = ""
-//            self.objects_found_field.stringValue        = ""
+            self.get_name_field.stringValue    = ""
+            self.put_name_field.stringValue    = ""
 
             self.getSummary_label.stringValue  = ""
             self.get_levelIndicator.floatValue = 0.0
@@ -5839,6 +5859,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.generalSectionToMigrate_button.selectItem(at: 0)
                 self.sectionToMigrate_button.selectItem(at: 0)
                 self.iOSsectionToMigrate_button.selectItem(at: 0)
+                self.selectiveFilter_TextField.stringValue = ""
 
                 self.objectsToMigrate.removeAll()
                 self.sourceDataArray.removeAll()
@@ -5852,6 +5873,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.srcSrvTableView.isEnabled = true
             }
         }
+    }
+    
+    func serverChanged(whichserver: String) {
+        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
+            srcSrvTableView.isEnabled = true
+            clearSelectiveList()
+            clearProcessingFields()
+        }
+        JamfProServer.version[whichserver] = ""
+        JamfProServer.validToken[whichserver] = false
     }
     
     // which platform mode tab are we on - start
@@ -7200,7 +7231,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
         }
     }
-
+    
     func setConcurrentThreads() -> Int {
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
 //        print("[ViewController] ConcurrentThreads: \(concurrent)")
@@ -7287,19 +7318,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
+        self.selectiveListCleared = false
         switch sender.tag {
         case 0:
             if self.source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
                 // source server changed, clear list of objects
-                clearSelectiveList()
+//                clearSelectiveList()
+                serverChanged(whichserver: "source")
             }
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
         case 1:
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
                 // source server changed, clear list of objects
-                self.selectiveListCleared = false
-                clearSelectiveList()
+//                clearSelectiveList()
+                serverChanged(whichserver: "destination")
             }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)

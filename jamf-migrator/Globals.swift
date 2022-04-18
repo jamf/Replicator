@@ -50,9 +50,10 @@ struct JamfProServer {
     static var authExpires  = ["source":"", "destination":""]
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
     static var validToken   = ["source":false, "destination":false]
-    static var sourceServer = ""
-    static var sourceCreds  = ""
-    static var sourceToken  = ""
+    static var version      = ["source":"", "destination":""]
+//    static var sourceServer = ""
+//    static var sourceCreds  = ""
+//    static var sourceToken  = ""
 }
 
 struct LogLevel {
