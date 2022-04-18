@@ -1,6 +1,6 @@
 # Jamf Migrator
 
-Current release Download: [Jamf Migrator](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/current/jamf-migrator.zip)
+Current release Download: [Jamf Migrator](https://github.com/jamfprofessionalservices/JamfMigrator/releases/download/v6.2.2/jamf-migrator.zip)
 
 A tool to migrate data granularly between Jamf Pro servers
 
