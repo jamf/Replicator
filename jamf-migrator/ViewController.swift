@@ -5797,7 +5797,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             authQ.sync {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[checkURL2] checking: \(serverURL)\n") }
                 
-                var healthCheckURL = "\(serverURL)/healthCheck.html)"
+                var healthCheckURL = "\(serverURL)/healthCheck.html"
                 healthCheckURL = healthCheckURL.replacingOccurrences(of: "//healthCheck.html", with: "/healthCheck.html")
                 
                 guard let encodedURL = URL(string: healthCheckURL) else {
