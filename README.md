@@ -154,6 +154,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.2**
+
+* Better visual response when changing source/destination server.
+* Fix authentication issue that resulted when the Jamf Pro web app was disabled.
+
 **v6.2.1**
 
 * Fix site lookups (migrating to a site) when using bearer token.
