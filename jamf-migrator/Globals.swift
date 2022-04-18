@@ -49,11 +49,9 @@ struct JamfProServer {
     static var authCreds    = ["source":"", "destination":""]
     static var authExpires  = ["source":"", "destination":""]
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
+    static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
     static var validToken   = ["source":false, "destination":false]
     static var version      = ["source":"", "destination":""]
-//    static var sourceServer = ""
-//    static var sourceCreds  = ""
-//    static var sourceToken  = ""
 }
 
 struct LogLevel {

@@ -39,7 +39,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         
-        if !(JamfProServer.validToken[whichServer] ?? false) {
+        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
             
             configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
@@ -55,6 +55,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                             JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
                             JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
                             JamfProServer.authType[whichServer]    = "Bearer"
+                            JamfProServer.base64Creds[whichServer] = base64creds
                             if wipeData.on && whichServer == "destination" {
                                 JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
                                 JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
