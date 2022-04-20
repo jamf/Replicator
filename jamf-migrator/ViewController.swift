@@ -268,6 +268,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // Source and destination buttons
     @IBOutlet weak var sourceServerPopup_button: NSPopUpButton!
     @IBOutlet weak var destServerPopup_button: NSPopUpButton!
+    @IBOutlet weak var disableExportOnly_button: NSButton!
     
     // GET and POST/PUT (DELETE) fields
     @IBOutlet weak var get_name_field: NSTextField!
@@ -1063,6 +1064,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 return
                             } else {
                                 self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
+                                // update keychain, if marked to save creds
+                                if !wipeData.on {
+                                    print("update source server creds")
+                                    if self.storeCredentials_button.state.rawValue == 1 {
+                                        self.Creds2.save(service: "migrator - "+self.source_jp_server.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+                                        self.storedSourceUser = self.source_user_field.stringValue
+                                    }
+                                }
                                 
                                 JamfPro().getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) {
                                     (authResult: (Int,String)) in
@@ -1075,7 +1084,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         
                                         return
                                     } else {
-                                        
+                                        // update keychain, if marked to save creds
+                                        if !export.saveOnly {
+                                            print("update destination server creds")
+                                            if self.storeCredentials_button.state.rawValue == 1 {
+                                                self.Creds2.save(service: "migrator - "+self.dest_jp_server.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
+                                                self.storedDestUser = self.dest_user_field.stringValue
+                                            }
+                                        }
                                         // determine if the cloud services connection is enabled
                                         Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
                                             (returnedJSON: [String:Any]) in
@@ -6968,6 +6984,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
     }
     
+    @IBAction func disableExportOnly_action(_ sender: Any) {
+        export.saveOnly = false
+        plistData["xml"] = ["saveRawXml":export.saveRawXml,
+                                "saveTrimmedXml":export.saveTrimmedXml,
+                                "saveOnly":export.saveOnly,
+                                "saveRawXmlScope":export.rawXmlScope,
+                                "saveTrimmedXmlScope":export.trimmedXmlScope]
+        savePrefs(prefs: plistData)
+        disableSource()
+    }
+    
+    
+    func disableSource() {
+        DispatchQueue.main.async {
+            self.dest_jp_server_field.isEnabled     = !export.saveOnly
+            self.destServerList_button.isEnabled    = !export.saveOnly
+            self.dest_user_field.isEnabled          = !export.saveOnly
+            self.dest_pwd_field.isEnabled           = !export.saveOnly
+            self.siteMigrate_button.isEnabled       = !export.saveOnly
+            self.disableExportOnly_button.isHidden  = !export.saveOnly
+        }
+    }
+    
     func savePrefs(prefs: [String:Any]) {
         plistData            = readSettings()
         plistData["scope"]   = prefs["scope"]
@@ -7664,7 +7703,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 export.saveRawXml                   = false
                 xmlPrefOptions["saveRawXml"] = export.saveRawXml
             }
-
+            
             if (xmlPrefOptions["saveTrimmedXml"] != nil) {
                 export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
             } else {
@@ -7678,6 +7717,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 export.saveOnly                   = false
                 xmlPrefOptions["saveOnly"] = export.saveOnly
             }
+            disableSource()
             
             if xmlPrefOptions["saveRawXmlScope"] == nil {
                 xmlPrefOptions["saveRawXmlScope"] = true

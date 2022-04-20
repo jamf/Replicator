@@ -2078,7 +2078,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="161"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="159"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="159"/>
@@ -2492,6 +2492,17 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aAP-FX-iSM">
+                                <rect key="frame" x="623" y="400" width="126" height="19"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="roundRect" title="Disable Export Only" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="IV6-bD-fgH">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="cellTitle"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="disableExportOnly_action:" target="XfG-lQ-9wD" id="tj1-st-515"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="top" secondItem="B8I-Gu-YOQ" secondAttribute="bottom" constant="18" id="08l-Tr-GMx"/>
@@ -2646,6 +2657,7 @@
                         <outlet property="destinationMethod_TextField" destination="7oa-bJ-2d1" id="1bu-JH-HFY"/>
                         <outlet property="directory_bindings_button" destination="tfr-3a-8nS" id="Me9-JY-iHK"/>
                         <outlet property="directory_bindings_field" destination="Jh1-S4-tyb" id="6iu-zl-ABJ"/>
+                        <outlet property="disableExportOnly_button" destination="aAP-FX-iSM" id="TWt-yk-eFw"/>
                         <outlet property="disk_encryptions_button" destination="ZNF-kE-Dab" id="rTI-yI-3Wa"/>
                         <outlet property="disk_encryptions_field" destination="Myf-Ot-UmX" id="nKq-gg-IH3"/>
                         <outlet property="dock_items_button" destination="864-jA-QKf" id="XMw-sV-FPV"/>
