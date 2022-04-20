@@ -149,6 +149,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         renewQ.async { [self] in
 //        sleep(1200) // 20 minutes
             sleep(token.refreshInterval)
+            JamfProServer.validToken[whichServer] = false
             getToken(whichServer: whichServer, serverUrl: server, base64creds: b64Creds, localSource: localSource) {
                 (result: (Int, String)) in
 //                print("[JamfPro.refresh] returned: \(result)")
