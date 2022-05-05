@@ -157,14 +157,9 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 **v6.2.4**
 
 * Fix credentials/servers not being saved.
+* Fix token not refreshing.
 * Disable destination server/credential fields if export only is detected at launch.
 * Add disable export only button if setting is detected at app launch.  Button does not disable xml export, only the export only option.
-
-**v6.2.3**
-
-* Fix token not refreshing.
-* Fix credentials not saving to the keychain, when enabled, and servers not saving to the list of connected servers.
-* Added button to disable export only mode if setting is detected at launch.  Does not disable save raw/trimmed xml.
 
 **v6.2.2**
 
