@@ -154,6 +154,12 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.4**
+
+* Fix credentials/servers not being saved.
+* Disable destination server/credential fields if export only is detected at launch.
+* Add disable export only button if setting is detected at app launch.  Button does not disable xml export, only the export only option.
+
 **v6.2.3**
 
 * Fix token not refreshing.
