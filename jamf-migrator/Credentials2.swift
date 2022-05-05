@@ -16,7 +16,6 @@ let kSecClassGenericPasswordString = NSString(format: kSecClassGenericPassword)
 class Credentials2 {
     
     func save(service: String, account: String, data: String) {
-        print("save keychain service: \(service)")
         
         if let password = data.data(using: String.Encoding.utf8) {
             var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
@@ -53,7 +52,6 @@ class Credentials2 {
     func retrieve(service: String) -> [String] {
         
         var storedCreds = [String]()
-        print("retrieve keychain service: \(service)")
         
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
                                             kSecAttrService as String: service,

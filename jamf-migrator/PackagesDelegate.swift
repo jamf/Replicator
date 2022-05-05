@@ -42,9 +42,17 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
                 destSession.finishTasksAndInvalidate()
+                
+                if LogLevel.debug {
+                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] jsonRequest: \(String(describing: jsonRequest.url!))\n")
+                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] response: \(String(describing: response))\n")
+                    if let _ = response as? HTTPURLResponse {
+                        WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] data: \(String(describing: String(data:data!, encoding: .utf8)))\n\n")
+                    }
+                }
+                
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-//                                    do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let destEndpointJSON = json as? [String: Any] {
 //                                print("[PackagesDelegate.getFilename] destEndpointJSON: \(String(describing: destEndpointJSON))")
@@ -58,7 +66,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                     completion((httpResponse.statusCode,returnedName))
                                 }
                             }
-//                                    }
                     } else {
                         WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)\n")
 //                        print("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)\n")
@@ -66,7 +73,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         
                     }
                 } else {
-                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error getting JSON for \(existingDestUrl)\n")
+                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error with response from \(String(describing: jsonRequest.url!))\n")
                     completion((0,""))
                 }   // if let httpResponse - end
                 semaphore.signal()

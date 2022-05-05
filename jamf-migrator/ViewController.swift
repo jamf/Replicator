@@ -527,6 +527,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.srcSrvTableView.stringValue = ""
                 self.srcSrvTableView.reloadData()
                 self.selectiveListCleared = true
+                
+                
+                
+                
                 _ = serverOrFiles()
             }
             catch let error as NSError {
@@ -1066,7 +1070,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                                 // update keychain, if marked to save creds
                                 if !wipeData.on {
-                                    print("update source server creds")
                                     if self.storeCredentials_button.state.rawValue == 1 {
                                         self.Creds2.save(service: "migrator - "+self.source_jp_server.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
                                         self.storedSourceUser = self.source_user_field.stringValue
@@ -1086,7 +1089,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     } else {
                                         // update keychain, if marked to save creds
                                         if !export.saveOnly {
-                                            print("update destination server creds")
                                             if self.storeCredentials_button.state.rawValue == 1 {
                                                 self.Creds2.save(service: "migrator - "+self.dest_jp_server.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
                                                 self.storedDestUser = self.dest_user_field.stringValue
@@ -4918,6 +4920,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
                             // check for file that allows deleting data from destination server, delete if found - start
                             self.rmDELETE()
+                            JamfProServer.validToken["source"] = false
+                            JamfProServer.version["source"]    = ""
 //                            print("[removeEndpoints] endpoint: \(endpointType)")
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)\n") }
 //                            self.resetAllCheckboxes()

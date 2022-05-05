@@ -27,6 +27,7 @@ struct export {
     static var saveOnly        = false
     static var rawXmlScope     = true
     static var trimmedXmlScope = true
+    static var backupMode      = false
 }
 
 struct History {

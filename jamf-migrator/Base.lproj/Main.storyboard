@@ -2492,9 +2492,8 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aAP-FX-iSM">
+                            <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aAP-FX-iSM">
                                 <rect key="frame" x="623" y="400" width="126" height="19"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="roundRect" title="Disable Export Only" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="IV6-bD-fgH">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="cellTitle"/>
@@ -2571,6 +2570,7 @@
                             <constraint firstItem="qDb-1R-ECk" firstAttribute="top" secondItem="FmU-Bg-tM4" secondAttribute="bottom" constant="2" id="bRD-yb-xOz"/>
                             <constraint firstItem="bKr-H7-03S" firstAttribute="leading" secondItem="DjG-yq-DnX" secondAttribute="trailing" constant="-28" id="cLe-NE-V0i"/>
                             <constraint firstItem="nNc-Ty-fZF" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="222" id="cqO-NZ-BEa"/>
+                            <constraint firstItem="aAP-FX-iSM" firstAttribute="top" secondItem="Kb9-jI-pZI" secondAttribute="bottom" constant="9" id="d3d-1o-IDz"/>
                             <constraint firstItem="ih0-OH-DT1" firstAttribute="top" secondItem="xlC-Th-zKf" secondAttribute="bottom" id="dNz-7N-DZN"/>
                             <constraint firstItem="b9W-KL-Gg4" firstAttribute="leading" secondItem="Uw9-pw-Waq" secondAttribute="trailing" constant="2" id="dme-8H-Ww5"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="bottom" secondItem="Kb9-jI-pZI" secondAttribute="bottom" id="e2J-6r-Ld8"/>
@@ -2623,6 +2623,7 @@
                             <constraint firstItem="ynJ-S6-o1y" firstAttribute="leading" secondItem="v1E-Y8-MAn" secondAttribute="leading" constant="2" id="xpf-tS-s27"/>
                             <constraint firstItem="XlU-vN-bbJ" firstAttribute="top" secondItem="0Aq-h1-aGw" secondAttribute="top" constant="-3" id="yRz-Mf-Z46"/>
                             <constraint firstItem="vfR-O9-7xw" firstAttribute="top" secondItem="XlU-vN-bbJ" secondAttribute="bottom" constant="7" id="yis-jh-hy2"/>
+                            <constraint firstItem="aAP-FX-iSM" firstAttribute="leading" secondItem="U40-E2-DvW" secondAttribute="trailing" constant="18" id="z1U-iY-Ycl"/>
                         </constraints>
                     </view>
                     <connections>

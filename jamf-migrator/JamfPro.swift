@@ -18,7 +18,6 @@ class JamfPro: NSObject, URLSessionDelegate {
 
         if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "destination" && !export.saveOnly)) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(serverUrl)\n")
-//        if wipeData.on && whichServer == "source" {
             completion((200, "success"))
             return
         }
@@ -103,7 +102,8 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                 WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic\n")
                                             }
                                             if JamfProServer.authType[whichServer] == "Bearer" {
-                                                self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: base64creds, localSource: localSource)
+                                                WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
+                                                self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
                                             }
                                             completion((200, "success"))
                                             return
@@ -112,6 +112,10 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 }
                                 // get Jamf Pro version - end
                             } else {
+                                if JamfProServer.authType[whichServer] == "Bearer" {
+                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
+                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
+                                }
                                 completion((200, "success"))
                                 return
                             }
@@ -150,7 +154,7 @@ class JamfPro: NSObject, URLSessionDelegate {
 //        sleep(1200) // 20 minutes
             sleep(token.refreshInterval)
             JamfProServer.validToken[whichServer] = false
-            getToken(whichServer: whichServer, serverUrl: server, base64creds: b64Creds, localSource: localSource) {
+            getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
                 (result: (Int, String)) in
 //                print("[JamfPro.refresh] returned: \(result)")
             }
