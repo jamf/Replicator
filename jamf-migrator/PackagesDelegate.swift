@@ -10,12 +10,13 @@ import Foundation
 
 class PackagesDelegate: NSObject, URLSessionDelegate {
     // get the package filename, rather than display name
-    func getFilename(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, completion: @escaping (_ result: (Int,String)) -> Void) {
+    func getFilename(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, currentTry: Int, completion: @escaping (_ result: (Int,String)) -> Void) {
 
 //        if skip {
 //            completion((theEndpointID,""))
 //            return
 //        }
+        let maxTries   = 4
         let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
     
         URLCache.shared.removeAllCachedResponses()
@@ -52,6 +53,8 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                 }
                 
                 if let httpResponse = response as? HTTPURLResponse {
+//                if (response as? HTTPURLResponse != nil) && !(currentTry < 5 && theEndpointID == 75) {
+//                    let httpResponse = response as! HTTPURLResponse
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let destEndpointJSON = json as? [String: Any] {
@@ -73,8 +76,20 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         
                     }
                 } else {
-                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error with response from \(String(describing: jsonRequest.url!))\n")
-                    completion((0,""))
+                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))\n")
+                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)\n")
+                    if currentTry < maxTries {
+                        self.getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: theEndpointID, skip: false, currentTry: currentTry+1) {
+                        (result: (Int,String)) in
+                            let (resultCode,returnedName) = result
+//                            print("[PackagesDelegate.getFilename] got filename (\(returnedName)) for package ID \(theEndpointID) on try \(currentTry+1)\n")
+                            if returnedName != "" {
+                                completion((resultCode,returnedName))
+                            }
+                        }
+                    } else {
+                        completion((0,""))
+                    }
                 }   // if let httpResponse - end
                 semaphore.signal()
                 if error != nil {
@@ -94,24 +109,29 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         var existingNameId        = currentPackageNamesIDs
         var duplicatePackagesDict = currentDuplicates
         
-        var message = ""
+//        var message     = ""
         var lookupCount = 0
+        
         let packageCount = packageIDsNames.count
             
         for (packageID, packageName) in packageIDsNames {
-            getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false) { [self]
+            getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false, currentTry: 3) { [self]
                 (result: (Int,String)) in
                 lookupCount += 1
 //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
                 let (resultCode,packageFilename) = result
+//                if pref.httpSuccess.contains(resultCode) && !(currentTry == 1 && (packageName == "connection package 2" || packageName == "connection package 3")) { // for testing
                 if pref.httpSuccess.contains(resultCode) {
-                    
+                    // found name, remove from list
                     packageIDsNames[packageID] = nil
 
                     if packageFilename != "" && existingNameId[packageFilename] == nil {
-//                        print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
-                        existingNameId[packageFilename] = packageID
+                        print("add package to dict")
+//                      print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
+                        existingNameId[packageFilename]        = packageID
+                        // used to check for duplicates: duplicatePackagesDict[packageFilename].count > 1?
                         duplicatePackagesDict[packageFilename] = [packageName]
+//                      WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
                     } else {
                         if packageFilename != "" {
                             duplicatePackagesDict[packageFilename]!.append(packageName)
@@ -119,50 +139,65 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup filename for \(packageName)\n")
                         }
 
-//                        print("[PackageDelegate.filenameIdDict] Duplicate package filename found on \(theServer): \(packageFilename), id: \(packageID)\n")
-//                                                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
                         if wipeData.on {
                             existingNameId[packageName] = packageID
                         }
                     }
                 } else {  // if pref.httpSuccess.contains(resultCode) - end
-//                    print("[PackageDelegate.filenameIdDict] failed looking up \(packageName)")
+//                  print("[PackageDelegate.filenameIdDict] failed looking up \(packageName)")
                     WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup \(packageName).  Status code: \(resultCode)\n")
                 }
                 // looked up last package in list
+                print("           currentTry: \(currentTry)")
+                print("             maxTries: \(maxTries+1)")
+                print("packageIDsNames.count: \(packageIDsNames.count)")
+                JamfProServer.pkgsNotFound = packageIDsNames.count
                 if lookupCount == packageCount {
-//                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
-                    
+                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
                     if currentTry < maxTries+1 && packageIDsNames.count > 0 {
+                        WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] \(packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)\n")
                         filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
                             (result: [String:Int]) in
+                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] returned from retry \(currentTry)\n")
+                            print("               currentTry1: \(currentTry)")
+                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
+                            if JamfProServer.pkgsNotFound == 0 || currentTry >= maxTries {
+                                print("call out dups and completion")
+                                self.callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
+                                completion(existingNameId)
+                            }
                         }
                     } else {
                         // call out duplicates
-                        for (pkgFilename, displayNames) in duplicatePackagesDict {
-                            if displayNames.count > 1 {
-                                for dup in displayNames {
-                                    message = "\(message)\t\(pkgFilename) : \(dup)\n"
-                                }
-                            }
-                        }
-                        if message != "" {
-                            message = "\tFilename : Display Name\n\(message)"
-                            
-                            if !wipeData.on {
-                                WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
-                                let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
-                                if theButton == "Stop" {
-                                    pref.stopMigration = true
-    //                                ViewController().stopButton(self)
-                                }
-                            }
-//                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
-                        }
+                        callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                         completion(existingNameId)
                     }
+                }   // if lookupCount == packageIDsNames.count - end
+            }   // getFilename(whichServer: - end
+        }   // for (packageID, packageName) - end
+    }
+    
+    func callOutDuplicates(duplicatesDict: [String:[String]], theServer: String) {
+        // call out duplicates
+        var message = ""
+        for (pkgFilename, displayNames) in duplicatesDict {
+            if displayNames.count > 1 {
+                for dup in displayNames {
+                    message = "\(message)\t\(pkgFilename) : \(dup)\n"
                 }
             }
-        }   // for (packageID, packageName) - end
+        }
+        if message != "" {
+            message = "\tFilename : Display Name\n\(message)"
+            
+            if !wipeData.on {
+                WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
+                let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                if theButton == "Stop" {
+                    pref.stopMigration = true
+                }
+            }
+//                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
+        }
     }
 }

@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 struct appInfo {
     static let dict    = Bundle.main.infoDictionary!
     static let version = dict["CFBundleShortVersionString"] as! String
@@ -53,6 +52,7 @@ struct JamfProServer {
     static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
     static var validToken   = ["source":false, "destination":false]
     static var version      = ["source":"", "destination":""]
+    static var pkgsNotFound = 0
 }
 
 struct LogLevel {
