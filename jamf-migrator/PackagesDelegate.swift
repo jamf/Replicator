@@ -17,7 +17,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //            return
 //        }
         let maxTries   = 4
-        let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
+        let getRecordQ = OperationQueue()
     
         URLCache.shared.removeAllCachedResponses()
         var existingDestUrl = ""
@@ -26,17 +26,17 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         existingDestUrl = existingDestUrl.urlFix
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] Looking up: \(existingDestUrl)\n") }
-//                    if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
+
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
         
-        let semaphore = DispatchSemaphore(value: 1)
         getRecordQ.maxConcurrentOperationCount = 3
+        let semaphore = DispatchSemaphore(value: 0)
         getRecordQ.addOperation {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
-//           = ["Authorization" : "Basic \(base64Creds)", "Accept" : "application/json"]
+
             destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType[whichServer]!)) \(String(describing: JamfProServer.authCreds[whichServer]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             
@@ -55,7 +55,8 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                 if let httpResponse = response as? HTTPURLResponse {
 //                if (response as? HTTPURLResponse != nil) && !(currentTry < 5 && theEndpointID == 75) {
 //                    let httpResponse = response as! HTTPURLResponse
-                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                    if pref.httpSuccess.contains(httpResponse.statusCode) {
+//                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let destEndpointJSON = json as? [String: Any] {
 //                                print("[PackagesDelegate.getFilename] destEndpointJSON: \(String(describing: destEndpointJSON))")
@@ -99,6 +100,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             task.resume()
             semaphore.wait()
         }   // getRecordQ - end
+//        getRecordQ.waitUntilAllOperationsAreFinished()
     }
     
     func filenameIdDict(whichServer: String, theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
@@ -126,7 +128,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                     packageIDsNames[packageID] = nil
 
                     if packageFilename != "" && existingNameId[packageFilename] == nil {
-                        print("add package to dict")
+//                        print("add package to dict")
 //                      print("[PackageDelegate.filenameIdDict] add \(packageFilename) to package dict")
                         existingNameId[packageFilename]        = packageID
                         // used to check for duplicates: duplicatePackagesDict[packageFilename].count > 1?
@@ -148,21 +150,21 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                     WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup \(packageName).  Status code: \(resultCode)\n")
                 }
                 // looked up last package in list
-                print("           currentTry: \(currentTry)")
-                print("             maxTries: \(maxTries+1)")
-                print("packageIDsNames.count: \(packageIDsNames.count)")
+//                print("           currentTry: \(currentTry)")
+//                print("             maxTries: \(maxTries+1)")
+//                print("packageIDsNames.count: \(packageIDsNames.count)")
                 JamfProServer.pkgsNotFound = packageIDsNames.count
                 if lookupCount == packageCount {
-                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
+//                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
                     if currentTry < maxTries+1 && packageIDsNames.count > 0 {
                         WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] \(packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)\n")
                         filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
                             (result: [String:Int]) in
                             WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] returned from retry \(currentTry)\n")
-                            print("               currentTry1: \(currentTry)")
-                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
+//                            print("               currentTry1: \(currentTry)")
+//                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
                             if JamfProServer.pkgsNotFound == 0 || currentTry >= maxTries {
-                                print("call out dups and completion")
+//                                print("call out dups and completion")
                                 self.callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                                 completion(existingNameId)
                             }
