@@ -116,7 +116,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     let Creds2           = Credentials2()
     var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
+    var storedSourcePwd  = ""       // source user account password stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
+    var storedDestPwd    = ""       // destination user account password stored in the keychain
     @IBOutlet weak var storeCredentials_button: NSButton!
     var storeCredentials = 0
     @IBAction func storeCredentials(_ sender: Any) {
@@ -341,9 +343,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var saveTrimmedXmlScope = true
     
     // plist and log variables
-    var didRun            = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
-    let plistPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
-    var format = PropertyListSerialization.PropertyListFormat.xml //format of the property list
+    var didRun                 = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
+    let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
+    var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
     var plistData:[String:Any] = [:]   //our server/username data
 
 //    var maxHistory:     Int = 20
@@ -886,11 +888,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
-            Go(sender: self)
+            Go(sender: "selectToMigrateButton")
+//            Go(sender: self)
         }
     }
     
-    @IBAction func Go(sender: AnyObject) {
+    @IBAction func Go_action(sender: NSButton) {
+        Go(sender: "goButton")
+    }
+    
+    func Go(sender: String) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
         if wipeData.on && export.saveOnly {
             _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
@@ -898,15 +905,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         History.startTime = Date()
-
-        plistData           = readSettings()
-        scopeOptions        = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-        xmlPrefOptions      = plistData["xml"] as! Dictionary<String,Bool>
-        export.saveOnly     = xmlPrefOptions["saveOnly"]!
-        export.saveRawXml   = xmlPrefOptions["saveRawXml"]!
-        export.saveTrimmedXml      = xmlPrefOptions["saveTrimmedXml"]!
-        saveRawXmlScope     = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
-        saveTrimmedXmlScope = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
+        if setting.fullGUI {
+            plistData             = readSettings()
+            scopeOptions          = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+            xmlPrefOptions        = plistData["xml"] as! Dictionary<String,Bool>
+            export.saveOnly       = (xmlPrefOptions["saveOnly"] == nil) ? false:xmlPrefOptions["saveOnly"]!
+            export.saveRawXml     = (xmlPrefOptions["saveRawXml"] == nil) ? false:xmlPrefOptions["saveRawXml"]!
+            export.saveTrimmedXml = (xmlPrefOptions["saveTrimmedXml"] == nil) ? false:xmlPrefOptions["saveTrimmedXml"]!
+            saveRawXmlScope       = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
+            saveTrimmedXmlScope   = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
+        } else {
+            if export.backupMode {
+                export.saveOnly       = true
+                export.saveRawXml     = true
+                export.saveTrimmedXml = false
+                saveRawXmlScope       = true
+                saveTrimmedXmlScope   = false
+            }
+        }
         
         if fileImport && (export.saveOnly || export.saveRawXml) {
             alert_dialog(header: "Attention", message: "Cannot select Save Only or Raw Source XML (Preferneces -> Export) when using File Import.")
@@ -914,12 +930,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         didRun = true
-        put_levelIndicator.fillColor = .systemGreen
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "Start Migrating/Removal\n") }
         // check for file that allow deleting data from destination server - start
-        //       var isDir: ObjCBool = false
-        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) && !export.backupMode {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
             wipeData.on = true
             
@@ -933,10 +947,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     return
                 }
                 // verify source and destination are not the same - end
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(source_jp_server_field.stringValue) to \(dest_jp_server_field.stringValue).\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(source_jp_server) to \(dest_jp_server).\n") }
                 migrateOrWipe = "----------- Starting Migration -----------\n"
             } else {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Exporting data from \(source_jp_server_field.stringValue).\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Exporting data from \(source_jp_server).\n") }
                 migrateOrWipe = "----------- Starting Export -----------\n"
             }
             wipeData.on = false
@@ -945,67 +959,71 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allow deleting data from destination server - end
         
         
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] go sender tag: \(String(describing: sender.tag))\n") }
-        // determine if we got here from the Go button or selectToMigrate button
-        if sender.tag != nil {
-            self.goSender = "goButton"
-        } else {
-            self.goSender = "selectToMigrateButton"
-        }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] go sender: \(sender)\n") }
+        // determine if we got here from the Go button, selectToMigrate button, or silently
+        self.goSender = "\(sender)"
+
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Go button pressed from: \(goSender)\n") }
         
-        // which migration mode tab are we on - start
-        if activeTab(fn: "Go") != "selective" {
-            migrationMode               = "bulk"
-            setting.migrateDependencies = false
+        if setting.fullGUI {
+            put_levelIndicator.fillColor = .systemGreen
+            // which migration mode tab are we on
+            if activeTab(fn: "Go") != "selective" {
+                migrationMode               = "bulk"
+                setting.migrateDependencies = false
+            } else {
+                migrationMode = "selective"
+            }
+            
+            if fileImport && migrationMode == "selective" {
+                alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
+                return
+            }
         } else {
-            migrationMode = "selective"
+            migrationMode = "bulk"
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Migration Mode (Go): \(migrationMode)\n") }
         
-        if fileImport && migrationMode == "selective" {
-            alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
-            return
+        if setting.fullGUI {
+            goButtonEnabled(button_status: false)
+            clearProcessingFields()
+            
+            // credentials were entered check - start
+            // don't check if we're importing files
+            if !fileImport {
+                if (source_user_field.stringValue == "" || source_pwd_field.stringValue == "") && !wipeData.on {
+                    alert_dialog(header: "Alert", message: "Must provide both a username and password for the source server.")
+                    //self.go_button.isEnabled = true
+                    goButtonEnabled(button_status: true)
+                    return
+                }
+            }
+            if !export.saveOnly {
+                if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
+                    alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
+                    //self.go_button.isEnabled = true
+                    goButtonEnabled(button_status: true)
+                    return
+                }
+            }
+            // credentials check - end
+            
+            // set credentials / servers - start
+            // don't set user / pass if we're importing files
+            self.source_jp_server = source_jp_server_field.stringValue
+            if !fileImport && !wipeData.on {
+                self.source_user = source_user_field.stringValue
+                self.source_pass = source_pwd_field.stringValue
+            }
+
+            self.dest_jp_server = dest_jp_server_field.stringValue
+            self.dest_user = dest_user_field.stringValue
+            self.dest_pass = dest_pwd_field.stringValue
+            // set credentials / servers - end
         }
-        
-        //self.go_button.isEnabled = false
         nodesMigrated = -1
-        goButtonEnabled(button_status: false)
-        clearProcessingFields()
         currentEPs.removeAll()
         
-        // credentials were entered check - start
-        // don't check if we're importing files
-        if !fileImport {
-            if (source_user_field.stringValue == "" || source_pwd_field.stringValue == "") && !wipeData.on {
-                alert_dialog(header: "Alert", message: "Must provide both a username and password for the source server.")
-                //self.go_button.isEnabled = true
-                goButtonEnabled(button_status: true)
-                return
-            }
-        }
-        if !export.saveOnly {
-            if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
-                alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
-                //self.go_button.isEnabled = true
-                goButtonEnabled(button_status: true)
-                return
-            }
-        }
-        // credentials check - end
-        
-        // set credentials / servers - start
-        // don't set user / pass if we're importing files
-        self.source_jp_server = source_jp_server_field.stringValue
-        if !fileImport && !wipeData.on {
-            self.source_user = source_user_field.stringValue
-            self.source_pass = source_pwd_field.stringValue
-        }
-
-        self.dest_jp_server = dest_jp_server_field.stringValue
-        self.dest_user = dest_user_field.stringValue
-        self.dest_pass = dest_pwd_field.stringValue
-        // set credentials / servers - end
         
         // server is reachable - start
         // don't check if we're importing files
@@ -1030,15 +1048,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         // server is reachable - end
                         
-                        // set site, if option selected - start
-                        if siteMigrate_button.state.rawValue == 1 {
-                            destinationSite = availableSites_button.selectedItem!.title
-                            itemToSite = true
-                        } else {
-                            itemToSite = false
+                        if setting.fullGUI {
+                            // set site, if option selected - start
+                            if siteMigrate_button.state.rawValue == 1 {
+                                destinationSite = availableSites_button.selectedItem!.title
+                                itemToSite = true
+                            } else {
+                                itemToSite = false
+                            }
+                            // set site, if option selected - end
                         }
-                        // set site, if option selected - end
-                        
                         
                         // don't set if we're importing files
                         if !self.fileImport {
@@ -1052,11 +1071,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                         // set credentials - end
                         
-                        var sourceURL      = URL(string: "")
-                        var destinationURL = URL(string: "")
+//                        var sourceURL      = URL(string: "")
+//                        var destinationURL = URL(string: "")
                         
                         // check authentication - start
-                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) {
+                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1067,16 +1086,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 return
                             } else {
-                                self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
-                                // update keychain, if marked to save creds
-                                if !wipeData.on {
-                                    if self.storeCredentials_button.state.rawValue == 1 {
-                                        self.Creds2.save(service: "migrator - "+self.source_jp_server.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
-                                        self.storedSourceUser = self.source_user_field.stringValue
+                                if setting.fullGUI {
+                                    self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
+                                    // update keychain, if marked to save creds
+                                    if !wipeData.on {
+                                        if self.storeCredentials_button.state.rawValue == 1 {
+                                            self.Creds2.save(service: "migrator - "+self.source_jp_server.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
+                                            self.storedSourceUser = self.source_user_field.stringValue
+                                        }
                                     }
                                 }
                                 
-                                JamfPro().getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) {
+                                JamfPro().getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) { [self]
                                     (authResult: (Int,String)) in
                                     let (authStatusCode, _) = authResult
                                     if !pref.httpSuccess.contains(authStatusCode) {
@@ -1088,16 +1109,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         return
                                     } else {
                                         // update keychain, if marked to save creds
-                                        if !export.saveOnly {
+                                        if !export.saveOnly && setting.fullGUI {
                                             if self.storeCredentials_button.state.rawValue == 1 {
                                                 self.Creds2.save(service: "migrator - "+self.dest_jp_server.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
                                                 self.storedDestUser = self.dest_user_field.stringValue
                                             }
                                         }
                                         // determine if the cloud services connection is enabled
-                                        Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: "GET") {
+                                        var csaMethod = "GET"
+                                        if export.saveOnly { csaMethod = "skip" }
+                                        Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: csaMethod) {
                                             (returnedJSON: [String:Any]) in
-//                                                    print("CSA: \(returnedJSON)")
+                                            print("CSA: \(returnedJSON)")
                                             if let _ = returnedJSON["scopes"] {
                                                 setting.csa = true
                                             } else {
@@ -1105,62 +1128,64 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
             //                                print("csa: \(setting.csa)")
                                             
-                                            if !export.saveOnly {
+                                            if !export.saveOnly && setting.fullGUI {
                                                 self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                                             }
+                                            
                                             // verify source server URL - start
-                                            if !self.fileImport && !wipeData.on {
-                                                sourceURL = URL(string: self.source_jp_server_field.stringValue)
-                                            } else {
-                                                sourceURL = URL(string: "https://www.jamf.com")
-                                            }
-                                            URLCache.shared.removeAllCachedResponses()
-                                            let task_sourceURL = URLSession.shared.dataTask(with: sourceURL!) { _, response, _ in
-                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
+//                                            if !self.fileImport && !wipeData.on {
+//                                                sourceURL = URL(string: self.source_jp_server_field.stringValue)
+//                                            } else {
+//                                                sourceURL = URL(string: "https://www.jamf.com")
+//                                            }
+                                            
+//                                            URLCache.shared.removeAllCachedResponses()
+//                                            let task_sourceURL = URLSession.shared.dataTask(with: URL(string: self.source_jp_server)!) { _, response, _ in
+//                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
                                                     //print(HTTPURLResponse.statusCode)
                                                     //===== change to go to function to check dest. server, which forwards to migrate if all is well
                                                     // verify destination server URL - start
-                                                    DispatchQueue.main.async {
-                                                        if !export.saveOnly {
-                                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
-                                                        } else {
-                                                            destinationURL = URL(string: "https://www.jamf.com")
-                                                        }
-                                                        URLCache.shared.removeAllCachedResponses()
-                                                        let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-                                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
+//                                                    DispatchQueue.main.async {
+//                                                        if !export.saveOnly {
+//                                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
+//                                                        } else {
+//                                                            destinationURL = URL(string: "https://www.jamf.com")
+//                                                        }
+//                                                        URLCache.shared.removeAllCachedResponses()
+//                                                        let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
+//                                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
                                                                 // print("Destination server response: \(response)")
-                                                                if (!self.theOpQ.isSuspended) {
+//                                                                if (!self.theOpQ.isSuspended) {
                                                                     //====================================    Start Migrating/Removing    ====================================//
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
                                                                     self.startMigrating()
-                                                                }
-                                                            } else {
-                //                                                DispatchQueue.main.async {
-                                                                    //print("Destination server response: \(response)")
-                                                                self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
-                //                                                }
-                                                                
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
-                                                                self.goButtonEnabled(button_status: true)
-                                                                return
-                                                            }
-                                                        }   // let task for destinationURL - end
+//                                                                }
+//                                                            } else {
+//                //                                                DispatchQueue.main.async {
+//                                                                    //print("Destination server response: \(response)")
+//                                                                self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
+//                //                                                }
+//
+//                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
+//                                                                self.goButtonEnabled(button_status: true)
+//                                                                return
+//                                                            }
+//                                                        }   // let task for destinationURL - end
                                                     
-                                                        task_destinationURL.resume()
-                                                    }
+//                                                        task_destinationURL.resume()
+//                                                    }
                                                     // verify source destination URL - end
                                                     
-                                                } else {
-                                                    DispatchQueue.main.async {
-                                                        self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
-                                                    }
-                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
-                                                    self.goButtonEnabled(button_status: true)
-                                                    return
-                                                }
-                                            }   // let task for soureURL - end
-                                            task_sourceURL.resume()
+//                                                } else {
+//                                                    DispatchQueue.main.async {
+//                                                        self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
+//                                                    }
+//                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
+//                                                    self.goButtonEnabled(button_status: true)
+//                                                    return
+//                                                }
+//                                            }   // let task for soureURL - end
+//                                            task_sourceURL.resume()
                                             // verify source server URL - end
                                         }
                                     } // else dest auth
@@ -1203,181 +1228,195 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         endpointInProgress    = ""
         var idPath            = ""  // adjust for jamf users/groups that use userid/groupid instead of id
         
-        DispatchQueue.main.async {
-            self.importFiles_button.state.rawValue == 0 ? (self.fileImport = false):(self.fileImport = true)
-            self.createDestUrlBase = "\(self.dest_jp_server_field.stringValue)/JSSResource"
-                
-            // set all the labels to white - start
-            self.AllEndpointsArray = self.macOSEndpointArray + self.iOSEndpointArray + self.generalEndpointArray
-            for i in (0..<self.AllEndpointsArray.count) {
-                self.labelColor(endpoint: self.AllEndpointsArray[i], theColor: self.whiteText)
+        DispatchQueue.main.async { [self] in
+            if !export.backupMode {
+                importFiles_button.state.rawValue == 0 ? (fileImport = false):(fileImport = true)
+                createDestUrlBase = "\(dest_jp_server_field.stringValue)/JSSResource"
+            } else {
+                fileImport = false
+                createDestUrlBase = "\(dest_jp_server)/JSSResource"
             }
-            // set all the labels to white - end
+                
+            if setting.fullGUI {
+                // set all the labels to white - start
+                AllEndpointsArray = macOSEndpointArray + iOSEndpointArray + generalEndpointArray
+                for i in (0..<AllEndpointsArray.count) {
+                    labelColor(endpoint: AllEndpointsArray[i], theColor: whiteText)
+                }
+                // set all the labels to white - end
+            }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Start Migrating/Removal\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] platform: \(self.deviceType()).\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Migration Mode (startMigration): \(self.migrationMode).\n") }
+            if setting.fullGUI {
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] platform: \(deviceType()).\n") }
+            }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Migration Mode (startMigration): \(migrationMode).\n") }
             
                 // list the items in the order they need to be migrated
-            if self.migrationMode == "bulk" {
+            if migrationMode == "bulk" {
                 // initialize list of items to migrate then add what we want - start
-                self.objectsToMigrate.removeAll()
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Types of objects to migrate: \(self.deviceType()).\n") }
-//                    DispatchQueue.main.async {
+                objectsToMigrate.removeAll()
+
+                if setting.fullGUI {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "Types of objects to migrate: \(deviceType()).\n") }
                     // macOS
-                    switch self.deviceType() {
+                    switch deviceType() {
+                    case "general":
+                        if sites_button.state.rawValue == 1 {
+                            objectsToMigrate += ["sites"]
+                        }
+                        
+                        if userEA_button.state.rawValue == 1 {
+                            objectsToMigrate += ["userextensionattributes"]
+                        }
+                        
+                        if ldapservers_button.state.rawValue == 1 {
+                            objectsToMigrate += ["ldapservers"]
+                        }
+                        
+                        if users_button.state.rawValue == 1 {
+                            objectsToMigrate += ["users"]
+                        }
+                        
+                        if building_button.state.rawValue == 1 {
+                            objectsToMigrate += ["buildings"]
+                        }
+                        
+                        if dept_button.state.rawValue == 1 {
+                            objectsToMigrate += ["departments"]
+                        }
+                        
+                        if categories_button.state.rawValue == 1 {
+                            objectsToMigrate += ["categories"]
+                        }
+                        
+                        if jamfUserAccounts_button.state.rawValue == 1 {
+                            objectsToMigrate += ["jamfusers"]
+                        }
+                        
+                        if jamfGroupAccounts_button.state.rawValue == 1 {
+                            objectsToMigrate += ["jamfgroups"]
+                        }
+                        
+                        if networks_button.state.rawValue == 1 {
+                            objectsToMigrate += ["networksegments"]
+                        }
+                        
+                        if advusersearch_button.state.rawValue == 1 {
+                            objectsToMigrate += ["advancedusersearches"]
+                        }
+                        
+                        if smartUserGrps_button.state.rawValue == 1 || staticUserGrps_button.state.rawValue == 1 {
+                            objectsToMigrate += ["usergroups"]
+                            smartUserGrps_button.state.rawValue == 1 ? (migrateSmartUserGroups = true):(migrateSmartUserGroups = false)
+                            staticUserGrps_button.state.rawValue == 1 ? (migrateStaticUserGroups = true):(migrateStaticUserGroups = false)
+                        }
                     case "macOS":
-                        if self.fileshares_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["distributionpoints"]
+                        if fileshares_button.state.rawValue == 1 {
+                            objectsToMigrate += ["distributionpoints"]
                         }
                         
-                        if self.directory_bindings_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["directorybindings"]
+                        if directory_bindings_button.state.rawValue == 1 {
+                            objectsToMigrate += ["directorybindings"]
                         }
                         
-                        if self.disk_encryptions_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["diskencryptionconfigurations"]
+                        if disk_encryptions_button.state.rawValue == 1 {
+                            objectsToMigrate += ["diskencryptionconfigurations"]
                         }
                         
-                        if self.dock_items_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["dockitems"]
+                        if dock_items_button.state.rawValue == 1 {
+                            objectsToMigrate += ["dockitems"]
                         }
                         
-                        if self.computers_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["computers"]
+                        if computers_button.state.rawValue == 1 {
+                            objectsToMigrate += ["computers"]
                         }
                         
-                        if self.sus_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["softwareupdateservers"]
+                        if sus_button.state.rawValue == 1 {
+                            objectsToMigrate += ["softwareupdateservers"]
                         }
                         
-                        if self.netboot_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["netbootservers"]
+                        if netboot_button.state.rawValue == 1 {
+                            objectsToMigrate += ["netbootservers"]
                         }
                         
-                        if self.ext_attribs_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["computerextensionattributes"]
+                        if ext_attribs_button.state.rawValue == 1 {
+                            objectsToMigrate += ["computerextensionattributes"]
                         }
                         
-                        if self.scripts_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["scripts"]
+                        if scripts_button.state.rawValue == 1 {
+                            objectsToMigrate += ["scripts"]
                         }
                         
-                        if self.printers_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["printers"]
+                        if printers_button.state.rawValue == 1 {
+                            objectsToMigrate += ["printers"]
                         }
                         
-                        if self.packages_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["packages"]
+                        if packages_button.state.rawValue == 1 {
+                            objectsToMigrate += ["packages"]
                         }
                         
-                        if self.smart_comp_grps_button.state.rawValue == 1 || self.static_comp_grps_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["computergroups"]
-                            self.smart_comp_grps_button.state.rawValue == 1 ? (self.migrateSmartComputerGroups = true):(self.migrateSmartComputerGroups = false)
-                            self.static_comp_grps_button.state.rawValue == 1 ? (self.migrateStaticComputerGroups = true):(self.migrateStaticComputerGroups = false)
+                        if smart_comp_grps_button.state.rawValue == 1 || static_comp_grps_button.state.rawValue == 1 {
+                            objectsToMigrate += ["computergroups"]
+                            smart_comp_grps_button.state.rawValue == 1 ? (migrateSmartComputerGroups = true):(migrateSmartComputerGroups = false)
+                            static_comp_grps_button.state.rawValue == 1 ? (migrateStaticComputerGroups = true):(migrateStaticComputerGroups = false)
                         }
                         
-                        if self.restrictedsoftware_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["restrictedsoftware"]
+                        if restrictedsoftware_button.state.rawValue == 1 {
+                            objectsToMigrate += ["restrictedsoftware"]
                         }
                         
-                        if self.osxconfigurationprofiles_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["osxconfigurationprofiles"]
+                        if osxconfigurationprofiles_button.state.rawValue == 1 {
+                            objectsToMigrate += ["osxconfigurationprofiles"]
                         }
                         
-                        if self.macapplications_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["macapplications"]
+                        if macapplications_button.state.rawValue == 1 {
+                            objectsToMigrate += ["macapplications"]
                         }
                         
-                        if self.patch_policies_button.state.rawValue == 1 {
-                            //                    self.objectsToMigrate += ["patches"]
-                            self.objectsToMigrate += ["patchpolicies"]
+                        if patch_policies_button.state.rawValue == 1 {
+                            //                    objectsToMigrate += ["patches"]
+                            objectsToMigrate += ["patchpolicies"]
                         }
                         
-                        if self.advcompsearch_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["advancedcomputersearches"]
+                        if advcompsearch_button.state.rawValue == 1 {
+                            objectsToMigrate += ["advancedcomputersearches"]
                         }
                         
-                        if self.policies_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["policies"]
+                        if policies_button.state.rawValue == 1 {
+                            objectsToMigrate += ["policies"]
                         }
                     case "iOS":
-                        if self.mobiledeviceextensionattributes_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["mobiledeviceextensionattributes"]
+                        if mobiledeviceextensionattributes_button.state.rawValue == 1 {
+                            objectsToMigrate += ["mobiledeviceextensionattributes"]
                         }
                         
-                        if self.mobiledevices_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["mobiledevices"]
+                        if mobiledevices_button.state.rawValue == 1 {
+                            objectsToMigrate += ["mobiledevices"]
                         }
                         
-                        if self.smart_ios_groups_button.state.rawValue == 1 || self.static_ios_groups_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["mobiledevicegroups"]
-                            self.smart_ios_groups_button.state.rawValue == 1 ? (self.migrateSmartMobileGroups = true):(self.migrateSmartMobileGroups = false)
-                            self.static_ios_groups_button.state.rawValue == 1 ? (self.migrateStaticMobileGroups = true):(self.migrateStaticMobileGroups = false)
+                        if smart_ios_groups_button.state.rawValue == 1 || static_ios_groups_button.state.rawValue == 1 {
+                            objectsToMigrate += ["mobiledevicegroups"]
+                            smart_ios_groups_button.state.rawValue == 1 ? (migrateSmartMobileGroups = true):(migrateSmartMobileGroups = false)
+                            static_ios_groups_button.state.rawValue == 1 ? (migrateStaticMobileGroups = true):(migrateStaticMobileGroups = false)
                         }
                         
-                        if self.advancedmobiledevicesearches_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["advancedmobiledevicesearches"]
+                        if advancedmobiledevicesearches_button.state.rawValue == 1 {
+                            objectsToMigrate += ["advancedmobiledevicesearches"]
                         }
                         
-                        if self.mobiledevicecApps_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["mobiledeviceapplications"]
+                        if mobiledevicecApps_button.state.rawValue == 1 {
+                            objectsToMigrate += ["mobiledeviceapplications"]
                         }
                         
-                        if self.mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["mobiledeviceconfigurationprofiles"]
-                        }
-                    case "general":
-                        if self.sites_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["sites"]
-                        }
-                        
-                        if self.userEA_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["userextensionattributes"]
-                        }
-                        
-                        if self.ldapservers_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["ldapservers"]
-                        }
-                        
-                        if self.users_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["users"]
-                        }
-                        
-                        if self.building_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["buildings"]
-                        }
-                        
-                        if self.dept_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["departments"]
-                        }
-                        
-                        if self.categories_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["categories"]
-                        }
-                        
-                        if self.jamfUserAccounts_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["jamfusers"]
-                        }
-                        
-                        if self.jamfGroupAccounts_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["jamfgroups"]
-                        }
-                        
-                        if self.networks_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["networksegments"]
-                        }
-                        
-                        if self.advusersearch_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["advancedusersearches"]
-                        }
-                        
-                        if self.smartUserGrps_button.state.rawValue == 1 || self.staticUserGrps_button.state.rawValue == 1 {
-                            self.objectsToMigrate += ["usergroups"]
-                            self.smartUserGrps_button.state.rawValue == 1 ? (self.migrateSmartUserGroups = true):(self.migrateSmartUserGroups = false)
-                            self.staticUserGrps_button.state.rawValue == 1 ? (self.migrateStaticUserGroups = true):(self.migrateStaticUserGroups = false)
+                        if mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
+                            objectsToMigrate += ["mobiledeviceconfigurationprofiles"]
                         }
                     default: break
                     }
+                } else {
+//                    objectsToMigrate = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "catagories", "jamfusers"]
+                    objectsToMigrate = ["buildings"]
+                }
                 
             }   // if migrationMode == "bulk" - end
             
@@ -1541,7 +1580,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let currentNode = self.objectsToMigrate[0]
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Starting to process \(currentNode)\n") }
-                if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") {
+                if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") || (self.goSender == "silent") {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] getting endpoint: \(currentNode)\n") }
                     
                     // this will populate list for selective migration or start migration of bulk operations
@@ -1872,8 +1911,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                print("[ViewController.readNodes] getEndpoints result: \(result)")
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
-                if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
-                    self.goButtonEnabled(button_status: true)
+                if setting.fullGUI {
+                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
+                        self.goButtonEnabled(button_status: true)
+                    }
                 }
             }
         }
@@ -1979,15 +2020,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
         var myURL = "\(self.source_jp_server)/JSSResource/\(node)"
         myURL = myURL.urlFix
-//        myURL = myURL.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)\n") }
         
         concurrentThreads = setConcurrentThreads()
         theOpQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
-        DispatchQueue.main.async {
-            self.srcSrvTableView.isEnabled = true
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                self.srcSrvTableView.isEnabled = true
+            }
         }
         self.sourceDataArray.removeAll()
         self.availableIDsToMigDict.removeAll()
@@ -2074,17 +2117,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                     }
                                                                 }
                                                                 WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(self.source_jp_server)\n\(message)\n")
-                                                                let theButton = Alert().display(header: "Warning:", message: "Several packages on \(self.source_jp_server), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
-                                                                if theButton == "Stop" {
-                                                                    self.stopButton(self)
+                                                                if setting.fullGUI {
+                                                                    let theButton = Alert().display(header: "Warning:", message: "Several packages on \(self.source_jp_server), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                                                    if theButton == "Stop" {
+                                                                        self.stopButton(self)
+                                                                    }
                                                                 }
                                                             }
                                                             if failedPkgNameLookup.count > 0 {
                                                                 WriteToLog().message(stringOfText: "[ViewController.getEndpoints] 1 or more package filenames on \(self.source_jp_server) could not be verified\n")
                                                                 WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Failed package filename lookup: \(failedPkgNameLookup)\n")
-                                                                let theButton = Alert().display(header: "Warning:", message: "1 or more package filenames on \(self.source_jp_server) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
-                                                                if theButton == "Stop" {
-                                                                    self.stopButton(self)
+                                                                if setting.fullGUI {
+                                                                    let theButton = Alert().display(header: "Warning:", message: "1 or more package filenames on \(self.source_jp_server) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
+                                                                    if theButton == "Stop" {
+                                                                        self.stopButton(self)
+                                                                    }
                                                                 }
                                                             }
                                                             
@@ -2098,7 +2145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                                             var counter = 1
                                                             
-                                                            if self.goSender == "goButton" {
+                                                            if self.goSender == "goButton" || self.goSender == "silent" {
                                                                 for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                                     if !wipeData.on  {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID of \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
@@ -2211,7 +2258,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
 
                                                 var counter = 1
-                                                if self.goSender == "goButton" {
+                                                if self.goSender == "goButton" || !setting.fullGUI {
                                                     for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                         if !wipeData.on  {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(self.currentEPs[l_xmlName] ?? 0)\n") }
@@ -2308,9 +2355,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     let smart: Bool = (record["is_smart"] as! Bool)
                                                     if smart {
                                                         //self.smartCount += 1
-                                                        if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
+//                                                        if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
                                                             smartGroupDict[record["id"] as! Int] = record["name"] as! String?
-                                                        }
+//                                                        }
                                                     } else {
                                                         //self.staticCount += 1
                                                         staticGroupDict[record["id"] as! Int] = record["name"] as! String?
@@ -3266,10 +3313,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
+        // set these when go is clicked or startmigration
+        /*
         export.saveRawXml      = xmlPrefOptions["saveRawXml"]!
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(export.saveRawXml)\n") }
         saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"] ?? false
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXmlScope: \(saveRawXmlScope)\n") }
+        */
 
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
@@ -4502,7 +4552,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 }
                 
-                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["destination"]!, method: apiAction) {
+                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["destination"]!, method: apiAction) { [self]
                     (jpapiResonse: [String:Any]) in
 //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                     var jpapiResult = "succeeded"
@@ -5956,43 +6006,59 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return newXML
     }
     
-    func fetchPassword(whichServer: String, url: String, theUser: String) {
-//        let regexKey        = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-//        let credKey         = regexKey.stringByReplacingMatches(in: url, options: [], range: NSRange(0..<url.utf16.count), withTemplate: "")
-//        let credentialsArray  = Creds2.retrieve(service: "migrator - "+credKey)
+    func fetchPassword(whichServer: String, url: String) {
+//      print("fetchPassword")
         let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
         
         if credentialsArray.count == 2 {
             if whichServer == "source" {
                 if (url != "") {
-                    source_user_field.stringValue = credentialsArray[0]
-                    source_pwd_field.stringValue  = credentialsArray[1]
-                    self.storedSourceUser         = credentialsArray[0]
+                    if setting.fullGUI {
+                        source_user_field.stringValue = credentialsArray[0]
+                        source_pwd_field.stringValue  = credentialsArray[1]
+                        self.storedSourceUser         = credentialsArray[0]
+                        self.storedSourcePwd          = credentialsArray[1]
+                    } else {
+                        source_user = credentialsArray[0]
+                        source_pass = credentialsArray[1]
+                    }
                 }
             } else {
                 if (url != "") {
-                    dest_user_field.stringValue = credentialsArray[0]
-                    dest_pwd_field.stringValue  = credentialsArray[1]
-                    self.storedDestUser         = credentialsArray[0]
+                    if setting.fullGUI {
+                        dest_user_field.stringValue = credentialsArray[0]
+                        dest_pwd_field.stringValue  = credentialsArray[1]
+                        self.storedDestUser         = credentialsArray[0]
+                        self.storedDestPwd          = credentialsArray[1]
+                    }
+                    dest_user = credentialsArray[0]
+                    dest_pass = credentialsArray[1]
                 } else {
-                    dest_pwd_field.stringValue = ""
-                    if source_pwd_field.stringValue != "" {
-                        dest_pwd_field.becomeFirstResponder()
+                    if setting.fullGUI {
+                        dest_pwd_field.stringValue = ""
+                        if source_pwd_field.stringValue != "" {
+                            dest_pwd_field.becomeFirstResponder()
+                        }
                     }
                 }
             }   // if whichServer - end
         } else {
             // credentials not found - blank out username / password fields
-            if whichServer == "source" {
-                source_user_field.stringValue = ""
-                source_pwd_field.stringValue = ""
-                self.storedSourceUser = ""
-                source_user_field.becomeFirstResponder()
+            if setting.fullGUI {
+                if whichServer == "source" {
+                    source_user_field.stringValue = ""
+                    source_pwd_field.stringValue = ""
+                    self.storedSourceUser = ""
+                    source_user_field.becomeFirstResponder()
+                } else {
+                    dest_user_field.stringValue = ""
+                    dest_pwd_field.stringValue = ""
+                    self.storedSourceUser = ""
+                    dest_user_field.becomeFirstResponder()
+                }
             } else {
-                dest_user_field.stringValue = ""
-                dest_pwd_field.stringValue = ""
-                self.storedSourceUser = ""
-                dest_user_field.becomeFirstResponder()
+                WriteToLog().message(stringOfText: "Validate URL and credentials are saved for both source and destination Jamf Pro instances.")
+                NSApplication.shared.terminate(self)
             }
         }
     }
@@ -6026,36 +6092,39 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.theCreateQ.cancelAllOperations()
 //                                self.stopButton(self)
                             }
-//                            if (self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning && migrationComplete.isDone  {
-//                                sleep(1)
-                                if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning {
-                                    
-                                    if !local_button_status {
-                                        History.endTime = Date()
+                            
+                            if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning {
+                                
+                                if !local_button_status {
+                                    History.endTime = Date()
 
-                                        let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
+                                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
 
-                                        let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-                                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
 
-                                        self.resetAllCheckboxes()
+                                    self.resetAllCheckboxes()
 
-                                        self.goButtonEnabled(button_status: true)
-                                        local_button_status = true
-                                        iconfiles.policyDict.removeAll()
-                                        iconfiles.pendingDict.removeAll()
-        //                                print("go button enabled")
-                                    }
-//                                }
+                                    self.goButtonEnabled(button_status: true)
+                                    local_button_status = true
+                                    iconfiles.policyDict.removeAll()
+                                    iconfiles.pendingDict.removeAll()
+    //                                print("go button enabled")
+                                }
                             }
                         }
                         usleep(300000)  // sleep 0.3 seconds
                     } while !local_button_status  // while !button_status - end
                 }   // self.theSpinnerQ.async - end
             }   // DispatchQueue.main.async  -end
-            self.mySpinner_ImageView.isHidden = button_status
-            self.stop_button.isHidden = button_status
-            self.go_button.isEnabled = button_status
+            if setting.fullGUI {
+                self.mySpinner_ImageView.isHidden = button_status
+                self.stop_button.isHidden = button_status
+                self.go_button.isEnabled = button_status
+            } else {
+                // silent run complete
+                NSApplication.shared.terminate(self)
+            }
         }
         
 //        print("button_status: \(button_status)")
@@ -6154,12 +6223,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.getCounters[adjEndpoint]!["get"]! += 1
         }
         
-        DispatchQueue.main.async {
-            if self.getCounters[adjEndpoint]!["get"]! > 0 {
-                if !setting.migrateDependencies || adjEndpoint == "policies" {
-                    self.get_name_field.stringValue    = adjEndpoint
-                    self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(total)
-                    self.getSummary_label.stringValue  = "\(self.getCounters[adjEndpoint]!["get"]!) of \(total)"
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                if self.getCounters[adjEndpoint]!["get"]! > 0 {
+                    if !setting.migrateDependencies || adjEndpoint == "policies" {
+                        self.get_name_field.stringValue    = adjEndpoint
+                        self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(total)
+                        self.getSummary_label.stringValue  = "\(self.getCounters[adjEndpoint]!["get"]!) of \(total)"
+                    }
                 }
             }
         }
@@ -6993,7 +7064,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if plistData.count == 0 {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
         }
-//        print("readSettings - plistData: \(String(describing: plistData["xml"]))\n")
+//        print("readSettings - plistData: \(String(describing: plistData))\n")
         return(plistData)
         // read environment settings - end
     }
@@ -7022,13 +7093,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     func disableSource() {
-        DispatchQueue.main.async {
-            self.dest_jp_server_field.isEnabled     = !export.saveOnly
-            self.destServerList_button.isEnabled    = !export.saveOnly
-            self.dest_user_field.isEnabled          = !export.saveOnly
-            self.dest_pwd_field.isEnabled           = !export.saveOnly
-            self.siteMigrate_button.isEnabled       = !export.saveOnly
-            self.disableExportOnly_button.isHidden  = !export.saveOnly
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                self.dest_jp_server_field.isEnabled     = !export.saveOnly
+                self.destServerList_button.isEnabled    = !export.saveOnly
+                self.dest_user_field.isEnabled          = !export.saveOnly
+                self.dest_pwd_field.isEnabled           = !export.saveOnly
+                self.siteMigrate_button.isEnabled       = !export.saveOnly
+                self.disableExportOnly_button.isHidden  = !export.saveOnly
+            }
         }
     }
     
@@ -7391,7 +7464,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 serverChanged(whichserver: "source")
             }
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue, theUser: self.source_user_field.stringValue)
+            fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue)
         case 1:
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
                 // source server changed, clear list of objects
@@ -7399,7 +7472,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 serverChanged(whichserver: "destination")
             }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue, theUser: self.dest_user_field.stringValue)
+            fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue)
             // reset list of available sites
             if siteMigrate_button.state.rawValue == 1 {
                 siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
@@ -7559,235 +7632,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         // Create Application Support folder for the app if missing - end
         
-        // Create preference file if missing - start
-        if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist", isDirectory: &isDir)) {
-            do {
-                try fm.copyItem(atPath: def_plist, toPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
-            }
-            catch let error as NSError {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed creating default settings.plist! Something went wrong: \(error)") }
-                alert_dialog(header: "Error:", message: "Failed creating default settings.plist")
-                exit(0)
-            }
-        }
-        // Create preference file if missing - end
-        
-        // check for file that allows deleting data from destination server, delete if found
-        self.rmDELETE()
-        
-        if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            print("resetting export location")
-            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
-            userDefaults.synchronize()
-        }
-        
-        // read environment settings from plist - start
-        plistData = readSettings()
-
-        if plistData["source_jp_server"] as! String != "" {
-            source_jp_server = plistData["source_jp_server"] as! String
-            source_jp_server_field.stringValue = source_jp_server
-            if source_jp_server.count > 0 {
-                self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
-            }
-        } else {
-            self.browseFiles_button.isHidden   = true
-        }
-        
-        if plistData["source_user"] != nil {
-            source_user = plistData["source_user"] as! String
-            source_user_field.stringValue = source_user
-            storedSourceUser = source_user
-        }
-        
-        if plistData["dest_jp_server"] != nil {
-            dest_jp_server = plistData["dest_jp_server"] as! String
-            dest_jp_server_field.stringValue = dest_jp_server
-        }
-        
-        if plistData["dest_user"] != nil {
-            dest_user = plistData["dest_user"] as! String
-            dest_user_field.stringValue = dest_user
-        }
-        
-        if plistData["source_server_array"] != nil {
-            sourceServerArray = plistData["source_server_array"] as! [String]
-            for theServer in sourceServerArray {
-                self.sourceServerList_button.addItems(withTitles: [theServer])
-            }
-        }
-        if plistData["dest_server_array"] != nil {
-            destServerArray = plistData["dest_server_array"] as! [String]
-            for theServer in destServerArray {
-                self.destServerList_button.addItems(withTitles: [theServer])
-            }
-        }
-        if plistData["storeCredentials"] != nil {
-            storeCredentials = plistData["storeCredentials"] as! Int
-            storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
-        }
-        // settings introduced with v2.8.0
-        // read scope settings - start
-        if plistData["scope"] != nil {
-            scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-
-            if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-            }
-            if self.scopeOptions["macapps"] != nil {
-                if self.scopeOptions["macapps"]!["copy"] != nil {
-                    self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
-                } else {
-                    self.scopeMaCopy = true
-                }
-            } else {
-                self.scopeMaCopy = true
-            }
-            if scopeOptions["policies"]!["copy"] != nil {
-                scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
-            }
-            if scopeOptions["policies"]!["disable"] != nil {
-                policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
-            }
-            if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
-            }
-            if scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
-            }
-            if self.scopeOptions["iosapps"] != nil {
-                if self.scopeOptions["iosapps"]!["copy"] != nil {
-                    self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
-                } else {
-                    self.scopeIaCopy = true
-                }
-            } else {
-                self.scopeIaCopy = true
-            }
-        } else {
-            // reset/initialize new settings
-            plistData          = readSettings()
-            plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
-                                  "macapps":["copy":true],
-                                  "policies":["copy":true,"disable":false],
-                                  "restrictedsoftware":["copy":true],
-                                  "mobiledeviceconfigurationprofiles":["copy":true],
-                                  "iosapps":["copy":true],
-                                  "scg":["copy":true],
-                                  "sig":["copy":true],
-                                  "users":["copy":true]] as Any
-            
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-        }
-        // read scope settings - end
-        
-        if scopeOptions["scg"] != nil && scopeOptions["sig"] != nil && scopeOptions["users"] != nil  {
-
-            if (scopeOptions["scg"]!["copy"] != nil) {
-                scopeScgCopy = scopeOptions["scg"]!["copy"]!
-            } else {
-                scopeScgCopy                  = true
-                scopeOptions["scg"]!["copy"] = scopeScgCopy
-            }
-
-            if (scopeOptions["sig"]!["copy"] != nil) {
-                scopeSigCopy = scopeOptions["sig"]!["copy"]!
-            } else {
-                scopeSigCopy                  = true
-                scopeOptions["sig"]!["copy"] = scopeSigCopy
-            }
-
-            if (scopeOptions["sig"]!["users"] != nil) {
-                scopeUsersCopy = scopeOptions["sig"]!["users"]!
-            } else {
-                scopeUsersCopy                 = true
-                scopeOptions["sig"]!["users"] = scopeUsersCopy
-            }
-        } else {
-            // reset/initialize scope preferences
-            plistData          = readSettings()
-            plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
-                                  "macapps":["copy":true],
-                                  "policies":["copy":true,"disable":false],
-                                  "restrictedsoftware":["copy":true],
-                                  "mobiledeviceconfigurationprofiles":["copy":true],
-                                  "iosapps":["copy":true],
-                                  "scg":["copy":true],
-                                  "sig":["copy":true],
-                                  "users":["copy":true]] as Any
-        }
-        
-        // read xml settings - start
-        if plistData["xml"] != nil {
-            xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
-
-            if (xmlPrefOptions["saveRawXml"] != nil) {
-                export.saveRawXml = xmlPrefOptions["saveRawXml"]!
-            } else {
-                export.saveRawXml                   = false
-                xmlPrefOptions["saveRawXml"] = export.saveRawXml
-            }
-            
-            if (xmlPrefOptions["saveTrimmedXml"] != nil) {
-                export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
-            } else {
-                export.saveTrimmedXml                   = false
-                xmlPrefOptions["saveTrimmedXml"] = export.saveTrimmedXml
-            }
-
-            if (xmlPrefOptions["saveOnly"] != nil) {
-                export.saveOnly = xmlPrefOptions["saveOnly"]!
-            } else {
-                export.saveOnly                   = false
-                xmlPrefOptions["saveOnly"] = export.saveOnly
-            }
-            disableSource()
-            
-            if xmlPrefOptions["saveRawXmlScope"] == nil {
-                xmlPrefOptions["saveRawXmlScope"] = true
-                saveRawXmlScope = true
-            }
-            if xmlPrefOptions["saveTrimmedXmlScope"] == nil {
-                xmlPrefOptions["saveTrimmedXmlScope"] = true
-                saveTrimmedXmlScope = true
-            }
-        } else {
-            // set default values
-            plistData        = readSettings()
-            plistData["xml"] = ["saveRawXml":false,
-                                "saveTrimmedXml":false,
-                                "export.saveOnly":false,
-                                "saveRawXmlScope":true,
-                                "saveTrimmedXmlScope":true] as Any
-        }
-        // update plist
-        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-        
-        // read xml settings - end
-        // read environment settings - end
-        
-        // see if we last migrated from files or a server
-        _ = serverOrFiles()
-
-        // check for stored passwords - start
-        if (dest_jp_server != "") {
-            fetchPassword(whichServer: "destination", url: dest_jp_server, theUser: dest_user)
-        }
-        if (source_jp_server != "") {
-            fetchPassword(whichServer: "source", url: source_jp_server, theUser: source_user)
-        }
-        if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
-            self.validCreds = false
-        }
-        // check for stored passwords - end
-        
-        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
-        
-        if hideGui {
-            
-        }
+        // read stored values from plist, if it exists
+        initVars()
         
     }   //viewDidAppear - end
     
@@ -7797,88 +7643,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
 //        debug = true
         
-        // read command line arguments - start
-        var numberOfArgs = 0
-        var startPos     = 1
-        // read commandline args
-        numberOfArgs = CommandLine.arguments.count - 2  // subtract 2 since we start counting at 0, another 1 for the app itself
-//        print("all arguments: \(CommandLine.arguments)")
-        if CommandLine.arguments.contains("-debug") {
-            numberOfArgs -= 1
-            startPos+=1
-            LogLevel.debug = true
-        }
-        if numberOfArgs >= 0 {
-            for i in stride(from: startPos, through: numberOfArgs+1, by: 2) {
-//                print("i: \(i)\t argument: \(CommandLine.arguments[i]) \t value: \(CommandLine.arguments[i+1])")
-                switch CommandLine.arguments[i].lowercased() {
-                case "-saverawxml":
-                    export.saveRawXml = true
-                case "-savetrimmedxml":
-                    export.saveTrimmedXml = true
-                case "-export.saveonly":
-                    export.saveOnly = true
-                case "-forceldapid":
-                    forceLdapId = Bool(CommandLine.arguments[i+1]) ?? false
-                case "-ldapid":
-                    ldapId = Int(CommandLine.arguments[i+1]) ?? -1
-                    if ldapId > 0 {
-                        hardSetLdapId = true
-                    }
-                case "-sourceserver":
-                    source_jp_server = "\(CommandLine.arguments[i+1])"
-                case "-destserver":
-                    dest_jp_server = "\(CommandLine.arguments[i+1])"
-                case "-backup":
-                    export.backupMode = Bool(CommandLine.arguments[i+1]) ?? false
-                    hideGui = true
-                case "-hidden":
-                    hideGui = true
-                case "-nsdocumentrevisionsdebugmode","YES":
-                    continue
-                default:
-                    print("unknown switch passed: \(CommandLine.arguments[i])")
-                }
-            }
-        }
-        // read command line arguments - end
-
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()
 //        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
-        
-        if !hideGui {
-        }
-        
-        // for selective migration - end
-        
-        // create log directory if missing - start
-        if !fm.fileExists(atPath: logPath!) {
-            do {
-                try fm.createDirectory(atPath: logPath!, withIntermediateDirectories: true, attributes: nil )
-                } catch {
-                alert_dialog(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.")
-                exit(0)
-            }
-        }
-        // create log directory if missing - end
-        
-        if fm.fileExists(atPath: historyPath!) {
-            // move legacy history files to log directory and delete history dir
-            moveHistoryToLog(source: historyPath!, destination: logPath!)
-        }
 
-        maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
-        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
-        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
-
-        isDir = false
-        if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {
-            fm.createFile(atPath: logPath! + logFile, contents: nil, attributes: nil)
-        }
-
-        sleep(1)
         if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
         
         if !hideGui {
@@ -7982,6 +7751,274 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // Insert code here to tear down your application
         saveSettings()
         logCleanup()
+    }
+    
+    func initVars() {
+        
+        // create log directory if missing - start
+        if !fm.fileExists(atPath: logPath!) {
+            do {
+                try fm.createDirectory(atPath: logPath!, withIntermediateDirectories: true, attributes: nil )
+                } catch {
+                alert_dialog(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.")
+                exit(0)
+            }
+        }
+        // create log directory if missing - end
+
+        if fm.fileExists(atPath: historyPath!) {
+            // move legacy history files to log directory and delete history dir
+            moveHistoryToLog(source: historyPath!, destination: logPath!)
+        }
+        
+        maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
+        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
+        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
+
+        isDir = false
+        if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {
+            fm.createFile(atPath: logPath! + logFile, contents: nil, attributes: nil)
+        }
+        sleep(1)
+        
+        if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
+            print("resetting export location")
+            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
+            userDefaults.synchronize()
+        }
+        
+        if setting.fullGUI {
+            // read environment settings from plist - start
+            plistData = readSettings()
+
+            if plistData["source_jp_server"] as? String != nil {
+                source_jp_server = plistData["source_jp_server"] as! String
+                
+                if setting.fullGUI {
+                    source_jp_server_field.stringValue = source_jp_server
+                    if source_jp_server.count > 0 {
+                        self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
+                    }
+                }
+            } else {
+                if setting.fullGUI {
+                    self.browseFiles_button.isHidden   = true
+                }
+            }
+            
+            if plistData["source_user"] != nil {
+                source_user = plistData["source_user"] as! String
+                if setting.fullGUI {
+                    source_user_field.stringValue = source_user
+                }
+                storedSourceUser = source_user
+            }
+            
+            if plistData["dest_jp_server"] != nil {
+                dest_jp_server = plistData["dest_jp_server"] as! String
+                if setting.fullGUI {
+                    dest_jp_server_field.stringValue = dest_jp_server
+                }
+            }
+            
+            if plistData["dest_user"] != nil {
+                dest_user = plistData["dest_user"] as! String
+                if setting.fullGUI {
+                    dest_user_field.stringValue = dest_user
+                }
+            }
+            
+            if setting.fullGUI {
+                if plistData["source_server_array"] != nil {
+                    sourceServerArray = plistData["source_server_array"] as! [String]
+                    for theServer in sourceServerArray {
+                        self.sourceServerList_button.addItems(withTitles: [theServer])
+                    }
+                }
+                if plistData["dest_server_array"] != nil {
+                    destServerArray = plistData["dest_server_array"] as! [String]
+                    for theServer in destServerArray {
+                        self.destServerList_button.addItems(withTitles: [theServer])
+                    }
+                }
+            }
+            if plistData["storeCredentials"] != nil {
+                storeCredentials = plistData["storeCredentials"] as! Int
+                if setting.fullGUI {
+                    storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
+                }
+            }
+            // settings introduced with v2.8.0
+            // read scope settings - start
+            if plistData["scope"] != nil {
+                scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+
+                if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                    scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+                }
+                if self.scopeOptions["macapps"] != nil {
+                    if self.scopeOptions["macapps"]!["copy"] != nil {
+                        self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+                    } else {
+                        self.scopeMaCopy = true
+                    }
+                } else {
+                    self.scopeMaCopy = true
+                }
+                if scopeOptions["policies"]!["copy"] != nil {
+                    scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
+                }
+                if scopeOptions["policies"]!["disable"] != nil {
+                    policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
+                }
+                if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                    scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
+                }
+                if scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                    scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+                }
+                if self.scopeOptions["iosapps"] != nil {
+                    if self.scopeOptions["iosapps"]!["copy"] != nil {
+                        self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+                    } else {
+                        self.scopeIaCopy = true
+                    }
+                } else {
+                    self.scopeIaCopy = true
+                }
+            } else {
+                // reset/initialize new settings
+                plistData          = readSettings()
+                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                                      "macapps":["copy":true],
+                                      "policies":["copy":true,"disable":false],
+                                      "restrictedsoftware":["copy":true],
+                                      "mobiledeviceconfigurationprofiles":["copy":true],
+                                      "iosapps":["copy":true],
+                                      "scg":["copy":true],
+                                      "sig":["copy":true],
+                                      "users":["copy":true]] as Any
+                
+                NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+            }
+            // read scope settings - end
+            
+            if scopeOptions["scg"] != nil && scopeOptions["sig"] != nil && scopeOptions["users"] != nil  {
+
+                if (scopeOptions["scg"]!["copy"] != nil) {
+                    scopeScgCopy = scopeOptions["scg"]!["copy"]!
+                } else {
+                    scopeScgCopy                  = true
+                    scopeOptions["scg"]!["copy"] = scopeScgCopy
+                }
+
+                if (scopeOptions["sig"]!["copy"] != nil) {
+                    scopeSigCopy = scopeOptions["sig"]!["copy"]!
+                } else {
+                    scopeSigCopy                  = true
+                    scopeOptions["sig"]!["copy"] = scopeSigCopy
+                }
+
+                if (scopeOptions["sig"]!["users"] != nil) {
+                    scopeUsersCopy = scopeOptions["sig"]!["users"]!
+                } else {
+                    scopeUsersCopy                 = true
+                    scopeOptions["sig"]!["users"] = scopeUsersCopy
+                }
+            } else {
+                // reset/initialize scope preferences
+                plistData          = readSettings()
+                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                                      "macapps":["copy":true],
+                                      "policies":["copy":true,"disable":false],
+                                      "restrictedsoftware":["copy":true],
+                                      "mobiledeviceconfigurationprofiles":["copy":true],
+                                      "iosapps":["copy":true],
+                                      "scg":["copy":true],
+                                      "sig":["copy":true],
+                                      "users":["copy":true]] as Any
+            }
+            
+            // read xml settings - start
+            if plistData["xml"] != nil {
+                xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+
+                if (xmlPrefOptions["saveRawXml"] != nil) {
+                    export.saveRawXml = xmlPrefOptions["saveRawXml"]!
+                } else {
+                    export.saveRawXml                   = false
+                    xmlPrefOptions["saveRawXml"] = export.saveRawXml
+                }
+                
+                if (xmlPrefOptions["saveTrimmedXml"] != nil) {
+                    export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
+                } else {
+                    export.saveTrimmedXml                   = false
+                    xmlPrefOptions["saveTrimmedXml"] = export.saveTrimmedXml
+                }
+
+                if (xmlPrefOptions["saveOnly"] != nil) {
+                    export.saveOnly = xmlPrefOptions["saveOnly"]!
+                } else {
+                    export.saveOnly                   = false
+                    xmlPrefOptions["saveOnly"] = export.saveOnly
+                }
+                disableSource()
+                
+                if xmlPrefOptions["saveRawXmlScope"] == nil {
+                    xmlPrefOptions["saveRawXmlScope"] = true
+                    saveRawXmlScope = true
+                }
+                if xmlPrefOptions["saveTrimmedXmlScope"] == nil {
+                    xmlPrefOptions["saveTrimmedXmlScope"] = true
+                    saveTrimmedXmlScope = true
+                }
+            } else {
+                // set default values
+                plistData        = readSettings()
+                plistData["xml"] = ["saveRawXml":false,
+                                    "saveTrimmedXml":false,
+                                    "export.saveOnly":false,
+                                    "saveRawXmlScope":true,
+                                    "saveTrimmedXmlScope":true] as Any
+            }
+            // update plist
+            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+            // read xml settings - end
+            // read environment settings - end
+            
+            // see if we last migrated from files or a server
+            // no need to backup local files, add later?
+            _ = serverOrFiles()
+        } else {
+            didRun = true
+            source_jp_server = JamfProServer.source
+            dest_jp_server   = JamfProServer.destination
+        }
+
+        // check for stored passwords - start
+        if (source_jp_server != "") {
+            fetchPassword(whichServer: "source", url: source_jp_server)
+        }
+        if (dest_jp_server != "") {
+            fetchPassword(whichServer: "destination", url: dest_jp_server)
+        }
+        if (storedSourcePwd == "") || (storedDestPwd == "") {
+            self.validCreds = false
+        }
+//        if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
+//            self.validCreds = false
+//        }
+        // check for stored passwords - end
+        
+        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
+        
+        if !setting.fullGUI {
+            WriteToLog().message(stringOfText: "Running silently\n")
+            Go(sender: "silent")
+        }
     }
     
     // Summary Window - start

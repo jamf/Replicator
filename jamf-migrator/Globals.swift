@@ -46,6 +46,8 @@ struct JamfProServer {
     static var minorVersion = 0
     static var patchVersion = 0
     static var build        = ""
+    static var source       = ""
+    static var destination  = ""
     static var authCreds    = ["source":"", "destination":""]
     static var authExpires  = ["source":"", "destination":""]
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
@@ -82,7 +84,7 @@ struct setting {
     static var waitingForPackages    = false
     static var migrateDependencies   = false
     static var csa                   = true // cloud services connection
-    static var hideGui               = false
+    static var fullGUI               = true
 }
 
 struct summaryHeader {

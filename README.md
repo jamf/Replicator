@@ -32,7 +32,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 * Institutional disk encryptions that contain the private key cannot be migrated.
-* Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a corrupt profle and failure in profile deployment.
+* Approved Kernel Extension payloads do not migrate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
 * System Extensions do not migrate properly.  They may appear to migrate but fail when being deployed.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.

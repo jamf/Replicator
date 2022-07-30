@@ -6,6 +6,7 @@
 //  Copyright © 2016 jamf. All rights reserved.
 //
 
+import ApplicationServices
 import Cocoa
 
 @NSApplicationMain
@@ -22,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let bookmark = try folderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
                 UserDefaults.standard.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
-                WriteToLog().message(stringOfText: "[AppDelegate] Set Bookmark Fails: \(error.description)")
+                WriteToLog().message(stringOfText: "[AppDelegate] Set Bookmark Fails: \(error.description)\n")
             }
         }
     }
@@ -32,16 +33,82 @@ class AppDelegate: NSObject, NSApplicationDelegate {
            do {
                var bookmarkIsStale = false
                let url = try URL.init(resolvingBookmarkData: bookmarkData as Data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &bookmarkIsStale)
-               url.startAccessingSecurityScopedResource()
+               let _ = url.startAccessingSecurityScopedResource()
            } catch let error as NSError {
-            WriteToLog().message(stringOfText: "Bookmark Access Fails: \(error.description)")
+            WriteToLog().message(stringOfText: "Bookmark Access Fails: \(error.description)\n")
            }
        }
-        if !CommandLine.arguments.contains("silent") {
+        
+        // read command line arguments - start
+        var numberOfArgs = 0
+        var startPos     = 1
+        // read commandline args
+        numberOfArgs = CommandLine.arguments.count
+//        print("all arguments: \(CommandLine.arguments)")
+        if CommandLine.arguments.contains("-debug") {
+            numberOfArgs -= 1
+            startPos+=1
+            LogLevel.debug = true
+        }
+        var index = 0
+        while index < numberOfArgs {
+                print("index: \(index)\t argument: \(CommandLine.arguments[index])")
+                switch CommandLine.arguments[index].lowercased() {
+                case "-saverawxml":
+                    export.saveRawXml = true
+                case "-savetrimmedxml":
+                    export.saveTrimmedXml = true
+                case "-export.saveonly":
+                    export.saveOnly = true
+                case "-forceldapid":
+                    index += 1
+//                    forceLdapId = Bool(CommandLine.arguments[index]) ?? false
+                case "-ldapid":
+                    index += 1
+//                    ldapId = Int(CommandLine.arguments[index]) ?? -1
+//                    if ldapId > 0 {
+//                        hardSetLdapId = true
+//                    }
+                case "-sourceurl":
+                    index += 1
+                    JamfProServer.source = "\(CommandLine.arguments[index])"
+                    if JamfProServer.source.prefix(4) != "http" {
+                        JamfProServer.source = "https://\(JamfProServer.source)"
+                    }
+                case "-desturl":
+                    index += 1
+                    JamfProServer.destination = "\(CommandLine.arguments[index])"
+                    if JamfProServer.destination.prefix(4) != "http" {
+                        JamfProServer.destination = "https://\(JamfProServer.destination)"
+                    }
+                case "-backup":
+                    index += 1
+                    export.backupMode = Bool(CommandLine.arguments[index]) ?? false
+                    setting.fullGUI = false
+                case "-silent":
+                    setting.fullGUI = false
+//                case "-nsdocumentrevisionsdebugmode","YES":
+//                    continue
+                default:
+                    print("unknown switch passed: \(CommandLine.arguments[index])")
+                }
+            index += 1
+        }
+        // read command line arguments - end
+        print("done reading command line args - index: \(index)")
+        
+        
+        if setting.fullGUI {
+            NSApp.setActivationPolicy(.regular)
             let storyboard = NSStoryboard(name: "Main", bundle: nil)
             let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController
             mainWindowController.window?.hidesOnDeactivate = false
             mainWindowController.showWindow(self)
+        }
+        else {
+            print("running silently")
+            
+            ViewController().initVars()
         }
     }
 
