@@ -92,8 +92,9 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         if baseXmlFolder == "" {
             baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
         } else {
-            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "file://", with: "")
-            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "%20", with: " ")
+//            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "file://", with: "")
+//            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "%20", with: " ")
+            baseXmlFolder = baseXmlFolder.pathToString
         }
             
         saveXmlFolder = baseXmlFolder+format+"/"

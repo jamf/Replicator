@@ -12,6 +12,7 @@ import Foundation
 
 class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
+    let userDefaults = UserDefaults.standard
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
     // selective list filter
@@ -70,7 +71,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
-    let userDefaults = UserDefaults.standard
     // determine if we're using dark mode
     var isDarkMode: Bool {
         let mode = userDefaults.string(forKey: "AppleInterfaceStyle")
@@ -112,7 +112,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
         
     // keychain access
-//    let Creds            = Credentials()
     let Creds2           = Credentials2()
     var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
@@ -126,6 +125,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
         
     // Buttons
+    // general tab
+    @IBOutlet weak var allNone_general_button: NSButton!
+    @IBOutlet weak var advusersearch_button: NSButton!
+    @IBOutlet weak var building_button: NSButton!
+    @IBOutlet weak var categories_button: NSButton!
+    @IBOutlet weak var dept_button: NSButton!
+    @IBOutlet weak var userEA_button: NSButton!
+    @IBOutlet weak var sites_button: NSButton!
+    @IBOutlet weak var ldapservers_button: NSButton!
+    @IBOutlet weak var networks_button: NSButton!
+    @IBOutlet weak var users_button: NSButton!
+    @IBOutlet weak var smartUserGrps_button: NSButton!
+    @IBOutlet weak var staticUserGrps_button: NSButton!
+    @IBOutlet weak var jamfUserAccounts_button: NSButton!
+    @IBOutlet weak var jamfGroupAccounts_button: NSButton!
     // macOS tab
     @IBOutlet weak var advcompsearch_button: NSButton!
     @IBOutlet weak var macapplications_button: NSButton!
@@ -158,21 +172,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var static_ios_groups_button: NSButton!
     @IBOutlet weak var advancedmobiledevicesearches_button: NSButton!
     @IBOutlet weak var iosPrestages_button: NSButton!
-    // general tab
-    @IBOutlet weak var allNone_general_button: NSButton!
-    @IBOutlet weak var advusersearch_button: NSButton!
-    @IBOutlet weak var building_button: NSButton!
-    @IBOutlet weak var categories_button: NSButton!
-    @IBOutlet weak var dept_button: NSButton!
-    @IBOutlet weak var userEA_button: NSButton!
-    @IBOutlet weak var sites_button: NSButton!
-    @IBOutlet weak var ldapservers_button: NSButton!
-    @IBOutlet weak var networks_button: NSButton!
-    @IBOutlet weak var users_button: NSButton!
-    @IBOutlet weak var smartUserGrps_button: NSButton!
-    @IBOutlet weak var staticUserGrps_button: NSButton!
-    @IBOutlet weak var jamfUserAccounts_button: NSButton!
-    @IBOutlet weak var jamfGroupAccounts_button: NSButton!
+    
+    var smartUserGrpsSelected      = false
+    var staticUserGrpsSelected     = false
+    var smartComputerGrpsSelected  = false
+    var staticComputerGrpsSelected = false
+    var smartIosGrpsSelected       = false
+    var staticIosGrpsSelected      = false
+    var jamfUserAccountsSelected   = false
+    var jamfGroupAccountsSelected  = false
     
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
@@ -348,7 +356,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
     var plistData:[String:Any] = [:]   //our server/username data
 
-//    var maxHistory:     Int = 20
+//  Log / backup vars
+    let backupDate          = DateFormatter()
     var maxLogFileCount     = 20
     var historyFile: String = ""
     var logFile:     String = ""
@@ -406,12 +415,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // import file vars
     var fileImport      = false
     var dataFilesRoot   = ""
-    
-    // command line only
-    var ldapId = -1
-    var hardSetLdapId = false
-    var forceLdapId = false
-
     
     var endpointDefDict = ["computergroups":"computer_groups", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     let ordered_dependency_array = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
@@ -484,8 +487,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var idDict            = [String:Dictionary<String,Int>]()
     
     
-    
-    
     let fm            = FileManager()
     var theOpQ        = OperationQueue() // create operation queue for API calls
     var getEndpointsQ = OperationQueue() // create operation queue for API calls
@@ -534,8 +535,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 
                 
                 _ = serverOrFiles()
-            }
-            catch let error as NSError {
+            } catch let error as NSError {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
             }
             DispatchQueue.main.async {
@@ -905,6 +905,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         History.startTime = Date()
+        
         if setting.fullGUI {
             plistData             = readSettings()
             scopeOptions          = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
@@ -914,13 +915,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             export.saveTrimmedXml = (xmlPrefOptions["saveTrimmedXml"] == nil) ? false:xmlPrefOptions["saveTrimmedXml"]!
             saveRawXmlScope       = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
             saveTrimmedXmlScope   = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
+            
+            smartUserGrpsSelected      = smartUserGrps_button.state.rawValue == 1
+            staticUserGrpsSelected     = staticUserGrps_button.state.rawValue == 1
+            smartComputerGrpsSelected  = smart_comp_grps_button.state.rawValue == 1
+            staticComputerGrpsSelected = static_comp_grps_button.state.rawValue == 1
+            smartIosGrpsSelected       = smart_ios_groups_button.state.rawValue == 1
+            staticIosGrpsSelected      = static_ios_groups_button.state.rawValue == 1
+            jamfUserAccountsSelected   = jamfUserAccounts_button.state.rawValue == 1
+            jamfGroupAccountsSelected  = jamfGroupAccounts_button.state.rawValue == 1
         } else {
             if export.backupMode {
+                backupDate.dateFormat = "yyyyMMdd_HHmmss"
                 export.saveOnly       = true
                 export.saveRawXml     = true
                 export.saveTrimmedXml = false
                 saveRawXmlScope       = true
                 saveTrimmedXmlScope   = false
+                
+                smartUserGrpsSelected      = true
+                staticUserGrpsSelected     = true
+                smartComputerGrpsSelected  = true
+                staticComputerGrpsSelected = true
+                smartIosGrpsSelected       = true
+                staticIosGrpsSelected      = true
+                jamfUserAccountsSelected   = true
+                jamfGroupAccountsSelected  = true
             }
         }
         
@@ -1120,7 +1140,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         if export.saveOnly { csaMethod = "skip" }
                                         Jpapi().action(serverUrl: self.dest_jp_server, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: csaMethod) {
                                             (returnedJSON: [String:Any]) in
-                                            print("CSA: \(returnedJSON)")
+//                                            print("CSA: \(returnedJSON)")
                                             if let _ = returnedJSON["scopes"] {
                                                 setting.csa = true
                                             } else {
@@ -1414,8 +1434,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     default: break
                     }
                 } else {
-//                    objectsToMigrate = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "catagories", "jamfusers"]
-                    objectsToMigrate = ["buildings"]
+                    objectsToMigrate = ["buildings", "departments", "categories", "jamfusers"]
+//                    objectsToMigrate = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups",
+//                                        "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "netbootservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies",
+//                                        "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
                 }
                 
             }   // if migrationMode == "bulk" - end
@@ -1459,16 +1481,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //            }
 //            let toMigrateArray = setting.migrateDependencies ? ordered_dependency_array.append("policies"):
             for currentNode in self.objectsToMigrate {
-                self.put_levelIndicatorFillColor[currentNode] = .systemGreen
+                if setting.fullGUI {
+                    self.put_levelIndicatorFillColor[currentNode] = .systemGreen
+                }
                 switch currentNode {
                 case "computergroups":
-                    if self.smart_comp_grps_button.state.rawValue == 1 {
+                    if self.smartComputerGrpsSelected {
                         self.progressCountArray["smartcomputergroups"] = 0
                         self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticcomputergroups"]       = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartcomputergroups"]        = ["get":0]
                     }
-                    if self.static_comp_grps_button.state.rawValue == 1 {
+                    if self.staticComputerGrpsSelected {
                         self.progressCountArray["staticcomputergroups"] = 0
                         self.counters["staticcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticcomputergroups"]        = ["create":[], "update":[], "fail":[]]
@@ -1476,13 +1500,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                     self.progressCountArray["computergroups"] = 0 // this is the recognized end point
                 case "mobiledevicegroups":
-                    if self.smart_ios_groups_button.state.rawValue == 1 {
+                    if self.smartIosGrpsSelected {
                         self.progressCountArray["smartmobiledevicegroups"] = 0
                         self.counters["smartmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["smartmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartmobiledevicegroups"]        = ["get":0]
                     }
-                    if self.static_ios_groups_button.state.rawValue == 1 {
+                    if self.staticIosGrpsSelected {
                         self.progressCountArray["staticmobiledevicegroups"] = 0
                         self.counters["staticmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
@@ -1490,13 +1514,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
                 case "usergroups":
-                    if self.smartUserGrps_button.state.rawValue == 1 {
+                    if self.smartUserGrpsSelected {
                         self.progressCountArray["smartusergroups"] = 0
                         self.counters["smartusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["smartusergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartusergroups"]        = ["get":0]
                     }
-                    if self.staticUserGrps_button.state.rawValue == 1 {
+                    if self.staticUserGrpsSelected {
                         self.progressCountArray["staticusergroups"] = 0
                         self.counters["staticusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticusergroups"]        = ["create":[], "update":[], "fail":[]]
@@ -1504,13 +1528,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                     self.progressCountArray["usergroups"] = 0 // this is the recognized end point
                 case "accounts":
-                    if self.jamfUserAccounts_button.state.rawValue == 1 {
+                    if self.jamfUserAccountsSelected {
                         self.progressCountArray["jamfusers"] = 0
                         self.counters["jamfusers"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["jamfusers"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["jamfusers"]        = ["get":0]
                     }
-                    if self.jamfGroupAccounts_button.state.rawValue == 1 {
+                    if self.jamfGroupAccountsSelected {
                         self.progressCountArray["jamfgroups"] = 0
                         self.counters["jamfgroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["jamfgroups"]        = ["create":[], "update":[], "fail":[]]
@@ -2355,9 +2379,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     let smart: Bool = (record["is_smart"] as! Bool)
                                                     if smart {
                                                         //self.smartCount += 1
-//                                                        if record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches" {
+                                                        if (record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches") || export.backupMode {
                                                             smartGroupDict[record["id"] as! Int] = record["name"] as! String?
-//                                                        }
+                                                        }
                                                     } else {
                                                         //self.staticCount += 1
                                                         staticGroupDict[record["id"] as! Int] = record["name"] as! String?
@@ -2367,43 +2391,51 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
                                                     self.nodesMigrated+=1
                                                 }
-
                                                 // split devicegroups into smart and static - end
+                                                
+                                                // groupType is "" for bulk migrations, smart/static for selective
                                                 switch endpoint {
-                                                case "computergroups":
-                                                    if (self.smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                case "usergroups":
+                                                    if (!self.smartUserGrpsSelected && groupType == "") || groupType == "static" {
                                                         excludeCount += smartGroupDict.count
                                                     }
-                                                    if (self.static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                    if (!self.staticUserGrpsSelected && groupType == "") || groupType == "smart" {
                                                         excludeCount += staticGroupDict.count
                                                     }
-                                                    if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 && groupType == "" {
+                                                    if self.self.smartUserGrpsSelected && self.staticUserGrpsSelected && groupType == "" {
+                                                        self.nodesMigrated-=1
+                                                    }
+                                                case "computergroups":
+//                                                        if (self.smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                    if (!self.smartComputerGrpsSelected && groupType == "") || groupType == "static" {
+                                                        excludeCount += smartGroupDict.count
+                                                    }
+//                                                        if (self.static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                    if (!self.staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
+                                                        excludeCount += staticGroupDict.count
+                                                    }
+//                                                        if self.smart_comp_grps_button.state.rawValue == 1 && self.static_comp_grps_button.state.rawValue == 1 && groupType == "" {
+                                                    if self.smartComputerGrpsSelected && self.staticComputerGrpsSelected && groupType == "" {
                                                         self.nodesMigrated-=1
                                                     }
                                                 case "mobiledevicegroups":
-                                                    if (self.smart_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
+                                                    if (!self.smartIosGrpsSelected && groupType == "") || groupType == "static" {
                                                         excludeCount += smartGroupDict.count
                                                     }
-                                                    if (self.static_ios_groups_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
+                                                    if (!self.staticIosGrpsSelected && groupType == "") || groupType == "smart" {
                                                         excludeCount += staticGroupDict.count
                                                     }
-                                                    if self.smart_ios_groups_button.state.rawValue == 1 && self.static_ios_groups_button.state.rawValue == 1 {
-                                                        self.nodesMigrated-=1
-                                                    }
-                                                case "usergroups":
-                                                    if (self.smartUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
-                                                        excludeCount += smartGroupDict.count
-                                                    }
-                                                    if (self.staticUserGrps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
-                                                        excludeCount += staticGroupDict.count
-                                                    }
-                                                    if self.smartUserGrps_button.state.rawValue == 1 && self.staticUserGrps_button.state.rawValue == 1 && groupType == "" {
+                                                    if self.smartIosGrpsSelected && self.staticIosGrpsSelected {
                                                         self.nodesMigrated-=1
                                                     }
 
                                                 default: break
                                                 }
-
+                                                
+//                                                print(" self.smart_comp_grps_button.state.rawValue: \(self.smart_comp_grps_button.state.rawValue)")
+//                                                print("self.static_comp_grps_button.state.rawValue: \(self.static_comp_grps_button.state.rawValue)")
+//                                                print("                                  groupType: \(groupType)")
+//                                                print("                               excludeCount: \(excludeCount)")
 
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(smartGroupDict.count) smart groups\n") }
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(staticGroupDict.count) static groups\n") }
@@ -2414,15 +2446,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     var groupCount = 0
                                                     var localEndpoint = endpoint
                                                     switch endpoint {
+                                                    case "usergroups":
+                                                        if ((self.smartUserGrpsSelected) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "smartcomputergroups"
+    //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "smartusergroups"
+                                                        }
+                                                        if ((self.staticUserGrpsSelected) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+    //                                                        self.DeviceGroupType = "staticcomputergroups"
+    //                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
+                                                            localEndpoint = "staticusergroups"
+                                                        }
                                                     case "computergroups":
-                                                        if ((self.smart_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                        if ((self.smartComputerGrpsSelected) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                             currentGroupDict = smartGroupDict
                                                             groupCount = currentGroupDict.count
     //                                                        self.DeviceGroupType = "smartcomputergroups"
     //                                                        print("computergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                             localEndpoint = "smartcomputergroups"
                                                         }
-                                                        if ((self.static_comp_grps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                        if ((self.staticComputerGrpsSelected) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
                                                             currentGroupDict = staticGroupDict
                                                             groupCount = currentGroupDict.count
     //                                                        self.DeviceGroupType = "staticcomputergroups"
@@ -2430,43 +2477,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             localEndpoint = "staticcomputergroups"
                                                         }
                                                     case "mobiledevicegroups":
-                                                        if ((self.smart_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                        if ((self.smartIosGrpsSelected) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                             currentGroupDict = smartGroupDict
                                                             groupCount = currentGroupDict.count
     //                                                        self.DeviceGroupType = "smartcomputergroups"
     //                                                        print("devicegroups smart - DeviceGroupType: \(self.DeviceGroupType)")
                                                             localEndpoint = "smartmobiledevicegroups"
                                                         }
-                                                        if ((self.static_ios_groups_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                        if ((self.staticIosGrpsSelected) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
                                                             currentGroupDict = staticGroupDict
                                                             groupCount = currentGroupDict.count
     //                                                        self.DeviceGroupType = "staticcomputergroups"
     //                                                        print("devicegroups static - DeviceGroupType: \(self.DeviceGroupType)")
                                                             localEndpoint = "staticmobiledevicegroups"
                                                         }
-                                                    case "usergroups":
-                                                        if ((self.smartUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                            currentGroupDict = smartGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        self.DeviceGroupType = "smartcomputergroups"
-    //                                                        print("usergroups smart - DeviceGroupType: \(self.DeviceGroupType)")
-                                                            localEndpoint = "smartusergroups"
-                                                        }
-                                                        if ((self.staticUserGrps_button.state.rawValue == 1) || (self.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                            currentGroupDict = staticGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        self.DeviceGroupType = "staticcomputergroups"
-    //                                                        print("usergroups static - DeviceGroupType: \(self.DeviceGroupType)")
-                                                            localEndpoint = "staticusergroups"
-                                                        }
                                                     default: break
                                                     }
+                                                    
                                                     var counter = 1
                                                     self.delayInt = self.listDelay(itemCount: currentGroupDict.count)
                                                     
                                                     for (l_xmlID, l_xmlName) in currentGroupDict {
                                                         self.availableObjsToMigDict[l_xmlID] = l_xmlName
-                                                        if self.goSender == "goButton" {
+                                                        if self.goSender == "goButton" || self.goSender == "silent" {
                                                             if !wipeData.on  {
 
                                                                 //need to call existingEndpoints here to keep proper order?
@@ -2551,10 +2584,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         var computerPoliciesDict: [Int: String] = [:]
 
                                         if endpointCount > 0 {
-                                            // display migrateDependencies button
-                                            DispatchQueue.main.async {
-                                                if !wipeData.on {
-                                                    self.migrateDependencies.isHidden = false
+                                            if setting.fullGUI {
+                                                // display migrateDependencies button
+                                                DispatchQueue.main.async {
+                                                    if !wipeData.on {
+                                                        self.migrateDependencies.isHidden = false
+                                                    }
                                                 }
                                             }
 
@@ -2568,19 +2603,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 for i in (0..<endpointCount) {
                                                     let record = endpointInfo[i] as! [String : AnyObject]
                                                     let nameCheck = record["name"] as! String
-                                                    if nameCheck.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
+                                                    
+                                                    if nameCheck.range(of:"[0-9]{4}-[0-9]{2}-[0-9]{2} at [0-9]", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
                                                         computerPoliciesDict[record["id"] as! Int] = nameCheck
                                                     }
                                                 }
                                                 // filter out policies created from casper remote - end
 
+                                                /* removed 22-07-30 lnh
                                                 // return if we have no policies to migrate - start
                                                 if computerPoliciesDict.count == 0 {
-                                                    self.goButtonEnabled(button_status: true)
+                                                    if setting.fullGUI {
+                                                        self.goButtonEnabled(button_status: true)
+                                                    }
                                                     completion(["did not find any policies", "0"])
                                                     return
                                                 }
                                                 // return if we have no policies to migrate - end
+                                                */
 
                                                 self.availableObjsToMigDict = computerPoliciesDict
                                                 let nonRemotePolicies = computerPoliciesDict.count
@@ -2589,7 +2629,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 self.delayInt = self.listDelay(itemCount: computerPoliciesDict.count)
 //                                                print("[ViewController.getEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
                                                 for (l_xmlID, l_xmlName) in computerPoliciesDict {
-                                                    if self.goSender == "goButton" {
+                                                    if self.goSender == "goButton" || self.goSender == "silent" {
                                                         if !wipeData.on  {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
     //                                                        if self.currentEPs[l_xmlName] != nil {
@@ -2647,6 +2687,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     } else {   //if let endpointInfo = endpointJSON - end
                                         if nodeIndex < nodesToMigrate.count - 1 {
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])\n") }
                                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                         }
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
@@ -2688,7 +2729,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
 
                                                     var counter = 1
-                                                    if self.goSender == "goButton" {
+                                                    if self.goSender == "goButton" || self.goSender == "silent" {
                                                         for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
                                                             if !wipeData.on  {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: self.currentEPs[l_xmlName]))\n") }
@@ -3364,8 +3405,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 DispatchQueue.main.async {
                                     let exportRawJson = (export.rawXmlScope) ? self.rmJsonData(rawJSON: returnedJSON, theTag: ""):self.rmJsonData(rawJSON: returnedJSON, theTag: "scope")
 //                                    print("exportRawJson: \(exportRawJson)")
-                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName).\n")
-                                    SaveDelegate().exportObject(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "raw")
+                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName)\n")
+                                    let exportFormat = (export.backupMode) ? "backup_\(self.backupDate.string(from: History.startTime))":"raw"
+                                    SaveDelegate().exportObject(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
                                 }
                             }
                             // save source JSON - end
@@ -3412,8 +3454,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     // added option to remove scope
     //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                     let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName).\n")
-                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "raw")
+                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)\n")
+                                    let exportFormat = (export.backupMode) ? "backup_\(self.backupDate.string(from: History.startTime))":"raw"
+                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
                                 }
                             }
                             // save source XML - end
@@ -3970,16 +4013,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let ldapServerInfo = tagValue(xmlString: PostXML, xmlTag: "ldap_server")
                 let ldapServerName = tagValue(xmlString: ldapServerInfo, xmlTag: "name")
                 let regexLDAP      = try! NSRegularExpression(pattern: "<ldap_server>(.|\n|\r)*?</ldap_server>", options:.caseInsensitive)
-                if !hardSetLdapId {
-                    ldapId         = currentLDAPServers[ldapServerName] ?? -1
+                if !setting.hardSetLdapId {
+                    setting.ldapId = currentLDAPServers[ldapServerName] ?? -1
                 }
-                PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(ldapId)</id></ldap_server>")
-            } else if forceLdapId && ldapId > 0 {
+                PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(setting.ldapId)</id></ldap_server>")
+            } else if setting.hardSetLdapId && setting.ldapId > 0 {
                 let ldapObjectUsername = tagValue(xmlString: PostXML, xmlTag: "name").lowercased()
                 // make sure we don't change the account we're authenticated to the destination server with
                 if ldapObjectUsername != dest_user.lowercased() {
-                    let regexNoLdap      = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
-                    PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(ldapId)</id></ldap_server>")
+                    let regexNoLdap    = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
+                    PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(setting.ldapId)</id></ldap_server>")
                 }
             }
 //            print("PostXML: \(PostXML)")
@@ -4512,7 +4555,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 DispatchQueue.main.async {
                     let exportTrimmedJson = (export.trimmedXmlScope) ? self.rmJsonData(rawJSON: endPointJSON, theTag: ""):self.rmJsonData(rawJSON: endPointJSON, theTag: "scope")
 //                    print("exportTrimmedJson: \(exportTrimmedJson)")
-                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpointType) - \(endpointName).\n")
+                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpointType) - \(endpointName)\n")
                     SaveDelegate().exportObject(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
                 
@@ -6123,7 +6166,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.go_button.isEnabled = button_status
             } else {
                 // silent run complete
-                NSApplication.shared.terminate(self)
+                if export.backupMode {
+                    if self.theOpQ.operationCount == 0 {
+                        print("archive path: \(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))")
+//                    self.zipIt(args: "cd \"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"") {
+//                        (result: String) in
+//                        print("returned from cd")
+                        self.zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o backup_\(self.backupDate.string(from: History.startTime)).zip backup_\(self.backupDate.string(from: History.startTime))/") {
+                            (result: String) in
+                            print("zipIt result: \(result)")
+                            do {
+                                if self.fm.fileExists(atPath: "\"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"") {
+                                    try self.fm.removeItem(at: URL(string: "\"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"")!)
+                                }
+                                WriteToLog().message(stringOfText: "[Migration Complete] Backup created: \(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime)).zip\n")
+                            } catch let error as NSError {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
+                            }
+                        }
+                        NSApplication.shared.terminate(self)
+                    }   //self.zipIt(args: "cd - end
+                } else {
+                    NSApplication.shared.terminate(self)
+                }
             }
         }
         
@@ -6181,30 +6246,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         return(theName)
     }
-    
-    /*
-    func getStatusUpdate(endpoint: String, current: Int, total: Int) {
-        var adjEndpoint = ""
-        switch endpoint {
-        case "accounts/userid":
-            adjEndpoint = "jamfusers"
-        case "accounts/groupid":
-            adjEndpoint = "jamfgroups"
-        default:
-            adjEndpoint = endpoint
-        }
-        
-        DispatchQueue.main.async {
-            self.get_name_field.stringValue = adjEndpoint
-            if current > 0 {
-//                self.get_completed_field.stringValue = "\(current)"
-                self.get_levelIndicator.floatValue = Float(current)/Float(total)
-                self.getSummary_label.stringValue = "\(current) of \(total)"
-            }
-//            self.get_found_field.stringValue = "\(total)"
-        }
-    }
-     */
     
     func getStatusUpdate2(endpoint: String, total: Int) {
         var adjEndpoint = ""
@@ -6671,7 +6712,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // end upload procdess
             
         case "PUT":
-        
+            
             WriteToLog().message(stringOfText: "[iconMigrate.\(action)] setting icon for policy \(createDestUrl).\n")
             
             theIconsQ.maxConcurrentOperationCount = 2
@@ -6815,104 +6856,106 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // func labelColor - start
     func labelColor(endpoint: String, theColor: NSColor) {
-        DispatchQueue.main.async {
-            switch endpoint {
-            // macOS tab
-            case "advancedcomputersearches":
-                self.advcompsearch_label_field.textColor = theColor
-            case "computers":
-                self.computers_label_field.textColor = theColor
-            case "directorybindings":
-                self.directory_bindings_field.textColor = theColor
-            case "diskencryptionconfigurations":
-                self.file_shares_label_field.textColor = theColor
-            case "distributionpoints":
-                self.file_shares_label_field.textColor = theColor
-            case "dockitems":
-                self.dock_items_field.textColor = theColor
-            case "softwareupdateservers":
-                self.sus_label_field.textColor = theColor
-            case "netbootservers":
-                self.netboot_label_field.textColor = theColor
-            case "osxconfigurationprofiles":
-                self.osxconfigurationprofiles_label_field.textColor = theColor
-            case "patchpolicies":
-                self.patch_policies_field.textColor = theColor
-            case "computerextensionattributes":
-                self.extension_attributes_label_field.textColor = theColor
-            case "scripts":
-                self.scripts_label_field.textColor = theColor
-            case "macapplications":
-                self.macapplications_label_field.textColor = theColor
-            case "computergroups":
-                self.smart_groups_label_field.textColor = theColor
-                self.static_groups_label_field.textColor = theColor
-            case "smartcomputergroups":
-                self.smart_groups_label_field.textColor = theColor
-            case "staticcomputergroups":
-                self.static_groups_label_field.textColor = theColor
-            case "packages":
-                self.packages_label_field.textColor = theColor
-            case "printers":
-                self.printers_label_field.textColor = theColor
-            case "policies":
-                self.policies_label_field.textColor = theColor
-            case "restrictedsoftware":
-                self.restrictedsoftware_label_field.textColor = theColor
-            case "computer-prestages":
-                self.macPrestages_label_field.textColor = theColor
-            // iOS tab
-            case "advancedmobiledevicesearches":
-                self.advancedmobiledevicesearches_label_field.textColor = theColor
-            case "mobiledeviceapplications":
-                self.mobiledeviceApps_label_field.textColor = theColor
-            case "mobiledeviceconfigurationprofiles":
-                self.mobiledeviceconfigurationprofile_label_field.textColor = theColor
-            case "mobiledeviceextensionattributes":
-                self.mobiledeviceextensionattributes_label_field.textColor = theColor
-            case "mobiledevices":
-                self.mobiledevices_label_field.textColor = theColor
-            case "mobiledevicegroups":
-                self.smart_ios_groups_label_field.textColor = theColor
-                self.static_ios_groups_label_field.textColor = theColor
-            case "smartmobiledevicegroups":
-                self.smart_ios_groups_label_field.textColor = theColor
-            case "staticmobiledevicegroups":
-                self.static_ios_groups_label_field.textColor = theColor
-            case "mobile-device-prestages":
-                self.mobiledevicePrestage_label_field.textColor = theColor
-            // general tab
-            case "advancedusersearches":
-                self.advusersearch_label_field.textColor = theColor
-            case "buildings":
-                self.building_label_field.textColor = theColor
-            case "categories":
-                self.categories_label_field.textColor = theColor
-            case "departments":
-                self.departments_label_field.textColor = theColor
-            case "userextensionattributes":
-                self.userEA_label_field.textColor = theColor
-            case "ldapservers":
-                self.ldapservers_label_field.textColor = theColor
-            case "sites":
-                self.sites_label_field.textColor = theColor
-            case "networksegments":
-                self.network_segments_label_field.textColor = theColor
-            case "users":
-                self.users_label_field.textColor = theColor
-            case "usergroups":
-                self.smartUserGrps_label_field.textColor = theColor
-                self.staticUserGrps_label_field.textColor = theColor
-            case "jamfusers", "accounts/userid":
-                self.jamfUserAccounts_field.textColor = theColor
-            case "jamfgroups", "accounts/groupid":
-                self.jamfGroupAccounts_field.textColor = theColor
-            case "smartusergroups":
-                self.smartUserGrps_label_field.textColor = theColor
-            case "staticusergroups":
-                self.staticUserGrps_label_field.textColor = theColor
-            default:
-                print("function labelColor: unknown label - \(endpoint)")
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                switch endpoint {
+                    // general tab
+                    case "advancedusersearches":
+                        self.advusersearch_label_field.textColor = theColor
+                    case "buildings":
+                        self.building_label_field.textColor = theColor
+                    case "categories":
+                        self.categories_label_field.textColor = theColor
+                    case "departments":
+                        self.departments_label_field.textColor = theColor
+                    case "userextensionattributes":
+                        self.userEA_label_field.textColor = theColor
+                    case "ldapservers":
+                        self.ldapservers_label_field.textColor = theColor
+                    case "sites":
+                        self.sites_label_field.textColor = theColor
+                    case "networksegments":
+                        self.network_segments_label_field.textColor = theColor
+                    case "users":
+                        self.users_label_field.textColor = theColor
+                    case "usergroups":
+                        self.smartUserGrps_label_field.textColor = theColor
+                        self.staticUserGrps_label_field.textColor = theColor
+                    case "jamfusers", "accounts/userid":
+                        self.jamfUserAccounts_field.textColor = theColor
+                    case "jamfgroups", "accounts/groupid":
+                        self.jamfGroupAccounts_field.textColor = theColor
+                    case "smartusergroups":
+                        self.smartUserGrps_label_field.textColor = theColor
+                    case "staticusergroups":
+                        self.staticUserGrps_label_field.textColor = theColor
+                // macOS tab
+                case "advancedcomputersearches":
+                    self.advcompsearch_label_field.textColor = theColor
+                case "computers":
+                    self.computers_label_field.textColor = theColor
+                case "directorybindings":
+                    self.directory_bindings_field.textColor = theColor
+                case "diskencryptionconfigurations":
+                    self.file_shares_label_field.textColor = theColor
+                case "distributionpoints":
+                    self.file_shares_label_field.textColor = theColor
+                case "dockitems":
+                    self.dock_items_field.textColor = theColor
+                case "softwareupdateservers":
+                    self.sus_label_field.textColor = theColor
+                case "netbootservers":
+                    self.netboot_label_field.textColor = theColor
+                case "osxconfigurationprofiles":
+                    self.osxconfigurationprofiles_label_field.textColor = theColor
+                case "patchpolicies":
+                    self.patch_policies_field.textColor = theColor
+                case "computerextensionattributes":
+                    self.extension_attributes_label_field.textColor = theColor
+                case "scripts":
+                    self.scripts_label_field.textColor = theColor
+                case "macapplications":
+                    self.macapplications_label_field.textColor = theColor
+                case "computergroups":
+                    self.smart_groups_label_field.textColor = theColor
+                    self.static_groups_label_field.textColor = theColor
+                case "smartcomputergroups":
+                    self.smart_groups_label_field.textColor = theColor
+                case "staticcomputergroups":
+                    self.static_groups_label_field.textColor = theColor
+                case "packages":
+                    self.packages_label_field.textColor = theColor
+                case "printers":
+                    self.printers_label_field.textColor = theColor
+                case "policies":
+                    self.policies_label_field.textColor = theColor
+                case "restrictedsoftware":
+                    self.restrictedsoftware_label_field.textColor = theColor
+                case "computer-prestages":
+                    self.macPrestages_label_field.textColor = theColor
+                // iOS tab
+                case "advancedmobiledevicesearches":
+                    self.advancedmobiledevicesearches_label_field.textColor = theColor
+                case "mobiledeviceapplications":
+                    self.mobiledeviceApps_label_field.textColor = theColor
+                case "mobiledeviceconfigurationprofiles":
+                    self.mobiledeviceconfigurationprofile_label_field.textColor = theColor
+                case "mobiledeviceextensionattributes":
+                    self.mobiledeviceextensionattributes_label_field.textColor = theColor
+                case "mobiledevices":
+                    self.mobiledevices_label_field.textColor = theColor
+                case "mobiledevicegroups":
+                    self.smart_ios_groups_label_field.textColor = theColor
+                    self.static_ios_groups_label_field.textColor = theColor
+                case "smartmobiledevicegroups":
+                    self.smart_ios_groups_label_field.textColor = theColor
+                case "staticmobiledevicegroups":
+                    self.static_ios_groups_label_field.textColor = theColor
+                case "mobile-device-prestages":
+                    self.mobiledevicePrestage_label_field.textColor = theColor
+                default:
+                    print("function labelColor: unknown label - \(endpoint)")
+                }
             }
         }
     }
@@ -7535,6 +7578,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
         return(sourceType)
+    }
+    
+    func zipIt(args: String..., completion: @escaping (_ result: String) -> Void) {
+
+        var cmdArgs = ["-c"]
+        for theArg in args {
+            cmdArgs.append(theArg)
+        }
+        var status  = ""
+        var statusArray  = [String]()
+        let pipe    = Pipe()
+        let task    = Process()
+        
+        task.launchPath     = "/bin/sh"
+        task.arguments      = cmdArgs
+        task.standardOutput = pipe
+        
+        task.launch()
+        
+        let outdata = pipe.fileHandleForReading.readDataToEndOfFile()
+        if var string = String(data: outdata, encoding: .utf8) {
+            string = string.trimmingCharacters(in: .newlines)
+            statusArray = string.components(separatedBy: "\n")
+            status = statusArray[0]
+        }
+        
+        task.waitUntilExit()
+        completion(status)
     }
     
     // selective migration functions - start

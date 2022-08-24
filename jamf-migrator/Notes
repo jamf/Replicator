@@ -14,3 +14,6 @@ paragraph.alignment = .center
 let attribText = NSAttributedString(string: "SEND", attributes: [NSAttributedString.Key.paragraphStyle : paragraph, NSAttributedString.Key.font : font!, NSAttributedString.Key.foregroundColor : color, NSAttributedString.Key.underlineStyle : NSUnderlineStyle.single.rawValue])
 self.destinationMethod_TextField.attributedStringValue = attribText
 
+Fix
+Export only smart groups - hangs, keeps spinning
+When unchecking save only in prefs, remove 'export only' notification in UI

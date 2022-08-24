@@ -11,16 +11,17 @@ import Foundation
 
 class VersionCheck: NSObject, URLSessionDelegate {
     
-    func versionCheck(completion: @escaping (_ result: Bool) -> Void) {
+    func versionCheck(completion: @escaping (_ result: Bool, _ latest: String) -> Void) {
         
         URLCache.shared.removeAllCachedResponses()
-        
+        print("appInfo.version: \(appInfo.version)")
         let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: appInfo.version)
         
         var updateAvailable = false
         var versionTest     = true
         
-        let versionUrl = URL(string: "https://api.github.com/repos/jamf/JamfMigrator/releases")
+        let versionUrl = URL(string: "https://api.github.com/repos/jamf/JamfMigrator/releases/latest")
+
         let configuration = URLSessionConfiguration.ephemeral
         var request = URLRequest(url: versionUrl!)
         request.httpMethod = "GET"
@@ -33,13 +34,11 @@ class VersionCheck: NSObject, URLSessionDelegate {
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json as? [Dictionary<String, Any>] {
+                    if let endpointJSON = json as? [String: Any] {
 
-                        for release in endpointJSON {
-                            let statusInfo = release as Dictionary<String, Any>
-                            let releaseInfo = statusInfo as Dictionary<String, Any>
-                            let tmpArray = "\(releaseInfo["name"]!)".components(separatedBy: " ")
-                            let fullVersion = (tmpArray[1] as String).replacingOccurrences(of: "v", with: "")
+//                        let release = endpointJSON
+                        
+                        let fullVersion = (endpointJSON["tag_name"] as! String).replacingOccurrences(of: "v", with: "")
 
                             if !runningBeta && fullVersion.firstIndex(of: "b") == nil {
                                 versionTest = self.compareVersions(currMajor: currMajor,
@@ -59,16 +58,16 @@ class VersionCheck: NSObject, URLSessionDelegate {
                             if !versionTest {
                                 updateAvailable = true
                             }
-                        }
-                        completion(updateAvailable)
+//                        }
+                        completion(updateAvailable, "v\(fullVersion)")
                         return
                     } else {    // if let endpointJSON error
-                        completion(false)
+                        completion(false, "")
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
                     WriteToLog().message(stringOfText: "[versionCheck] response error: \(httpResponse.statusCode)\n")
-                    completion(false)
+                    completion(false, "")
                     return
                 }
                 
@@ -115,13 +114,16 @@ class VersionCheck: NSObject, URLSessionDelegate {
         var isBeta  = false
         
         let versionArray = theVersion.split(separator: ".")
-        major = Int(versionArray[0])!
-        minor = Int(versionArray[1])!
-        let patchArray = versionArray[2].lowercased().split(separator: "b")
-        patch = Int(patchArray[0])!
-        if patchArray.count > 1 {
-            isBeta = true
-            betaVer = Int(patchArray[1])!
+        if versionArray.count > 2 {
+            print("versionArray: \(versionArray)")
+            major = Int(versionArray[0])!
+            minor = Int(versionArray[1])!
+            let patchArray = versionArray[2].lowercased().split(separator: "b")
+            patch = Int(patchArray[0])!
+            if patchArray.count > 1 {
+                isBeta = true
+                betaVer = Int(patchArray[1])!
+            }
         }
         return (major, minor, patch, isBeta, betaVer)
     }

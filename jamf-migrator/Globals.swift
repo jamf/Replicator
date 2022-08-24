@@ -27,6 +27,7 @@ struct export {
     static var rawXmlScope     = true
     static var trimmedXmlScope = true
     static var backupMode      = false
+    static var saveLocation    = ""
 }
 
 struct History {
@@ -82,6 +83,8 @@ struct q {
 struct setting {
     static var createIsRunning       = false
     static var waitingForPackages    = false
+    static var ldapId                = -1
+    static var hardSetLdapId         = false
     static var migrateDependencies   = false
     static var csa                   = true // cloud services connection
     static var fullGUI               = true

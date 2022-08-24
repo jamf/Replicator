@@ -12,7 +12,8 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    let vc = ViewController()
+    let vc           = ViewController()
+    let userDefaults = UserDefaults.standard
     
     var prefWindowController: NSWindowController?
 
@@ -52,7 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         var index = 0
         while index < numberOfArgs {
-                print("index: \(index)\t argument: \(CommandLine.arguments[index])")
+//                print("index: \(index)\t argument: \(CommandLine.arguments[index])")
                 switch CommandLine.arguments[index].lowercased() {
                 case "-saverawxml":
                     export.saveRawXml = true
@@ -60,15 +61,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     export.saveTrimmedXml = true
                 case "-export.saveonly":
                     export.saveOnly = true
-                case "-forceldapid":
-                    index += 1
+//                case "-forceldapid":
+//                    index += 1
 //                    forceLdapId = Bool(CommandLine.arguments[index]) ?? false
                 case "-ldapid":
                     index += 1
-//                    ldapId = Int(CommandLine.arguments[index]) ?? -1
-//                    if ldapId > 0 {
-//                        hardSetLdapId = true
-//                    }
+                    setting.ldapId = Int(CommandLine.arguments[index]) ?? -1
+                    if setting.ldapId > 0 {
+                        setting.hardSetLdapId = true
+                    }
                 case "-sourceurl":
                     index += 1
                     JamfProServer.source = "\(CommandLine.arguments[index])"
@@ -87,16 +88,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     setting.fullGUI = false
                 case "-silent":
                     setting.fullGUI = false
-//                case "-nsdocumentrevisionsdebugmode","YES":
-//                    continue
                 default:
                     print("unknown switch passed: \(CommandLine.arguments[index])")
                 }
             index += 1
         }
         // read command line arguments - end
-        print("done reading command line args - index: \(index)")
+//        print("done reading command line args - index: \(index)")
         
+        export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
+        if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
+            export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+        } else {
+            export.saveLocation = export.saveLocation.pathToString
+            self.userDefaults.synchronize()
+        }
         
         if setting.fullGUI {
             NSApp.setActivationPolicy(.regular)
@@ -106,6 +113,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mainWindowController.showWindow(self)
         }
         else {
+            WriteToLog().message(stringOfText: "[AppDelegate] jamf migrator is running silently\n")
             print("running silently")
             
             ViewController().initVars()
@@ -119,9 +127,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let version = appInfo["CFBundleShortVersionString"] as! String
         
         verCheck.versionCheck() {
-            (result: Bool) in
+            (result: Bool, latest: String) in
             if result {
-                self.alert_dialog(header: "A new versions is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
+                self.alert_dialog(header: "A new version (\(latest)) is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
             } else {
                 self.alert_dialog(header: "Running Jamf Migrator: \(version)", message: "No updates are currently available.", updateAvail: result)
             }

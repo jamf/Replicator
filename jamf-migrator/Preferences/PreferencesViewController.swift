@@ -182,7 +182,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 
         export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
         export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
-
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -440,22 +439,22 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
             
-            var saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-            if !(FileManager().fileExists(atPath: saveLocation, isDirectory: &isDir)) {
-                saveLocation = NSHomeDirectory() + "/Downloads/Jamf Migrator/"
-                self.userDefaults.set("\(saveLocation)", forKey: "saveLocation")
+            export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            if !(FileManager().fileExists(atPath: export.saveLocation, isDirectory: &isDir)) {
+                export.saveLocation = NSHomeDirectory() + "/Downloads/Jamf Migrator/"
+                self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 self.userDefaults.synchronize()
             }
             
-            saveLocation = saveLocation.pathToString
+            export.saveLocation = export.saveLocation.pathToString
             
             let homePathArray = NSHomeDirectory().split(separator: "/")
             if homePathArray.count > 1 {
-                saveLocation = saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
+                export.saveLocation = export.saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
             }
             
-            showSaveLocation_button.toolTip    = "\(saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
-            saveLocation_textfield.stringValue = "Export to: \(saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+            showSaveLocation_button.toolTip    = "\(export.saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+            saveLocation_textfield.stringValue = "Export to: \(export.saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
         }
         if self.title! == "Computer" {
             credentialsArray.removeAll()
