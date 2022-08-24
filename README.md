@@ -154,6 +154,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.6**
+
+Fix issues #77 (self service display name) and #78 (crash when checking for updates)
+
 **v6.2.5**
 
 Better handling of package filename/display name lookups.
