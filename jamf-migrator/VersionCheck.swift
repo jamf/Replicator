@@ -14,7 +14,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
     func versionCheck(completion: @escaping (_ result: Bool, _ latest: String) -> Void) {
         
         URLCache.shared.removeAllCachedResponses()
-        print("appInfo.version: \(appInfo.version)")
+
         let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: appInfo.version)
         
         var updateAvailable = false
@@ -35,8 +35,6 @@ class VersionCheck: NSObject, URLSessionDelegate {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json as? [String: Any] {
-
-//                        let release = endpointJSON
                         
                         let fullVersion = (endpointJSON["tag_name"] as! String).replacingOccurrences(of: "v", with: "")
 
@@ -85,15 +83,12 @@ class VersionCheck: NSObject, URLSessionDelegate {
         if available != "\(currMajor).\(currMinor).\(currPatch)\(betaVer)" {
             let (availMajor, availMinor, availPatch, availBeta, availBetaVer) = versionDetails(theVersion: available)
             if availMajor > currMajor {
-//                print("availMajor: \(availMajor) \t currMajor: \(currMajor)")
                 runningCurrent = false
             } else if availMajor == currMajor {
                 if availMinor > currMinor {
-//                    print("availMinor: \(availMinor) \t currMinor: \(currMinor)")
                     runningCurrent = false
                 } else if availMinor == currMinor {
                     if availPatch > currPatch {
-//                        print("availPatch: \(availPatch) \t currPatch: \(currPatch)")
                         runningCurrent = false
                     } else if availPatch == currPatch && ((runningBeta && availBeta) || (runningBeta && !availBeta))  {
                         if availBetaVer > currBeta {
@@ -115,7 +110,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
         
         let versionArray = theVersion.split(separator: ".")
         if versionArray.count > 2 {
-            print("versionArray: \(versionArray)")
+
             major = Int(versionArray[0])!
             minor = Int(versionArray[1])!
             let patchArray = versionArray[2].lowercased().split(separator: "b")

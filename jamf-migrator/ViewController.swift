@@ -3971,9 +3971,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
-            // update references to the Jamf server
-            let regexServer = try! NSRegularExpression(pattern: self.urlToFqdn(serverUrl: self.source_jp_server), options:.caseInsensitive)
-            PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: self.urlToFqdn(serverUrl: self.dest_jp_server))
+            // update references to the Jamf server - skip if migrating files
+            if self.source_jp_server.prefix(4) == "http" {
+                let regexServer = try! NSRegularExpression(pattern: self.urlToFqdn(serverUrl: self.source_jp_server), options:.caseInsensitive)
+                PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: self.urlToFqdn(serverUrl: self.dest_jp_server))
+            }
             
             // set the password used in the accounts payload to jamfchangeme - start
             let regexAccounts = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.23\">(.*?)</password_sha256>", options:.caseInsensitive)
@@ -4096,7 +4098,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-
+        
         if pref.stopMigration {
             stopButton(self)
             completion("stop")
@@ -4189,7 +4191,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if export.saveOnly {
                 if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+
+                    let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": ""]
+                    self.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+//                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                 }
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
                     self.rmDELETE()
@@ -4258,8 +4263,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
                                 self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                             }
-                            
-                            
+                                                        
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                                 WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
                                 
@@ -4300,7 +4304,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                print("setting.csa: \(setting.csa)")
                                 if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
                                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+//                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                    let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": "\(self.tagValue2(xmlString: endPointXML, startTag: "<self_service>", endTag: "</self_service>"))"]
+                                    self.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
                                 
                             } else {
@@ -6277,7 +6283,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
-    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: String, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
+//    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: String, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
+    func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
@@ -6285,7 +6292,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         var newSelfServiceIconId = ""
         var iconXml              = ""
         
+        let ssIconName           = ssInfo["ssIconName"]!
+        let ssIconUri            = ssInfo["ssIconUri"]!
+        let ssIconId             = ssInfo["ssIconId"]!
+        let ssXml                = ssInfo["ssXml"]!
+
         if (ssIconName != "") && (ssIconUri != "") {
+            
             var iconNode     = "policies"
             var iconNodeSave = "selfservicepolicyicon"
             switch endpointType {
@@ -6391,7 +6404,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
                                             
                                             if setting.csa {
-                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
+                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
                                                 
                                                 let policyUrl = "\(self.createDestUrlBase)/policies/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
                                                 self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
@@ -6448,13 +6461,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)\n") }
                                                                                             
-                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
                                                 } else {
                                                     WriteToLog().message(stringOfText: "[ViewController.icons] Unable to locate icon on destination server for: policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))\n")
-                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon></self_service_icon></self_service></policy>"
                                                 }
                                             } else {
-                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon></self_service_icon></self_service></policy>"
+                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon></self_service_icon></self_service></policy>"
                                             }
 //                                            print("iconXml: \(iconXml)")
                                         
@@ -6796,7 +6809,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                    print("[iconMigrationHold] iconDict: \(iconDict)")
                                     let ssIconUriArray = ssIconUri.split(separator: "/")
                                     let ssIconId = String("\(ssIconUriArray.last)")
-                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                    
+                                    
+                                    let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": ""]
+                                    self.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                    
+//                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                                 }
                             }
                             self.iconDictArray.removeValue(forKey: iconId)
