@@ -7522,6 +7522,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if self.source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
                 // source server changed, clear list of objects
 //                clearSelectiveList()
+                JamfProServer.validToken["source"] = false
                 serverChanged(whichserver: "source")
             }
             self.source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
@@ -7530,6 +7531,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
                 // source server changed, clear list of objects
 //                clearSelectiveList()
+                JamfProServer.validToken["destination"] = false
                 serverChanged(whichserver: "destination")
             }
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
