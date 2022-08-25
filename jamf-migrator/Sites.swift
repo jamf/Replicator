@@ -34,7 +34,7 @@ class Sites: NSObject, URLSessionDelegate {
         
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
-        JamfPro().getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
+        JamfPro(controller: vc).getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
             (authResult: (Int,String)) in
             let (authStatusCode, _) = authResult
 

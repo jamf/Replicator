@@ -1095,7 +1095,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                        var destinationURL = URL(string: "")
                         
                         // check authentication - start
-                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) { [self]
+//                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) { [self]
+                        jamfpro!.getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: self.fileImport) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1117,7 +1118,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }
                                 
-                                JamfPro().getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) { [self]
+                                JamfPro(controller: self).getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) { [self]
                                     (authResult: (Int,String)) in
                                     let (authStatusCode, _) = authResult
                                     if !pref.httpSuccess.contains(authStatusCode) {
@@ -7142,7 +7143,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func disableExportOnly_action(_ sender: Any) {
-        export.saveOnly = false
+        export.saveOnly       = false
+        export.saveRawXml     = false
+        export.saveTrimmedXml = false
         plistData["xml"] = ["saveRawXml":export.saveRawXml,
                                 "saveTrimmedXml":export.saveTrimmedXml,
                                 "saveOnly":export.saveOnly,
@@ -7671,16 +7674,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         source_pwd_field.nextKeyView        = dest_jp_server_field
         dest_jp_server_field.nextKeyView    = dest_user_field
         dest_user_field.nextKeyView         = dest_pwd_field
-
-//        source_jp_server_field.drawsBackground = true
-//        source_jp_server_field.bac
         
         // v1 colors
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
         
-        // Get app version
+        // display app version
         appVersion_TextField.stringValue = "v\(appInfo.version)"
         
         // OS version info
@@ -7728,12 +7728,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
     }   //viewDidAppear - end
     
+    var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
 //        hardSetLdapId = false
 
 //        debug = true
-        
+        jamfpro = JamfPro(controller: self)
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()

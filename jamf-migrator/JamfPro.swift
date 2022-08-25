@@ -10,6 +10,11 @@ import Foundation
 
 class JamfPro: NSObject, URLSessionDelegate {
     
+    var controller: ViewController? = nil
+    init(controller: ViewController) {
+      self.controller = controller
+    }
+    
     var renewQ = DispatchQueue(label: "com.jamfmigrator.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
     
     let userDefaults = UserDefaults.standard
@@ -102,7 +107,6 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                 WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic\n")
                                             }
                                             if JamfProServer.authType[whichServer] == "Bearer" {
-                                                WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
                                                 self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
                                             }
                                             completion((200, "success"))
@@ -150,6 +154,14 @@ class JamfPro: NSObject, URLSessionDelegate {
     }
     
     func refresh(server: String, whichServer: String, b64Creds: String, localSource: Bool) {
+        print("button isHidden: \(controller!.stop_button.isHidden)")
+        if controller!.stop_button.isHidden {
+            JamfProServer.validToken["source"]      = false
+            JamfProServer.validToken["destination"] = false
+            WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")
+            return
+        }
+        WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
         renewQ.async { [self] in
 //        sleep(1200) // 20 minutes
             sleep(token.refreshInterval)

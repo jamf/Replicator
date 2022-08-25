@@ -95,7 +95,7 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 15*60  // 15 minutes
+    static var refreshInterval:UInt32 = 15*60  // 15 minutes (15*60)
 }
 
 struct wipeData {
