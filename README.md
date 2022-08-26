@@ -154,6 +154,10 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v6.2.7**
+
+Fix crash when running on a machine for the first time (#79 ?). Invalidate tokens when switching servers and stop token refresh once migration competes. Better user experience when working with export options and the disable export only button.
+
 **v6.2.6**
 
 Fix issues #77 (self service display name) and #78 (crash when checking for updates)
