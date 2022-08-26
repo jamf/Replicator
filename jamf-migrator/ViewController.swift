@@ -4470,7 +4470,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     }   // func createEndpoints - end
     
-    // for the Jamf Pro API
+    // for the Jamf Pro API - used for buildings
     func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         if pref.stopMigration {
@@ -4545,7 +4545,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
        
         theCreateQ.addOperation { [self] in
             
-            // save trimmed XML - start
+            // save trimmed JSON - start
             if export.saveTrimmedXml {
                 let endpointName = endPointJSON["name"] as! String   //self.getName(endpoint: endpointType, objectXML: endPointJSON)
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).\n") }
@@ -4557,7 +4557,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
             }
-            // save trimmed XML - end
+            // save trimmed JSON - end
             
             if export.saveOnly {
                 if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
@@ -5224,7 +5224,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         destRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.ephemeral
-//                        destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+
                         destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
@@ -5288,11 +5288,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                     
                                                     PackagesDelegate().filenameIdDict(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
                                                         (currentDestinationPackages: [String:Int]) in
-//                                                        self.currentEPs = currentDestinationPackages
+                                                        self.currentEPs = currentDestinationPackages
                                                         setting.waitingForPackages = false
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing packages: \(currentDestinationPackages)\n") }
-//                                                        print("[existingEndpoints.packages] returning existing packages: \(currentDestinationPackages)")
                                                         
+                                                        print("[existingEndpoints.packages] returning existing packages: \(currentDestinationPackages)")
+                                                        print("[existingEndpoints.packages] self.currentEPs: \(self.currentEPs)")
                                                         
                                                         completed += 1
                                                         waiting = (completed < endpointDependencyArray.count) ? false:true
@@ -6742,7 +6743,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] icon updated on \(createDestUrl)\n")
-                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
+//                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                             } else {
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
