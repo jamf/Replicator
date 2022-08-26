@@ -93,24 +93,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
-        
-//        if let helpWindow = helpWindowController.window {
-////            let helpViewController = helpWindow.contentViewController as! HelpViewController
-//
-//            let application = NSApplication.shared
-//            application.runModal(for: helpWindow)
-//
-//            helpWindow.close()
-//        }
     }
     
     // Show Preferences Window
-//    var prefWindowController2: PrefsWindowController? removed lnh 2021-02-06
     @IBAction func showPrefsWindow(_ sender: Any) {
         PrefsWindowController().show()
     }
 
-        
     // keychain access
     let Creds2           = Credentials2()
     var validCreds       = true     // used to deterine if keychain has valid credentials
@@ -7881,11 +7870,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if setting.fullGUI {
             if !FileManager.default.fileExists(atPath: plistPath!) {
-                print("missing plist")
                 do {
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
                 } catch {
-                    
+                    WriteToLog().message(stringOfText: "Unable to find/create \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "Try to manually copy the file from ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\\ Support/jamf-migrator/settings.plist to \(plistPath!)\n")
+                    NSApplication.shared.terminate(self)
                 }
             }
             
@@ -8113,7 +8103,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        }
         // check for stored passwords - end
         
-        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let appVersion = appInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
         WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
         

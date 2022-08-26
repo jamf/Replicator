@@ -14,7 +14,6 @@ struct appInfo {
     static let name    = dict["CFBundleExecutable"] as! String
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
-//    static var settings = "\(NSHomeDirectory())/Library/Application Support/jamf-migrator/settings.plist"
 }
 
 struct dependency {

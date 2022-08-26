@@ -154,7 +154,6 @@ class JamfPro: NSObject, URLSessionDelegate {
     }
     
     func refresh(server: String, whichServer: String, b64Creds: String, localSource: Bool) {
-        print("button isHidden: \(controller!.stop_button.isHidden)")
         if controller!.stop_button.isHidden {
             JamfProServer.validToken["source"]      = false
             JamfProServer.validToken["destination"] = false
@@ -163,7 +162,6 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
         renewQ.async { [self] in
-//        sleep(1200) // 20 minutes
             sleep(token.refreshInterval)
             JamfProServer.validToken[whichServer] = false
             getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
