@@ -100,7 +100,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         prefFsRwPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
         prefFsRoPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
     }
-
+    
     let Creds2           = Credentials2()
     var credentialsArray = [String]()
     let vc               = ViewController()
@@ -182,6 +182,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 
         export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
         export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
+//        controller?.disableExportOnly_button.isHidden = (saveOnly_button.state.rawValue == 1) ? true:false
+//        print("isHidden: \(ViewController().disableExportOnly_button.isHidden)")
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -286,6 +288,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         // Set view sizes
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
         self.view.wantsLayer = true

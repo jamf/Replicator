@@ -7880,6 +7880,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         if setting.fullGUI {
+            if !FileManager.default.fileExists(atPath: plistPath!) {
+                print("missing plist")
+                do {
+                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
+                } catch {
+                    
+                }
+            }
+            
+            
             // read environment settings from plist - start
             plistData = readSettings()
 
@@ -7889,7 +7899,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if setting.fullGUI {
                     source_jp_server_field.stringValue = source_jp_server
                     if source_jp_server.count > 0 {
-                        self.browseFiles_button.isHidden   = (source_jp_server.first! == "/") ? false:true
+                        self.browseFiles_button.isHidden = (source_jp_server.first! == "/") ? false:true
                     }
                 }
             } else {
