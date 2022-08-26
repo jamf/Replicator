@@ -16,6 +16,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
     }
     
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        DistributedNotificationCenter.default.removeObserver(self, name: .saveOnlyButtonToggle, object: nil)
         self.window?.orderOut(sender)
         return false
     }

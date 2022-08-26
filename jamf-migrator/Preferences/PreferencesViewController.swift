@@ -172,18 +172,33 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         vc.savePrefs(prefs: plistData)
     }
     
+    
+    @objc func exportButtons(_ notification: Notification) {
+        viewDidAppear()
+    }
     @IBAction func updateExportPrefs_button(_ sender: NSButton) {
-                plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
-                                    "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-                                    "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
-                                    "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
-                                    "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
+                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
+                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
+                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
+                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
         vc.savePrefs(prefs: plistData)
 
         export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
         export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
-//        controller?.disableExportOnly_button.isHidden = (saveOnly_button.state.rawValue == 1) ? true:false
-//        print("isHidden: \(ViewController().disableExportOnly_button.isHidden)")
+        if saveRawXml_button.state.rawValue == 1 || saveTrimmedXml_button.state.rawValue == 1 {
+            saveOnly_button.isEnabled = true
+        } else {
+            saveOnly_button.isEnabled = false
+            saveOnly_button.state     = NSControl.StateValue(rawValue: 0)
+            plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
+                                    "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
+                                    "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
+                                    "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
+                                    "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+            vc.savePrefs(prefs: plistData)
+        }
+        NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -288,6 +303,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(exportButtons(_:)), name: .exportOff, object: nil)
         
         // Set view sizes
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
@@ -438,7 +455,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             var isDir: ObjCBool = true
             saveRawXml_button.state          = boolToState(TF: saveRawXml)
             saveTrimmedXml_button.state      = boolToState(TF: saveTrimmedXml)
-            saveOnly_button.state            = boolToState(TF: saveOnly)
+            if !saveRawXml && !saveTrimmedXml {
+                saveOnly_button.isEnabled    = false
+                saveOnly_button.state        = boolToState(TF: false)
+            } else {
+                saveOnly_button.state        = boolToState(TF: saveOnly)
+            }
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
             
@@ -527,4 +549,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             userDefaults.synchronize()
         }
     }
+}
+
+extension Notification.Name {
+    public static let exportOff = Notification.Name("exportButtons")
 }

@@ -97,6 +97,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Show Preferences Window
     @IBAction func showPrefsWindow(_ sender: Any) {
+        NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
         PrefsWindowController().show()
     }
 
@@ -7141,6 +7142,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 "saveRawXmlScope":export.rawXmlScope,
                                 "saveTrimmedXmlScope":export.trimmedXmlScope]
         savePrefs(prefs: plistData)
+        NotificationCenter.default.post(name: .exportOff, object: nil)
         disableSource()
     }
     
@@ -7717,6 +7719,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
     }   //viewDidAppear - end
     
+    @objc func toggleExportOnly(_ notification: Notification) {
+        disableSource()
+    }
+    
     var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -7732,6 +7738,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
         
         if !hideGui {
+            
             selectiveFilter_TextField.delegate   = self
             selectiveFilter_TextField.wantsLayer = true
             selectiveFilter_TextField.isBordered = true
@@ -8327,4 +8334,8 @@ extension String {
             return newString
         }
     }
+}
+
+extension Notification.Name {
+    public static let saveOnlyButtonToggle = Notification.Name("toggleExportOnly")
 }
