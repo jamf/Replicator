@@ -67,7 +67,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
     }
-    var availableFilesToMigDict:[String:[String]] = [:]   // something like xmlID, xmlName
+    var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
+    var displayNameToFilename   = [String: String]()
     
     @IBOutlet weak var objectsToSelect: NSScrollView!
     
@@ -436,10 +437,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var endpointName          = ""
     var POSTsuccessCount      = 0
     var failedCount           = 0
-    var postCount             = 1       // is this needed?
-    var counters    = Dictionary<String, Dictionary<String,Int>>()             // summary counters of created, updated, failed, and deleted objects
-    var getCounters = [String:[String:Int]]()
-//    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()          // used to hold value of counter and avoid simultaneous access when updating
+    var postCount             = 1
+    var counters    = Dictionary<String, Dictionary<String,Int>>()          // summary counters of created, updated, failed, and deleted objects
+    var getCounters = [String:[String:Int]]()                               // summary counters of created, updated, failed, and deleted objects
+    var putCounters = [String:[String:Int]]()
+//    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()        // used to hold value of counter and avoid simultaneous access when updating
     var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
@@ -676,13 +678,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     @IBAction func toggleAllNone(_ sender: NSButton) {
-
-//        var withOptionKey = false
-
-//        let state = (sender.state.rawValue == 1) ? "on":"off"
-
         if NSEvent.modifierFlags.contains(.option) {
-//            withOptionKey = true
             markAllNone(rawStateValue: sender.state.rawValue)
         }
 		  inactiveTabDisable(activeTab: "bulk")
@@ -803,10 +799,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
 
-        if fileImport {
-            alert_dialog(header: "Attention:", message: "Selective migration while importing files is not yet available.")
-            return
-        }
+//        if fileImport {
+//            alert_dialog(header: "Attention:", message: "Selective migration while importing files is not yet available.")
+////            return
+//        }
         
         
 
@@ -826,7 +822,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             itemIndex = generalSectionToMigrate_button.indexOfSelectedItem
         }
         
-        if whichTab != "macOS" {
+        if whichTab != "macOS" || fileImport {
             DispatchQueue.main.async {
                 setting.migrateDependencies       = false
                 self.migrateDependencies.state    = NSControl.StateValue(rawValue: 0)
@@ -864,7 +860,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             objectsToMigrate.append(AllEndpointsArray[itemIndex-1])
             
-//            print("wipeData.on: \(wipeData.on)")
             if AllEndpointsArray[itemIndex-1] == "policies" && !wipeData.on {
                 DispatchQueue.main.async {
                     self.migrateDependencies.isHidden = false
@@ -878,8 +873,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
-            Go(sender: "selectToMigrateButton")
-//            Go(sender: self)
+            Go(sender: goSender)
         }
     }
     
@@ -978,17 +972,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if setting.fullGUI {
             put_levelIndicator.fillColor = .systemGreen
             // which migration mode tab are we on
-            if activeTab(fn: "Go") != "selective" {
+            if activeTab(fn: "Go") == "selective" {
+                migrationMode = "selective"
+            } else {
                 migrationMode               = "bulk"
                 setting.migrateDependencies = false
-            } else {
-                migrationMode = "selective"
             }
             
-            if fileImport && migrationMode == "selective" {
-                alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
-                return
-            }
+//            if fileImport && migrationMode == "selective" {
+//                print("[go] fileImport && migrationMode == 'selective'")    // this printed
+//                alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
+////                return
+//            }
         } else {
             migrationMode = "bulk"
         }
@@ -1019,7 +1014,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // credentials check - end
             
             // set credentials / servers - start
-            // don't set user / pass if we're importing files
+            // don't set user / pass if we're importing files or removing
             self.source_jp_server = source_jp_server_field.stringValue
             if !fileImport && !wipeData.on {
                 self.source_user = source_user_field.stringValue
@@ -1108,7 +1103,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     }
                                 }
                                 
-                                JamfPro(controller: self).getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) { [self]
+                                jamfpro!.getToken(whichServer: "destination", serverUrl: self.dest_jp_server, base64creds: self.destBase64Creds, localSource: self.fileImport) { [self]
                                     (authResult: (Int,String)) in
                                     let (authStatusCode, _) = authResult
                                     if !pref.httpSuccess.contains(authStatusCode) {
@@ -1142,62 +1137,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if !export.saveOnly && setting.fullGUI {
                                                 self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                                             }
-                                            
-                                            // verify source server URL - start
-//                                            if !self.fileImport && !wipeData.on {
-//                                                sourceURL = URL(string: self.source_jp_server_field.stringValue)
-//                                            } else {
-//                                                sourceURL = URL(string: "https://www.jamf.com")
-//                                            }
-                                            
-//                                            URLCache.shared.removeAllCachedResponses()
-//                                            let task_sourceURL = URLSession.shared.dataTask(with: URL(string: self.source_jp_server)!) { _, response, _ in
-//                                                if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || self.fileImport {
-                                                    //print(HTTPURLResponse.statusCode)
-                                                    //===== change to go to function to check dest. server, which forwards to migrate if all is well
-                                                    // verify destination server URL - start
-//                                                    DispatchQueue.main.async {
-//                                                        if !export.saveOnly {
-//                                                            destinationURL = URL(string: self.dest_jp_server_field.stringValue)
-//                                                        } else {
-//                                                            destinationURL = URL(string: "https://www.jamf.com")
-//                                                        }
-//                                                        URLCache.shared.removeAllCachedResponses()
-//                                                        let task_destinationURL = URLSession.shared.dataTask(with: destinationURL!) { _, response, _ in
-//                                                            if (response as? HTTPURLResponse) != nil || (response as? HTTPURLResponse) == nil || export.saveOnly {
-                                                                // print("Destination server response: \(response)")
-//                                                                if (!self.theOpQ.isSuspended) {
-                                                                    //====================================    Start Migrating/Removing    ====================================//
-                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
-                                                                    self.startMigrating()
-//                                                                }
-//                                                            } else {
-//                //                                                DispatchQueue.main.async {
-//                                                                    //print("Destination server response: \(response)")
-//                                                                self.alert_dialog(header: "Attention:", message: "The destination server URL could not be validated.")
-//                //                                                }
-//
-//                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect to destination server.\n") }
-//                                                                self.goButtonEnabled(button_status: true)
-//                                                                return
-//                                                            }
-//                                                        }   // let task for destinationURL - end
-                                                    
-//                                                        task_destinationURL.resume()
-//                                                    }
-                                                    // verify source destination URL - end
-                                                    
-//                                                } else {
-//                                                    DispatchQueue.main.async {
-//                                                        self.alert_dialog(header: "Attention:", message: "The source server URL could not be validated.")
-//                                                    }
-//                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Failed to connect source server.\n") }
-//                                                    self.goButtonEnabled(button_status: true)
-//                                                    return
-//                                                }
-//                                            }   // let task for soureURL - end
-//                                            task_sourceURL.resume()
-                                            // verify source server URL - end
+                                            print("Start Migrating/Removing")
+                    
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
+                                            self.startMigrating()
                                         }
                                     } // else dest auth
                                 }   // JamfPro().getToken(whichServer: "destination" - end
@@ -1261,7 +1204,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] platform: \(deviceType()).\n") }
             }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Migration Mode (startMigration): \(migrationMode).\n") }
-            
+                        
                 // list the items in the order they need to be migrated
             if migrationMode == "bulk" {
                 // initialize list of items to migrate then add what we want - start
@@ -1425,10 +1368,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     default: break
                     }
                 } else {
-                    objectsToMigrate = ["buildings", "departments", "categories", "jamfusers"]
-//                    objectsToMigrate = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups",
-//                                        "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "netbootservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies",
-//                                        "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+//                    objectsToMigrate = ["buildings", "departments", "categories", "jamfusers"]    // for testing
+                    objectsToMigrate = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups",
+                                        "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "netbootservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies",
+                                        "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
                 }
                 
             }   // if migrationMode == "bulk" - end
@@ -1464,13 +1407,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             WriteToLog().message(stringOfText: self.migrateOrWipe)
             
-            // initialize created/updated/failed counters
-//            var toMigrateArray = self.objectsToMigrate
-//            if setting.migrateDependencies {
-//                toMigrateArray = self.ordered_dependency_array
-//                toMigrateArray.append("policies")
-//            }
-//            let toMigrateArray = setting.migrateDependencies ? ordered_dependency_array.append("policies"):
+            // initialize counters
             for currentNode in self.objectsToMigrate {
                 if setting.fullGUI {
                     self.put_levelIndicatorFillColor[currentNode] = .systemGreen
@@ -1482,12 +1419,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticcomputergroups"]       = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartcomputergroups"]        = ["get":0]
+                        self.putCounters["smartcomputergroups"]        = ["put":0]
                     }
                     if self.staticComputerGrpsSelected {
                         self.progressCountArray["staticcomputergroups"] = 0
                         self.counters["staticcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticcomputergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticcomputergroups"]        = ["get":0]
+                        self.putCounters["staticcomputergroups"]        = ["put":0]
                     }
                     self.progressCountArray["computergroups"] = 0 // this is the recognized end point
                 case "mobiledevicegroups":
@@ -1496,12 +1435,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.counters["smartmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["smartmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartmobiledevicegroups"]        = ["get":0]
+                        self.putCounters["smartmobiledevicegroups"]        = ["put":0]
                     }
                     if self.staticIosGrpsSelected {
                         self.progressCountArray["staticmobiledevicegroups"] = 0
                         self.counters["staticmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticmobiledevicegroups"]        = ["get":0]
+                        self.putCounters["staticmobiledevicegroups"]        = ["put":0]
                     }
                     self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
                 case "usergroups":
@@ -1510,12 +1451,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.counters["smartusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["smartusergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartusergroups"]        = ["get":0]
+                        self.putCounters["smartusergroups"]        = ["put":0]
                     }
                     if self.staticUserGrpsSelected {
                         self.progressCountArray["staticusergroups"] = 0
                         self.counters["staticusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["staticusergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticusergroups"]        = ["get":0]
+                        self.putCounters["staticusergroups"]        = ["put":0]
                     }
                     self.progressCountArray["usergroups"] = 0 // this is the recognized end point
                 case "accounts":
@@ -1524,12 +1467,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         self.counters["jamfusers"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["jamfusers"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["jamfusers"]        = ["get":0]
+                        self.putCounters["jamfusers"]        = ["put":0]
                     }
                     if self.jamfGroupAccountsSelected {
                         self.progressCountArray["jamfgroups"] = 0
                         self.counters["jamfgroups"]           = ["create":0, "update":0, "fail":0, "total":0]
                         self.summaryDict["jamfgroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["jamfgroups"]        = ["get":0]
+                        self.putCounters["jamfgroups"]        = ["put":0]
                     }
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
                 default:
@@ -1537,6 +1482,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.counters[currentNode] = ["create":0, "update":0, "fail":0, "total":0]
                     self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
                     self.getCounters[currentNode] = ["get":0]
+                    self.putCounters[currentNode] = ["put":0]
                 }
             }
 
@@ -1595,6 +1541,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 let currentNode = self.objectsToMigrate[0]
 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Starting to process \(currentNode)\n") }
+                                
                 if (self.goSender == "goButton" && self.migrationMode == "bulk") || (self.goSender == "selectToMigrateButton") || (self.goSender == "silent") {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] getting endpoint: \(currentNode)\n") }
                     
@@ -1605,9 +1552,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 } else {
                     // **************************************** selective migration - start ****************************************
                     if self.fileImport {
-                        self.alert_dialog(header: "Attention:", message: "Selective migration is not yet available when importing files.")
-                        self.goButtonEnabled(button_status: true)
-                        return
+//                        self.alert_dialog(header: "Attention:", message: "Selective migration is not yet available when importing files.")
+//                        self.goButtonEnabled(button_status: true)
+//                        return
                     }
                     var selectedEndpoint = ""
                     switch self.objectsToMigrate[0] {
@@ -1619,12 +1566,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         selectedEndpoint = self.objectsToMigrate[0]
                     }
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Look for existing endpoints for: \(self.objectsToMigrate[0])\n") }
+//                    print("call self.existingEndpoints")
+                    
                     self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: (String,String)) in
                         
                         let (resultMessage, resultEndpoint) = result
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Returned from existing endpoints: \(resultMessage)\n") }
-
+                        
+//                        print("build list for selective migration")
+                        
                         // clear targetDataArray - needed to handle switching tabs
                         if !setting.migrateDependencies || resultEndpoint == "policies" {
                             self.targetDataArray.removeAll()
@@ -1634,6 +1585,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     if self.srcSrvTableView.isRowSelected(k) {
                                         // prevent the modification/removal of the account we're using with the destination server
                                         if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
+//                                            print("add \(self.sourceDataArray[k]) to selective migration")
                                             self.targetDataArray.append(self.sourceDataArray[k])
                                         }
                                     }   // if self.srcSrvTableView.isRowSelected(k) - end
@@ -1706,7 +1658,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 rawEndpoint = selectedEndpoint
         }
         
-        Json().getRecord(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: "\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")  {
+        let endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)"
+        
+        Json().getRecord(whichServer: "source", theServer: self.source_jp_server, base64Creds: self.sourceBase64Creds, theEndpoint: endpointToLookup)  {
             (result: [String:AnyObject]) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
             
@@ -1732,26 +1686,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         advancedMigrateDict = [:]
                     }
                     
-                    if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
+                    
+//                    if let selectedObject = self.availableObjsToMigDict[objToMigrateID] {
+                    let selectedObject = self.targetDataArray[objectIndex] //self.targetDataArray[objectIndex]{
                             // migrate dependencies - start
 //                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
 
                         self.destEPQ.async { [self] in
-//                                while advancedMigrateDict.count != 0 {
-//                                if advancedMigrateDict.count > 0 {
-//                                    let (tmp_id, _) = advancedMigrateDict.first!
-                                
-                                // how many dependencies; categories, buildings, scripts, packages,...
-                                var totalDependencies = 0
-                                for (_, arrayOfDependencies) in returnedDependencies {
-                                    totalDependencies += arrayOfDependencies.count
-                                }
+
+                            // how many dependencies; categories, buildings, scripts, packages,...
+                            var totalDependencies = 0
+                            for (_, arrayOfDependencies) in returnedDependencies {
+                                totalDependencies += arrayOfDependencies.count
+                            }
 //                                print("[ViewController.startSelectiveMigration] total dependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID): \(totalDependencies)")
                                 
-                                
+                            if !fileImport {
                                 for (object, arrayOfDependencies) in returnedDependencies {
                                     if nil == self.getCounters[object] {
                                         getCounters[object]         = ["get":0]
+                                        putCounters[object]         = ["put":0]
                                         progressCountArray[object]  = 0
                                         counters[object]?["create"] = 0
                                         counters[object]?["update"] = 0
@@ -1824,9 +1778,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }   // for (theName, theId) in advancedMigrateDict[object]! - end
                                     }
                                 }   // for (object, arrayOfDependencies) in returnedDependencies - end
+                            }
 
                                 // migrate the policy or selected object now the dependencies are done
-                                DispatchQueue.global(qos: .utility).async { [self] in
+                            DispatchQueue.global(qos: .utility).async { [self] in
+                                if !fileImport {
                                     var step = 0
                                     while dependencyMigratedCount[dependencyParentId] != totalDependencies && theButton != "Stop" && setting.migrateDependencies && !export.saveOnly {
                                         if theButton == "Stop" { setting.migrateDependencies = false }
@@ -1834,33 +1790,46 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         usleep(10000)
                                         step += 1
                                     }
-                                    if theButton == "Stop" { return }
 //                                    print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")
                                     dependencyMigratedCount[dependencyParentId] = 0
-                                    var theAction     = "create"
-                                    var theEndpointID = 0
-                                    if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
-                                    
-                                    if nil != self.currentEPDict[rawEndpoint]?[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
-                                        theAction     = "update"
-                                        theEndpointID = (self.currentEPDict[rawEndpoint]?[self.availableObjsToMigDict[objToMigrateID]!])!
-                                    }
-                                        
-                                    WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
-
-                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: self.targetDataArray.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
-                                        
-                                    // call next item
-                                    if objectIndex+1 < targetDataArray.count {
-//                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
-                                        startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
-                                    } else if objectIndex+1 == targetDataArray.count {
-                                        dependency.isRunning = false
-                                    }
                                 }
+                                
+                                if theButton == "Stop" { return }
+                                var theAction     = "create"
+                                var theEndpointID = 0
+                                if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
+                                
+//                                if nil != self.currentEPDict[rawEndpoint]?[self.availableObjsToMigDict[objToMigrateID]!] && !export.saveOnly {
+                                if nil != self.currentEPDict[rawEndpoint]?[selectedObject] && !export.saveOnly {
+                                    theAction     = "update"
+                                    theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
+                                }
+                                    
+                                WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
+
+                                if !fileImport {
+                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: self.targetDataArray.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
+                                } else {
+//                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
+                                    let fileToMigrate = displayNameToFilename[selectedObject]
+                                    
+                                    self.processFiles(endpoint: selectedEndpoint, fileCount: 1, itemsDict: [selectedObject: self.availableFilesToMigDict[fileToMigrate!]!]) {
+                                         (result: String) in
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).\n") }
+                                     }
+                                }
+                                    
+                                // call next item
+                                if objectIndex+1 < targetDataArray.count {
+//                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
+                                    startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
+                                } else if objectIndex+1 == targetDataArray.count {
+                                    dependency.isRunning = false
+                                }
+                            }
                         }
                         // migrate dependencies - end
-                    }
+//                    }
                     
                 }
             } else {
@@ -1883,7 +1852,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
 
         if pref.stopMigration {
-//            print("[ViewController.readNodes] stopMigration")
             stopButton(self)
             return
         }
@@ -1912,9 +1880,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
+        
+        // add case to list files with fileImport
         if self.fileImport {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] reading files for: \(nodesToMigrate)\n") }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes]         nodeIndex: \(nodeIndex)\n") }
+            print("call readDataFiles for \(nodesToMigrate)")
             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex) {
                 (result: String) in
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] processFiles result: \(result)\n") }
@@ -2180,7 +2151,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                     counter+=1
                                                                 }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                             } else {
-                                                                // populate source server under the selective tab
+                                                                // populate source server under the selective tab - bulk
                                                                 if !pref.stopMigration {
 //                                                                    print("-populate (\(endpoint)) source server under the selective tab")
                                                                     self.delayInt = self.listDelay(itemCount: self.availableObjsToMigDict.count)
@@ -2199,11 +2170,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                                 }
                                                                             // slight delay in building the list - visual effect
                                                                             usleep(self.delayInt)
-                        //                                                            self.goButtonEnabled(button_status: true)
-                        //                                                        }   //if self.availableIDsToMigDict.count - end
-                        //                                                        DispatchQueue.main.async {
-                        //                                                            self.srcSrvTableView.reloadData()
-                        //                                                        }
+                                                                            
                                                                             if counter == self.availableObjsToMigDict.count {
                                                                                 self.goButtonEnabled(button_status: true)
                                                                             }
@@ -3017,65 +2984,60 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.dataFilesRoot = self.source_jp_server_field.stringValue
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] dataFilesRoot: \(dataFilesRoot)\n") }
+        print("[readDataFiles] start dataFilesRoot: \(dataFilesRoot)")
         
         var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
         
-        switch nodesToMigrate[nodeIndex] {
-        case "computergroups":
+//        switch nodesToMigrate[nodeIndex] {
+        switch endpoint {
+        case "computergroups", "smartcomputergroups", "staticcomputergroups":
             self.progressCountArray["smartcomputergroups"] = 0
             self.progressCountArray["staticcomputergroups"] = 0
             self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-        case "mobiledevicegroups":
+            if migrateSmartComputerGroups || endpoint == "smartcomputergroups" {
+                local_endpointArray.append("smartcomputergroups")
+            }
+            if migrateStaticComputerGroups || endpoint == "staticcomputergroups" {
+                local_endpointArray.append("staticcomputergroups")
+            }
+            if migrateSmartComputerGroups && migrateStaticComputerGroups {
+                self.nodesMigrated-=1
+            }
+        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
             self.progressCountArray["smartmobiledevicegroups"] = 0
             self.progressCountArray["staticmobiledevicegroups"] = 0
             self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-        case "usergroups":
+            if migrateSmartMobileGroups || endpoint == "smartmobiledevicegroups" {
+                local_endpointArray.append("smartmobiledevicegroups")
+            }
+            if migrateStaticMobileGroups || endpoint == "staticmobiledevicegroups" {
+                local_endpointArray.append("staticmobiledevicegroups")
+            }
+            if migrateSmartMobileGroups && migrateStaticMobileGroups {
+                self.nodesMigrated-=1
+            }
+        case "usergroups", "smartusergroups", "staticusergroups":
             self.progressCountArray["smartusergroups"] = 0
             self.progressCountArray["staticusergroups"] = 0
             self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-        case "accounts":
+            if migrateSmartUserGroups || endpoint == "smartusergroups" {
+                local_endpointArray.append("smartusergroups")
+            }
+            if migrateStaticUserGroups || endpoint == "staticusergroups" {
+                local_endpointArray.append("staticusergroups")
+            }
+            if migrateSmartUserGroups && migrateStaticUserGroups {
+                self.nodesMigrated-=1
+            }
+        case "accounts", "jamfusers", "jamfgroups":
             self.progressCountArray["jamfusers"] = 0
             self.progressCountArray["jamfgroups"] = 0
             self.progressCountArray["accounts"] = 0 // this is the recognized end point
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
-        }
-
-        switch endpoint {
-            case "computergroups":
-                if migrateSmartComputerGroups {
-                    local_endpointArray.append("smartcomputergroups")
-                }
-                if migrateStaticComputerGroups {
-                    local_endpointArray.append("staticcomputergroups")
-                }
-                if migrateSmartComputerGroups && migrateStaticComputerGroups {
-                    self.nodesMigrated-=1
-                }
-            case "mobiledevicegroups":
-                if migrateSmartMobileGroups {
-                    local_endpointArray.append("smartmobiledevicegroups")
-                }
-                if migrateStaticMobileGroups {
-                    local_endpointArray.append("staticmobiledevicegroups")
-                }
-                if migrateSmartMobileGroups && migrateStaticMobileGroups {
-                    self.nodesMigrated-=1
-                }
-            case "usergroups":
-                if migrateSmartUserGroups {
-                    local_endpointArray.append("smartusergroups")
-                }
-                if migrateStaticUserGroups {
-                    local_endpointArray.append("staticusergroups")
-                }
-                if migrateSmartUserGroups && migrateStaticUserGroups {
-                    self.nodesMigrated-=1
-                }
-            default:
-                local_endpointArray = [endpoint]
+            local_endpointArray = [endpoint]
         }
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]       Data files root: \(dataFilesRoot)\n") }
@@ -3083,14 +3045,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]   local_endpointArray: \(local_endpointArray)\n") }
 
         self.availableFilesToMigDict.removeAll()
+        self.displayNameToFilename.removeAll()
+        
         theOpQ.maxConcurrentOperationCount = 1
 //        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
 //            print("[ViewController.files] nodesToMigrate: \(nodesToMigrate)")
             for local_folder in local_endpointArray {
-//                var directoryPath = "\(String(describing: self.userDefaults.string(forKey: "dataFilesRoot")!))/\(local_folder)"
                 var directoryPath = "\(self.dataFilesRoot)/\(local_folder)"
                 directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
+                print("[readDataFiles] scanning: \(directoryPath) for files.")
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n") }
                 do {
                     let allFiles = FileManager.default.enumerator(atPath: "\(directoryPath)")
@@ -3109,7 +3073,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         let dataFilesCount = xmlFilePaths.count
 //                        print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
-                    
+                        var counter = 1
+                        
                         if dataFilesCount < 1 {
                             DispatchQueue.main.async {
                                 self.alert_dialog(header: "Attention:", message: "No files found.  If the folder exists outside the Downloads directory, reselect it and try again.")
@@ -3124,7 +3089,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 do {
                                     // remove 'extra' data so we can get name and id from between general tags
                                     let fileContents = try String(contentsOf: fileUrl!)
-                                    var fileJSON     = [String:Any]()
+//                                    var fileJSON     = [String:Any]()
                                     var name         = ""
                                     var id           = ""
                                     
@@ -3134,7 +3099,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         do {
                                             if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
                                             {
-                                                fileJSON = jsonData
+//                                                fileJSON = jsonData
                                                 name     = "\(jsonData["name"] ?? "")"
                                                 id       = "\(jsonData["id"] ?? "")"
                                             } else {
@@ -3143,12 +3108,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         } catch let error as NSError {
                                             print(error)
                                         }
-                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "jamfgroups", "jamfusers", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
+                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
                                         local_general = fileContents
                                         for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
                                             local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
                                         }
-                                    case "advancedusersearches":
+                                    case "advancedusersearches", "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
                                         local_general = fileContents
                                         for xmlTag in ["criteria", "users", "display_fields", "site"] {
                                             local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
@@ -3162,14 +3127,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }
                                     }
 
-                                    
                                     if endpoint != "buildings" {
                                         id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
                                         name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
                                     }
-
+                                    
+                                    self.displayNameToFilename[name]       = dataFile
                                     self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
+                                    print("[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)")
+                                    // populate selective list, when appropriate
+                                    if self.goSender == "selectToMigrateButton" {
+    //                                  print("fileImport - goSender: \(self.goSender)")
+//                                        print("adding \(name) to array")
+                                              
+                                        self.availableIDsToMigDict[name] = Int(id)
+                                        self.sourceDataArray.append(name)
+                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+
+                                        self.staticSourceDataArray = self.sourceDataArray
+
+                                          DispatchQueue.main.async {
+                                              self.srcSrvTableView.reloadData()
+                                          }
+                                        // slight delay in building the list - visual effect
+                                        usleep(self.delayInt)
+
+                                        if counter == dataFilesCount {
+                                          self.goButtonEnabled(button_status: true)
+                                        }
+                                        counter+=1
+                                    }
+                                    
                                 } catch {
                                     //                    print("unable to read \(dataFile)")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
@@ -3182,22 +3171,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
                 }
             
+//                print("whichTab: \(self.activeTab(fn: "readDataFiles"))")
+                if self.goSender == "bulk"{
+                    var fileCount = self.availableFilesToMigDict.count
+                } else {
+                    
+                }
+                
                 var fileCount = self.availableFilesToMigDict.count
             
-                //        print("node: \(local_folder) has \(fileCount) files.")
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
             
                 if fileCount > 0 {
 //                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                    self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
-                        (result: String) in
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
-//                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                        self.availableFilesToMigDict.removeAll()
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                    if self.goSender == "goButton" {
+                        self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
+                            (result: String) in
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
+    //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+                            self.availableFilesToMigDict.removeAll()
+                            if nodeIndex < nodesToMigrate.count - 1 {
+                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                            }
+                            completion("fetched xml for: \(endpoint)")
                         }
-                        completion("fetched xml for: \(endpoint)")
                     }
                 } else {   // if fileCount - end
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] fileCount = 0.\n") }
@@ -3223,14 +3220,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             self.readFilesQ.maxConcurrentOperationCount = 1
             
+//            print("itemsDict: \(itemsDict)")
+            
             var l_index = 1
             for (_, objectInfo) in itemsDict {
-//                self.readFilesQ.sync {
                 self.readFilesQ.addOperation {
-                    let l_id   = Int(objectInfo[0])   // id of object
-                    let l_name = objectInfo[1].xmlDecode        // name of object, remove xml encoding
-                    let l_xml  = objectInfo[2]        // xml of object
-
+                    let l_id   = Int(objectInfo[0])         // id of object
+                    let l_name = objectInfo[1].xmlDecode    // name of object, remove xml encoding
+                    let l_xml  = objectInfo[2]              // xml of object
+                    
                     if l_id != nil && l_name != "" && l_xml != "" {
                         if !wipeData.on  {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] check for ID on \(String(describing: l_name)): \(self.currentEPs[l_name] ?? 0)\n") }
@@ -3330,7 +3328,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                             }
                         }
-//                        self.getStatusUpdate2(endpoint: endpoint, total: fileCount)
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] [\(endpoint)]: trouble with \(objectInfo)\n") }
                     }
                     l_index+=1
@@ -3443,7 +3440,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async {
                                     // added option to remove scope
-    //                                print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+//                                    print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                     let exportRawXml = (export.rawXmlScope) ? PostXML:self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
                                     WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)\n")
                                     let exportFormat = (export.backupMode) ? "backup_\(self.backupDate.string(from: History.startTime))":"raw"
@@ -3497,8 +3494,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
 
         self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
-//        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[theEndpoint]!["get"]!, total: endpointCount)
-        
         
         self.CreateEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
@@ -3509,7 +3504,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 completion("")
             }
         }
-        
     }
         
     
@@ -3524,9 +3518,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             return
         }
         
-        if !fileImport {
-            completion("")
-        }
+        // removed lnh 20220907
+//        if !fileImport {
+//            completion("")
+//        }
+        
         var PostXML       = Xml
         var knownEndpoint = true
 
@@ -3559,7 +3555,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
 //        }
         
-        // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - start
+        // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, restrictedsoftware... - start
         switch endpoint {
         case "osxconfigurationprofiles":
             if !self.scopeOcpCopy {
@@ -3588,7 +3584,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if !self.scopeIaCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
             }
-        case "usergroups", "staticusergroups":
+        case "usergroups", "smartusergroups", "staticusergroups":
             if !self.scopeUsersCopy {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "users", keepTags: false)
             }
@@ -4039,7 +4035,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }   // switch - end
 
         self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
-//        self.getStatusUpdate(endpoint: endpoint, current: self.getCounters[theEndpoint]!["get"]!, total: endpointCount)
         
         if knownEndpoint {
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
@@ -4063,13 +4058,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     // update XML to be posted with original/existing UUID of the configuration profile
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
-                                
+                
+                print("call createEndpoints for \(theEndpoint)")
                 self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                     if endpointCurrent == endpointCount {
+                        print("completed \(endpointCurrent) of \(endpointCount) - created last endpoint")
                         completion("last")
                     } else {
+                        print("completed \(endpointCurrent) of \(endpointCount) - created next endpoint")
                         completion("")
                     }
                 }
@@ -4185,13 +4183,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                     let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": ""]
                     self.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-//                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
                 }
-                if self.objectsToMigrate.last == localEndPointType && endpointCount == endpointCurrent {
+                if self.objectsToMigrate.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
                     self.rmDELETE()
                     self.goButtonEnabled(button_status: true)
-//                    print("Done - CreateEndpoints")
+                    print("Done - CreateEndpoints")
                 }
+                completion("")
                 return
             }
             
@@ -4424,7 +4422,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if self.totalCompleted > 0 {
                                 if !setting.migrateDependencies || endpointType == "policies" {
                                     self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-                                    self.putSummary_label.stringValue  = "\(self.totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+//                                    self.putSummary_label.stringValue  = "\(self.totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                    self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
                                     self.put_name_field.stringValue    = "\(endpointType)"
                                 }
                             }
@@ -4800,7 +4799,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             if totalCompleted > 0 {
                                 if !setting.migrateDependencies || endpointType == "policies" {
                                     put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-                                    putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+//                                    putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+                                    self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
                                     put_name_field.stringValue    = "\(endpointType)"
                                 }
                             }
@@ -5010,7 +5010,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             if totalCompleted > 0 {
                                 self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(endpointCount)
-                                self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
+//                                self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
+                                self.putStatusUpdate2(endpoint: endpointType, total: endpointCount)
                             }
                             
                             if totalDeleted == endpointCount && self.changeColor {
@@ -5292,13 +5293,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                         setting.waitingForPackages = false
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] returning existing packages: \(currentDestinationPackages)\n") }
                                                         
-                                                        print("[existingEndpoints.packages] returning existing packages: \(currentDestinationPackages)")
-                                                        print("[existingEndpoints.packages] self.currentEPs: \(self.currentEPs)")
+//                                                        print("[existingEndpoints.packages] returning existing packages: \(currentDestinationPackages)")
+//                                                        print("[existingEndpoints.packages] self.currentEPs: \(self.currentEPs)")
                                                         
                                                         completed += 1
                                                         waiting = (completed < endpointDependencyArray.count) ? false:true
-                                                        
-//                                                        print("1-completed: \(completed) of \(endpointDependencyArray.count) (packages)")
                                                         
                                                         if !pref.stopMigration {
                                                             self.currentEPDict["packages"] = currentDestinationPackages
@@ -5433,11 +5432,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }   // end do/catch
                                 
                                 if existingEndpointNode != "packages" {
-//                                if destEndpoint != "packages" {
                                     
                                     completed += 1
                                     waiting = (completed < endpointDependencyArray.count) ? false:true
-//                                    print("2-completed: \(completed) of \(endpointDependencyArray.count) (\(existingEndpointNode))")
                                     
                                     if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
     //                                    print(httpResponse.statusCode)
@@ -5500,6 +5497,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
     func getDependencies(object: String, json: [String:AnyObject], completion: @escaping (_ returnedDependencies: [String:[String:String]]) -> Void) {
         WriteToLog().message(stringOfText: "[getDependencies] enter\n")
+        
+        if json.count == 0 {
+            completion([:])
+            return
+        }
         
         var objectDict           = [String:Any]()
         var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
@@ -5838,34 +5840,65 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     @IBAction func migrateToSite(_ sender: Any) {
         if siteMigrate_button.state.rawValue == 1 {
+            if dest_jp_server_field.stringValue == "" {
+                Alert().display(header: "Attention", message: "Destination URL is required", secondButton: "")
+                return
+            }
+            if self.dest_user_field.stringValue == "" || self.dest_pwd_field.stringValue == "" {
+                Alert().display(header: "Attention", message: "Credentials for the destination server are required", secondButton: "")
+                return
+            }
+            
             itemToSite = true
             availableSites_button.removeAllItems()
+            
+            self.destCreds = "\(self.dest_user_field.stringValue):\(self.dest_pwd_field.stringValue)"
+            self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
 
             DispatchQueue.main.async {
                 self.siteMigrate_button.isEnabled = false
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
             
-            Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
-                (result: (Int,[String])) in
-                let (httpStatus, destSitesArray) = result
-                if pref.httpSuccess.contains(httpStatus) {
-                    if destSitesArray.count == 0 {destinationLabel_TextField.stringValue = "Site Name"
-                        // no sites found - allow migration from a site to none
-                        availableSites_button.addItems(withTitles: ["None"])
-                    }
-                    self.destinationLabel_TextField.stringValue = "Site Name"
-                    self.availableSites_button.addItems(withTitles: ["None"])
-                    for theSite in destSitesArray {
-                        self.availableSites_button.addItems(withTitles: [theSite])
-                    }
-                    self.availableSites_button.isEnabled = true
-                    
-                    DispatchQueue.main.async {
-                        self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                        self.siteMigrate_button.isEnabled = true
+            jamfpro!.getToken(whichServer: "destination", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
+                (authResult: (Int,String)) in
+                let (authStatusCode, _) = authResult
+                print("authResult: \(authResult)")
+
+                if pref.httpSuccess.contains(authStatusCode) {
+                    Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
+                        (result: (Int,[String])) in
+                        let (httpStatus, destSitesArray) = result
+                        if pref.httpSuccess.contains(httpStatus) {
+                            if destSitesArray.count == 0 {destinationLabel_TextField.stringValue = "Site Name"
+                                // no sites found - allow migration from a site to none
+                                availableSites_button.addItems(withTitles: ["None"])
+                            }
+                            self.destinationLabel_TextField.stringValue = "Site Name"
+                            self.availableSites_button.addItems(withTitles: ["None"])
+                            for theSite in destSitesArray {
+                                self.availableSites_button.addItems(withTitles: [theSite])
+                            }
+                            self.availableSites_button.isEnabled = true
+                            
+                            DispatchQueue.main.async {
+                                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
+                                self.siteMigrate_button.isEnabled = true
+                            }
+                        } else {
+                            self.destinationLabel_TextField.stringValue = "Destination"
+                            self.availableSites_button.isEnabled = false
+                            self.destinationSite = ""
+                            itemToSite = false
+                            DispatchQueue.main.async {
+                                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
+                                self.siteMigrate_button.isEnabled = true
+                                self.siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
+                            }
+                        }
                     }
                 } else {
+                    print("[sites fn] failed to auth")
                     self.destinationLabel_TextField.stringValue = "Destination"
                     self.availableSites_button.isEnabled = false
                     self.destinationSite = ""
@@ -5877,7 +5910,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     }
                 }
             }
-            
+                
         } else {
             destinationLabel_TextField.stringValue = "Destination"
             self.availableSites_button.isEnabled = false
@@ -6262,20 +6295,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.getCounters[adjEndpoint]!["get"]! += 1
         }
         
+        let totalCount = (fileImport && activeTab(fn: "getStatusUpdate2") == "selective") ? targetDataArray.count:total
+        
         if setting.fullGUI {
             DispatchQueue.main.async {
                 if self.getCounters[adjEndpoint]!["get"]! > 0 {
                     if !setting.migrateDependencies || adjEndpoint == "policies" {
                         self.get_name_field.stringValue    = adjEndpoint
-                        self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(total)
-                        self.getSummary_label.stringValue  = "\(self.getCounters[adjEndpoint]!["get"]!) of \(total)"
+                        self.get_levelIndicator.floatValue = Float(self.getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
+                        self.getSummary_label.stringValue  = "\(self.getCounters[adjEndpoint]!["get"]!) of \(totalCount)"
+                    }
+                }
+            }
+        }
+    }
+    func putStatusUpdate2(endpoint: String, total: Int) {
+        var adjEndpoint = ""
+        switch endpoint {
+        case "accounts/userid":
+            adjEndpoint = "jamfusers"
+        case "accounts/groupid":
+            adjEndpoint = "jamfgroups"
+        default:
+            adjEndpoint = endpoint
+        }
+        
+        if self.putCounters[adjEndpoint] == nil {
+            self.putCounters[adjEndpoint] = ["put":1]
+        } else {
+            self.putCounters[adjEndpoint]!["put"]! += 1
+        }
+        
+        let totalCount = (fileImport && activeTab(fn: "puStatusUpdate2") == "selective") ? targetDataArray.count:total
+        
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                if self.putCounters[adjEndpoint]!["put"]! > 0 {
+                    if !setting.migrateDependencies || adjEndpoint == "policies" {
+                        self.put_name_field.stringValue    = adjEndpoint
+                        self.put_levelIndicator.floatValue = Float(self.putCounters[adjEndpoint]!["put"]!)/Float(totalCount)
+                        self.putSummary_label.stringValue  = "\(self.putCounters[adjEndpoint]!["put"]!) of \(totalCount)"
                     }
                 }
             }
         }
     }
     
-//    func icons(endpointType: String, action: String, ssIconName: String, ssIconId: String, ssIconUri: String, f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
     func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
         var createDestUrl        = f_createDestUrl

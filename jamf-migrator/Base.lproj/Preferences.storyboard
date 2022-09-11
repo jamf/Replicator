@@ -513,6 +513,7 @@ DQ
                         <outlet property="saveRawXml_button" destination="ygP-ng-L4v" id="FmS-uz-mr0"/>
                         <outlet property="saveTrimmedXmlScope_button" destination="B4M-2x-uq5" id="1Q0-ZV-gXB"/>
                         <outlet property="saveTrimmedXml_button" destination="CCj-Rl-VKk" id="Ppc-hs-6Ta"/>
+                        <outlet property="select_button" destination="AMh-rS-Q2f" id="Wki-n4-dy9"/>
                         <outlet property="showSaveLocation_button" destination="zp8-37-IJS" id="MDd-Rx-S09"/>
                     </connections>
                 </viewController>

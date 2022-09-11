@@ -13,9 +13,12 @@ class Sites: NSObject, URLSessionDelegate {
     let vc           = ViewController()
     var resourcePath = ""
     var base64Creds  = ""
-
+    
+    var jamfpro: JamfPro?
+    
     func fetch(server: String, creds: String, completion: @escaping ((Int,[String])) -> Void) {
         
+        jamfpro = JamfPro(controller: ViewController())
         var siteArray = [String]()
 //        var siteDict  = Dictionary<String, Any>()
         base64Creds   = Data("\(creds)".utf8).base64EncodedString()
@@ -34,22 +37,25 @@ class Sites: NSObject, URLSessionDelegate {
         
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
-        JamfPro(controller: vc).getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
-            (authResult: (Int,String)) in
-            let (authStatusCode, _) = authResult
+//        jamfpro!.getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
 
-            if pref.httpSuccess.contains(authStatusCode) {
+//        JamfPro(controller: ViewController()).getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
+//            (authResult: (Int,String)) in
+//            let (authStatusCode, _) = authResult
+
+//            if pref.httpSuccess.contains(authStatusCode) {
                 getSites() {
                     (result: [String]) in
                     siteArray = result
-                    completion((authStatusCode,siteArray))
+                    completion((200,siteArray))
+//                    completion((authStatusCode,siteArray))
                     return siteArray
                 }
-            } else {
-                WriteToLog().message(stringOfText: "[Sites] Failed to authenticate to \(server), no sites returned\n")
-                completion((authStatusCode,siteArray))
-            }
-        }
+//            } else {
+//                WriteToLog().message(stringOfText: "[Sites] Failed to authenticate to \(server), no sites returned\n")
+//                completion((authStatusCode,siteArray))
+//            }
+//        }
     }
     
     func getSites(completion: @escaping ([String]) -> [String]) {

@@ -31,6 +31,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var saveTrimmedXmlScope_button: NSButton!
     @IBOutlet weak var showSaveLocation_button: NSButton!
     @IBOutlet var saveLocation_textfield: NSTextField!
+    @IBOutlet weak var select_button: NSButton!
     
     @IBOutlet var site_View: NSView!
     
@@ -271,6 +272,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func saveLocation() {
+        select_button.isEnabled = false
         DispatchQueue.main.async {
             let openPanel = NSOpenPanel()
         
@@ -297,6 +299,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                     self.saveLocation_textfield.stringValue = "Export to: \(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
                     
                 }
+                self.select_button.isEnabled = true
             } // openPanel.begin - end
         }
     }

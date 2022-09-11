@@ -746,7 +746,7 @@
                                 </constraints>
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
-                                    <tabViewItem label="General" identifier="tab0" id="88A-Nu-WEM">
+                                    <tabViewItem label="General" identifier="General" id="88A-Nu-WEM">
                                         <view key="view" identifier="General" id="CPy-PU-zBW">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1037,7 +1037,7 @@
                                             </constraints>
                                         </view>
                                     </tabViewItem>
-                                    <tabViewItem label="macOS" identifier="tab1" id="Nof-Zl-FoE">
+                                    <tabViewItem label="macOS" identifier="macOS" id="Nof-Zl-FoE">
                                         <view key="view" id="fn5-oe-BJC">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1086,7 +1086,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="phd-7I-bpv">
-                                                                        <rect key="frame" x="382" y="134.5" width="103" height="18"/>
+                                                                        <rect key="frame" x="382" y="135" width="103" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="G3V-g7-lgi"/>
                                                                             <constraint firstAttribute="width" constant="101" id="lmp-zI-oKe"/>
@@ -1112,7 +1112,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rfx-qW-1EN" userLabel="Static Groups btn">
-                                                                        <rect key="frame" x="382" y="114.5" width="103" height="18"/>
+                                                                        <rect key="frame" x="382" y="115" width="103" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="DUm-9W-vow"/>
                                                                             <constraint firstAttribute="width" constant="101" id="tVy-7e-62H"/>
@@ -1138,7 +1138,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tIV-9V-gpi">
-                                                                        <rect key="frame" x="207" y="94.5" width="72" height="18"/>
+                                                                        <rect key="frame" x="207" y="95" width="72" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="70" id="Gn6-IO-yuE"/>
                                                                             <constraint firstAttribute="height" constant="17" id="hGm-Ya-Jcr"/>
@@ -1164,7 +1164,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hPA-qy-uIr" userLabel="Ext attribs btn">
-                                                                        <rect key="frame" x="207" y="114.5" width="148" height="18"/>
+                                                                        <rect key="frame" x="207" y="115" width="148" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="146" id="KSc-t8-Aej"/>
                                                                             <constraint firstAttribute="height" constant="17" id="PWK-Ku-Kmg"/>
@@ -1190,7 +1190,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="maX-gS-OdH" userLabel="File Shares (AFP/SMB) btn">
-                                                                        <rect key="frame" x="18" y="134.5" width="154" height="18"/>
+                                                                        <rect key="frame" x="18" y="135" width="154" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="fij-lY-2kP"/>
                                                                             <constraint firstAttribute="width" constant="152" id="h6z-LF-eAa"/>
@@ -1216,7 +1216,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Oq-z3-hPc" userLabel="SUS btn">
-                                                                        <rect key="frame" x="18" y="54.5" width="57" height="18"/>
+                                                                        <rect key="frame" x="18" y="55" width="57" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="55" id="Ofs-1Q-wcx"/>
                                                                             <constraint firstAttribute="height" constant="17" id="v2g-vE-ix8"/>
@@ -1242,7 +1242,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iW5-vh-2hL" userLabel="Policies">
-                                                                        <rect key="frame" x="547" y="94.5" width="79" height="18"/>
+                                                                        <rect key="frame" x="547" y="95" width="79" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="1Qu-Ab-5ft"/>
                                                                             <constraint firstAttribute="width" constant="77" id="rYL-et-7or"/>
@@ -1320,7 +1320,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KIq-hd-UjN" userLabel=" Adv Comp Searches btn">
-                                                                        <rect key="frame" x="547" y="114.5" width="155" height="18"/>
+                                                                        <rect key="frame" x="547" y="115" width="155" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="153" id="seI-as-n9v"/>
                                                                             <constraint firstAttribute="height" constant="17" id="zWA-Ix-JP9"/>
@@ -1346,7 +1346,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CA1-Zz-dcv" userLabel="Netboot Servers btn">
-                                                                        <rect key="frame" x="207" y="134.5" width="123" height="18"/>
+                                                                        <rect key="frame" x="207" y="135" width="123" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="3wR-kJ-EP0"/>
                                                                             <constraint firstAttribute="width" constant="121" id="y3g-Un-wTy"/>
@@ -1372,7 +1372,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RJ3-X5-ZGl" userLabel="Packages button">
-                                                                        <rect key="frame" x="207" y="54.5" width="86" height="18"/>
+                                                                        <rect key="frame" x="207" y="55" width="86" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="BNj-Lq-Aaa"/>
                                                                             <constraint firstAttribute="width" constant="84" id="FAz-US-7gT"/>
@@ -1398,7 +1398,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cMq-R0-wLL" userLabel="Printers button">
-                                                                        <rect key="frame" x="207" y="74.5" width="79" height="18"/>
+                                                                        <rect key="frame" x="207" y="75" width="79" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="lnI-ue-W2K"/>
                                                                             <constraint firstAttribute="width" constant="77" id="pIE-rg-cS8"/>
@@ -1424,7 +1424,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tfr-3a-8nS" userLabel="directory bindings btn">
-                                                                        <rect key="frame" x="18" y="114.5" width="139" height="18"/>
+                                                                        <rect key="frame" x="18" y="115" width="139" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="YvC-JO-sz9"/>
                                                                             <constraint firstAttribute="width" constant="137" id="dsP-2t-8ZV"/>
@@ -1450,7 +1450,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="864-jA-QKf" userLabel="dock items btn">
-                                                                        <rect key="frame" x="18" y="94.5" width="91" height="18"/>
+                                                                        <rect key="frame" x="18" y="95" width="91" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="89" id="H5e-Km-q7R"/>
                                                                             <constraint firstAttribute="height" constant="17" id="v7n-Yb-vG2"/>
@@ -1476,7 +1476,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TsB-ot-L5w" userLabel="Restricted Software btn">
-                                                                        <rect key="frame" x="382" y="94.5" width="145" height="18"/>
+                                                                        <rect key="frame" x="382" y="95" width="145" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="143" id="DeG-QL-CiV"/>
                                                                             <constraint firstAttribute="height" constant="17" id="fyt-U6-ItZ"/>
@@ -1502,7 +1502,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
-                                                                        <rect key="frame" x="547" y="54.5" width="113" height="18"/>
+                                                                        <rect key="frame" x="547" y="55" width="113" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="Agt-AY-kpU"/>
                                                                             <constraint firstAttribute="width" constant="111" id="naM-gv-Psj"/>
@@ -1554,7 +1554,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZNF-kE-Dab" userLabel="Disk Encryptions btn">
-                                                                        <rect key="frame" x="382" y="54.5" width="139" height="18"/>
+                                                                        <rect key="frame" x="382" y="55" width="139" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="137" id="7kD-7X-0hD"/>
                                                                             <constraint firstAttribute="height" constant="17" id="skb-UW-eRT"/>
@@ -1580,7 +1580,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdm-q1-rol" userLabel="Prestages">
-                                                                        <rect key="frame" x="547" y="74.5" width="79" height="18"/>
+                                                                        <rect key="frame" x="547" y="75" width="79" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="77" id="OD7-Gn-CuP"/>
                                                                             <constraint firstAttribute="height" constant="17" id="yvm-wN-P0q"/>
@@ -1643,7 +1643,7 @@
                                             </subviews>
                                         </view>
                                     </tabViewItem>
-                                    <tabViewItem label="iOS" identifier="tab2" id="ECI-6E-ufR">
+                                    <tabViewItem label="iOS" identifier="iOS" id="ECI-6E-ufR">
                                         <view key="view" id="p6U-ah-Cbx">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1933,7 +1933,7 @@
                                             </subviews>
                                         </view>
                                     </tabViewItem>
-                                    <tabViewItem label="Selective" identifier="tab3" id="Fo1-1P-mP5">
+                                    <tabViewItem label="Selective" identifier="Selective" id="Fo1-1P-mP5">
                                         <view key="view" id="TA8-Ho-89h">
                                             <rect key="frame" x="10" y="33" width="707" height="186"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -2078,7 +2078,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="161"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="159"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="159"/>
@@ -2456,7 +2456,7 @@
                                     <action selector="fileImport:" target="XfG-lQ-9wD" id="bzz-dP-5F0"/>
                                 </connections>
                             </button>
-                            <button toolTip="Preferences" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DjG-yq-DnX">
+                            <button toolTip="Preferences" translatesAutoresizingMaskIntoConstraints="NO" id="DjG-yq-DnX">
                                 <rect key="frame" x="18" y="18" width="32" height="32"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAdvanced" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="nTb-Hf-Ygi">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2555,7 +2555,7 @@
                             <constraint firstItem="dKE-kP-Pu7" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="34" id="QB3-pM-Oe1"/>
                             <constraint firstItem="Kb9-jI-pZI" firstAttribute="centerY" secondItem="yF6-Ie-7cn" secondAttribute="centerY" constant="-2.5" id="QJw-gj-x8N"/>
                             <constraint firstItem="B8I-Gu-YOQ" firstAttribute="leading" secondItem="DjG-yq-DnX" secondAttribute="leading" constant="18" id="QXt-xa-lMc"/>
-                            <constraint firstAttribute="bottom" secondItem="DjG-yq-DnX" secondAttribute="bottom" constant="14" id="QbP-3p-ALx"/>
+                            <constraint firstAttribute="bottom" secondItem="DjG-yq-DnX" secondAttribute="bottom" constant="18" id="QbP-3p-ALx"/>
                             <constraint firstItem="GTJ-yW-OOe" firstAttribute="firstBaseline" secondItem="2FL-Bn-T2a" secondAttribute="firstBaseline" id="RYZ-fO-i25"/>
                             <constraint firstItem="vfR-O9-7xw" firstAttribute="firstBaseline" secondItem="U40-E2-DvW" secondAttribute="firstBaseline" id="UBg-g9-WoE"/>
                             <constraint firstItem="2FL-Bn-T2a" firstAttribute="leading" secondItem="7oa-bJ-2d1" secondAttribute="leading" constant="-2" id="UDm-GX-Vtq"/>
