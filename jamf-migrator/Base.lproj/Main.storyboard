@@ -1230,7 +1230,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V21-1X-tzz">
-                                                                        <rect key="frame" x="567" y="96" width="74" height="16"/>
+                                                                        <rect key="frame" x="567" y="96" width="54" height="16"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="70" id="6qg-Aq-LCA"/>
                                                                             <constraint firstAttribute="height" constant="16" id="Qze-bA-D4K"/>
@@ -1490,7 +1490,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TwK-8j-8nD" userLabel="Patch Policies fld">
-                                                                        <rect key="frame" x="567" y="56" width="106" height="16"/>
+                                                                        <rect key="frame" x="566" y="37" width="106" height="16"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="16" id="VyT-mo-mOH"/>
                                                                             <constraint firstAttribute="width" constant="102" id="vu2-T6-rpt"/>
@@ -1502,7 +1502,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
-                                                                        <rect key="frame" x="547" y="55" width="113" height="17"/>
+                                                                        <rect key="frame" x="546" y="36" width="113" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="17" id="Agt-AY-kpU"/>
                                                                             <constraint firstAttribute="width" constant="111" id="naM-gv-Psj"/>
@@ -1568,7 +1568,7 @@
                                                                         </connections>
                                                                     </button>
                                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8U0-Qe-paa" userLabel="Prestages">
-                                                                        <rect key="frame" x="567" y="76" width="74" height="16"/>
+                                                                        <rect key="frame" x="566" y="57" width="74" height="16"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="16" id="BNf-HA-eaw"/>
                                                                             <constraint firstAttribute="width" constant="70" id="pZp-F8-ak2"/>
@@ -1580,7 +1580,7 @@
                                                                         </textFieldCell>
                                                                     </textField>
                                                                     <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdm-q1-rol" userLabel="Prestages">
-                                                                        <rect key="frame" x="547" y="75" width="79" height="17"/>
+                                                                        <rect key="frame" x="546" y="56" width="79" height="17"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="width" constant="77" id="OD7-Gn-CuP"/>
                                                                             <constraint firstAttribute="height" constant="17" id="yvm-wN-P0q"/>
@@ -1593,6 +1593,15 @@
                                                                             <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Yfj-WY-ddy"/>
                                                                         </connections>
                                                                     </button>
+                                                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="758-4h-BMs">
+                                                                        <rect key="frame" x="566" y="80" width="110" height="16"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="Ze9-vB-izL">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
                                                                 </subviews>
                                                                 <constraints>
                                                                     <constraint firstItem="rfx-qW-1EN" firstAttribute="top" secondItem="phd-7I-bpv" secondAttribute="bottom" constant="3" id="0Dq-vv-zsR"/>
@@ -1600,7 +1609,7 @@
                                                                     <constraint firstItem="ZNF-kE-Dab" firstAttribute="top" secondItem="uAi-xC-0ej" secondAttribute="bottom" constant="4" id="3Ho-cy-fSj"/>
                                                                     <constraint firstItem="TsB-ot-L5w" firstAttribute="top" secondItem="rfx-qW-1EN" secondAttribute="bottom" constant="3" id="7hT-z5-txI"/>
                                                                     <constraint firstItem="Jh1-S4-tyb" firstAttribute="top" secondItem="maX-gS-OdH" secondAttribute="bottom" constant="3" id="8Cc-Qc-0Ea"/>
-                                                                    <constraint firstItem="8U0-Qe-paa" firstAttribute="top" secondItem="iW5-vh-2hL" secondAttribute="bottom" constant="3" id="B1z-VN-fzB"/>
+                                                                    <constraint firstItem="8U0-Qe-paa" firstAttribute="top" secondItem="iW5-vh-2hL" secondAttribute="bottom" constant="22" id="B1z-VN-fzB"/>
                                                                     <constraint firstItem="KIq-hd-UjN" firstAttribute="top" secondItem="vif-GW-Rxk" secondAttribute="bottom" constant="4" id="DbJ-0h-8wd"/>
                                                                     <constraint firstItem="VB2-eO-067" firstAttribute="top" secondItem="tIV-9V-gpi" secondAttribute="bottom" constant="3" id="JN1-Fs-zPG"/>
                                                                     <constraint firstItem="TwK-8j-8nD" firstAttribute="top" secondItem="hdm-q1-rol" secondAttribute="bottom" constant="3" id="JPd-Uk-oai"/>
@@ -1615,7 +1624,7 @@
                                                                     <constraint firstItem="2tr-YW-IQ0" firstAttribute="top" secondItem="rfx-qW-1EN" secondAttribute="bottom" constant="3" id="PIE-ux-esh"/>
                                                                     <constraint firstItem="maX-gS-OdH" firstAttribute="top" secondItem="gsZ-k6-bEX" secondAttribute="top" constant="39" id="Qic-Cx-UZt"/>
                                                                     <constraint firstItem="tIV-9V-gpi" firstAttribute="top" secondItem="hPA-qy-uIr" secondAttribute="bottom" constant="3" id="R8G-PH-mit"/>
-                                                                    <constraint firstItem="hdm-q1-rol" firstAttribute="top" secondItem="iW5-vh-2hL" secondAttribute="bottom" constant="3" id="Rmc-KP-YDA"/>
+                                                                    <constraint firstItem="hdm-q1-rol" firstAttribute="top" secondItem="iW5-vh-2hL" secondAttribute="bottom" constant="22" id="Rmc-KP-YDA"/>
                                                                     <constraint firstItem="uAi-xC-0ej" firstAttribute="top" secondItem="TsB-ot-L5w" secondAttribute="bottom" constant="3" id="Rsn-T2-ufG"/>
                                                                     <constraint firstItem="gyq-nN-Llg" firstAttribute="top" secondItem="gsZ-k6-bEX" secondAttribute="top" constant="39" id="SdG-Sa-nQn"/>
                                                                     <constraint firstItem="tfr-3a-8nS" firstAttribute="top" secondItem="maX-gS-OdH" secondAttribute="bottom" constant="3" id="VyF-gI-kCj"/>
@@ -2078,7 +2087,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="161"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="159"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="159"/>
@@ -2759,6 +2768,7 @@
                         <outlet property="storeCredentials_button" destination="lsc-CO-2iT" id="uhK-Zf-c16"/>
                         <outlet property="sus_button" destination="0Oq-z3-hPc" id="tAC-fB-AAZ"/>
                         <outlet property="sus_label_field" destination="TGh-dy-khY" id="l8I-32-bex"/>
+                        <outlet property="uploadingIcons_textfield" destination="758-4h-BMs" id="iqx-xc-bay"/>
                         <outlet property="userEA_button" destination="5QD-Ga-H9N" id="Ib7-Aj-kw9"/>
                         <outlet property="userEA_label_field" destination="UU9-3N-hsp" id="i91-CO-i9i"/>
                         <outlet property="users_button" destination="ycJ-dt-zVj" id="s4w-mq-oDB"/>

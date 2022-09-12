@@ -232,6 +232,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var jamfGroupAccounts_field: NSTextField!
     @IBOutlet weak var restrictedsoftware_label_field: NSTextField!
     @IBOutlet weak var macPrestages_label_field: NSTextField!
+    @IBOutlet weak var uploadingIcons_textfield: NSTextField!
     // iOS button labels
     @IBOutlet weak var smart_ios_groups_label_field: NSTextField!
     @IBOutlet weak var static_ios_groups_label_field: NSTextField!
@@ -6144,30 +6145,36 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 var theImageNo = 0
                 if !local_button_status {
                     repeat {
-                        DispatchQueue.main.async {
-                            self.mySpinner_ImageView.image = self.theImage[theImageNo]
+                        DispatchQueue.main.async { [self] in
+                            mySpinner_ImageView.image = theImage[theImageNo]
                             theImageNo += 1
                             if theImageNo > 2 {
                                 theImageNo = 0
                             }
                             if pref.stopMigration {
-                                self.objectsToMigrate.removeAll()
-                                self.AllEndpointsArray.removeAll()
-                                self.availableObjsToMigDict.removeAll()
-                                self.sourceDataArray.removeAll()
-                                self.srcSrvTableView.reloadData()
-                                self.targetDataArray.removeAll()
+                                objectsToMigrate.removeAll()
+                                AllEndpointsArray.removeAll()
+                                availableObjsToMigDict.removeAll()
+                                sourceDataArray.removeAll()
+                                srcSrvTableView.reloadData()
+                                targetDataArray.removeAll()
 
-                                self.getEndpointsQ.cancelAllOperations()
+                                getEndpointsQ.cancelAllOperations()
                                 q.getRecord.cancelAllOperations()
-                                self.readFilesQ.cancelAllOperations()
-                                self.readNodesQ.cancelAllOperations()
-                                self.theOpQ.cancelAllOperations()
-                                self.theCreateQ.cancelAllOperations()
-//                                self.stopButton(self)
+                                readFilesQ.cancelAllOperations()
+                                readNodesQ.cancelAllOperations()
+                                theOpQ.cancelAllOperations()
+                                theCreateQ.cancelAllOperations()
+//                                stopButton(self)
                             }
                             
-                            if (self.theCreateQ.operationCount + self.theOpQ.operationCount + self.theIconsQ.operationCount + self.getEndpointsQ.operationCount) == 0 && self.nodesMigrated >= self.objectsToMigrate.count && self.objectsToMigrate.count != 0 && self.iconDictArray.count == 0 && !dependency.isRunning {
+                            if theIconsQ.operationCount > 0 {
+                                uploadingIcons_textfield.isHidden = false
+                            } else {
+                                uploadingIcons_textfield.isHidden = true
+                            }
+                            
+                            if (theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning {
                                 
                                 if !local_button_status {
                                     History.endTime = Date()
@@ -6177,9 +6184,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
                                     WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
 
-                                    self.resetAllCheckboxes()
+                                    resetAllCheckboxes()
 
-                                    self.goButtonEnabled(button_status: true)
+                                    goButtonEnabled(button_status: true)
                                     local_button_status = true
                                     iconfiles.policyDict.removeAll()
                                     iconfiles.pendingDict.removeAll()
@@ -6401,7 +6408,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
                 
                 // download the icon - action = "GET"
-                iconMigrate(action: action, ssIconUri: ssIconUri, ssIconId: ssIconId, ssIconName: ssIconName, iconToUpload: "", createDestUrl: "") {
+                iconMigrate(action: action, ssIconUri: ssIconUri, ssIconId: ssIconId, ssIconName: ssIconName, _iconToUpload: "", createDestUrl: "") {
                     (result: Int) in
 //                    print("action: \(action)")
 //                    print("Icon url: \(ssIconUri)")
@@ -6430,7 +6437,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                        print("createDestUrl: \(createDestUrl)")
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
                                 
-                                    self.iconMigrate(action: "POST", ssIconUri: "", ssIconId: ssIconId, ssIconName: ssIconName, iconToUpload: "\(iconToUpload)", createDestUrl: createDestUrl) {
+                                    self.iconMigrate(action: "POST", ssIconUri: "", ssIconId: ssIconId, ssIconName: ssIconName, _iconToUpload: "\(iconToUpload)", createDestUrl: createDestUrl) {
                                         (iconMigrateResult: Int) in
 
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] result of icon POST: \(iconMigrateResult).\n") }
@@ -6464,7 +6471,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                 iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
                                                 
                                                 let policyUrl = "\(self.createDestUrlBase)/policies/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-                                                self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                                self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                                 (result: Int) in
                                                 
                                                     if result > 199 && result < 300 {
@@ -6528,7 +6535,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
 //                                            print("iconXml: \(iconXml)")
                                         
-                                            self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                            self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                             (result: Int) in
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] after updating policy with icon id.\n") }
                                             
@@ -6545,7 +6552,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
         //                                            print("iconXml: \(iconXml)")
                                         
-                                        self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                        self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                         (result: Int) in
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after updating policy with icon id.\n") }
                                         
@@ -6575,15 +6582,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
-    func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
-
-//        var apiAction    = action
+    func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
+        
+        // fix id being passed as optional
+        var iconToUpload = _iconToUpload.replacingOccurrences(of: "Optional(\"?id=", with: "")
+        iconToUpload     = iconToUpload.replacingOccurrences(of: "\")/", with: "/")
         var curlResult   = 0
-//        let tmpIconArray = ssIconUri.components(separatedBy: "id=")
-//        let iconId       = (tmpIconArray.count > 1) ? tmpIconArray[1]:"0"
+        
         var moveIcon     = true
         var savedURL:URL!
-//        var pendingDownload = [String:Bool]()
 
         switch action {
         case "GET":
@@ -6669,7 +6676,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     let startTime = Date()
                     var postData  = Data()
                     
-                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
+//                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
                     let fileType = NSURL(fileURLWithPath: "\(String(describing: fileURL!))").pathExtension
                 
                     WriteToLog().message(stringOfText: "[iconMigrate.\(action)] uploading \(ssIconName)\n")
