@@ -879,6 +879,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func Go_action(sender: NSButton) {
+        getCounters.removeAll()
+        putCounters.removeAll()
         Go(sender: "goButton")
     }
     
@@ -1138,7 +1140,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             if !export.saveOnly && setting.fullGUI {
                                                 self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
                                             }
-                                            print("Start Migrating/Removing")
                     
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "call startMigrating().\n") }
                                             self.startMigrating()
@@ -1311,9 +1312,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         
                         if smart_comp_grps_button.state.rawValue == 1 || static_comp_grps_button.state.rawValue == 1 {
-                            objectsToMigrate += ["computergroups"]
                             smart_comp_grps_button.state.rawValue == 1 ? (migrateSmartComputerGroups = true):(migrateSmartComputerGroups = false)
                             static_comp_grps_button.state.rawValue == 1 ? (migrateStaticComputerGroups = true):(migrateStaticComputerGroups = false)
+                            if !fileImport {
+                                objectsToMigrate += ["computergroups"]
+                            } else {
+                                if migrateSmartComputerGroups {
+                                    objectsToMigrate += ["smartcomputergroups"]
+                                }
+                                if migrateStaticComputerGroups {
+                                    objectsToMigrate += ["staticcomputergroups"]
+                                }
+                            }
                         }
                         
                         if restrictedsoftware_button.state.rawValue == 1 {
@@ -1414,7 +1424,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     self.put_levelIndicatorFillColor[currentNode] = .systemGreen
                 }
                 switch currentNode {
-                case "computergroups":
+                case "computergroups", "smartcomputergroups", "staticcomputergroups":
                     if self.smartComputerGrpsSelected {
                         self.progressCountArray["smartcomputergroups"] = 0
                         self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
@@ -1548,15 +1558,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     
                     // this will populate list for selective migration or start migration of bulk operations
                     self.readNodes(nodesToMigrate: self.objectsToMigrate, nodeIndex: 0)
-//                    print("done with readNodes")
                     
                 } else {
                     // **************************************** selective migration - start ****************************************
-                    if self.fileImport {
+//                    if self.fileImport {
 //                        self.alert_dialog(header: "Attention:", message: "Selective migration is not yet available when importing files.")
 //                        self.goButtonEnabled(button_status: true)
 //                        return
-                    }
+//                    }
                     var selectedEndpoint = ""
                     switch self.objectsToMigrate[0] {
                     case "jamfusers":
@@ -1851,7 +1860,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
-
+        
         if pref.stopMigration {
             stopButton(self)
             return
@@ -1859,7 +1868,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] enter search for \(nodesToMigrate[nodeIndex])\n") }
         
-//        print("nodesToMigrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             self.progressCountArray["smartcomputergroups"]  = 0
@@ -1886,7 +1894,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if self.fileImport {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] reading files for: \(nodesToMigrate)\n") }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes]         nodeIndex: \(nodeIndex)\n") }
-            print("call readDataFiles for \(nodesToMigrate)")
+            print("call readDataFiles for \(nodesToMigrate)")   // called too often
             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex) {
                 (result: String) in
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] processFiles result: \(result)\n") }
@@ -1905,12 +1913,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
-        
-    }
+    }   // func readNodes - end
     
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects form source server (query source server)
-        
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] enter\n") }
 
         if pref.stopMigration {
@@ -2985,65 +2991,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.dataFilesRoot = self.source_jp_server_field.stringValue
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] dataFilesRoot: \(dataFilesRoot)\n") }
-        print("[readDataFiles] start dataFilesRoot: \(dataFilesRoot)")
         
-        var local_endpointArray = [String]()
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
         
-//        switch nodesToMigrate[nodeIndex] {
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             self.progressCountArray["smartcomputergroups"] = 0
             self.progressCountArray["staticcomputergroups"] = 0
             self.progressCountArray["computergroups"] = 0 // this is the recognized end point
-            if migrateSmartComputerGroups || endpoint == "smartcomputergroups" {
-                local_endpointArray.append("smartcomputergroups")
-            }
-            if migrateStaticComputerGroups || endpoint == "staticcomputergroups" {
-                local_endpointArray.append("staticcomputergroups")
-            }
-            if migrateSmartComputerGroups && migrateStaticComputerGroups {
-                self.nodesMigrated-=1
-            }
         case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
             self.progressCountArray["smartmobiledevicegroups"] = 0
             self.progressCountArray["staticmobiledevicegroups"] = 0
             self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
-            if migrateSmartMobileGroups || endpoint == "smartmobiledevicegroups" {
-                local_endpointArray.append("smartmobiledevicegroups")
-            }
-            if migrateStaticMobileGroups || endpoint == "staticmobiledevicegroups" {
-                local_endpointArray.append("staticmobiledevicegroups")
-            }
-            if migrateSmartMobileGroups && migrateStaticMobileGroups {
-                self.nodesMigrated-=1
-            }
         case "usergroups", "smartusergroups", "staticusergroups":
             self.progressCountArray["smartusergroups"] = 0
             self.progressCountArray["staticusergroups"] = 0
             self.progressCountArray["usergroups"] = 0 // this is the recognized end point
-            if migrateSmartUserGroups || endpoint == "smartusergroups" {
-                local_endpointArray.append("smartusergroups")
-            }
-            if migrateStaticUserGroups || endpoint == "staticusergroups" {
-                local_endpointArray.append("staticusergroups")
-            }
-            if migrateSmartUserGroups && migrateStaticUserGroups {
-                self.nodesMigrated-=1
-            }
         case "accounts", "jamfusers", "jamfgroups":
             self.progressCountArray["jamfusers"] = 0
             self.progressCountArray["jamfgroups"] = 0
             self.progressCountArray["accounts"] = 0 // this is the recognized end point
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
-            local_endpointArray = [endpoint]
         }
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]       Data files root: \(dataFilesRoot)\n") }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]   local_endpointArray: \(local_endpointArray)\n") }
 
         self.availableFilesToMigDict.removeAll()
         self.displayNameToFilename.removeAll()
@@ -3051,12 +3025,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         theOpQ.maxConcurrentOperationCount = 1
 //        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
-//            print("[ViewController.files] nodesToMigrate: \(nodesToMigrate)")
-            for local_folder in local_endpointArray {
+//            print("[readDataFiles] local_endpointArray: \(local_endpointArray)")
+//            for local_folder in local_endpointArray {
+                let local_folder = nodesToMigrate[nodeIndex]
+                self.availableFilesToMigDict.removeAll()
+                
                 var directoryPath = "\(self.dataFilesRoot)/\(local_folder)"
                 directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
-                print("[readDataFiles] scanning: \(directoryPath) for files.")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n") }
+
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n") }
                 do {
                     let allFiles = FileManager.default.enumerator(atPath: "\(directoryPath)")
 
@@ -3136,7 +3113,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.displayNameToFilename[name]       = dataFile
                                     self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)\n") }
-                                    print("[readDataFiles] read \(local_folder): file name : object name - \(dataFile) \t: \(name)")
                                     // populate selective list, when appropriate
                                     if self.goSender == "selectToMigrateButton" {
     //                                  print("fileImport - goSender: \(self.goSender)")
@@ -3168,21 +3144,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             }   // for i in 1...dataFilesCount - end
                         }
                     }   // if let allFilePaths - end
-                } catch {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
-                }
-            
-//                print("whichTab: \(self.activeTab(fn: "readDataFiles"))")
-                if self.goSender == "bulk"{
-                    var fileCount = self.availableFilesToMigDict.count
-                } else {
-                    
-                }
+                } //catch {
+                    //if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
+                //}
                 
                 var fileCount = self.availableFilesToMigDict.count
             
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
             
+                
                 if fileCount > 0 {
 //                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
                     if self.goSender == "goButton" {
@@ -3192,7 +3162,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
                             self.availableFilesToMigDict.removeAll()
                             if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                                    (result: String) in
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] processFiles result: \(result)\n") }
+                                }
                             }
                             completion("fetched xml for: \(endpoint)")
                         }
@@ -3201,14 +3174,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] fileCount = 0.\n") }
                     self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
                     if nodeIndex < nodesToMigrate.count - 1 {
-                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                        self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                            (result: String) in
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] no files found for: \(local_folder)\n") }
+                        }
                     }
                     completion("fetched xml for: \(endpoint)")
                 }
                 fileCount = 0
-            }
+//            }
         }   // self.theOpQ - end
-    }
+    }   // func readDataFiles - end
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: Dictionary<String,[String]>, completion: @escaping (_ result: String) -> Void) {
         
@@ -3220,9 +3196,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] Returned from existing \(endpoint): \(resultMessage)\n") }
             
             self.readFilesQ.maxConcurrentOperationCount = 1
-            
-//            print("itemsDict: \(itemsDict)")
-            
+                        
             var l_index = 1
             for (_, objectInfo) in itemsDict {
                 self.readFilesQ.addOperation {
@@ -4060,15 +4034,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                print("call createEndpoints for \(theEndpoint)")
+//                print("call createEndpoints for \(theEndpoint)")
                 self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                     if endpointCurrent == endpointCount {
-                        print("completed \(endpointCurrent) of \(endpointCount) - created last endpoint")
+//                        print("completed \(endpointCurrent) of \(endpointCount) - created last endpoint")
                         completion("last")
                     } else {
-                        print("completed \(endpointCurrent) of \(endpointCount) - created next endpoint")
+//                        print("completed \(endpointCurrent) of \(endpointCount) - created next endpoint")
                         completion("")
                     }
                 }
@@ -4421,6 +4395,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.totalCompleted = self.totalCreated + self.totalUpdated + self.totalFailed
                             
                             if self.totalCompleted > 0 {
+//                                print("[CreateEndpoints] self.counters: \(self.counters)")
                                 if !setting.migrateDependencies || endpointType == "policies" {
                                     self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
 //                                    self.putSummary_label.stringValue  = "\(self.totalCompleted) of \(self.counters[endpointType]!["total"]!)"
