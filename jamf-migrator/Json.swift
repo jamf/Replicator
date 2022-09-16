@@ -25,8 +25,6 @@ class Json: NSObject, URLSessionDelegate {
         
         existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
         existingDestUrl = existingDestUrl.urlFix
-//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "/?failover", with: "")
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)\n") }
 //      print("existing endpoints URL: \(existingDestUrl)")
@@ -53,6 +51,7 @@ class Json: NSObject, URLSessionDelegate {
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let endpointJSON = json as? [String:AnyObject] {
+                                WriteToLog().message(stringOfText: "[Json.getRecord] retrieved \(theEndpoint)\n")
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[Json.getRecord] \(endpointJSON)\n") }
                                 completion(endpointJSON)
                             } else {
