@@ -26,7 +26,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 
 * Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A password can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
 * Certificate used for LDAPS does not migrate.
-* Icons associated with Mac App Store apps are not migrated (can't be migrated).
+* Icons associated with Mac App Store apps are not migrated as the API does not support it.
 * Only AFP and SMB shares can be migrated.
 * Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
@@ -41,6 +41,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
   <li>The API allows for the creation of multiple packages, with different display names, to reference the same package file name.  The Jamf Pro console prevents this as there should be a one to one mapping.</li>
   </ul>
 * Saving of objects whos name contains a : (colon) will be saved using a ; (semi-colon).
+* Enabled state of mobile device applications is not handled in the API, as a result all migrated mobile device applications will be enabled on the destination server whether it is enabled or disabled on the source.
 
 <hr>
 

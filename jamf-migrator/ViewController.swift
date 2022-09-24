@@ -154,7 +154,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var restrictedsoftware_button: NSButton!
     @IBOutlet weak var macPrestages_button: NSButton!
     // iOS tab
-    @IBOutlet weak var allNone_iOS_button: NSButton!
     @IBOutlet weak var mobiledevices_button: NSButton!
     @IBOutlet weak var mobiledeviceconfigurationprofiles_button: NSButton!
     @IBOutlet weak var mobiledeviceextensionattributes_button: NSButton!
@@ -242,6 +241,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var mobiledeviceApps_label_field: NSTextField!
     @IBOutlet weak var advancedmobiledevicesearches_label_field: NSTextField!
     @IBOutlet weak var mobiledevicePrestage_label_field: NSTextField!
+    @IBOutlet weak var uploadingIcons2_textfield: NSTextField!
     // general button labels
     @IBOutlet weak var advusersearch_label_field: NSTextField!
     @IBOutlet weak var building_label_field: NSTextField!
@@ -1810,9 +1810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 var theEndpointID = 0
                                 if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
                                 
-                                print("rawEndpoint: \(rawEndpoint)")
-                                print("rawEndpoint id: \(primaryObjToMigrateID)")
-                                print("selectedObject: \(selectedObject)")
+                                // remove (policyId) from displayed policy name
                                 if rawEndpoint == "policies" {
                                     var tmpArray = selectedObject.components(separatedBy: " ")
                                     selectedObject = ""
@@ -1824,10 +1822,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             selectedObject.append("\(i)")
                                         }
                                     }
-//                                    let removePolicyId = tmpArray.last
-//                                    selectedObject = selectedObject.replacingOccurrences(of: " \(String(describing: removePolicyId))", with: "")
                                 }
-                                print("new selectedObject: \(selectedObject)\n")
+
                                 if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
                                     theAction     = "update"
                                     theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
@@ -3426,7 +3422,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if let httpResponse = response as? HTTPURLResponse {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
                             let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
-                            print("[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)")
+
                             // save source XML - start
                             if export.saveRawXml {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
@@ -4122,7 +4118,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)\n") }
         }
-//        var createDestUrl = createDestUrlBase
         //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
         
         concurrentThreads = setConcurrentThreads()
@@ -4151,7 +4146,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-        
+                
         theCreateQ.addOperation {
             
             // save trimmed XML - start
@@ -4163,7 +4158,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     WriteToLog().message(stringOfText: "[endPointByID] Exporting trimmed XML for \(endpointType) - \(endpointName).\n")
                     XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
-                
             }
             // save trimmed XML - end
             
@@ -4258,6 +4252,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 }
                                 
                                 self.POSTsuccessCount += 1
+                                whichError = ""
+                                self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
                                 
                                 if let _ = self.progressCountArray["\(endpointType)"] {
                                     self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
@@ -4311,7 +4307,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
                                     self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
-                                    if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 { whichError = "" }
+                                    if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
+                                        whichError = ""
+                                        self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
+                                    }
                                 } else {
                                     self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 1
                                 }
@@ -4409,7 +4408,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             self.totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             self.totalCompleted = self.totalCreated + self.totalUpdated + self.totalFailed
                             
-                            if self.totalCompleted > 0 {
+                            if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == nil && self.totalCompleted > 0  {
 //                                print("[CreateEndpoints] self.counters: \(self.counters)")
                                 if !setting.migrateDependencies || endpointType == "policies" {
                                     self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
@@ -6120,7 +6119,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     dest_user_field.becomeFirstResponder()
                 }
             } else {
-                WriteToLog().message(stringOfText: "Validate URL and credentials are saved for both source and destination Jamf Pro instances.")
+                WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
                 NSApplication.shared.terminate(self)
             }
         }
@@ -6158,8 +6157,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             
                             if theIconsQ.operationCount > 0 {
                                 uploadingIcons_textfield.isHidden = false
+                                uploadingIcons2_textfield.isHidden = false
                             } else {
                                 uploadingIcons_textfield.isHidden = true
+                                uploadingIcons2_textfield.isHidden = true
                             }
                             
                             if (theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning {
@@ -6391,7 +6392,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             if iconfiles.pendingDict["\(ssIconId.fixOptional)"] != "pending" {
                 if iconfiles.pendingDict["\(ssIconId.fixOptional)"] != "ready" {
                     iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "pending"
-                    WriteToLog().message(stringOfText: "[ViewController.icons] marking icon for policy id \(sourcePolicyId) as pending\n")
+                    WriteToLog().message(stringOfText: "[ViewController.icons] marking icon for \(iconNode) id \(sourcePolicyId) as pending\n")
                 } else {
                     action = "SKIP"
                 }
@@ -6457,11 +6458,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                             }
                                             
                                             if setting.csa {
-                                                iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
+                                                switch endpointType {
+                                                case "policies":
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
+                                                case "mobiledeviceapplications":
+//                                                    let newAppIcon = iconfiles.policyDict["\(ssIconId)"]?["policyId"] ?? "0"
+                                                    iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><mobile_device_application><general><icon><id>\(iconMigrateResult)</id><name>\(ssIconName)</name><uri>\(ssIconUri)</uri></icon></general></mobile_device_application>"
+                                                default:
+                                                    break
+                                                }
                                                 
-                                                let policyUrl = "\(self.createDestUrlBase)/policies/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+                                                let policyUrl = "\(self.createDestUrlBase)/\(endpointType)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
                                                 self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
-                                                (result: Int) in
+                                                    (result: Int) in
                                                 
                                                     if result > 199 && result < 300 {
                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] successfully updated policy (id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)\n") }
@@ -6575,9 +6584,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         // fix id/hash being passed as optional
         let iconToUpload = _iconToUpload.fixOptional
-//        var iconToUpload = _iconToUpload.replacingOccurrences(of: "Optional(\"?id=", with: "")
-//        iconToUpload     = iconToUpload.replacingOccurrences(of: "Optional(\"hash", with: "hash")
-//        iconToUpload     = iconToUpload.replacingOccurrences(of: "\")/", with: "/")
         var curlResult   = 0
 //        print("[ViewController] iconToUpload: \(iconToUpload)")
         
@@ -6645,7 +6651,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 // swift file download - end
             
         case "POST":
-            print("[POST] ssIconId: \(ssIconId.fixOptional)")
             if uploadedIcons[ssIconId.fixOptional] == nil && setting.csa {
                 // upload icon to fileuploads endpoint / icon server
                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)\n")
@@ -6788,7 +6793,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
         case "PUT":
             
-            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] setting icon for policy \(createDestUrl).\n")
+            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] setting icon for \(createDestUrl)\n")
             
             theIconsQ.maxConcurrentOperationCount = 2
             let semaphore    = DispatchSemaphore(value: 0)
@@ -6816,7 +6821,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
                             } else {
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
-                                WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n")
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n") }
+                                print("[iconMigrate.\(action)] iconToUpload: \(iconToUpload)")
                                 
                             }
                         completion(httpResponse.statusCode)
@@ -6854,8 +6860,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         iconHoldQ.async {
             while iconfiles.pendingDict.count > 0 {
-                print("[iconMigrationHold] iconfiles.pendingDict.count: \(iconfiles.pendingDict.count)")
-                print("[iconMigrationHold] iconfiles.pendingDict: \(iconfiles.pendingDict)")
                 if pref.stopMigration {
                     break
                 }
@@ -7467,7 +7471,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
             self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
             // iOS tab
-            self.allNone_iOS_button.state = NSControl.StateValue(rawValue: 0)
             self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
             self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
