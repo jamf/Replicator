@@ -15,5 +15,10 @@ let attribText = NSAttributedString(string: "SEND", attributes: [NSAttributedStr
 self.destinationMethod_TextField.attributedStringValue = attribText
 
 Fix
-Export only smart groups - hangs, keeps spinning
-When unchecking save only in prefs, remove 'export only' notification in UI
+migrating mobile device apps - randomly tries to update policies instead
+20220924_115045 [iconMigrate.PUT] setting icon for https://coldmizer.jamfcloud.com/JSSResource/mobiledeviceapplications/id/161
+20220924_115045 [iconMigrate.PUT] **** error code: 404 failed to update icon on https://coldmizer.jamfcloud.com/JSSResource/policies/id/173
+
+
+20220924_115745 [iconMigrate.PUT] icon updated on https://coldmizer.jamfcloud.com/JSSResource/mobiledeviceapplications/id/183
+20220924_115745 [iconMigrate.PUT] **** error code: 404 failed to update icon on https://coldmizer.jamfcloud.com/JSSResource/policies/id/161

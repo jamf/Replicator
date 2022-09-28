@@ -6061,6 +6061,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     // which platform mode tab are we on - end
     
+    func dd(value: Int) -> String {
+        let formattedValue = (value < 10) ? "0\(value)":"\(value)"
+        return formattedValue
+    }
+    
     func disable(theXML: String) -> String {
         let regexDisable    = try? NSRegularExpression(pattern: "<enabled>true</enabled>", options:.caseInsensitive)
         let newXML          = (regexDisable?.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "<enabled>false</enabled>"))!
@@ -6170,8 +6175,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                     let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
 
-                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+//                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+//                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+                                    
+                                    let timeDifference = Int(components.second!)
+                                    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+                                    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+                                    
+                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
 
                                     resetAllCheckboxes()
 
@@ -6420,8 +6431,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         if !export.saveOnly {
                             
                             // see if the icon has been downloaded
-//                            print("iconfiles.policyDict value for icon id \(ssIconId): \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
-                            if iconfiles.policyDict["\(ssIconId)"]?["policyId"] == nil || iconfiles.policyDict["\(ssIconId)"]?["policyId"] == "" {
+//                            if iconfiles.policyDict["\(ssIconId)"]?["policyId"] == nil || iconfiles.policyDict["\(ssIconId)"]?["policyId"] == "" {
+                            let downloadedIcon = iconfiles.policyDict["\(ssIconId)"]?["policyId"]
+                            if downloadedIcon?.fixOptional == nil || downloadedIcon?.fixOptional == "" {
+//                                print("[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
                                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)\n") }
 //                                        print("createDestUrl: \(createDestUrl)")
@@ -6498,13 +6511,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                                 // destination policy to upload icon to
                                 let thePolicyID = "\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
-                                let policyUrl   = "\(self.createDestUrlBase)/policies/id/\(thePolicyID)"
+                                let policyUrl   = "\(self.createDestUrlBase)/\(endpointType)/id/\(thePolicyID)"
+//                                print("\n[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
+//                                print("[ViewController.icons] policyUrl: \(policyUrl)\n")
                                 
-                                if iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]! == "" {
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))\n") }
+                                if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))\n") }
                                     var policyIconDict = iconfiles.policyDict
                                     
-//                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(String(describing: iconfiles.policyDict["\(ssIconId)"]!["policyId"]!))/subset/SelfService")  {
                                     Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
 //                                        print("[icons] result of Json().getRecord: \(result)")
@@ -6550,10 +6564,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 } else {
                                     WriteToLog().message(stringOfText: "[ViewController.icons] using new icon id from destination server\n")
                                     newSelfServiceIconId = Int(iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
+                                    
+                                    
+                                        switch endpointType {
+                                        case "policies":
+                                            iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
+                                        case "mobiledeviceapplications":
+//                                                    let newAppIcon = iconfiles.policyDict["\(ssIconId)"]?["policyId"] ?? "0"
+                                            iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><mobile_device_application><general><icon><id>\(newSelfServiceIconId)</id><uri>\(ssIconUri)</uri></icon></general></mobile_device_application>"
+                                        default:
+                                            break
+                                        }
+                                    
                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service><self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
         //                                            print("iconXml: \(iconXml)")
-                                        
-                                        self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
+                                    self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                         (result: Int) in
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] after updating policy with icon id.\n") }
                                         
@@ -6766,13 +6791,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 
                             let endTime = Date()
                             let components = Calendar.current.dateComponents([.second], from: startTime, to: endTime)
-    //                        let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
 
-                            let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
+                            let timeDifference = Int(components.second!)
                             let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
                             let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-    //                        WriteToLog().message(stringOfText: "[iconMigrate.POST] upload time: \(timeDifference) seconds\n")
-                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(h):\(m):\(s) (h:m:s)\n")
+
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(self.dd(value: h)):\(self.dd(value: m)):\(self.dd(value: s)) (h:m:s)\n")
                             
                             completion(newId)
                             // upload checksum - end
@@ -6822,7 +6846,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                             } else {
                                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)\n")
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)\n") }
-                                print("[iconMigrate.\(action)] iconToUpload: \(iconToUpload)")
+//                                print("[iconMigrate.\(action)] iconToUpload: \(iconToUpload)")
                                 
                             }
                         completion(httpResponse.statusCode)

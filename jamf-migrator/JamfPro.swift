@@ -74,44 +74,51 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 // get Jamf Pro version - start
                                 Jpapi().action(serverUrl: serverUrl, endpoint: "jamf-pro-version", apiData: [:], id: "", token: JamfProServer.authCreds[whichServer]!, method: "GET") {
                                     (result: [String:Any]) in
-                                    let versionString = result["version"] as! String
-                
-                                    if versionString != "" {
-                                        WriteToLog().message(stringOfText: "[JamfPro.getVersion] Jamf Pro Version: \(versionString)\n")
-                                        JamfProServer.version[whichServer] = versionString
-                                        let tmpArray = versionString.components(separatedBy: ".")
-                                        if tmpArray.count > 2 {
-                                            for i in 0...2 {
-                                                switch i {
-                                                case 0:
-                                                    JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
-                                                case 1:
-                                                    JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
-                                                case 2:
-                                                    let tmp = tmpArray[i].components(separatedBy: "-")
-                                                    JamfProServer.patchVersion = Int(tmp[0]) ?? 0
-                                                    if tmp.count > 1 {
-                                                        JamfProServer.build = tmp[1]
+                                    if let versionString = result["version"] as? String {
+                                        
+                                        if versionString != "" {
+                                            WriteToLog().message(stringOfText: "[JamfPro.getVersion] Jamf Pro Version: \(versionString)\n")
+                                            JamfProServer.version[whichServer] = versionString
+                                            let tmpArray = versionString.components(separatedBy: ".")
+                                            if tmpArray.count > 2 {
+                                                for i in 0...2 {
+                                                    switch i {
+                                                    case 0:
+                                                        JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
+                                                    case 1:
+                                                        JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
+                                                    case 2:
+                                                        let tmp = tmpArray[i].components(separatedBy: "-")
+                                                        JamfProServer.patchVersion = Int(tmp[0]) ?? 0
+                                                        if tmp.count > 1 {
+                                                            JamfProServer.build = tmp[1]
+                                                        }
+                                                    default:
+                                                        break
                                                     }
-                                                default:
-                                                    break
                                                 }
+                                                if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) {
+                                                    JamfProServer.authType[whichServer] = "Bearer"
+                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use OAuth\n")
+                                                    
+                                                } else {
+                                                    JamfProServer.authType[whichServer]  = "Basic"
+                                                    JamfProServer.authCreds[whichServer] = base64creds
+                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic\n")
+                                                }
+                                                if JamfProServer.authType[whichServer] == "Bearer" {
+                                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
+                                                }
+                                                completion((200, "success"))
+                                                return
                                             }
-                                            if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) {
-                                                JamfProServer.authType[whichServer] = "Bearer"
-                                                WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use OAuth\n")
-                                                
-                                            } else {
-                                                JamfProServer.authType[whichServer]  = "Basic"
-                                                JamfProServer.authCreds[whichServer] = base64creds
-                                                WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic\n")
-                                            }
-                                            if JamfProServer.authType[whichServer] == "Bearer" {
-                                                self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
-                                            }
-                                            completion((200, "success"))
-                                            return
                                         }
+                                    } else {   // if let versionString - end
+                                        WriteToLog().message(stringOfText: "[JamfPro.getToken] failed to get version information from \(String(describing: serverUrl))\n")
+                                        JamfProServer.validToken[whichServer]  = false
+                                        _ = Alert().display(header: "Attention", message: "Failed to get version information from \(String(describing: serverUrl))", secondButton: "")
+                                        completion((httpResponse.statusCode, "failed"))
+                                        return
                                     }
                                 }
                                 // get Jamf Pro version - end
