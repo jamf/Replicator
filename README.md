@@ -159,7 +159,7 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 Add ability to utilize selective migration while using exported files as the source.  Fix crash (issue #80) when Site is selected.  Show text while icons are being uploaded for self service policies and iOS apps.  Fix issue with selective migration of policies.
 
 **v6.2.7**<br>
-Fix crash when running on a machine for the first time (#79 ?). Invalidate tokens when switching servers and stop token refresh once migration competes. Better user experience when working with export options and the disable export only button.
+Fix crash when running on a machine for the first time (#79). Invalidate tokens when switching servers and stop token refresh once migration competes. Better user experience when working with export options and the disable export only button.
 
 **v6.2.6**<br>
 Fix issues #77 (self service display name) and #78 (crash when checking for updates)
