@@ -1908,7 +1908,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if self.fileImport {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] reading files for: \(nodesToMigrate)\n") }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes]         nodeIndex: \(nodeIndex)\n") }
-            print("call readDataFiles for \(nodesToMigrate)")   // called too often
+//            print("call readDataFiles for \(nodesToMigrate)")   // called too often
             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex) {
                 (result: String) in
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] processFiles result: \(result)\n") }
