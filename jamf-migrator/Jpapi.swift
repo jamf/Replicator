@@ -10,7 +10,7 @@ import Cocoa
 
 class Jpapi: NSObject, URLSessionDelegate {
     
-    var theUapiQ = OperationQueue() // create operation queue for API calls
+//    var theUapiQ = OperationQueue() // create operation queue for API calls
     
     func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
@@ -60,7 +60,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).\n") }
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
