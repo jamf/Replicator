@@ -7830,7 +7830,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()
-//        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
         

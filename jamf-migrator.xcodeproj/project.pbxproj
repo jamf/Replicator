@@ -21,10 +21,11 @@
 		B53AF7F21F5CCF1000A2739C /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B53AF7EF1F5CCF1000A2739C /* 2.png */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
-		B54438DC25F6224A00465FA5 /* Notes in Resources */ = {isa = PBXBuildFile; fileRef = B54438DB25F6224A00465FA5 /* Notes */; };
+		B54438DC25F6224A00465FA5 /* Misc. in Resources */ = {isa = PBXBuildFile; fileRef = B54438DB25F6224A00465FA5 /* Misc. */; };
 		B556A79E2773A100003CBEE9 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556A79D2773A100003CBEE9 /* Alert.swift */; };
 		B55A277D1EAF8CA700AF8398 /* quit.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277B1EAF8CA700AF8398 /* quit.png */; };
 		B55A277E1EAF8CA700AF8398 /* go.png in Resources */ = {isa = PBXBuildFile; fileRef = B55A277C1EAF8CA700AF8398 /* go.png */; };
+		B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CA91728E88DE200236A8A /* SourceDestVC.swift */; };
 		B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CBA89277B939100F26E8C /* SaveDelegate.swift */; };
 		B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */; };
 		B57B1EFB21D7999F0098326E /* selective.png in Resources */ = {isa = PBXBuildFile; fileRef = B57B1EF921D7999E0098326E /* selective.png */; };
@@ -74,11 +75,13 @@
 		B53AF7EF1F5CCF1000A2739C /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
-		B54438DB25F6224A00465FA5 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
+		B54438DB25F6224A00465FA5 /* Misc. */ = {isa = PBXFileReference; lastKnownFileType = text; path = Misc.; sourceTree = "<group>"; };
 		B556A79D2773A100003CBEE9 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B55A277B1EAF8CA700AF8398 /* quit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = quit.png; sourceTree = "<group>"; };
 		B55A277C1EAF8CA700AF8398 /* go.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = go.png; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
+		B56CA91728E88DE200236A8A /* SourceDestVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SourceDestVC.swift; sourceTree = "<group>"; };
+		B56CA91C28EA74EB00236A8A /* Call function in another VC that updates UI.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Call function in another VC that updates UI.md"; sourceTree = "<group>"; };
 		B56CBA89277B939100F26E8C /* SaveDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveDelegate.swift; sourceTree = "<group>"; };
 		B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackagesDelegate.swift; sourceTree = "<group>"; };
 		B57B1EF921D7999E0098326E /* selective.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = selective.png; sourceTree = "<group>"; };
@@ -126,6 +129,7 @@
 		9BC01C531DFB0C07007E634E = {
 			isa = PBXGroup;
 			children = (
+				B56CA91B28EA742200236A8A /* Notes */,
 				9BC01C5E1DFB0C07007E634E /* jamf-migrator */,
 				9BC01C5D1DFB0C07007E634E /* Products */,
 				B53796C82273FFBA0006C1E4 /* Frameworks */,
@@ -155,6 +159,7 @@
 				B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */,
 				B56CBA89277B939100F26E8C /* SaveDelegate.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
+				B56CA91728E88DE200236A8A /* SourceDestVC.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
@@ -168,7 +173,6 @@
 				9BC01C681DFB0C07007E634E /* Info.plist */,
 				9BC01C6E1DFBC564007E634E /* settings.plist */,
 				B5E179EF1F1FDACF00A20AAA /* help */,
-				B54438DB25F6224A00465FA5 /* Notes */,
 			);
 			path = "jamf-migrator";
 			sourceTree = "<group>";
@@ -200,6 +204,15 @@
 				B508D5D61FA1A1780069ED0B /* stop.png */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		B56CA91B28EA742200236A8A /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				B54438DB25F6224A00465FA5 /* Misc. */,
+				B56CA91C28EA74EB00236A8A /* Call function in another VC that updates UI.md */,
+			);
+			path = Notes;
 			sourceTree = "<group>";
 		};
 		B57B1EF821D798670098326E /* tabs */ = {
@@ -331,7 +344,7 @@
 				B5E179F31F1FDAFA00A20AAA /* index.html in Resources */,
 				B5C042491EB11CF400C6E872 /* 1.png in Resources */,
 				B5E1912F21AAEFD400A1A9CA /* export.png in Resources */,
-				B54438DC25F6224A00465FA5 /* Notes in Resources */,
+				B54438DC25F6224A00465FA5 /* Misc. in Resources */,
 				B57B1F0721D7A0300098326E /* ios_active.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -354,6 +367,7 @@
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
+				B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,

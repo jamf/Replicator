@@ -14,6 +14,10 @@ class JamfPro: NSObject, URLSessionDelegate {
     init(controller: ViewController) {
       self.controller = controller
     }
+    var sdController: SourceDestVC? = nil
+    init(sdController: SourceDestVC) {
+      self.sdController = sdController
+    }
     
     var renewQ = DispatchQueue(label: "com.jamfmigrator.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
     
