@@ -662,7 +662,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
-                                <rect key="frame" x="32" y="123" width="108" height="16"/>
+                                <rect key="frame" x="32" y="125" width="108" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -670,7 +670,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
-                                <rect key="frame" x="147" y="120" width="41" height="21"/>
+                                <rect key="frame" x="147" y="122" width="41" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="41" id="S72-hv-cl9"/>
                                 </constraints>
@@ -680,17 +680,29 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZlP-uk-Rxu">
+                                <rect key="frame" x="33" y="86" width="188" height="18"/>
+                                <buttonCell key="cell" type="check" title="Force Basic Authentication" bezelStyle="regularSquare" imagePosition="left" inset="2" id="0gj-rM-eDb">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="forceBasicAuth_action:" target="Ojm-Op-AKi" id="EkJ-8Q-3YO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="34" id="0Xa-MU-vCo"/>
-                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="107" id="7UV-XO-T2H"/>
+                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="105" id="7UV-XO-T2H"/>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="Zj6-mi-35l" secondAttribute="leading" id="AJ6-yE-Ejn"/>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="baseline" secondItem="GJ0-5l-PEg" secondAttribute="baseline" id="AJF-3U-Wyi"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="baseline" secondItem="mty-65-1H0" secondAttribute="firstBaseline" id="Dpz-eu-WuJ"/>
                             <constraint firstItem="Zj6-mi-35l" firstAttribute="top" secondItem="y1Q-0c-cgq" secondAttribute="bottom" constant="3" id="EI6-oK-pR8"/>
                             <constraint firstItem="GJ0-5l-PEg" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="trailing" constant="9" id="Eg8-7r-Foc"/>
-                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Zj6-mi-35l" secondAttribute="bottom" constant="19" id="P6f-b1-gWm"/>
+                            <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="Zj6-mi-35l" secondAttribute="bottom" constant="17" id="P6f-b1-gWm"/>
+                            <constraint firstItem="ZlP-uk-Rxu" firstAttribute="top" secondItem="GJ0-5l-PEg" secondAttribute="bottom" constant="19" id="SLi-Ik-91d"/>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="leading" id="aWX-IO-uay"/>
+                            <constraint firstItem="ZlP-uk-Rxu" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="35" id="fBz-of-A8A"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="trailing" constant="4" id="iJ0-g9-soh"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="trailing" secondItem="Zj6-mi-35l" secondAttribute="trailing" id="mWa-Nw-cYn"/>
                         </constraints>
@@ -698,6 +710,7 @@ DQ
                     <connections>
                         <outlet property="concurrentThreads_slider" destination="Zj6-mi-35l" id="bhh-c4-Wzv"/>
                         <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
+                        <outlet property="forceBasicAuth_button" destination="ZlP-uk-Rxu" id="Y8L-B6-QZI"/>
                         <outlet property="logFilesCountPref_textfield" destination="GJ0-5l-PEg" id="DiQ-A8-CZq"/>
                     </connections>
                 </viewController>

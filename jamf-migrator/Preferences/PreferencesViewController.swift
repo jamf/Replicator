@@ -43,7 +43,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
     @IBOutlet weak var concurrentThreads_textfield: NSTextField!
     @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
-
+    @IBOutlet weak var forceBasicAuth_button: NSButton!
+    
     // computer prefs
     @IBOutlet weak var migrateAsManaged_button: NSButton!
     @IBOutlet weak var prefMgmtAcct_label: NSTextField!
@@ -144,6 +145,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         userDefaults.set(Int(concurrentThreads_textfield.stringValue), forKey: "concurrentThreads")
         userDefaults.synchronize()
     }
+    
+    @IBAction func forceBasicAuth_action(_ sender: Any) {
+        userDefaults.set(Int(forceBasicAuth_button.state.rawValue), forKey: "forceBasicAuth")
+        userDefaults.synchronize()
+    }
+    
 
     @IBAction func siteGroup_action(_ sender: Any) {
         userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
@@ -311,15 +318,14 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         
         // Set view sizes
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
-        self.view.wantsLayer = true
-        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
+//        self.view.wantsLayer = true
+//        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
 
         NSApp.activate(ignoringOtherApps: true)
     }
     
     override func viewDidAppear() {
         super.viewDidAppear()
-
         // set window title
         self.parent?.view.window?.title = self.title!
         
@@ -346,6 +352,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads"))"
             concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
+            forceBasicAuth_button.state = NSControl.StateValue(userDefaults.integer(forKey: "forceBasicAuth"))
             userDefaults.synchronize()
         }
         

@@ -31,6 +31,8 @@ class JamfPro: NSObject, URLSessionDelegate {
             return
         }
         
+        let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
+        
 //        print("\(serverUrl.prefix(4))")
         if serverUrl.prefix(4) != "http" {
             completion((0, "skipped"))
@@ -101,9 +103,9 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                         break
                                                     }
                                                 }
-                                                if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) {
+                                                if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) && !forceBasicAuth {
                                                     JamfProServer.authType[whichServer] = "Bearer"
-                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use OAuth\n")
+                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Bearer Token\n")
                                                     
                                                 } else {
                                                     JamfProServer.authType[whichServer]  = "Basic"
