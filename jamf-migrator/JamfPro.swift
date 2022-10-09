@@ -165,7 +165,8 @@ class JamfPro: NSObject, URLSessionDelegate {
     }
     
     func refresh(server: String, whichServer: String, b64Creds: String, localSource: Bool) {
-        if controller!.stop_button.isHidden {
+//        if controller!.go_button.title == "Stop" {
+        if migrationComplete.isDone {
             JamfProServer.validToken["source"]      = false
             JamfProServer.validToken["destination"] = false
             WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")

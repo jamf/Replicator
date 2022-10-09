@@ -10,7 +10,7 @@ import AppKit
 import Cocoa
 import Foundation
 
-class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
+class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let userDefaults = UserDefaults.standard
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
@@ -49,9 +49,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     // Main Window
     @IBOutlet var migrator_window: NSView!
     @IBOutlet weak var modeTab_TabView: NSTabView!
-    
-    @IBOutlet weak var sitesSpinner_ProgressIndicator: NSProgressIndicator!
-    
     
     // Import file variables
     @IBOutlet weak var importFiles_button: NSButton!
@@ -98,7 +95,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     // Show Preferences Window
     @IBAction func showPrefsWindow(_ sender: Any) {
-        NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
+        // other VC - lnh
+//        NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
         PrefsWindowController().show()
     }
 
@@ -177,7 +175,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     @IBOutlet weak var siteMigrate_button: NSButton!
     @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
     
-    var itemToSite      = false
+//    var itemToSite      = false
     var destinationSite = ""
     
     @IBOutlet weak var destinationLabel_TextField: NSTextField!
@@ -421,7 +419,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var currentEndpointID   = 0
     var progressCountArray  = [String:Int]() // track if post/put was successful
     
-    var whiteText:NSColor   = NSColor.white
+    var whiteText:NSColor   = NSColor.systemGray
     var greenText:NSColor   = NSColor.green
     var yellowText:NSColor  = NSColor.yellow
     var redText:NSColor     = NSColor.red
@@ -452,11 +450,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var totalFailed    = 0
     var totalCompleted = 0
 
-    @IBOutlet weak var mySpinner_ImageView: NSImageView!
-    var theImage:[NSImage] = [NSImage(named: "0.png")!,
-                              NSImage(named: "1.png")!,
-                              NSImage(named: "2.png")!]
-    var showSpinner = false
+    @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
+//    @IBOutlet weak var mySpinner_ImageView: NSImageView!
+//    var theImage:[NSImage] = [NSImage(named: "0.png")!,
+//                              NSImage(named: "1.png")!,
+//                              NSImage(named: "2.png")!]
+//    var showSpinner = false
     
     // group counters
     var smartCount      = 0
@@ -493,7 +492,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
     var theModeQ    = DispatchQueue(label: "com.jamf.addRemove")
+    
     var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
+    
     var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
@@ -502,74 +503,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     var concurrentThreads = 2
     
     var migrateOrWipe: String = ""
-    var httpStatusCode: Int = 0
-    var URLisValid: Bool = true
-    var processGroup = DispatchGroup()
+    var httpStatusCode: Int   = 0
+    var URLisValid: Bool      = true
+    var processGroup          = DispatchGroup()
     
-    @IBAction func deleteMode_fn(_ sender: Any) {
-        var isDir: ObjCBool = false
-
-        resetAllCheckboxes()
-        clearProcessingFields()
-        self.generalSectionToMigrate_button.selectItem(at: 0)
-        self.sectionToMigrate_button.selectItem(at: 0)
-        self.iOSsectionToMigrate_button.selectItem(at: 0)
-        self.selectiveFilter_TextField.stringValue = ""
-        
-        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
-            do {
-                try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
-                self.sourceDataArray.removeAll()
-                self.srcSrvTableView.stringValue = ""
-                self.srcSrvTableView.reloadData()
-                self.selectiveListCleared = true
-                
-                
-                
-                
-                _ = serverOrFiles()
-            } catch let error as NSError {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
-            }
-            DispatchQueue.main.async {
-                self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
-            }
-            wipeData.on = false
-        } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
-            
-            self.fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
-            DispatchQueue.main.async {
-                wipeData.on = true
-                self.selectiveTabelHeader_textview.stringValue = "Select object(s) to remove from the destination"
-                setting.migrateDependencies        = false
-                self.migrateDependencies.state     = NSControl.StateValue(rawValue: 0)
-                self.migrateDependencies.isHidden  = true
-                if self.srcSrvTableView.isEnabled {
-                    self.sourceDataArray.removeAll()
-                    self.srcSrvTableView.stringValue = ""
-                    self.srcSrvTableView.reloadData()
-                    self.selectiveListCleared = true
-                }
-            }
-        }
-    }
+//    var tabImage:[NSImage] = [NSImage(named: "general.png")!,
+//                              NSImage(named: "general_active.png")!,
+//                              NSImage(named: "macos.png")!,
+//                              NSImage(named: "macos_active.png")!,
+//                              NSImage(named: "ios.png")!,
+//                              NSImage(named: "ios_active.png")!,
+//                              NSImage(named: "selective.png")!,
+//                              NSImage(named: "selective_active.png")!]
     
-    var tabImage:[NSImage] = [NSImage(named: "general.png")!,
-                              NSImage(named: "general_active.png")!,
-                              NSImage(named: "macos.png")!,
-                              NSImage(named: "macos_active.png")!,
-                              NSImage(named: "ios.png")!,
-                              NSImage(named: "ios_active.png")!,
-                              NSImage(named: "selective.png")!,
-                              NSImage(named: "selective_active.png")!]
+//    @IBOutlet weak var generalTab_NSButton: NSButton!
+//    @IBOutlet weak var macosTab_NSButton: NSButton!
+//    @IBOutlet weak var iosTab_NSButton: NSButton!
+//    @IBOutlet weak var selectiveTab_NSButton: NSButton!
     
-    @IBOutlet weak var generalTab_NSButton: NSButton!
-    @IBOutlet weak var macosTab_NSButton: NSButton!
-    @IBOutlet weak var iosTab_NSButton: NSButton!
-    @IBOutlet weak var selectiveTab_NSButton: NSButton!
     
+    /*
     @IBAction func selectTab_fn(_ sender: NSButton) {
         let whichTab = (sender.identifier?.rawValue)!
         switch whichTab {
@@ -583,49 +536,40 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             setTab_fn(selectedTab: "Selective")
         }
     }
-    
-    func setTab_fn(selectedTab: String) {
-        DispatchQueue.main.async {
-            switch selectedTab {
-            case "General":
-                self.activeTab_TabView.selectTabViewItem(at: 0)
-                self.generalTab_NSButton.image = self.tabImage[1]
-                self.macosTab_NSButton.image = self.tabImage[2]
-                self.iosTab_NSButton.image = self.tabImage[4]
-                self.selectiveTab_NSButton.image = self.tabImage[6]
-            case "macOS":
-                self.activeTab_TabView.selectTabViewItem(at: 1)
-                self.generalTab_NSButton.image = self.tabImage[0]
-                self.macosTab_NSButton.image = self.tabImage[3]
-                self.iosTab_NSButton.image = self.tabImage[4]
-                self.selectiveTab_NSButton.image = self.tabImage[6]
-            case "iOS":
-                self.activeTab_TabView.selectTabViewItem(at: 2)
-                self.generalTab_NSButton.image = self.tabImage[0]
-                self.macosTab_NSButton.image = self.tabImage[2]
-                self.iosTab_NSButton.image = self.tabImage[5]
-                self.selectiveTab_NSButton.image = self.tabImage[6]
-            default:
-                self.activeTab_TabView.selectTabViewItem(at: 3)
-                self.generalTab_NSButton.image = self.tabImage[0]
-                self.macosTab_NSButton.image = self.tabImage[2]
-                self.iosTab_NSButton.image = self.tabImage[4]
-                self.selectiveTab_NSButton.image = self.tabImage[7]
-            }   // swtich - end
-        }   // DispatchQueue - end
-    }   // func setTab_fn - end
-    
-    @IBAction func showLogFolder(_ sender: Any) {
-        isDir = true
-        if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
-            NSWorkspace.shared.openFile(logPath!)
-        } else {
-            alert_dialog(header: "Alert", message: "There are currently no log files to display.")
-        }
-    }
+     */
+     func setTab_fn(selectedTab: String) {
+         DispatchQueue.main.async {
+             switch selectedTab {
+             case "General":
+                 self.activeTab_TabView.selectTabViewItem(at: 0)
+//                 self.generalTab_NSButton.image = self.tabImage[1]
+//                 self.macosTab_NSButton.image = self.tabImage[2]
+//                 self.iosTab_NSButton.image = self.tabImage[4]
+//                 self.selectiveTab_NSButton.image = self.tabImage[6]
+             case "macOS":
+                 self.activeTab_TabView.selectTabViewItem(at: 1)
+//                 self.generalTab_NSButton.image = self.tabImage[0]
+//                 self.macosTab_NSButton.image = self.tabImage[3]
+//                 self.iosTab_NSButton.image = self.tabImage[4]
+//                 self.selectiveTab_NSButton.image = self.tabImage[6]
+             case "iOS":
+                 self.activeTab_TabView.selectTabViewItem(at: 2)
+//                 self.generalTab_NSButton.image = self.tabImage[0]
+//                 self.macosTab_NSButton.image = self.tabImage[2]
+//                 self.iosTab_NSButton.image = self.tabImage[5]
+//                 self.selectiveTab_NSButton.image = self.tabImage[6]
+             default:
+                 self.activeTab_TabView.selectTabViewItem(at: 3)
+//                 self.generalTab_NSButton.image = self.tabImage[0]
+//                 self.macosTab_NSButton.image = self.tabImage[2]
+//                 self.iosTab_NSButton.image = self.tabImage[4]
+//                 self.selectiveTab_NSButton.image = self.tabImage[7]
+             }   // swtich - end
+         }   // DispatchQueue - end
+     }   // func setTab_fn - end
     
     @IBAction func fileImport(_ sender: NSButton) {
-        if importFiles_button.state.rawValue == 1 {
+        if JamfProServer.importFiles == 1 {
             let toggleFileImport = (sender.title == "Browse") ? false:true
             
             DispatchQueue.main.async {
@@ -880,12 +824,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     
     @IBAction func Go_action(sender: NSButton) {
-        getCounters.removeAll()
-        putCounters.removeAll()
-        iconfiles.policyDict.removeAll()
-        iconfiles.pendingDict.removeAll()
-        uploadedIcons.removeAll()
-        Go(sender: "goButton")
+        if sender.title == "Go!" {
+            go_button.title = "Stop"
+            getCounters.removeAll()
+            putCounters.removeAll()
+            iconfiles.policyDict.removeAll()
+            iconfiles.pendingDict.removeAll()
+            uploadedIcons.removeAll()
+            Go(sender: "goButton")
+        } else {
+            WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
+            pref.stopMigration = true
+
+            goButtonEnabled(button_status: true)
+        }
     }
     
     func Go(sender: String) {
@@ -952,7 +904,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         } else {
             if !export.saveOnly {
                 // verify source and destination are not the same - start
-                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate_button.state.rawValue == 0 {
+//                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate_button.state.rawValue == 0 {
+                if (JamfProServer.source == JamfProServer.destination) && siteMigrate_button.state.rawValue == 0 {
                     alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
                     self.goButtonEnabled(button_status: true)
                     return
@@ -972,7 +925,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] go sender: \(sender)\n") }
         // determine if we got here from the Go button, selectToMigrate button, or silently
-        self.goSender = "\(sender)"
+        goSender = "\(sender)"
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Go button pressed from: \(goSender)\n") }
         
@@ -1003,7 +956,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // credentials were entered check - start
             // don't check if we're importing files
             if !fileImport {
-                if (source_user_field.stringValue == "" || source_pwd_field.stringValue == "") && !wipeData.on {
+//                if (source_user_field.stringValue == "" || source_pwd_field.stringValue == "") && !wipeData.on {
+                if (JamfProServer.sourceUser == "" || JamfProServer.sourcePwd == "") && !wipeData.on {
                     alert_dialog(header: "Alert", message: "Must provide both a username and password for the source server.")
                     //self.go_button.isEnabled = true
                     goButtonEnabled(button_status: true)
@@ -1011,7 +965,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
             if !export.saveOnly {
-                if dest_user_field.stringValue == "" || dest_pwd_field.stringValue == "" {
+                if JamfProServer.destUser == "" || JamfProServer.destPwd == "" {
                     alert_dialog(header: "Alert", message: "Must provide both a username and password for the destination server.")
                     //self.go_button.isEnabled = true
                     goButtonEnabled(button_status: true)
@@ -1022,15 +976,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             // set credentials / servers - start
             // don't set user / pass if we're importing files or removing
-            self.source_jp_server = source_jp_server_field.stringValue
+            self.source_jp_server = JamfProServer.source
             if !fileImport && !wipeData.on {
-                self.source_user = source_user_field.stringValue
-                self.source_pass = source_pwd_field.stringValue
+                self.source_user = JamfProServer.sourceUser
+                self.source_pass = JamfProServer.sourcePwd
             }
 
-            self.dest_jp_server = dest_jp_server_field.stringValue
-            self.dest_user = dest_user_field.stringValue
-            self.dest_pass = dest_pwd_field.stringValue
+            self.dest_jp_server = JamfProServer.destination
+            self.dest_user = JamfProServer.destUser
+            self.dest_pass = JamfProServer.destPwd
             // set credentials / servers - end
         }
         nodesMigrated = -1
@@ -1062,12 +1016,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         
                         if setting.fullGUI {
                             // set site, if option selected - start
-                            if siteMigrate_button.state.rawValue == 1 {
-                                destinationSite = availableSites_button.selectedItem!.title
-                                itemToSite = true
-                            } else {
-                                itemToSite = false
-                            }
+                            /*
+                             if siteMigrate_button.state.rawValue == 1 {
+                                 destinationSite = availableSites_button.selectedItem!.title
+                                 itemToSite = true
+                             } else {
+                                 itemToSite = false
+                             }
+                             */
                             // set site, if option selected - end
                         }
                         
@@ -1103,9 +1059,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     self.updateServerArray(url: self.source_jp_server, serverList: "source_server_array", theArray: self.sourceServerArray)
                                     // update keychain, if marked to save creds
                                     if !wipeData.on {
-                                        if self.storeCredentials_button.state.rawValue == 1 {
-                                            self.Creds2.save(service: "migrator - "+self.source_jp_server.fqdnFromUrl, account: self.source_user_field.stringValue, data: self.source_pwd_field.stringValue)
-                                            self.storedSourceUser = self.source_user_field.stringValue
+//                                        if self.storeCredentials_button.state.rawValue == 1 {
+                                        if JamfProServer.storeCreds == 1 {
+                                            self.Creds2.save(service: "migrator - "+JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, data: JamfProServer.sourcePwd)
+                                            self.storedSourceUser = JamfProServer.sourceUser
                                         }
                                     }
                                 }
@@ -1123,9 +1080,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                     } else {
                                         // update keychain, if marked to save creds
                                         if !export.saveOnly && setting.fullGUI {
-                                            if self.storeCredentials_button.state.rawValue == 1 {
-                                                self.Creds2.save(service: "migrator - "+self.dest_jp_server.fqdnFromUrl, account: self.dest_user_field.stringValue, data: self.dest_pwd_field.stringValue)
-                                                self.storedDestUser = self.dest_user_field.stringValue
+                                            if JamfProServer.storeCreds == 1 {
+                                                self.Creds2.save(service: "migrator - "+JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, data: JamfProServer.destPwd)
+                                                self.storedDestUser = JamfProServer.destUser
                                             }
                                         }
                                         // determine if the cloud services connection is enabled
@@ -1167,8 +1124,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // check for file that allows deleting data from destination server, delete if found - end
         self.goButtonEnabled(button_status: true)
         
-        let tabLabel = (activeTab_TabView.selectedTabViewItem?.label)!        
-        userDefaults.set(tabLabel, forKey: "activeTab")
+//        let tabLabel = (activeTab_TabView.selectedTabViewItem?.label)!
+//        userDefaults.set(tabLabel, forKey: "activeTab")
 
         WriteToLog().logFileW?.closeFile()
         NSApplication.shared.terminate(self)
@@ -1190,11 +1147,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         DispatchQueue.main.async { [self] in
             if !export.backupMode {
-                importFiles_button.state.rawValue == 0 ? (fileImport = false):(fileImport = true)
-                createDestUrlBase = "\(dest_jp_server_field.stringValue)/JSSResource"
+                JamfProServer.importFiles == 0 ? (fileImport = false):(fileImport = true)
+                createDestUrlBase = "\(JamfProServer.destination)/JSSResource".urlFix
             } else {
                 fileImport = false
-                createDestUrlBase = "\(dest_jp_server)/JSSResource"
+                createDestUrlBase = "\(dest_jp_server)/JSSResource".urlFix
             }
                 
             if setting.fullGUI {
@@ -2193,6 +2150,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                             usleep(self.delayInt)
                                                                             
                                                                             if counter == self.availableObjsToMigDict.count {
+                                                                                self.nodesMigrated += 1
                                                                                 self.goButtonEnabled(button_status: true)
                                                                             }
                                                                             counter+=1
@@ -2299,12 +2257,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 }
                                                             // slight delay in building the list - visual effect
                                                             usleep(self.delayInt)
-    //                                                            self.goButtonEnabled(button_status: true)
-    //                                                        }   //if self.availableIDsToMigDict.count - end
-    //                                                        DispatchQueue.main.async {
-    //                                                            self.srcSrvTableView.reloadData()
-    //                                                        }
+                                                            
                                                             if counter == self.availableObjsToMigDict.count {
+                                                                self.nodesMigrated += 1
                                                                 self.goButtonEnabled(button_status: true)
                                                             }
                                                             counter+=1
@@ -2511,7 +2466,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 usleep(self.delayInt)
 
                                                                 if counter == self.sourceDataArray.count {
-//                                                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+
                                                                     self.sortList(theArray: self.sourceDataArray) {
                                                                         (result: [String]) in
                                                                         self.sourceDataArray = result
@@ -2641,6 +2596,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                             usleep(self.delayInt)
 
                                                             if counter == computerPoliciesDict.count {
+                                                                self.nodesMigrated += 1
                                                                 self.goButtonEnabled(button_status: true)
                                                             }
                                                             counter+=1
@@ -2750,6 +2706,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                                                 usleep(self.delayInt)
 
                                                                 if counter == self.availableObjsToMigDict.count {
+                                                                    self.nodesMigrated += 1
                                                                     self.goButtonEnabled(button_status: true)
                                                                 }
                                                                 counter+=1
@@ -2780,197 +2737,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         }
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
-
-                                /*
-                                case "computerconfigurations":
-                                    if let endpointInfo = endpointJSON[self.endpointDefDict[endpoint]!] as? [Any] {
-                                        endpointCount = endpointInfo.count
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
-
-                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)\n") }
-
-                                        if endpointCount > 0 {
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Create Id Mappings - start.\n") }
-
-                                            self.nameIdDict(server: self.source_jp_server, endPoint: "computerconfigurations", id: "sourceId") {
-                                                (result: [String:Dictionary<String,Int>]) in
-                                                self.idDict.removeAll()
-
-                                                self.nameIdDict(server: self.source_jp_server, endPoint: "packages", id: "sourceId") {
-                                                    (result: [String:Dictionary<String,Int>]) in
-
-                                                    self.nameIdDict(server: self.dest_jp_server, endPoint: "packages", id: "destId") {
-                                                        (result: [String:Dictionary<String,Int>]) in
-                                                        self.packages_id_map = result
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] packages id map:\n\(self.packages_id_map)\n") }
-                                                        self.idDict.removeAll()
-
-                                                        self.nameIdDict(server: self.source_jp_server, endPoint: "scripts", id: "sourceId") {
-                                                            (result: [String:Dictionary<String,Int>]) in
-
-                                                            self.nameIdDict(server: self.dest_jp_server, endPoint: "scripts", id: "destId") {
-                                                                (result: [String:Dictionary<String,Int>]) in
-                                                                self.scripts_id_map = result
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] scripts id map:\n\(self.scripts_id_map)\n") }
-                                                                self.idDict.removeAll()
-
-                                                                self.nameIdDict(server: self.source_jp_server, endPoint: "printers", id: "sourceId") {
-                                                                    (result: [String:Dictionary<String,Int>]) in
-
-                                                                    self.nameIdDict(server: self.dest_jp_server, endPoint: "printers", id: "destId") {
-                                                                        (result: [String:Dictionary<String,Int>]) in
-                                                                        self.printers_id_map = result
-                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] printers id map:\n\(self.printers_id_map)\n")}
-                                                                        self.idDict.removeAll()
-
-                                                                        self.nameIdDict(server: self.source_jp_server, endPoint: "directorybindings", id: "sourceId") {
-                                                                            (result: [String:Dictionary<String,Int>]) in
-
-                                                                            self.nameIdDict(server: self.dest_jp_server, endPoint: "directorybindings", id: "destId") {
-                                                                                (result: [String:Dictionary<String,Int>]) in
-                                                                                self.bindings_id_map = result
-                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] bindings id map:\n\(self.bindings_id_map)\n")}
-                                                                                self.idDict.removeAll()
-
-                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Create Id Mappings - end.\n") }
-
-                                                                                var orderedConfArray = [String]()
-                                                                                var movedParentArray = [String]()
-                                                                                self.orphanIds.removeAll()
-                                                                                //                                        var remainingConfigsArray = [String]()
-
-                                                                                while self.configObjectsDict.count != movedParentArray.count {
-                                                                                    for (key, _) in self.configObjectsDict {
-                                                                                        if ((self.configObjectsDict[key]?["type"] == "Standard") && (movedParentArray.firstIndex(of: key) == nil)) || ((movedParentArray.firstIndex(of: key) == nil) && (movedParentArray.firstIndex(of: (self.configObjectsDict[key]?["parent"])!) != nil)) {
-                                                                                            orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
-                                                                                            movedParentArray.append(key)
-                                                                                            // look for configs missing their parent
-                                                                                        } else if (((self.configObjectsDict[key]?["type"])! == "Smart") && (self.configObjectsDict[(self.configObjectsDict[key]?["parent"])!]?.count == nil)) && (movedParentArray.firstIndex(of: key) == nil) {
-                                                                                            WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Smart config '\(self.configObjectsDict[key]?["parent"] ?? "name not found")' is missing its parent and cannot be migrated.\n")
-                                                                                            WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Smart config '\(key)' (child of '\(self.configObjectsDict[key]?["parent"] ?? "name not found")') will be migrated and changed from smart to standard.\n")
-                                                                                            orderedConfArray.append((self.configObjectsDict[key]?["id"])!)
-                                                                                            movedParentArray.append(key)
-                                                                                            self.orphanIds.append((self.configObjectsDict[key]?["id"])!)
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                                if wipeData.on {
-                                                                                    orderedConfArray.reverse()
-                                                                                }
-    //                                                                            print("parent array: \(orderedConfArray)")
-
-                                                                                self.existingEndpoints(theDestEndpoint: "\(endpoint)")  {
-                                                                                    (result: String) in
-                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(result)\n") }
-
-                                                                                    var tmp_availableObjsToMigDict = [Int:String]()
-
-                                                                                    for i in (0..<endpointCount) {
-    //                                                                                    if i == 0 { self.availableObjsToMigDict.removeAll() }
-
-                                                                                        let record = endpointInfo[i] as! [String : AnyObject]
-
-                                                                                        tmp_availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-
-                                                                                    }   // for i in (0..<endpointCount) end
-
-                                                                                    self.availableObjsToMigDict.removeAll()
-                                                                                    for orderedId in orderedConfArray {
-
-                                                                                        self.availableObjsToMigDict[Int(orderedId)!] = tmp_availableObjsToMigDict[Int(orderedId)!]
-
-                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Current number of \(endpoint) to process: \(self.availableObjsToMigDict.count)\n") }
-                                                                                    }   // for i in (0..<endpointCount) end
-
-
-                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(self.availableObjsToMigDict.count) \(endpoint) to process\n") }
-
-                                                                                    var counter = 1
-                                                                                    if self.goSender == "goButton" {
-    //                                                                                  for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                                                        for orderedId in orderedConfArray {
-                                                                                            let l_xmlID = Int(orderedId)
-                                                                                            let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
-                                                                                            if (l_xmlID != nil) && (l_xmlName != nil) {
-                                                                                                if !wipeData.on  {
-                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(String(describing: l_xmlName)): \(self.currentEPs[l_xmlName!] ?? 0)\n") }
-                                                                                                    if self.currentEPs[l_xmlName!] != nil {
-                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(String(describing: l_xmlName)) already exists\n") }
-                                                                                                        //self.currentEndpointID = self.currentEPs[l_xmlName]!
-                                                                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "update", destEpId: self.currentEPs[l_xmlName!]!, destEpName: l_xmlName!)
-                                                                                                    } else {
-                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(String(describing: l_xmlName)) - create\n") }
-                                                                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(String(describing: l_xmlID)), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                                                        self.endPointByID(endpoint: endpoint, endpointID: l_xmlID!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName!)
-                                                                                                    }
-                                                                                                } else {
-                                                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(String(describing: l_xmlID))\t endpointName: \(String(describing: l_xmlName))\n") }
-                                                                                                    self.RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID!, endpointName: l_xmlName!, endpointCurrent: counter, endpointCount: self.availableObjsToMigDict.count)
-                                                                                                }   // if !wipeData.on else - end
-                                                                                            }
-                                                                                                counter+=1
-                                                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                                    } else {
-                                                                                        // populate source server under the selective tab
-                                                                                        // for (l_xmlID, l_xmlName) in self.availableObjsToMigDict {
-                                                                                        self.delayInt = self.listDelay(itemCount: orderedConfArray.count)
-                                                                                        for orderedId in orderedConfArray {
-                                                                                            let l_xmlID = Int(orderedId)
-                                                                                            let l_xmlName = tmp_availableObjsToMigDict[l_xmlID!]
-                                                                                            self.sortQ.async {
-                                                                                                //print("adding \(l_xmlName) to array")
-                                                                                                self.availableIDsToMigDict[l_xmlName!] = l_xmlID
-                                                                                                self.sourceDataArray.append(l_xmlName!)
-                                                                                                self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                                                
-                                                                                                self.staticSourceDataArray = self.sourceDataArray
-                                                                                                
-                                                                                                DispatchQueue.main.async {
-                                                                                                    self.srcSrvTableView.reloadData()
-                                                                                                }
-                                                                                                // slight delay in building the list - visual effect
-                                                                                                usleep(self.delayInt)
-
-                                                                                                if counter == orderedConfArray.count {
-                                                                                                    self.goButtonEnabled(button_status: true)
-                                                                                                }
-                                                                                                counter+=1
-                                                                                            }   // DispatchQueue.main.async - end
-                                                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                                    }   // if self.goSender else - end
-                                                                                }   // self.existingEndpoints - end
-
-                                                                            }   // self.nameIdDict(server: self.dest_jp_server - bindings end
-                                                                        }   // self.nameIdDict(server: self.source_jp_server - bindings end
-                                                                    }   // self.nameIdDict(server: self.dest_jp_server - printers end
-                                                                }   // self.nameIdDict(server: self.source_jp_server - printers end
-                                                            }   // self.nameIdDict(server: self.dest_jp_server - scripts end
-                                                        }   // self.nameIdDict(server: self.source_jp_server - scripts end
-                                                    }   // self.nameIdDict(server: self.dest_jp_server - packages end
-                                                }   // self.nameIdDict(server: self.source_jp_server - packages end
-                                            }   // self.nameIdDict(server: self.source_jp_server - computerconfigurations end
-
-                                        } else {
-                                            self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints5")
-                                            if endpoint == self.objectsToMigrate.last {
-                                                self.rmDELETE()
-    //                                            self.resetAllCheckboxes()
-    //                                            self.goButtonEnabled(button_status: true)
-                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                            }
-                                        }   // if endpointCount > 0 - end
-                                        if nodeIndex < nodesToMigrate.count - 1 {
-                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                        }
-                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                    } else {  // end if computerconfigurations
-                                        if nodeIndex < nodesToMigrate.count - 1 {
-                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                        }
-                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                    }
-                            */
-
                                 default:
                                     break
                                 }   // switch - end
@@ -3144,7 +2910,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                         usleep(self.delayInt)
 
                                         if counter == dataFilesCount {
-                                          self.goButtonEnabled(button_status: true)
+                                            self.nodesMigrated += 1
+                                            self.goButtonEnabled(button_status: true)
                                         }
                                         counter+=1
                                     }
@@ -3600,7 +3367,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: "mobile_devices", keepTags: false)
                 }
                 
-                if itemToSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
+//                if itemToSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
+                if JamfProServer.toSite && destinationSite != "" && endpoint != "advancedmobiledevicesearches" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -3609,13 +3377,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
-                if itemToSite && destinationSite != "" {
+                if JamfProServer.toSite && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
             case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
                 // migrating to another site
-                if itemToSite && destinationSite != "" {
+                if JamfProServer.toSite && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
                 
@@ -3789,7 +3557,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: "device_aad_infos", keepTags: false)
             }
             
-            if itemToSite && destinationSite != "" {
+            if JamfProServer.toSite && destinationSite != "" {
                 PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
             }
             
@@ -3872,7 +3640,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             
             // migrating to another site
 //            DispatchQueue.main.async {
-            if itemToSite && destinationSite != "" {
+            if JamfProServer.toSite && destinationSite != "" {
                     PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
                 }
 //            }
@@ -3960,7 +3728,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             //print("\nXML: \(PostXML)")
             
             // migrating to another site
-            if itemToSite && destinationSite != "" && endpoint == "policies" {
+            if JamfProServer.toSite && destinationSite != "" && endpoint == "policies" {
                 PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
             }
             
@@ -3973,7 +3741,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             for xmlTag in ["enable_custom_photo_url", "custom_photo_url", "links", "ldap_server"] {
                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
-            if itemToSite && destinationSite != "" {
+            if JamfProServer.toSite && destinationSite != "" {
                 PostXML = setSite(xmlString: PostXML, site: destinationSite, endpoint: endpoint)
             }
             
@@ -4105,7 +3873,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // if working a site migrations within a single server force create when copying an item
-        if self.itemToSite && sitePref == "Copy" {
+        if JamfProServer.toSite && sitePref == "Copy" {
             if endpointType != "users"{
                 destinationEpId = 0
                 apiAction       = "create"
@@ -4492,7 +4260,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
         // if working a site migrations within a single server force create/POST when copying an item
-        if self.itemToSite && sitePref == "Copy" {
+        if JamfProServer.toSite && sitePref == "Copy" {
             if endpointType != "users" {
                 destinationEpId = 0
                 apiAction       = "create"
@@ -4525,10 +4293,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             localEndPointType = endpointType
         }
         var responseData = ""
-        
-        if self.itemToSite {
-            
-        }
                 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)\n") }
        
@@ -5826,6 +5590,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         setting.migrateDependencies = migrateDependencies.state.rawValue == 1 ? true:false
     }
     
+    /*
     @IBAction func migrateToSite(_ sender: Any) {
         if siteMigrate_button.state.rawValue == 1 {
             if dest_jp_server_field.stringValue == "" {
@@ -5912,6 +5677,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
         
     }
+     */
 
     //==================================== Utility functions ====================================
     
@@ -6073,6 +5839,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         return newXML
     }
     
+    /*
     func fetchPassword(whichServer: String, url: String) {
 //      print("fetchPassword")
         let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
@@ -6129,20 +5896,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
     }
+     */
     
     func goButtonEnabled(button_status: Bool) {
         var local_button_status = button_status
-        DispatchQueue.main.async {
-            self.theSpinnerQ.async {
-                var theImageNo = 0
+        DispatchQueue.main.async { [self] in
+            theSpinnerQ.async { [self] in
+
                 if !local_button_status {
+                    if setting.fullGUI {
+                        DispatchQueue.main.async { [self] in
+                            spinner_progressIndicator.startAnimation(self)
+                        }
+                    }
                     repeat {
                         DispatchQueue.main.async { [self] in
-                            mySpinner_ImageView.image = theImage[theImageNo]
-                            theImageNo += 1
-                            if theImageNo > 2 {
-                                theImageNo = 0
-                            }
+                            
                             if pref.stopMigration {
                                 objectsToMigrate.removeAll()
                                 AllEndpointsArray.removeAll()
@@ -6172,6 +5941,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 
                                 if !local_button_status {
                                     History.endTime = Date()
+                                    spinner_progressIndicator.stopAnimation(self)
 
                                     let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
 
@@ -6196,43 +5966,47 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                         }
                         usleep(300000)  // sleep 0.3 seconds
                     } while !local_button_status  // while !button_status - end
-                }   // self.theSpinnerQ.async - end
-            }   // DispatchQueue.main.async  -end
+                }   // if !local_button_status - end
+            }   // theSpinnerQ.async - end
             if setting.fullGUI {
-                self.mySpinner_ImageView.isHidden = button_status
-                self.stop_button.isHidden = button_status
-                self.go_button.isEnabled = button_status
+//                mySpinner_ImageView.isHidden = button_status
+//                stop_button.isHidden = button_status
+//                go_button.isEnabled = button_status
+                if local_button_status {
+                    spinner_progressIndicator.stopAnimation(self)
+                }
+                go_button.title = local_button_status ? "Go!":"Stop"
             } else {
                 // silent run complete
                 if export.backupMode {
-                    if self.theOpQ.operationCount == 0 {
-                        print("archive path: \(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))")
-//                    self.zipIt(args: "cd \"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"") {
+                    if theOpQ.operationCount == 0 {
+                        print("archive path: \(export.saveLocation)backup_\(backupDate.string(from: History.startTime))")
+//                    zipIt(args: "cd \"\(export.saveLocation)backup_\(backupDate.string(from: History.startTime))\"") {
 //                        (result: String) in
 //                        print("returned from cd")
-                        self.zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o backup_\(self.backupDate.string(from: History.startTime)).zip backup_\(self.backupDate.string(from: History.startTime))/") {
+                        zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o backup_\(backupDate.string(from: History.startTime)).zip backup_\(backupDate.string(from: History.startTime))/") { [self]
                             (result: String) in
                             print("zipIt result: \(result)")
                             do {
-                                if self.fm.fileExists(atPath: "\"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"") {
-                                    try self.fm.removeItem(at: URL(string: "\"\(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime))\"")!)
+                                if fm.fileExists(atPath: "\"\(export.saveLocation)backup_\(backupDate.string(from: History.startTime))\"") {
+                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)backup_\(backupDate.string(from: History.startTime))\"")!)
                                 }
-                                WriteToLog().message(stringOfText: "[Migration Complete] Backup created: \(export.saveLocation)backup_\(self.backupDate.string(from: History.startTime)).zip\n")
+                                WriteToLog().message(stringOfText: "[Migration Complete] Backup created: \(export.saveLocation)backup_\(backupDate.string(from: History.startTime)).zip\n")
                             } catch let error as NSError {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
                             }
                         }
                         NSApplication.shared.terminate(self)
-                    }   //self.zipIt(args: "cd - end
+                    }   //zipIt(args: "cd - end
                 } else {
                     NSApplication.shared.terminate(self)
                 }
             }
-        }
+        }   // DispatchQueue.main.async
         
 //        print("button_status: \(button_status)")
         if button_status {
-            // display summary of created, updated, and failed objects
+            // display summary of created, updated, and failed objects?
             if counters.count > 0 {
 //                print("summary:\n\(counters)")
 //                print("summary dict:\n\(summaryDict)")
@@ -6249,13 +6023,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // clear previous results
             counters.removeAll()
         }
-    }
-    
-    @IBAction func stopButton(_ sender: Any) {
-        WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
-        pref.stopMigration = true
-
-        goButtonEnabled(button_status: true)
     }
     
     // scale the delay when listing items with selective migrations based on the number of items
@@ -7098,21 +6865,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     // move history to logs - end
     
-    func mySpinner(spin: Bool) {
-        theSpinnerQ.async {
-            var theImageNo = 0
-            while spin {
-                DispatchQueue.main.async {
-                    self.mySpinner_ImageView.image = self.theImage[theImageNo]
-                    theImageNo += 1
-                    if theImageNo > 2 {
-                        theImageNo = 0
-                    }
-                }
-                usleep(300000)  // sleep 0.3 seconds
-            }
-        }
-    }
+//    func mySpinner(spin: Bool) {
+//        theSpinnerQ.async {
+//            var theImageNo = 0
+//            while spin {
+//                DispatchQueue.main.async {
+//                    self.mySpinner_ImageView.image = self.theImage[theImageNo]
+//                    theImageNo += 1
+//                    if theImageNo > 2 {
+//                        theImageNo = 0
+//                    }
+//                }
+//                usleep(300000)  // sleep 0.3 seconds
+//            }
+//        }
+//    }
     
     // script parameter label fix
     func parameterFix(theXML: String) -> String {
@@ -7219,14 +6986,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // read environment settings - end
     }
     
+    func stopButton(_ sender: Any) {
+        WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
+        pref.stopMigration = true
+
+        goButtonEnabled(button_status: true)
+    }
+    
     func saveSettings() {
         plistData                       = readSettings()
+        /*
+         // other VC - lnh
         plistData["source_jp_server"]   = source_jp_server_field.stringValue as Any?
         plistData["source_user"]        = storedSourceUser as Any?
         plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
         plistData["dest_user"]          = dest_user_field.stringValue as Any?
 //        plistData["maxHistory"]         = maxHistory as Any?
         plistData["storeCredentials"]   = storeCredentials_button.state as Any?
+         */
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
     }
     
@@ -7241,10 +7018,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                                 "saveTrimmedXmlScope":export.trimmedXmlScope]
         savePrefs(prefs: plistData)
         NotificationCenter.default.post(name: .exportOff, object: nil)
-        disableSource()
+//        disableSource()
     }
     
-    
+    /*
+     // other VC - lnh
     func disableSource() {
         if setting.fullGUI {
             DispatchQueue.main.async {
@@ -7257,6 +7035,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             }
         }
     }
+     */
     
     func savePrefs(prefs: [String:Any]) {
         plistData            = readSettings()
@@ -7504,7 +7283,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
             self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
             // general tab
-            self.allNone_general_button.state = NSControl.StateValue(rawValue: 0)
             self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
             self.building_button.state = NSControl.StateValue(rawValue: 0)
             self.categories_button.state = NSControl.StateValue(rawValue: 0)
@@ -7557,7 +7335,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     }
     //  extract the value between (different) tags - end
     
+    // add notification - run fn in SourceDestVC
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
+        NotificationCenter.default.post(name: .updateServerList, object: self)
+        /*
 //        if !(fileImport && serverList == "source_server_array") {
             var local_serverArray = theArray
             let positionInList = local_serverArray.firstIndex(of: url)
@@ -7592,6 +7373,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 self.destServerArray = local_serverArray
             default: break
             }
+        */
     }
     
     func urlToFqdn(serverUrl: String) -> String {
@@ -7606,6 +7388,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    /*
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
         self.selectiveListCleared = false
         switch sender.tag {
@@ -7641,6 +7424,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // see if we're migrating from files or a server
         _ = serverOrFiles()
     }
+     */
     
     func windowIsVisible(windowName: String) -> Bool {
         let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
@@ -7665,6 +7449,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         // see if we last migrated from files or a server
 //        print("entered serverOrFiles.")
         var sourceType = ""
+        /*
         DispatchQueue.main.async {
             if self.source_jp_server_field.stringValue != "" {
 //                print("prefix: \(self.source_jp_server_field.stringValue.prefix(4).lowercased())")
@@ -7688,6 +7473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                 }
             }
         }
+         */
         return(sourceType)
     }
     
@@ -7717,6 +7503,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         task.waitUntilExit()
         completion(status)
+    }
+    
+    func tabView(_ tabView: NSTabView, didSelect: NSTabViewItem?) {
+        userDefaults.set("\(didSelect!.label)", forKey: "activeTab")
     }
     
     // selective migration functions - start
@@ -7757,6 +7547,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
     override func viewDidAppear() {
         // set tab order
         // Use interface builder, right click a field and drag nextKeyView to the next
+        /*
+         
         source_jp_server_field.nextKeyView  = source_user_field
         source_user_field.nextKeyView       = source_pwd_field
         source_pwd_field.nextKeyView        = dest_jp_server_field
@@ -7767,6 +7559,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
         self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+         
         
         // display app version
         appVersion_TextField.stringValue = "v\(appInfo.version)"
@@ -7795,6 +7588,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             quit_button.image = NSImage(named: "quit_dark.png")!
             go_button.image = NSImage(named: "go_dark.png")!
         }
+         */
+        // display app version
+        appVersion_TextField.stringValue = "v\(appInfo.version)"
         
         let def_plist = Bundle.main.path(forResource: "settings", ofType: "plist")!
         var isDir: ObjCBool = true
@@ -7815,10 +7611,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         initVars()
         
     }   //viewDidAppear - end
-    
-    @objc func toggleExportOnly(_ notification: Notification) {
-        disableSource()
-    }
+//
+//    @objc func toggleExportOnly(_ notification: Notification) {
+//        disableSource()
+//    }
     
     var jamfpro: JamfPro?
     override func viewDidLoad() {
@@ -7826,6 +7622,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
 //        hardSetLdapId = false
 
 //        debug = true
+        NotificationCenter.default.addObserver(self, selector: #selector(showSummaryWindow(_:)), name: .showSummaryWindow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(showLogFolder(_:)), name: .showLogFolder, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(deleteMode(_:)), name: .deleteMode, object: nil)
         jamfpro = JamfPro(controller: self)
         // Do any additional setup after loading the view.
         // read maxConcurrentOperationCount setting
@@ -7835,6 +7634,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         
         if !hideGui {
             
+            activeTab_TabView.delegate           = self
+            
             selectiveFilter_TextField.delegate   = self
             selectiveFilter_TextField.wantsLayer = true
             selectiveFilter_TextField.isBordered = true
@@ -7842,84 +7643,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             selectiveFilter_TextField.layer?.cornerRadius = 0.0
             selectiveFilter_TextField.layer?.borderColor  = .black
             
-            siteMigrate_button.attributedTitle = NSMutableAttributedString(string: "Site", attributes: [NSAttributedString.Key.foregroundColor: NSColor.white, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 14)])
+            
+//            siteMigrate_button.attributedTitle = NSMutableAttributedString(string: "Site", attributes: [NSAttributedString.Key.foregroundColor: NSColor.white, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 14)])
 
-            let whichTab = userDefaults.object(forKey: "activeTab") as? String ?? "generalTab"
+            let whichTab = userDefaults.object(forKey: "activeTab") as? String ?? "General"
             setTab_fn(selectedTab: whichTab)
         
             // Set all checkboxes off
             resetAllCheckboxes()
             
-            source_jp_server_field.becomeFirstResponder()
+//            source_jp_server_field.becomeFirstResponder()
             go_button.isEnabled = true
             
-            theModeQ.async {
-                var isDir: ObjCBool = false
-                var isRed = false
-                
-                while true {
-                    if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-                        // clear selective list of items when changing from migration to delete mode
-                        DispatchQueue.main.async {
-                            self.clearSelectiveList()
-                        }
-                        
-                        DispatchQueue.main.async {
-                            // disable source server, username and password fields (to finish)
-                            if self.source_jp_server_field.isEnabled {
-                                self.source_jp_server_field.textColor   = NSColor.white
-                                self.source_jp_server_field.isEnabled   = false
-                                self.sourceServerList_button.isEnabled  = false
-                                self.source_user_field.isEnabled        = false
-                                self.source_pwd_field.isEnabled         = false
-                            }
-
-                            if isRed == false {
-                                // Set the text for the operation
-                                self.migrateOrRemove_TextField.stringValue = "--- Removing ---"
-                                self.migrateOrRemove_TextField.textColor = self.redText
-                                // Set the text for destination method
-                                self.destinationMethod_TextField.stringValue = "DELETE:"
-                                self.destinationMethod_TextField.textColor = self.yellowText
-                                isRed = true
-                            } else {
-                                self.migrateOrRemove_TextField.textColor = self.yellowText
-                                self.destinationMethod_TextField.textColor = self.redText
-                                isRed = false
-                            }
-                            // Set the text for destination method
-                            self.destinationMethod_TextField.stringValue = "DELETE:"
-                            if self.fileImport {
-                                self.fileImport = false
-                                self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
-    //                            self.importFiles_button.isEnabled = false
-                            }
-                        }
-                    } else {
-                        DispatchQueue.main.async {
-                            if !self.source_jp_server_field.isEnabled {
-                                if !self.isDarkMode {
-                                    self.source_jp_server_field.textColor   = NSColor.black
-                                } else {
-                                    self.source_jp_server_field.textColor   = NSColor.white
-                                }
-                                self.source_jp_server_field.isEnabled   = true
-                                self.sourceServerList_button.isEnabled  = true
-                                self.source_user_field.isEnabled        = true
-                                self.source_pwd_field.isEnabled         = true
-                                self.selectiveListCleared               = false
-                            }
-
-                            self.migrateOrRemove_TextField.stringValue = "Migrate"
-                            self.migrateOrRemove_TextField.textColor = self.whiteText
-                            self.destinationMethod_TextField.stringValue = "SEND:"
-                            self.destinationMethod_TextField.textColor = self.whiteText
-                            isRed = false
-                        }
-                    }
-                    usleep(500000)  // 0.5 seconds
-                }   // while true - end
-            }
             // bring app to foreground
             NSApplication.shared.activate(ignoringOtherApps: true)
         }
@@ -7986,6 +7721,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             // read environment settings from plist - start
             plistData = readSettings()
 
+            /*
+             
             if plistData["source_jp_server"] as? String != nil {
                 source_jp_server = plistData["source_jp_server"] as! String
                 
@@ -8043,6 +7780,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
                 }
             }
+             */
             // settings introduced with v2.8.0
             // read scope settings - start
             if plistData["scope"] != nil {
@@ -8158,7 +7896,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
                     export.saveOnly                   = false
                     xmlPrefOptions["saveOnly"] = export.saveOnly
                 }
-                disableSource()
+//                disableSource()
                 
                 if xmlPrefOptions["saveRawXmlScope"] == nil {
                     xmlPrefOptions["saveRawXmlScope"] = true
@@ -8187,10 +7925,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
             _ = serverOrFiles()
         } else {
             didRun = true
-            source_jp_server = JamfProServer.source
-            dest_jp_server   = JamfProServer.destination
+            // other VC - lnh
+//            source_jp_server = JamfProServer.source
+//            dest_jp_server   = JamfProServer.destination
         }
 
+        /*
         // check for stored passwords - start
         if (source_jp_server != "") {
             fetchPassword(whichServer: "source", url: source_jp_server)
@@ -8201,10 +7941,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         if (storedSourcePwd == "") || (storedDestPwd == "") {
             self.validCreds = false
         }
-//        if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
-//            self.validCreds = false
-//        }
         // check for stored passwords - end
+         */
         
         let appVersion = appInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
@@ -8216,8 +7954,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     
+    // Log Folder - start
+    @objc func showLogFolder(_ notification: Notification) {
+        isDir = true
+        if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
+            NSWorkspace.shared.openFile(logPath!)
+        } else {
+            alert_dialog(header: "Alert", message: "There are currently no log files to display.")
+        }
+    }
+    // Log Folder - end
     // Summary Window - start
-    @IBAction func showSummaryWindow(_ sender: AnyObject) {
+    @objc func showSummaryWindow(_ notification: Notification) {
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let summaryWindowController = storyboard.instantiateController(withIdentifier: "Summary Window Controller") as! NSWindowController
         if let summaryWindow = summaryWindowController.window {
@@ -8232,6 +7980,97 @@ class ViewController: NSViewController, URLSessionDelegate, NSTableViewDelegate,
         }
     }
     // Summary Window - end
+    @objc func deleteMode(_ notification: Notification) {
+        var isDir: ObjCBool = false
+        var isRed           = false
+
+        resetAllCheckboxes()
+        clearProcessingFields()
+        self.generalSectionToMigrate_button.selectItem(at: 0)
+        self.sectionToMigrate_button.selectItem(at: 0)
+        self.iOSsectionToMigrate_button.selectItem(at: 0)
+        self.selectiveFilter_TextField.stringValue = ""
+        
+        DispatchQueue.main.async {
+            self.clearSelectiveList()
+        }
+        
+        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }
+            do {
+                try fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
+                sourceDataArray.removeAll()
+                srcSrvTableView.stringValue = ""
+                srcSrvTableView.reloadData()
+                selectiveListCleared = true
+                
+                _ = serverOrFiles()
+                
+                NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
+                
+                DispatchQueue.main.async { [self] in
+                    migrateOrRemove_TextField.stringValue = "Migrate"
+//                    migrateOrRemove_TextField.textColor = self.whiteText
+                    destinationMethod_TextField.stringValue = "SEND:"
+//                    destinationMethod_TextField.textColor = self.whiteText
+                    isRed = false
+                    selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
+                }
+                wipeData.on = false
+            } catch let error as NSError {
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete file! Something went wrong: \(error)\n") }
+            }
+        } else {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "Enabling delete mode to removing data from destination server - \(dest_jp_server_field.stringValue)\n") }
+            fm.createFile(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", contents: nil)
+            
+            NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
+
+            DispatchQueue.main.async { [self] in
+                wipeData.on = true
+                selectiveTabelHeader_textview.stringValue = "Select object(s) to remove from the destination"
+                setting.migrateDependencies        = false
+                migrateDependencies.state     = NSControl.StateValue(rawValue: 0)
+                migrateDependencies.isHidden  = true
+                if srcSrvTableView.isEnabled {
+                    sourceDataArray.removeAll()
+                    srcSrvTableView.stringValue = ""
+                    srcSrvTableView.reloadData()
+                    selectiveListCleared = true
+                }
+                // Set the text for destination method
+                destinationMethod_TextField.stringValue = "DELETE:"
+                
+                theModeQ.async { [self] in
+                    while true {
+                        if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+                            break
+                        }
+                        DispatchQueue.main.async { [self] in
+                            if isRed == false {
+                                // Set the text for the operation
+                                migrateOrRemove_TextField.stringValue = "--- Removing ---"
+                                migrateOrRemove_TextField.textColor = redText
+                                // Set the text for destination method
+                                destinationMethod_TextField.stringValue = "DELETE:"
+                                destinationMethod_TextField.textColor = yellowText
+                                isRed = true
+                            } else {
+                                migrateOrRemove_TextField.textColor = yellowText
+                                destinationMethod_TextField.textColor = redText
+                                isRed = false
+                            }
+                        }
+                        usleep(500000)  // 0.5 seconds
+                    }
+                
+                }
+            }   // DispatchQueue.main.async - end
+            
+            
+        }
+    }
+    
     func summaryXml(theSummary: Dictionary<String, Dictionary<String,Int>>, theSummaryDetail: Dictionary<String, Dictionary<String,[String]>>) -> String {
         var cellDetails = ""
         var summaryResult = "<!DOCTYPE html>" +
@@ -8441,4 +8280,7 @@ extension String {
 
 extension Notification.Name {
     public static let saveOnlyButtonToggle = Notification.Name("toggleExportOnly")
+    public static let showSummaryWindow    = Notification.Name("showSummaryWindow")
+    public static let showLogFolder        = Notification.Name("showLogFolder")
+    public static let deleteMode           = Notification.Name("deleteMode")
 }

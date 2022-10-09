@@ -12,10 +12,20 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    let vc           = ViewController()
+//   var vc: ViewController?
     let userDefaults = UserDefaults.standard
     
     var prefWindowController: NSWindowController?
+    
+    @IBAction func showSummaryWindow(_ sender: AnyObject) {
+        NotificationCenter.default.post(name: .showSummaryWindow, object: self)
+    }
+    @IBAction func showLogFolder(_ sender: AnyObject) {
+        NotificationCenter.default.post(name: .showLogFolder, object: self)
+    }
+    @IBAction func deleteMode(_ sender: AnyObject) {
+        NotificationCenter.default.post(name: .deleteMode, object: self)
+    }
 
     // allow access to previously selected folder - start
     var folderPath: URL? {
