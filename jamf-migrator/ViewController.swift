@@ -787,14 +787,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func Go(sender: String) {
 //        print("go (before readSettings) scopeOptions: \(String(describing: scopeOptions))\n")
-        if wipeData.on && export.saveOnly {
-            _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
-            return
-        }
         
         History.startTime = Date()
         
         if setting.fullGUI {
+            if wipeData.on && export.saveOnly {
+                _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
+                return
+            }
+            if wipeData.on {
+                let deleteResponse = Alert().display(header: "Attention:", message: "You are about remove data from \n\(JamfProServer.destination),\nare you sure you with to continue?", secondButton: "Cancel")
+                print("deleteResponse: \(deleteResponse)")
+                if deleteResponse == "Cancel" {
+                    rmDELETE()
+                    return
+                }
+            }
             plistData             = readSettings()
             scopeOptions          = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
             xmlPrefOptions        = plistData["xml"] as! Dictionary<String,Bool>
@@ -902,7 +910,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // credentials were entered check - start
             // don't check if we're importing files
 //            if !fileImport {
-            if JamfProServer.importFiles == 0 {
+            if JamfProServer.importFiles == 0 && !wipeData.on {
 //                if (source_user_field.stringValue == "" || source_pwd_field.stringValue == "") && !wipeData.on {
                 if (JamfProServer.sourceUser == "" || JamfProServer.sourcePwd == "") && !wipeData.on {
                     alert_dialog(header: "Alert", message: "Must provide both a username and password for the source server.")
@@ -4601,7 +4609,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
             
-            removeDestUrl = "\(self.dest_jp_server_field.stringValue)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
+            removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
             if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
             removeDestUrl = removeDestUrl.urlFix
 //            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -6944,49 +6952,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         goButtonEnabled(button_status: true)
     }
     
-    func saveSettings() {
-        plistData                       = readSettings()
-        /*
-         // other VC - lnh
-        plistData["source_jp_server"]   = source_jp_server_field.stringValue as Any?
-        plistData["source_user"]        = storedSourceUser as Any?
-        plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
-        plistData["dest_user"]          = dest_user_field.stringValue as Any?
-//        plistData["maxHistory"]         = maxHistory as Any?
-        plistData["storeCredentials"]   = storeCredentials_button.state as Any?
-         */
+    func saveSettings(settings: [String:Any]) {
+        plistData                       = settings
+
+//        plistData["source_jp_server"]   = JamfProServer.source as Any?
+//        plistData["source_user"]        = JamfProServer.sourceUser as Any?
+//        plistData["dest_jp_server"]     = JamfProServer.destination as Any?
+//        plistData["dest_user"]          = JamfProServer.destUser as Any?
+//        plistData["storeCredentials"]   = JamfProServer.storeCreds as Any?
+
+        print("[saveSettings] save plistData: \(String(describing: plistData["xml"]))")
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
     }
-    
-    @IBAction func disableExportOnly_action(_ sender: Any) {
-        export.saveOnly       = false
-        export.saveRawXml     = false
-        export.saveTrimmedXml = false
-        plistData["xml"] = ["saveRawXml":export.saveRawXml,
-                                "saveTrimmedXml":export.saveTrimmedXml,
-                                "saveOnly":export.saveOnly,
-                                "saveRawXmlScope":export.rawXmlScope,
-                                "saveTrimmedXmlScope":export.trimmedXmlScope]
-        savePrefs(prefs: plistData)
-        NotificationCenter.default.post(name: .exportOff, object: nil)
-//        disableSource()
-    }
-    
-    /*
-     // other VC - lnh
-    func disableSource() {
-        if setting.fullGUI {
-            DispatchQueue.main.async {
-                self.dest_jp_server_field.isEnabled     = !export.saveOnly
-                self.destServerList_button.isEnabled    = !export.saveOnly
-                self.dest_user_field.isEnabled          = !export.saveOnly
-                self.dest_pwd_field.isEnabled           = !export.saveOnly
-                self.siteMigrate_button.isEnabled       = !export.saveOnly
-                self.disableExportOnly_button.isHidden  = !export.saveOnly
-            }
-        }
-    }
-     */
     
     func savePrefs(prefs: [String:Any]) {
         plistData            = readSettings()
@@ -7021,8 +6998,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             saveRawXmlScope = false
         }
         NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
-//      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
+        print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
     }
+    
+//    @IBAction func disableExportOnly_action(_ sender: Any) {
+//        export.saveOnly       = false
+//        export.saveRawXml     = false
+//        export.saveTrimmedXml = false
+//        plistData["xml"] = ["saveRawXml":export.saveRawXml,
+//                                "saveTrimmedXml":export.saveTrimmedXml,
+//                                "saveOnly":export.saveOnly,
+//                                "saveRawXmlScope":export.rawXmlScope,
+//                                "saveTrimmedXmlScope":export.trimmedXmlScope]
+//        savePrefs(prefs: plistData)
+//        NotificationCenter.default.post(name: .exportOff, object: nil)
+////        disableSource()
+//    }
+    
+    /*
+     // other VC - lnh
+    func disableSource() {
+        if setting.fullGUI {
+            DispatchQueue.main.async {
+                self.dest_jp_server_field.isEnabled     = !export.saveOnly
+                self.destServerList_button.isEnabled    = !export.saveOnly
+                self.dest_user_field.isEnabled          = !export.saveOnly
+                self.dest_pwd_field.isEnabled           = !export.saveOnly
+                self.siteMigrate_button.isEnabled       = !export.saveOnly
+                self.disableExportOnly_button.isHidden  = !export.saveOnly
+            }
+        }
+    }
+     */
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
             DispatchQueue.main.async {
@@ -7573,11 +7580,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        hardSetLdapId = false
 
 //        debug = true
+        
+        // Do any additional setup after loading the view.
+        print("[ViewController] viewDidLoad")
         NotificationCenter.default.addObserver(self, selector: #selector(showSummaryWindow(_:)), name: .showSummaryWindow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showLogFolder(_:)), name: .showLogFolder, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode(_:)), name: .deleteMode, object: nil)
         jamfpro = JamfPro(controller: self)
-        // Do any additional setup after loading the view.
+        
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()
 
@@ -7619,12 +7629,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-        saveSettings()
+        plistData = readSettings()
+        saveSettings(settings: plistData)
         logCleanup()
     }
     
     func initVars() {
-        
+        /*
         // create log directory if missing - start
         if !fm.fileExists(atPath: logPath!) {
             do {
@@ -7656,7 +7667,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
             userDefaults.synchronize()
         }
-        
+        */
         if setting.fullGUI {
             if !FileManager.default.fileExists(atPath: plistPath!) {
                 do {
@@ -7732,7 +7743,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             }
              */
-            // settings introduced with v2.8.0
+            
             // read scope settings - start
             if plistData["scope"] != nil {
                 scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
@@ -7933,7 +7944,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // Summary Window - end
     @objc func deleteMode(_ notification: Notification) {
         var isDir: ObjCBool = false
-        var isRed           = false
+//        var isRed           = false
 
         resetAllCheckboxes()
         clearProcessingFields()
@@ -7964,7 +7975,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                    migrateOrRemove_TextField.textColor = self.whiteText
                     destinationMethod_TextField.stringValue = "SEND:"
 //                    destinationMethod_TextField.textColor = self.whiteText
-                    isRed = false
+//                    isRed = false
                     selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
                 }
                 wipeData.on = false
@@ -7994,11 +8005,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 // Set the text for destination method
                 destinationMethod_TextField.stringValue = "DELETE:"
                 
-//                theModeQ.async { [self] in
-//                    while true {
-//                        if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
-//                            break
-//                        }
+                theModeQ.async { [self] in
+                    while true {
+                        if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
+                            DispatchQueue.main.async { [self] in
+                                NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
+                                migrateOrRemove_TextField.stringValue = "Migrate"
+                                destinationMethod_TextField.stringValue = "SEND:"
+                            }
+                            break
+                        }
 //                        DispatchQueue.main.async { [self] in
 //                            if isRed == false {
 //                                // Set the text for the operation
@@ -8014,10 +8030,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                isRed = false
 //                            }
 //                        }
-//                        usleep(500000)  // 0.5 seconds
-//                    }
-//
-//                }
+                        usleep(500000)  // 0.5 seconds
+                    }
+
+                }
             }   // DispatchQueue.main.async - end
             
             

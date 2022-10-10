@@ -12,6 +12,8 @@ import CoreFoundation
 
 class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
+    let userDefaults = UserDefaults.standard
+    
     @IBOutlet weak var copyScopeOCP_button: NSButton!       // os x config profiles
     @IBOutlet weak var copyScopeMA_button: NSButton!        // mac applications
     @IBOutlet weak var copyScopeRS_button: NSButton!        // restricted software
@@ -106,7 +108,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     let Creds2           = Credentials2()
     var credentialsArray = [String]()
     let vc               = ViewController()
-    let userDefaults     = UserDefaults.standard
     var plistData:[String:Any] = [:]  //our server/username data
     
     // default scope preferences
@@ -204,8 +205,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                     "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
                                     "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
                                     "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+            
             vc.savePrefs(prefs: plistData)
         }
+//        userDefaults.set(convertToBool(state: saveRawXml_button.state.rawValue), forKey: "saveRawXml")
+//        userDefaults.set(convertToBool(state: saveTrimmedXml_button.state.rawValue), forKey: "saveTrimmedXml")
+//        userDefaults.set(convertToBool(state: saveOnly_button.state.rawValue), forKey: "saveOnly")
+//        userDefaults.set(convertToBool(state: saveRawXmlScope_button.state.rawValue), forKey: "saveRawXmlScope")
+//        userDefaults.set(convertToBool(state: saveTrimmedXmlScope_button.state.rawValue), forKey: "saveTrimmedXmlScope")
+//        userDefaults.synchronize()
         NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)
     }
     
@@ -357,6 +365,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         
         plistData = vc.readSettings()
+        print("[preferences] read plistData: \(plistData["xml"])")
         
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
@@ -413,7 +422,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                       "scg":["copy":true],
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
-                vc.saveSettings()
+                vc.saveSettings(settings: plistData)
             }
         } else {
             // initilize new settings
@@ -426,11 +435,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
-            vc.saveSettings()
+            vc.saveSettings(settings: plistData)
         }
         // read xml settings - start
         if plistData["xml"] != nil {
-            xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+            xmlPrefOptions       = plistData["xml"] as! [String:Bool]
             saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
             saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
             saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
@@ -443,7 +452,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                 "saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
-            vc.saveSettings()
+            vc.saveSettings(settings: plistData)
+//            userDefaults.set(false, forKey: "saveRawXml")
+//            userDefaults.set(false, forKey: "saveTrimmedXml")
+//            userDefaults.set(false, forKey: "saveOnly")
+//            userDefaults.set(true, forKey: "saveRawXmlScope")
+//            userDefaults.set(true, forKey: "saveTrimmedXmlScope")
+//            userDefaults.synchronize()
         }
         // read xml settings - end
 
