@@ -51,8 +51,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var modeTab_TabView: NSTabView!
     
     // Import file variables
-//    @IBOutlet weak var importFiles_button: NSButton!
-//    @IBOutlet weak var browseFiles_button: NSButton!
     var exportedFilesUrl = URL(string: "")
     var xportFolderPath: URL? {
         didSet {
@@ -342,11 +340,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var isDir: ObjCBool = false
     
     // command line switches
-//    var debug           = false
     var hideGui             = false
-//    var export.saveOnly     = false
-//    var saveRawXml          = false
-//    var saveTrimmedXml      = false
     var saveRawXmlScope     = true
     var saveTrimmedXmlScope = true
     
@@ -461,11 +455,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var totalCompleted = 0
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
-//    @IBOutlet weak var mySpinner_ImageView: NSImageView!
-//    var theImage:[NSImage] = [NSImage(named: "0.png")!,
-//                              NSImage(named: "1.png")!,
-//                              NSImage(named: "2.png")!]
-//    var showSpinner = false
     
     // group counters
     var smartCount      = 0
@@ -517,36 +506,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var URLisValid: Bool      = true
     var processGroup          = DispatchGroup()
     
-//    var tabImage:[NSImage] = [NSImage(named: "general.png")!,
-//                              NSImage(named: "general_active.png")!,
-//                              NSImage(named: "macos.png")!,
-//                              NSImage(named: "macos_active.png")!,
-//                              NSImage(named: "ios.png")!,
-//                              NSImage(named: "ios_active.png")!,
-//                              NSImage(named: "selective.png")!,
-//                              NSImage(named: "selective_active.png")!]
-    
-//    @IBOutlet weak var generalTab_NSButton: NSButton!
-//    @IBOutlet weak var macosTab_NSButton: NSButton!
-//    @IBOutlet weak var iosTab_NSButton: NSButton!
-//    @IBOutlet weak var selectiveTab_NSButton: NSButton!
-    
-    
-    /*
-    @IBAction func selectTab_fn(_ sender: NSButton) {
-        let whichTab = (sender.identifier?.rawValue)!
-        switch whichTab {
-        case "generalTab":
-            setTab_fn(selectedTab: "General")
-        case "macosTab":
-            setTab_fn(selectedTab: "macOS")
-        case "iosTab":
-            setTab_fn(selectedTab: "iOS")
-        default:
-            setTab_fn(selectedTab: "Selective")
-        }
-    }
-     */
      func setTab_fn(selectedTab: String) {
          DispatchQueue.main.async {
              switch selectedTab {
@@ -702,11 +661,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
 
-//        if fileImport {
-//            alert_dialog(header: "Attention:", message: "Selective migration while importing files is not yet available.")
-////            return
-//        }
-        
         pref.stopMigration = false
 
         inactiveTabDisable(activeTab: "selective")
@@ -812,6 +766,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let deleteResponse = Alert().display(header: "Attention:", message: "You are about remove data from \n\(JamfProServer.destination),\nare you sure you with to continue?", secondButton: "Cancel")
                 if deleteResponse == "Cancel" {
                     rmDELETE()
+                    selectiveListCleared = false
+                    clearSelectiveList()
+                    clearProcessingFields()
+                    resetAllCheckboxes()
+                    goButtonEnabled(button_status: true)
                     return
                 }
             }
@@ -903,12 +862,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 migrationMode               = "bulk"
                 setting.migrateDependencies = false
             }
-            
-//            if fileImport && migrationMode == "selective" {
-//                print("[go] fileImport && migrationMode == 'selective'")    // this printed
-//                alert_dialog(header: "Attention", message: "Selective mode is currently not available when importing files")
-////                return
-//            }
         } else {
             migrationMode = "bulk"
         }
@@ -979,20 +932,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         // server is reachable - end
                         
                         if setting.fullGUI {
-                            // set site, if option selected - start
                             if JamfProServer.toSite {
                                 destinationSite = JamfProServer.destSite
                                 itemToSite = true
                             } else {
                                 itemToSite = false
                             }
-//                             if siteMigrate_button.state.rawValue == 1 {
-//                                 destinationSite = availableSites_button.selectedItem!.title
-//                                 itemToSite = true
-//                             } else {
-//                                 itemToSite = false
-//                             }
-                            // set site, if option selected - end
                         }
                         
                         // don't set if we're importing files
@@ -1007,11 +952,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                         // set credentials - end
                         
-//                        var sourceURL      = URL(string: "")
-//                        var destinationURL = URL(string: "")
-                        
                         // check authentication - start
-//                        JamfPro().getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
                         let localsource = (JamfProServer.importFiles == 1) ? true:false
                         jamfpro!.getToken(whichServer: "source", serverUrl: self.source_jp_server, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
                             (authResult: (Int,String)) in
@@ -1769,10 +1710,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).\n") }
                                          }
                                     }
-//                                    self.processFiles(endpoint: selectedEndpoint, fileCount: 1, itemsDict: [selectedObject: self.availableFilesToMigDict[fileToMigrate!]!]) {
-//                                         (result: String) in
-//                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).\n") }
-//                                     }
                                 }
                                     
                                 // call next item
@@ -3283,11 +3220,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-        // removed lnh 20220907
-//        if !fileImport {
-//            completion("")
-//        }
-        
         var PostXML       = Xml
         var knownEndpoint = true
 
@@ -3309,16 +3241,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         // strip out <id> tag from XML
-//        switch endpoint {
-//        case "computerconfigurations":
-//            // parent computerconfigurations reference child configurations by id not name
-//            let regexComp = try! NSRegularExpression(pattern: "<general><id>(.*?)</id>", options:.caseInsensitive)
-//            PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<general>")
-//        default:
-            for xmlTag in ["id"] {
-                PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
-            }
-//        }
+        for xmlTag in ["id"] {
+            PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
+        }
         
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, restrictedsoftware... - start
         switch endpoint {
@@ -3411,47 +3336,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 for xmlTag in ["full_name", "phone_number", "email_address"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
-             /*
-            case "computerconfigurations":
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] cleaning up computerconfigurations - verbose\n") }
-                // remove password from XML, since it doesn't work on the new server
-                let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=(.*?)</password_sha256>", options:.caseInsensitive)
-                PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
                 
-                for (item,itemIds) in self.packages_id_map {
-                    let sourceId = itemIds["sourceId"]
-                    let destId = itemIds["destId"]
-                    let regexComp = try! NSRegularExpression(pattern: "<package><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
-                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<package><id>\(destId ?? 0)</id><name>\(item)</name>")
-                }
-                for (item,itemIds) in self.scripts_id_map {
-                    let sourceId = itemIds["sourceId"]
-                    let destId = itemIds["destId"]
-                    let regexComp = try! NSRegularExpression(pattern: "<script><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
-                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<script><id>\(destId ?? 0)</id><name>\(item)</name>")
-                }
-                for (item,itemIds) in self.printers_id_map {
-                    let sourceId = itemIds["sourceId"]
-                    let destId = itemIds["destId"]
-                    let regexComp = try! NSRegularExpression(pattern: "<printer><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
-                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<printer><id>\(destId ?? 0)</id><name>\(item)</name>")
-                }
-                for (item,itemIds) in self.bindings_id_map {
-                    let sourceId = itemIds["sourceId"]
-                    let destId = itemIds["destId"]
-                    let regexComp = try! NSRegularExpression(pattern: "<directory_bindings><id>\(sourceId ?? 0)</id><name>\(item)</name>", options:.caseInsensitive)
-                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<directory_bindings><id>\(destId ?? 0)</id><name>\(item)</name>")
-                }
-                if self.orphanIds.firstIndex(of: "\(endpointID)") != nil {
-                    let regexComp = try! NSRegularExpression(pattern: "<type>Smart<type>", options:.caseInsensitive)
-                    PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<type>Standard<type>")
-                    let regexComp2 = try! NSRegularExpression(pattern: "<parent>(.*?)</parent>", options:.caseInsensitive)
-                    PostXML = regexComp2.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
-                }
-                for xmlTag in ["script_contents", "script_contents_encoded", "ppd_contents"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
-                }
-            */
             case "scripts":
                 for xmlTag in ["script_contents_encoded"] {
                     PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
@@ -4338,12 +4223,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.goButtonEnabled(button_status: true)
 //                    print("Done - CreateEndpoints")
                 }
-                /*
-                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                }
-                */
                 return
             }
             
@@ -4424,142 +4303,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
                                 self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                             }
+                        
+                                                        
+                            self.POSTsuccessCount += 1
+                            
+//                            print("endpointType: \(endpointType)")
+//                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
+                            
+                            if let _ = self.progressCountArray["\(endpointType)"] {
+                                self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
+                            }
+                            
+                            let localTmp = (self.counters[endpointType]?["\(apiMethod)"])!
+    //                        print("localTmp: \(localTmp)")
+                            self.counters[endpointType]?["\(apiMethod)"] = localTmp + 1
                             
                             
-//                            if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                
-                                self.POSTsuccessCount += 1
-                                
-    //                            print("endpointType: \(endpointType)")
-    //                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
-                                
-                                if let _ = self.progressCountArray["\(endpointType)"] {
-                                    self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
-                                }
-                                
-                                let localTmp = (self.counters[endpointType]?["\(apiMethod)"])!
-        //                        print("localTmp: \(localTmp)")
-                                self.counters[endpointType]?["\(apiMethod)"] = localTmp + 1
-                                
-                                
-                                if var summaryArray = self.summaryDict[endpointType]?["\(apiMethod)"] {
-                                    summaryArray.append("\(endPointJSON["name"] ?? "unknown")")
-                                    self.summaryDict[endpointType]?["\(apiMethod)"] = summaryArray
-                                }
-                                /*
-                                // currently there is no way to upload mac app store icons; no api endpoint
-                                // removed check for those -  || (endpointType == "macapplications")
-                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                                }
-                                */
-//                            }
+                            if var summaryArray = self.summaryDict[endpointType]?["\(apiMethod)"] {
+                                summaryArray.append("\(endPointJSON["name"] ?? "unknown")")
+                                self.summaryDict[endpointType]?["\(apiMethod)"] = summaryArray
+                            }
                             /*
-                            else {
-                                // create failed
-
-                                self.labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            
-                                // Write xml for degugging - start
-                                let errorMsg = self.tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
-                                var localErrorMsg = ""
-
-                                errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(self.tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
-                                
-                                // Write xml for degugging - end
-                                
-                                if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
-                                    whichError = "category"
-                                } else {
-                                    whichError = errorMsg
-                                }
-                                
-                                // retry computers with dublicate serial or MAC - start
-                                switch whichError {
-                                case "Duplicate serial number", "Duplicate MAC address":
-                                    if !retry {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address.\n")
-                                        var tmp_endPointXML = endPointXML
-                                        for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
-                                            tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                        }
-                                        self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                            (result: String) in
-                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
-                                        }
-                                    } else {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address failed.\n")
-                                    }
-                                case "category":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category.\n")
-                                    var tmp_endPointXML = endPointXML
-                                    for xmlTag in ["category"] {
-                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                    }
-                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                        (result: String) in
-                                    }
-                                //    self.postCount -= 1
-                               //     return
-                                case "Problem with department in location":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department.\n")
-                                    var tmp_endPointXML = endPointXML
-                                    for xmlTag in ["department"] {
-                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                    }
-                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                        (result: String) in
-                                    }
-                                //    self.postCount -= 1
-                                //    return
-                                case "Problem with building in location":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building.\n")
-                                    var tmp_endPointXML = endPointXML
-                                    for xmlTag in ["building"] {
-                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                    }
-                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                        (result: String) in
-                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
-                                    }
-
-                                // retry network segment without distribution point
-                                case "Problem in assignment to distribution point":
-                                    WriteToLog().message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point.\n")
-                                    var tmp_endPointXML = endPointXML
-                                    for xmlTag in ["distribution_point", "url"] {
-                                        tmp_endPointXML = self.rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
-                                    }
-                                    self.CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: (endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                        (result: String) in
-                                        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
-                                    }
-
-                                default:
-                                    WriteToLog().message(stringOfText: "[CreateEndpoints2] [\(localEndPointType)] \(self.getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
-                                    
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2]  ---------- xml of failed upload ----------\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] \(endPointXML)\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] ---------- status code ----------\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] \(httpResponse.statusCode)\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] ---------- response data ----------\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] \n\(responseData)\n") }
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] ---------- response data ----------\n\n") }
-                                    // 400 - likely the format of the xml is incorrect or wrong endpoint
-                                    // 401 - wrong username and/or password
-                                    // 409 - unable to create object; already exists or data missing or xml error
-                                    
-                                    // update global counters
-                                    let localTmp = (self.counters[endpointType]?["fail"])!
-                                    self.counters[endpointType]?["fail"] = localTmp + 1
-                                    if var summaryArray = self.summaryDict[endpointType]?["fail"] {
-                                        summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
-                                        self.summaryDict[endpointType]?["fail"] = summaryArray
-                                    }
-                                }
-                            }   // create failed - end
+                            // currently there is no way to upload mac app store icons; no api endpoint
+                            // removed check for those -  || (endpointType == "macapplications")
+                            if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                                sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                                self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                            }
                             */
 
                             totalCreated   = self.counters[endpointType]?["create"] ?? 0
@@ -5612,95 +5382,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         setting.migrateDependencies = migrateDependencies.state.rawValue == 1 ? true:false
     }
     
-    /*
-    @IBAction func migrateToSite(_ sender: Any) {
-        if siteMigrate_button.state.rawValue == 1 {
-            if dest_jp_server_field.stringValue == "" {
-                Alert().display(header: "Attention", message: "Destination URL is required", secondButton: "")
-                return
-            }
-            if self.dest_user_field.stringValue == "" || self.dest_pwd_field.stringValue == "" {
-                Alert().display(header: "Attention", message: "Credentials for the destination server are required", secondButton: "")
-                return
-            }
-            
-            itemToSite = true
-            availableSites_button.removeAllItems()
-            
-            self.destCreds = "\(self.dest_user_field.stringValue):\(self.dest_pwd_field.stringValue)"
-            self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
-
-            DispatchQueue.main.async {
-                self.siteMigrate_button.isEnabled = false
-                self.sitesSpinner_ProgressIndicator.startAnimation(self)
-            }
-            
-            jamfpro!.getToken(whichServer: "destination", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
-                (authResult: (Int,String)) in
-                let (authStatusCode, _) = authResult
-                print("authResult: \(authResult)")
-
-                if pref.httpSuccess.contains(authStatusCode) {
-                    Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
-                        (result: (Int,[String])) in
-                        let (httpStatus, destSitesArray) = result
-                        if pref.httpSuccess.contains(httpStatus) {
-                            if destSitesArray.count == 0 {destinationLabel_TextField.stringValue = "Site Name"
-                                // no sites found - allow migration from a site to none
-                                availableSites_button.addItems(withTitles: ["None"])
-                            }
-                            self.destinationLabel_TextField.stringValue = "Site Name"
-                            self.availableSites_button.addItems(withTitles: ["None"])
-                            for theSite in destSitesArray {
-                                self.availableSites_button.addItems(withTitles: [theSite])
-                            }
-                            self.availableSites_button.isEnabled = true
-                            
-                            DispatchQueue.main.async {
-                                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                                self.siteMigrate_button.isEnabled = true
-                            }
-                        } else {
-                            self.destinationLabel_TextField.stringValue = "Destination"
-                            self.availableSites_button.isEnabled = false
-                            self.destinationSite = ""
-                            itemToSite = false
-                            DispatchQueue.main.async {
-                                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                                self.siteMigrate_button.isEnabled = true
-                                self.siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
-                            }
-                        }
-                    }
-                } else {
-                    print("[sites fn] failed to auth")
-                    self.destinationLabel_TextField.stringValue = "Destination"
-                    self.availableSites_button.isEnabled = false
-                    self.destinationSite = ""
-                    itemToSite = false
-                    DispatchQueue.main.async {
-                        self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                        self.siteMigrate_button.isEnabled = true
-                        self.siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
-                    }
-                }
-            }
-                
-        } else {
-            destinationLabel_TextField.stringValue = "Destination"
-            self.availableSites_button.isEnabled = false
-            self.availableSites_button.removeAllItems()
-            destinationSite = ""
-            itemToSite = false
-            DispatchQueue.main.async {
-                self.sitesSpinner_ProgressIndicator.stopAnimation(self)
-                self.siteMigrate_button.isEnabled = true
-            }
-        }
-        
-    }
-     */
-
     //==================================== Utility functions ====================================
     
     func activeTab(fn: String) -> String {
@@ -5861,65 +5542,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
   
         return newXML
     }
-    
-    /*
-    func fetchPassword(whichServer: String, url: String) {
-//      print("fetchPassword")
-        let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
-        
-        if credentialsArray.count == 2 {
-            if whichServer == "source" {
-                if (url != "") {
-                    if setting.fullGUI {
-                        source_user_field.stringValue = credentialsArray[0]
-                        source_pwd_field.stringValue  = credentialsArray[1]
-                        self.storedSourceUser         = credentialsArray[0]
-                        self.storedSourcePwd          = credentialsArray[1]
-                    } else {
-                        source_user = credentialsArray[0]
-                        source_pass = credentialsArray[1]
-                    }
-                }
-            } else {
-                if (url != "") {
-                    if setting.fullGUI {
-                        dest_user_field.stringValue = credentialsArray[0]
-                        dest_pwd_field.stringValue  = credentialsArray[1]
-                        self.storedDestUser         = credentialsArray[0]
-                        self.storedDestPwd          = credentialsArray[1]
-                    }
-                    dest_user = credentialsArray[0]
-                    dest_pass = credentialsArray[1]
-                } else {
-                    if setting.fullGUI {
-                        dest_pwd_field.stringValue = ""
-                        if source_pwd_field.stringValue != "" {
-                            dest_pwd_field.becomeFirstResponder()
-                        }
-                    }
-                }
-            }   // if whichServer - end
-        } else {
-            // credentials not found - blank out username / password fields
-            if setting.fullGUI {
-                if whichServer == "source" {
-                    source_user_field.stringValue = ""
-                    source_pwd_field.stringValue = ""
-                    self.storedSourceUser = ""
-                    source_user_field.becomeFirstResponder()
-                } else {
-                    dest_user_field.stringValue = ""
-                    dest_pwd_field.stringValue = ""
-                    self.storedSourceUser = ""
-                    dest_user_field.becomeFirstResponder()
-                }
-            } else {
-                WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
-                NSApplication.shared.terminate(self)
-            }
-        }
-    }
-     */
     
     func goButtonEnabled(button_status: Bool) {
         var local_button_status = button_status
@@ -6890,22 +6512,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     // move history to logs - end
-    
-//    func mySpinner(spin: Bool) {
-//        theSpinnerQ.async {
-//            var theImageNo = 0
-//            while spin {
-//                DispatchQueue.main.async {
-//                    self.mySpinner_ImageView.image = self.theImage[theImageNo]
-//                    theImageNo += 1
-//                    if theImageNo > 2 {
-//                        theImageNo = 0
-//                    }
-//                }
-//                usleep(300000)  // sleep 0.3 seconds
-//            }
-//        }
-//    }
     
     // script parameter label fix
     func parameterFix(theXML: String) -> String {
