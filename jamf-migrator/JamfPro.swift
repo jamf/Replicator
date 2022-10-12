@@ -32,6 +32,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         
         let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
+        WriteToLog().message(stringOfText: "[JamfPro.getToken] Force basic authentication on \(serverUrl): \(forceBasicAuth)\n")
         
 //        print("\(serverUrl.prefix(4))")
         if serverUrl.prefix(4) != "http" {
@@ -50,7 +51,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         request.httpMethod = "POST"
         
         if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) {
-            WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
+            WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
             
             configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -110,7 +111,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                 } else {
                                                     JamfProServer.authType[whichServer]  = "Basic"
                                                     JamfProServer.authCreds[whichServer] = base64creds
-                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic\n")
+                                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic Authentication\n")
                                                 }
                                                 if JamfProServer.authType[whichServer] == "Bearer" {
                                                     self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)

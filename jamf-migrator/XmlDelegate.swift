@@ -48,7 +48,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                             (data, response, error) -> Void in
                             destSession.finishTasksAndInvalidate()
                             if let httpResponse = response as? HTTPURLResponse {
-            //                    print("[Xml.apiAction] httpResponse: \(String(describing: httpResponse))")
                                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                                     do {
                                         let returnedXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
@@ -57,7 +56,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                                     }
                                 } else {
                                     WriteToLog().message(stringOfText: "[Xml.apiAction] error HTTP Status Code: \(httpResponse.statusCode)\n")
-            //                        print("[Xml.apiAction] error HTTP Status Code: \(httpResponse.statusCode)\n")
                                     if method != "DELETE" {
                                         completion((httpResponse.statusCode,""))
                                     } else {

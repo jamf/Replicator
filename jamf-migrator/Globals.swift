@@ -49,6 +49,7 @@ struct JamfProServer {
     static var build        = ""
     static var source       = ""
     static var destination  = ""
+    static var whichServer  = ""
     static var sourceUser   = ""
     static var destUser     = ""
     static var sourcePwd    = ""

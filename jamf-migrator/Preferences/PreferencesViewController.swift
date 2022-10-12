@@ -150,6 +150,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func forceBasicAuth_action(_ sender: Any) {
         userDefaults.set(Int(forceBasicAuth_button.state.rawValue), forKey: "forceBasicAuth")
         userDefaults.synchronize()
+        if forceBasicAuth_button.state.rawValue == 1 {
+            JamfProServer.authType   = ["source":"Basic", "destination":"Basic"]
+            JamfProServer.validToken = ["source":false, "destination":false]
+            JamfProServer.version    = ["source":"", "destination":""]
+        } else {
+            JamfProServer.authType   = ["source":"Bearer", "destination":"Bearer"]
+            JamfProServer.validToken = ["source":false, "destination":false]
+            JamfProServer.version    = ["source":"", "destination":""]
+        }
     }
     
 
@@ -365,7 +374,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         
         plistData = vc.readSettings()
-        print("[preferences] read plistData: \(plistData["xml"])")
         
         if plistData["scope"] != nil {
             scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>

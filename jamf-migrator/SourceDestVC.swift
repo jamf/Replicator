@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SourceDestVC.swift
 //  jamf-migrator
 //
 //  Created by lnh on 12/9/16.
@@ -18,9 +18,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    @IBOutlet var migrator_window: NSView!
     
     @IBOutlet weak var hideCreds_button: NSButton!
-    @IBAction func hideCreds_action(_ sender: NSButton) {
-        userDefaults.set("\(sender.state.rawValue)", forKey: "hideCreds")
-        setWindowSize(setting: sender.state.rawValue)
+    @IBAction func hideCreds_action(_ sender: Any) {
+        userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
+        setWindowSize(setting: hideCreds_button.state.rawValue)
     }
     func setWindowSize(setting: Int) {
         if setting == 0 {
@@ -417,6 +417,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 // disable source server, username and password fields (to finish)
                 if source_jp_server_field.isEnabled {
 //                    source_jp_server_field.textColor   = NSColor.white
+                    importFiles_button.isEnabled      = false
+                    browseFiles_button.isEnabled      = false
                     source_jp_server_field.isEnabled  = false
                     sourceServerList_button.isEnabled = false
                     source_user_field.isEnabled       = false
@@ -427,6 +429,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 // enable source server, username and password fields (to finish)
                 if !source_jp_server_field.isEnabled {
+                    importFiles_button.isEnabled      = true
+                    browseFiles_button.isEnabled      = true
                     source_jp_server_field.isEnabled  = true
                     sourceServerList_button.isEnabled = true
                     source_user_field.isEnabled       = true
@@ -436,14 +440,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
      }
     
-    @IBAction func showLogFolder(_ sender: Any) {
-        isDir = true
-        if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
-            NSWorkspace.shared.openFile(logPath!)
-        } else {
-            _ = Alert().display(header: "Alert", message: "There are currently no log files to display.", secondButton: "")
-        }
-    }
+//    @IBAction func showLogFolder(_ sender: Any) {
+//        isDir = true
+//        if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
+//            NSWorkspace.shared.openFile(logPath!)
+//        } else {
+//            _ = Alert().display(header: "Alert", message: "There are currently no log files to display.", secondButton: "")
+//        }
+//    }
     
     @IBAction func fileImport_action(_ sender: NSButton) {
         if importFiles_button.state.rawValue == 1 {
@@ -602,6 +606,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func serverChanged(whichserver: String) {
         if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) {
+            // post to notification center
+            JamfProServer.whichServer = whichserver
+            NotificationCenter.default.post(name: .resetListFields, object: self)
+            
 //        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
 //            srcSrvTableView.isEnabled = true
 //            clearSelectiveList()
@@ -659,6 +667,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         } else {
             // credentials not found - blank out username / password fields
             if setting.fullGUI {
+                hideCreds_button.state = NSControl.StateValue(rawValue: 1)
+                hideCreds_action(self)
                 if whichServer == "source" {
                     source_user_field.stringValue = ""
                     source_pwd_field.stringValue = ""
@@ -698,6 +708,30 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        plistData["storeCredentials"]   = storeCredentials_button.state as Any?
 //        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
 //    }
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if let textField = obj.object as? NSTextField {
+            switch textField.identifier!.rawValue {
+            case "sourceServer":
+                _ = serverOrFiles()
+                JamfProServer.source = source_jp_server_field.stringValue
+                fetchPassword(whichServer: "source", url: JamfProServer.source)
+            case "sourceUser":
+                JamfProServer.sourceUser = source_user_field.stringValue
+            case "sourcePassword":
+                JamfProServer.sourcePwd = source_pwd_field.stringValue
+            case "destServer":
+                print("identifier: \(textField.identifier!.rawValue)")
+                JamfProServer.destination = dest_jp_server_field.stringValue
+                fetchPassword(whichServer: "destination", url: JamfProServer.destination)
+            case "destUser":
+                JamfProServer.destUser = dest_user_field.stringValue
+            case "destPassword":
+                JamfProServer.destPwd = dest_pwd_field.stringValue
+            default:
+                break
+            }
+        }
+    }
     
     @IBAction func disableExportOnly_action(_ sender: Any) {
         export.saveOnly       = false
@@ -716,13 +750,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func disableSource() {
         if setting.fullGUI {
-            DispatchQueue.main.async {
-                self.dest_jp_server_field.isEnabled     = !export.saveOnly
-                self.destServerList_button.isEnabled    = !export.saveOnly
-                self.dest_user_field.isEnabled          = !export.saveOnly
-                self.dest_pwd_field.isEnabled           = !export.saveOnly
-                self.siteMigrate_button.isEnabled       = !export.saveOnly
-                self.disableExportOnly_button.isHidden  = !export.saveOnly
+            DispatchQueue.main.async { [self] in
+                dest_jp_server_field.isEnabled      = !export.saveOnly
+                destServerList_button.isEnabled     = !export.saveOnly
+                dest_user_field.isEnabled           = !export.saveOnly
+                dest_pwd_field.isEnabled            = !export.saveOnly
+                siteMigrate_button.isEnabled        = !export.saveOnly
+                destinationLabel_TextField.isHidden = export.saveOnly
+                setDestSite_button.isHidden         = export.saveOnly
+                disableExportOnly_button.isHidden   = !export.saveOnly
             }
         }
     }
@@ -838,7 +874,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         plistData["dest_user"]          = dest_user_field.stringValue as Any?
         plistData["storeCredentials"]   = JamfProServer.storeCreds as Any?
 
-        print("[saveSourceDestInfo] save plistData: \(String(describing: plistData["xml"]))")
         NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
         _ = readSettings()
     }
@@ -849,8 +884,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         switch sender.identifier!.rawValue {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
-                // source server changed, clear list of objects
-//                clearSelectiveList()
                 JamfProServer.validToken["source"] = false
                 serverChanged(whichserver: "source")
                 if sourceServerArray.firstIndex(of: "\(source_jp_server_field.stringValue)") == nil {
@@ -862,8 +895,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue)
         case "destination":
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
-                // source server changed, clear list of objects
-//                clearSelectiveList()
                 JamfProServer.validToken["destination"] = false
                 serverChanged(whichserver: "destination")
                 if destServerArray.firstIndex(of: "\(dest_jp_server_field.stringValue)") == nil {
@@ -950,9 +981,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        debug = true
         
         // Do any additional setup after loading the view.
-        print("[SourceDestVC] viewDidLoad")
-        NotificationCenter.default.addObserver(self, selector: #selector(updateServerList(_:)), name: .updateServerList, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateServerList(_:)), name: .updateServerList, object: nil)
+        
+        source_jp_server_field.delegate = self
+        source_user_field.delegate      = self
+        source_pwd_field.delegate       = self
+        dest_jp_server_field.delegate   = self
+        dest_user_field.delegate        = self
+        dest_pwd_field.delegate         = self
+        
         // read maxConcurrentOperationCount setting
 //        concurrentThreads = setConcurrentThreads()
 //        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
@@ -1172,6 +1211,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
             }
+             */
             
             // read xml settings - start
             if plistData["xml"] != nil {
@@ -1216,7 +1256,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                                     "saveRawXmlScope":true,
                                     "saveTrimmedXmlScope":true] as Any
             }
-            */
             // update plist
             NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
             // read xml settings - end
@@ -1264,6 +1303,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 }
 
 extension Notification.Name {
-    public static let updateServerList = Notification.Name("updateServerList")
-    public static let deleteMode_sdvc  = Notification.Name("deleteMode_sdvc")
+    public static let deleteMode_sdvc      = Notification.Name("deleteMode_sdvc")
+    public static let saveOnlyButtonToggle = Notification.Name("toggleExportOnly")
+    public static let updateServerList     = Notification.Name("updateServerList")
 }
