@@ -44,7 +44,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
                 self.userDefaults.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
-                print("[ViewController] Set Bookmark Fails: \(error.description)")
+                print("[SourceDestVC] Set Bookmark Fails: \(error.description)")
             }
         }
     }
@@ -509,7 +509,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     @IBAction func migrateToSite_action(_ sender: Any) {
         JamfProServer.toSite   = false
-        JamfProServer.destSite = ""
+        JamfProServer.destSite = "None"
         if siteMigrate_button.state.rawValue == 1 {
             if dest_jp_server_field.stringValue == "" {
                 _ = Alert().display(header: "Attention", message: "Destination URL is required", secondButton: "")
@@ -605,18 +605,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) {
+        print("[SourceDestVC] whichServer: \(whichserver)")
+        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
-            NotificationCenter.default.post(name: .resetListFields, object: self)
-            
-//        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
-//            srcSrvTableView.isEnabled = true
-//            clearSelectiveList()
-//            clearProcessingFields()
+            print("[SourceDestVC] post notification for resetListFields")
+            NotificationCenter.default.post(name: .resetListFields, object: nil)
         }
-        JamfProServer.version[whichserver] = ""
-        JamfProServer.validToken[whichserver] = false
     }
    
     func fetchPassword(whichServer: String, url: String) {
@@ -698,16 +693,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         // read environment settings - end
     }
     
-//    func saveSettings() {
-//        plistData                       = readSettings()
-//        plistData["source_jp_server"]   = source_jp_server_field.stringValue as Any?
-//        plistData["source_user"]        = storedSourceUser as Any?
-//        plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
-//        plistData["dest_user"]          = dest_user_field.stringValue as Any?
-////        plistData["maxHistory"]         = maxHistory as Any?
-//        plistData["storeCredentials"]   = storeCredentials_button.state as Any?
-//        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-//    }
     func controlTextDidEndEditing(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
@@ -880,7 +865,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
 //        self.selectiveListCleared = false
-        print("[setServerUrl_button] identifier: \(String(describing: sender.identifier!.rawValue))\n")
+        print("[SourceDestVC] setServerUrl_button identifier: \(String(describing: sender.identifier!.rawValue))\n")
         switch sender.identifier!.rawValue {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
@@ -894,7 +879,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
             fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue)
         case "destination":
-            if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
+            if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
                 JamfProServer.validToken["destination"] = false
                 serverChanged(whichserver: "destination")
                 if destServerArray.firstIndex(of: "\(dest_jp_server_field.stringValue)") == nil {

@@ -830,7 +830,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 // verify source and destination are not the same - start
 //                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate_button.state.rawValue == 0 {
                 let sameSite = (JamfProServer.source == JamfProServer.destination) ? true:false
-                if sameSite && (JamfProServer.destSite == "None" || JamfProServer.destSite == "") {
+//                if sameSite && (JamfProServer.destSite == "None" || JamfProServer.destSite == "") {
+                if sameSite && JamfProServer.destSite == "" {
                     alert_dialog(header: "Alert", message: "Source and destination servers cannot be the same.")
                     self.goButtonEnabled(button_status: true)
                     return
@@ -5497,7 +5498,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        print("serverChanged - whichServer: \(whichserver)")
+        print("[ViewController] whichServer: \(whichserver)")
         if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
@@ -7581,7 +7582,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @objc func resetListFields(_ notification: Notification) {
-        if (JamfProServer.whichServer == "source" && !wipeData.on) || (JamfProServer.whichServer == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
+        print("[ViewController] resetListFields - whichServer: \(JamfProServer.whichServer)")
+        if (JamfProServer.whichServer == "source" && !wipeData.on) || (JamfProServer.whichServer == "destination" && !export.saveOnly) || (srcSrvTableView.isEnabled == false) {
+            
+            print("[ViewController] resetListFields - clear things")
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
             clearSelectiveList()
