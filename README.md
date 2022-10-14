@@ -6,21 +6,19 @@ A tool to migrate data granularly between Jamf Pro servers
 
 ![alt text](./jamf-migrator/images/migrator2.png "JamfMigrator")
 
-
 Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
+</br></br>
+
+Username and password fields can be hidden/shown using the disclosure tringle on the left.
+
+![alt text](./jamf-migrator/images/migrator2.1.png "JamfMigrator")
+
+When migrating files be sure to open the 'raw' folder.
   ![alt text](./jamf-migrator/images/migrator2.5a.png "Files")
   
-  Groups, Policies, and Configuration Profiles can be targeted to a particular site.
+  Devices (computers and iOS), Groups, Policies, and Configuration Profiles can be targeted to a particular site.</br>
   ![alt text](./jamf-migrator/images/migrator2.5b.png "Files")
-
-Feedback in the GUI gives a simplistic overview of the success of a transfer:
-* Green - everything transferred.
-* Yellow - some items transferred.
-* Red - nothing transferred.
-* White - nothing to transfer.
-
-   You may see a difference between the color of the text and the progress bar.  This is an indication some dependency was missing.  For example a script migrated but the category it was associated with on the source server is missing on the destination server.
-
+</br></br>
 
 **Limitations/requirements to be aware of:**
 
@@ -32,8 +30,7 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
 * Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
 * Institutional disk encryptions that contain the private key cannot be migrated.
-* Approved Kernel Extension payloads do not migrate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
-* System Extensions do not migrate properly.  They may appear to migrate but fail when being deployed.
+* Approved System/Kernel Extension payloads do not migrate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
 * Packages <ul>
@@ -45,21 +42,21 @@ Feedback in the GUI gives a simplistic overview of the success of a transfer:
 
 <hr>
 
-The 'Selective' tab provides the ability to select a subset of items within a category.  For example you might only want to transfer 4 new scripts from a larger pool of existing scripts.
+The Selective tab provides the ability to select a subset of (or all) items within a collection of objects.  For example you might only want to transfer 4 scripts from a larger pool of existing scripts.
   ![alt text](./jamf-migrator/images/migrator3.png "Selective")
   
 Note: Policies are listed along with the their ID.  They'll be listed with a format of: policy name (ID)
 
-Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
+Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.
 ![alt text](./jamf-migrator/images/migrator3Policies.png "Selective")
 
 
-When importing XML files they must be organized into folders that, for the most part, mirror their respective API nodes. i.e. computer XML files in a folder labeled computers, mobile devices in a folder called mobiledevices. Exceptions to this are group items, for example computer groups are split into a smartcomputergroups folder and staticcomputergroups folder. This is also how jamf-migrator exports files. Then when importing, select the folder that contains the API nodes we wish to update. For example, if selecting files generated by exporting data with jamf-migrator we would select the folder called raw.
+Files exported using jamf-migrator can be imported into another Jamf Pro server.  Be sure to open the 'raw' folder when importing.
 
 ![alt text](./jamf-migrator/images/open.png "Open")
-  
+</br></br>
 **Important:** Trimmed XML files cannot be used as they are missing data required for the migration. 
-
+</br></br>
 **Command Line Options:**
 
 Options for setting an ldap id on jamf user accounts and/or converting standard accounts to ldap accounts can be accomplished by launching jamf-migrator from Terminal.  For example to set an ldap id of 3 and force that id (even on local accounts) use the following:
@@ -83,11 +80,11 @@ Options for setting an ldap id on jamf user accounts and/or converting standard 
 In addition, Policies can be copied in a disabled state.
 
 ![](./jamf-migrator/images/copyPrefs.png)
-
+</br></br>
 Options to export XML from the source server are also available.
 
 ![](./jamf-migrator/images/exportPrefs.png)
-
+</br></br>
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
 * Save only saves the XML files and does not send them to the destination server.
@@ -97,24 +94,24 @@ Options to export XML from the source server are also available.
 Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
 
 ![](./jamf-migrator/images/sitePrefs.png)
-
+</br></br>
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
-The number of concurrent API operations (from 1 to 5) and number of log files to retain can be configured.
+The number of concurrent API operations (from 1 to 5), number of log files to retain, along with forcing basic authentication can be configured.
 
 ![](./jamf-migrator/images/appPrefs.png)
-
+</br></br>
 Migrated computers can show as managed by setting the management account.
 
 ![](./jamf-migrator/images/computerPrefs.png)
-
+</br></br>
 Set a password for following migrated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
 
-![](h./jamf-migrator/images/passwordPrefs.png)
+![](./jamf-migrator/images/passwordPrefs.png)
 
 Note, the same password will be applied if you have multiple binds, or ldap servers, or file shares coonfigured.  
-
+</br></br>
 **Migration Summary:**
 
 * To get details on how many items were created/updated or failed to migrate type ⌘S, or select Show Summary under the File menu.
@@ -155,6 +152,9 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
+**v7.0.0**<br>
+Redesigned UI.  Add ability to show/hide username and password fields.  Migrate locally created classes and delete any class.  Add ability to force basic authentication.
+
 **v6.3.0**<br>
 Add ability to utilize selective migration while using exported files as the source.  Fix crash (issue #80) when Site is selected.  Show text while icons are being uploaded for self service policies and iOS apps.  Fix issue with selective migration of policies.
 

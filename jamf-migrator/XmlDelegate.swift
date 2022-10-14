@@ -17,6 +17,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     var baseXmlFolder = ""
     var saveXmlFolder = ""
     var endpointPath  = ""
+//    let backupDate    = DateFormatter()
 
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
         
@@ -101,7 +102,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             do {
                 try fm.createDirectory(atPath: saveXmlFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] Problem creating \(saveXmlFolder) folder: Error \(error)\n") }
+                WriteToLog().message(stringOfText: "[XmlDelegate.save] Problem creating \(saveXmlFolder) folder: Error \(error)\n")
                 return
             }
         }
@@ -110,6 +111,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         // Create endpoint type to store xml files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
+            print("[icons] saveFolder: \(saveXmlFolder)")
             endpointPath = saveXmlFolder+node+"/\(id)"
         case "accounts/groupid":
             endpointPath = saveXmlFolder+"jamfgroups"
@@ -133,6 +135,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             
             var copyIcon   = true
             let iconSource = "\(xml)"
+//            let iconDest   = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))":"\(endpointPath)/\(name)"
             let iconDest   = "\(endpointPath)/\(name)"
 
 //            print("copy from \(iconSource) to: \(iconDest)")
@@ -148,6 +151,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             if copyIcon {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving icon to: \(iconDest)\n") }
                 do {
+                    print("[icons] copy to: \(iconDest)")
                     try fm.copyItem(atPath: iconSource, toPath: iconDest)
                     if export.saveOnly {
                         do {

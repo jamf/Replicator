@@ -31,7 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var folderPath: URL? {
         didSet {
             do {
-                let bookmark = try folderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
+                let bookmark = try folderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+//                let bookmark = try folderPath?.bookmarkData(options: .securityScopeAllowOnlyReadAccess, includingResourceValuesForKeys: nil, relativeTo: nil)
                 UserDefaults.standard.set(bookmark, forKey: "bookmark")
             } catch let error as NSError {
                 WriteToLog().message(stringOfText: "[AppDelegate] Set Bookmark Fails: \(error.description)\n")
@@ -126,7 +127,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             WriteToLog().message(stringOfText: "[AppDelegate] jamf migrator is running silently\n")
             print("running silently")
             
-            ViewController().initVars()
+            SourceDestVC().initVars()
+//            ViewController().initVars()
         }
     }
 

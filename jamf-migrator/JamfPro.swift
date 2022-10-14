@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AppKit
 
 class JamfPro: NSObject, URLSessionDelegate {
     
@@ -144,8 +145,12 @@ class JamfPro: NSObject, URLSessionDelegate {
                             return
                         }
                     } else {    // if httpResponse.statusCode <200 or >299
-                        _ = Alert().display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
                         WriteToLog().message(stringOfText: "[JamfPro.getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode).\n")
+                        if setting.fullGUI {
+                            _ = Alert().display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
+                        } else {
+                            NSApplication.shared.terminate(self)
+                        }
                         JamfProServer.validToken[whichServer]  = false
                         completion((httpResponse.statusCode, "failed"))
                         return

@@ -78,7 +78,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                     }
                 } else {
                     WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))\n")
-                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)\n")
+//                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)\n")
                     if currentTry < maxTries {
                         self.getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: theEndpointID, skip: false, currentTry: currentTry+1) {
                         (result: (Int,String)) in

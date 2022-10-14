@@ -60,7 +60,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     // keychain access
     let Creds2           = Credentials2()
-    var validCreds       = true     // used to deterine if keychain has valid credentials
+//    var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedSourcePwd  = ""       // source user account password stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
@@ -534,7 +534,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             jamfpro!.getToken(whichServer: "destination", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
                 (authResult: (Int,String)) in
                 let (authStatusCode, _) = authResult
-                print("authResult: \(authResult)")
 
                 if pref.httpSuccess.contains(authStatusCode) {
                     Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
@@ -572,6 +571,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     }
                 } else {
                     print("[sites fn] failed to auth")
+                    WriteToLog().message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)\n")
                     setDestSite_button.isHidden                 = true
                     self.destinationLabel_TextField.stringValue = "Destination"
                     self.availableSites_button.isEnabled = false
@@ -605,11 +605,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        print("[SourceDestVC] whichServer: \(whichserver)")
         if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
-            print("[SourceDestVC] post notification for resetListFields")
             NotificationCenter.default.post(name: .resetListFields, object: nil)
         }
     }
@@ -705,7 +703,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             case "sourcePassword":
                 JamfProServer.sourcePwd = source_pwd_field.stringValue
             case "destServer":
-                print("identifier: \(textField.identifier!.rawValue)")
                 JamfProServer.destination = dest_jp_server_field.stringValue
                 fetchPassword(whichServer: "destination", url: JamfProServer.destination)
             case "destUser":
@@ -865,7 +862,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
 //        self.selectiveListCleared = false
-        print("[SourceDestVC] setServerUrl_button identifier: \(String(describing: sender.identifier!.rawValue))\n")
         switch sender.identifier!.rawValue {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
@@ -947,8 +943,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         dest_jp_server_field.nextKeyView    = dest_user_field
         dest_user_field.nextKeyView         = dest_pwd_field
         
-        initVars()
-        
     }   //viewDidAppear - end
     
     @objc func toggleExportOnly(_ notification: Notification) {
@@ -990,6 +984,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             setWindowSize(setting: hideCreds_button.state.rawValue)
             source_jp_server_field.becomeFirstResponder()
         }
+        
+        initVars()
     }   //override func viewDidLoad() - end
     
     override var representedObject: Any? {
@@ -1027,7 +1023,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         sleep(1)
         
         if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            print("resetting export location")
             userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
             userDefaults.synchronize()
         }
@@ -1049,6 +1044,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 
             if plistData["source_jp_server"] as? String != nil {
                 source_jp_server = plistData["source_jp_server"] as! String
+                JamfProServer.source = source_jp_server
                 
                 if setting.fullGUI {
                     source_jp_server_field.stringValue = source_jp_server
@@ -1256,30 +1252,20 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
 
         // check for stored passwords - start
-        if (source_jp_server != "") {
-            fetchPassword(whichServer: "source", url: source_jp_server)
+        if (JamfProServer.source != "") {
+            fetchPassword(whichServer: "source", url: JamfProServer.source)
         }
         if (dest_jp_server != "") {
             fetchPassword(whichServer: "destination", url: dest_jp_server)
         }
-        if (storedSourcePwd == "") || (storedDestPwd == "") {
-            self.validCreds = false
-        }
-//        if (source_pwd_field.stringValue == "") || (dest_pwd_field.stringValue == "") {
+//        if (storedSourcePwd == "") || (storedDestPwd == "") {
 //            self.validCreds = false
 //        }
         // check for stored passwords - end
-        /*
-        let appVersion = appInfo.version
-        let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog().message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )\n")
         
         if !setting.fullGUI {
-            WriteToLog().message(stringOfText: "Running silently\n")
-            Go(sender: "silent")
+            ViewController().initVars()
         }
-         */
-
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
