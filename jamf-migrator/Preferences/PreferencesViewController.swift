@@ -194,29 +194,50 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @objc func exportButtons(_ notification: Notification) {
         viewDidAppear()
     }
+    
     @IBAction func updateExportPrefs_button(_ sender: NSButton) {
-        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
-                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
-                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
-                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
-        vc.savePrefs(prefs: plistData)
-
-        export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
-        export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
+//        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
+//                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
+//                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
+//                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
+//                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+//        vc.savePrefs(prefs: plistData)
+        
         if saveRawXml_button.state.rawValue == 1 || saveTrimmedXml_button.state.rawValue == 1 {
             saveOnly_button.isEnabled = true
         } else {
             saveOnly_button.isEnabled = false
             saveOnly_button.state     = NSControl.StateValue(rawValue: 0)
-            plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
-                                    "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-                                    "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
-                                    "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
-                                    "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
-            
-            vc.savePrefs(prefs: plistData)
+            export.saveOnly           = convertToBool(state: saveOnly_button.state.rawValue)
         }
+        
+        switch sender.identifier!.rawValue {
+        case "rawSourceXml":
+            export.saveRawXml = convertToBool(state: saveRawXml_button.state.rawValue)
+        case "trimmedSourceXml":
+            export.saveTrimmedXml = convertToBool(state: saveTrimmedXml_button.state.rawValue)
+        case "saveOnly":
+            export.saveOnly = convertToBool(state: saveOnly_button.state.rawValue)
+        case "rawXmlScope":
+            export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
+        case "trimmedXmlScope":
+            export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
+        default:
+            break
+        }
+        
+        plistData["xml"] = ["saveRawXml":export.saveRawXml,
+                            "saveTrimmedXml":export.saveTrimmedXml,
+                            "saveOnly":export.saveOnly,
+                            "saveRawXmlScope":export.rawXmlScope,
+                            "saveTrimmedXmlScope":export.trimmedXmlScope]
+        
+//        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
+//                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
+//                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
+//                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
+//                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+        vc.savePrefs(prefs: plistData)
 //        userDefaults.set(convertToBool(state: saveRawXml_button.state.rawValue), forKey: "saveRawXml")
 //        userDefaults.set(convertToBool(state: saveTrimmedXml_button.state.rawValue), forKey: "saveTrimmedXml")
 //        userDefaults.set(convertToBool(state: saveOnly_button.state.rawValue), forKey: "saveOnly")
@@ -461,6 +482,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
             vc.saveSettings(settings: plistData)
+            
+            saveRawXml           = false
+            saveTrimmedXml       = false
+            saveOnly             = false
+            saveRawXmlScope      = true
+            saveTrimmedXmlScope  = true
 //            userDefaults.set(false, forKey: "saveRawXml")
 //            userDefaults.set(false, forKey: "saveTrimmedXml")
 //            userDefaults.set(false, forKey: "saveOnly")

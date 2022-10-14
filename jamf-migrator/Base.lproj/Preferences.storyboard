@@ -376,7 +376,7 @@
                                     <action selector="updateExportPrefs_button:" target="zJe-p7-yg6" id="7xY-c4-pKC"/>
                                 </connections>
                             </button>
-                            <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lUE-WG-wQ1">
+                            <button identifier="rawXmlScope" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lUE-WG-wQ1">
                                 <rect key="frame" x="254" y="154" width="18" height="18"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="yqx-oD-YTV">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -386,7 +386,7 @@
                                     <action selector="updateExportPrefs_button:" target="zJe-p7-yg6" id="9Vb-97-ZFv"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="B4M-2x-uq5">
+                            <button identifier="trimmedXmlScope" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="B4M-2x-uq5">
                                 <rect key="frame" x="254" y="135" width="22" height="18"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="18" id="0WU-Hj-gaH"/>
