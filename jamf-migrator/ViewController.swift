@@ -145,7 +145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var dock_items_button: NSButton!
     @IBOutlet weak var fileshares_button: NSButton!
     @IBOutlet weak var sus_button: NSButton!
-    @IBOutlet weak var netboot_button: NSButton!
+//    @IBOutlet weak var netboot_button: NSButton!
     @IBOutlet weak var osxconfigurationprofiles_button: NSButton!
 //    @IBOutlet weak var patch_mgmt_button: NSButton!
     @IBOutlet weak var patch_policies_button: NSButton!
@@ -221,7 +221,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var dock_items_field: NSTextField!
     @IBOutlet weak var file_shares_label_field: NSTextField!
     @IBOutlet weak var sus_label_field: NSTextField!
-    @IBOutlet weak var netboot_label_field: NSTextField!
+//    @IBOutlet weak var netboot_label_field: NSTextField!
     @IBOutlet weak var osxconfigurationprofiles_label_field: NSTextField!
 //    @IBOutlet weak var patch_mgmt_field: NSTextField!
     @IBOutlet weak var patch_policies_field: NSTextField!
@@ -432,7 +432,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "classes", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
@@ -556,7 +556,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
             self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
             self.sus_button.state = NSControl.StateValue(rawValue: 0)
-            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+//            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
 //            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
             self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
@@ -621,7 +621,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.dock_items_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.fileshares_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.sus_button.state = NSControl.StateValue(rawValue: rawStateValue)
-            self.netboot_button.state = NSControl.StateValue(rawValue: rawStateValue)
+//            self.netboot_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
 //            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.patch_policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -1181,9 +1181,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             objectsToMigrate += ["softwareupdateservers"]
                         }
                         
-                        if netboot_button.state.rawValue == 1 {
-                            objectsToMigrate += ["netbootservers"]
-                        }
+//                        if netboot_button.state.rawValue == 1 {
+//                            objectsToMigrate += ["netbootservers"]
+//                        }
                         
                         if ext_attribs_button.state.rawValue == 1 {
                             objectsToMigrate += ["computerextensionattributes"]
@@ -1863,8 +1863,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointParent = "dock_items"
         case "macapplications":
             endpointParent = "mac_applications"
-        case "netbootservers":
-            endpointParent = "netboot_servers"
+//        case "netbootservers":
+//            endpointParent = "netboot_servers"
         case "osxconfigurationprofiles":
             endpointParent = "os_x_configuration_profiles"
         case "patches":
@@ -2135,7 +2135,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     }
                                     
-                                case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "netbootservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
                                     if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
@@ -2860,7 +2860,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         } catch let error as NSError {
                                             print(error)
                                         }
-                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "netbootservers", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
+                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
                                         local_general = fileContents
                                         for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
                                             local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
@@ -3148,6 +3148,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if returnedJSON.count > 0 {
                             // save source JSON - start
                             if export.saveRawXml {
+                                print("[endpointByID] save building")
                                 DispatchQueue.main.async { [self] in
                                     let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: returnedJSON, theTag: ""):rmJsonData(rawJSON: returnedJSON, theTag: "scope")
 //                                    print("exportRawJson: \(exportRawJson)")
@@ -3214,6 +3215,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                             // save source XML - start
                             if export.saveRawXml {
+                                print("[endpointByID] save \(endpoint)")
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async { [self] in
                                     // added option to remove scope
@@ -3399,7 +3401,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "netbootservers", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanupXml] processing \(endpoint) - verbose\n") }
             //print("\nXML: \(PostXML)")
             
@@ -3621,7 +3623,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let regexDistro1 = try! NSRegularExpression(pattern: "<distribution_server>(.*?)</distribution_server>", options:.caseInsensitive)
 //            let regexDistro2 = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
             let regexDistroUrl = try! NSRegularExpression(pattern: "<url>(.*?)</url>", options:.caseInsensitive)
-            let regexNetBoot = try! NSRegularExpression(pattern: "<netboot_server>(.*?)</netboot_server>", options:.caseInsensitive)
+//            let regexNetBoot = try! NSRegularExpression(pattern: "<netboot_server>(.*?)</netboot_server>", options:.caseInsensitive)
             let regexSUS = try! NSRegularExpression(pattern: "<swu_server>(.*?)</swu_server>", options:.caseInsensitive)
             PostXML = regexDistro1.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_server/>")
             // clear JCDS url from network segments xml - start
@@ -3630,9 +3632,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             // clear JCDS url from network segments xml - end
             // if not migrating netboot server remove then from network segments xml - start
-            if self.objectsToMigrate.firstIndex(of: "netbootservers") == 0 {
-                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-            }
+//            if self.objectsToMigrate.firstIndex(of: "netbootservers") == 0 {
+//                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
+//            }
             // if not migrating netboot server remove then from network segments xml - end
             // if not migrating software update server remove then from network segments xml - start
             if self.objectsToMigrate.firstIndex(of: "softwareupdateservers") == 0 {
@@ -4108,9 +4110,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                } else {
 //                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 1
 //                                }
-                                
-                                print("[CreateEndpoints] [\(localEndPointType)] id: \(sourceEpId) \(whichError)")
-                                
+                                                                
                                 // retry computers with dublicate serial or MAC - start
                                 switch whichError {
                                 case "Duplicate serial number", "Duplicate MAC address":
@@ -4204,8 +4204,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             self.totalCompleted = self.totalCreated + self.totalUpdated + self.totalFailed
                             
-                            
-                            print("[CreateEndpoints] self.createRetryCount[\(localEndPointType)-\(sourceEpId)]: \(String(describing: self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]))")
 //                            if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == nil && self.totalCompleted > 0  {
                             if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && self.totalCompleted > 0  {
 //                                print("[CreateEndpoints] self.counters: \(self.counters)")
@@ -4574,6 +4572,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
             
             if export.saveRawXml {
+                print("[RemoveEndpoints] call save endPointByID")
                 endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
             }
             if export.saveOnly {
@@ -4804,8 +4803,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 endpointParent = "directory_bindings"
             case "dockitems":
                 endpointParent = "dock_items"
-            case "netbootservers":
-                endpointParent = "netboot_servers"
+//            case "netbootservers":
+//                endpointParent = "netboot_servers"
             case "osxconfigurationprofiles":
                 endpointParent = "os_x_configuration_profiles"
             case "patches":
@@ -5713,27 +5712,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if ((theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning) || pref.stopMigration {
                                 
                                 if !local_button_status {
-                                    History.endTime = Date()
+//                                    History.endTime = Date()
+//
+//
+//                                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
+//
+////                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+////                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+//
+//                                    let timeDifference = Int(components.second!)
+//                                    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+//                                    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+//
+                                    let (h,m,s) = runTime()
+                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                                     
                                     if setting.fullGUI {
                                         spinner_progressIndicator.stopAnimation(self)
                                     }
-
-                                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
-
-//                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
                                     
-                                    let timeDifference = Int(components.second!)
-                                    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
-                                    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-                                    
-                                    if !export.backupMode {
-                                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                                    } else {
-                                        WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                                    }
-
                                     resetAllCheckboxes()
 
                                     goButtonEnabled(button_status: true)
@@ -5768,6 +5765,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))\"")!)
                                 }
                                 WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip\n")
+                                
+                                let (h,m,s) = runTime()
+                                WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                             } catch let error as NSError {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
                             }
@@ -5799,6 +5799,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // clear previous results
             counters.removeAll()
         }
+    }
+    
+    func runTime() -> (Int,Int,Int) {
+        History.endTime = Date()
+        let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
+//          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+//          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+        let timeDifference = Int(components.second!)
+        let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+        let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+        return(h,m,s)
     }
     
     // scale the delay when listing items with selective migrations based on the number of items
@@ -6561,8 +6572,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.dock_items_field.textColor = theColor
                 case "softwareupdateservers":
                     self.sus_label_field.textColor = theColor
-                case "netbootservers":
-                    self.netboot_label_field.textColor = theColor
+//                case "netbootservers":
+//                    self.netboot_label_field.textColor = theColor
                 case "osxconfigurationprofiles":
                     self.osxconfigurationprofiles_label_field.textColor = theColor
                 case "patchpolicies":
@@ -7025,7 +7036,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
             self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
             self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
-            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+//            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
     //        patch_mgmt_button.state = 1
             self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
@@ -7105,7 +7116,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // add notification - run fn in SourceDestVC
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
-        NotificationCenter.default.post(name: .updateServerList, object: self)
+        switch serverList {
+        case "source_server_array":
+            NotificationCenter.default.post(name: .updateSourceServerList, object: self)
+        case "dest_server_array":
+            NotificationCenter.default.post(name: .updateDestServerList, object: self)
+        default:
+            break
+        }
         /*
 //        if !(fileImport && serverList == "source_server_array") {
             var local_serverArray = theArray

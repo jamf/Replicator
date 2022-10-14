@@ -176,7 +176,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     let data = xmlDoc.xmlData(options:.nodePrettyPrint)
                     let formattedXml = String(data: data, encoding: .utf8)!
                     //                print("policy xml:\n\(formattedXml)")
-                    
+                    print("[save] write to: \(endpointPath)/\(xmlFile)")
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saved to: \(endpointPath)\n") }

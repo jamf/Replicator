@@ -335,7 +335,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "netbootservers", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
@@ -429,12 +429,16 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 // enable source server, username and password fields (to finish)
                 if !source_jp_server_field.isEnabled {
-                    importFiles_button.isEnabled      = true
-                    browseFiles_button.isEnabled      = true
-                    source_jp_server_field.isEnabled  = true
-                    sourceServerList_button.isEnabled = true
-                    source_user_field.isEnabled       = true
-                    source_pwd_field.isEnabled        = true
+                    importFiles_button.isEnabled       = true
+                    browseFiles_button.isEnabled       = true
+                    source_jp_server_field.isEnabled   = true
+                    sourceServerList_button.isEnabled  = true
+                    source_user_field.isEnabled        = true
+                    source_pwd_field.isEnabled         = true
+                    JamfProServer.validToken["source"] = false
+                    JamfProServer.source               = source_jp_server_field.stringValue
+                    JamfProServer.sourceUser           = source_user_field.stringValue
+                    JamfProServer.sourcePwd            = source_pwd_field.stringValue
                 }
             }
         }
@@ -948,8 +952,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @objc func toggleExportOnly(_ notification: Notification) {
         disableSource()
     }
-    @objc func updateServerList(_ notification: Notification) {
+    @objc func updateSourceServerList(_ notification: Notification) {
         updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
+    }
+    @objc func updateDestServerList(_ notification: Notification) {
+        updateServerArray(url: JamfProServer.destination, serverList: "dest_server_array", theArray: self.destServerArray)
     }
     
     var jamfpro: JamfPro?
@@ -962,7 +969,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         // Do any additional setup after loading the view.
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(updateServerList(_:)), name: .updateServerList, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateSourceServerList(_:)), name: .updateSourceServerList, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateDestServerList(_:)), name: .updateDestServerList, object: nil)
         
         source_jp_server_field.delegate = self
         source_user_field.delegate      = self
@@ -1274,7 +1282,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 }
 
 extension Notification.Name {
-    public static let deleteMode_sdvc      = Notification.Name("deleteMode_sdvc")
-    public static let saveOnlyButtonToggle = Notification.Name("toggleExportOnly")
-    public static let updateServerList     = Notification.Name("updateServerList")
+    public static let deleteMode_sdvc        = Notification.Name("deleteMode_sdvc")
+    public static let saveOnlyButtonToggle   = Notification.Name("toggleExportOnly")
+    public static let updateSourceServerList = Notification.Name("updateSourceServerList")
+    public static let updateDestServerList   = Notification.Name("updateDestServerList")
 }

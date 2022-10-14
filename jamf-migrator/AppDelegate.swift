@@ -172,6 +172,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //return true
     }   // func alert_dialog - end
     
+    // Help Window
+    @IBAction func showHelpWindow(_ sender: AnyObject) {
+        let storyboard = NSStoryboard(name: "Main", bundle: nil)
+        let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
+        if !ViewController().windowIsVisible(windowName: "Help") {
+            helpWindowController.window?.hidesOnDeactivate = false
+            helpWindowController.showWindow(self)
+        } else {
+            let windowsCount = NSApp.windows.count
+            for i in (0..<windowsCount) {
+                if NSApp.windows[i].title == "Help" {
+                    NSApp.windows[i].makeKeyAndOrderFront(self)
+                    break
+                }
+            }
+        }
+    }
+    
     @IBAction func showPreferences(_ sender: Any) {
         PrefsWindowController().show()
     }

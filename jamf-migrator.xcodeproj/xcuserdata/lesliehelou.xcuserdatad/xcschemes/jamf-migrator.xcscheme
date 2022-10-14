@@ -69,7 +69,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-sourceurl m.hickoryhillseast.net"
+            argument = "-sourceurl https://m.hickoryhillseast.net"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
