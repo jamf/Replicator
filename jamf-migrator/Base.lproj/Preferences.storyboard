@@ -690,6 +690,32 @@ DQ
                                     <action selector="forceBasicAuth_action:" target="Ojm-Op-AKi" id="EkJ-8Q-3YO"/>
                                 </connections>
                             </button>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7nu-gl-e0B">
+                                <rect key="frame" x="34" y="55" width="92" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Color scheme:" id="0eQ-rJ-zhy">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="afe-0d-eps">
+                                <rect key="frame" x="127" y="47" width="97" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="c2R-FR-hj1">
+                                        <items>
+                                            <menuItem title="default" state="on" id="5f8-q8-Iy9"/>
+                                            <menuItem title="classic" id="neW-66-X7j"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="colorScheme_action:" target="Ojm-Op-AKi" id="hGr-2m-gN2"/>
+                                </connections>
+                            </popUpButton>
                         </subviews>
                         <constraints>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="34" id="0Xa-MU-vCo"/>
@@ -708,6 +734,7 @@ DQ
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="colorScheme_button" destination="afe-0d-eps" id="fRW-kC-eKj"/>
                         <outlet property="concurrentThreads_slider" destination="Zj6-mi-35l" id="bhh-c4-Wzv"/>
                         <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
                         <outlet property="forceBasicAuth_button" destination="ZlP-uk-Rxu" id="Y8L-B6-QZI"/>

@@ -14,6 +14,7 @@
 		9BC01C6F1DFBC564007E634E /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BC01C6E1DFBC564007E634E /* settings.plist */; };
 		B508D5D71FA1A1780069ED0B /* stop.png in Resources */ = {isa = PBXBuildFile; fileRef = B508D5D61FA1A1780069ED0B /* stop.png */; };
 		B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5165E1520E580A00086E31D /* XmlDelegate.swift */; };
+		B51742DA28FB4F2B0058ED55 /* SplitViewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51742D928FB4F2B0058ED55 /* SplitViewVC.swift */; };
 		B5245C39255D2BB1000A4E48 /* app.png in Resources */ = {isa = PBXBuildFile; fileRef = B5245C38255D2BB1000A4E48 /* app.png */; };
 		B53796C32273AF310006C1E4 /* go_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C22273AF310006C1E4 /* go_dark.png */; };
 		B53796C52273AF4A0006C1E4 /* quit_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = B53796C42273AF4A0006C1E4 /* quit_dark.png */; };
@@ -68,6 +69,7 @@
 		9BC01C6E1DFBC564007E634E /* settings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = settings.plist; sourceTree = "<group>"; };
 		B508D5D61FA1A1780069ED0B /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
 		B5165E1520E580A00086E31D /* XmlDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XmlDelegate.swift; sourceTree = "<group>"; };
+		B51742D928FB4F2B0058ED55 /* SplitViewVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewVC.swift; sourceTree = "<group>"; };
 		B5245C38255D2BB1000A4E48 /* app.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app.png; sourceTree = "<group>"; };
 		B53796C22273AF310006C1E4 /* go_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = go_dark.png; path = Assets.xcassets/go_dark.imageset/go_dark.png; sourceTree = "<group>"; };
 		B53796C42273AF4A0006C1E4 /* quit_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = quit_dark.png; path = Assets.xcassets/quit_dark.imageset/quit_dark.png; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				B56CBA89277B939100F26E8C /* SaveDelegate.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B56CA91728E88DE200236A8A /* SourceDestVC.swift */,
+				B51742D928FB4F2B0058ED55 /* SplitViewVC.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
@@ -361,6 +364,7 @@
 				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
+				B51742DA28FB4F2B0058ED55 /* SplitViewVC.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,

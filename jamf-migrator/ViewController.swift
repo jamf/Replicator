@@ -13,6 +13,7 @@ import Foundation
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let userDefaults = UserDefaults.standard
+    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
     // selective list filter
@@ -7343,7 +7344,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-    //    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
+//  func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
     //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
         if (tableView == srcSrvTableView) && row < sourceDataArray.count
@@ -7354,28 +7355,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 newString = sourceDataArray.last ?? ""
             }
         }
-
-        //            // [NSColor colorWithCalibratedRed:0x6F/255.0 green:0x8E/255.0 blue:0x9D/255.0 alpha:0xFF/255.0]/* 6F8E9DFF */
-        //            //[NSColor colorWithCalibratedRed:0x8C/255.0 green:0xB5/255.0 blue:0xC8/255.0 alpha:0xFF/255.0]/* 8CB5C8FF */
-        //        rowView.backgroundColor = (row % 2 == 0)
-        //            ? NSColor(calibratedRed: 0x6F/255.0, green: 0x8E/255.0, blue: 0x9D/255.0, alpha: 0xFF/255.0)
-        //            : NSColor(calibratedRed: 0x8C/255.0, green: 0xB5/255.0, blue: 0xC8/255.0, alpha: 0xFF/255.0)
+//      rowView.wantsLayer = true
+//            rowView.backgroundColor = (row % 2 == 0)
+//                ? NSColor(calibratedRed: 0x6F/255.0, green: 0x8E/255.0, blue: 0x9D/255.0, alpha: 0xFF/255.0)
+//                : NSColor(calibratedRed: 0x8C/255.0, green: 0xB5/255.0, blue: 0xC8/255.0, alpha: 0xFF/255.0)
 
         return newString;
     }
     // selective migration functions - end
-    
+
     override func viewDidAppear() {
-        // set tab order
-        // Use interface builder, right click a field and drag nextKeyView to the next
-        /*
-         
-        source_jp_server_field.nextKeyView  = source_user_field
-        source_user_field.nextKeyView       = source_pwd_field
-        source_pwd_field.nextKeyView        = dest_jp_server_field
-        dest_jp_server_field.nextKeyView    = dest_user_field
-        dest_user_field.nextKeyView         = dest_pwd_field
         
+        /*
         // v1 colors
         //        self.view.layer?.backgroundColor = CGColor(red: 0x11/255.0, green: 0x1E/255.0, blue: 0x3A/255.0, alpha: 1.0)
         // v2 colors
@@ -7441,6 +7432,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        LogLevel.debug = true
         
         // Do any additional setup after loading the view.
+        
+        self.view.wantsLayer = true
+        selectiveFilter_TextField.drawsBackground = true
+        selectiveFilter_TextField.backgroundColor = classic
+        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+        srcSrvTableView.backgroundColor = classic
+        srcSrvTableView.usesAlternatingRowBackgroundColors = false
+        
         NotificationCenter.default.addObserver(self, selector: #selector(resetListFields(_:)), name: .resetListFields, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showSummaryWindow(_:)), name: .showSummaryWindow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showLogFolder(_:)), name: .showLogFolder, object: nil)

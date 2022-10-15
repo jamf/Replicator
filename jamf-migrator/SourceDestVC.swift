@@ -13,6 +13,7 @@ import Foundation
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let userDefaults = UserDefaults.standard
+    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     
     // Main Window
 //    @IBOutlet var migrator_window: NSView!
@@ -25,10 +26,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     func setWindowSize(setting: Int) {
         if setting == 0 {
             preferredContentSize = CGSize(width: 848, height: 55)
-            hideCreds_button.toolTip = "show"
+            hideCreds_button.toolTip = "show username/password fields"
         } else {
             preferredContentSize = CGSize(width: 848, height: 120)
-            hideCreds_button.toolTip = "hide"
+            hideCreds_button.toolTip = "hide username/password fields"
         }
     }
     @IBOutlet weak var setDestSite_button: NSPopUpButton!
@@ -967,6 +968,24 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        debug = true
         
         // Do any additional setup after loading the view.
+//        if classicBackground {
+//
+//        }
+        self.view.wantsLayer = true
+        source_jp_server_field.drawsBackground = true
+        source_jp_server_field.backgroundColor = classic
+        source_user_field.drawsBackground = true
+        source_user_field.backgroundColor = classic
+        source_pwd_field.drawsBackground = true
+        source_pwd_field.backgroundColor = classic
+        dest_jp_server_field.drawsBackground = true
+        dest_jp_server_field.backgroundColor = classic
+        dest_pwd_field.backgroundColor = classic
+        dest_user_field.drawsBackground = true
+        dest_user_field.backgroundColor = classic
+        dest_pwd_field.drawsBackground = true
+        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateSourceServerList(_:)), name: .updateSourceServerList, object: nil)

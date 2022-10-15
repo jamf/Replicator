@@ -46,6 +46,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var concurrentThreads_textfield: NSTextField!
     @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
     @IBOutlet weak var forceBasicAuth_button: NSButton!
+    @IBOutlet weak var colorScheme_button: NSPopUpButton!
+    
     
     // computer prefs
     @IBOutlet weak var migrateAsManaged_button: NSButton!
@@ -159,6 +161,9 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             JamfProServer.validToken = ["source":false, "destination":false]
             JamfProServer.version    = ["source":"", "destination":""]
         }
+    }
+    @IBAction func colorScheme_action(_ sender: NSButton) {
+        print("title: \(sender.title)")
     }
     
 

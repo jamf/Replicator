@@ -668,12 +668,11 @@
                                     <action selector="fileImport_action:" target="eUd-vB-D7a" id="z1A-uR-PBb"/>
                                 </connections>
                             </button>
-                            <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uaM-au-3Ze">
-                                <rect key="frame" x="4" y="78" width="13" height="13"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="disclosureTriangle" bezelStyle="disclosure" imagePosition="only" alignment="left" state="on" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="8uU-kd-obU">
-                                    <behavior key="behavior" pushIn="YES" changeBackground="YES" changeGray="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system" size="18"/>
+                            <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uaM-au-3Ze">
+                                <rect key="frame" x="5" y="78" width="14" height="14"/>
+                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="disclosureRight" imagePosition="only" alignment="left" alternateImage="disclosureDown" imageScaling="proportionallyUpOrDown" inset="2" id="8uU-kd-obU">
+                                    <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="hideCreds_action:" target="eUd-vB-D7a" id="P7y-w0-k6p"/>
@@ -703,6 +702,7 @@
                             <constraint firstAttribute="trailing" secondItem="KCT-A6-xGn" secondAttribute="trailing" constant="28" id="7bj-I1-K6U"/>
                             <constraint firstAttribute="trailing" secondItem="JIr-xR-auh" secondAttribute="trailing" constant="207" id="86W-K9-qCD"/>
                             <constraint firstAttribute="trailing" secondItem="bWB-O9-Yc3" secondAttribute="trailing" constant="26" id="9H5-rg-riL"/>
+                            <constraint firstItem="uaM-au-3Ze" firstAttribute="bottom" secondItem="oWq-4n-u3f" secondAttribute="bottom" constant="-2" id="Bkv-zn-bBG"/>
                             <constraint firstItem="bMP-IF-7ZQ" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="10" id="DB9-b6-o6D"/>
                             <constraint firstAttribute="trailing" secondItem="BVE-BE-oEy" secondAttribute="trailing" constant="26" id="DvZ-rT-FuQ"/>
                             <constraint firstItem="tkt-Wc-DhS" firstAttribute="centerX" secondItem="xCj-67-1hr" secondAttribute="centerX" id="GLk-DS-uyh"/>
@@ -723,15 +723,18 @@
                             <constraint firstItem="1FY-7i-xqV" firstAttribute="centerX" secondItem="xCj-67-1hr" secondAttribute="centerX" id="cN7-jg-dWV"/>
                             <constraint firstItem="WKS-OT-80i" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="9" id="cOn-EI-GEQ"/>
                             <constraint firstAttribute="trailing" secondItem="b8g-kK-BoL" secondAttribute="trailing" constant="27" id="dOg-c6-P2g"/>
+                            <constraint firstItem="NzE-CG-YkQ" firstAttribute="leading" secondItem="uaM-au-3Ze" secondAttribute="trailing" constant="7" id="exz-M0-cwV"/>
                             <constraint firstItem="bMP-IF-7ZQ" firstAttribute="leading" secondItem="WKS-OT-80i" secondAttribute="trailing" constant="95" id="gTO-4N-vob"/>
                             <constraint firstItem="Boh-LW-16Z" firstAttribute="leading" secondItem="YgI-SY-krZ" secondAttribute="trailing" constant="93" id="gbP-yG-kov"/>
                             <constraint firstItem="1FY-7i-xqV" firstAttribute="top" secondItem="M9v-UM-Eh7" secondAttribute="bottom" constant="5" id="gsV-iX-50k"/>
                             <constraint firstItem="K9l-8G-oes" firstAttribute="top" secondItem="YgI-SY-krZ" secondAttribute="bottom" constant="-16" id="i5g-88-keu"/>
                             <constraint firstItem="K9l-8G-oes" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="114" id="iNj-2y-ZKX"/>
                             <constraint firstItem="YgI-SY-krZ" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="25" id="iOx-tE-pn3"/>
+                            <constraint firstItem="uaM-au-3Ze" firstAttribute="centerY" secondItem="oWq-4n-u3f" secondAttribute="centerY" constant="1" id="mwE-Lr-rUt"/>
                             <constraint firstItem="YgI-SY-krZ" firstAttribute="top" secondItem="NzE-CG-YkQ" secondAttribute="bottom" constant="-41" id="nzY-dJ-NNd"/>
                             <constraint firstItem="MVH-WU-0uc" firstAttribute="top" secondItem="1FY-7i-xqV" secondAttribute="bottom" constant="6" id="p1m-bK-mly"/>
                             <constraint firstItem="b8g-kK-BoL" firstAttribute="top" secondItem="bMP-IF-7ZQ" secondAttribute="bottom" constant="2" id="pc5-ii-xsD"/>
+                            <constraint firstItem="uaM-au-3Ze" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="5" id="qxv-BG-yvS"/>
                             <constraint firstItem="bWB-O9-Yc3" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="13" id="r2m-Ed-dx7"/>
                             <constraint firstItem="mdU-Bj-ruz" firstAttribute="top" secondItem="Boh-LW-16Z" secondAttribute="bottom" constant="5" id="sNL-Zo-XKB"/>
                             <constraint firstItem="WKS-OT-80i" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="317" id="wyM-08-RNF"/>
@@ -950,7 +953,7 @@
                                             </userGuides>
                                             <subviews>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
-                                                    <rect key="frame" x="18" y="139" width="58" height="17"/>
+                                                    <rect key="frame" x="18" y="139" width="58" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="56" id="5m5-5O-QLS"/>
                                                     </constraints>
@@ -976,7 +979,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="97" width="113" height="17"/>
+                                                    <rect key="frame" x="18" y="97" width="113" height="18"/>
                                                     <buttonCell key="cell" type="check" title="LDAP Servers                                   " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1019,7 +1022,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="360" y="139" width="97" height="17"/>
+                                                    <rect key="frame" x="360" y="139" width="97" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="95" id="oig-hM-WdF"/>
                                                     </constraints>
@@ -1042,7 +1045,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="360" y="97" width="142" height="17"/>
+                                                    <rect key="frame" x="360" y="97" width="142" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Network Segments" bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1052,7 +1055,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Adv User Search">
-                                                    <rect key="frame" x="531" y="139" width="148" height="17"/>
+                                                    <rect key="frame" x="531" y="139" width="148" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Adv. User Searches" bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1082,7 +1085,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="189" y="139" width="79" height="17"/>
+                                                    <rect key="frame" x="189" y="139" width="79" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="77" id="pVq-78-Haf"/>
                                                     </constraints>
@@ -2116,7 +2119,6 @@
                                                                         </menuItem>
                                                                         <menuItem title="Extension Attributes" id="Abg-uI-loX"/>
                                                                         <menuItem title="File Shares" id="TiA-cD-OrE"/>
-                                                                        <menuItem title="Netboot Servers" id="e78-AX-SO6"/>
                                                                         <menuItem title="Packages" id="gPQ-gf-J3z"/>
                                                                         <menuItem title="Policies" id="jwH-Jm-D0E"/>
                                                                         <menuItem title="Prestages" hidden="YES" id="XWe-5m-1Pa">
@@ -2609,5 +2611,7 @@
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="NSStopProgressTemplate" width="14" height="13"/>
+        <image name="disclosureDown" width="14" height="14"/>
+        <image name="disclosureRight" width="100" height="100"/>
     </resources>
 </document>
