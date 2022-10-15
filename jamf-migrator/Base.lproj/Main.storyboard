@@ -2139,7 +2139,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="161"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="159"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="159"/>

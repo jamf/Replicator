@@ -27,7 +27,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     sourceDataArray = sourceDataArray.filter { $0.range(of: filter, options: .caseInsensitive) != nil }
 //                    print("sourceDataArray: \(sourceDataArray)")
                     self.srcSrvTableView.deselectAll(self)
-                        self.srcSrvTableView.reloadData()
+                    self.srcSrvTableView.reloadData()
                 } else {
                     self.srcSrvTableView.deselectAll(self)
                     self.srcSrvTableView.reloadData()
@@ -2507,7 +2507,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 let (resultMessage, _) = result
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] policies - returned from existing endpoints: \(resultMessage)\n") }
 
-                                                // filter out policies created from casper remote - start
+                                                // filter out policies created from jamf remote (casper remote) - start
                                                 for i in (0..<endpointCount) {
                                                     let record = endpointInfo[i] as! [String : AnyObject]
                                                     let nameCheck = record["name"] as! String
@@ -3464,11 +3464,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
         case "classes":
-             for xmlTag in ["student_ids", "teacher_ids", "student_group_ids", "teacher_group_ids", "mobile_device_group_ids"] {
-                 PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
-             }
-            for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
-                PostXML = PostXML.replacingOccurrences(of: "<\(xmlTag)>", with: "")
+            // check for Apple School Manager class
+            let source = tagValue2(xmlString: "\(PostXML)", startTag: "<source>", endTag: "</source>")
+            print("source: \(source)")
+            if source == "Apple School Manager" {
+                let className = "[skipped]-"+tagValue2(xmlString: "\(PostXML)", startTag: "<name>", endTag: "</name><description/>")
+                knownEndpoint = false
+                // Apple School Manager class - handle those here
+                // update global counters
+
+                let localTmp = (self.counters[endpoint]?["fail"])!
+                self.counters[endpoint]?["fail"] = localTmp + 1
+                if var summaryArray = self.summaryDict[endpoint]?["fail"] {
+                    summaryArray.append(className)
+                    self.summaryDict[endpoint]?["fail"] = summaryArray
+                }
+                WriteToLog().message(stringOfText: "[cleanUpXml] Apple School Manager classes are not migrated, skipping \(className)\n")
+                self.postCount += 1
+                putStatusUpdate2(endpoint: "classes", total: endpointCount)
+                if self.objectsToMigrate.last == endpoint && endpointCount == endpointCurrent {
+                    //self.go_button.isEnabled = true
+                    self.rmDELETE()
+//                    self.resetAllCheckboxes()
+                    self.goButtonEnabled(button_status: true)
+                }
+            } else {
+                for xmlTag in ["student_ids", "teacher_ids", "student_group_ids", "teacher_group_ids", "mobile_device_group_ids"] {
+                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
+                }
+               for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
+                   PostXML = PostXML.replacingOccurrences(of: "<\(xmlTag)>", with: "")
+               }
             }
 
         case "computerextensionattributes":
@@ -4017,10 +4043,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         DispatchQueue.main.async {
                         
                             // ? remove creation of counters dict defined earlier ?
-                            if self.counters[endpointType] == nil {
-                                self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-                                self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-                            }
+                            /*
+                             // removed lnh 221014
+                             if self.counters[endpointType] == nil {
+                                 self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                                 self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                             }
+                             */
                             
                             if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
@@ -4620,8 +4649,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if self.activeTab(fn: "RemoveEndpoints") == "selective" {
 //                                print("endPointID: \(endPointID)")
                                 let lineNumber = self.availableIdsToDelArray.firstIndex(of: endPointID)!
+                                let objectToRemove = self.sourceDataArray[lineNumber]
                                 self.availableIdsToDelArray.remove(at: lineNumber)
                                 self.sourceDataArray.remove(at: lineNumber)
+                                let staticLineNumber = self.staticSourceDataArray.firstIndex(of: objectToRemove)!
+//                                print("self.staticSourceDataArray: \(self.staticSourceDataArray)")
+//                                print("objectToRemove: \(objectToRemove), lineNumber: \(staticLineNumber)")
+                                self.staticSourceDataArray.remove(at: staticLineNumber)
                                 
                                 DispatchQueue.main.async {
                                     self.srcSrvTableView.beginUpdates()
@@ -5889,7 +5923,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.putCounters[adjEndpoint]!["put"]! += 1
         }
         
-        let totalCount = (fileImport && activeTab(fn: "puStatusUpdate2") == "selective") ? targetDataArray.count:total
+        print("[putStatusUpdate2] \(adjEndpoint) total failed: \(counters[adjEndpoint]?["fail"] ?? 0)")
+        let failedCount = counters[adjEndpoint]?["fail"] ?? 0
+        if (failedCount > 0 && put_levelIndicatorFillColor[adjEndpoint] == .systemGreen) || failedCount == total {
+            let newColor = (failedCount == total) ? NSColor.systemRed:NSColor.systemYellow
+            if newColor != put_levelIndicatorFillColor[adjEndpoint] {
+            put_levelIndicatorFillColor[adjEndpoint] = newColor
+            put_levelIndicator.fillColor = newColor
+            }
+        }
+        let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? targetDataArray.count:total
         
         if setting.fullGUI {
             DispatchQueue.main.async {
@@ -7773,6 +7816,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     // Summary Window - end
+    
     @objc func deleteMode(_ notification: Notification) {
         var isDir: ObjCBool = false
 //        var isRed           = false
