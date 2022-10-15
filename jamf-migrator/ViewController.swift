@@ -3466,7 +3466,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         case "classes":
             // check for Apple School Manager class
             let source = tagValue2(xmlString: "\(PostXML)", startTag: "<source>", endTag: "</source>")
-            print("source: \(source)")
             if source == "Apple School Manager" {
                 let className = "[skipped]-"+tagValue2(xmlString: "\(PostXML)", startTag: "<name>", endTag: "</name><description/>")
                 knownEndpoint = false
@@ -4653,8 +4652,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 self.availableIdsToDelArray.remove(at: lineNumber)
                                 self.sourceDataArray.remove(at: lineNumber)
                                 let staticLineNumber = self.staticSourceDataArray.firstIndex(of: objectToRemove)!
-//                                print("self.staticSourceDataArray: \(self.staticSourceDataArray)")
-//                                print("objectToRemove: \(objectToRemove), lineNumber: \(staticLineNumber)")
                                 self.staticSourceDataArray.remove(at: staticLineNumber)
                                 
                                 DispatchQueue.main.async {
@@ -5923,7 +5920,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.putCounters[adjEndpoint]!["put"]! += 1
         }
         
-        print("[putStatusUpdate2] \(adjEndpoint) total failed: \(counters[adjEndpoint]?["fail"] ?? 0)")
         let failedCount = counters[adjEndpoint]?["fail"] ?? 0
         if (failedCount > 0 && put_levelIndicatorFillColor[adjEndpoint] == .systemGreen) || failedCount == total {
             let newColor = (failedCount == total) ? NSColor.systemRed:NSColor.systemYellow
