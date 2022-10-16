@@ -12,8 +12,11 @@ import Foundation
 
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
-    let userDefaults = UserDefaults.standard
-    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
+    let userDefaults      = UserDefaults.standard
+    let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+    let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
+    let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
+    let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
     // selective list filter
@@ -7423,6 +7426,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         initVars()
         
     }   //viewDidAppear - end
+
+    @objc func setColorScheme_VC(_ notification: Notification) {
+        switch userDefaults.string(forKey: "colorScheme") {
+        case "classic":
+            self.view.wantsLayer = true
+            selectiveFilter_TextField.drawsBackground = true
+            selectiveFilter_TextField.backgroundColor = classicHighlight
+            self.view.layer?.backgroundColor          = classicBackground
+            srcSrvTableView.backgroundColor           = classicHighlight
+            srcSrvTableView.usesAlternatingRowBackgroundColors = false
+        case "casper":
+            self.view.wantsLayer = true
+            selectiveFilter_TextField.drawsBackground = true
+            selectiveFilter_TextField.backgroundColor = casperHighlight
+            self.view.layer?.backgroundColor          = casperBackground
+            srcSrvTableView.backgroundColor           = casperHighlight
+            srcSrvTableView.usesAlternatingRowBackgroundColors = false
+        default:
+            break
+        }
+    }
     
     var jamfpro: JamfPro?
     override func viewDidLoad() {
@@ -7432,18 +7456,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        LogLevel.debug = true
         
         // Do any additional setup after loading the view.
-        
-        self.view.wantsLayer = true
-        selectiveFilter_TextField.drawsBackground = true
-        selectiveFilter_TextField.backgroundColor = classic
-        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
-        srcSrvTableView.backgroundColor = classic
-        srcSrvTableView.usesAlternatingRowBackgroundColors = false
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_VC(_:)), name: .setColorScheme_VC, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resetListFields(_:)), name: .resetListFields, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showSummaryWindow(_:)), name: .showSummaryWindow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showLogFolder(_:)), name: .showLogFolder, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode(_:)), name: .deleteMode, object: nil)
+        
+        NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
         
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()
@@ -8130,6 +8149,7 @@ extension String {
 }
 
 extension Notification.Name {
+    public static let setColorScheme_VC    = Notification.Name("setColorScheme_VC")
     public static let resetListFields      = Notification.Name("resetListFields")
     public static let showSummaryWindow    = Notification.Name("showSummaryWindow")
     public static let showLogFolder        = Notification.Name("showLogFolder")

@@ -163,7 +163,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
     }
     @IBAction func colorScheme_action(_ sender: NSButton) {
-        print("title: \(sender.title)")
+        let currentScheme = userDefaults.string(forKey: "colorScheme")
+        let newScheme     = sender.title
+        userDefaults.set(sender.title, forKey: "colorScheme")
+        userDefaults.synchronize()
+        if (currentScheme != newScheme)  && newScheme == "default" {
+            _ = Alert().display(header: "Attention:", message: "App must be restarted to display default color scheme", secondButton: "")
+        }
+        NotificationCenter.default.post(name: .setColorScheme_sdvc, object: self)
+        NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
     }
     
 
@@ -396,6 +404,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
             forceBasicAuth_button.state = NSControl.StateValue(userDefaults.integer(forKey: "forceBasicAuth"))
+            let currentTitle = userDefaults.string(forKey: "colorScheme")
+            colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
             userDefaults.synchronize()
         }
         

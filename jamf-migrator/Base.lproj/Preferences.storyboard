@@ -708,6 +708,9 @@ DQ
                                     <menu key="menu" id="c2R-FR-hj1">
                                         <items>
                                             <menuItem title="default" state="on" id="5f8-q8-Iy9"/>
+                                            <menuItem title="casper" id="o37-x9-frO">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
                                             <menuItem title="classic" id="neW-66-X7j"/>
                                         </items>
                                     </menu>

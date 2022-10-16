@@ -13,6 +13,10 @@ import Foundation
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let userDefaults = UserDefaults.standard
+    let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+    let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
+    let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
+    let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
     let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     
     // Main Window
@@ -960,6 +964,42 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         updateServerArray(url: JamfProServer.destination, serverList: "dest_server_array", theArray: self.destServerArray)
     }
     
+    @objc func setColorScheme_sdvc(_ notification: Notification) {
+        switch userDefaults.string(forKey: "colorScheme") {
+        case "classic":
+            self.view.wantsLayer = true
+            source_jp_server_field.drawsBackground = true
+            source_jp_server_field.backgroundColor = classicHighlight
+            source_user_field.drawsBackground = true
+            source_user_field.backgroundColor = classicHighlight
+            source_pwd_field.drawsBackground = true
+            source_pwd_field.backgroundColor = classicHighlight
+            dest_jp_server_field.drawsBackground = true
+            dest_jp_server_field.backgroundColor = classicHighlight
+            dest_pwd_field.backgroundColor = classicHighlight
+            dest_user_field.drawsBackground = true
+            dest_user_field.backgroundColor = classicHighlight
+            dest_pwd_field.drawsBackground = true
+            self.view.layer?.backgroundColor = classicBackground
+        case "casper":
+            self.view.wantsLayer = true
+            source_jp_server_field.drawsBackground = true
+            source_jp_server_field.backgroundColor = casperHighlight
+            source_user_field.drawsBackground = true
+            source_user_field.backgroundColor = casperHighlight
+            source_pwd_field.drawsBackground = true
+            source_pwd_field.backgroundColor = casperHighlight
+            dest_jp_server_field.drawsBackground = true
+            dest_jp_server_field.backgroundColor = casperHighlight
+            dest_pwd_field.backgroundColor = casperHighlight
+            dest_user_field.drawsBackground = true
+            dest_user_field.backgroundColor = casperHighlight
+            dest_pwd_field.drawsBackground = true
+            self.view.layer?.backgroundColor = casperBackground
+        default:
+            break
+        }
+    }
     var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -971,25 +1011,30 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        if classicBackground {
 //
 //        }
-        self.view.wantsLayer = true
-        source_jp_server_field.drawsBackground = true
-        source_jp_server_field.backgroundColor = classic
-        source_user_field.drawsBackground = true
-        source_user_field.backgroundColor = classic
-        source_pwd_field.drawsBackground = true
-        source_pwd_field.backgroundColor = classic
-        dest_jp_server_field.drawsBackground = true
-        dest_jp_server_field.backgroundColor = classic
-        dest_pwd_field.backgroundColor = classic
-        dest_user_field.drawsBackground = true
-        dest_user_field.backgroundColor = classic
-        dest_pwd_field.drawsBackground = true
-        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+        if userDefaults.string(forKey: "colorScheme") == "classic" {
+            self.view.wantsLayer = true
+            source_jp_server_field.drawsBackground = true
+            source_jp_server_field.backgroundColor = classic
+            source_user_field.drawsBackground = true
+            source_user_field.backgroundColor = classic
+            source_pwd_field.drawsBackground = true
+            source_pwd_field.backgroundColor = classic
+            dest_jp_server_field.drawsBackground = true
+            dest_jp_server_field.backgroundColor = classic
+            dest_pwd_field.backgroundColor = classic
+            dest_user_field.drawsBackground = true
+            dest_user_field.backgroundColor = classic
+            dest_pwd_field.drawsBackground = true
+            self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
+        }
         
+        NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateSourceServerList(_:)), name: .updateSourceServerList, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateDestServerList(_:)), name: .updateDestServerList, object: nil)
+        
+        NotificationCenter.default.post(name: .setColorScheme_sdvc, object: self)
         
         source_jp_server_field.delegate = self
         source_user_field.delegate      = self
@@ -1301,6 +1346,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 }
 
 extension Notification.Name {
+    public static let setColorScheme_sdvc    = Notification.Name("setColorScheme_sdvc")
     public static let deleteMode_sdvc        = Notification.Name("deleteMode_sdvc")
     public static let saveOnlyButtonToggle   = Notification.Name("toggleExportOnly")
     public static let updateSourceServerList = Notification.Name("updateSourceServerList")
