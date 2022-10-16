@@ -7428,24 +7428,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   //viewDidAppear - end
 
     @objc func setColorScheme_VC(_ notification: Notification) {
-        switch userDefaults.string(forKey: "colorScheme") {
-        case "classic":
-            self.view.wantsLayer = true
-            selectiveFilter_TextField.drawsBackground = true
-            selectiveFilter_TextField.backgroundColor = classicHighlight
-            self.view.layer?.backgroundColor          = classicBackground
-            srcSrvTableView.backgroundColor           = classicHighlight
-            srcSrvTableView.usesAlternatingRowBackgroundColors = false
-        case "casper":
-            self.view.wantsLayer = true
-            selectiveFilter_TextField.drawsBackground = true
-            selectiveFilter_TextField.backgroundColor = casperHighlight
-            self.view.layer?.backgroundColor          = casperBackground
-            srcSrvTableView.backgroundColor           = casperHighlight
-            srcSrvTableView.usesAlternatingRowBackgroundColors = false
-        default:
-            break
-        }
+        
+            let whichColorScheme = userDefaults.string(forKey: "colorScheme") ?? ""
+            if appColor.schemes.firstIndex(of: whichColorScheme) != nil {
+                self.view.wantsLayer = true
+                selectiveFilter_TextField.drawsBackground = true
+                selectiveFilter_TextField.backgroundColor = appColor.highlight[whichColorScheme]
+                self.view.layer?.backgroundColor          = appColor.background[whichColorScheme]
+                srcSrvTableView.backgroundColor           = appColor.highlight[whichColorScheme]!
+                srcSrvTableView.usesAlternatingRowBackgroundColors = false
+            }
     }
     
     var jamfpro: JamfPro?

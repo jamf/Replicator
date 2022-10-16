@@ -6,7 +6,16 @@
 //  Copyright © 2019 jamf. All rights reserved.
 //
 
+import Cocoa
 import Foundation
+
+class appColor: NSColor {
+    static let schemes:[String]            = ["casper", "classic"]
+    static let background:[String:CGColor] = ["casper":CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0),
+                                              "classic":CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)]
+    static let highlight:[String:NSColor]  = ["casper":NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0),
+                                              "classic":NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)]
+}
 
 struct appInfo {
     static let dict    = Bundle.main.infoDictionary!

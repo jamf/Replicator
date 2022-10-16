@@ -17,7 +17,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
     let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
-    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
+//    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     
     // Main Window
 //    @IBOutlet var migrator_window: NSView!
@@ -28,6 +28,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         setWindowSize(setting: hideCreds_button.state.rawValue)
     }
     func setWindowSize(setting: Int) {
+//        print("setWindowSize - setting: \(setting)")
         if setting == 0 {
             preferredContentSize = CGSize(width: 848, height: 55)
             hideCreds_button.toolTip = "show username/password fields"
@@ -40,7 +41,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var sitesSpinner_ProgressIndicator: NSProgressIndicator!
     
     // Import file variables
-    @IBOutlet weak var importFiles_button: NSButton!
+    @IBOutlet weak var fileImport_button: NSButton!
     @IBOutlet weak var browseFiles_button: NSButton!
     var exportedFilesUrl = URL(string: "")
     var xportFolderPath: URL? {
@@ -422,7 +423,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 // disable source server, username and password fields (to finish)
                 if source_jp_server_field.isEnabled {
 //                    source_jp_server_field.textColor   = NSColor.white
-                    importFiles_button.isEnabled      = false
+                    fileImport_button.isEnabled      = false
                     browseFiles_button.isEnabled      = false
                     source_jp_server_field.isEnabled  = false
                     sourceServerList_button.isEnabled = false
@@ -434,7 +435,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 // enable source server, username and password fields (to finish)
                 if !source_jp_server_field.isEnabled {
-                    importFiles_button.isEnabled       = true
+                    fileImport_button.isEnabled       = true
                     browseFiles_button.isEnabled       = true
                     source_jp_server_field.isEnabled   = true
                     sourceServerList_button.isEnabled  = true
@@ -459,7 +460,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    }
     
     @IBAction func fileImport_action(_ sender: NSButton) {
-        if importFiles_button.state.rawValue == 1 {
+        print("[fileImport] buttonState: \(fileImport_button.state.rawValue)")
+        if fileImport_button.state.rawValue == 1 {
+            userDefaults.set(true, forKey: "fileImport")
             let toggleFileImport = (sender.title == "Browse") ? false:true
             
             DispatchQueue.main.async {
@@ -494,26 +497,29 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     } else {
                         if toggleFileImport {
 //                            self.source_jp_server_field.stringValue = ""
-                            source_user_field.isHidden         = false
-                            source_pwd_field.isHidden          = false
-                            fileImport                         = false
-                            importFiles_button.state           = NSControl.StateValue(rawValue: 0)
-                            JamfProServer.importFiles = 0
+                            source_user_field.isHidden = false
+                            source_pwd_field.isHidden  = false
+                            fileImport                 = false
+                            fileImport_button.state    = NSControl.StateValue(rawValue: 0)
+                            JamfProServer.importFiles  = 0
+                            userDefaults.set(false, forKey: "fileImport")
                         }
                     }
                 } // openPanel.begin - end
             }   // DispatchQueue.main.async - end
-        } else {    // if importFiles_button.state - end
+        } else {    // if fileImport_button.state - end
+            userDefaults.set(false, forKey: "fileImport")
             DispatchQueue.main.async {
                 self.source_jp_server_field.stringValue = ""
                 self.source_user_field.isHidden = false
                 self.source_pwd_field.isHidden = false
                 self.fileImport = false
-                self.importFiles_button.state = NSControl.StateValue(rawValue: 0)
+                self.fileImport_button.state = NSControl.StateValue(rawValue: 0)
                 self.browseFiles_button.isHidden        = true
                 JamfProServer.importFiles = 0
             }
         }
+        userDefaults.synchronize()
     }   // @IBAction func fileImport - end
     
     @IBAction func migrateToSite_action(_ sender: Any) {
@@ -622,70 +628,77 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
    
     func fetchPassword(whichServer: String, url: String) {
-        let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
-        
-        if credentialsArray.count == 2 {
-            if whichServer == "source" {
-                JamfProServer.sourceUser = ""
-                JamfProServer.sourcePwd  = ""
-                if (url != "") {
-                    if setting.fullGUI {
-                        source_user_field.stringValue = credentialsArray[0]
-                        source_pwd_field.stringValue  = credentialsArray[1]
-                        self.storedSourceUser         = credentialsArray[0]
-                        self.storedSourcePwd          = credentialsArray[1]
-                    } else {
-                        source_user = credentialsArray[0]
-                        source_pass = credentialsArray[1]
+        fileImport = userDefaults.bool(forKey: "fileImport")
+        if !(whichServer == "source" && fileImport) {
+            let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
+            
+            if credentialsArray.count == 2 {
+                if whichServer == "source" {
+                    JamfProServer.sourceUser = ""
+                    JamfProServer.sourcePwd  = ""
+                    if (url != "") {
+                        if setting.fullGUI {
+                            source_user_field.stringValue = credentialsArray[0]
+                            source_pwd_field.stringValue  = credentialsArray[1]
+                            self.storedSourceUser         = credentialsArray[0]
+                            self.storedSourcePwd          = credentialsArray[1]
+                        } else {
+                            source_user = credentialsArray[0]
+                            source_pass = credentialsArray[1]
+                        }
+                        JamfProServer.source     = url
+                        JamfProServer.sourceUser = credentialsArray[0]
+                        JamfProServer.sourcePwd  = credentialsArray[1]
                     }
-                    JamfProServer.source     = url
-                    JamfProServer.sourceUser = credentialsArray[0]
-                    JamfProServer.sourcePwd  = credentialsArray[1]
-                }
-            } else {
-                JamfProServer.destUser   = ""
-                JamfProServer.destPwd    = ""
-                if (url != "") {
-                    if setting.fullGUI {
-                        dest_user_field.stringValue = credentialsArray[0]
-                        dest_pwd_field.stringValue  = credentialsArray[1]
-                        self.storedDestUser         = credentialsArray[0]
-                        self.storedDestPwd          = credentialsArray[1]
-                    }
-                    dest_user = credentialsArray[0]
-                    dest_pass = credentialsArray[1]
-                    JamfProServer.destination = url
-                    JamfProServer.destUser    = credentialsArray[0]
-                    JamfProServer.destPwd     = credentialsArray[1]
                 } else {
-                    if setting.fullGUI {
-                        dest_pwd_field.stringValue = ""
-                        if source_pwd_field.stringValue != "" {
-                            dest_pwd_field.becomeFirstResponder()
+                    JamfProServer.destUser   = ""
+                    JamfProServer.destPwd    = ""
+                    if (url != "") {
+                        if setting.fullGUI {
+                            dest_user_field.stringValue = credentialsArray[0]
+                            dest_pwd_field.stringValue  = credentialsArray[1]
+                            self.storedDestUser         = credentialsArray[0]
+                            self.storedDestPwd          = credentialsArray[1]
+                        }
+                        dest_user = credentialsArray[0]
+                        dest_pass = credentialsArray[1]
+                        JamfProServer.destination = url
+                        JamfProServer.destUser    = credentialsArray[0]
+                        JamfProServer.destPwd     = credentialsArray[1]
+                    } else {
+                        if setting.fullGUI {
+                            dest_pwd_field.stringValue = ""
+                            if source_pwd_field.stringValue != "" {
+                                dest_pwd_field.becomeFirstResponder()
+                            }
                         }
                     }
-                }
-            }   // if whichServer - end
-        } else {
-            // credentials not found - blank out username / password fields
-            if setting.fullGUI {
-                hideCreds_button.state = NSControl.StateValue(rawValue: 1)
-                hideCreds_action(self)
-                if whichServer == "source" {
-                    source_user_field.stringValue = ""
-                    source_pwd_field.stringValue = ""
-                    self.storedSourceUser = ""
-                    source_user_field.becomeFirstResponder()
-                } else {
-                    dest_user_field.stringValue = ""
-                    dest_pwd_field.stringValue = ""
-                    self.storedSourceUser = ""
-                    dest_user_field.becomeFirstResponder()
-                }
+                }   // if whichServer - end
             } else {
-                WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
-                NSApplication.shared.terminate(self)
+                // credentials not found - blank out username / password fields
+                if setting.fullGUI {
+                    hideCreds_button.state = NSControl.StateValue(rawValue: 1)
+                    hideCreds_action(self)
+                    if whichServer == "source" {
+                        source_user_field.stringValue = ""
+                        source_pwd_field.stringValue = ""
+                        self.storedSourceUser = ""
+                        source_user_field.becomeFirstResponder()
+                    } else {
+                        dest_user_field.stringValue = ""
+                        dest_pwd_field.stringValue = ""
+                        self.storedSourceUser = ""
+                        dest_user_field.becomeFirstResponder()
+                    }
+                } else {
+                    WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
+                    NSApplication.shared.terminate(self)
+                }
             }
+        } else {
+            source_user_field.stringValue = ""
+            source_pwd_field.stringValue = ""
+            self.storedSourceUser = ""
         }
     }
     
@@ -701,12 +714,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
+        print("enter controlTextDidEndEditing")
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
             case "sourceServer":
-                _ = serverOrFiles()
-                JamfProServer.source = source_jp_server_field.stringValue
-                fetchPassword(whichServer: "source", url: JamfProServer.source)
+                serverOrFiles() { [self]
+                    (result: String) in
+                    JamfProServer.source = source_jp_server_field.stringValue
+                    fetchPassword(whichServer: "source", url: JamfProServer.source)
+                }
             case "sourceUser":
                 JamfProServer.sourceUser = source_user_field.stringValue
             case "sourcePassword":
@@ -882,7 +898,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
             JamfProServer.source = sourceServerList_button.titleOfSelectedItem!
             source_jp_server_field.stringValue = sourceServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "source", url: self.source_jp_server_field.stringValue)
+            // see if we're migrating from files or a server
+            serverOrFiles() { [self]
+                (result: String) in
+                saveSourceDestInfo(info: plistData)
+                fetchPassword(whichServer: "source", url: JamfProServer.source)
+            }
         case "destination":
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
                 JamfProServer.validToken["destination"] = false
@@ -905,43 +926,41 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
         default: break
         }
-        // see if we're migrating from files or a server
-        _ = serverOrFiles()
-        saveSourceDestInfo(info: plistData)
     }
     
-    func serverOrFiles() -> String {
+    func serverOrFiles(completion: @escaping (_ sourceType: String) -> Void) {
         // see if we last migrated from files or a server
-//        print("entered serverOrFiles.")
         var sourceType = ""
-        DispatchQueue.main.async { [self] in
-            if source_jp_server_field.stringValue != "" {
-//                print("prefix: \(source_jp_server_field.stringValue.prefix(4).lowercased())")
-                if source_jp_server_field.stringValue.prefix(4).lowercased() == "http" {
-//                    print("source: server.")
-                    importFiles_button.state    = NSControl.StateValue(rawValue: 0)
-                    browseFiles_button.isHidden = true
-                    source_user_field.isHidden  = false
-                    source_pwd_field.isHidden   = false
-                    fileImport                  = false
-                    sourceType                  = "server"
-                } else {
-//                    print("source: local files")
-                    importFiles_button.state    = NSControl.StateValue(rawValue: 1)
-                    browseFiles_button.isHidden = false
-                    dataFilesRoot               = source_jp_server_field.stringValue
-                    JamfProServer.source        = source_jp_server_field.stringValue
-                    exportedFilesUrl            = URL(string: "file://\(dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
-                    source_user_field.isHidden  = true
-                    source_pwd_field.isHidden   = true
-                    fileImport                  = true
-                    sourceType                  = "files"
-                }
-                JamfProServer.importFiles = importFiles_button.state.rawValue
+        
+//        DispatchQueue.main.async { [self] in
+        if source_jp_server_field.stringValue != "" {
+            if source_jp_server_field.stringValue.prefix(4).lowercased() == "http" {
+//                print("source: server.")
+                fileImport_button.state    = NSControl.StateValue(rawValue: 0)
+                browseFiles_button.isHidden = true
+                source_user_field.isHidden  = false
+                source_pwd_field.isHidden   = false
+                fileImport                  = false
+                sourceType                  = "server"
+            } else {
+//                print("source: local files")
+                fileImport_button.state    = NSControl.StateValue(rawValue: 1)
+                browseFiles_button.isHidden = false
+                dataFilesRoot               = source_jp_server_field.stringValue
+                JamfProServer.source        = source_jp_server_field.stringValue
+                exportedFilesUrl            = URL(string: "file://\(dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
+                source_user_field.isHidden  = true
+                source_pwd_field.isHidden   = true
+                fileImport                  = true
+                sourceType                  = "files"
             }
+            JamfProServer.importFiles = fileImport_button.state.rawValue
         }
-        return(sourceType)
-    }
+//        }
+        userDefaults.set(fileImport, forKey: "fileImport")
+        userDefaults.synchronize()
+        completion(sourceType)
+    }   // func serverOrFiles() - end
     
     override func viewDidAppear() {
         // set tab order
@@ -963,43 +982,26 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @objc func updateDestServerList(_ notification: Notification) {
         updateServerArray(url: JamfProServer.destination, serverList: "dest_server_array", theArray: self.destServerArray)
     }
-    
     @objc func setColorScheme_sdvc(_ notification: Notification) {
-        switch userDefaults.string(forKey: "colorScheme") {
-        case "classic":
+        let whichColorScheme = userDefaults.string(forKey: "colorScheme") ?? ""
+        if appColor.schemes.firstIndex(of: whichColorScheme) != nil {
             self.view.wantsLayer = true
             source_jp_server_field.drawsBackground = true
-            source_jp_server_field.backgroundColor = classicHighlight
+            source_jp_server_field.backgroundColor = appColor.highlight[whichColorScheme]
             source_user_field.drawsBackground = true
-            source_user_field.backgroundColor = classicHighlight
+            source_user_field.backgroundColor = appColor.highlight[whichColorScheme]
             source_pwd_field.drawsBackground = true
-            source_pwd_field.backgroundColor = classicHighlight
+            source_pwd_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_jp_server_field.drawsBackground = true
-            dest_jp_server_field.backgroundColor = classicHighlight
-            dest_pwd_field.backgroundColor = classicHighlight
+            dest_jp_server_field.backgroundColor = appColor.highlight[whichColorScheme]
+            dest_pwd_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_user_field.drawsBackground = true
-            dest_user_field.backgroundColor = classicHighlight
+            dest_user_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_pwd_field.drawsBackground = true
-            self.view.layer?.backgroundColor = classicBackground
-        case "casper":
-            self.view.wantsLayer = true
-            source_jp_server_field.drawsBackground = true
-            source_jp_server_field.backgroundColor = casperHighlight
-            source_user_field.drawsBackground = true
-            source_user_field.backgroundColor = casperHighlight
-            source_pwd_field.drawsBackground = true
-            source_pwd_field.backgroundColor = casperHighlight
-            dest_jp_server_field.drawsBackground = true
-            dest_jp_server_field.backgroundColor = casperHighlight
-            dest_pwd_field.backgroundColor = casperHighlight
-            dest_user_field.drawsBackground = true
-            dest_user_field.backgroundColor = casperHighlight
-            dest_pwd_field.drawsBackground = true
-            self.view.layer?.backgroundColor = casperBackground
-        default:
-            break
+            self.view.layer?.backgroundColor = appColor.background[whichColorScheme]
         }
     }
+    
     var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -1008,25 +1010,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        debug = true
         
         // Do any additional setup after loading the view.
-//        if classicBackground {
-//
-//        }
-        if userDefaults.string(forKey: "colorScheme") == "classic" {
-            self.view.wantsLayer = true
-            source_jp_server_field.drawsBackground = true
-            source_jp_server_field.backgroundColor = classic
-            source_user_field.drawsBackground = true
-            source_user_field.backgroundColor = classic
-            source_pwd_field.drawsBackground = true
-            source_pwd_field.backgroundColor = classic
-            dest_jp_server_field.drawsBackground = true
-            dest_jp_server_field.backgroundColor = classic
-            dest_pwd_field.backgroundColor = classic
-            dest_user_field.drawsBackground = true
-            dest_user_field.backgroundColor = classic
-            dest_pwd_field.drawsBackground = true
-            self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
-        }
         
         NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
@@ -1043,21 +1026,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         dest_user_field.delegate        = self
         dest_pwd_field.delegate         = self
         
-        // read maxConcurrentOperationCount setting
-//        concurrentThreads = setConcurrentThreads()
-//        print("concurrentThreads: \(userDefaults.integer(forKey: "concurrentThreads"))")
-
-//        if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
-        
         jamfpro = JamfPro(sdController: self)
-        
-        if !hideGui {
-            hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
-            setWindowSize(setting: hideCreds_button.state.rawValue)
-            source_jp_server_field.becomeFirstResponder()
-        }
-        
+        fileImport = userDefaults.bool(forKey: "fileImport")
         initVars()
+        
+//        if !hideGui {
+            hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+//            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
+            setWindowSize(setting: hideCreds_button.state.rawValue)
+//            source_jp_server_field.becomeFirstResponder()
+//        }
+        
     }   //override func viewDidLoad() - end
     
     override var representedObject: Any? {
@@ -1109,7 +1088,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     NSApplication.shared.terminate(self)
                 }
             }
-            
             
             // read environment settings from plist - start
             plistData = readSettings()
@@ -1172,99 +1150,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     storeCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeCreds)
                 }
             }
-            /*
-             // read in ViewController
-             
-            // read scope settings - start
-            if plistData["scope"] != nil {
-                scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-
-                if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                    scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-                }
-                if self.scopeOptions["macapps"] != nil {
-                    if self.scopeOptions["macapps"]!["copy"] != nil {
-                        self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
-                    } else {
-                        self.scopeMaCopy = true
-                    }
-                } else {
-                    self.scopeMaCopy = true
-                }
-                if scopeOptions["policies"]!["copy"] != nil {
-                    scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
-                }
-                if scopeOptions["policies"]!["disable"] != nil {
-                    policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
-                }
-                if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                    scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
-                }
-                if scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                    scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
-                }
-                if self.scopeOptions["iosapps"] != nil {
-                    if self.scopeOptions["iosapps"]!["copy"] != nil {
-                        self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
-                    } else {
-                        self.scopeIaCopy = true
-                    }
-                } else {
-                    self.scopeIaCopy = true
-                }
-            } else {
-                // reset/initialize new settings
-                plistData          = readSettings()
-                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
-                                      "macapps":["copy":true],
-                                      "policies":["copy":true,"disable":false],
-                                      "restrictedsoftware":["copy":true],
-                                      "mobiledeviceconfigurationprofiles":["copy":true],
-                                      "iosapps":["copy":true],
-                                      "scg":["copy":true],
-                                      "sig":["copy":true],
-                                      "users":["copy":true]] as Any
-                
-                NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-            }
-            // read scope settings - end
-            
-            if scopeOptions["scg"] != nil && scopeOptions["sig"] != nil && scopeOptions["users"] != nil  {
-
-                if (scopeOptions["scg"]!["copy"] != nil) {
-                    scopeScgCopy = scopeOptions["scg"]!["copy"]!
-                } else {
-                    scopeScgCopy                  = true
-                    scopeOptions["scg"]!["copy"] = scopeScgCopy
-                }
-
-                if (scopeOptions["sig"]!["copy"] != nil) {
-                    scopeSigCopy = scopeOptions["sig"]!["copy"]!
-                } else {
-                    scopeSigCopy                  = true
-                    scopeOptions["sig"]!["copy"] = scopeSigCopy
-                }
-
-                if (scopeOptions["sig"]!["users"] != nil) {
-                    scopeUsersCopy = scopeOptions["sig"]!["users"]!
-                } else {
-                    scopeUsersCopy                 = true
-                    scopeOptions["sig"]!["users"] = scopeUsersCopy
-                }
-            } else {
-                // reset/initialize scope preferences
-                plistData          = readSettings()
-                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
-                                      "macapps":["copy":true],
-                                      "policies":["copy":true,"disable":false],
-                                      "restrictedsoftware":["copy":true],
-                                      "mobiledeviceconfigurationprofiles":["copy":true],
-                                      "iosapps":["copy":true],
-                                      "scg":["copy":true],
-                                      "sig":["copy":true],
-                                      "users":["copy":true]] as Any
-            }
-             */
             
             // read xml settings - start
             if plistData["xml"] != nil {
@@ -1316,7 +1201,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             
             // see if we last migrated from files or a server
             // no need to backup local files, add later?
-            _ = serverOrFiles()
+            
+            serverOrFiles() { [self]
+                (result: String) in
+                hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+                source_jp_server_field.becomeFirstResponder()
+            }
+//            print("initVars - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
+//            print("fileImport: \(fileImport)")
+//            print("source: \(theSource)")
+//            setWindowSize(setting: hideCreds_button.state.rawValue)
+            
         } else {
 //            didRun = true
             source_jp_server = JamfProServer.source
