@@ -708,13 +708,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if plistData.count == 0 {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
         }
-//        print("readSettings - plistData: \(String(describing: plistData))\n")
         return(plistData)
         // read environment settings - end
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
-        print("enter controlTextDidEndEditing")
+//        print("enter controlTextDidEndEditing")
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
             case "sourceServer":
@@ -728,6 +727,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             case "sourcePassword":
                 JamfProServer.sourcePwd = source_pwd_field.stringValue
             case "destServer":
+                if JamfProServer.destination != dest_jp_server_field.stringValue {
+                    serverChanged(whichserver: "destination")
+                }
                 JamfProServer.destination = dest_jp_server_field.stringValue
                 fetchPassword(whichServer: "destination", url: JamfProServer.destination)
             case "destUser":
