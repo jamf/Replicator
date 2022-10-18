@@ -4021,6 +4021,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let configuration = URLSessionConfiguration.default
 //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
                 configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                
+                // sticky session
+                let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
+                print("create sticky session for \(cookieUrl)")
+                if JamfProServer.sessionCookie.count > 0 {
+                    URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: cookieUrl), mainDocumentURL: URL(string: cookieUrl))
+                }
+                
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -4058,7 +4066,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
                                 if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
                                     whichError = ""
-                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
+                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
                                 }
                             } else {
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
@@ -4066,6 +4074,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                                 WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(self.getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
+                                
+                                self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
                                 
                                 if endpointCurrent == 1 && !retry {
                                     migrationComplete.isDone = false
@@ -6278,7 +6288,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 // swift file download - end
             
         case "POST":
-            if uploadedIcons[ssIconId.fixOptional] == nil && setting.csa {
+            if uploadedIcons[ssIconId.fixOptional] == nil || setting.csa {
                 // upload icon to fileuploads endpoint / icon server
                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)\n")
                
@@ -6414,7 +6424,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     //                    NotificationCenter.default.removeObserver(uploadObserver)
                     }   // theUploadQ.addOperation - end
             } else {
-                completion(uploadedIcons[ssIconId.fixOptional]!)
+//                if let _ = uploadedIcons[ssIconId.fixOptional] {
+                    completion(uploadedIcons[ssIconId.fixOptional]!)
+//                } else {
+//                    completion(0)
+//                }
             }
             
         case "PUT":
@@ -6665,7 +6679,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 case "mobile-device-prestages":
                     self.mobiledevicePrestage_label_field.textColor = theColor
                 default:
-                    print("function labelColor: unknown label - \(endpoint)")
+                    break
+//                    print("function labelColor: unknown label - \(endpoint)")
                 }
             }
         }

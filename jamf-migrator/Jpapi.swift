@@ -14,6 +14,13 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
+        // cookie stuff
+//        var cookies:[HTTPCookie]?
+        var sessionCookie: HTTPCookie?
+        var cookieName         = "" // name of cookie to look for
+        var currentCookieValue = ""
+        var cookieJar          = [String: HTTPCookie]()
+        
         if method.lowercased() == "skip" {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
             completion(["JPAPI_result":"failed", "JPAPI_response":000])
@@ -38,7 +45,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //        print("[Jpapi] urlString: \(urlString)")
         
         let url            = URL(string: "\(urlString)")
-        let configuration  = URLSessionConfiguration.ephemeral
+        let configuration  = URLSessionConfiguration.default
         var request        = URLRequest(url: url!)
         switch method.lowercased() {
         case "get":
@@ -61,12 +68,55 @@ class Jpapi: NSObject, URLSessionDelegate {
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+        
+        // sticky session
+//        let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
+        print("jpapi sticky session for \(serverUrl)")
+        if JamfProServer.sessionCookie.count > 0 {
+            URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
+        }
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                    
+                    if endpoint == "csa/token" {
+                        JamfProServer.sessionCookie.removeAll()
+                        currentCookieValue = ""
+            //            let cookies = HTTPCookieStorage.shared.cookies!
+            //            print("total cookies: \(cookies.count)")
+
+                        if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "jpro-ingress" }) {
+                            sessionCookie = cookie
+                            cookieName = "jpro-ingress"
+                            currentCookieValue = cookie.value
+                            print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
+                        } else {
+                            if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "APBALANCEID" }) {
+                                sessionCookie = cookie
+                                cookieName = "APBALANCEID"
+                                currentCookieValue = cookie.value
+                                print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
+                            } else {
+                                // some other cookie to identify node
+                                if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "???xxxx???" }) {
+                                    sessionCookie = cookie
+                                    cookieName = "???xxxx???"
+                                    currentCookieValue = cookie.value
+                                    print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
+                                } else {
+                                    sessionCookie = nil
+                                }
+                            }
+                        }
+                        if sessionCookie != nil {
+                            JamfProServer.sessionCookie.append(sessionCookie!)
+                        }
+                    }
+                    
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json! as? [String:Any] {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).\n") }

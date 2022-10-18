@@ -22,58 +22,62 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
         
         if theEndpoint.prefix(4) != "skip" {
-                    let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
-                
-                    URLCache.shared.removeAllCachedResponses()
-                    var existingDestUrl = ""
-                    
-                    existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)"
+            let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
+        
+            URLCache.shared.removeAllCachedResponses()
+            var existingDestUrl = ""
+            
+            existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)"
             existingDestUrl = existingDestUrl.urlFix
 //            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                     
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.apiAction] Looking up: \(existingDestUrl)\n") }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[Xml.apiAction] Looking up: \(existingDestUrl)\n") }
 //                    if "\(existingDestUrl)" == "" { existingDestUrl = "https://localhost" }
-                    let destEncodedURL = URL(string: existingDestUrl)
-                    let xmlRequest     = NSMutableURLRequest(url: destEncodedURL! as URL)
-                    
-                    let semaphore = DispatchSemaphore(value: 1)
-                    getRecordQ.maxConcurrentOperationCount = 3
-                    getRecordQ.addOperation {
-                        
-                        xmlRequest.httpMethod = "\(method.uppercased())"
-                        let destConf = URLSessionConfiguration.ephemeral
-//                         ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                        destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
-                        let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-                        let task = destSession.dataTask(with: xmlRequest as URLRequest, completionHandler: {
-                            (data, response, error) -> Void in
-                            destSession.finishTasksAndInvalidate()
-                            if let httpResponse = response as? HTTPURLResponse {
-                                if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                                    do {
-                                        let returnedXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+            let destEncodedURL = URL(string: existingDestUrl)
+            let xmlRequest     = NSMutableURLRequest(url: destEncodedURL! as URL)
+            
+            let semaphore = DispatchSemaphore(value: 1)
+            getRecordQ.maxConcurrentOperationCount = 3
+            getRecordQ.addOperation {
+                
+                xmlRequest.httpMethod = "\(method.uppercased())"
+                let destConf = URLSessionConfiguration.default
 
-                                        completion((httpResponse.statusCode,returnedXML))
-                                    }
-                                } else {
-                                    WriteToLog().message(stringOfText: "[Xml.apiAction] error HTTP Status Code: \(httpResponse.statusCode)\n")
-                                    if method != "DELETE" {
-                                        completion((httpResponse.statusCode,""))
-                                    } else {
-                                        completion((httpResponse.statusCode,""))
-                                    }
-                                }
-                            } else {
-                                WriteToLog().message(stringOfText: "[Xml.apiAction] error getting XML for \(existingDestUrl)\n")
-                                completion((0,""))
-                            }   // if let httpResponse - end
-                            semaphore.signal()
-                            if error != nil {
+                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                
+                // sticky session
+                //        let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
+                if JamfProServer.sessionCookie.count > 0 {
+                    print("xml sticky session for \(theServer)")
+                    URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: theServer), mainDocumentURL: URL(string: theServer))
+                }
+                
+                let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
+                let task = destSession.dataTask(with: xmlRequest as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    destSession.finishTasksAndInvalidate()
+                    if let httpResponse = response as? HTTPURLResponse {
+                        if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                            do {
+                                let returnedXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+
+                                completion((httpResponse.statusCode,returnedXML))
                             }
-                        })  // let task = destSession - end
-                        //print("GET")
-                        task.resume()
-                    }   // getRecordQ - end
+                        } else {
+                            WriteToLog().message(stringOfText: "[Xml.apiAction] error HTTP Status Code: \(httpResponse.statusCode)\n")
+                            completion((httpResponse.statusCode,""))
+                        }
+                    } else {
+                        WriteToLog().message(stringOfText: "[Xml.apiAction] error getting XML for \(existingDestUrl)\n")
+                        completion((0,""))
+                    }   // if let httpResponse - end
+                    semaphore.signal()
+                    if error != nil {
+                    }
+                })  // let task = destSession - end
+                //print("GET")
+                task.resume()
+            }   // getRecordQ - end
         } else {
             completion((200,""))
         }

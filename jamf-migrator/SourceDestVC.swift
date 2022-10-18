@@ -460,7 +460,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    }
     
     @IBAction func fileImport_action(_ sender: NSButton) {
-        print("[fileImport] buttonState: \(fileImport_button.state.rawValue)")
         if fileImport_button.state.rawValue == 1 {
             userDefaults.set(true, forKey: "fileImport")
             let toggleFileImport = (sender.title == "Browse") ? false:true

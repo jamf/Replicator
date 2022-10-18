@@ -449,7 +449,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField identifier="sourceUser" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Boh-LW-16Z">
+                            <textField identifier="sourceUser" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Boh-LW-16Z">
                                 <rect key="frame" x="207" y="50" width="170" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="170" id="YL9-3L-y2F"/>
@@ -702,6 +702,7 @@
                             <constraint firstAttribute="trailing" secondItem="BVE-BE-oEy" secondAttribute="trailing" constant="26" id="DvZ-rT-FuQ"/>
                             <constraint firstItem="tkt-Wc-DhS" firstAttribute="centerX" secondItem="xCj-67-1hr" secondAttribute="centerX" id="GLk-DS-uyh"/>
                             <constraint firstItem="NzE-CG-YkQ" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="26" id="Gbv-yj-Oay"/>
+                            <constraint firstItem="Boh-LW-16Z" firstAttribute="leading" secondItem="mdU-Bj-ruz" secondAttribute="leading" id="H28-eV-eFL"/>
                             <constraint firstItem="3bq-4s-0tw" firstAttribute="top" secondItem="KCT-A6-xGn" secondAttribute="bottom" constant="4" id="H6I-Gd-KsV"/>
                             <constraint firstItem="BVE-BE-oEy" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="5" id="HNt-Eu-lxZ"/>
                             <constraint firstItem="oWq-4n-u3f" firstAttribute="top" secondItem="WKS-OT-80i" secondAttribute="bottom" constant="3" id="IW9-1e-2Pn"/>
@@ -1506,6 +1507,14 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Yfj-WY-ddy"/>
                                                     </connections>
                                                 </button>
+                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="758-4h-BMs">
+                                                    <rect key="frame" x="600" y="77" width="110" height="16"/>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="Ze9-vB-izL">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b5v-KK-ZKw" userLabel="File Shares (AFP/SMB)">
                                                     <rect key="frame" x="543" y="18" width="112" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="File Shares (local)" id="uPY-59-Z8S" userLabel="File Shares (AFP/SMB)">
@@ -1671,15 +1680,6 @@
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="758-4h-BMs">
-                                                    <rect key="frame" x="539" y="14" width="110" height="16"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="Ze9-vB-izL">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8U0-Qe-paa" userLabel="Prestages">
                                                     <rect key="frame" x="557" y="21" width="75" height="16"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1735,6 +1735,8 @@
                                                 <constraint firstItem="TsB-ot-L5w" firstAttribute="top" secondItem="rfx-qW-1EN" secondAttribute="bottom" constant="4" id="cZI-35-Wz8"/>
                                                 <constraint firstItem="phd-7I-bpv" firstAttribute="top" secondItem="fn5-oe-BJC" secondAttribute="top" constant="30" id="dzH-3Y-Ws1"/>
                                                 <constraint firstItem="ZNF-kE-Dab" firstAttribute="leading" secondItem="RJ3-X5-ZGl" secondAttribute="trailing" constant="256" id="fV3-cn-2ZH"/>
+                                                <constraint firstItem="758-4h-BMs" firstAttribute="top" secondItem="KIq-hd-UjN" secondAttribute="bottom" constant="5" id="gCS-Hl-KeE"/>
+                                                <constraint firstItem="758-4h-BMs" firstAttribute="leading" secondItem="4Qx-cz-EYa" secondAttribute="trailing" constant="121" id="irA-fI-4qn"/>
                                                 <constraint firstItem="b5v-KK-ZKw" firstAttribute="leading" secondItem="fn5-oe-BJC" secondAttribute="leading" constant="545" id="j8N-dr-v9j"/>
                                                 <constraint firstItem="llc-Ji-GYb" firstAttribute="top" secondItem="864-jA-QKf" secondAttribute="bottom" constant="4" id="lfH-EA-GPK"/>
                                                 <constraint firstItem="Jh1-S4-tyb" firstAttribute="top" secondItem="maX-gS-OdH" secondAttribute="bottom" constant="105" id="lhL-0q-yLf"/>
@@ -1860,6 +1862,14 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="1Un-cc-Xbc"/>
                                                     </connections>
                                                 </button>
+                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="exf-L4-EBY">
+                                                    <rect key="frame" x="413" y="138" width="110" height="16"/>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="bls-L0-0rc">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uo3-PW-fQz" userLabel="Static Group fld">
                                                     <rect key="frame" x="538" y="12" width="98" height="16"/>
                                                     <constraints>
@@ -1952,18 +1962,10 @@
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="exf-L4-EBY">
-                                                    <rect key="frame" x="538" y="12" width="110" height="16"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="bls-L0-0rc">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                </textField>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="h8I-FY-zDu" firstAttribute="leading" secondItem="Q6a-6E-m2M" secondAttribute="leading" id="1Mg-5m-UPl"/>
+                                                <constraint firstItem="exf-L4-EBY" firstAttribute="top" secondItem="p6U-ah-Cbx" secondAttribute="top" constant="32" id="2lD-NG-Lvk"/>
                                                 <constraint firstAttribute="trailing" secondItem="HiT-1i-N3p" secondAttribute="trailing" constant="57" id="3hi-G2-1AR"/>
                                                 <constraint firstItem="Q6a-6E-m2M" firstAttribute="top" secondItem="h8I-FY-zDu" secondAttribute="bottom" constant="8" id="5z3-p2-vSs"/>
                                                 <constraint firstItem="Cdp-dK-MDl" firstAttribute="baseline" secondItem="qhC-l8-gex" secondAttribute="baseline" id="AhU-rw-4jQ"/>
@@ -1971,6 +1973,7 @@
                                                 <constraint firstItem="qhC-l8-gex" firstAttribute="baseline" secondItem="ICa-bR-OiZ" secondAttribute="baseline" id="EIK-n5-gWh"/>
                                                 <constraint firstItem="Cdp-dK-MDl" firstAttribute="top" secondItem="tLs-US-62W" secondAttribute="bottom" constant="4" id="IQ1-qm-JVl"/>
                                                 <constraint firstItem="tLs-US-62W" firstAttribute="firstBaseline" secondItem="HiT-1i-N3p" secondAttribute="firstBaseline" id="Kqu-7v-gHI"/>
+                                                <constraint firstItem="exf-L4-EBY" firstAttribute="leading" secondItem="VyL-Hh-erV" secondAttribute="trailing" constant="118" id="O6F-mQ-SE4"/>
                                                 <constraint firstItem="tLs-US-62W" firstAttribute="baseline" secondItem="VyL-Hh-erV" secondAttribute="baseline" id="OPx-tJ-OpB"/>
                                                 <constraint firstItem="ICa-bR-OiZ" firstAttribute="baseline" secondItem="h8I-FY-zDu" secondAttribute="baseline" id="OQf-Wh-do3"/>
                                                 <constraint firstItem="VyL-Hh-erV" firstAttribute="baseline" secondItem="w1S-rf-b7s" secondAttribute="baseline" id="OTF-V6-21x"/>
@@ -2136,7 +2139,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="161"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="159"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="159"/>
