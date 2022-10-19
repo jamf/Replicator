@@ -46,9 +46,8 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 
                 // sticky session
-                //        let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
-                if JamfProServer.sessionCookie.count > 0 {
-                    print("xml sticky session for \(theServer)")
+                if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
+//                    print("xml sticky session for \(theServer)")
                     URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: theServer), mainDocumentURL: URL(string: theServer))
                 }
                 

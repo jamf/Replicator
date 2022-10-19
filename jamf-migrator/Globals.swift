@@ -75,6 +75,7 @@ struct JamfProServer {
     static var version      = ["source":"", "destination":""]
     static var pkgsNotFound = 0
     static var sessionCookie = [HTTPCookie]()
+    static var stickySession = false
 }
 
 struct LogLevel {

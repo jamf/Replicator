@@ -4024,8 +4024,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 // sticky session
                 let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
-                print("create sticky session for \(cookieUrl)")
-                if JamfProServer.sessionCookie.count > 0 {
+//                print("create sticky session for \(cookieUrl)")
+                if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
                     URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: cookieUrl), mainDocumentURL: URL(string: cookieUrl))
                 }
                 
@@ -4935,9 +4935,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
                         
                         destRequest.httpMethod = "GET"
-                        let destConf = URLSessionConfiguration.ephemeral
+                        let destConf = URLSessionConfiguration.default
 
                         destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+                        
+                        // sticky session
+//                        print("[existingEndpoints] JamfProServer.sessionCookie.count: \(JamfProServer.sessionCookie.count)")
+//                        print("[existingEndpoints]       JamfProServer.stickySession: \(JamfProServer.stickySession)")
+                        if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
+                            print("[existingEndpoints] sticky session for \(self.dest_jp_server)")
+                            URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: self.dest_jp_server), mainDocumentURL: URL(string: self.dest_jp_server))
+                        }
+                        
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         let task = destSession.dataTask(with: destRequest as URLRequest, completionHandler: {
                             (data, response, error) -> Void in
@@ -6740,6 +6749,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if (self.fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
+                wipeData.on = false
                 _ = serverOrFiles()
                 DispatchQueue.main.async {
                     self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"

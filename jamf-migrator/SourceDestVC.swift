@@ -83,6 +83,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var destServerList_button: NSPopUpButton!
     @IBOutlet weak var siteMigrate_button: NSButton!
     @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
+    @IBOutlet weak var stickySessions_label: NSTextField!
     
     var itemToSite      = false
     var destinationSite = ""
@@ -974,6 +975,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
     }   //viewDidAppear - end
     
+    @objc func stickySessionToggle(_ notification: Notification) {
+        stickySessions_label.isHidden = !JamfProServer.stickySession
+    }
     @objc func toggleExportOnly(_ notification: Notification) {
         disableSource()
     }
@@ -1015,6 +1019,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(toggleExportOnly(_:)), name: .saveOnlyButtonToggle, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(stickySessionToggle(_:)), name: .stickySessionToggle, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateSourceServerList(_:)), name: .updateSourceServerList, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateDestServerList(_:)), name: .updateDestServerList, object: nil)
         
@@ -1029,6 +1034,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
         jamfpro = JamfPro(sdController: self)
         fileImport = userDefaults.bool(forKey: "fileImport")
+        JamfProServer.stickySession = userDefaults.bool(forKey: "stickySession")
+        stickySessions_label.isHidden = !JamfProServer.stickySession
+    
         initVars()
         
 //        if !hideGui {
@@ -1245,6 +1253,7 @@ extension Notification.Name {
     public static let setColorScheme_sdvc    = Notification.Name("setColorScheme_sdvc")
     public static let deleteMode_sdvc        = Notification.Name("deleteMode_sdvc")
     public static let saveOnlyButtonToggle   = Notification.Name("toggleExportOnly")
+    public static let stickySessionToggle    = Notification.Name("stickySessionToggle")
     public static let updateSourceServerList = Notification.Name("updateSourceServerList")
     public static let updateDestServerList   = Notification.Name("updateDestServerList")
 }

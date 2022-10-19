@@ -45,6 +45,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
     @IBOutlet weak var concurrentThreads_textfield: NSTextField!
     @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
+    @IBOutlet weak var stickySession_button: NSButton!
     @IBOutlet weak var forceBasicAuth_button: NSButton!
     @IBOutlet weak var colorScheme_button: NSPopUpButton!
     
@@ -148,7 +149,16 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         userDefaults.set(Int(concurrentThreads_textfield.stringValue), forKey: "concurrentThreads")
         userDefaults.synchronize()
     }
-    
+    @IBAction func stickySession_action(_ sender: NSButton) {
+        if sender.state.rawValue == 1 {
+            JamfProServer.stickySession = true
+        } else {
+            JamfProServer.stickySession = false
+        }
+        userDefaults.set(JamfProServer.stickySession, forKey: "stickySession")
+        userDefaults.synchronize()
+        NotificationCenter.default.post(name: .stickySessionToggle, object: self)
+    }
     @IBAction func forceBasicAuth_action(_ sender: Any) {
         userDefaults.set(Int(forceBasicAuth_button.state.rawValue), forKey: "forceBasicAuth")
         userDefaults.synchronize()
@@ -403,6 +413,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads"))"
             concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
+            stickySession_button.state = userDefaults.bool(forKey: "stickySession") ? NSControl.StateValue(1):NSControl.StateValue(0)
             forceBasicAuth_button.state = NSControl.StateValue(userDefaults.integer(forKey: "forceBasicAuth"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")

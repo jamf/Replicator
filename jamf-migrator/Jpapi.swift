@@ -18,8 +18,6 @@ class Jpapi: NSObject, URLSessionDelegate {
 //        var cookies:[HTTPCookie]?
         var sessionCookie: HTTPCookie?
         var cookieName         = "" // name of cookie to look for
-        var currentCookieValue = ""
-        var cookieJar          = [String: HTTPCookie]()
         
         if method.lowercased() == "skip" {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
@@ -70,9 +68,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
         
         // sticky session
-//        let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
-        print("jpapi sticky session for \(serverUrl)")
-        if JamfProServer.sessionCookie.count > 0 {
+//        print("jpapi sticky session for \(serverUrl)")
+        if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
             URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
         }
         
@@ -83,37 +80,38 @@ class Jpapi: NSObject, URLSessionDelegate {
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     
-                    if endpoint == "csa/token" {
+//                    print("[jpapi] endpoint: \(endpoint)")
+
+                    if endpoint == "jamf-pro-version" {
                         JamfProServer.sessionCookie.removeAll()
-                        currentCookieValue = ""
             //            let cookies = HTTPCookieStorage.shared.cookies!
             //            print("total cookies: \(cookies.count)")
-
-                        if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "jpro-ingress" }) {
-                            sessionCookie = cookie
-                            cookieName = "jpro-ingress"
-                            currentCookieValue = cookie.value
-                            print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
-                        } else {
-                            if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "APBALANCEID" }) {
-                                sessionCookie = cookie
-                                cookieName = "APBALANCEID"
-                                currentCookieValue = cookie.value
-                                print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
-                            } else {
-                                // some other cookie to identify node
-                                if let cookie = HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "???xxxx???" }) {
-                                    sessionCookie = cookie
-                                    cookieName = "???xxxx???"
-                                    currentCookieValue = cookie.value
-                                    print("\(endpoint) cookie name, \(cookieName): \(cookie.value)")
-                                } else {
-                                    sessionCookie = nil
+                        
+                        for theCookie in HTTPCookieStorage.shared.cookies! {
+//                            print("cookie name \(theCookie.name)")
+                            if ["jpro-ingress", "APBALANCEID"].contains(theCookie.name) {
+                                sessionCookie = theCookie
+                                cookieName    = theCookie.name
+                                break
+                            }
+                        }
+                        // look for alternalte cookie to use with sticky sessions
+                        if sessionCookie == nil {
+                            for theCookie in HTTPCookieStorage.shared.cookies! {
+//                                print("cookie name \(theCookie.name)")
+                                if ["AWSALB"].contains(theCookie.name) {
+                                    sessionCookie = theCookie
+                                    cookieName    = theCookie.name
+                                    break
                                 }
                             }
                         }
-                        if sessionCookie != nil {
+                        
+                        if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
+                            WriteToLog().message(stringOfText: "[Jpapi.action] set cookie (\(String(describing: sessionCookie))) for \(String(describing: sessionCookie!.domain))\n")
                             JamfProServer.sessionCookie.append(sessionCookie!)
+                        } else {
+                            HTTPCookieStorage.shared.removeCookies(since: History.startTime)
                         }
                     }
                     
