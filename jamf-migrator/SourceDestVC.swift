@@ -10,7 +10,7 @@ import AppKit
 import Cocoa
 import Foundation
 
-class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate, NSSplitViewDelegate {
+class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let userDefaults      = UserDefaults.standard
     let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
@@ -1010,8 +1010,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
-//        let test = SplitViewVC().splitView.dividerThickness
-//        print("test: \(test)")
 //        hardSetLdapId = false
 
 //        debug = true

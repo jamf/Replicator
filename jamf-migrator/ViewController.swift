@@ -613,6 +613,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             targetDataArray.removeAll()
         }
         // disable buttons on inactive tabs - end
+        srcSrvTableView.isEnabled = true
 	}
 
     func markAllNone(rawStateValue: Int) {
@@ -5654,7 +5655,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func clearSelectiveList() {
         DispatchQueue.main.async { [self] in
             if !selectiveListCleared && srcSrvTableView.isEnabled {
-
+                
                 generalSectionToMigrate_button.selectItem(at: 0)
                 sectionToMigrate_button.selectItem(at: 0)
                 iOSsectionToMigrate_button.selectItem(at: 0)
@@ -5765,19 +5766,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if ((theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning) || pref.stopMigration {
                                 
                                 if !local_button_status {
-//                                    History.endTime = Date()
 //
-//
-//                                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
-//
-////                                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-////                                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
-//
-//                                    let timeDifference = Int(components.second!)
-//                                    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
-//                                    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-//
-                                    let (h,m,s) = runTime()
+                                    let (h,m,s) = timeDiff(forWhat: "runTime")
                                     WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                                     
                                     if setting.fullGUI {
@@ -5819,7 +5809,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                                 WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip\n")
                                 
-                                let (h,m,s) = runTime()
+                                let (h,m,s) = timeDiff(forWhat: "runTime")
                                 WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                             } catch let error as NSError {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
@@ -5854,16 +5844,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func runTime() -> (Int,Int,Int) {
-        History.endTime = Date()
-        let components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: History.endTime)
-//          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
-        let timeDifference = Int(components.second!)
-        let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
-        let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-        return(h,m,s)
-    }
+//    func timeDiff(forWhat: String) -> (Int,Int,Int) {
+//        var components:DateComponents?
+//        switch forWhat {
+//        case "runTime":
+//            components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: Date())
+//        case "sourceTokenAge","destTokenAge":
+//            if forWhat == "sourceTokenAge" {
+//                components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["source"] ?? Date())!, to: Date())
+//            } else {
+//                components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["destination"] ?? Date())!, to: Date())
+//            }
+//        default:
+//            break
+//        }
+////          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+////          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+//        let timeDifference = Int(components?.second! ?? 0)
+//        let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+//        let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+//        return(h,m,s)
+//    }
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
@@ -7857,10 +7858,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         resetAllCheckboxes()
         clearProcessingFields()
-        self.generalSectionToMigrate_button.selectItem(at: 0)
-        self.sectionToMigrate_button.selectItem(at: 0)
-        self.iOSsectionToMigrate_button.selectItem(at: 0)
-        self.selectiveFilter_TextField.stringValue = ""
+        if srcSrvTableView.isEnabled {
+            self.generalSectionToMigrate_button.selectItem(at: 0)
+            self.sectionToMigrate_button.selectItem(at: 0)
+            self.iOSsectionToMigrate_button.selectItem(at: 0)
+            self.selectiveFilter_TextField.stringValue = ""
+        }
         
         DispatchQueue.main.async {
             self.clearSelectiveList()

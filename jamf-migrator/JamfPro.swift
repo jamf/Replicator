@@ -51,7 +51,10 @@ class JamfPro: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         
-        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) {
+        let forWhat = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
+        let (hoursOld, minutesOld, _) = timeDiff(forWhat: forWhat)
+//        print("[JamfPro] \(whichServer) tokenAge: \(60*hoursOld+minutesOld) minutes")
+        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || (60*hoursOld+minutesOld) > 25 {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
             
             configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
@@ -73,6 +76,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
                                 JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
                             }
+                            JamfProServer.tokenCreated[whichServer] = Date()
                             
     //                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
     //                      print("[JamfPro] result of token request: \(endpointJSON)")

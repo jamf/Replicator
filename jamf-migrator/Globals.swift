@@ -43,7 +43,6 @@ struct History {
     static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
     static var logFile          = ""
     static var startTime        = Date()
-    static var endTime          = Date()
 }
 
 struct iconfiles {
@@ -72,6 +71,7 @@ struct JamfProServer {
     static var authType     = ["source":"Bearer", "destination":"Bearer"]
     static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
     static var validToken   = ["source":false, "destination":false]
+    static var tokenCreated = [String:Date?]()
     static var version      = ["source":"", "destination":""]
     static var pkgsNotFound = 0
     static var sessionCookie = [HTTPCookie]()
@@ -115,9 +115,31 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 15*60  // 15 minutes (15*60)
+    static var refreshInterval:UInt32 = 20*60  // 20 minutes
 }
 
 struct wipeData {
     static var on = false
+}
+
+public func timeDiff(forWhat: String) -> (Int,Int,Int) {
+    var components:DateComponents?
+    switch forWhat {
+    case "runTime":
+        components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: Date())
+    case "sourceTokenAge","destTokenAge":
+        if forWhat == "sourceTokenAge" {
+            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["source"] ?? Date())!, to: Date())
+        } else {
+            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["destination"] ?? Date())!, to: Date())
+        }
+    default:
+        break
+    }
+//          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+//          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+    let timeDifference = Int(components?.second! ?? 0)
+    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+    return(h,m,s)
 }
