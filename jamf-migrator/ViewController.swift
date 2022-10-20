@@ -4246,14 +4246,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                             self.totalCompleted = self.totalCreated + self.totalUpdated + self.totalFailed
                             
-//                            if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == nil && self.totalCompleted > 0  {
                             if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && self.totalCompleted > 0  {
 //                                print("[CreateEndpoints] self.counters: \(self.counters)")
                                 if !setting.migrateDependencies || endpointType == "policies" {
                                     self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-//                                    self.putSummary_label.stringValue  = "\(self.totalCompleted) of \(self.counters[endpointType]!["total"]!)"
+
                                     self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
-                                    self.put_name_field.stringValue    = "\(endpointType)"
+                                    self.put_name_field.stringValue = "\(endpointType)"
                                 }
                             }
                             
@@ -4943,7 +4942,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                        print("[existingEndpoints] JamfProServer.sessionCookie.count: \(JamfProServer.sessionCookie.count)")
 //                        print("[existingEndpoints]       JamfProServer.stickySession: \(JamfProServer.stickySession)")
                         if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
-                            print("[existingEndpoints] sticky session for \(self.dest_jp_server)")
+//                            print("[existingEndpoints] sticky session for \(self.dest_jp_server)")
                             URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: self.dest_jp_server), mainDocumentURL: URL(string: self.dest_jp_server))
                         }
                         
@@ -5953,13 +5952,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? targetDataArray.count:total
         
+        let newPutTotal = (self.counters[adjEndpoint]?["create"] ?? 0) + (self.counters[adjEndpoint]?["update"] ?? 0) + (self.counters[adjEndpoint]?["fail"] ?? 0)
+        
         if setting.fullGUI {
             DispatchQueue.main.async {
                 if self.putCounters[adjEndpoint]!["put"]! > 0 {
                     if !setting.migrateDependencies || adjEndpoint == "policies" {
                         self.put_name_field.stringValue    = adjEndpoint
-                        self.put_levelIndicator.floatValue = Float(self.putCounters[adjEndpoint]!["put"]!)/Float(totalCount)
-                        self.putSummary_label.stringValue  = "\(self.putCounters[adjEndpoint]!["put"]!) of \(totalCount)"
+                        self.put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
+                        self.putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
+//                        self.put_levelIndicator.floatValue = Float(self.putCounters[adjEndpoint]!["put"]!)/Float(totalCount)
+//                        self.putSummary_label.stringValue  = "\(self.putCounters[adjEndpoint]!["put"]!) of \(totalCount)"
                     }
                 }
             }

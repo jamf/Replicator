@@ -10,14 +10,13 @@ import AppKit
 import Cocoa
 import Foundation
 
-class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
+class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate, NSSplitViewDelegate {
     
-    let userDefaults = UserDefaults.standard
+    let userDefaults      = UserDefaults.standard
     let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
     let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
     let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
-//    let classic      = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
     
     // Main Window
 //    @IBOutlet var migrator_window: NSView!
@@ -999,17 +998,20 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             source_pwd_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_jp_server_field.drawsBackground = true
             dest_jp_server_field.backgroundColor = appColor.highlight[whichColorScheme]
-            dest_pwd_field.backgroundColor = appColor.highlight[whichColorScheme]
-            dest_user_field.drawsBackground = true
-            dest_user_field.backgroundColor = appColor.highlight[whichColorScheme]
-            dest_pwd_field.drawsBackground = true
+            dest_pwd_field.backgroundColor   = appColor.highlight[whichColorScheme]
+            dest_user_field.drawsBackground  = true
+            dest_user_field.backgroundColor  = appColor.highlight[whichColorScheme]
+            dest_pwd_field.drawsBackground   = true
             self.view.layer?.backgroundColor = appColor.background[whichColorScheme]
         }
     }
     
+    
     var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
+//        let test = SplitViewVC().splitView.dividerThickness
+//        print("test: \(test)")
 //        hardSetLdapId = false
 
 //        debug = true
