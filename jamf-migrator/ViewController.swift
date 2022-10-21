@@ -4249,10 +4249,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && self.totalCompleted > 0  {
 //                                print("[CreateEndpoints] self.counters: \(self.counters)")
                                 if !setting.migrateDependencies || endpointType == "policies" {
-                                    self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+//                                    self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
 
                                     self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
-                                    self.put_name_field.stringValue = "\(endpointType)"
+//                                    self.put_name_field.stringValue = "\(endpointType)"
                                 }
                             }
                             
@@ -4506,10 +4506,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             // update counters
                             if totalCompleted > 0 {
                                 if !setting.migrateDependencies || endpointType == "policies" {
-                                    put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
+//                                    put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
 //                                    putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
                                     self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
-                                    put_name_field.stringValue    = "\(endpointType)"
+//                                    put_name_field.stringValue    = "\(endpointType)"
                                 }
                             }
                             
@@ -4613,7 +4613,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
             
             if export.saveRawXml {
-                print("[RemoveEndpoints] call save endPointByID")
+
                 endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
             }
             if export.saveOnly {
@@ -4719,12 +4719,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         totalCompleted = totalDeleted + totalFailed
 
                         DispatchQueue.main.async {
-                            self.put_name_field.stringValue       = "\(endpointType)"
+//                            self.put_name_field.stringValue = "\(endpointType)"
                             
                             if totalCompleted > 0 {
-                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(endpointCount)
+//                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
 //                                self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
-                                self.putStatusUpdate2(endpoint: endpointType, total: endpointCount)
+                                self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
                             }
                             
                             if totalDeleted == endpointCount && self.changeColor {

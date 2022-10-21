@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="20037"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="20037"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21225"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="21225"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -397,7 +397,7 @@
                         <splitViewItem id="iHa-US-HVk"/>
                         <splitViewItem id="oFv-BQ-a5Y"/>
                     </splitViewItems>
-                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomThickness" customModule="jamf_migrator" customModuleProvider="target">
+                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomSeparator" customModule="jamf_migrator" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
@@ -2151,7 +2151,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="156"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="154"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="154"/>
@@ -2622,7 +2622,7 @@
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="NSStopProgressTemplate" width="14" height="13"/>
-        <image name="disclosureDown" width="14" height="14"/>
+        <image name="disclosureDown" width="100" height="100"/>
         <image name="disclosureRight" width="100" height="100"/>
     </resources>
 </document>
