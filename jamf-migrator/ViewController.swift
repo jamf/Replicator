@@ -1072,7 +1072,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                   changeColor = true
         getEndpointInProgress = "start"
         endpointInProgress    = ""
-        var idPath            = ""  // adjust for jamf users/groups that use userid/groupid instead of id
+//        var idPath            = ""  // adjust for jamf users/groups that use userid/groupid instead of id
         
         DispatchQueue.main.async { [self] in
             if !export.backupMode {
@@ -3153,7 +3153,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if returnedJSON.count > 0 {
                             // save source JSON - start
                             if export.saveRawXml {
-                                print("[endpointByID] save building")
                                 DispatchQueue.main.async { [self] in
                                     let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: returnedJSON, theTag: ""):rmJsonData(rawJSON: returnedJSON, theTag: "scope")
 //                                    print("exportRawJson: \(exportRawJson)")
@@ -3220,7 +3219,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                             // save source XML - start
                             if export.saveRawXml {
-                                print("[endpointByID] save \(endpoint)")
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async { [self] in
                                     // added option to remove scope
@@ -3914,6 +3912,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // counterts for completed endpoints
         if endpointCurrent == 1 {
 //            print("[CreateEndpoints] reset counters")
+            labelColor(endpoint: endpointType, theColor: self.greenText)
             totalCreated   = 0
             totalUpdated   = 0
             totalFailed    = 0
@@ -4319,7 +4318,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         var destinationEpId = destEpId
         var apiAction       = action
-        var sourcePolicyId  = ""
+//        var sourcePolicyId  = ""
         
         // counterts for completed endpoints
         if endpointCurrent == 1 {
@@ -4351,7 +4350,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
 
         var localEndPointType = ""
-        var whichError        = ""
+//        var whichError        = ""
         
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -4363,7 +4362,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             localEndPointType = endpointType
         }
-        var responseData = ""
+//        var responseData = ""
                 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)\n") }
        
@@ -4687,7 +4686,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                self.put_levelIndicator.fillColor = .systemYellow
                             }
                             self.changeColor = false
-                            WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName)\n")
+                            WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (statusCode: \(httpResponse.statusCode))\n")
+//                            if httpResponse.statusCode == 401 {
+//                                gettoken
+//                            }
                             if httpResponse.statusCode == 400 {
                                 WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Verify other items are not dependent on \(endpointName)\n")
                                 WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** For example, \(endpointName) is not used in a policy\n")
@@ -5943,15 +5945,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.putCounters[adjEndpoint]!["put"]! += 1
         }
         
-        let failedCount = counters[adjEndpoint]?["fail"] ?? 0
-        if (failedCount > 0 && put_levelIndicatorFillColor[adjEndpoint] == .systemGreen) || failedCount == total {
-            let newColor = (failedCount == total) ? NSColor.systemRed:NSColor.systemYellow
-            if newColor != put_levelIndicatorFillColor[adjEndpoint] {
-            put_levelIndicatorFillColor[adjEndpoint] = newColor
-            put_levelIndicator.fillColor = newColor
-            }
-        }
         let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? targetDataArray.count:total
+        
+        if self.counters[adjEndpoint]?["fail"] == 0 {
+            put_levelIndicatorFillColor[adjEndpoint] = .green
+            put_levelIndicator.fillColor = .green
+        } else if ((self.counters[adjEndpoint]?["fail"] ?? 0)! > 0 && (self.counters[adjEndpoint]?["fail"] ?? 0)! < totalCount) {
+            put_levelIndicatorFillColor[adjEndpoint] = .yellow
+            put_levelIndicator.fillColor = .yellow
+        } else {
+            put_levelIndicatorFillColor[adjEndpoint] = .red
+            put_levelIndicator.fillColor = .red
+        }
         
         let newPutTotal = (self.counters[adjEndpoint]?["create"] ?? 0) + (self.counters[adjEndpoint]?["update"] ?? 0) + (self.counters[adjEndpoint]?["fail"] ?? 0)
         
