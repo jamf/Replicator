@@ -114,7 +114,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         // Create endpoint type to store xml files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
-            print("[icons] saveFolder: \(saveXmlFolder)")
+//            print("[icons] saveFolder: \(saveXmlFolder)")
             endpointPath = saveXmlFolder+node+"/\(id)"
         case "accounts/groupid":
             endpointPath = saveXmlFolder+"jamfgroups"
@@ -154,7 +154,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             if copyIcon {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving icon to: \(iconDest)\n") }
                 do {
-                    print("[icons] copy to: \(iconDest)")
+//                    print("[icons] copy to: \(iconDest)")
                     try fm.copyItem(atPath: iconSource, toPath: iconDest)
                     if export.saveOnly {
                         do {

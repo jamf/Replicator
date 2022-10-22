@@ -12,14 +12,7 @@ import Foundation
 
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
-    let userDefaults      = UserDefaults.standard
-    let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
-    let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
-    let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
-    let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
-    
-    // Main Window
-//    @IBOutlet var migrator_window: NSView!
+    let userDefaults = UserDefaults.standard
     
     @IBOutlet weak var hideCreds_button: NSButton!
     @IBAction func hideCreds_action(_ sender: Any) {
@@ -711,30 +704,46 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         // read environment settings - end
     }
     
+    func controlTextDidChange(_ obj: Notification) {
+        if let textField = obj.object as? NSTextField {
+            switch textField.identifier!.rawValue {
+            case "sourcePassword":
+                JamfProServer.sourcePwd = source_pwd_field.stringValue
+            case "destPassword":
+                JamfProServer.destPwd = dest_pwd_field.stringValue
+            default:
+                break
+            }
+        }
+    }
+    
     func controlTextDidEndEditing(_ obj: Notification) {
 //        print("enter controlTextDidEndEditing")
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
-            case "sourceServer":
+            case "sourceServer", "sourceUser", "sourcePassword":
+                if JamfProServer.source != source_jp_server_field.stringValue {
+                    serverChanged(whichserver: "source")
+                }
                 serverOrFiles() { [self]
                     (result: String) in
-                    JamfProServer.source = source_jp_server_field.stringValue
-                    fetchPassword(whichServer: "source", url: JamfProServer.source)
+                    if textField.identifier!.rawValue == "sourceServer" {
+                        fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
+                    }
+                    JamfProServer.source     = source_jp_server_field.stringValue
+                    JamfProServer.sourceUser = source_user_field.stringValue
+                    JamfProServer.sourcePwd  = source_pwd_field.stringValue
                 }
-            case "sourceUser":
-                JamfProServer.sourceUser = source_user_field.stringValue
-            case "sourcePassword":
-                JamfProServer.sourcePwd = source_pwd_field.stringValue
-            case "destServer":
+            case "destServer", "destUser", "destPassword":
                 if JamfProServer.destination != dest_jp_server_field.stringValue {
                     serverChanged(whichserver: "destination")
                 }
+                if textField.identifier!.rawValue == "destServer" {
+                    fetchPassword(whichServer: "destination", url: dest_jp_server_field.stringValue)
+                }
                 JamfProServer.destination = dest_jp_server_field.stringValue
-                fetchPassword(whichServer: "destination", url: JamfProServer.destination)
-            case "destUser":
-                JamfProServer.destUser = dest_user_field.stringValue
-            case "destPassword":
-                JamfProServer.destPwd = dest_pwd_field.stringValue
+                JamfProServer.destUser    = dest_user_field.stringValue
+                JamfProServer.destPwd     = dest_pwd_field.stringValue
             default:
                 break
             }
@@ -1014,7 +1023,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 
 //        debug = true
         
-        // Do any additional setup after loading the view.
+        // Do any additional setup after loading the view
+        ViewController().rmDELETE()
         
         NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode_sdvc(_:)), name: .deleteMode_sdvc, object: nil)
@@ -1090,10 +1100,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if setting.fullGUI {
             if !FileManager.default.fileExists(atPath: plistPath!) {
                 do {
+                    if !FileManager.default.fileExists(atPath: plistPath!.replacingOccurrences(of: "settings.plist", with: "")) {
+                        // create directory
+                        try FileManager.default.createDirectory(atPath: plistPath!.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
+                    }
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "Unable to find/create \(plistPath!)\n")
-                    WriteToLog().message(stringOfText: "Try to manually copy the file from ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\\ Support/jamf-migrator/settings.plist to \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(plistPath!)\n")
                     NSApplication.shared.terminate(self)
                 }
             }

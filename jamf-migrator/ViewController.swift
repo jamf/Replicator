@@ -12,11 +12,8 @@ import Foundation
 
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
-    let userDefaults      = UserDefaults.standard
-    let classicBackground = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)
-    let classicHighlight  = NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)
-    let casperBackground  = CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0)
-    let casperHighlight   = NSColor(calibratedRed: 0x8C/255.0, green:0x8E/255.0, blue:0x92/255.0, alpha:0xFF/255.0)
+    let userDefaults = UserDefaults.standard
+    
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
     // selective list filter
@@ -864,7 +861,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Go button pressed from: \(goSender)\n") }
         
         if setting.fullGUI {
-            put_levelIndicator.fillColor = .systemGreen
+            put_levelIndicator.fillColor = .green
             // which migration mode tab are we on
             if activeTab(fn: "Go") == "selective" {
                 migrationMode = "selective"
@@ -1045,7 +1042,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            }
 //        }
     }   // @IBAction func Go - end
-    
     
     @IBAction func QuitNow(sender: AnyObject) {
         // check for file that sets mode to delete data from destination server, delete if found - start
@@ -1317,7 +1313,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // initialize counters
             for currentNode in self.objectsToMigrate {
                 if setting.fullGUI {
-                    self.put_levelIndicatorFillColor[currentNode] = .systemGreen
+                    self.put_levelIndicatorFillColor[currentNode] = .green
                 }
                 switch currentNode {
                 case "computergroups", "smartcomputergroups", "staticcomputergroups":
@@ -1569,7 +1565,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 return
             }
             
-            self.put_levelIndicatorFillColor[selectedEndpoint] = .systemGreen
+            self.put_levelIndicatorFillColor[selectedEndpoint] = .green
             
             let objToMigrateID = self.availableIDsToMigDict[self.targetDataArray[objectIndex]]!
 
@@ -4080,7 +4076,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if endpointCurrent == 1 && !retry {
                                     migrationComplete.isDone = false
                                     if !setting.migrateDependencies || endpointType == "policies" {
-                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemGreen)
+                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
                                     }
                                 } else if !retry {
                                     if let _ = self.put_levelIndicatorFillColor[endpointType] {
@@ -4434,7 +4430,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if endpointCurrent == 1 && !retry {
                             migrationComplete.isDone = false
                             if !setting.migrateDependencies || endpointType == "policies" {
-                                self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemGreen)
+                                self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
                             }
                         } else if !retry {
                             if let _ = self.put_levelIndicatorFillColor[endpointType] {
@@ -4566,7 +4562,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if endpointCurrent == 1 {
 //            migrationComplete.isDone = false
             if !setting.migrateDependencies || endpointType == "policies" {
-                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemGreen)
+                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
             }
         } else {
             if let _ = self.put_levelIndicatorFillColor[endpointType] {
@@ -6760,9 +6756,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
                 wipeData.on = false
                 _ = serverOrFiles()
-                DispatchQueue.main.async {
-                    self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
-                }
+//                DispatchQueue.main.async {
+//                    self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
+//                }
                 // re-enable source server, username, and password fields (to finish later)
 //                source_jp_server_field.isEnabled = true
 //                sourceServerList_button.isEnabled = true
@@ -6929,7 +6925,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
             DispatchQueue.main.async {
 //                print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
-                if self.put_levelIndicator.fillColor == .systemGreen || self.put_levelIndicatorFillColor[endpointType] == .systemRed {
+                if self.put_levelIndicator.fillColor == .green || self.put_levelIndicatorFillColor[endpointType] == .systemRed {
                     self.put_levelIndicatorFillColor[endpointType] = fillColor
                     self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
                 }
@@ -7478,7 +7474,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     override func viewDidLoad() {
         super.viewDidLoad()
 //        hardSetLdapId = false
-
+        
 //        LogLevel.debug = true
         
         // Do any additional setup after loading the view.
@@ -7576,9 +7572,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if !FileManager.default.fileExists(atPath: plistPath!) {
                 do {
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
+                    WriteToLog().message(stringOfText: "[ViewController] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "Unable to find/create \(plistPath!)\n")
-                    WriteToLog().message(stringOfText: "Try to manually copy the file from path_to/jamf-migrator.app/Contents/Resources/settings.plist to \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[ViewController] Unable to find/create \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[ViewController] Try to manually copy the file from path_to/jamf-migrator.app/Contents/Resources/settings.plist to \(plistPath!)\n")
                     NSApplication.shared.terminate(self)
                 }
             }
