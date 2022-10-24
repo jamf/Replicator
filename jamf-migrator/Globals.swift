@@ -125,13 +125,12 @@ struct wipeData {
 }
 
 public func storeBookmark(theURL: URL) {
-    print("[Global] theURL: \(theURL)")
     do {
         let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
         appInfo.bookmarks[theURL] = data
         NSKeyedArchiver.archiveRootObject(appInfo.bookmarks, toFile: appInfo.bookmarksPath)
     } catch let error as NSError {
-        print("[Global] Set Bookmark Failed: \(error.description)")
+        WriteToLog().message(stringOfText: "[Global] Set Bookmark Failed: \(error.description)\n")
     }
 }
 
