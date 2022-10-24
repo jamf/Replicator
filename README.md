@@ -153,6 +153,11 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 ## History
 **v7.0.0**<br>
+prevent sleep while migrating
+better handling of access to previously selected folders
+fix token refresh
+
+**v7.0.0**<br>
 Redesigned UI.  Add ability to show/hide username and password fields.  Migrate locally created classes and delete any class.  Add ability to force basic authentication.
 
 **v6.3.0**<br>
