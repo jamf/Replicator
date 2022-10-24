@@ -81,83 +81,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var destinationSite = ""
     
     @IBOutlet weak var destinationLabel_TextField: NSTextField!
-//    @IBOutlet weak var destinationMethod_TextField: NSTextField!
-    
-//    @IBOutlet weak var quit_button: NSButton!
-//    @IBOutlet weak var go_button: NSButton!
-//    @IBOutlet weak var stop_button: NSButton!
-    
-    // Migration mode/platform tabs/var
-//    @IBOutlet weak var bulk_tabViewItem: NSTabViewItem! // bulk_tabViewItem.tabState.rawValue = 0 if active, 1 if not active
-//    @IBOutlet weak var selective_tabViewItem: NSTabViewItem!
-//    @IBOutlet weak var bulk_iOS_tabViewItem: NSTabViewItem!
-//    @IBOutlet weak var general_tabViewItem: NSTabViewItem!
-//    @IBOutlet weak var macOS_tabViewItem: NSTabViewItem!
-//    @IBOutlet weak var iOS_tabViewItem: NSTabViewItem!
-//    @IBOutlet weak var activeTab_TabView: NSTabView!    // macOS, iOS, general, or selective
-//
-//    @IBOutlet weak var sectionToMigrate_button: NSPopUpButton!
-//    @IBOutlet weak var iOSsectionToMigrate_button: NSPopUpButton!
-//    @IBOutlet weak var generalSectionToMigrate_button: NSPopUpButton!
-    
-    /*
-     var migrationMode = ""  // either buld or selective
-     
-     var platform = ""  // either macOS, iOS, or general
-     
-     var goSender = ""
-     
-     // button labels
-     // macOS button labels
-     @IBOutlet weak var advcompsearch_label_field: NSTextField!
-     @IBOutlet weak var macapplications_label_field: NSTextField!
-     @IBOutlet weak var computers_label_field: NSTextField!
-     @IBOutlet weak var directory_bindings_field: NSTextField!
-     @IBOutlet weak var disk_encryptions_field: NSTextField!
-     @IBOutlet weak var dock_items_field: NSTextField!
-     @IBOutlet weak var file_shares_label_field: NSTextField!
-     @IBOutlet weak var sus_label_field: NSTextField!
-     @IBOutlet weak var netboot_label_field: NSTextField!
-     @IBOutlet weak var osxconfigurationprofiles_label_field: NSTextField!
- //    @IBOutlet weak var patch_mgmt_field: NSTextField!
-     @IBOutlet weak var patch_policies_field: NSTextField!
-     @IBOutlet weak var extension_attributes_label_field: NSTextField!
-     @IBOutlet weak var scripts_label_field: NSTextField!
-     @IBOutlet weak var smart_groups_label_field: NSTextField!
-     @IBOutlet weak var static_groups_label_field: NSTextField!
-     @IBOutlet weak var packages_label_field: NSTextField!
-     @IBOutlet weak var printers_label_field: NSTextField!
-     @IBOutlet weak var policies_label_field: NSTextField!
-     @IBOutlet weak var jamfUserAccounts_field: NSTextField!
-     @IBOutlet weak var jamfGroupAccounts_field: NSTextField!
-     @IBOutlet weak var restrictedsoftware_label_field: NSTextField!
-     @IBOutlet weak var macPrestages_label_field: NSTextField!
-     @IBOutlet weak var uploadingIcons_textfield: NSTextField!
-     // iOS button labels
-     @IBOutlet weak var smart_ios_groups_label_field: NSTextField!
-     @IBOutlet weak var static_ios_groups_label_field: NSTextField!
-     @IBOutlet weak var mobiledeviceconfigurationprofile_label_field: NSTextField!
-     @IBOutlet weak var mobiledeviceextensionattributes_label_field: NSTextField!
-     @IBOutlet weak var mobiledevices_label_field: NSTextField!
-     @IBOutlet weak var mobiledeviceApps_label_field: NSTextField!
-     @IBOutlet weak var advancedmobiledevicesearches_label_field: NSTextField!
-     @IBOutlet weak var mobiledevicePrestage_label_field: NSTextField!
-     @IBOutlet weak var uploadingIcons2_textfield: NSTextField!
-     // general button labels
-     @IBOutlet weak var advusersearch_label_field: NSTextField!
-     @IBOutlet weak var building_label_field: NSTextField!
-     @IBOutlet weak var categories_label_field: NSTextField!
-     @IBOutlet weak var departments_label_field: NSTextField!
-     @IBOutlet weak var userEA_label_field: NSTextField!
-     @IBOutlet weak var sites_label_field: NSTextField!
-     @IBOutlet weak var ldapservers_label_field: NSTextField!
-     @IBOutlet weak var network_segments_label_field: NSTextField!
-     @IBOutlet weak var users_label_field: NSTextField!
-     @IBOutlet weak var smartUserGrps_label_field: NSTextField!
-     @IBOutlet weak var staticUserGrps_label_field: NSTextField!
-     */
-    
-//    @IBOutlet weak var migrateOrRemove_TextField: NSTextField!
     
     // Source and destination fields
     @IBOutlet weak var source_jp_server_field: NSTextField!
@@ -182,77 +105,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     var hideGui             = false
     
-    // GET and POST/PUT (DELETE) fields
-//    @IBOutlet weak var get_name_field: NSTextField!
-//    @IBOutlet weak var getSummary_label: NSTextField!
-//    @IBOutlet weak var get_levelIndicator: NSLevelIndicator!
-
-//    @IBOutlet weak var put_name_field: NSTextField!  // object being migrated
-//    @IBOutlet weak var putSummary_label: NSTextField!
-//
-//    @IBOutlet weak var put_levelIndicator: NSLevelIndicator!
-//    var put_levelIndicatorFillColor = [String:NSColor]()
-
-    // selective migration items - start
-    // source / destination tables
-    
-//    @IBOutlet var selectiveTabelHeader_textview: NSTextField!
-//    @IBOutlet weak var migrateDependencies: NSButton!
-//    @IBOutlet weak var srcSrvTableView: NSTableView!
-    
-    /*
-    // selective migration vars
-    var advancedMigrateDict     = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - id:category:dictionary of dependencies
-    var migratedDependencies    = [String:[Int]]()
-    var migratedPkgDependencies = [String:String]()
-    var waitForDependencies     = false
-    var dependencyParentId      = 0
-    var dependencyMigratedCount = [Int:Int]()   // [policyID:number of dependencies]
-    
-    
-    // source / destination array / dictionary of items
-    var sourceDataArray            = [String]()
-    var staticSourceDataArray      = [String]()
-    var targetDataArray            = [String]()
-    var availableIDsToMigDict:[String:Int]  = [:]   // something like xmlName, xmlID
-    var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
-    var availableIdsToDelArray:[Int]        = []   // array of objects' to delete IDs
-    var selectiveListCleared                = false
-    var delayInt: UInt32                    = 50000
-    var createRetryCount                    = [String:Int]()   // objectType-objectID:retryCount
-    
-    // destination TextFieldCells
-    @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
-    @IBOutlet weak var dest_TableColumn: NSTableColumn!
-    // selective migration items - end
-    
-    // app version label
-    @IBOutlet weak var appVersion_TextField: NSTextField!
-    
-    // smartgroup vars
-    var migrateSmartComputerGroups  = false
-    var migrateStaticComputerGroups = false
-    var migrateSmartMobileGroups    = false
-    var migrateStaticMobileGroups   = false
-    var migrateSmartUserGroups      = false
-    var migrateStaticUserGroups     = false
-    
-    // command line switches
-//    var debug           = false
-    var hideGui             = false
-//    var export.saveOnly     = false
-//    var saveRawXml          = false
-//    var saveTrimmedXml      = false
-    var saveRawXmlScope     = true
-    var saveTrimmedXmlScope = true
-    
-    // plist and log variables
-    var didRun                 = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
-    let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
-    var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-    var plistData:[String:Any] = [:]   //our server/username data
-     */
-
 //  Log / backup vars
     let backupDate          = DateFormatter()
     var maxLogFileCount     = 20
@@ -457,7 +309,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             userDefaults.set(true, forKey: "fileImport")
             let toggleFileImport = (sender.title == "Browse") ? false:true
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [self] in
                 let openPanel = NSOpenPanel()
             
                 openPanel.canChooseDirectories = true
@@ -466,10 +318,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 openPanel.begin { [self] (result) in
                     if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
                         exportedFilesUrl = openPanel.url
-                        dataFilesRoot = (exportedFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
-                        dataFilesRoot = dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
-        //                print("encoded dataFilesRoot: \(String(describing: dataFilesRoot))")
+//                        dataFilesRoot = (exportedFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
+//                        dataFilesRoot = dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
+                        dataFilesRoot = exportedFilesUrl!.path + "/"
+
+                        storeBookmark(theURL: exportedFilesUrl!)
+                        
                         source_jp_server_field.stringValue = dataFilesRoot
+                        JamfProServer.source               = dataFilesRoot
                         source_user_field.isHidden         = true
                         source_pwd_field.isHidden          = true
                         fileImport                         = true
@@ -486,9 +342,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         userDefaults.synchronize()
                         browseFiles_button.isHidden        = false
                         saveSourceDestInfo(info: plistData)
+                        serverChanged(whichserver: "source")
                     } else {
                         if toggleFileImport {
-//                            self.source_jp_server_field.stringValue = ""
                             source_user_field.isHidden = false
                             source_pwd_field.isHidden  = false
                             fileImport                 = false
@@ -498,20 +354,24 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     }
                 } // openPanel.begin - end
+//                serverOrFiles() {
+//                    (result: String) in
+//                }
+                userDefaults.synchronize()
             }   // DispatchQueue.main.async - end
         } else {    // if fileImport_button.state - end
             userDefaults.set(false, forKey: "fileImport")
-            DispatchQueue.main.async {
-                self.source_jp_server_field.stringValue = ""
-                self.source_user_field.isHidden = false
-                self.source_pwd_field.isHidden = false
-                self.fileImport = false
-                self.fileImport_button.state = NSControl.StateValue(rawValue: 0)
-                self.browseFiles_button.isHidden        = true
-                JamfProServer.importFiles = 0
+            DispatchQueue.main.async { [self] in
+                source_jp_server_field.stringValue = ""
+                source_user_field.isHidden  = false
+                source_pwd_field.isHidden   = false
+                fileImport                  = false
+                fileImport_button.state     = NSControl.StateValue(rawValue: 0)
+                browseFiles_button.isHidden = true
+                JamfProServer.importFiles   = 0
+                userDefaults.synchronize()
             }
         }
-        userDefaults.synchronize()
     }   // @IBAction func fileImport - end
     
     @IBAction func migrateToSite_action(_ sender: Any) {
@@ -946,7 +806,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if source_jp_server_field.stringValue != "" {
             if source_jp_server_field.stringValue.prefix(4).lowercased() == "http" {
 //                print("source: server.")
-                fileImport_button.state    = NSControl.StateValue(rawValue: 0)
+                fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
                 source_user_field.isHidden  = false
                 source_pwd_field.isHidden   = false
@@ -954,7 +814,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 sourceType                  = "server"
             } else {
 //                print("source: local files")
-                fileImport_button.state    = NSControl.StateValue(rawValue: 1)
+                fileImport_button.state     = NSControl.StateValue(rawValue: 1)
                 browseFiles_button.isHidden = false
                 dataFilesRoot               = source_jp_server_field.stringValue
                 JamfProServer.source        = source_jp_server_field.stringValue
@@ -963,6 +823,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 source_pwd_field.isHidden   = true
                 fileImport                  = true
                 sourceType                  = "files"
+                
+                getAccess(theURL: exportedFilesUrl!)
+                
+
             }
             JamfProServer.importFiles = fileImport_button.state.rawValue
         }
@@ -971,6 +835,20 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         userDefaults.synchronize()
         completion(sourceType)
     }   // func serverOrFiles() - end
+    
+    func getAccess(theURL: URL) {
+        do {
+            if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
+                if let data = bookmarks[exportedFilesUrl!] {
+                    var isStale = false
+                    exportedFilesUrl = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
+                    _ = exportedFilesUrl?.startAccessingSecurityScopedResource()
+                }
+            }
+        } catch {
+            
+        }
+    }
     
     override func viewDidAppear() {
         // set tab order
@@ -1024,6 +902,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        debug = true
         
         // Do any additional setup after loading the view
+        if !FileManager.default.fileExists(atPath: appInfo.bookmarksPath) {
+            FileManager.default.createFile(atPath: appInfo.bookmarksPath, contents: nil)
+        }
         ViewController().rmDELETE()
         
         NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)

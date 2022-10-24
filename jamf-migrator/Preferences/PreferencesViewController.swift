@@ -135,12 +135,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
     var saveFolderPath: URL? {
         didSet {
-            do {
-                let bookmark = try saveFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-                self.userDefaults.set(bookmark, forKey: "bookmark")
-            } catch let error as NSError {
-                print("[PreferencesViewController] Set Bookmark Fails: \(error.description)")
-            }
+            storeBookmark(theURL: (saveFolderPath?.appendingPathComponent("raw", isDirectory: true))!)
+//            do {
+//                let bookmark = try saveFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+//                self.userDefaults.set(bookmark, forKey: "bookmark")
+//            } catch let error as NSError {
+//                print("[PreferencesViewController] Set Bookmark Fails: \(error.description)")
+//            }
         }
     }
 

@@ -25,9 +25,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     let userDefaults = UserDefaults.standard
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool, completion: @escaping (_ authResult: (Int,String)) -> Void) {
-        print("whichServer: \(whichServer)")
-        print("!wideData.on: \(!wipeData.on)")
-        print("!localSource: \(!localSource)")
+       
         if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "destination" && !export.saveOnly)) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(serverUrl)\n")
             completion((200, "success"))

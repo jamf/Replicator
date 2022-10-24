@@ -742,6 +742,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @IBAction func Go_action(sender: NSButton) {
+        JamfProServer.validToken["source"]      = false
+        JamfProServer.validToken["destination"] = false
+        JamfProServer.version["source"]         = ""
+        JamfProServer.version["destination"]    = ""
+        migrationComplete.isDone                = false
         if sender.title == "Go!" {
             go_button.title = "Stop"
             getCounters.removeAll()
@@ -1059,6 +1064,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     //================================= migration functions =================================//
     
     func startMigrating() {
+        
+        _ = disableSleep(reason: "starting process")
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] enter\n") }
         pref.stopMigration = false
@@ -1790,7 +1797,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getting endpoint: \(nodesToMigrate[nodeIndex])\n") }
         
-        // add case to list files with fileImport
         if self.fileImport && !wipeData.on {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] reading files for: \(nodesToMigrate)\n") }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes]         nodeIndex: \(nodeIndex)\n") }
@@ -2763,7 +2769,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] enter\n") }
         
-        // self.exportedFilesUrl           = URL(string: "file://\(self.dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
         exportedFilesUrl = URL(string: "file://\(JamfProServer.source.replacingOccurrences(of: " ", with: "%20"))")
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] JamfProServer.source: \(JamfProServer.source)\n") }
         
@@ -2801,172 +2806,170 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        let semaphore = DispatchSemaphore(value: 0)
         self.theOpQ.addOperation {
 //            print("[readDataFiles] local_endpointArray: \(local_endpointArray)")
-//            for local_folder in local_endpointArray {
-                let local_folder = nodesToMigrate[nodeIndex]
-                self.availableFilesToMigDict.removeAll()
-                
-                var directoryPath = "\(JamfProServer.source)/\(local_folder)"
-                directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
+            let local_folder = nodesToMigrate[nodeIndex]
+            self.availableFilesToMigDict.removeAll()
+            
+            var directoryPath = "\(JamfProServer.source)/\(local_folder)"
+            directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
 
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n") }
-                do {
-                    let allFiles = FileManager.default.enumerator(atPath: "\(directoryPath)")
+            WriteToLog().message(stringOfText: "[readDataFiles] scanning: \(directoryPath) for files.\n")
+            do {
+                let allFiles = FileManager.default.enumerator(atPath: "\(directoryPath)")
 
-                    if let allFilePaths = allFiles?.allObjects {
-                        let allFilePathsArray = allFilePaths as! [String]
-                        var xmlFilePaths      = [String]()
-                        
+                if let allFilePaths = allFiles?.allObjects {
+                    let allFilePathsArray = allFilePaths as! [String]
+                    var xmlFilePaths      = [String]()
+                    
 //                        print("[ViewController.files] looking for files in \(local_folder)")
-                        switch local_folder {
-                        case "buildings":
-                            xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
-                        default:
-                            xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")}  // filter for only files with xml extension
-                        }
-                        
-                        let dataFilesCount = xmlFilePaths.count
+                    switch local_folder {
+                    case "buildings":
+                        xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
+                    default:
+                        xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")}  // filter for only files with xml extension
+                    }
+                    
+                    let dataFilesCount = xmlFilePaths.count
 //                        print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
-                        var counter = 1
-                        
-                        if dataFilesCount < 1 {
-                            DispatchQueue.main.async {
-                                self.alert_dialog(header: "Attention:", message: "No files found.  If the folder exists outside the Downloads directory, reselect it and try again.")
-                            }
-                            completion("no files found for: \(endpoint)")
-                        } else {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Found \(dataFilesCount) files for endpoint: \(endpoint)\n") }
-                            for i in 1...dataFilesCount {
-                                let dataFile = xmlFilePaths[i-1]
-        //                        let dataFile = dataFiles[i-1]
-                                let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                                do {
-                                    // remove 'extra' data so we can get name and id from between general tags
-                                    let fileContents = try String(contentsOf: fileUrl!)
+                    var counter = 1
+                    
+                    if dataFilesCount < 1 {
+                        DispatchQueue.main.async {
+                            self.alert_dialog(header: "Attention:", message: "No files found.  If the folder exists outside the Downloads directory, reselecting it with the Browse button and try again.")
+                        }
+                        completion("no files found for: \(endpoint)")
+                    } else {
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Found \(dataFilesCount) files for endpoint: \(endpoint)\n") }
+                        for i in 1...dataFilesCount {
+                            let dataFile = xmlFilePaths[i-1]
+    //                        let dataFile = dataFiles[i-1]
+                            let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                            do {
+                                // remove 'extra' data so we can get name and id from between general tags
+                                let fileContents = try String(contentsOf: fileUrl!)
 //                                    var fileJSON     = [String:Any]()
-                                    var name         = ""
-                                    var id           = ""
-                                    
-                                    switch endpoint {
-                                    case "buildings":
-                                        let data = fileContents.data(using: .utf8)!
-                                        do {
-                                            if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
-                                            {
+                                var name         = ""
+                                var id           = ""
+                                
+                                switch endpoint {
+                                case "buildings":
+                                    let data = fileContents.data(using: .utf8)!
+                                    do {
+                                        if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
+                                        {
 //                                                fileJSON = jsonData
-                                                name     = "\(jsonData["name"] ?? "")"
-                                                id       = "\(jsonData["id"] ?? "")"
-                                            } else {
-                                                print("issue with string format, not json")
-                                            }
-                                        } catch let error as NSError {
-                                            print(error)
+                                            name     = "\(jsonData["name"] ?? "")"
+                                            id       = "\(jsonData["id"] ?? "")"
+                                        } else {
+                                            print("issue with string format, not json")
                                         }
-                                    case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
-                                        local_general = fileContents
-                                        for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                        }
-                                    case "advancedusersearches", "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
-                                        local_general = fileContents
-                                        for xmlTag in ["criteria", "users", "display_fields", "site"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                        }
-                                    case "departments", "sites", "directorybindings":
-                                        local_general = fileContents
-                                    case "classes":
-                                        local_general = self.tagValue2(xmlString:fileContents, startTag:"<class>", endTag:"</class>")
-                                        for xmlTag in ["student_ids", "teacher_ids", "student_group_ids", "teacher_group_ids", "mobile_device_group_ids"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                        }
-                                        for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
-                                            local_general = local_general.replacingOccurrences(of: "<\(xmlTag)>", with: "")
-                                        }
-                                    default:
-                                        local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
-                                        for xmlTag in ["site", "category", "payloads"] {
-                                            local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
-                                        }
+                                    } catch let error as NSError {
+                                        print(error)
                                     }
+                                case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
+                                    local_general = fileContents
+                                    for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                    }
+                                case "advancedusersearches", "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
+                                    local_general = fileContents
+                                    for xmlTag in ["criteria", "users", "display_fields", "site"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                    }
+                                case "departments", "sites", "directorybindings":
+                                    local_general = fileContents
+                                case "classes":
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<class>", endTag:"</class>")
+                                    for xmlTag in ["student_ids", "teacher_ids", "student_group_ids", "teacher_group_ids", "mobile_device_group_ids"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                    }
+                                    for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
+                                        local_general = local_general.replacingOccurrences(of: "<\(xmlTag)>", with: "")
+                                    }
+                                default:
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
+                                    for xmlTag in ["site", "category", "payloads"] {
+                                        local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                    }
+                                }
 
-                                    if endpoint != "buildings" {
-                                        id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
-                                        name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
-                                    }
-                                    
-                                    self.displayNameToFilename[name]       = dataFile
-                                    self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile)  :  \(name)\n") }
-                                    // populate selective list, when appropriate
-                                    if self.goSender == "selectToMigrateButton" {
-    //                                  print("fileImport - goSender: \(self.goSender)")
+                                if endpoint != "buildings" {
+                                    id   = self.tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
+                                    name = self.tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
+                                }
+                                
+                                self.displayNameToFilename[name]       = dataFile
+                                self.availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile)  :  \(name)\n") }
+                                // populate selective list, when appropriate
+                                if self.goSender == "selectToMigrateButton" {
+//                                  print("fileImport - goSender: \(self.goSender)")
 //                                        print("adding \(name) to array")
-                                              
-                                        self.availableIDsToMigDict[name] = Int(id)
-                                        self.sourceDataArray.append(name)
-                                        self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                          
+                                    self.availableIDsToMigDict[name] = Int(id)
+                                    self.sourceDataArray.append(name)
+                                    self.sourceDataArray = self.sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
 
-                                        self.staticSourceDataArray = self.sourceDataArray
+                                    self.staticSourceDataArray = self.sourceDataArray
 
-                                          DispatchQueue.main.async {
-                                              self.srcSrvTableView.reloadData()
-                                          }
-                                        // slight delay in building the list - visual effect
-                                        usleep(self.delayInt)
+                                      DispatchQueue.main.async {
+                                          self.srcSrvTableView.reloadData()
+                                      }
+                                    // slight delay in building the list - visual effect
+                                    usleep(self.delayInt)
 
-                                        if counter == dataFilesCount {
-                                            self.nodesMigrated += 1
-                                            self.goButtonEnabled(button_status: true)
-                                        }
-                                        counter+=1
+                                    if counter == dataFilesCount {
+                                        self.nodesMigrated += 1
+                                        self.goButtonEnabled(button_status: true)
                                     }
-                                    
-                                } catch {
-                                    //                    print("unable to read \(dataFile)")
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
+                                    counter+=1
                                 }
-//                                self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
-                            }   // for i in 1...dataFilesCount - end
-                        }
-                    }   // if let allFilePaths - end
-                } //catch {
-                    //if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
-                //}
-                
-                var fileCount = self.availableFilesToMigDict.count
-            
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
-            
-                
-                if fileCount > 0 {
-//                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                    if self.goSender == "goButton" {
-                        self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
-                            (result: String) in
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
-    //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                            self.availableFilesToMigDict.removeAll()
-                            if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
-                                    (result: String) in
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] processFiles result: \(result)\n") }
-                                }
+                                
+                            } catch {
+                                //                    print("unable to read \(dataFile)")
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] unable to read \(dataFile)\n") }
                             }
-                            completion("fetched xml for: \(endpoint)")
-                        }
+//                                self.getStatusUpdate(endpoint: local_folder, current: i, total: dataFilesCount)
+                        }   // for i in 1...dataFilesCount - end
                     }
-                } else {   // if fileCount - end
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] fileCount = 0.\n") }
-                    self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
-                    if nodeIndex < nodesToMigrate.count - 1 {
-                        self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
-                            (result: String) in
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] no files found for: \(local_folder)\n") }
+                }   // if let allFilePaths - end
+            } //catch {
+                //if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder): unable to get files.\n") }
+            //}
+            
+            var fileCount = self.availableFilesToMigDict.count
+        
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.\n") }
+        
+            
+            if fileCount > 0 {
+//                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+                if self.goSender == "goButton" {
+                    self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
+                        (result: String) in
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
+//                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+                        self.availableFilesToMigDict.removeAll()
+                        if nodeIndex < nodesToMigrate.count - 1 {
+                            self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                                (result: String) in
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] processFiles result: \(result)\n") }
+                            }
                         }
+                        completion("fetched xml for: \(endpoint)")
                     }
-                    completion("fetched xml for: \(endpoint)")
                 }
-                fileCount = 0
-//            }
+            } else {   // if fileCount - end
+                WriteToLog().message(stringOfText: "[readDataFiles] fileCount = 0.\n")
+                self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
+                if nodeIndex < nodesToMigrate.count - 1 {
+                    self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                        (result: String) in
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readDataFiles] no files found for: \(local_folder)\n") }
+                    }
+                }
+                completion("fetched xml for: \(endpoint)")
+            }
+            fileCount = 0
         }   // self.theOpQ - end
     }   // func readDataFiles - end
     
@@ -3466,7 +3469,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // check for Apple School Manager class
             let source = tagValue2(xmlString: "\(PostXML)", startTag: "<source>", endTag: "</source>")
             if source == "Apple School Manager" {
-                let className = "[skipped]-"+tagValue2(xmlString: "\(PostXML)", startTag: "<name>", endTag: "</name><description/>")
+                let className = getName(endpoint: "classes", objectXML: PostXML)
                 knownEndpoint = false
                 // Apple School Manager class - handle those here
                 // update global counters
@@ -4048,16 +4051,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }   // look to see if we are processing the next localEndPointType - end
                         
                         DispatchQueue.main.async {
-                        
-                            // ? remove creation of counters dict defined earlier ?
-                            /*
-                             // removed lnh 221014
-                             if self.counters[endpointType] == nil {
-                                 self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-                                 self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-                             }
-                             */
-                            
                             if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
                                 if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
@@ -4098,9 +4091,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(self.dependencyMigratedCount[self.dependencyParentId]!)")
                                 }
                                 
-                                let localTmp = (self.counters[endpointType]?["\(apiAction)"])!
-        //                        print("localTmp: \(localTmp)")
-                                self.counters[endpointType]?["\(apiAction)"] = localTmp + 1
+//                                let localTmp = (self.counters[endpointType]?["\(apiAction)"])
+//                                self.counters[endpointType]?["\(apiAction)"] = (localTmp ?? 0) + 1
+
+                                self.counters[endpointType]?["\(apiAction)"]! += 1
                                 
                                 if var summaryArray = self.summaryDict[endpointType]?["\(apiAction)"] {
                                     summaryArray.append(self.getName(endpoint: endpointType, objectXML: endPointXML))
@@ -4137,17 +4131,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 } else {
                                     whichError = errorMsg
                                 }
-                                
-                                // moved lnh 221014
-//                                if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
-//                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
-//                                    if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
-//                                        whichError = ""
-//                                        self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
-//                                    }
-//                                } else {
-//                                    self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 1
-//                                }
                                                                 
                                 // retry computers with dublicate serial or MAC - start
                                 switch whichError {
@@ -4245,15 +4228,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && self.totalCompleted > 0  {
 //                                print("[CreateEndpoints] self.counters: \(self.counters)")
                                 if !setting.migrateDependencies || endpointType == "policies" {
-//                                    self.put_levelIndicator.floatValue = Float(self.totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-
                                     self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
-//                                    self.put_name_field.stringValue = "\(endpointType)"
                                 }
                             }
                             
                             if self.totalCompleted == endpointCount {
-                                migrationComplete.isDone = true
+//                                migrationComplete.isDone = true
 
                                 if self.totalFailed == 0 {   // removed  && self.changeColor from if condition
                                     self.labelColor(endpoint: endpointType, theColor: self.greenText)
@@ -4510,7 +4490,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             
                             if totalCompleted == endpointCount {
-                                migrationComplete.isDone = true
+//                                migrationComplete.isDone = true
 
                                 if totalFailed == 0 {   // removed  && self.changeColor from if condition
                                     self.labelColor(endpoint: endpointType, theColor: self.greenText)
@@ -4806,6 +4786,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
 //            var duplicatePackages      = false
 //            var duplicatePackagesDict  = [String:[String]]()
+            
+            if self.counters[destEndpoint] == nil {
+                self.counters[destEndpoint] = ["create":0, "update":0, "fail":0, "total":0]
+                self.summaryDict[destEndpoint] = ["create":[], "update":[], "fail":[]]
+            }
 
             switch destEndpoint {
             case "smartusergroups", "staticusergroups":
@@ -5764,7 +5749,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if ((theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning) || pref.stopMigration {
                                 
                                 if !local_button_status {
-//
+                                    migrationComplete.isDone = true
                                     let (h,m,s) = timeDiff(forWhat: "runTime")
                                     WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                                     
@@ -5794,6 +5779,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     spinner_progressIndicator.stopAnimation(self)
                 }
                 go_button.title = local_button_status ? "Go!":"Stop"
+                if go_button.title == "Go!" {
+                    _ = enableSleep()
+                }
             } else {
                 // silent run complete
                 if export.backupMode {
@@ -5943,30 +5931,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? targetDataArray.count:total
         
-        if self.counters[adjEndpoint]?["fail"] == 0 {
-            put_levelIndicatorFillColor[adjEndpoint] = .green
-            put_levelIndicator.fillColor = .green
-        } else if ((self.counters[adjEndpoint]?["fail"] ?? 0)! > 0 && (self.counters[adjEndpoint]?["fail"] ?? 0)! < totalCount) {
-            put_levelIndicatorFillColor[adjEndpoint] = .yellow
-            put_levelIndicator.fillColor = .yellow
-        } else {
-            put_levelIndicatorFillColor[adjEndpoint] = .red
-            put_levelIndicator.fillColor = .red
-        }
-        
-        let newPutTotal = (self.counters[adjEndpoint]?["create"] ?? 0) + (self.counters[adjEndpoint]?["update"] ?? 0) + (self.counters[adjEndpoint]?["fail"] ?? 0)
-        
-        if setting.fullGUI {
-            DispatchQueue.main.async {
-                if self.putCounters[adjEndpoint]!["put"]! > 0 {
-                    if !setting.migrateDependencies || adjEndpoint == "policies" {
-                        self.put_name_field.stringValue    = adjEndpoint
-                        self.put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
-                        self.putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
-//                        self.put_levelIndicator.floatValue = Float(self.putCounters[adjEndpoint]!["put"]!)/Float(totalCount)
-//                        self.putSummary_label.stringValue  = "\(self.putCounters[adjEndpoint]!["put"]!) of \(totalCount)"
-                    }
+        DispatchQueue.main.async { [self] in
+            
+            let newPutTotal = (self.counters[adjEndpoint]?["create"] ?? 0) + (self.counters[adjEndpoint]?["update"] ?? 0) + (self.counters[adjEndpoint]?["fail"] ?? 0)
+            
+            if setting.fullGUI {
+                if self.counters[adjEndpoint]?["fail"] == 0 {
+                    put_levelIndicatorFillColor[adjEndpoint] = .green
+                    put_levelIndicator.fillColor = .green
+                } else if ((self.counters[adjEndpoint]?["fail"] ?? 0)! > 0 && (self.counters[adjEndpoint]?["fail"] ?? 0)! < totalCount) {
+                    put_levelIndicatorFillColor[adjEndpoint] = .yellow
+                    put_levelIndicator.fillColor = .yellow
+                } else {
+                    put_levelIndicatorFillColor[adjEndpoint] = .red
+                    put_levelIndicator.fillColor = .red
                 }
+//                DispatchQueue.main.async {
+                    if self.putCounters[adjEndpoint]!["put"]! > 0 {
+                        if !setting.migrateDependencies || adjEndpoint == "policies" {
+                            self.put_name_field.stringValue    = adjEndpoint
+                            self.put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
+                            self.putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
+                        }
+                    }
+//                }
             }
         }
     }
@@ -7485,6 +7473,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode(_:)), name: .deleteMode, object: nil)
         
         NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
+        
+        exportedFilesUrl = URL(string: userDefaults.string(forKey: "saveLocation") ?? "")
         
         // read maxConcurrentOperationCount setting
         concurrentThreads = setConcurrentThreads()

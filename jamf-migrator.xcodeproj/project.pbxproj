@@ -19,6 +19,7 @@
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
 		B54438DC25F6224A00465FA5 /* Misc. in Resources */ = {isa = PBXBuildFile; fileRef = B54438DB25F6224A00465FA5 /* Misc. */; };
+		B54509412904D96500094739 /* Awake.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54509402904D96500094739 /* Awake.swift */; };
 		B556A79E2773A100003CBEE9 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556A79D2773A100003CBEE9 /* Alert.swift */; };
 		B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CA91728E88DE200236A8A /* SourceDestVC.swift */; };
 		B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CBA89277B939100F26E8C /* SaveDelegate.swift */; };
@@ -56,6 +57,7 @@
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
 		B54438DB25F6224A00465FA5 /* Misc. */ = {isa = PBXFileReference; lastKnownFileType = text; path = Misc.; sourceTree = "<group>"; };
+		B54509402904D96500094739 /* Awake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Awake.swift; sourceTree = "<group>"; };
 		B556A79D2773A100003CBEE9 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
 		B56CA91728E88DE200236A8A /* SourceDestVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SourceDestVC.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 			children = (
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B556A79D2773A100003CBEE9 /* Alert.swift */,
+				B54509402904D96500094739 /* Awake.swift */,
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
 				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
 				B51742D928FB4F2B0058ED55 /* CustomSeparator.swift */,
@@ -290,6 +293,7 @@
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
+				B54509412904D96500094739 /* Awake.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,

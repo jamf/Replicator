@@ -18,9 +18,11 @@ class appColor: NSColor {
 }
 
 struct appInfo {
-    static let dict    = Bundle.main.infoDictionary!
-    static let version = dict["CFBundleShortVersionString"] as! String
-    static let name    = dict["CFBundleExecutable"] as! String
+    static let dict            = Bundle.main.infoDictionary!
+    static let version         = dict["CFBundleShortVersionString"] as! String
+    static let name            = dict["CFBundleExecutable"] as! String
+    static var bookmarks       = [URL: Data]()
+    static let bookmarksPath   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
 }
@@ -120,6 +122,17 @@ struct token {
 
 struct wipeData {
     static var on = false
+}
+
+public func storeBookmark(theURL: URL) {
+    print("[Global] theURL: \(theURL)")
+    do {
+        let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+        appInfo.bookmarks[theURL] = data
+        NSKeyedArchiver.archiveRootObject(appInfo.bookmarks, toFile: appInfo.bookmarksPath)
+    } catch let error as NSError {
+        print("[Global] Set Bookmark Failed: \(error.description)")
+    }
 }
 
 public func timeDiff(forWhat: String) -> (Int,Int,Int) {
