@@ -661,16 +661,6 @@
                                     <action selector="fileImport_action:" target="eUd-vB-D7a" id="z1A-uR-PBb"/>
                                 </connections>
                             </button>
-                            <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uaM-au-3Ze">
-                                <rect key="frame" x="5" y="78" width="14" height="14"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="disclosureRight" imagePosition="only" alignment="left" alternateImage="disclosureDown" imageScaling="proportionallyUpOrDown" inset="2" id="8uU-kd-obU">
-                                    <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="hideCreds_action:" target="eUd-vB-D7a" id="P7y-w0-k6p"/>
-                                </connections>
-                            </button>
                             <button identifier="xmlFilesFolder" hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="K9l-8G-oes">
                                 <rect key="frame" x="107" y="91" width="79" height="32"/>
                                 <constraints>
@@ -694,6 +684,20 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sw5-wd-hho">
+                                <rect key="frame" x="3" y="76" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="20" id="BhJ-Y1-MO3"/>
+                                    <constraint firstAttribute="width" constant="20" id="aDS-CG-5xI"/>
+                                </constraints>
+                                <buttonCell key="cell" type="bevel" title="&gt;" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="SkL-Eh-ytn">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                    <font key="font" metaFont="system" size="22"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="hideCreds_action:" target="eUd-vB-D7a" id="v2C-42-GrS"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="zJR-K2-c7Y" firstAttribute="top" secondItem="KCT-A6-xGn" secondAttribute="bottom" constant="-41" id="1Rj-Lu-JSz"/>
@@ -702,19 +706,21 @@
                             <constraint firstItem="YgI-SY-krZ" firstAttribute="firstBaseline" secondItem="bMP-IF-7ZQ" secondAttribute="baseline" constant="-1" id="3kl-Qd-DBX"/>
                             <constraint firstItem="M9v-UM-Eh7" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="33" id="48C-u1-AOU"/>
                             <constraint firstItem="NzE-CG-YkQ" firstAttribute="top" secondItem="WKS-OT-80i" secondAttribute="bottom" constant="4" id="5Ss-YE-O9c"/>
+                            <constraint firstItem="sw5-wd-hho" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="3" id="7Av-UX-aEZ"/>
                             <constraint firstAttribute="trailing" secondItem="KCT-A6-xGn" secondAttribute="trailing" constant="28" id="7bj-I1-K6U"/>
                             <constraint firstAttribute="trailing" secondItem="JIr-xR-auh" secondAttribute="trailing" constant="207" id="86W-K9-qCD"/>
                             <constraint firstAttribute="trailing" secondItem="bWB-O9-Yc3" secondAttribute="trailing" constant="26" id="9H5-rg-riL"/>
-                            <constraint firstItem="uaM-au-3Ze" firstAttribute="bottom" secondItem="oWq-4n-u3f" secondAttribute="bottom" constant="-2" id="Bkv-zn-bBG"/>
                             <constraint firstItem="K9l-8G-oes" firstAttribute="leading" secondItem="YgI-SY-krZ" secondAttribute="trailing" id="CdI-Tz-CDp"/>
                             <constraint firstItem="bMP-IF-7ZQ" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="10" id="DB9-b6-o6D"/>
                             <constraint firstAttribute="trailing" secondItem="BVE-BE-oEy" secondAttribute="trailing" constant="26" id="DvZ-rT-FuQ"/>
+                            <constraint firstItem="sw5-wd-hho" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="32" id="EQf-ON-qrI"/>
                             <constraint firstItem="tkt-Wc-DhS" firstAttribute="centerX" secondItem="xCj-67-1hr" secondAttribute="centerX" id="GLk-DS-uyh"/>
                             <constraint firstItem="NzE-CG-YkQ" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="26" id="Gbv-yj-Oay"/>
                             <constraint firstItem="Boh-LW-16Z" firstAttribute="leading" secondItem="mdU-Bj-ruz" secondAttribute="leading" id="H28-eV-eFL"/>
                             <constraint firstItem="3bq-4s-0tw" firstAttribute="top" secondItem="KCT-A6-xGn" secondAttribute="bottom" constant="4" id="H6I-Gd-KsV"/>
                             <constraint firstItem="BVE-BE-oEy" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="5" id="HNt-Eu-lxZ"/>
                             <constraint firstItem="oWq-4n-u3f" firstAttribute="top" secondItem="WKS-OT-80i" secondAttribute="bottom" constant="3" id="IW9-1e-2Pn"/>
+                            <constraint firstItem="NzE-CG-YkQ" firstAttribute="leading" secondItem="sw5-wd-hho" secondAttribute="trailing" constant="3" id="LYC-3x-acH"/>
                             <constraint firstItem="Boh-LW-16Z" firstAttribute="top" secondItem="NzE-CG-YkQ" secondAttribute="bottom" constant="5" id="OaJ-Ul-tQN"/>
                             <constraint firstItem="M9v-UM-Eh7" firstAttribute="centerX" secondItem="xCj-67-1hr" secondAttribute="centerX" id="RDp-Le-iAQ"/>
                             <constraint firstItem="oWq-4n-u3f" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="26" id="RUf-GV-FMS"/>
@@ -731,15 +737,12 @@
                             <constraint firstItem="WKS-OT-80i" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="9" id="cOn-EI-GEQ"/>
                             <constraint firstItem="K9l-8G-oes" firstAttribute="baseline" secondItem="XBr-2e-cXM" secondAttribute="baseline" id="dK9-dJ-YAS"/>
                             <constraint firstAttribute="trailing" secondItem="b8g-kK-BoL" secondAttribute="trailing" constant="27" id="dOg-c6-P2g"/>
-                            <constraint firstItem="NzE-CG-YkQ" firstAttribute="leading" secondItem="uaM-au-3Ze" secondAttribute="trailing" constant="7" id="exz-M0-cwV"/>
                             <constraint firstItem="bMP-IF-7ZQ" firstAttribute="leading" secondItem="WKS-OT-80i" secondAttribute="trailing" constant="95" id="gTO-4N-vob"/>
                             <constraint firstItem="1FY-7i-xqV" firstAttribute="top" secondItem="M9v-UM-Eh7" secondAttribute="bottom" constant="5" id="gsV-iX-50k"/>
                             <constraint firstItem="K9l-8G-oes" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="114" id="iNj-2y-ZKX"/>
                             <constraint firstItem="YgI-SY-krZ" firstAttribute="firstBaseline" secondItem="zJR-K2-c7Y" secondAttribute="baseline" constant="-1" id="lop-Cb-Aeq"/>
-                            <constraint firstItem="uaM-au-3Ze" firstAttribute="centerY" secondItem="oWq-4n-u3f" secondAttribute="centerY" constant="1" id="mwE-Lr-rUt"/>
                             <constraint firstItem="MVH-WU-0uc" firstAttribute="top" secondItem="1FY-7i-xqV" secondAttribute="bottom" constant="6" id="p1m-bK-mly"/>
                             <constraint firstItem="b8g-kK-BoL" firstAttribute="top" secondItem="bMP-IF-7ZQ" secondAttribute="bottom" constant="2" id="pc5-ii-xsD"/>
-                            <constraint firstItem="uaM-au-3Ze" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="5" id="qxv-BG-yvS"/>
                             <constraint firstItem="bWB-O9-Yc3" firstAttribute="top" secondItem="xCj-67-1hr" secondAttribute="top" constant="13" id="r2m-Ed-dx7"/>
                             <constraint firstItem="mdU-Bj-ruz" firstAttribute="top" secondItem="Boh-LW-16Z" secondAttribute="bottom" constant="5" id="sNL-Zo-XKB"/>
                             <constraint firstItem="WKS-OT-80i" firstAttribute="leading" secondItem="xCj-67-1hr" secondAttribute="leading" constant="317" id="wyM-08-RNF"/>
@@ -758,7 +761,7 @@
                         <outlet property="destinationLabel_TextField" destination="bMP-IF-7ZQ" id="uMn-C9-Sbv"/>
                         <outlet property="disableExportOnly_button" destination="zJR-K2-c7Y" id="BHd-mY-wTz"/>
                         <outlet property="fileImport_button" destination="YgI-SY-krZ" id="fY4-lh-0J4"/>
-                        <outlet property="hideCreds_button" destination="uaM-au-3Ze" id="fWx-VH-5rV"/>
+                        <outlet property="hideCreds_button" destination="sw5-wd-hho" id="tzr-C4-D2Y"/>
                         <outlet property="setDestSite_button" destination="XBr-2e-cXM" id="b71-iv-amF"/>
                         <outlet property="siteMigrate_button" destination="bWB-O9-Yc3" id="13s-8j-GHJ"/>
                         <outlet property="sitesSpinner_ProgressIndicator" destination="BVE-BE-oEy" id="Ziy-do-Sj6"/>
@@ -2658,7 +2661,5 @@
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="NSStopProgressTemplate" width="14" height="13"/>
-        <image name="disclosureDown" width="100" height="100"/>
-        <image name="disclosureRight" width="100" height="100"/>
     </resources>
 </document>

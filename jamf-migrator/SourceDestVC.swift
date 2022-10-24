@@ -14,8 +14,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     let userDefaults = UserDefaults.standard
     
+    
+    
+    
     @IBOutlet weak var hideCreds_button: NSButton!
     @IBAction func hideCreds_action(_ sender: Any) {
+        hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
         userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
         setWindowSize(setting: hideCreds_button.state.rawValue)
     }
