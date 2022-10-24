@@ -18,7 +18,6 @@
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
-		B54438DC25F6224A00465FA5 /* Misc in Resources */ = {isa = PBXBuildFile; fileRef = B54438DB25F6224A00465FA5 /* Misc */; };
 		B54509412904D96500094739 /* Awake.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54509402904D96500094739 /* Awake.swift */; };
 		B556A79E2773A100003CBEE9 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556A79D2773A100003CBEE9 /* Alert.swift */; };
 		B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CA91728E88DE200236A8A /* SourceDestVC.swift */; };
@@ -271,7 +270,6 @@
 				9BC01C671DFB0C07007E634E /* Main.storyboard in Resources */,
 				B5E179F31F1FDAFA00A20AAA /* index.html in Resources */,
 				B5E1912F21AAEFD400A1A9CA /* export.png in Resources */,
-				B54438DC25F6224A00465FA5 /* Misc in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
