@@ -250,6 +250,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             break
         }
         
+        print("export.saveRawXml: \(export.saveRawXml)")
+        
         plistData["xml"] = ["saveRawXml":export.saveRawXml,
                             "saveTrimmedXml":export.saveTrimmedXml,
                             "saveOnly":export.saveOnly,
@@ -261,6 +263,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
 //                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
 //                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
+        print("[Preferences] call vc.savePrefs")
         vc.savePrefs(prefs: plistData)
 //        userDefaults.set(convertToBool(state: saveRawXml_button.state.rawValue), forKey: "saveRawXml")
 //        userDefaults.set(convertToBool(state: saveTrimmedXml_button.state.rawValue), forKey: "saveTrimmedXml")

@@ -534,6 +534,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 // credentials not found - blank out username / password fields
                 if setting.fullGUI {
                     hideCreds_button.state = NSControl.StateValue(rawValue: 1)
+                    hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
                     hideCreds_action(self)
                     if whichServer == "source" {
                         source_user_field.stringValue = ""
@@ -645,6 +646,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func savePrefs(prefs: [String:Any]) {
+        print("[savePrefs] enter")
         plistData            = readSettings()
         plistData["scope"]   = prefs["scope"]
         plistData["xml"]     = prefs["xml"]
@@ -936,6 +938,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
 //        if !hideGui {
             hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+            hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
 //            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
             setWindowSize(setting: hideCreds_button.state.rawValue)
 //            source_jp_server_field.becomeFirstResponder()
@@ -1114,6 +1117,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             serverOrFiles() { [self]
                 (result: String) in
                 hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+                hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
                 source_jp_server_field.becomeFirstResponder()
             }
 //            print("initVars - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")

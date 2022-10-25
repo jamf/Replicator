@@ -787,7 +787,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             plistData             = readSettings()
             scopeOptions          = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            xmlPrefOptions        = plistData["xml"] as! Dictionary<String,Bool>
+            xmlPrefOptions        = plistData["xml"] as! [String:Bool]
+            
+            print("[Go] xmlPrefOptions: \(xmlPrefOptions)")
             export.saveOnly       = (xmlPrefOptions["saveOnly"] == nil) ? false:xmlPrefOptions["saveOnly"]!
             export.saveRawXml     = (xmlPrefOptions["saveRawXml"] == nil) ? false:xmlPrefOptions["saveRawXml"]!
             export.saveTrimmedXml = (xmlPrefOptions["saveTrimmedXml"] == nil) ? false:xmlPrefOptions["saveTrimmedXml"]!
@@ -3217,6 +3219,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
 
                             // save source XML - start
+                            print("export.saveRawXml: \(export.saveRawXml)")
                             if export.saveRawXml {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async { [self] in
@@ -6846,12 +6849,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func savePrefs(prefs: [String:Any]) {
+        print("[ViewController] enter savePrefs")
         plistData            = readSettings()
         plistData["scope"]   = prefs["scope"]
         plistData["xml"]     = prefs["xml"]
         scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-        xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
-//        export.saveOnly            = xmlPrefOptions["saveOnly"]!
+        xmlPrefOptions       = prefs["xml"] as! [String:Bool]
+        print("[ViewController] savePrefs xml: \(xmlPrefOptions)")
+        
         if let _ = xmlPrefOptions["saveOnly"] {
             export.saveOnly = xmlPrefOptions["saveOnly"]!
         } else {
