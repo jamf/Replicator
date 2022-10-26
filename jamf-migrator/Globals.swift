@@ -23,6 +23,8 @@ struct appInfo {
     static let name            = dict["CFBundleExecutable"] as! String
     static var bookmarks       = [URL: Data]()
     static let bookmarksPath   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"
+    static var settings        = [String:Any]()
+    static let plistPath       = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
 }
@@ -124,7 +126,21 @@ struct wipeData {
     static var on = false
 }
 
+public func readSettings() -> [String:Any] {
+    appInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: appInfo.plistPath)) as? [String : Any])!
+    if appInfo.settings.count == 0 {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist: \(appInfo.plistPath)\n") }
+    }
+//        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))\n")
+    return(appInfo.settings)
+}
+
+public func saveSettings(settings: [String:Any]) {
+    NSDictionary(dictionary: settings).write(toFile: appInfo.plistPath, atomically: true)
+}
+
 public func storeBookmark(theURL: URL) {
+    appInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] ?? [:]
     do {
         let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
         appInfo.bookmarks[theURL] = data

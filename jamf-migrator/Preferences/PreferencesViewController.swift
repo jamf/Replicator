@@ -73,10 +73,10 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             userDefaults.synchronize()
         }
 
-        prefMgmtAcct_label.isHidden     = !convertToBool(state: migrateAsManaged_button.state.rawValue)
-        prefMgmtAcct_textfield.isHidden = !convertToBool(state: migrateAsManaged_button.state.rawValue)
-        prefMgmtPwd_label.isHidden      = !convertToBool(state: migrateAsManaged_button.state.rawValue)
-        prefMgmtPwd_textfield.isHidden  = !convertToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtAcct_label.isHidden     = !stateToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtAcct_textfield.isHidden = !stateToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtPwd_label.isHidden      = !stateToBool(state: migrateAsManaged_button.state.rawValue)
+        prefMgmtPwd_textfield.isHidden  = !stateToBool(state: migrateAsManaged_button.state.rawValue)
 
     }
 
@@ -102,16 +102,16 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             userDefaults.synchronize()
         }
 
-        prefBindPwd_textfield.isEnabled = convertToBool(state: prefBindPwd_button.state.rawValue)
-        prefLdapPwd_textfield.isEnabled = convertToBool(state: prefLdapPwd_button.state.rawValue)
-        prefFsRwPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
-        prefFsRoPwd_textfield.isEnabled = convertToBool(state: prefFileSharePwd_button.state.rawValue)
+        prefBindPwd_textfield.isEnabled = stateToBool(state: prefBindPwd_button.state.rawValue)
+        prefLdapPwd_textfield.isEnabled = stateToBool(state: prefLdapPwd_button.state.rawValue)
+        prefFsRwPwd_textfield.isEnabled = stateToBool(state: prefFileSharePwd_button.state.rawValue)
+        prefFsRoPwd_textfield.isEnabled = stateToBool(state: prefFileSharePwd_button.state.rawValue)
     }
     
     let Creds2           = Credentials2()
     var credentialsArray = [String]()
     let vc               = ViewController()
-    var plistData:[String:Any] = [:]  //our server/username data
+//    var plistData:[String:Any] = [:]  //our server/username data
     
     // default scope preferences
     var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
@@ -136,12 +136,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     var saveFolderPath: URL? {
         didSet {
             storeBookmark(theURL: (saveFolderPath?.appendingPathComponent("raw", isDirectory: true))!)
-//            do {
-//                let bookmark = try saveFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-//                self.userDefaults.set(bookmark, forKey: "bookmark")
-//            } catch let error as NSError {
-//                print("[PreferencesViewController] Set Bookmark Fails: \(error.description)")
-//            }
         }
     }
 
@@ -202,16 +196,17 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //    var buttonState = true
     
     @IBAction func updateCopyPrefs_button(_ sender: Any) {
-        plistData["scope"] = ["osxconfigurationprofiles":["copy":convertToBool(state: copyScopeOCP_button.state.rawValue)],
-                              "macapps":["copy":convertToBool(state: copyScopeMA_button.state.rawValue)],
-                              "restrictedsoftware":["copy":convertToBool(state: copyScopeRS_button.state.rawValue)],
-                              "policies":["copy":convertToBool(state: copyScopePolicy_button.state.rawValue),"disable":convertToBool(state: disablePolicies_button.state.rawValue)],
-                              "mobiledeviceconfigurationprofiles":["copy":convertToBool(state: copyScopeMCP_button.state.rawValue)],
-                              "iosapps":["copy":convertToBool(state: copyScopeIA_button.state.rawValue)],
-                              "scg":["copy":convertToBool(state: copyScopeScg_button.state.rawValue)],
-                              "sig":["copy":convertToBool(state: copyScopeSig_button.state.rawValue)],
-                              "users":["copy":convertToBool(state: copyScopeUsers_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
-        vc.savePrefs(prefs: plistData)
+        appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
+                              "macapps":["copy":stateToBool(state: copyScopeMA_button.state.rawValue)],
+                              "restrictedsoftware":["copy":stateToBool(state: copyScopeRS_button.state.rawValue)],
+                              "policies":["copy":stateToBool(state: copyScopePolicy_button.state.rawValue),"disable":stateToBool(state: disablePolicies_button.state.rawValue)],
+                              "mobiledeviceconfigurationprofiles":["copy":stateToBool(state: copyScopeMCP_button.state.rawValue)],
+                              "iosapps":["copy":stateToBool(state: copyScopeIA_button.state.rawValue)],
+                              "scg":["copy":stateToBool(state: copyScopeScg_button.state.rawValue)],
+                              "sig":["copy":stateToBool(state: copyScopeSig_button.state.rawValue)],
+                              "users":["copy":stateToBool(state: copyScopeUsers_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
+//        vc.savePrefs(prefs: plistData)
+        saveSettings(settings: appInfo.settings)
     }
     
     
@@ -220,57 +215,42 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     @IBAction func updateExportPrefs_button(_ sender: NSButton) {
-//        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
-//                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-//                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
-//                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
-//                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
-//        vc.savePrefs(prefs: plistData)
         
         if saveRawXml_button.state.rawValue == 1 || saveTrimmedXml_button.state.rawValue == 1 {
             saveOnly_button.isEnabled = true
         } else {
             saveOnly_button.isEnabled = false
             saveOnly_button.state     = NSControl.StateValue(rawValue: 0)
-            export.saveOnly           = convertToBool(state: saveOnly_button.state.rawValue)
+            export.saveOnly           = stateToBool(state: saveOnly_button.state.rawValue)
         }
         
         switch sender.identifier!.rawValue {
         case "rawSourceXml":
-            export.saveRawXml = convertToBool(state: saveRawXml_button.state.rawValue)
+            export.saveRawXml = stateToBool(state: saveRawXml_button.state.rawValue)
         case "trimmedSourceXml":
-            export.saveTrimmedXml = convertToBool(state: saveTrimmedXml_button.state.rawValue)
+            export.saveTrimmedXml = stateToBool(state: saveTrimmedXml_button.state.rawValue)
         case "saveOnly":
-            export.saveOnly = convertToBool(state: saveOnly_button.state.rawValue)
+            export.saveOnly = stateToBool(state: saveOnly_button.state.rawValue)
         case "rawXmlScope":
-            export.rawXmlScope = convertToBool(state: saveRawXmlScope_button.state.rawValue)
+            export.rawXmlScope = stateToBool(state: saveRawXmlScope_button.state.rawValue)
         case "trimmedXmlScope":
-            export.trimmedXmlScope = convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)
+            export.trimmedXmlScope = stateToBool(state: saveTrimmedXmlScope_button.state.rawValue)
         default:
             break
         }
         
         print("export.saveRawXml: \(export.saveRawXml)")
         
-        plistData["xml"] = ["saveRawXml":export.saveRawXml,
+        appInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
                             "saveTrimmedXml":export.saveTrimmedXml,
                             "saveOnly":export.saveOnly,
                             "saveRawXmlScope":export.rawXmlScope,
                             "saveTrimmedXmlScope":export.trimmedXmlScope]
         
-//        plistData["xml"] = ["saveRawXml":convertToBool(state: saveRawXml_button.state.rawValue),
-//                                "saveTrimmedXml":convertToBool(state: saveTrimmedXml_button.state.rawValue),
-//                                "saveOnly":convertToBool(state: saveOnly_button.state.rawValue),
-//                                "saveRawXmlScope":convertToBool(state: saveRawXmlScope_button.state.rawValue),
-//                                "saveTrimmedXmlScope":convertToBool(state: saveTrimmedXmlScope_button.state.rawValue)]
-        print("[Preferences] call vc.savePrefs")
-        vc.savePrefs(prefs: plistData)
-//        userDefaults.set(convertToBool(state: saveRawXml_button.state.rawValue), forKey: "saveRawXml")
-//        userDefaults.set(convertToBool(state: saveTrimmedXml_button.state.rawValue), forKey: "saveTrimmedXml")
-//        userDefaults.set(convertToBool(state: saveOnly_button.state.rawValue), forKey: "saveOnly")
-//        userDefaults.set(convertToBool(state: saveRawXmlScope_button.state.rawValue), forKey: "saveRawXmlScope")
-//        userDefaults.set(convertToBool(state: saveTrimmedXmlScope_button.state.rawValue), forKey: "saveTrimmedXmlScope")
-//        userDefaults.synchronize()
+        print("[Preferences] call savePrefs")
+//        vc.savePrefs(prefs: plistData)
+        saveSettings(settings: appInfo.settings)
+        
         NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)
     }
     
@@ -279,7 +259,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         return NSControl.StateValue(rawValue: state)
     }
     
-    func convertToBool(state: Int) -> Bool {
+    func stateToBool(state: Int) -> Bool {
         let boolValue = (state == 0) ? false:true
         return boolValue
     }
@@ -424,10 +404,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             userDefaults.synchronize()
         }
         
-        plistData = vc.readSettings()
+        _ = readSettings()
+//        plistData = vc.readSettings()
         
-        if plistData["scope"] != nil {
-            scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        if appInfo.settings["scope"] != nil {
+            scopeOptions = appInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
             if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
                 scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
             }
@@ -472,7 +453,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                     scopeUsersCopy = scopeOptions["users"]!["copy"]!
                 }
             } else {
-                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                       "macapps":["copy":true],
                                       "policies":["copy":true,"disable":false],
                                       "restrictedsoftware":["copy":true],
@@ -481,11 +462,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                       "scg":["copy":true],
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
-                vc.saveSettings(settings: plistData)
+//                vc.saveSettings(settings: plistData)
+                saveSettings(settings: appInfo.settings)
             }
         } else {
             // initilize new settings
-            plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+            appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                   "macapps":["copy":true],
                                   "policies":["copy":true,"disable":false],
                                   "restrictedsoftware":["copy":true],
@@ -494,11 +476,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                   "scg":["copy":true],
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
-            vc.saveSettings(settings: plistData)
+//            vc.saveSettings(settings: plistData)
+            saveSettings(settings: appInfo.settings)
         }
         // read xml settings - start
-        if plistData["xml"] != nil {
-            xmlPrefOptions       = plistData["xml"] as! [String:Bool]
+        if appInfo.settings["xml"] != nil {
+            xmlPrefOptions       = appInfo.settings["xml"] as! [String:Bool]
             saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
             saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
             saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
@@ -506,12 +489,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveTrimmedXmlScope  = (xmlPrefOptions["saveTrimmedXmlScope"] != nil) ? xmlPrefOptions["saveTrimmedXmlScope"]!:true
         } else {
             // set default values
-            plistData["xml"] = ["saveRawXml":false,
+            appInfo.settings["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
                                 "saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
-            vc.saveSettings(settings: plistData)
+//            vc.saveSettings(settings: plistData)
+            saveSettings(settings: appInfo.settings)
             
             saveRawXml           = false
             saveTrimmedXml       = false

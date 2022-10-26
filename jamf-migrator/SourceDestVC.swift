@@ -40,16 +40,16 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var fileImport_button: NSButton!
     @IBOutlet weak var browseFiles_button: NSButton!
     var exportedFilesUrl = URL(string: "")
-    var xportFolderPath: URL? {
-        didSet {
-            do {
-                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-                self.userDefaults.set(bookmark, forKey: "bookmark")
-            } catch let error as NSError {
-                print("[SourceDestVC] Set Bookmark Fails: \(error.description)")
-            }
-        }
-    }
+//    var xportFolderPath: URL? {
+//        didSet {
+//            do {
+//                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+//                self.userDefaults.set(bookmark, forKey: "bookmark")
+//            } catch let error as NSError {
+//                print("[SourceDestVC] Set Bookmark Fails: \(error.description)")
+//            }
+//        }
+//    }
     
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
@@ -102,7 +102,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var isDir: ObjCBool        = false
     let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-    var plistData:[String:Any] = [:]   //our server/username data
+//    var plistData:[String:Any] = [:]   //our server/username data
     
     var saveRawXmlScope     = true
     var saveTrimmedXmlScope = true
@@ -341,11 +341,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         JamfProServer.importFiles = 1
                         
                         // Note, merge this with xportFilesURL
-                        xportFolderPath = openPanel.url
+//                        xportFolderPath = openPanel.url
                         
                         userDefaults.synchronize()
                         browseFiles_button.isHidden        = false
-                        saveSourceDestInfo(info: plistData)
+                        saveSourceDestInfo(info: appInfo.settings)
                         serverChanged(whichserver: "source")
                     } else {
                         if toggleFileImport {
@@ -559,16 +559,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
-    func readSettings() -> [String:Any] {
-        // read environment settings - start
-        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
-        if plistData.count == 0 {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
-        }
-        return(plistData)
-        // read environment settings - end
-    }
-    
     func controlTextDidChange(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
@@ -619,12 +609,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         export.saveOnly       = false
         export.saveRawXml     = false
         export.saveTrimmedXml = false
-        plistData["xml"] = ["saveRawXml":export.saveRawXml,
+        appInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
                                 "saveTrimmedXml":export.saveTrimmedXml,
                                 "saveOnly":export.saveOnly,
                                 "saveRawXmlScope":export.rawXmlScope,
                                 "saveTrimmedXmlScope":export.trimmedXmlScope]
-        savePrefs(prefs: plistData)
+        savePrefs(prefs: appInfo.settings)
         NotificationCenter.default.post(name: .exportOff, object: nil)
         disableSource()
     }
@@ -647,9 +637,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func savePrefs(prefs: [String:Any]) {
         print("[savePrefs] enter")
-        plistData            = readSettings()
-        plistData["scope"]   = prefs["scope"]
-        plistData["xml"]     = prefs["xml"]
+        _ = readSettings()
+        appInfo.settings["scope"]   = prefs["scope"]
+        appInfo.settings["xml"]     = prefs["xml"]
         scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
 //        export.saveOnly            = xmlPrefOptions["saveOnly"]!
@@ -678,8 +668,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         } else {
             saveRawXmlScope = false
         }
-        NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
-//      print("savePrefs xml: \(String(describing: self.plistData["xml"]))\n")
+        NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
+//      print("savePrefs xml: \(String(describing: self.appInfo.settings["xml"]))\n")
     }
 
     // extract the value between xml tags - start
@@ -722,8 +712,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             while local_serverArray.count > 10 {
                 local_serverArray.removeLast()
             }
-            plistData[serverList] = local_serverArray as Any?
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+            appInfo.settings[serverList] = local_serverArray as Any?
+            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
             switch serverList {
             case "source_server_array":
                 self.sourceServerList_button.removeAllItems()
@@ -745,19 +735,19 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             default: break
             }
         }
-        saveSourceDestInfo(info: plistData)
+        saveSourceDestInfo(info: appInfo.settings)
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
-        plistData                       = info
+        appInfo.settings                       = info
 
-        plistData["source_jp_server"]   = source_jp_server_field.stringValue as Any?
-        plistData["source_user"]        = source_user_field.stringValue as Any?
-        plistData["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
-        plistData["dest_user"]          = dest_user_field.stringValue as Any?
-        plistData["storeCredentials"]   = JamfProServer.storeCreds as Any?
+        appInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue as Any?
+        appInfo.settings["source_user"]        = source_user_field.stringValue as Any?
+        appInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
+        appInfo.settings["dest_user"]          = dest_user_field.stringValue as Any?
+        appInfo.settings["storeCredentials"]   = JamfProServer.storeCreds as Any?
 
-        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+        NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
         _ = readSettings()
     }
     
@@ -777,7 +767,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             // see if we're migrating from files or a server
             serverOrFiles() { [self]
                 (result: String) in
-                saveSourceDestInfo(info: plistData)
+                saveSourceDestInfo(info: appInfo.settings)
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
         case "destination":
@@ -1002,10 +992,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
             
             // read environment settings from plist - start
-            plistData = readSettings()
+//            plistData -> appInfo.settings
+            _ = readSettings()
 
-            if plistData["source_jp_server"] as? String != nil {
-                source_jp_server = plistData["source_jp_server"] as! String
+            if appInfo.settings["source_jp_server"] as? String != nil {
+                source_jp_server = appInfo.settings["source_jp_server"] as! String
                 JamfProServer.source = source_jp_server
                 
                 if setting.fullGUI {
@@ -1020,52 +1011,52 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             }
             
-            if plistData["source_user"] != nil {
-                source_user = plistData["source_user"] as! String
+            if appInfo.settings["source_user"] != nil {
+                source_user = appInfo.settings["source_user"] as! String
                 if setting.fullGUI {
                     source_user_field.stringValue = source_user
                 }
                 storedSourceUser = source_user
             }
             
-            if plistData["dest_jp_server"] != nil {
-                dest_jp_server = plistData["dest_jp_server"] as! String
+            if appInfo.settings["dest_jp_server"] != nil {
+                dest_jp_server = appInfo.settings["dest_jp_server"] as! String
                 if setting.fullGUI {
                     dest_jp_server_field.stringValue = dest_jp_server
                 }
             }
             
-            if plistData["dest_user"] != nil {
-                dest_user = plistData["dest_user"] as! String
+            if appInfo.settings["dest_user"] != nil {
+                dest_user = appInfo.settings["dest_user"] as! String
                 if setting.fullGUI {
                     dest_user_field.stringValue = dest_user
                 }
             }
             
             if setting.fullGUI {
-                if plistData["source_server_array"] != nil {
-                    sourceServerArray = plistData["source_server_array"] as! [String]
+                if appInfo.settings["source_server_array"] != nil {
+                    sourceServerArray = appInfo.settings["source_server_array"] as! [String]
                     for theServer in sourceServerArray {
                         self.sourceServerList_button.addItems(withTitles: [theServer])
                     }
                 }
-                if plistData["dest_server_array"] != nil {
-                    destServerArray = plistData["dest_server_array"] as! [String]
+                if appInfo.settings["dest_server_array"] != nil {
+                    destServerArray = appInfo.settings["dest_server_array"] as! [String]
                     for theServer in destServerArray {
                         self.destServerList_button.addItems(withTitles: [theServer])
                     }
                 }
             }
-            if plistData["storeCredentials"] != nil {
-                JamfProServer.storeCreds = plistData["storeCredentials"] as! Int
+            if appInfo.settings["storeCredentials"] != nil {
+                JamfProServer.storeCreds = appInfo.settings["storeCredentials"] as! Int
                 if setting.fullGUI {
                     storeCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeCreds)
                 }
             }
             
             // read xml settings - start
-            if plistData["xml"] != nil {
-                xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+            if appInfo.settings["xml"] != nil {
+                xmlPrefOptions       = appInfo.settings["xml"] as! Dictionary<String,Bool>
 
                 if (xmlPrefOptions["saveRawXml"] != nil) {
                     export.saveRawXml = xmlPrefOptions["saveRawXml"]!
@@ -1099,15 +1090,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             } else {
                 // set default values
-                plistData        = readSettings()
-                plistData["xml"] = ["saveRawXml":false,
+                _ = readSettings()
+                appInfo.settings["xml"] = ["saveRawXml":false,
                                     "saveTrimmedXml":false,
                                     "export.saveOnly":false,
                                     "saveRawXmlScope":true,
                                     "saveTrimmedXmlScope":true] as Any
             }
             // update plist
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
             // read xml settings - end
             // read environment settings - end
             

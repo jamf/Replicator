@@ -53,16 +53,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // Import file variables
     var exportedFilesUrl = URL(string: "")
-    var xportFolderPath: URL? {
-        didSet {
-            do {
-                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-                self.userDefaults.set(bookmark, forKey: "bookmark")
-            } catch let error as NSError {
-                print("[ViewController] Set Bookmark Fails: \(error.description)")
-            }
-        }
-    }
+//    var xportFolderPath: URL? {
+//        didSet {
+//            do {
+//                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+//                self.userDefaults.set(bookmark, forKey: "bookmark")
+//            } catch let error as NSError {
+//                print("[ViewController] Set Bookmark Fails: \(error.description)")
+//            }
+//        }
+//    }
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
     
@@ -349,7 +349,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var didRun                 = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
     let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-    var plistData:[String:Any] = [:]   //our server/username data
+//    var plistData:[String:Any] = [:]   //our server/username data
 
 //  Log / backup vars
     let backupDate          = DateFormatter()
@@ -785,11 +785,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     return
                 }
             }
-            plistData             = readSettings()
-            scopeOptions          = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            xmlPrefOptions        = plistData["xml"] as! [String:Bool]
             
-            print("[Go] xmlPrefOptions: \(xmlPrefOptions)")
+            print("[Go] before readSettings() xmlPrefOptions: \(xmlPrefOptions)")
+            _ = readSettings()
+            scopeOptions          = appInfo.settings["scope"] as! [String:[String:Bool]]
+            xmlPrefOptions        = appInfo.settings["xml"] as! [String:Bool]
+            
+            print("[Go]  after readSettings() xmlPrefOptions: \(xmlPrefOptions)")
             export.saveOnly       = (xmlPrefOptions["saveOnly"] == nil) ? false:xmlPrefOptions["saveOnly"]!
             export.saveRawXml     = (xmlPrefOptions["saveRawXml"] == nil) ? false:xmlPrefOptions["saveRawXml"]!
             export.saveTrimmedXml = (xmlPrefOptions["saveTrimmedXml"] == nil) ? false:xmlPrefOptions["saveTrimmedXml"]!
@@ -1399,7 +1401,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
 
             // get scope copy / policy disable options
-            self.scopeOptions = self.readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
+            self.scopeOptions = readSettings()["scope"] as! Dictionary<String, Dictionary<String, Bool>>
 //            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
             
             // get scope preference settings - start
@@ -6818,16 +6820,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         return newXML_trimmed
     }
     
-    func readSettings() -> [String:Any] {
-        // read environment settings - start
-        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
-        if plistData.count == 0 {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
-        }
-//        print("readSettings - plistData: \(String(describing: plistData))\n")
-        return(plistData)
-        // read environment settings - end
-    }
+//    func readSettings() -> [String:Any] {
+//        // read environment settings - start
+//        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
+//        if plistData.count == 0 {
+//            if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
+//        }
+////        print("readSettings - plistData: \(String(describing: plistData))\n")
+//        return(plistData)
+//        // read environment settings - end
+//    }
     
     func stopButton(_ sender: Any) {
         WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
@@ -6836,8 +6838,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         goButtonEnabled(button_status: true)
     }
     
-    func saveSettings(settings: [String:Any]) {
-        plistData                       = settings
+//    func saveSettings(settings: [String:Any]) {
+//        plistData                       = settings
 
 //        plistData["source_jp_server"]   = JamfProServer.source as Any?
 //        plistData["source_user"]        = JamfProServer.sourceUser as Any?
@@ -6845,14 +6847,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        plistData["dest_user"]          = JamfProServer.destUser as Any?
 //        plistData["storeCredentials"]   = JamfProServer.storeCreds as Any?
 
-        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-    }
+//        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+//    }
     
     func savePrefs(prefs: [String:Any]) {
         print("[ViewController] enter savePrefs")
-        plistData            = readSettings()
-        plistData["scope"]   = prefs["scope"]
-        plistData["xml"]     = prefs["xml"]
+        _ = readSettings()
+        appInfo.settings["scope"]   = prefs["scope"]
+        appInfo.settings["xml"]     = prefs["xml"]
         scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions       = prefs["xml"] as! [String:Bool]
         print("[ViewController] savePrefs xml: \(xmlPrefOptions)")
@@ -6882,38 +6884,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         } else {
             saveRawXmlScope = false
         }
-        NSDictionary(dictionary: plistData).write(toFile: self.plistPath!, atomically: true)
+        NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
     }
-    
-//    @IBAction func disableExportOnly_action(_ sender: Any) {
-//        export.saveOnly       = false
-//        export.saveRawXml     = false
-//        export.saveTrimmedXml = false
-//        plistData["xml"] = ["saveRawXml":export.saveRawXml,
-//                                "saveTrimmedXml":export.saveTrimmedXml,
-//                                "saveOnly":export.saveOnly,
-//                                "saveRawXmlScope":export.rawXmlScope,
-//                                "saveTrimmedXmlScope":export.trimmedXmlScope]
-//        savePrefs(prefs: plistData)
-//        NotificationCenter.default.post(name: .exportOff, object: nil)
-////        disableSource()
-//    }
-    
-    /*
-     // other VC - lnh
-    func disableSource() {
-        if setting.fullGUI {
-            DispatchQueue.main.async {
-                self.dest_jp_server_field.isEnabled     = !export.saveOnly
-                self.destServerList_button.isEnabled    = !export.saveOnly
-                self.dest_user_field.isEnabled          = !export.saveOnly
-                self.dest_pwd_field.isEnabled           = !export.saveOnly
-                self.siteMigrate_button.isEnabled       = !export.saveOnly
-                self.disableExportOnly_button.isHidden  = !export.saveOnly
-            }
-        }
-    }
-     */
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
             DispatchQueue.main.async {
@@ -7190,95 +7162,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             break
         }
-        /*
-//        if !(fileImport && serverList == "source_server_array") {
-            var local_serverArray = theArray
-            let positionInList = local_serverArray.firstIndex(of: url)
-            if positionInList == nil && url != "" {
-                    local_serverArray.insert(url, at: 0)
-            } else if positionInList! > 0 && url != "" {
-                local_serverArray.remove(at: positionInList!)
-                local_serverArray.insert(url, at: 0)
-            }
-            while local_serverArray.count > 10 {
-                local_serverArray.removeLast()
-            }
-            plistData[serverList] = local_serverArray as Any?
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
-            switch serverList {
-            case "source_server_array":
-                self.sourceServerList_button.removeAllItems()
-                for theServer in local_serverArray {
-                    if theServer != "" {
-                        self.sourceServerList_button.addItems(withTitles: [theServer])
-                    }
-                    self.sourceServerList_button.addItems(withTitles: [theServer])
-                }
-                self.sourceServerArray = local_serverArray
-            case "dest_server_array":
-                self.destServerList_button.removeAllItems()
-                for theServer in local_serverArray {
-                    if theServer != "" {
-                        self.destServerList_button.addItems(withTitles: [theServer])
-                    }
-                }
-                self.destServerArray = local_serverArray
-            default: break
-            }
-        */
     }
     
-    
-    /*
-    func urlToFqdn(serverUrl: String) -> String {
-        if serverUrl != "" {
-            var fqdn = serverUrl.replacingOccurrences(of: "http://", with: "")
-            fqdn = serverUrl.replacingOccurrences(of: "https://", with: "")
-            let fqdnArray = fqdn.split(separator: "/")
-            fqdn = "\(fqdnArray[0])"
-            return fqdn
-        } else {
-            return ""
-        }
-    }
-     
-    @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
-        self.selectiveListCleared = false
-        switch sender.tag {
-        case 0:
-            if JamfProServer.source_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
-                // source server changed, clear list of objects
-//                clearSelectiveList()
-                JamfProServer.validToken["source"] = false
-                serverChanged(whichserver: "source")
-            }
-            JamfProServer.source_field.stringValue = sourceServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "source", url: JamfProServer.source_field.stringValue)
-        case 1:
-            if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && wipeData.on {
-                // source server changed, clear list of objects
-//                clearSelectiveList()
-                JamfProServer.validToken["destination"] = false
-                serverChanged(whichserver: "destination")
-            }
-            self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue)
-            // reset list of available sites
-            if siteMigrate_button.state.rawValue == 1 {
-                siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
-                availableSites_button.isEnabled = false
-                availableSites_button.removeAllItems()
-                destinationLabel_TextField.stringValue = "Destination"
-                destinationSite = ""
-                itemToSite = false
-            }
-        default: break
-        }
-        // see if we're migrating from files or a server
-        _ = serverOrFiles()
-    }
-     */
-    
+   
     func windowIsVisible(windowName: String) -> Bool {
         let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
         let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
@@ -7297,31 +7183,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // see if we last migrated from files or a server
 //        print("entered serverOrFiles.")
         var sourceType = ""
-        /*
-        DispatchQueue.main.async {
-            if JamfProServer.source_field.stringValue != "" {
-//                print("prefix: \(JamfProServer.source_field.stringValue.prefix(4).lowercased())")
-                if JamfProServer.source_field.stringValue.prefix(4).lowercased() == "http" {
-//                    print("source: server.")
-                    self.importFiles_button.state    = NSControl.StateValue(rawValue: 0)
-                    self.browseFiles_button.isHidden = true
-                    self.source_user_field.isHidden  = false
-                    self.source_pwd_field.isHidden   = false
-                    self.fileImport                  = false
-                    sourceType                       = "server"
-                } else {
-//                    print("source: files.")
-                    self.importFiles_button.state   = NSControl.StateValue(rawValue: 1)
-                    self.dataFilesRoot              = JamfProServer.source_field.stringValue
-                    self.exportedFilesUrl           = URL(string: "file://\(self.dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
-                    self.source_user_field.isHidden = true
-                    self.source_pwd_field.isHidden  = true
-                    self.fileImport                 = true
-                    sourceType                      = "files"
-                }
-            }
-        }
-         */
+
         return(sourceType)
     }
     
@@ -7521,8 +7383,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-        plistData = readSettings()
-        saveSettings(settings: plistData)
+        _ = readSettings()
+        saveSettings(settings: appInfo.settings)
         logCleanup()
     }
     
@@ -7577,72 +7439,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             
             // read environment settings from plist - start
-            plistData = readSettings()
+            _ = readSettings()
 
-            /*
-             
-            if plistData["source_jp_server"] as? String != nil {
-                source_jp_server = plistData["source_jp_server"] as! String
-                
-                if setting.fullGUI {
-                    source_jp_server_field.stringValue = source_jp_server
-                    if source_jp_server.count > 0 {
-                        self.browseFiles_button.isHidden = (source_jp_server.first! == "/") ? false:true
-                    }
-                }
-            } else {
-                if setting.fullGUI {
-                    self.browseFiles_button.isHidden   = true
-                }
-            }
-            
-            if plistData["source_user"] != nil {
-                source_user = plistData["source_user"] as! String
-                if setting.fullGUI {
-                    source_user_field.stringValue = source_user
-                }
-                storedSourceUser = source_user
-            }
-            
-            if plistData["dest_jp_server"] != nil {
-                dest_jp_server = plistData["dest_jp_server"] as! String
-                if setting.fullGUI {
-                    dest_jp_server_field.stringValue = dest_jp_server
-                }
-            }
-            
-            if plistData["dest_user"] != nil {
-                dest_user = plistData["dest_user"] as! String
-                if setting.fullGUI {
-                    dest_user_field.stringValue = dest_user
-                }
-            }
-            
-            if setting.fullGUI {
-                if plistData["source_server_array"] != nil {
-                    sourceServerArray = plistData["source_server_array"] as! [String]
-                    for theServer in sourceServerArray {
-                        self.sourceServerList_button.addItems(withTitles: [theServer])
-                    }
-                }
-                if plistData["dest_server_array"] != nil {
-                    destServerArray = plistData["dest_server_array"] as! [String]
-                    for theServer in destServerArray {
-                        self.destServerList_button.addItems(withTitles: [theServer])
-                    }
-                }
-            }
-            if plistData["storeCredentials"] != nil {
-                storeCredentials = plistData["storeCredentials"] as! Int
-                if setting.fullGUI {
-                    storeCredentials_button.state = NSControl.StateValue(rawValue: storeCredentials)
-                }
-            }
-             */
-            
             // read scope settings - start
-            if plistData["scope"] != nil {
-                scopeOptions = plistData["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+            if appInfo.settings["scope"] != nil {
+                scopeOptions = appInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
 
                 if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
                     scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
@@ -7679,8 +7480,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             } else {
                 // reset/initialize new settings
-                plistData          = readSettings()
-                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                _ = readSettings()
+                appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                       "macapps":["copy":true],
                                       "policies":["copy":true,"disable":false],
                                       "restrictedsoftware":["copy":true],
@@ -7690,7 +7491,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
                 
-                NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+                NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
             }
             // read scope settings - end
             
@@ -7718,8 +7519,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             } else {
                 // reset/initialize scope preferences
-                plistData          = readSettings()
-                plistData["scope"] = ["osxconfigurationprofiles":["copy":true],
+                _ = readSettings()
+                appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                       "macapps":["copy":true],
                                       "policies":["copy":true,"disable":false],
                                       "restrictedsoftware":["copy":true],
@@ -7731,8 +7532,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             // read xml settings - start
-            if plistData["xml"] != nil {
-                xmlPrefOptions       = plistData["xml"] as! Dictionary<String,Bool>
+            if appInfo.settings["xml"] != nil {
+                xmlPrefOptions       = appInfo.settings["xml"] as! Dictionary<String,Bool>
 
                 if (xmlPrefOptions["saveRawXml"] != nil) {
                     export.saveRawXml = xmlPrefOptions["saveRawXml"]!
@@ -7766,15 +7567,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             } else {
                 // set default values
-                plistData        = readSettings()
-                plistData["xml"] = ["saveRawXml":false,
+                _ = readSettings()
+                appInfo.settings["xml"] = ["saveRawXml":false,
                                     "saveTrimmedXml":false,
                                     "export.saveOnly":false,
                                     "saveRawXmlScope":true,
                                     "saveTrimmedXmlScope":true] as Any
             }
             // update plist
-            NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
             // read xml settings - end
             // read environment settings - end
             
