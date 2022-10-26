@@ -1996,12 +1996,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                                        print("[ViewController.getEndpoints] result: \(result)")
                                                         lookupCount += 1
                                                         if packageFilename != "" && uniquePackages.firstIndex(of: packageFilename) == nil {
-//                                                            print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
                                                             uniquePackages.append(packageFilename)
                                                             availableObjsToMigDict[packageID] = packageFilename
                                                             duplicatePackagesDict[packageFilename] = [displayName]
                                                         }  else {
-//                                                            print("[ViewController.getEndpoints] Duplicate package filename found on \(JamfProServer.source): \(packageFilename), id: \(packageID)\n")
                                                             if endpointCountDict[endpoint]! > 0 {
                                                                 endpointCountDict[endpoint]! -= 1
                                                             }
@@ -2016,7 +2014,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             }
                                                         }
                                                         if lookupCount == endpointCount {
-//                                                            print("[ViewController.getEndpoints] done looking up packages on \(JamfProServer.source)")
                                                             if duplicatePackages {
                                                                 var message = "\tFilename : Display Name\n"
                                                                 for (pkgFilename, displayNames) in duplicatePackagesDict {
@@ -2165,7 +2162,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     let record = endpointInfo[i] as! [String : AnyObject]
 
                                                     if record["name"] != nil {
-                                                        print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
                                                         availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                     } else {
                                                         availableObjsToMigDict[record["id"] as! Int] = ""
