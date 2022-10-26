@@ -100,9 +100,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var disableExportOnly_button: NSButton!
     
     var isDir: ObjCBool        = false
-    let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-//    var plistData:[String:Any] = [:]   //our server/username data
     
     var saveRawXmlScope     = true
     var saveTrimmedXmlScope = true
@@ -671,7 +669,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         } else {
             saveRawXmlScope = false
         }
-        NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
+        NSDictionary(dictionary: appInfo.settings).write(toFile: self.appInfo.plistPath, atomically: true)
     }
      */
 
@@ -716,7 +714,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 local_serverArray.removeLast()
             }
             appInfo.settings[serverList] = local_serverArray as Any?
-            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
+            NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
             switch serverList {
             case "source_server_array":
                 self.sourceServerList_button.removeAllItems()
@@ -750,7 +748,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         appInfo.settings["dest_user"]          = dest_user_field.stringValue as Any?
         appInfo.settings["storeCredentials"]   = JamfProServer.storeCreds as Any?
 
-        NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
+        NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
         _ = readSettings()
     }
     
@@ -979,17 +977,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
         
         if setting.fullGUI {
-            if !FileManager.default.fileExists(atPath: plistPath!) {
+            if !FileManager.default.fileExists(atPath: appInfo.plistPath) {
                 do {
-                    if !FileManager.default.fileExists(atPath: plistPath!.replacingOccurrences(of: "settings.plist", with: "")) {
+                    if !FileManager.default.fileExists(atPath: appInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")) {
                         // create directory
-                        try FileManager.default.createDirectory(atPath: plistPath!.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
+                        try FileManager.default.createDirectory(atPath: appInfo.plistPath.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
                     }
-                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
+                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: appInfo.plistPath)
                     WriteToLog().message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(plistPath!)\n")
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(appInfo.plistPath)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(appInfo.plistPath)\n")
                     NSApplication.shared.terminate(self)
                 }
             }
@@ -1101,7 +1099,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                                     "saveTrimmedXmlScope":true] as Any
             }
             // update plist
-            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
+            NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
             // read xml settings - end
             // read environment settings - end
             

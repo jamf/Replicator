@@ -96,7 +96,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBAction func showPrefsWindow(_ sender: Any) {
         if NSEvent.modifierFlags.contains(.option) {
 //            isDir = true
-            let settingsFolder = plistPath!.replacingOccurrences(of: "settings.plist", with: "")
+            let settingsFolder = appInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")
             if (self.fm.fileExists(atPath: settingsFolder)) {
                 NSWorkspace.shared.openFile(settingsFolder)
             } else {
@@ -347,9 +347,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // plist and log variables
     var didRun                 = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
-    let plistPath:String?      = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist")
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
-//    var plistData:[String:Any] = [:]   //our server/username data
 
 //  Log / backup vars
     let backupDate          = DateFormatter()
@@ -393,8 +391,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // settings variables
     let safeCharSet                 = CharacterSet.alphanumerics
-//    var source_jp_server: String    = ""
-//    var source_user: String         = ""
     var source_pass: String         = ""
     var dest_jp_server: String      = ""
     var dest_user: String           = ""
@@ -403,14 +399,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var destBase64Creds: String     = ""
     
     var sourceURL = ""
-//    var destURL = ""
     var createDestUrlBase = ""
     var iconDictArray = [String:[[String:String]]]()
     var uploadedIcons = [String:Int]()
     
     // import file vars
     var fileImport      = false
-//    var dataFilesRoot   = ""
     
     var endpointDefDict = ["computergroups":"computer_groups", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
     let ordered_dependency_array = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
@@ -2171,7 +2165,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     let record = endpointInfo[i] as! [String : AnyObject]
 
                                                     if record["name"] != nil {
-//                                                        print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
+                                                        print("[ViewController.getEndpoints] add \(record["name"]!) to \(endpoint) dict")
                                                         availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                     } else {
                                                         availableObjsToMigDict[record["id"] as! Int] = ""
@@ -4550,6 +4544,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if counters[endpointType] == nil {
             self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
             self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+        } else {
+            counters[endpointType]!["total"] = endpointCount
         }
         
         // whether the operation was successful or not, either delete or fail
@@ -6740,7 +6736,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             do {
                 try self.fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE")
                 wipeData.on = false
-                _ = serverOrFiles()
+//                _ = serverOrFiles()
 //                DispatchQueue.main.async {
 //                    self.selectiveTabelHeader_textview.stringValue = "Select object(s) to migrate"
 //                }
@@ -6814,7 +6810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
 //    func readSettings() -> [String:Any] {
 //        // read environment settings - start
-//        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: plistPath!)) as? [String : Any])!
+//        plistData = (NSDictionary(contentsOf: URL(fileURLWithPath: appInfo.plistPath)) as? [String : Any])!
 //        if plistData.count == 0 {
 //            if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist\n") }
 //        }
@@ -6839,7 +6835,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        plistData["dest_user"]          = JamfProServer.destUser as Any?
 //        plistData["storeCredentials"]   = JamfProServer.storeCreds as Any?
 
-//        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
+//        NSDictionary(dictionary: plistData).write(toFile: appInfo.plistPath, atomically: true)
 //    }
     /*
     func savePrefs(prefs: [String:Any]) {
@@ -6874,7 +6870,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         } else {
             saveRawXmlScope = false
         }
-        NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
+        NSDictionary(dictionary: appInfo.settings).write(toFile: self.appInfo.plistPath, atomically: true)
     }
      */
     
@@ -7170,13 +7166,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         return false
     }
     
-    func serverOrFiles() -> String {
-        // see if we last migrated from files or a server
-//        print("entered serverOrFiles.")
-        var sourceType = ""
-
-        return(sourceType)
-    }
+//    func serverOrFiles() -> String {
+//        // see if we last migrated from files or a server
+////        print("entered serverOrFiles.")
+//        var sourceType = ""
+//
+//        return(sourceType)
+//    }
     
     func zipIt(args: String..., completion: @escaping (_ result: String) -> Void) {
 
@@ -7384,13 +7380,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         jamfpro = JamfPro(controller: self)
         
         if setting.fullGUI {
-            if !FileManager.default.fileExists(atPath: plistPath!) {
+            if !FileManager.default.fileExists(atPath: appInfo.plistPath) {
                 do {
-                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: plistPath!)
+                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: appInfo.plistPath)
                     WriteToLog().message(stringOfText: "[ViewController] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "[ViewController] Unable to find/create \(plistPath!)\n")
-                    WriteToLog().message(stringOfText: "[ViewController] Try to manually copy the file from path_to/jamf-migrator.app/Contents/Resources/settings.plist to \(plistPath!)\n")
+                    WriteToLog().message(stringOfText: "[ViewController] Unable to find/create \(appInfo.plistPath)\n")
+                    WriteToLog().message(stringOfText: "[ViewController] Try to manually copy the file from path_to/jamf-migrator.app/Contents/Resources/settings.plist to \(appInfo.plistPath)\n")
                     NSApplication.shared.terminate(self)
                 }
             }
@@ -7449,7 +7445,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
                 
-                NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
+                NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
             }
             // read scope settings - end
             
@@ -7533,13 +7529,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     "saveTrimmedXmlScope":true] as Any
             }
             // update plist
-            NSDictionary(dictionary: appInfo.settings).write(toFile: plistPath!, atomically: true)
+            NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
             // read xml settings - end
             // read environment settings - end
             
             // see if we last migrated from files or a server
             // no need to backup local files, add later?
-            _ = serverOrFiles()
+//            _ = serverOrFiles()
         } else {
             didRun = true
             // other VC - lnh
@@ -7634,7 +7630,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 srcSrvTableView.reloadData()
                 selectiveListCleared = true
                 
-                _ = serverOrFiles()
+//                _ = serverOrFiles()
                 
                 NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
                 
