@@ -152,9 +152,14 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
 ## History
-**v7.0.0**<br>
-prevent sleep while migrating
+**v7.0.2**<br>
+Make disclosure triangle more visible in light mode with default color scheme
+Fix counter when deleting items
 better handling of access to previously selected folders
+better handling of preferences as they are changed
+
+**v7.0.1**<br>
+prevent sleep while migrating
 fix token refresh
 
 **v7.0.0**<br>
