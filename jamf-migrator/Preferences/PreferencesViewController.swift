@@ -239,16 +239,12 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             break
         }
         
-        print("export.saveRawXml: \(export.saveRawXml)")
-        
         appInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
                             "saveTrimmedXml":export.saveTrimmedXml,
                             "saveOnly":export.saveOnly,
                             "saveRawXmlScope":export.rawXmlScope,
                             "saveTrimmedXmlScope":export.trimmedXmlScope]
         
-        print("[Preferences] call savePrefs")
-//        vc.savePrefs(prefs: plistData)
         saveSettings(settings: appInfo.settings)
         
         NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)

@@ -441,7 +441,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     }
                 } else {
-                    print("[sites fn] failed to auth")
                     WriteToLog().message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)\n")
                     setDestSite_button.isHidden                 = true
                     self.destinationLabel_TextField.stringValue = "Destination"
@@ -484,7 +483,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
    
     func fetchPassword(whichServer: String, url: String) {
-        fileImport = userDefaults.bool(forKey: "fileImport")
+        if setting.fullGUI {
+            fileImport = userDefaults.bool(forKey: "fileImport")
+        } else {
+            fileImport = false
+        }
         if !(whichServer == "source" && fileImport) {
             let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
             
@@ -614,7 +617,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                                 "saveOnly":export.saveOnly,
                                 "saveRawXmlScope":export.rawXmlScope,
                                 "saveTrimmedXmlScope":export.trimmedXmlScope]
-        savePrefs(prefs: appInfo.settings)
+        saveSettings(settings: appInfo.settings)
         NotificationCenter.default.post(name: .exportOff, object: nil)
         disableSource()
     }
@@ -635,8 +638,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
+    /*
     func savePrefs(prefs: [String:Any]) {
-        print("[savePrefs] enter")
         _ = readSettings()
         appInfo.settings["scope"]   = prefs["scope"]
         appInfo.settings["xml"]     = prefs["xml"]
@@ -669,8 +672,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             saveRawXmlScope = false
         }
         NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
-//      print("savePrefs xml: \(String(describing: self.appInfo.settings["xml"]))\n")
     }
+     */
 
     // extract the value between xml tags - start
     func tagValue(xmlString:String, xmlTag:String) -> String {

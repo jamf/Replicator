@@ -786,12 +786,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             }
             
-            print("[Go] before readSettings() xmlPrefOptions: \(xmlPrefOptions)")
             _ = readSettings()
             scopeOptions          = appInfo.settings["scope"] as! [String:[String:Bool]]
             xmlPrefOptions        = appInfo.settings["xml"] as! [String:Bool]
             
-            print("[Go]  after readSettings() xmlPrefOptions: \(xmlPrefOptions)")
             export.saveOnly       = (xmlPrefOptions["saveOnly"] == nil) ? false:xmlPrefOptions["saveOnly"]!
             export.saveRawXml     = (xmlPrefOptions["saveRawXml"] == nil) ? false:xmlPrefOptions["saveRawXml"]!
             export.saveTrimmedXml = (xmlPrefOptions["saveTrimmedXml"] == nil) ? false:xmlPrefOptions["saveTrimmedXml"]!
@@ -2130,7 +2128,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             self.nodesMigrated+=1
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                                print("last node: \(endpoint)")
                                                 self.rmDELETE()
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
@@ -2240,7 +2237,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             // print("[endpointsRead += 1] \(endpoint)")
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                                print("last node: \(endpoint)")
                                                 self.rmDELETE()
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
@@ -2471,7 +2467,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             // print("[endpointsRead += 1] \(endpoint)")
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                                print("last node: \(endpoint)")
                                                 self.rmDELETE()
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
@@ -2605,7 +2600,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             // print("[endpointsRead += 1] \(endpoint)")
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
-                                                print("last node: \(endpoint)")
                                                 self.rmDELETE()
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
@@ -2864,7 +2858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             name     = "\(jsonData["name"] ?? "")"
                                             id       = "\(jsonData["id"] ?? "")"
                                         } else {
-                                            print("issue with string format, not json")
+                                            WriteToLog().message(stringOfText: "[readDataFiles] buildings - issue with string format, not json\n")
                                         }
                                     } catch let error as NSError {
                                         print(error)
@@ -3019,7 +3013,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             WriteToLog().message(stringOfText: "[ViewController.processFiles] JSON file for \(l_name) successfully parsed.\n")
                                         } else {
                                             WriteToLog().message(stringOfText: "[ViewController.processFiles] JSON file \(objectInfo) failed to parse.\n")
-//                                            print("issue with string format, not json")
                                             action = "skip"
                                         }
                                     } catch let error as NSError {
@@ -3221,7 +3214,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
 
                             // save source XML - start
-                            print("export.saveRawXml: \(export.saveRawXml)")
                             if export.saveRawXml {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
                                 DispatchQueue.main.async { [self] in
@@ -6849,15 +6841,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
 //        NSDictionary(dictionary: plistData).write(toFile: plistPath!, atomically: true)
 //    }
-    
+    /*
     func savePrefs(prefs: [String:Any]) {
-        print("[ViewController] enter savePrefs")
         _ = readSettings()
         appInfo.settings["scope"]   = prefs["scope"]
         appInfo.settings["xml"]     = prefs["xml"]
         scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
         xmlPrefOptions       = prefs["xml"] as! [String:Bool]
-        print("[ViewController] savePrefs xml: \(xmlPrefOptions)")
         
         if let _ = xmlPrefOptions["saveOnly"] {
             export.saveOnly = xmlPrefOptions["saveOnly"]!
@@ -6886,6 +6876,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         NSDictionary(dictionary: appInfo.settings).write(toFile: self.plistPath!, atomically: true)
     }
+     */
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
             DispatchQueue.main.async {
@@ -7389,39 +7380,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func initVars() {
-        /*
-        // create log directory if missing - start
-        if !fm.fileExists(atPath: logPath!) {
-            do {
-                try fm.createDirectory(atPath: logPath!, withIntermediateDirectories: true, attributes: nil )
-                } catch {
-                alert_dialog(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.")
-                exit(0)
-            }
-        }
-        // create log directory if missing - end
-
-        if fm.fileExists(atPath: historyPath!) {
-            // move legacy history files to log directory and delete history dir
-            moveHistoryToLog(source: historyPath!, destination: logPath!)
-        }
-        
-        maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
-        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
-        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
-
-        isDir = false
-        if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {
-            fm.createFile(atPath: logPath! + logFile, contents: nil, attributes: nil)
-        }
-        sleep(1)
-        
-        if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            print("resetting export location")
-            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
-            userDefaults.synchronize()
-        }
-        */
         
         jamfpro = JamfPro(controller: self)
         
