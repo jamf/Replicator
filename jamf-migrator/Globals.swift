@@ -58,6 +58,7 @@ struct JamfProServer {
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0
+    static var version      = ["source":"", "destination":""]
     static var build        = ""
     static var source       = ""
     static var destination  = ""
@@ -76,7 +77,6 @@ struct JamfProServer {
     static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
     static var validToken   = ["source":false, "destination":false]
     static var tokenCreated = [String:Date?]()
-    static var version      = ["source":"", "destination":""]
     static var pkgsNotFound = 0
     static var sessionCookie = [HTTPCookie]()
     static var stickySession = false

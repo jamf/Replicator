@@ -2833,7 +2833,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let fileUrl = self.exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
                             do {
                                 // remove 'extra' data so we can get name and id from between general tags
-                                let fileContents = try String(contentsOf: fileUrl!)
+                                var fileContents = try String(contentsOf: fileUrl!)
 //                                    var fileJSON     = [String:Any]()
                                 var name         = ""
                                 var id           = ""
@@ -2857,6 +2857,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     local_general = fileContents
                                     for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
                                         local_general = self.rmXmlData(theXML: local_general, theTag: xmlTag, keepTags: false)
+                                    }
+                                    let theScript = self.tagValue(xmlString: fileContents, xmlTag: "script_contents")
+                                    if theScript != "" {
+                                        fileContents = self.rmXmlData(theXML: fileContents, theTag: "script_contents", keepTags: true)
+                                        fileContents = fileContents.replacingOccurrences(of: "<script_contents/>", with: "<script_contents>\(theScript.xmlEncode)</script_contents>")
                                     }
                                 case "advancedusersearches", "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
                                     local_general = fileContents
@@ -4037,12 +4042,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.POSTsuccessCount = 0
                         }   // look to see if we are processing the next localEndPointType - end
                         
-                        DispatchQueue.main.async {
+//                        DispatchQueue.main.async {
                             if let _ = self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
                                 if self.createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
-                                    whichError = ""
+                                    whichError = "skip"
                                     self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.\n")
                                 }
                             } else {
                                 self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
@@ -4065,7 +4071,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                                 
                                 self.POSTsuccessCount += 1
-                                whichError = ""
+                                
+//                                whichError = ""
 //                                self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
                                 
                                 if let _ = self.progressCountArray["\(endpointType)"] {
@@ -4113,10 +4120,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 
                                 // Write xml for degugging - end
                                 
-                                if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
-                                    whichError = "category"
-                                } else {
-                                    whichError = errorMsg
+                                if whichError != "skip" {
+                                    if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
+                                        whichError = "category"
+                                    } else {
+                                        whichError = errorMsg
+                                    }
                                 }
                                                                 
                                 // retry computers with dublicate serial or MAC - start
@@ -4234,7 +4243,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                             }
                             completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-                        }   // DispatchQueue.main.async - end
+//                        }   // DispatchQueue.main.async - end
                     }   // if let httpResponse = response - end
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)\n") }
@@ -7914,6 +7923,17 @@ extension String {
                 .replacingOccurrences(of: "&apos;", with: "'")
                 .replacingOccurrences(of: "&lt;", with: "<")
                 .replacingOccurrences(of: "&gt;", with: ">")
+            return newString
+        }
+    }
+    var xmlEncode: String {
+        get {
+            var newString = self
+            newString = newString.replacingOccurrences(of: "&", with: "&amp;")
+                .replacingOccurrences(of: "'", with: "&apos;")
+                .replacingOccurrences(of: "<", with: "&lt;")
+                .replacingOccurrences(of: ">", with: "&gt;")
+            
             return newString
         }
     }

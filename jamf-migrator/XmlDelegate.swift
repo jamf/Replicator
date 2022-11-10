@@ -177,7 +177,10 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             if let xmlDoc = try? XMLDocument(xmlString: xml, options: .nodePrettyPrint) {
                 if let _ = try? XMLElement.init(xmlString:"\(xml)") {
                     let data = xmlDoc.xmlData(options:.nodePrettyPrint)
-                    let formattedXml = String(data: data, encoding: .utf8)!
+                    var formattedXml = String(data: data, encoding: .utf8)!
+                    if node == "scripts" {
+                        formattedXml = formattedXml.xmlDecode
+                    }
                     //                print("policy xml:\n\(formattedXml)")
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)

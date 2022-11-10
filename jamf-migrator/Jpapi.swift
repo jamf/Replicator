@@ -108,7 +108,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                         
                         if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
-                            WriteToLog().message(stringOfText: "[Jpapi.action] set cookie (\(String(describing: sessionCookie!.value))) for \(String(describing: sessionCookie!.domain))\n")
+                            WriteToLog().message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))\n")
                             JamfProServer.sessionCookie.append(sessionCookie!)
                         } else {
                             HTTPCookieStorage.shared.removeCookies(since: History.startTime)
