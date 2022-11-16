@@ -4073,7 +4073,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 self.POSTsuccessCount += 1
                                 
 //                                whichError = ""
-//                                self.createRetryCount["\(localEndPointType)-\(sourceEpId)"] = nil
                                 
                                 if let _ = self.progressCountArray["\(endpointType)"] {
                                     self.progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
@@ -4085,9 +4084,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(self.dependencyMigratedCount[self.dependencyParentId]!)")
                                 }
                                 
-//                                let localTmp = (self.counters[endpointType]?["\(apiAction)"])
-//                                self.counters[endpointType]?["\(apiAction)"] = (localTmp ?? 0) + 1
-
                                 self.counters[endpointType]?["\(apiAction)"]! += 1
                                 
                                 if var summaryArray = self.summaryDict[endpointType]?["\(apiAction)"] {
