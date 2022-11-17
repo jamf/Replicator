@@ -1044,17 +1044,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        }
     }   // @IBAction func Go - end
     
-    @IBAction func QuitNow(sender: AnyObject) {
+    @IBAction func quit_action(sender: AnyObject) {
         // check for file that sets mode to delete data from destination server, delete if found - start
         rmDELETE()
         // check for file that allows deleting data from destination server, delete if found - end
         self.goButtonEnabled(button_status: true)
+        AppDelegate().quitNow(sender: self)
         
-//        let tabLabel = (activeTab_TabView.selectedTabViewItem?.label)!
-//        userDefaults.set(tabLabel, forKey: "activeTab")
-
-        WriteToLog().logFileW?.closeFile()
-        NSApplication.shared.terminate(self)
+//        WriteToLog().logFileW?.closeFile()
+//        NSApplication.shared.terminate(self)
     }
     
     //================================= migration functions =================================//

@@ -29,7 +29,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         var path = ""
 
         switch endpoint {
-        case  "buildings", "csa/token", "icon", "jamf-pro-version":
+        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token":
             path = "v1/\(endpoint)"
         default:
             path = "v2/\(endpoint)"
@@ -116,13 +116,17 @@ class Jpapi: NSObject, URLSessionDelegate {
                     }
                     
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json! as? [String:Any] {
+                    if let endpointJSON = json as? [String:Any] {
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).\n") }
                         completion(endpointJSON)
                         return
                     } else {    // if let endpointJSON error
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))\n") }
-                        completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
+                        if httpResponse.statusCode == 204 && endpoint == "auth/invalidate-token" {
+                            completion(["JPAPI_result":"token terminated", "JPAPI_response":httpResponse.statusCode])
+                        } else {
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))\n") }
+                            completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
+                        }
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299

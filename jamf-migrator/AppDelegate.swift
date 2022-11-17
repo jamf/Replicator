@@ -12,7 +12,6 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-//   var vc: ViewController?
     let userDefaults = UserDefaults.standard
     
     var prefWindowController: NSWindowController?
@@ -26,18 +25,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func deleteMode(_ sender: AnyObject) {
         NotificationCenter.default.post(name: .deleteMode, object: self)
     }
+    @IBAction func quit_menu(sender: AnyObject) {
+        // check for file that sets mode to delete data from destination server, delete if found - start
+        ViewController().rmDELETE()
+        // check for file that allows deleting data from destination server, delete if found - end
+//        self.goButtonEnabled(button_status: true)
+        quitNow(sender: self)
+        
+//        WriteToLog().logFileW?.closeFile()
+//        NSApplication.shared.terminate(self)
+    }
 
-    // allow access to previously selected folder - start
-//    var folderPath: URL? {
-//        didSet {
-//            do {
-//                let bookmark = try folderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-//                UserDefaults.standard.set(bookmark, forKey: "bookmark")
-//            } catch let error as NSError {
-//                WriteToLog().message(stringOfText: "[AppDelegate] Set Bookmark Fails: \(error.description)\n")
-//            }
-//        }
-//    }
+    public func quitNow(sender: AnyObject) {
+        Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: "POST") {
+            (returnedJSON: [String:Any]) in
+            WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
+            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: "POST") {
+                (returnedJSON: [String:Any]) in
+                WriteToLog().message(stringOfText: "destination server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
+                WriteToLog().logFileW?.closeFile()
+                NSApplication.shared.terminate(self)
+            }
+        }
+    }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
        if let bookmarkData = UserDefaults.standard.object(forKey: "bookmark") as? Data {
