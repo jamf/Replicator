@@ -90,24 +90,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if setting.ldapId > 0 {
                         setting.hardSetLdapId = true
                     }
-                case "-sourceurl":
+                case "-migrate":
+                    setting.migrate = true
+                    setting.fullGUI = false
+                case "-objects":
+                    index += 1
+                    let objectsString = "\(CommandLine.arguments[index])".replacingOccurrences(of: "[", with: "").replacingOccurrences(of: "]", with: "")
+                    setting.objects = objectsString.components(separatedBy: ",")
+                case "-site":
+                    index += 1
+                    JamfProServer.toSite   = true
+                    JamfProServer.destSite = "\(CommandLine.arguments[index])"
+                case "-source":
                     index += 1
                     JamfProServer.source = "\(CommandLine.arguments[index])"
-                    if JamfProServer.source.prefix(4) != "http" {
+                    if JamfProServer.source.prefix(4) != "http" && JamfProServer.source.prefix(1) != "/" {
                         JamfProServer.source = "https://\(JamfProServer.source)"
                     }
-                case "-desturl":
+                case "-dest":
                     index += 1
                     JamfProServer.destination = "\(CommandLine.arguments[index])"
-                    if JamfProServer.destination.prefix(4) != "http" {
+                    if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
                 case "-backup":
-                    index += 1
-                    export.backupMode = Bool(CommandLine.arguments[index]) ?? false
-                    setting.fullGUI = false
+//                    index += 1
+//                    export.backupMode = Bool(CommandLine.arguments[index]) ?? false
+                    export.backupMode = true
+                    setting.fullGUI   = false
                 case "-silent":
                     setting.fullGUI = false
+                case "-sticky":
+                    JamfProServer.stickySession = true
                 default:
                     print("unknown switch passed: \(CommandLine.arguments[index])")
                 }

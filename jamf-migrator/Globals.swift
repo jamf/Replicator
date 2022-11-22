@@ -106,11 +106,13 @@ struct q {
 
 struct setting {
     static var createIsRunning       = false
+    static var csa                   = true // cloud services connection
     static var waitingForPackages    = false
     static var ldapId                = -1
     static var hardSetLdapId         = false
     static var migrateDependencies   = false
-    static var csa                   = true // cloud services connection
+    static var migrate               = false
+    static var objects               = [String]()
     static var fullGUI               = true
 }
 

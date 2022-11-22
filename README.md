@@ -151,6 +151,20 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
 
+**Running from the command line**
+
+Running the following in Terminal will export all objects (full XML) that can be migrated:
+```
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -backup
+```
+Before running via command line at least one export from the app must be manually run saving the source username and password.
+
+To migrate object(s) using the command line, something like the following can be used:
+```
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -dest dest.jamfPro.fqdn -objects categories,buildings -migrate
+```
+
+
 ## History
 **v7.0.2**<br>
 Make disclosure triangle more visible in light mode with default color scheme
