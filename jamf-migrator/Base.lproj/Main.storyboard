@@ -692,7 +692,7 @@
                                 </constraints>
                                 <buttonCell key="cell" type="bevel" title="&gt;" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="SkL-Eh-ytn">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                    <font key="font" metaFont="system" size="22"/>
+                                    <font key="font" metaFont="system" size="18"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="hideCreds_action:" target="eUd-vB-D7a" id="v2C-42-GrS"/>
@@ -2457,7 +2457,7 @@
                                 </textFieldCell>
                             </textField>
                             <progressIndicator maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="HH9-el-AHl">
-                                <rect key="frame" x="415" y="286" width="32" height="32"/>
+                                <rect key="frame" x="415" y="287" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="7lw-na-rDf"/>
                                 </constraints>
@@ -2514,7 +2514,7 @@
                             <constraint firstItem="7oa-bJ-2d1" firstAttribute="trailing" secondItem="ynJ-S6-o1y" secondAttribute="trailing" id="VUf-cP-m2p"/>
                             <constraint firstItem="ynJ-S6-o1y" firstAttribute="trailing" secondItem="hv1-dW-eem" secondAttribute="trailing" id="WVg-S4-E2p"/>
                             <constraint firstItem="HH9-el-AHl" firstAttribute="leading" secondItem="xlC-Th-zKf" secondAttribute="trailing" constant="34" id="Wxa-dc-nRi"/>
-                            <constraint firstItem="HH9-el-AHl" firstAttribute="top" secondItem="1dY-rP-xsl" secondAttribute="bottom" constant="12" id="Yrg-68-B4X"/>
+                            <constraint firstItem="HH9-el-AHl" firstAttribute="top" secondItem="1dY-rP-xsl" secondAttribute="bottom" constant="11" id="Yrg-68-B4X"/>
                             <constraint firstItem="TbV-JY-cbz" firstAttribute="top" secondItem="ih0-OH-DT1" secondAttribute="bottom" constant="9" id="agR-qU-dFY"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="b6o-xi-6QC"/>
                             <constraint firstAttribute="bottom" secondItem="bKr-H7-03S" secondAttribute="bottom" constant="13" id="brF-Jb-aBQ"/>
@@ -2523,7 +2523,7 @@
                             <constraint firstItem="UMW-p7-6qE" firstAttribute="leading" secondItem="xlC-Th-zKf" secondAttribute="leading" id="eyk-k1-Qgr"/>
                             <constraint firstItem="DjG-yq-DnX" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="22" id="fJ0-Qz-FoF"/>
                             <constraint firstItem="TbV-JY-cbz" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="68" id="gTi-88-359"/>
-                            <constraint firstItem="TbV-JY-cbz" firstAttribute="top" secondItem="HH9-el-AHl" secondAttribute="bottom" constant="10" id="j7M-NA-L1V"/>
+                            <constraint firstItem="TbV-JY-cbz" firstAttribute="top" secondItem="HH9-el-AHl" secondAttribute="bottom" constant="11" id="j7M-NA-L1V"/>
                             <constraint firstAttribute="bottom" secondItem="mhL-ca-YdU" secondAttribute="bottom" constant="16" id="lUH-Vu-oj7"/>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="baseline" secondItem="v1E-Y8-MAn" secondAttribute="baseline" id="lW1-EC-GDs"/>
                             <constraint firstItem="hv1-dW-eem" firstAttribute="leading" secondItem="HH9-el-AHl" secondAttribute="trailing" constant="33" id="nG1-SO-fEZ"/>

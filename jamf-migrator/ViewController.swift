@@ -361,7 +361,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     
     // scope preferences
-    var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
+    var scopeOptions:           [String:[String: Bool]] = [:]
     var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
     var scopeMaCopy:            Bool = true   // macapps copy scope
     var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
@@ -374,6 +374,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var scopeScgCopy:           Bool = true // static computer groups copy scope
     var scopeSigCopy:           Bool = true // static iOS device groups copy scope
     var scopeUsersCopy:         Bool = true // static user groups copy scope
+    
+    // command line scope copy
+    var copyScope               = true
     
     // xml prefs
     var xmlPrefOptions: Dictionary<String,Bool> = [:]
@@ -442,7 +445,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var getCounters = [String:[String:Int]]()                               // summary counters of created, updated, failed, and deleted objects
     var putCounters = [String:[String:Int]]()
 //    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()        // used to hold value of counter and avoid simultaneous access when updating
-    var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
+    var summaryDict = [String: [String:[String]]]()     // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
     var totalCreated   = 0
@@ -768,7 +771,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 return
             }
             if wipeData.on && sender != "selectToMigrateButton" {
-                let deleteResponse = Alert().display(header: "Attention:", message: "You are about remove data from \n\(JamfProServer.destination),\nare you sure you with to continue?", secondButton: "Cancel")
+                let deleteResponse = Alert().display(header: "Attention:", message: "You are about remove data from:\n\n\(JamfProServer.destination)\n\nare you sure you with to continue?", secondButton: "Cancel")
                 if deleteResponse == "Cancel" {
                     rmDELETE()
                     selectiveListCleared = false
@@ -844,7 +847,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     return
                 }
                 // verify source and destination are not the same - end
-                if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(JamfProServer.source) to \(dest_jp_server).\n") }
+                if LogLevel.debug { WriteToLog().message(stringOfText: "Migrating data from \(JamfProServer.source) to \(JamfProServer.destination).\n") }
                 migrateOrWipe = "----------- Starting Migration -----------\n"
             } else {
                 if LogLevel.debug { WriteToLog().message(stringOfText: "Exporting data from \(JamfProServer.source).\n") }
@@ -1052,7 +1055,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         DispatchQueue.main.async { [self] in
             if !export.backupMode {
-                JamfProServer.importFiles == 0 ? (fileImport = false):(fileImport = true)
+                fileImport = (JamfProServer.importFiles == 1) ? true:false
                 createDestUrlBase = "\(JamfProServer.destination)/JSSResource".urlFix
             } else {
                 fileImport = false
@@ -1129,9 +1132,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                         
                         if smartUserGrps_button.state.rawValue == 1 || staticUserGrps_button.state.rawValue == 1 {
-                            objectsToMigrate += ["usergroups"]
                             smartUserGrps_button.state.rawValue == 1 ? (migrateSmartUserGroups = true):(migrateSmartUserGroups = false)
                             staticUserGrps_button.state.rawValue == 1 ? (migrateStaticUserGroups = true):(migrateStaticUserGroups = false)
+                            if !fileImport || wipeData.on {
+                                objectsToMigrate += ["usergroups"]
+                            } else {
+                                if migrateSmartUserGroups {
+                                    objectsToMigrate += ["smartusergroups"]
+                                }
+                                if migrateStaticUserGroups {
+                                    objectsToMigrate += ["staticusergroups"]
+                                }
+                            }
                         }
                         
                         if classes_button.state.rawValue == 1 {
@@ -1185,7 +1197,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if smart_comp_grps_button.state.rawValue == 1 || static_comp_grps_button.state.rawValue == 1 {
                             smart_comp_grps_button.state.rawValue == 1 ? (migrateSmartComputerGroups = true):(migrateSmartComputerGroups = false)
                             static_comp_grps_button.state.rawValue == 1 ? (migrateStaticComputerGroups = true):(migrateStaticComputerGroups = false)
-                            if !fileImport {
+                            if !fileImport || wipeData.on {
                                 objectsToMigrate += ["computergroups"]
                             } else {
                                 if migrateSmartComputerGroups {
@@ -1229,13 +1241,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if mobiledevices_button.state.rawValue == 1 {
                             objectsToMigrate += ["mobiledevices"]
                         }
-                        
+
                         if smart_ios_groups_button.state.rawValue == 1 || static_ios_groups_button.state.rawValue == 1 {
-                            objectsToMigrate += ["mobiledevicegroups"]
-                            smart_ios_groups_button.state.rawValue == 1 ? (migrateSmartMobileGroups = true):(migrateSmartMobileGroups = false)
-                            static_ios_groups_button.state.rawValue == 1 ? (migrateStaticMobileGroups = true):(migrateStaticMobileGroups = false)
-                        }
-                        
+                             smart_ios_groups_button.state.rawValue == 1 ? (migrateSmartMobileGroups = true):(migrateSmartMobileGroups = false)
+                             static_ios_groups_button.state.rawValue == 1 ? (migrateStaticMobileGroups = true):(migrateStaticMobileGroups = false)
+                             if !fileImport || wipeData.on {
+                                 objectsToMigrate += ["mobiledevicegroups"]
+                             } else {
+                                 if migrateSmartMobileGroups {
+                                     objectsToMigrate += ["smartmobiledevicegroups"]
+                                 }
+                                 if migrateStaticMobileGroups {
+                                     objectsToMigrate += ["staticmobiledevicegroups"]
+                                 }
+                             }
+                         }
+
                         if advancedmobiledevicesearches_button.state.rawValue == 1 {
                             objectsToMigrate += ["advancedmobiledevicesearches"]
                         }
@@ -1254,7 +1275,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         // set migration order
                         let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
                         for theObject in allObjects {
-                            if setting.objects.firstIndex(of: theObject) != nil {
+                            if setting.objects.firstIndex(of: theObject) != nil || setting.objects.contains("allobjects") {
                                 objectsToMigrate += [theObject]
                             }
                         }
@@ -1381,50 +1402,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.scopeOptions = readSettings()["scope"] as! [String: [String: Bool]]
 //            print("startMigrating scopeOptions: \(String(describing: self.scopeOptions))")
             
-            // get scope preference settings - start
-            if self.scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
-            }
-            if self.scopeOptions["macapps"] != nil {
-                if self.scopeOptions["macapps"]!["copy"] != nil {
-                    self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+            if setting.fullGUI {
+                // get scope preference settings - start
+                if self.scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
+                    self.scopeOcpCopy = self.scopeOptions["osxconfigurationprofiles"]!["copy"]!
+                }
+                if self.scopeOptions["macapps"] != nil {
+                    if self.scopeOptions["macapps"]!["copy"] != nil {
+                        self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+                    } else {
+                        self.scopeMaCopy = true
+                    }
                 } else {
                     self.scopeMaCopy = true
                 }
-            } else {
-                self.scopeMaCopy = true
-            }
-            if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
-            }
-            if self.scopeOptions["policies"]!["copy"] != nil {
-                self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
-            }
-            if self.scopeOptions["policies"]!["disable"] != nil {
-                self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
-            }
-            if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
-            }
-            if self.scopeOptions["iosapps"] != nil {
-                if self.scopeOptions["iosapps"]!["copy"] != nil {
-                    self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+                if self.scopeOptions["restrictedsoftware"]!["copy"] != nil {
+                    self.scopeRsCopy = self.scopeOptions["restrictedsoftware"]!["copy"]!
+                }
+                if self.scopeOptions["policies"]!["copy"] != nil {
+                    self.scopePoliciesCopy = self.scopeOptions["policies"]!["copy"]!
+                }
+                if self.scopeOptions["policies"]!["disable"] != nil {
+                    self.policyPoliciesDisable = self.scopeOptions["policies"]!["disable"]!
+                }
+                if self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                    self.scopeMcpCopy = self.scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+                }
+                if self.scopeOptions["iosapps"] != nil {
+                    if self.scopeOptions["iosapps"]!["copy"] != nil {
+                        self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+                    } else {
+                        self.scopeIaCopy = true
+                    }
                 } else {
                     self.scopeIaCopy = true
                 }
-            } else {
-                self.scopeIaCopy = true
+                if self.scopeOptions["scg"]!["copy"] != nil {
+                    self.scopeScgCopy = self.scopeOptions["scg"]!["copy"]!
+                }
+                if self.scopeOptions["sig"]!["copy"] != nil {
+                    self.scopeSigCopy = self.scopeOptions["sig"]!["copy"]!
+                }
+                if self.scopeOptions["users"]!["copy"] != nil {
+                    self.scopeUsersCopy = self.scopeOptions["users"]!["copy"]!
+                }
+                // get scope preference settings - end
             }
-            if self.scopeOptions["scg"]!["copy"] != nil {
-                self.scopeScgCopy = self.scopeOptions["scg"]!["copy"]!
-            }
-            if self.scopeOptions["sig"]!["copy"] != nil {
-                self.scopeSigCopy = self.scopeOptions["sig"]!["copy"]!
-            }
-            if self.scopeOptions["users"]!["copy"] != nil {
-                self.scopeUsersCopy = self.scopeOptions["users"]!["copy"]!
-            }
-            // get scope preference settings - end
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] migrating/removing \(self.objectsToMigrate.count) sections\n") }
             // loop through process of migrating or removing - start
@@ -1949,8 +1972,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
                                         
-                                        print("[\(#line)] endpointCount: \(endpointCount)")
-                                        print("[\(#line)] endpointJSON: \(endpointJSON)")
                                         
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)\n") }
 
@@ -1977,8 +1998,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     let record      = endpointInfo[i] as! [String : AnyObject]
                                                     let packageID   = record["id"] as! Int
                                                     let displayName = record["name"] as! String
-                                                    
-                                                    print("[\(#line)-getEndpoints] package name: \(displayName),    id: \(packageID)")
                                                     
                                                     PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
                                                         (result: (Int,String)) in
@@ -2282,26 +2301,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 
                                                 // groupType is "" for bulk migrations, smart/static for selective
                                                 switch endpoint {
-                                                case "usergroups":
-                                                    if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
-                                                        excludeCount += smartGroupDict.count
-                                                    }
-                                                    if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
-                                                        excludeCount += staticGroupDict.count
-                                                    }
-                                                    if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
-                                                        nodesMigrated-=1
-                                                    }
                                                 case "computergroups":
-//                                                        if (smart_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "static" {
                                                     if (!smartComputerGrpsSelected && groupType == "") || groupType == "static" {
                                                         excludeCount += smartGroupDict.count
                                                     }
-//                                                        if (static_comp_grps_button.state.rawValue == 0 && groupType == "") || groupType == "smart" {
                                                     if (!staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
                                                         excludeCount += staticGroupDict.count
                                                     }
-//                                                        if smart_comp_grps_button.state.rawValue == 1 && static_comp_grps_button.state.rawValue == 1 && groupType == "" {
                                                     if smartComputerGrpsSelected && staticComputerGrpsSelected && groupType == "" {
                                                         nodesMigrated-=1
                                                     }
@@ -2313,6 +2319,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         excludeCount += staticGroupDict.count
                                                     }
                                                     if smartIosGrpsSelected && staticIosGrpsSelected {
+                                                        nodesMigrated-=1
+                                                    }
+                                                case "usergroups":
+                                                    if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
+                                                        excludeCount += smartGroupDict.count
+                                                    }
+                                                    if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
+                                                        excludeCount += staticGroupDict.count
+                                                    }
+                                                    if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
                                                         nodesMigrated-=1
                                                     }
 
@@ -2334,6 +2350,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     var groupCount = 0
                                                     var localEndpoint = endpoint
                                                     switch endpoint {
+                                                    case "computergroups":
+                                                        if (smartComputerGrpsSelected || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+                                                            localEndpoint = "smartcomputergroups"
+                                                        }
+                                                        if (staticComputerGrpsSelected || (goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+                                                            localEndpoint = "staticcomputergroups"
+                                                        }
+                                                    case "mobiledevicegroups":
+                                                        if ((smartIosGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                            currentGroupDict = smartGroupDict
+                                                            groupCount = currentGroupDict.count
+                                                            localEndpoint = "smartmobiledevicegroups"
+                                                        }
+                                                        if ((staticIosGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                            currentGroupDict = staticGroupDict
+                                                            groupCount = currentGroupDict.count
+                                                            localEndpoint = "staticmobiledevicegroups"
+                                                        }
                                                     case "usergroups":
                                                         if ((smartUserGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
                                                             currentGroupDict = smartGroupDict
@@ -2349,36 +2387,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     //                                                        print("usergroups static - DeviceGroupType: \(DeviceGroupType)")
                                                             localEndpoint = "staticusergroups"
                                                         }
-                                                    case "computergroups":
-                                                        if ((smartComputerGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                            currentGroupDict = smartGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        DeviceGroupType = "smartcomputergroups"
-    //                                                        print("computergroups smart - DeviceGroupType: \(DeviceGroupType)")
-                                                            localEndpoint = "smartcomputergroups"
-                                                        }
-                                                        if ((staticComputerGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                            currentGroupDict = staticGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        DeviceGroupType = "staticcomputergroups"
-    //                                                        print("computergroups static - DeviceGroupType: \(DeviceGroupType)")
-                                                            localEndpoint = "staticcomputergroups"
-                                                        }
-                                                    case "mobiledevicegroups":
-                                                        if ((smartIosGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                            currentGroupDict = smartGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        DeviceGroupType = "smartcomputergroups"
-    //                                                        print("devicegroups smart - DeviceGroupType: \(DeviceGroupType)")
-                                                            localEndpoint = "smartmobiledevicegroups"
-                                                        }
-                                                        if ((staticIosGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                            currentGroupDict = staticGroupDict
-                                                            groupCount = currentGroupDict.count
-    //                                                        DeviceGroupType = "staticcomputergroups"
-    //                                                        print("devicegroups static - DeviceGroupType: \(DeviceGroupType)")
-                                                            localEndpoint = "staticmobiledevicegroups"
-                                                        }
                                                     default: break
                                                     }
                                                     
@@ -2390,7 +2398,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         availableObjsToMigDict[l_xmlID] = l_xmlName
                                                         if goSender == "goButton" || goSender == "silent" {
                                                             if !wipeData.on  {
-
                                                                 //need to call existingEndpoints here to keep proper order?
                                                                 if currentEPs[l_xmlName] != nil {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
@@ -2400,9 +2407,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
                                                                     endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                 }
-
                                                             } else {
-
                                                                 RemoveEndpoints(endpointType: localEndpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
                                                             }   // if !wipeData.on else - end
                                                             counter += 1
@@ -2448,7 +2453,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                                 self.rmDELETE()
-                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                // removed 221124 - lnh
+//                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
                                         }   // else if endpointCount > 0 - end
                                         if nodeIndex < nodesToMigrate.count - 1 {
@@ -2528,51 +2534,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 endpointCountDict[endpoint] = computerPoliciesDict.count
                                                 if computerPoliciesDict.count == 0 {
                                                     endpointsRead += 1
+                                                    nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
                                                     // print("[endpointsRead += 1] \(endpoint)")
-                                                }
-                                                for (l_xmlID, l_xmlName) in computerPoliciesDict {
-                                                    if goSender == "goButton" || goSender == "silent" {
-                                                        if !wipeData.on  {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))\n") }
-    //                                                        if currentEPs[l_xmlName] != nil {
-                                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                } else {
+                                                    for (l_xmlID, l_xmlName) in computerPoliciesDict {
+                                                        if goSender == "goButton" || goSender == "silent" {
+                                                            if !wipeData.on  {
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))\n") }
+                                                                //                                                        if currentEPs[l_xmlName] != nil {
+                                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
+                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                } else {
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
+                                                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                }
                                                             } else {
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
-                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                            }
+                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
+                                                                RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
+                                                            }   // if !wipeData.on else - end
+                                                            counter += 1
                                                         } else {
-                                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                            RemoveEndpoints(endpointType: endpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
-                                                        }   // if !wipeData.on else - end
-                                                        counter += 1
-                                                    } else {
-                                                    // populate source server under the selective tab
-//                                                        print("[ViewController.getEndpoints] [policies] adding \(l_xmlName) to array")
-                                                        sortQ.async { [self] in
-                                                            availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
-                                                            sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                            sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                            // populate source server under the selective tab
+                                                            sortQ.async { [self] in
+                                                                availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = l_xmlID
+                                                                sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
+                                                                sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                
+                                                                staticSourceDataArray = sourceDataArray
+                                                                
+                                                                DispatchQueue.main.async { [self] in
+                                                                    srcSrvTableView.reloadData()
+                                                                }
+                                                                // slight delay in building the list - visual effect
+                                                                usleep(delayInt)
+                                                                
+                                                                if counter == computerPoliciesDict.count {
+                                                                    nodesMigrated += 1
+                                                                    goButtonEnabled(button_status: true)
+                                                                }
+                                                                counter+=1
+                                                            }   // sortQ.async - end
                                                             
-                                                            staticSourceDataArray = sourceDataArray
-                                                            
-                                                            DispatchQueue.main.async { [self] in
-                                                                srcSrvTableView.reloadData()
-                                                            }
-                                                            // slight delay in building the list - visual effect
-                                                            usleep(delayInt)
-
-                                                            if counter == computerPoliciesDict.count {
-                                                                nodesMigrated += 1
-                                                                goButtonEnabled(button_status: true)
-                                                            }
-                                                            counter+=1
-                                                        }   // sortQ.async - end
-
-                                                    }   // if goSender else - end
-                                                }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
+                                                        }   // if goSender else - end
+                                                    }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
+                                                }   // else for (l_xmlID, l_xmlName) - end
                                             }   // existingEndpoints - end
                                         } else {
                                             self.nodesMigrated+=1
@@ -2581,7 +2588,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             if endpoint == self.objectsToMigrate.last {
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)\n") }
                                                 self.rmDELETE()
-                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
                                         }   // if endpointCount > 0
                                         if nodeIndex < nodesToMigrate.count - 1 {
@@ -2599,8 +2606,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
 
                                 case "jamfusers", "jamfgroups":
-                                    let accountsDict = endpointJSON as Dictionary<String, Any>
-                                    let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
+                                    let accountsDict = endpointJSON as [String: Any]
+                                    let usersGroups = accountsDict["accounts"] as! [String: Any]
 
                                     if let endpointInfo = usersGroups[endpointParent] as? [Any] {
                                         endpointCount = endpointInfo.count
@@ -2691,9 +2698,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             }   // sortQ.async - end
                                                         }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
                                                     }   // if goSender else - end
+                                                    
+                                                    // fix reading next endpoint for other endpoints - lnh
+                                                    if nodeIndex < nodesToMigrate.count - 1 {
+                                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                    }
+                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                    
                                                 }   // existingEndpoints - end
-
-
                                             }
 
                                         } else {
@@ -2702,15 +2714,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             // print("[endpointsRead += 1] \(endpoint)")
                                             if endpoint == self.objectsToMigrate.last {
                                                 self.rmDELETE()
-    //                                            self.resetAllCheckboxes()
-    //                                            self.goButtonEnabled(button_status: true)
+//                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                
+                                                // fix reading next endpoint for other endpoints - lnh
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                
                                             }
                                         }   // if endpointCount > 0 - end
-                                        if nodeIndex < nodesToMigrate.count - 1 {
-                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                        }
-                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     } else {   // end if let buildings, departments...
                                         if nodeIndex < nodesToMigrate.count - 1 {
                                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
@@ -2868,6 +2881,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
                                         local_general = local_general.replacingOccurrences(of: "<\(xmlTag)>", with: "")
                                     }
+                                case "userextensionattributes":
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<user_extension_attribute>", endTag:"</user_extension_attribute>")
+                                case "diskencryptionconfigurations":
+                                    local_general = self.tagValue2(xmlString:fileContents, startTag:"<disk_encryption_configuration>", endTag:"</disk_encryption_configuration>")
                                 default:
                                     local_general = self.tagValue2(xmlString:fileContents, startTag:"<general>", endTag:"</general>")
                                     for xmlTag in ["site", "category", "payloads"] {
@@ -2926,7 +2943,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             if fileCount > 0 {
 //                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                if self.goSender == "goButton" {
+                if self.goSender == "goButton" || self.goSender == "silent" {
                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
                         (result: String) in
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
@@ -3074,8 +3091,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] [\(endpoint)]: trouble with \(objectInfo)\n") }
                     }
                     l_index+=1
-                    usleep(50000)  // slow the file read process
+                    usleep(25000)  // slow the file read process
                 }   // readFilesQ.sync - end
+                usleep(25000)  // slow the file read process
             }   // for (_, objectInfo) - end
         }
     }
@@ -3211,10 +3229,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             // save source XML - end
                             if !export.backupMode {
-                                if endpoint == "packages" {
-                                    print("[\(#line)-endPointByID] package id: \(endpointID)")
-//                                    print("postXML:\n\(PostXML)\n")
-                                }
+                                
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
                                 cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                                     (result: String) in
@@ -3688,30 +3703,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         case "policies", "macapplications", "mobiledeviceapplications":
             if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] processing \(endpoint) - verbose\n") }
             // check for a self service icon and grab name and id if present - start
+            // also used for exporting items - iOS
             if PostXML.range(of: "</self_service_icon>") != nil {
                 let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
                 iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
                 iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
-//                print("iconUri: \(iconUri)")
-                if let index = iconUri.firstIndex(of: "=") {
-                    iconId_string = iconUri.suffix(from: index).replacingOccurrences(of: "=", with: "")
-//                    print("iconId_string: \(iconId_string)")
-                    if endpoint != "policies" {
-                        if let index = iconId_string.firstIndex(of: "&") {
-//                            iconId = Int(iconId_string.prefix(upTo: index))!
-                            iconId = String(iconId_string.prefix(upTo: index))
-                        }
-                    } else {
-                        iconId = String(iconId_string)
-                    }
-                } else {
-                    if iconUri != "" {
-                        let iconUriArray = iconUri.split(separator: "/")
-                        iconId = String("\(iconUriArray.last!)")
-                    } else {
-                        iconId = ""
-                    }
-                }
+                // endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName
+                iconId = getIconId(iconUri: iconUri, endpoint: endpoint)
             }
             // check for a self service icon and grab name and id if present - end
             
@@ -3723,16 +3721,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let regexVPP = try! NSRegularExpression(pattern: "<vpp>(.*?)</vpp>", options:.caseInsensitive)
                 PostXML = regexVPP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<vpp><assign_vpp_device_based_licenses>false</assign_vpp_device_based_licenses><vpp_admin_account_id>-1</vpp_admin_account_id></vpp>")
             }
-            
-            // Self Service description fix, migrating from 9 to 10.2+
-            //                            if self.tagValue(xmlString: PostXML, xmlTag: "use_for_self_service") == "true" {
-            //                                if self.tagValue(xmlString: PostXML, xmlTag: "self_service_display_name") == "" {
-            //                                    let SsText = "<use_for_self_service>true</use_for_self_service>"
-            //                                    let SsDesc = "<self_service_display_name>\(destEpName)</self_service_display_name>"
-            //                                    let regexSsDesc = try! NSRegularExpression(pattern: SsText, options:.caseInsensitive)
-            //                                    PostXML = regexSsDesc.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: SsText+"\n"+SsDesc)
-            //                                }
-            //                            }
             
             // fix names that start with spaces - convert space to hex: &#xA0;
             let regexPolicyName = try! NSRegularExpression(pattern: "<name> ", options:.caseInsensitive)
@@ -3843,9 +3831,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                if theEndpoint == "packages"{
-                    print("[\(#line)-cleanupXml] call createEndpoints for \(theEndpoint) id: \(endpointID)")
-                }
+//                if theEndpoint == "packages"{
+//                    print("[\(#line)-cleanupXml] call createEndpoints for \(theEndpoint) id: \(endpointID)")
+//                }
                 self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] \(result)\n") }
@@ -3885,10 +3873,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)\n") }
 
         if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             counters[endpointType]!["total"] = endpointCount
+        }
+        if summaryDict[endpointType] == nil {
+//            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
 
         var destinationEpId = destEpId
@@ -3924,10 +3916,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         concurrentThreads = setConcurrentThreads()
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
-        if endpointType == "packages" {
-            print("[\(#line)-createEndpoints] package id: \(sourceEpId)")
-//            print("\(endPointXML)")
-        }
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
         var whichError        = ""
@@ -4014,7 +4002,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 // sticky session
                 let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
-//                print("create sticky session for \(cookieUrl)")
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
                     URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: cookieUrl), mainDocumentURL: URL(string: cookieUrl))
                 }
@@ -4077,10 +4064,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     progressCountArray["\(endpointType)"] = progressCountArray["\(endpointType)"]!+1
                                 }
                                 
-                //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                                 if localEndPointType != "policies" && dependency.isRunning {
                                     dependencyMigratedCount[dependencyParentId]! += 1
-            //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(dependencyMigratedCount[dependencyParentId]!)")
                                 }
                                 
                                 counters[endpointType]?["\(apiAction)"]! += 1
@@ -4092,8 +4077,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 
                                 // currently there is no way to upload mac app store icons; no api endpoint
                                 // removed check for those -  || (endpointType == "macapplications")
+                                // mobiledeviceapplication icon data is in the object xml
 //                                print("setting.csa: \(setting.csa)")
-                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
+//                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
+                                if (endpointType == "policies") && (action == "create" || setting.csa) {
                                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
 
                                     let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": "\(tagValue2(xmlString: endPointXML, startTag: "<self_service>", endTag: "</self_service>"))"]
@@ -4275,10 +4262,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] enter\n") }
 
         if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             counters[endpointType]!["total"] = endpointCount
+        }
+        if summaryDict[endpointType] == nil {
+//            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+            summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
 
         var destinationEpId = destEpId
@@ -4539,11 +4530,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
         
+        print("[\(#line)-RemoveEndpoints] counters: \(counters)")
         if counters[endpointType] == nil {
-            self.counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
-            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+            print("[\(#line)-RemoveEndpoints] init counters")
+            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             counters[endpointType]!["total"] = endpointCount
+        }
+        if summaryDict[endpointType] == nil {
+            print("[\(#line)-RemoveEndpoints] init summaryDict")
+            summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
         
         // whether the operation was successful or not, either delete or fail
@@ -4672,13 +4669,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] ---------- response ----------\n\n") }
                         }
                         
-
                         // update global counters
+                        print("[\(#line)-RemoveEndpoints] endpointType: \(endpointType)    methodResult: \(methodResult)")
+                        print("[\(#line)-RemoveEndpoints] endpointName: \(endpointName)")
+//                        print("[\(#line)-RemoveEndpoints] summaryDict: \(String(describing: self.summaryDict[endpointType]?[methodResult]))")
                         let localTmp = (self.counters[endpointType]?[methodResult])!
                         self.counters[endpointType]?[methodResult] = localTmp + 1
                         if var summaryArray = self.summaryDict[endpointType]?[methodResult] {
                             summaryArray.append(endpointName)
                             self.summaryDict[endpointType]?[methodResult] = summaryArray
+//                            print("[\(#line)-RemoveEndpoints] summaryDict: \(self.summaryDict)")
                         }
                         
                         totalDeleted   = self.counters[endpointType]?["create"] ?? 0
@@ -4689,8 +4689,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                            self.put_name_field.stringValue = "\(endpointType)"
                             
                             if totalCompleted > 0 {
-//                                self.put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
-//                                self.putSummary_label.stringValue  = "\(totalCompleted) of \(endpointCount)"
                                 self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
                             }
                             
@@ -5041,8 +5039,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             
                                         default:
                                             if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
-                                                let accountsDict = destEndpointJSON as Dictionary<String, Any>
-                                                let usersGroups = accountsDict["accounts"] as! Dictionary<String, Any>
+                                                let accountsDict = destEndpointJSON as [String: Any]
+                                                let usersGroups = accountsDict["accounts"] as! [String: Any]
             //                                    print("users: \(String(describing: usersGroups["users"]))")
             //                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                                 destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
@@ -5800,6 +5798,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
                             }
                         }
+                        
+                        logCleanup()
                         NSApplication.shared.terminate(self)
                     }   //zipIt(args: "cd - end
                 } else {                    
@@ -5810,9 +5810,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         var otherLine: Bool = false
                         var paddingChar = " "
                         let sortedObjects = objectsToMigrate.sorted()
-                        let leading = LogLevel.debug ? "                            ":"                "
+                        // find longest length of objects migrated
+                        var column1Padding = ""
+                        for theObject in objectsToMigrate {
+                            if theObject.count+1 > column1Padding.count {
+                                column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
+                            }
+                        }
+                        let leading = LogLevel.debug ? "                             ":"                 "
                         
-                        summary = "Object".padding(toLength: 35, withPad: " ", startingAt: 0) +
+                        summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
                               "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
                               "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
                               "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
@@ -5820,17 +5827,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         for theObject in sortedObjects {
                             let counts = counters[theObject]!
 //                        for (theObject, counts) in counters {
+                            let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
                             otherLine.toggle()
                             paddingChar = otherLine ? " ":"."
-                            summary = summary.appending(leading + "\(theObject)".padding(toLength: 35+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
                                   "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
                                                         "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
                                   "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
                                   "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+//                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+//                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+//                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
+//                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
+//                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
                         }
                         WriteToLog().message(stringOfText: summary)
                         let (h,m,s) = timeDiff(forWhat: "runTime")
                         WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                        
+                        logCleanup()
                         NSApplication.shared.terminate(self)
                     }
                 }
@@ -5965,6 +5980,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
+    func getIconId(iconUri: String, endpoint: String) -> String {
+        var iconId = "0"
+        if iconUri != "" {
+            if let index = iconUri.firstIndex(of: "=") {
+                let iconId_string = iconUri.suffix(from: index).dropFirst()
+//                    print("iconId_string: \(iconId_string)")
+                if endpoint != "policies" {
+                    if let index = iconId_string.firstIndex(of: "&") {
+//                            iconId = Int(iconId_string.prefix(upTo: index))!
+                        iconId = String(iconId_string.prefix(upTo: index))
+                    }
+                } else {
+                    iconId = String(iconId_string)
+                }
+            } else {
+                let iconUriArray = iconUri.split(separator: "/")
+                iconId = String("\(iconUriArray.last!)")
+            }
+        }
+        return iconId
+    }
+    
     func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
         var createDestUrl        = f_createDestUrl
@@ -5998,8 +6035,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
             // set icon source
             if fileImport {
-                action       = "SKIP"
-                iconToUpload = "\(JamfProServer.source)\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
+                action         = "SKIP"
+                let sourcePath = JamfProServer.source.suffix(1) != "/" ? "\(JamfProServer.source)/":JamfProServer.source
+                iconToUpload   = "\(sourcePath)\(iconNodeSave)/\(ssIconId)/\(ssIconName)"
             } else {
                 iconToUpload = "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)"
             }
@@ -6138,22 +6176,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))\n") }
                                     var policyIconDict = iconfiles.policyDict
-                                    
-                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
+//                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
+                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
 //                                        print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
                                         
 //                                        if !setting.csa {
                                             if result.count > 0 {
-                                                let selfServiceInfoDict = result["policy"]?["self_service"] as! [String:Any]
+                                                let theKey = (endpointType == "policies") ? "policy":"mobile_device_application"
+                                                let selfServiceInfoDict = result[theKey]?["self_service"] as! [String:Any]
 //                                                print("[icons] selfServiceInfoDict: \(selfServiceInfoDict)")
                                                 let selfServiceIconDict = selfServiceInfoDict["self_service_icon"] as! [String:Any]
                                                 newSelfServiceIconId = selfServiceIconDict["id"] as? Int ?? 0
                                                 
-//                                                print("policy \(thePolicyID), new self service icon id: \(newSelfServiceIconId)")
-    //                                        print("icon \(ssIconId) policyIconDict: \(String(describing: policyIconDict["\(ssIconId)"]?["destinationIconId"]))")
-    //                                        print("icon \(ssIconId) iconfiles.policyDict: \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"]))")
                                                 if newSelfServiceIconId != 0 {
                                                     policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
                                                     iconfiles.policyDict = policyIconDict
@@ -6168,7 +6204,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             } else {
                                                 iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon></self_service_icon></self_service></policy>"
                                             }
-//                                            print("iconXml: \(iconXml)")
                                         
                                             self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                             (result: Int) in
@@ -6184,7 +6219,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 } else {
                                     WriteToLog().message(stringOfText: "[ViewController.icons] using new icon id from destination server\n")
                                     newSelfServiceIconId = Int(iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
-                                    
                                     
                                         switch endpointType {
                                         case "policies":
@@ -6213,16 +6247,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] failed to retrieved icon from \(ssIconUri).\n") }
                     }
                 }   // iconMigrate - end
-
                 
-                } else {
-                    // hold processing already used icon until it's been uploaded to the new server
-                    if !export.saveOnly {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed\n") }
-                        iconMigrationHold(ssIconId: "\(ssIconId)", newIconDict: ["endpointType": endpointType, "action": action, "ssIconId": "\(ssIconId)", "ssIconName": ssIconName, "ssIconUri": ssIconUri, "f_createDestUrl": f_createDestUrl, "responseData": responseData, "sourcePolicyId": sourcePolicyId])
-                    }
-                }//                }   // if !(iconfiles.policyDict["\(ssIconId)"]?["policyId"] - end
-            }   // if (ssIconName != "") && (ssIconUri != "") - end
+            } else {
+                // hold processing already used icon until it's been uploaded to the new server
+                if !export.saveOnly {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed\n") }
+                    iconMigrationHold(ssIconId: "\(ssIconId)", newIconDict: ["endpointType": endpointType, "action": action, "ssIconId": "\(ssIconId)", "ssIconName": ssIconName, "ssIconUri": ssIconUri, "f_createDestUrl": f_createDestUrl, "responseData": responseData, "sourcePolicyId": sourcePolicyId])
+                }
+            }//                }   // if !(iconfiles.policyDict["\(ssIconId)"]?["policyId"] - end
+        }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
     func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
@@ -6301,7 +6334,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 WriteToLog().message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)\n")
                
                 var fileURL: URL!
-                var newId = 0
                 
                 fileURL = URL(fileURLWithPath: iconToUpload)
 
@@ -6319,6 +6351,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                         let startTime = Date()
                         var postData  = Data()
+                        var newId     = 0
                         
     //                    WriteToLog().message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))\n")
                         let fileType = NSURL(fileURLWithPath: "\(String(describing: fileURL!))").pathExtension
@@ -6513,21 +6546,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 sleep(1)
                 for (iconId, state) in iconfiles.pendingDict {
-//                    print("[iconMigrationHold] iconfiles.pendingDict: \(iconfiles.pendingDict)")
-//                    print("[iconMigrationHold] iconId: \(iconId)    state: \(state)")
                     if (state == "ready") {
-//                        print("icon id \(iconId) is ready")
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {
                                 if let endpointType = iconDict["endpointType"], let action = iconDict["action"], let ssIconName = iconDict["ssIconName"], let ssIconUri = iconDict["ssIconUri"], let f_createDestUrl = iconDict["f_createDestUrl"], let responseData = iconDict["responseData"], let sourcePolicyId = iconDict["sourcePolicyId"] {
-//                                    print("[iconMigrationHold] iconDict: \(iconDict)")
-                                    let ssIconUriArray = ssIconUri.split(separator: "/")
-                                    let ssIconId = String("\(ssIconUriArray.last)")
-                                    
+                                
+//                                    let ssIconUriArray = ssIconUri.split(separator: "/")
+//                                    let ssIconId = String("\(ssIconUriArray.last)")
+                                    let ssIconId = self.getIconId(iconUri: ssIconUri, endpoint: endpointType)
                                     
                                     let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": ""]
                                     self.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: f_createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                                    
                                 }
                             }
                             self.iconDictArray.removeValue(forKey: iconId)
@@ -6855,7 +6884,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         _ = readSettings()
         appInfo.settings["scope"]   = prefs["scope"]
         appInfo.settings["xml"]     = prefs["xml"]
-        scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        scopeOptions         = prefs["scope"] as! [String:[String: Bool]]
         xmlPrefOptions       = prefs["xml"] as! [String:Bool]
         
         if let _ = xmlPrefOptions["saveOnly"] {
@@ -7404,7 +7433,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
             // read scope settings - start
             if appInfo.settings["scope"] != nil {
-                scopeOptions = appInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+                scopeOptions = appInfo.settings["scope"] as! [String:[String: Bool]]
 
                 if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
                     scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
@@ -7545,24 +7574,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            _ = serverOrFiles()
         } else {
             didRun = true
-            // other VC - lnh
-//            source_jp_server = JamfProServer.source
-//            dest_jp_server   = JamfProServer.destination
+            
+            scopeOcpCopy          = setting.copyScope   // osxconfigurationprofiles copy scope
+            scopeMaCopy           = setting.copyScope   // macapps copy scope
+            scopeRsCopy           = setting.copyScope   // restrictedsoftware copy scope
+            scopePoliciesCopy     = setting.copyScope   // policies copy scope
+//            policyPoliciesDisable = setting.copyScope  // policies disable on copy
+            scopeMcpCopy          = setting.copyScope   // mobileconfigurationprofiles copy scope
+            scopeIaCopy           = setting.copyScope   // iOSapps copy scope
+            scopeScgCopy          = setting.copyScope   // static computer groups copy scope
+            scopeSigCopy          = setting.copyScope   // static iOS device groups copy scope
+            scopeUsersCopy        = setting.copyScope   // static user groups copy scope
+            
         }
-
-        /*
-        // check for stored passwords - start
-        if (source_jp_server != "") {
-            fetchPassword(whichServer: "source", url: source_jp_server)
-        }
-        if (dest_jp_server != "") {
-            fetchPassword(whichServer: "destination", url: dest_jp_server)
-        }
-        if (storedSourcePwd == "") || (storedDestPwd == "") {
-            self.validCreds = false
-        }
-        // check for stored passwords - end
-         */
         
         let appVersion = appInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
@@ -7711,7 +7735,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func summaryXml(theSummary: Dictionary<String, Dictionary<String,Int>>, theSummaryDetail: Dictionary<String, Dictionary<String,[String]>>) -> String {
+    func summaryXml(theSummary: [String: [String:Int]], theSummaryDetail: [String: [String:[String]]]) -> String {
         var cellDetails = ""
         var summaryResult = "<!DOCTYPE html>" +
             "<html>" +
@@ -7790,39 +7814,42 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         var updateIndex = 0
         var failIndex = 0
         
+        
         if theSummary.count > 0 {
             for (key,values) in theSummary {
-                var createHtml = ""
-                var updateHtml = ""
-                var failHtml = ""
-                if let summaryCreateArray = theSummaryDetail[key]?["create"] {
-                    for name in summaryCreateArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
-                        createHtml.append("• " + name + "<br>")
+                if key != "computergroups" && key != "mobiledevicegroups" {
+                    var createHtml = ""
+                    var updateHtml = ""
+                    var failHtml = ""
+                    if let summaryCreateArray = theSummaryDetail[key]?["create"] {
+                        for name in summaryCreateArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
+                            createHtml.append("• " + name + "<br>")
+                        }
                     }
-                }
-                updateIndex = createIndex + 1
-                if let summaryUpdateArray = theSummaryDetail[key]?["update"] {
-                    for name in summaryUpdateArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
-                        updateHtml.append("• " + name + "<br>")
+                    updateIndex = createIndex + 1
+                    if let summaryUpdateArray = theSummaryDetail[key]?["update"] {
+                        for name in summaryUpdateArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
+                            updateHtml.append("• " + name + "<br>")
+                        }
                     }
-                }
-                failIndex = createIndex + 2
-                if let summaryFailArray = theSummaryDetail[key]?["fail"] {
-                    for name in summaryFailArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
-                        failHtml.append("• " + name + "<br>")
+                    failIndex = createIndex + 2
+                    if let summaryFailArray = theSummaryDetail[key]?["fail"] {
+                        for name in summaryFailArray.sorted(by: {$0.caseInsensitiveCompare($1) == .orderedAscending}) {
+                            failHtml.append("• " + name + "<br>")
+                        }
                     }
+                    createIndex += 3
+                    
+                    endpointSummary.append("<tr>")
+                    endpointSummary.append("<td style='text-align:right; width: 35%;'>\(String(describing: key))</td>")
+                    endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(createIndex)'>\(values["create"] ?? 0)</a></td>")
+                    endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(updateIndex)'>\(values["update"] ?? 0)</a></td>")
+                    endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(failIndex)'>\(values["fail"] ?? 0)</a></td>")
+                    endpointSummary.append("</tr>\n")
+                    cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)d", values: createHtml))
+                    cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key)) Updated", values: updateHtml))
+                    cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key)) Failed", values: failHtml))
                 }
-                createIndex += 3
-                
-                endpointSummary.append("<tr>")
-                endpointSummary.append("<td style='text-align:right; width: 35%;'>\(String(describing: key))</td>")
-                endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(createIndex)'>\(values["create"] ?? 0)</a></td>")
-                endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(updateIndex)'>\(values["update"] ?? 0)</a></td>")
-                endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(failIndex)'>\(values["fail"] ?? 0)</a></td>")
-                endpointSummary.append("</tr>\n")
-                cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)d", values: createHtml))
-                cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key)) Updated", values: updateHtml))
-                cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key)) Failed", values: failHtml))
             }
             summaryResult.append("<table style='table-layout:fixed; border-collapse: collapse; margin-left: auto; margin-right: auto; width: 95%;'>" +
             "<tr>" +

@@ -105,6 +105,7 @@ struct q {
 }
 
 struct setting {
+    static var copyScope             = true
     static var createIsRunning       = false
     static var csa                   = true // cloud services connection
     static var waitingForPackages    = false
@@ -127,6 +128,55 @@ struct token {
 struct wipeData {
     static var on = false
 }
+
+public let helpText = """
+
+Usage: /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -parameter1 value(s) -parameter2 values(s)....
+
+Note: Not all parameters have values.
+
+Parameters:
+         -backup: No value needed.  Exports all object to a zipped file in the current export location (defined in the UI).
+
+          -debug: No value needed.  Enables debug mode, more verbose logging.
+
+    -destination: Destination server.  Can be entered as either a fqdn or url.
+
+        -migrate: No value needed.  Used if migrating objects from one server/folder to another server.
+
+        -objects: List of objects to migrate.  Objects are comma seperated and the list must not contain any spaces.  Order of the objects listed is not important.
+                  Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
+                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,
+                                      distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
+                                      computerextensionattributes,scripts,printers,packages,smartcomputergroups,staticcomputergroups,restrictedsoftware,
+                                      osxconfigurationprofiles,macapplications,patchpolicies,advancedcomputersearches,policies,
+                                      mobiledeviceextensionattributes,mobiledevices,smartmobiledevicegroups,staticmobiledevicegroups,
+                                      advancedmobiledevicesearches,mobiledeviceapplications,mobiledeviceconfigurationprofiles
+
+                                      You can use 'allobjects' (without quotes) to migrate all objects.
+
+          -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to anything with a scope; policies, configuration profiles, restrictions...
+
+         -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
+                  wrapped in quotes.
+
+         -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides the
+                  needed information.
+
+Examples:
+    Create a backup (export) of all objects:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -backup
+
+    Migrate scripts, packages, and policies from one server to another:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects scripts,packages,policies
+
+    Migrate smart/static groups, and computer configuration profiles from one server to the same node on another server:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects samrtcomputergroups,staticcomputergroups,osxconfigurationprofles -sticky
+
+    Migrate all objects from a folder to a server:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Migrator/raw" -destination prod.jamfpro.server -objects allobjects
+
+"""
 
 public func readSettings() -> [String:Any] {
     appInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: appInfo.plistPath)) as? [String : Any])!

@@ -116,7 +116,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     
     // scope preferences
-    var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
+    var scopeOptions:           [String:[String: Bool]] = [:]
     var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
     var scopeMaCopy:            Bool = true   // macapps copy scope
     var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
@@ -200,7 +200,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var getCounters = [String:[String:Int]]()                               // summary counters of created, updated, failed, and deleted objects
     var putCounters = [String:[String:Int]]()
 //    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()        // used to hold value of counter and avoid simultaneous access when updating
-    var summaryDict = Dictionary<String, Dictionary<String,[String]>>()     // summary arrays of created, updated, and failed objects
+    var summaryDict = [String: [String:[String]]]()     // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
     var totalCreated   = 0
@@ -481,7 +481,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if setting.fullGUI {
             fileImport = userDefaults.bool(forKey: "fileImport")
         } else {
-            fileImport = false
+            fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
         if !(whichServer == "source" && fileImport) {
             let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
@@ -638,7 +638,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         _ = readSettings()
         appInfo.settings["scope"]   = prefs["scope"]
         appInfo.settings["xml"]     = prefs["xml"]
-        scopeOptions         = prefs["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        scopeOptions         = prefs["scope"] as! [String:[String: Bool]]
         xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
 //        export.saveOnly            = xmlPrefOptions["saveOnly"]!
         if let _ = xmlPrefOptions["saveOnly"] {
@@ -1121,7 +1121,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
 
         // check for stored passwords - start
-        if (JamfProServer.source != "") {
+        if (JamfProServer.source != "") && JamfProServer.importFiles == 0 {
             fetchPassword(whichServer: "source", url: JamfProServer.source)
         }
         if (dest_jp_server != "") {

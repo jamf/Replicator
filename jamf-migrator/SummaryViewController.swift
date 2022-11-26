@@ -12,7 +12,7 @@ import WebKit
 class SummaryViewController: NSViewController {
     
     @IBOutlet weak var summary_WebView: WKWebView!
-    var summaryDict = Dictionary<String, Dictionary<String,Int>>()     // summary counters of created, updated, and failed objects
+    var summaryDict = [String: [String:[String]]]()     // summary counters of created, updated, and failed objects
     
     @IBOutlet weak var summary_TextField: NSTextField!
     override func viewDidLoad() {

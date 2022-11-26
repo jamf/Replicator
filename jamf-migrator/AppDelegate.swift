@@ -37,7 +37,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     public func quitNow(sender: AnyObject) {
-        Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: "POST") {
+        let sourceMethod = (JamfProServer.importFiles == 1) ? "SKIP":"POST"
+        Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
             WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
             Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: "POST") {
@@ -75,6 +76,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         while index < numberOfArgs {
 //                print("index: \(index)\t argument: \(CommandLine.arguments[index])")
                 switch CommandLine.arguments[index].lowercased() {
+                case "-backup":
+                    export.backupMode = true
+                    setting.fullGUI   = false
                 case "-saverawxml":
                     export.saveRawXml = true
                 case "-savetrimmedxml":
@@ -84,6 +88,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //                case "-forceldapid":
 //                    index += 1
 //                    forceLdapId = Bool(CommandLine.arguments[index]) ?? false
+                case "-help":
+                    print("\(helpText)")
+                    NSApplication.shared.terminate(self)
                 case "-ldapid":
                     index += 1
                     setting.ldapId = Int(CommandLine.arguments[index]) ?? -1
@@ -95,8 +102,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     setting.fullGUI = false
                 case "-objects":
                     index += 1
-                    let objectsString = "\(CommandLine.arguments[index])".replacingOccurrences(of: "[", with: "").replacingOccurrences(of: "]", with: "")
+                    let objectsString = "\(CommandLine.arguments[index])".lowercased()
                     setting.objects = objectsString.components(separatedBy: ",")
+                case "-scope":
+                    index += 1
+                    setting.copyScope = Bool(CommandLine.arguments[index].lowercased()) ?? true
                 case "-site":
                     index += 1
                     JamfProServer.toSite   = true
@@ -106,24 +116,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     JamfProServer.source = "\(CommandLine.arguments[index])"
                     if JamfProServer.source.prefix(4) != "http" && JamfProServer.source.prefix(1) != "/" {
                         JamfProServer.source = "https://\(JamfProServer.source)"
+                    } else if JamfProServer.source.prefix(1) == "/" {
+                        JamfProServer.importFiles = 1   // importing files
                     }
-                case "-dest":
+                case "-dest","-destination":
                     index += 1
                     JamfProServer.destination = "\(CommandLine.arguments[index])"
                     if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
-                case "-backup":
-//                    index += 1
-//                    export.backupMode = Bool(CommandLine.arguments[index]) ?? false
-                    export.backupMode = true
-                    setting.fullGUI   = false
                 case "-silent":
                     setting.fullGUI = false
                 case "-sticky":
                     JamfProServer.stickySession = true
                 default:
-                    print("unknown switch passed: \(CommandLine.arguments[index])")
+                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" {
+                        print("unknown switch passed: \(CommandLine.arguments[index])")
+                    }
                 }
             index += 1
         }
