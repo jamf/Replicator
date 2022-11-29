@@ -178,19 +178,21 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func refresh(server: String, whichServer: String, b64Creds: String, localSource: Bool) {
 //        if controller!.go_button.title == "Stop" {
-        if migrationComplete.isDone {
-            JamfProServer.validToken["source"]      = false
-            JamfProServer.validToken["destination"] = false
-            WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")
-            return
-        }
-        WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
-        renewQ.async { [self] in
-            sleep(token.refreshInterval)
-            JamfProServer.validToken[whichServer] = false
-            getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
-                (result: (Int, String)) in
-//                print("[JamfPro.refresh] returned: \(result)")
+        DispatchQueue.main.async { [self] in
+            if migrationComplete.isDone {
+                JamfProServer.validToken["source"]      = false
+                JamfProServer.validToken["destination"] = false
+                WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")
+                return
+            }
+            WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
+            renewQ.async { [self] in
+                sleep(token.refreshInterval)
+                JamfProServer.validToken[whichServer] = false
+                getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
+                    (result: (Int, String)) in
+//                    print("[JamfPro.refresh] returned: \(result)")
+                }
             }
         }
     }

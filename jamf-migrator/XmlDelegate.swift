@@ -89,13 +89,10 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         name     = name.replacingOccurrences(of: "/", with: ":")
         if LogLevel.debug { WriteToLog().message(stringOfText: "[XmlDelegate.save] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store xml files if needed - start
-//        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil
         baseXmlFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseXmlFolder == "" {
             baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
         } else {
-//            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "file://", with: "")
-//            baseXmlFolder = baseXmlFolder.replacingOccurrences(of: "%20", with: " ")
             baseXmlFolder = baseXmlFolder.pathToString
         }
             

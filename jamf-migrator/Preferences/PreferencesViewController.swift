@@ -133,11 +133,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     var saveTrimmedXmlScope:    Bool = true
 
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
-    var saveFolderPath: URL? {
-        didSet {
-            storeBookmark(theURL: (saveFolderPath?.appendingPathComponent("raw", isDirectory: true))!)
-        }
-    }
+//    var saveFolderURL: URL? {
+//        didSet {
+//            storeBookmark(theURL: saveFolderURL!)
+//        }
+//    }
 
     @IBAction func concurrentThreads_action(_ sender: Any) {
         concurrentThreads_textfield.stringValue = concurrentThreads_slider.stringValue
@@ -329,13 +329,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             openPanel.canChooseFiles       = false
             openPanel.allowsMultipleSelection = false
             
-            openPanel.begin { (result) in
+            openPanel.begin { [self] (result) in
                 if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
 
-                    self.userDefaults.set(openPanel.url!.absoluteString.pathToString, forKey: "saveLocation")
-                    self.userDefaults.synchronize()
+                    userDefaults.set(openPanel.url!.absoluteString.pathToString, forKey: "saveLocation")
+                    userDefaults.synchronize()
                     
-                    self.saveFolderPath = openPanel.url
+//                    saveFolderURL = openPanel.url
+                    
+                    storeBookmark(theURL: openPanel.url!)
                     
                     var theTooltip = "\(openPanel.url!.absoluteString.pathToString)"
                     let homePathArray = NSHomeDirectory().split(separator: "/")
@@ -343,11 +345,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                         theTooltip = theTooltip.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
                     }
                     
-                    self.showSaveLocation_button.toolTip    = "\(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
-                    self.saveLocation_textfield.stringValue = "Export to: \(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+                    showSaveLocation_button.toolTip    = "\(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+                    saveLocation_textfield.stringValue = "Export to: \(theTooltip.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
                     
                 }
-                self.select_button.isEnabled = true
+                select_button.isEnabled = true
             } // openPanel.begin - end
         }
     }

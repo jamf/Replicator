@@ -37,16 +37,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var fileImport_button: NSButton!
     @IBOutlet weak var browseFiles_button: NSButton!
     var exportedFilesUrl = URL(string: "")
-//    var xportFolderPath: URL? {
-//        didSet {
-//            do {
-//                let bookmark = try xportFolderPath?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-//                self.userDefaults.set(bookmark, forKey: "bookmark")
-//            } catch let error as NSError {
-//                print("[SourceDestVC] Set Bookmark Fails: \(error.description)")
-//            }
-//        }
-//    }
     
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
@@ -319,7 +309,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         exportedFilesUrl = openPanel.url
 //                        dataFilesRoot = (exportedFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
 //                        dataFilesRoot = dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
-                        dataFilesRoot = exportedFilesUrl!.path + "/"
+                        dataFilesRoot = (exportedFilesUrl!.path.last == "/") ? exportedFilesUrl!.path:exportedFilesUrl!.path + "/"
 
                         storeBookmark(theURL: exportedFilesUrl!)
                         
@@ -818,7 +808,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 fileImport                  = true
                 sourceType                  = "files"
                 
-                getAccess(theURL: exportedFilesUrl!)
+//                getAccess(theURL: exportedFilesUrl!)
                 
 
             }
@@ -829,20 +819,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         userDefaults.synchronize()
         completion(sourceType)
     }   // func serverOrFiles() - end
-    
-    func getAccess(theURL: URL) {
-        do {
-            if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
-                if let data = bookmarks[exportedFilesUrl!] {
-                    var isStale = false
-                    exportedFilesUrl = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-                    _ = exportedFilesUrl?.startAccessingSecurityScopedResource()
-                }
-            }
-        } catch {
-            
-        }
-    }
     
     override func viewDidAppear() {
         // set tab order

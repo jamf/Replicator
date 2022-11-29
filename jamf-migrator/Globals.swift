@@ -136,13 +136,14 @@ Usage: /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -parameter1 value
 Note: Not all parameters have values.
 
 Parameters:
-         -backup: No value needed.  Exports all object to a zipped file in the current export location (defined in the UI).
+         -export: No value needed but -objects must be used.  Exports object listed to a zipped file in the current export location (defined in the UI).  Must define a source server (-source).
 
           -debug: No value needed.  Enables debug mode, more verbose logging.
 
-    -destination: Destination server.  Can be entered as either a fqdn or url.
+    -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for jamf migrator.
 
-        -migrate: No value needed.  Used if migrating objects from one server/folder to another server.
+        -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
+                  saving credentials, between the source and destination before the command line can be successful.  Must also use -source and -destination.
 
         -objects: List of objects to migrate.  Objects are comma seperated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
@@ -155,23 +156,27 @@ Parameters:
 
                                       You can use 'allobjects' (without quotes) to migrate all objects.
 
-          -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to anything with a scope; policies, configuration profiles, restrictions...
+          -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to
+                  anything with a scope; policies, configuration profiles, restrictions...  By defalt the scope is copied.
 
          -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
-                  wrapped in quotes.
+                  wrapped in quotes.  Credentials for the source server must be saved in the keychain for jamf migrator.
 
-         -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides the
-                  needed information.
+         -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
+                  the needed information.  By default sticky sessions are not used.
 
 Examples:
     Create a backup (export) of all objects:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -backup
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -backup -source your.jamfpro.server
 
-    Migrate scripts, packages, and policies from one server to another:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects scripts,packages,policies
+    Migrate computer configuration profiles from one server to another in debug mode:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects osxconfigurationprofiles -debug
 
     Migrate smart/static groups, and computer configuration profiles from one server to the same node on another server:
     /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects samrtcomputergroups,staticcomputergroups,osxconfigurationprofles -sticky
+
+    Migrate all policies, scripts, and packages from a folder to a server, without (policy) scope:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Migrator/raw" -destination prod.jamfpro.server -objects policies,scripts,packages -scope false
 
     Migrate all objects from a folder to a server:
     /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Migrator/raw" -destination prod.jamfpro.server -objects allobjects
@@ -192,7 +197,12 @@ public func saveSettings(settings: [String:Any]) {
 }
 
 public func storeBookmark(theURL: URL) {
+    print("[\(#line)-storeBookmark] store \(theURL) in \(appInfo.bookmarksPath)")
     appInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] ?? [:]
+    print("[\(#line)-storeBookmark] current bookmarks:")
+    for (theBookmark,_) in appInfo.bookmarks {
+        print("[\(#line)-storeBookmark] \(theBookmark)")
+    }
     do {
         let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
         appInfo.bookmarks[theURL] = data

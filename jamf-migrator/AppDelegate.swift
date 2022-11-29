@@ -51,16 +51,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-       if let bookmarkData = UserDefaults.standard.object(forKey: "bookmark") as? Data {
-           do {
-               var bookmarkIsStale = false
-               let url = try URL.init(resolvingBookmarkData: bookmarkData as Data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &bookmarkIsStale)
-               let _ = url.startAccessingSecurityScopedResource()
-           } catch let error as NSError {
-            WriteToLog().message(stringOfText: "Bookmark Access Fails: \(error.description)\n")
-           }
-       }
-        
         // read command line arguments - start
         var numberOfArgs = 0
         var startPos     = 1
@@ -74,10 +64,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         var index = 0
         while index < numberOfArgs {
-//                print("index: \(index)\t argument: \(CommandLine.arguments[index])")
+//                print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
                 switch CommandLine.arguments[index].lowercased() {
-                case "-backup":
+                case "-backup","-export":
                     export.backupMode = true
+                    export.saveOnly   = true
                     setting.fullGUI   = false
                 case "-saverawxml":
                     export.saveRawXml = true
@@ -130,7 +121,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 case "-sticky":
                     JamfProServer.stickySession = true
                 default:
-                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" {
+                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" && CommandLine.arguments[index].lowercased() != "-debug"{
                         print("unknown switch passed: \(CommandLine.arguments[index])")
                     }
                 }
