@@ -36,7 +36,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     // Import file variables
     @IBOutlet weak var fileImport_button: NSButton!
     @IBOutlet weak var browseFiles_button: NSButton!
-    var exportedFilesUrl = URL(string: "")
+    var importFilesUrl   = URL(string: "")
+//    var exportedFilesUrl = URL(string: "")
     
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
@@ -306,12 +307,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             
                 openPanel.begin { [self] (result) in
                     if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
-                        exportedFilesUrl = openPanel.url
-//                        dataFilesRoot = (exportedFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
+                        importFilesUrl = openPanel.url
+//                        dataFilesRoot = (importFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
 //                        dataFilesRoot = dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
-                        dataFilesRoot = (exportedFilesUrl!.path.last == "/") ? exportedFilesUrl!.path:exportedFilesUrl!.path + "/"
+                        dataFilesRoot = (importFilesUrl!.path.last == "/") ? importFilesUrl!.path:importFilesUrl!.path + "/"
 
-                        storeBookmark(theURL: exportedFilesUrl!)
+                        storeBookmark(theURL: importFilesUrl!)
                         
                         source_jp_server_field.stringValue = dataFilesRoot
                         JamfProServer.source               = dataFilesRoot
@@ -622,43 +623,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
         }
     }
-    
-    /*
-    func savePrefs(prefs: [String:Any]) {
-        _ = readSettings()
-        appInfo.settings["scope"]   = prefs["scope"]
-        appInfo.settings["xml"]     = prefs["xml"]
-        scopeOptions         = prefs["scope"] as! [String:[String: Bool]]
-        xmlPrefOptions       = prefs["xml"] as! Dictionary<String,Bool>
-//        export.saveOnly            = xmlPrefOptions["saveOnly"]!
-        if let _ = xmlPrefOptions["saveOnly"] {
-            export.saveOnly = xmlPrefOptions["saveOnly"]!
-        } else {
-            export.saveOnly = false
-        }
-        if let _ = xmlPrefOptions["saveRawXml"] {
-            export.saveRawXml = xmlPrefOptions["saveRawXml"]!
-        } else {
-            export.saveRawXml = false
-        }
-        if let _ = xmlPrefOptions["saveTrimmedXml"] {
-            export.saveTrimmedXml = xmlPrefOptions["saveTrimmedXml"]!
-        } else {
-            export.saveTrimmedXml = false
-        }
-        if let _ = xmlPrefOptions["saveRawXmlScope"] {
-            saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"]!
-        } else {
-            saveRawXmlScope = false
-        }
-        if let _ = xmlPrefOptions["saveTrimmedXmlScope"] {
-            saveTrimmedXmlScope = xmlPrefOptions["saveTrimmedXmlScope"]!
-        } else {
-            saveRawXmlScope = false
-        }
-        NSDictionary(dictionary: appInfo.settings).write(toFile: self.appInfo.plistPath, atomically: true)
-    }
-     */
 
     // extract the value between xml tags - start
     func tagValue(xmlString:String, xmlTag:String) -> String {
@@ -802,13 +766,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 browseFiles_button.isHidden = false
                 dataFilesRoot               = source_jp_server_field.stringValue
                 JamfProServer.source        = source_jp_server_field.stringValue
-                exportedFilesUrl            = URL(string: "file://\(dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
+                importFilesUrl            = URL(string: "file://\(dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
                 source_user_field.isHidden  = true
                 source_pwd_field.isHidden   = true
                 fileImport                  = true
                 sourceType                  = "files"
                 
-//                getAccess(theURL: exportedFilesUrl!)
+//                getAccess(theURL: importFilesUrl!)
                 
 
             }

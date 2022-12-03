@@ -51,7 +51,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet var migrator_window: NSView!
     @IBOutlet weak var modeTab_TabView: NSTabView!
     
-    // Import file variables
+    // Import/export file variables
+    var importFilesUrl   = URL(string: "")
     var exportedFilesUrl = URL(string: "")
 
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
@@ -454,7 +455,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     
     // define list of items to migrate
-    var objectsToMigrate: [String] = []
+    var objectsToMigrate           = [String]()
+    var totalObjectsToMigrate      = 0
     var endpointsRead              = 0
     var nodesMigrated              = 0
     var objectNode                 = "" // link dependency type to object endpoint. ex. (dependency) category to (endpoint) categories
@@ -658,7 +660,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
 
         pref.stopMigration  = false
-        go_button.isEnabled = false
+//        go_button.isEnabled = false
+        goButtonEnabled(button_status: false)
 
         inactiveTabDisable(activeTab: "selective")
         goSender = "selectToMigrateButton"
@@ -765,6 +768,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if setting.fullGUI {
             if wipeData.on && export.saveOnly {
                 _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
+                goButtonEnabled(button_status: true)
                 return
             }
             if wipeData.on && sender != "selectToMigrateButton" {
@@ -820,6 +824,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if JamfProServer.importFiles == 1 && (export.saveOnly || export.saveRawXml) {
             alert_dialog(header: "Attention", message: "Cannot select Export Only or Raw Source XML (Preferneces -> Export) when using File Import.")
+            goButtonEnabled(button_status: true)
             return
         }
 
@@ -874,7 +879,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.Go] Migration Mode (Go): \(migrationMode)\n") }
         
-            goButtonEnabled(button_status: false)
+        goButtonEnabled(button_status: false)
         if setting.fullGUI {
 //            goButtonEnabled(button_status: false)
             clearProcessingFields()
@@ -1270,8 +1275,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     default: break
                     }
+                    totalObjectsToMigrate = objectsToMigrate.count
+                    if smartUserGrps_button.state.rawValue == 1 && staticUserGrps_button.state.rawValue == 1 {
+                        totalObjectsToMigrate += 1
+                    } else if smart_comp_grps_button.state.rawValue == 1 && static_comp_grps_button.state.rawValue == 1 {
+                        totalObjectsToMigrate += 1
+                    } else if smart_ios_groups_button.state.rawValue == 1 && static_ios_groups_button.state.rawValue == 1 {
+                        totalObjectsToMigrate += 1
+                    }
                 } else {
-                    print("[\(#line)-startMigrating] fsetting.migrate: \(setting.migrate)")
+                    print("[\(#line)-startMigrating] setting.migrate: \(setting.migrate)")
                     if setting.migrate {
                         // set migration order
                         let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
@@ -1291,9 +1304,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }
 //                    objectsToMigrate = ["buildings", "departments", "categories", "jamfusers"]    // for testing
+                    totalObjectsToMigrate = objectsToMigrate.count
                 }
                 endpointsRead = 0
-            }   // if migrationMode == "bulk" - end
+            } else {   // if migrationMode == "bulk" - end
+                totalObjectsToMigrate = 1
+            }
             
             // initialize list of items to migrate then add what we want - end
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] objects: \(self.objectsToMigrate).\n") }
@@ -1811,6 +1827,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if nodeIndex == 0 {
             // see if the source is a folder, is so allow access
             if JamfProServer.source.first == "/" {
+                if JamfProServer.source.last != "/" {
+                    JamfProServer.source = JamfProServer.source + "/"
+                }
                 do {
                     print("[\(#line)-readModes] source: file://\(JamfProServer.source)")
                     if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
@@ -1822,30 +1841,49 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }
                 } catch {
-                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(JamfProServer.source).\n")
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(JamfProServer.source)\n")
                 }
-            }
-            
-            if export.saveLocation.last != "/" {
-                export.saveLocation = export.saveLocation + "/"
-            }
-            print("[\(#line)-readNodes] export.saveLocation: \(export.saveLocation)")
-            exportedFilesUrl = URL(string: export.saveLocation)
+                
+                
+                /*
+                print("[\(#line)-readNodes] export.saveLocation: \(JamfProServer.source)")
+                importFilesUrl = URL(string: JamfProServer.source)
+                print("[\(#line)-readNodes] exportedFilesUrl: \(String(describing: importFilesUrl))")
 
-            do {
-                if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
-//                    if let data = bookmarks[exportedFilesUrl!] {
-                    if let data = bookmarks[URL(fileURLWithPath: exportedFilesUrl!.path)] {
-                        var isStale = false
-                        exportedFilesUrl = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-                        _ = exportedFilesUrl?.startAccessingSecurityScopedResource()
-                        WriteToLog().message(stringOfText: "[ViewController.readNodes] set permissions to \(export.saveLocation)\n")
+                do {
+                    if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
+    //                    if let data = bookmarks[importFilesUrl!] {
+                        if let data = bookmarks[URL(fileURLWithPath: JamfProServer.source)] {
+                            var isStale = false
+                            importFilesUrl = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
+                            _ = importFilesUrl?.startAccessingSecurityScopedResource()
+                            WriteToLog().message(stringOfText: "[ViewController.readNodes] set permissions to \(String(describing: importFilesUrl))\n")
+                        }
                     }
+                } catch {
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed.\n")
                 }
-            } catch {
-                WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed.\n")
+                */
+            }
+            if export.saveRawXml {
+                if export.saveLocation.last != "/" {
+                    export.saveLocation = export.saveLocation + "/"
+                }
+                do {
+                    if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
+                        if let data = bookmarks[URL(fileURLWithPath: "\(export.saveLocation)")] {
+                            var isStale = false
+                            let exportFileURL = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
+                            _ = exportFileURL.startAccessingSecurityScopedResource()
+                            WriteToLog().message(stringOfText: "[ViewController.readNodes] set access permissions to file://\(export.saveLocation)\n")
+                        }
+                    }
+                } catch {
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for file://\(export.saveLocation)\n")
+                }
             }
         }
+            
         
         if self.fileImport && !wipeData.on {
             
@@ -1864,7 +1902,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)\n") }
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
                 if setting.fullGUI {
-                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
+//                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
+                    if self.activeTab(fn: "readNodes") == "selective" {
                         self.goButtonEnabled(button_status: true)
                     }
                 }
@@ -2839,7 +2878,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if JamfProServer.source.last != "/" {
             JamfProServer.source = JamfProServer.source + "/"
         }
-        exportedFilesUrl = URL(string: "file://\(JamfProServer.source.replacingOccurrences(of: " ", with: "%20"))")
+        importFilesUrl = URL(string: "file://\(JamfProServer.source.replacingOccurrences(of: " ", with: "%20"))")
         
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] JamfProServer.source: \(JamfProServer.source)\n") }
@@ -2921,7 +2960,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         for i in 1...dataFilesCount {
                             let dataFile = xmlFilePaths[i-1]
     //                        let dataFile = dataFiles[i-1]
-                            let fileUrl = exportedFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
+                            let fileUrl = importFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
                             do {
                                 // remove 'extra' data so we can get name and id from between general tags
                                 var fileContents = try String(contentsOf: fileUrl!)
@@ -3292,7 +3331,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: returnedJSON, theTag: ""):rmJsonData(rawJSON: returnedJSON, theTag: "scope")
 //                                    print("exportRawJson: \(exportRawJson)")
                                     WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName)\n")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))":"raw"
+                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
                                     exportItems(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
 //                                    SaveDelegate().exportObject(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
                                 }
@@ -3366,7 +3405,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                    print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
                                     let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
                                     WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)\n")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))":"raw"
+                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
                                     XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
                                 }
                             }
@@ -4605,7 +4644,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                    put_levelIndicator.floatValue = Float(totalCompleted)/Float(self.counters[endpointType]!["total"]!)
 //                                    putSummary_label.stringValue  = "\(totalCompleted) of \(self.counters[endpointType]!["total"]!)"
                                     putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
-//                                    put_name_field.stringValue    = "\(endpointType)"
                                 }
                             }
                             
@@ -4819,7 +4857,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         totalCompleted = totalDeleted + totalFailed
 
                         DispatchQueue.main.async {
-//                            self.put_name_field.stringValue = "\(endpointType)"
                             
                             if totalCompleted > 0 {
                                 self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
@@ -5838,108 +5875,110 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func runComplete() {
+        DispatchQueue.main.async { [self] in
 //        endpointCountDict.removeAll()
-        nodesComplete = 0
-        AllEndpointsArray.removeAll()
-        availableObjsToMigDict.removeAll()
-        /*
-         if setting.fullGUI {
-             if activeTab(fn: "runComplete") == "selective" {
-                 sourceDataArray.removeAll()
-                 srcSrvTableView.reloadData()
-                 targetDataArray.removeAll()
+            nodesComplete = 0
+            AllEndpointsArray.removeAll()
+            availableObjsToMigDict.removeAll()
+            /*
+             if setting.fullGUI {
+                 if activeTab(fn: "runComplete") == "selective" {
+                     sourceDataArray.removeAll()
+                     srcSrvTableView.reloadData()
+                     targetDataArray.removeAll()
+                 }
              }
-         }
-         */
-        iconfiles.policyDict.removeAll()
-        iconfiles.pendingDict.removeAll()
-        
-        migrationComplete.isDone = true
-        
-        if setting.fullGUI {
-            let (h,m,s) = timeDiff(forWhat: "runTime")
-            WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-            spinner_progressIndicator.stopAnimation(self)
-            resetAllCheckboxes()
-        }
+             */
+            iconfiles.policyDict.removeAll()
+            iconfiles.pendingDict.removeAll()
+            
+            migrationComplete.isDone = true
+            
+            if setting.fullGUI {
+                let (h,m,s) = timeDiff(forWhat: "runTime")
+                WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                    spinner_progressIndicator.stopAnimation(self)
+                resetAllCheckboxes()
+            }
 
-        if wipeData.on {
-            rmDELETE()
-        }
-        goButtonEnabled(button_status: true)
-        
-        if setting.fullGUI {
-            spinner_progressIndicator.stopAnimation(self)
-            go_button.title = "Go!"
-            _ = enableSleep()
-        } else {
-            // silent run complete
-            if export.backupMode {
-//                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
-                    zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))/") { [self]
-                        (result: String) in
-//                            print("zipIt result: \(result)")
-                        do {
-                            if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))\"") {
-                                try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))\"")!)
-                            }
-                            WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip\n")
-                            
-                            let (h,m,s) = timeDiff(forWhat: "runTime")
-                            WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                        } catch let error as NSError {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
-                        }
-                    }
-                    
-                    logCleanup()
-                    NSApplication.shared.terminate(self)
-//                }   //zipIt(args: "cd - end
+            if wipeData.on {
+                rmDELETE()
+            }
+            goButtonEnabled(button_status: true)
+            
+            if setting.fullGUI {
+                spinner_progressIndicator.stopAnimation(self)
+                go_button.title = "Go!"
+                _ = enableSleep()
             } else {
-                if nodesMigrated > 0 {
-//                        print("summaryDict: \(summaryDict)")
-//                        print("counters: \(counters)")
-                    var summary = ""
-                    var otherLine: Bool = true
-                    var paddingChar = " "
-                    let sortedObjects = objectsToMigrate.sorted()
-                    // find longest length of objects migrated
-                    var column1Padding = ""
-                    for theObject in objectsToMigrate {
-                        if theObject.count+1 > column1Padding.count {
-                            column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
+                // silent run complete
+                if export.backupMode {
+    //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
+                    zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))/") { [self]
+                            (result: String) in
+    //                            print("zipIt result: \(result)")
+                            do {
+                                if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"") {
+                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"")!)
+                                }
+                                WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip\n")
+                                
+                                let (h,m,s) = timeDiff(forWhat: "runTime")
+                                WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                            } catch let error as NSError {
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
+                            }
                         }
+                        
+                        logCleanup()
+                        NSApplication.shared.terminate(self)
+    //                }   //zipIt(args: "cd - end
+                } else {
+                    if nodesMigrated > 0 {
+    //                        print("summaryDict: \(summaryDict)")
+    //                        print("counters: \(counters)")
+                        var summary = ""
+                        var otherLine: Bool = true
+                        var paddingChar = " "
+                        let sortedObjects = objectsToMigrate.sorted()
+                        // find longest length of objects migrated
+                        var column1Padding = ""
+                        for theObject in objectsToMigrate {
+                            if theObject.count+1 > column1Padding.count {
+                                column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
+                            }
+                        }
+                        let leading = LogLevel.debug ? "                             ":"                 "
+                        
+                        summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
+                              "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                              "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                              "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                              "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
+                        for theObject in sortedObjects {
+                            let counts = counters[theObject]!
+    //                        for (theObject, counts) in counters {
+                            let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
+                            otherLine.toggle()
+                            paddingChar = otherLine ? " ":"."
+                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
+                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+    //                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+    //                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+    //                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
+    //                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
+    //                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+                        }
+                        WriteToLog().message(stringOfText: summary)
+                        let (h,m,s) = timeDiff(forWhat: "runTime")
+                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                        
+                        logCleanup()
+                        NSApplication.shared.terminate(self)
                     }
-                    let leading = LogLevel.debug ? "                             ":"                 "
-                    
-                    summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
-                          "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                          "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                          "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                          "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
-                    for theObject in sortedObjects {
-                        let counts = counters[theObject]!
-//                        for (theObject, counts) in counters {
-                        let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
-                        otherLine.toggle()
-                        paddingChar = otherLine ? " ":"."
-                        summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
-                              "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                                    "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-                              "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-                              "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-//                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-                    }
-                    WriteToLog().message(stringOfText: summary)
-                    let (h,m,s) = timeDiff(forWhat: "runTime")
-                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                    
-                    logCleanup()
-                    NSApplication.shared.terminate(self)
                 }
             }
         }
@@ -6048,14 +6087,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 // silent run complete
                 if export.backupMode {
                     if theOpQ.operationCount == 0 && nodesMigrated > 0 {
-                        zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))/") { [self]
+                        zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))/") { [self]
                             (result: String) in
 //                            print("zipIt result: \(result)")
                             do {
-                                if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))\"") {
-                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))\"")!)
+                                if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))\"") {
+                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))\"")!)
                                 }
-                                WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime)).zip\n")
+                                WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime)).zip\n")
                                 
                                 let (h,m,s) = timeDiff(forWhat: "runTime")
                                 WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
@@ -6312,11 +6351,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let totalCount = (fileImport && activeTab(fn: "getStatusUpdate2") == "selective") ? targetDataArray.count:total
         
+//        if getNodesComplete == 0 {
+//            print("[\(#line)-getStatusUpdate2] objectsToMigrate: \(objectsToMigrate)")
+//        }
+        
         if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-            print("[\(#line)-getStatusUpdate2] \(adjEndpoint) get complete")
             getNodesComplete += 1
-            print("[\(#line)-getStatusUpdate2] \(getNodesComplete) of \(objectsToMigrate.count) complete")
-            if getNodesComplete == objectsToMigrate.count && export.saveOnly {
+            print("[\(#line)-getStatusUpdate2] \(adjEndpoint) get: \(getNodesComplete) of \(totalObjectsToMigrate) complete")
+            if getNodesComplete == totalObjectsToMigrate && export.saveOnly {
                 print("[\(#line)-getStatusUpdate2] run complete")
                 runComplete()
             }
@@ -6336,6 +6378,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     func putStatusUpdate2(endpoint: String, total: Int) {
         var adjEndpoint = ""
+        
         switch endpoint {
         case "accounts/userid":
             adjEndpoint = "jamfusers"
@@ -6351,17 +6394,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             putCounters[adjEndpoint]!["put"]! += 1
         }
         
-        let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? targetDataArray.count:total
+        let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? totalObjectsToMigrate:total
         
-        DispatchQueue.main.async { [self] in
+//        DispatchQueue.main.async { [self] in
             
             let newPutTotal = (counters[adjEndpoint]?["create"] ?? 0) + (counters[adjEndpoint]?["update"] ?? 0) + (counters[adjEndpoint]?["fail"] ?? 0)
-            
+        let theTask = wipeData.on ? "removal":"create/update"
             if newPutTotal == totalCount || total == 0 {
-                print("[\(#line)-putStatusUpdate2] \(adjEndpoint) create/update/remove complete")
                 nodesComplete += 1
-                print("[\(#line)-putStatusUpdate2] \(nodesComplete) of \(objectsToMigrate.count) complete")
-                if nodesComplete == objectsToMigrate.count {
+                print("[\(#line)-putStatusUpdate2] \(adjEndpoint) \(theTask): \(nodesComplete) of \(totalObjectsToMigrate) complete")
+                WriteToLog().message(stringOfText: "[ViewController.putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(totalObjectsToMigrate) complete\n")
+                if nodesComplete == totalObjectsToMigrate {
                     print("[\(#line)-putStatusUpdate2] run complete")
                     runComplete()
                 }
@@ -6378,17 +6421,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     put_levelIndicatorFillColor[adjEndpoint] = .red
                     put_levelIndicator.fillColor = .red
                 }
-//                DispatchQueue.main.async {
-                    if putCounters[adjEndpoint]!["put"]! > 0 {
-                        if !setting.migrateDependencies || adjEndpoint == "policies" {
-                            put_name_field.stringValue    = adjEndpoint
-                            put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
-                            putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
-                        }
+                if putCounters[adjEndpoint]!["put"]! > 0 {
+                    if !setting.migrateDependencies || adjEndpoint == "policies" {
+                        put_name_field.stringValue    = adjEndpoint
+                        put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
+                        putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
                     }
-//                }
+                }
             }
-        }
+//        }
     }
     
     func getIconId(iconUri: String, endpoint: String) -> String {
@@ -6489,7 +6530,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if export.saveRawXml || export.saveTrimmedXml {
                             var saveFormat = export.saveRawXml ? "raw":"trimmed"
                             if export.backupMode {
-                                saveFormat = "\(JamfProServer.source.urlToFqdn)_backup_\(self.backupDate.string(from: History.startTime))"
+                                saveFormat = "\(JamfProServer.source.fqdnFromUrl)_export_\(self.backupDate.string(from: History.startTime))"
                             }
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).\n") }
                             DispatchQueue.main.async {
@@ -8224,6 +8265,12 @@ extension String {
                 fqdn = fqdnArray[0]
             }
             return fqdn
+        }
+    }
+    var noPort: String {
+        get {
+            let stringArray = self.components(separatedBy: ":")
+            return stringArray[0]
         }
     }
     var pathToString: String {

@@ -135,7 +135,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             
             var copyIcon   = true
             let iconSource = "\(xml)"
-//            let iconDest   = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_backup_\(backupDate.string(from: History.startTime))":"\(endpointPath)/\(name)"
+//            let iconDest   = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))":"\(endpointPath)/\(name)"
             let iconDest   = "\(endpointPath)/\(name)"
 
 //            print("copy from \(iconSource) to: \(iconDest)")

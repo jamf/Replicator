@@ -69,6 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
+                    export.saveRawXml = true
                     setting.fullGUI   = false
                 case "-saverawxml":
                     export.saveRawXml = true
@@ -136,7 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString
-            self.userDefaults.synchronize()
+//            self.userDefaults.synchronize()
         }
         
         if setting.fullGUI {

@@ -369,6 +369,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     override func viewDidAppear() {
         super.viewDidAppear()
+        var saveLocationText = ""
         // set window title
         self.parent?.view.window?.title = self.title!
         
@@ -536,7 +537,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             
             export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
             if !(FileManager().fileExists(atPath: export.saveLocation, isDirectory: &isDir)) {
-                export.saveLocation = NSHomeDirectory() + "/Downloads/Jamf Migrator/"
                 self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 self.userDefaults.synchronize()
             }
@@ -545,11 +545,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             
             let homePathArray = NSHomeDirectory().split(separator: "/")
             if homePathArray.count > 1 {
-                export.saveLocation = export.saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
+                saveLocationText = export.saveLocation.replacingOccurrences(of: "/\(homePathArray[0])/\(homePathArray[1])", with: "~")
             }
             
-            showSaveLocation_button.toolTip    = "\(export.saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
-            saveLocation_textfield.stringValue = "Export to: \(export.saveLocation.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+            showSaveLocation_button.toolTip    = "\(saveLocationText.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
+            saveLocation_textfield.stringValue = "Export to: \(saveLocationText.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
         }
         if self.title! == "Computer" {
             credentialsArray.removeAll()
