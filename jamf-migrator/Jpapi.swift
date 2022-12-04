@@ -21,7 +21,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         if method.lowercased() == "skip" {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
-            completion(["JPAPI_result":"failed", "JPAPI_response":000])
+            let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
+            completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
             return
         }
         

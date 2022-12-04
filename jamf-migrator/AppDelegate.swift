@@ -37,11 +37,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     public func quitNow(sender: AnyObject) {
-        let sourceMethod = (JamfProServer.importFiles == 1) ? "SKIP":"POST"
+//        let sourceMethod = (JamfProServer.importFiles == 1 || !JamfProServer.validToken["source"]!) ? "SKIP":"POST"
+        let sourceMethod = (JamfProServer.validToken["source"]!) ? "POST":"SKIP"
         Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
             WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
-            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: "POST") {
+            let destMethod = (JamfProServer.validToken["destination"]!) ? "POST":"SKIP"
+            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
                 WriteToLog().message(stringOfText: "destination server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
                 WriteToLog().logFileW?.closeFile()
