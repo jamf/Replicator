@@ -1499,7 +1499,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Look for existing endpoints for: \(self.objectsToMigrate[0])\n") }
 //                    print("call self.existingEndpoints")
                     
-                    self.existingEndpoints(theDestEndpoint: "\(self.objectsToMigrate[0])")  {
+                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(self.objectsToMigrate[0])")  {
                         (result: (String,String)) in
                         
                         let (resultMessage, resultEndpoint) = result
@@ -2065,7 +2065,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                         if endpointCount > 0 {
 
-                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  { [self]
+                                            self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
                                                 (result: (String,String)) in
                                                 if pref.stopMigration {
                                                     rmDELETE()
@@ -2206,7 +2206,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         }
                                                     }
                                                 } // for i - end
-                                            } // existingEndpoints(theDestEndpoint - end
+                                            } // existingEndpoints(skipLookup: false, theDestEndpoint - end
                                         } else {
                                             // no packages were found
                                             endpointsRead += 1
@@ -2243,7 +2243,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                         if endpointCount > 0 {
 
-                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  { [self]
+                                            self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
                                                 (result: (String,String)) in
                                                 if pref.stopMigration {
                                                     rmDELETE()
@@ -2359,7 +2359,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         var staticGroupDict: [Int: String] = [:]
 
                                         if endpointCount > 0 {
-                                            self.existingEndpoints(theDestEndpoint: "\(endpoint)")  { [self]
+                                            self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
                                                 (result: (String,String)) in
                                                 if pref.stopMigration {
                                                     rmDELETE()
@@ -2548,7 +2548,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     nodesMigrated+=1
 
                                                 }   //for g in (0...1) - end
-                                            }   // existingEndpoints(theDestEndpoint: "\(endpoint)") - end
+                                            }   // existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)") - end
                                         } else {    //if endpointCount > 0 - end
 //                                            self.nodesMigrated+=1
                                             getStatusUpdate2(endpoint: endpoint, total: 0)
@@ -2598,7 +2598,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             }
 
                                             // create dictionary of existing policies
-                                            self.existingEndpoints(theDestEndpoint: "policies")  { [self]
+                                            self.existingEndpoints(skipLookup: false, theDestEndpoint: "policies")  { [self]
                                                 (result: (String,String)) in
                                                 let (resultMessage, _) = result
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] policies - returned from existing endpoints: \(resultMessage)\n") }
@@ -2728,7 +2728,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                         if endpointCount > 0 {
 
-                                            self.existingEndpoints(theDestEndpoint: "ldapservers")  {
+                                            self.existingEndpoints(skipLookup: false, theDestEndpoint: "ldapservers")  {
                                                 (result: (String,String)) in
                                                 if pref.stopMigration {
                                                     self.rmDELETE()
@@ -2738,7 +2738,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 let (resultMessage, _) = result
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[getEndpoints-LDAP] Returned from existing ldapservers: \(resultMessage)\n") }
 
-                                                self.existingEndpoints(theDestEndpoint: endpoint)  { [self]
+                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: endpoint)  { [self]
                                                     (result: (String,String)) in
                                                     let (resultMessage, _) = result
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(node): \(resultMessage)\n") }
@@ -3147,9 +3147,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func readDataFiles - end
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: [String:[String]], completion: @escaping (_ result: String) -> Void) {
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] enter\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] enter: endpoint - \(endpoint)\n") }
         
-        self.existingEndpoints(theDestEndpoint: "\(endpoint)") {
+        let skipLookup = (activeTab(fn: "processFiles") == "selective") ? true:false
+        self.existingEndpoints(skipLookup: skipLookup, theDestEndpoint: "\(endpoint)") {
             (result: (String,String)) in
             let (resultMessage, _) = result
             if LogLevel.debug { WriteToLog().message(stringOfText: "[processFiles] Returned from existing \(endpoint): \(resultMessage)\n") }
@@ -4920,9 +4921,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }   // func removeEndpoints - end
     
-    func existingEndpoints(theDestEndpoint: String, completion: @escaping (_ result: (String,String)) -> Void) {
+    func existingEndpoints(skipLookup: Bool, theDestEndpoint: String, completion: @escaping (_ result: (String,String)) -> Void) {
         // query destination server
-        
+        if skipLookup {
+            completion(("skipping lookup","skipping lookup"))
+            return
+        }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter - destination endpoint: \(theDestEndpoint)\n") }
         
         if pref.stopMigration {
@@ -5069,6 +5073,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         existingEndpointNode = endpointDependencyArray[completed]   // endpoint to look up
                         existingDestUrl      = "\(JamfProServer.destination)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl      = existingDestUrl.urlFix
+                        print("[\(#line)-existingEndpoints] existingEndpointsUrl: \(existingDestUrl)")
                         
                         let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)

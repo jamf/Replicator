@@ -33,8 +33,9 @@ When migrating files be sure to open the 'raw' folder.
 * Approved System/Kernel Extension payloads do not migrate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
 * Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
 * Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
+* Users and usergroups used in policy limitations/exclusions do not migrate as the API does not provide that information.
 * Packages <ul>
-  <li>Only package metadata (display name, file name, size, ...) are migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)</li>
+  <li>Only package metadata (display name, file name, size, ...) is migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)</li>
   <li>The API allows for the creation of multiple packages, with different display names, to reference the same package file name.  The Jamf Pro console prevents this as there should be a one to one mapping.</li>
   </ul>
 * Saving of objects whos name contains a : (colon) will be saved using a ; (semi-colon).
@@ -57,13 +58,6 @@ Files exported using jamf-migrator can be imported into another Jamf Pro server.
 </br></br>
 **Important:** Trimmed XML files cannot be used as they are missing data required for the migration. 
 </br></br>
-**Command Line Options:**
-
-Options for setting an ldap id on jamf user accounts and/or converting standard accounts to ldap accounts can be accomplished by launching jamf-migrator from Terminal.  For example to set an ldap id of 3 and force that id (even on local accounts) use the following:
-```
-~/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true
-```
-
 
 **Preferences:**
 
@@ -149,23 +143,41 @@ If you have used jamf-migrator and saved passwords you will see the following af
 touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete
 ```
 
-* You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.
+* You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.<br><br>
 
-**Running from the command line**
+## Running from the command line
 
+Help is available by running:
+```
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -help
+```
 Running the following in Terminal will export all objects (full XML) that can be migrated:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -backup
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects
 ```
-Before running via command line at least one export from the app must be manually run saving the source username and password.
+Before running an export via command line at least one export from the app must be manually run saving the source username and password.<br>
 
 To migrate object(s) using the command line, something like the following can be used:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -dest dest.jamfPro.fqdn -objects categories,buildings -migrate
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -destination dest.jamfPro.fqdn -objects categories,buildings -migrate
 ```
+If importing files, the import folder must be selected in the UI before the command line can be successfully run.
+
+To set an ldap id of 3 on jamf user accounts and force that id (also converts local accounts to ldap) use the following:
+```
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -source /Users/admin/Desktop/export/raw -migrate -objects jamfusers
+```
+This can also be accomplished using the UI by launching jamf-migrator from Terminal:  
+```
+/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3
+```
+<br><br>
 
 
 ## History
+**v7.1.0**<br>
+Command line functionality.  Note, -backup has been renamed -export and allows for specific types of objects to be exported.  Exported scripts no longer have characters XML encoded.  Expire tokens when quitting app.
+
 **v7.0.2**<br>
 Make disclosure triangle more visible in light mode with default color scheme
 Fix counter when deleting items

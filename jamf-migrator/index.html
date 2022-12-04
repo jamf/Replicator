@@ -143,14 +143,18 @@ body
     <li>Policies with the Accounts payload will migrate with <strong>a new password assigned</strong> to the user defined within the payload.  The password being <strong>jamfchangeme</strong>.</li>
     <li>Icons associated with Mac App Store apps are not migrated (can't be migrated).</li>
     <li>Only AFP and SMB shares can be migrated.</li>
-   <li>Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.</li>
-   <li>Buildings - the Jamf API only allows the name to be migrated.</li>
-   <li>If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update or migrate those items from the source to destination server.  When migrating only the last item migrated will appear as each one migrates it will overwrite (update) any existing item with the same name.</li>
-   <li>Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.</li>
-   <li>Institutional disk encryptions that contain the private key cannot be migrated.</li>
-   <li>Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a failure in profile deployment.</li>
-   <li>Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.</li>
-   <li>Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.</li>
+    <li>Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.</li>
+    <li>If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update or migrate those items from the source to destination server.  When migrating only the last item migrated will appear as each one migrates it will overwrite (update) any existing item with the same name.</li>
+    <li>Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.</li>
+    <li>Institutional disk encryptions that contain the private key cannot be migrated.</li>
+    <li>Approved Kernel Extension payloads do not migrate properly.  Display nanes are dropped and additional keys/values are added by the Jamf API that results in a failure in profile deployment.</li>
+    <li>Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.</li>
+    <li>Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.</li>
+    <li>Users and usergroups used in policy limitations/exclusions do not migrate as the API does not provide that information.</li>
+    <li>Only package metadata (display name, file name, size, ...) is migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)</li>
+    <li>The API allows for the creation of multiple packages, with different display names, to reference the same package file name.  The Jamf Pro console prevents this as there should be a one to one mapping.</li>
+    <li>Saving of objects whos name contains a : (colon) will be saved using a ; (semi-colon).</li>
+    <li>Enabled state of mobile device applications is not handled in the API, as a result all migrated mobile device applications will be enabled on the destination server whether it is enabled or disabled on the source.</li>
 </ul>
 <div><br></div>
 <div>The 'Selective' tab provides the ability to select a subset of items within a category.&nbsp; For example you might only want to transfer 3 new scripts from a larger pool of existing scripts.</div>
@@ -179,14 +183,6 @@ body
 <div id="app_image" style="position:relative;width:440px">
     <img src="images/open.png" alt=""><br><br>
     <strong>Important:</strong> Trimmed XML files cannot be used as they are missing data required for the migration.
-</div>
-
-<strong>Command Line Options:</strong><br>
-<div>
-    Options for setting an ldap id on jamf user accounts and/or converting standard accounts to ldap accounts can be accomplished by launching jamf-migrator from Terminal.  For example to set an ldap id of 3 and force that id (even on local accounts) use the following:
-    <ul style="margin-left:28px; list-style-type: none;">
-        <li><span style="font-family:'Courier New';">~/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true</span></li>
-    </ul>
 </div>
 
 <strong>Preferences:</strong>
@@ -307,6 +303,45 @@ If you have used jamf-migrator and saved passwords you will see the following af
     <img src="images/exportDeleted.png" alt="" style="position:relative; left: 100px; width:360px">
 </div>
     </div>
+
+    <a name="command_line_usage"></a>  
+    <br><br><hr>
+    <div>
+        <div>
+            <h1 id="Heading1">Command Line Usage</h1></div>
+        <div>
+            Help is available by running:
+            <ul style="margin-left:28px; list-style-type: none;">
+                <li><span style="font-family:'Courier New';">/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -help</span></li>
+            </ul>
+        </div>
+        <strong>Examples:</strong><br>
+        <div>
+            Running the following in Terminal will export all objects (full XML) that can be migrated:
+            <ul style="margin-left:28px; list-style-type: none;">
+                <li><span style="font-family:'Courier New';">/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects</span></li>
+            </ul>
+            Before running an export via command line at least one export from the app must be manually run saving the source username and password.<br><br>
+        </div>
+        <div>
+            To migrate object(s) using the command line, something like the following can be used:
+            <ul style="margin-left:28px; list-style-type: none;">
+                <li><span style="font-family:'Courier New';">/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -destination dest.jamfPro.fqdn -objects categories,buildings -migrate</span></li>
+            </ul>
+            If importing files, the import folder must be selected in the UI before the command line can be successfully run.<br><br>
+        </div>
+        <div>
+            To set an ldap id of 3 on jamf user accounts and force that id (also converts local accounts to ldap) use the following:
+            <ul style="margin-left:28px; list-style-type: none;">
+                <li><span style="font-family:'Courier New';">/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true</span></li>
+            </ul>
+            This can also be accomplished using the UI by launching jamf-migrator from Terminal:
+            <ul style="margin-left:28px; list-style-type: none;">
+                <li><span style="font-family:'Courier New';">/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -forceldapid true</span></li>
+            </ul>
+        </div>
+    </div>
+
 </div>
     <a name="migration_order"></a>    
     <div>
@@ -432,6 +467,7 @@ If you have used jamf-migrator and saved passwords you will see the following af
 
 <ul class="nav_ul">
   <li class="nav_li"><a class="nav_li_a" href="#home">Home</a></li>
+  <li class="nav_li"><a class="nav_li_a" href="#command_line_usage">Command Line Usage</a></li>
   <li class="nav_li"><a class="nav_li_a" href="#migration_order">Migration Order</a></li>
   <li class="nav_li"><a class="nav_li_a" href="#dependencies">Dependencies</a></li>
 </ul>
