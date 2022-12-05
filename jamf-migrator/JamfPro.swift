@@ -111,10 +111,12 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                 }
                                                 if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) && !forceBasicAuth {
                                                     JamfProServer.authType[whichServer] = "Bearer"
+                                                    JamfProServer.validToken[whichServer] = true
                                                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Bearer Token\n")
                                                     
                                                 } else {
                                                     JamfProServer.authType[whichServer]  = "Basic"
+                                                    JamfProServer.validToken[whichServer] = false
                                                     JamfProServer.authCreds[whichServer] = base64creds
                                                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic Authentication\n")
                                                 }

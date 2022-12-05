@@ -1276,12 +1276,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     default: break
                     }
                     totalObjectsToMigrate = objectsToMigrate.count
-                    if smartUserGrps_button.state.rawValue == 1 && staticUserGrps_button.state.rawValue == 1 {
-                        totalObjectsToMigrate += 1
-                    } else if smart_comp_grps_button.state.rawValue == 1 && static_comp_grps_button.state.rawValue == 1 {
-                        totalObjectsToMigrate += 1
-                    } else if smart_ios_groups_button.state.rawValue == 1 && static_ios_groups_button.state.rawValue == 1 {
-                        totalObjectsToMigrate += 1
+                    if !fileImport {
+                        if smartUserGrps_button.state.rawValue == 1 && staticUserGrps_button.state.rawValue == 1 {
+                            totalObjectsToMigrate += 1
+                        } else if smart_comp_grps_button.state.rawValue == 1 && static_comp_grps_button.state.rawValue == 1 {
+                            totalObjectsToMigrate += 1
+                        } else if smart_ios_groups_button.state.rawValue == 1 && static_ios_groups_button.state.rawValue == 1 {
+                            totalObjectsToMigrate += 1
+                        }
                     }
                 } else {
                     print("[\(#line)-startMigrating] setting.migrate: \(setting.migrate)")
@@ -1881,6 +1883,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } catch {
                     WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for file://\(export.saveLocation)\n")
                 }
+            }
+            if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
+                WriteToLog().message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Migrator/\n")
+                export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+                self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
             }
         }
             
@@ -8170,7 +8177,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         
         if theSummary.count > 0 {
-            for (key,values) in theSummary {
+            var sortedObjectsArray = [String]()
+            for (theObject, _) in theSummary {
+                sortedObjectsArray.append(theObject)
+            }
+            sortedObjectsArray = sortedObjectsArray.sorted()
+            print("[\(#line)-summaryXml] sortedObjects: \(sortedObjectsArray)")
+            print("[\(#line)-summaryXml] theSummary: \(theSummary)")
+            for key in sortedObjectsArray {
+                
+                let values = theSummary[key]!
+//            for (key,values) in theSummary {
                 if key != "computergroups" && key != "mobiledevicegroups" && key != "usergroups" {
                     var createHtml = ""
                     var updateHtml = ""
