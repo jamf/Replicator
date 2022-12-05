@@ -1883,13 +1883,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } catch {
                     WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for file://\(export.saveLocation)\n")
                 }
-            }
-            if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
-                WriteToLog().message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Migrator/\n")
-                export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-                self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
-            }
-        }
+                if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Migrator/\n")
+                    export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+                    self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+                }
+            }   // if export.saveRawXml - end
+        }   // if nodeIndex == 0 - end
             
         
         if self.fileImport && !wipeData.on {
@@ -2868,6 +2868,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                         }
                         completion(["Unable to get endpoint - \(endpoint).  Status Code: \(httpResponse.statusCode)", "0"])
+                        getStatusUpdate2(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
                     }
                 }   // if let httpResponse as? HTTPURLResponse - end
                 semaphore.signal()
@@ -8182,12 +8184,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 sortedObjectsArray.append(theObject)
             }
             sortedObjectsArray = sortedObjectsArray.sorted()
-            print("[\(#line)-summaryXml] sortedObjects: \(sortedObjectsArray)")
-            print("[\(#line)-summaryXml] theSummary: \(theSummary)")
             for key in sortedObjectsArray {
                 
                 let values = theSummary[key]!
-//            for (key,values) in theSummary {
                 if key != "computergroups" && key != "mobiledevicegroups" && key != "usergroups" {
                     var createHtml = ""
                     var updateHtml = ""
