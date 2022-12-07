@@ -1585,6 +1585,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 rawEndpoint = "mobiledevicegroups"
             case "smartusergroups", "staticusergroups":
                 rawEndpoint = "usergroups"
+            case "accounts/userid":
+                rawEndpoint = "jamfusers"
+            case "accounts/groupid":
+                rawEndpoint = "jamfgroups"
             default:
                 rawEndpoint = selectedEndpoint
         }
@@ -1742,6 +1746,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
 
+                                print("\(#line) rawEndpoint: \(rawEndpoint), selectedObject: \(selectedObject)")
+                                print("\(#line) currentEPDict: \(currentEPDict)")
                                 if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
                                     theAction     = "update"
                                     theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
@@ -2867,9 +2873,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if nodeIndex < nodesToMigrate.count - 1 {
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                         }
-                        completion(["Unable to get endpoint - \(endpoint).  Status Code: \(httpResponse.statusCode)", "0"])
+                        if httpResponse.statusCode == 401 {
+                            WriteToLog().message(stringOfText: "[readDataFiles] verify \(JamfProServer.sourceUser) has premission to read \(endpoint)\n")
+                        }
                         getStatusUpdate2(endpoint: endpoint, total: 0)
                         putStatusUpdate2(endpoint: endpoint, total: 0)
+                        completion(["Unable to get endpoint - \(endpoint).  Status Code: \(httpResponse.statusCode)", "0"])
                     }
                 }   // if let httpResponse as? HTTPURLResponse - end
                 semaphore.signal()

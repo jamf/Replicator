@@ -1802,7 +1802,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="tLs-US-62W" userLabel="mobiledevices btn">
-                                                    <rect key="frame" x="17" y="145" width="101" height="14"/>
+                                                    <rect key="frame" x="18" y="145" width="101" height="14"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="99" id="a8S-vk-7dt"/>
                                                     </constraints>
@@ -1815,7 +1815,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="Cdp-dK-MDl">
-                                                    <rect key="frame" x="17" y="124" width="147" height="17"/>
+                                                    <rect key="frame" x="18" y="123" width="147" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Extension Attributes" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZoI-x8-1P5">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1825,7 +1825,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="VyL-Hh-erV" userLabel="Smart Groups">
-                                                    <rect key="frame" x="188" y="145" width="108" height="17"/>
+                                                    <rect key="frame" x="189" y="145" width="108" height="17"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="106" id="gC9-EM-QFE"/>
                                                     </constraints>
@@ -1838,7 +1838,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="qhC-l8-gex" userLabel="Static Groups">
-                                                    <rect key="frame" x="188" y="124" width="110" height="17"/>
+                                                    <rect key="frame" x="189" y="123" width="110" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Static Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="r6R-hY-C6L">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1848,7 +1848,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="w1S-rf-b7s" userLabel="Apps">
-                                                    <rect key="frame" x="359" y="145" width="59" height="17"/>
+                                                    <rect key="frame" x="360" y="145" width="59" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="57" id="sbT-tK-NEJ"/>
                                                     </constraints>
@@ -1861,7 +1861,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="ICa-bR-OiZ" userLabel="Adv. iOS Searches btn">
-                                                    <rect key="frame" x="359" y="124" width="144" height="17"/>
+                                                    <rect key="frame" x="360" y="123" width="144" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Adv. iOS Searches" bezelStyle="regularSquare" imagePosition="left" inset="2" id="lnP-rB-5A4">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1870,8 +1870,8 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="Uu6-rJ-6yc"/>
                                                     </connections>
                                                 </button>
-                                                <button misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HiT-1i-N3p" userLabel="Config Profile">
-                                                    <rect key="frame" x="530" y="145" width="119" height="14"/>
+                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="HiT-1i-N3p" userLabel="Config Profile">
+                                                    <rect key="frame" x="530" y="145" width="119" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Config. Profiles" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="JgT-mE-6rw">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1881,7 +1881,7 @@
                                                     </connections>
                                                 </button>
                                                 <button hidden="YES" translatesAutoresizingMaskIntoConstraints="NO" id="h8I-FY-zDu" userLabel="Classes">
-                                                    <rect key="frame" x="530" y="124" width="72" height="17"/>
+                                                    <rect key="frame" x="531" y="123" width="72" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="70" id="Uij-Kd-C0J"/>
                                                     </constraints>
@@ -1904,7 +1904,7 @@
                                                     </connections>
                                                 </button>
                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="exf-L4-EBY">
-                                                    <rect key="frame" x="412" y="145" width="110" height="16"/>
+                                                    <rect key="frame" x="413" y="145" width="110" height="16"/>
                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="(uploading icons)" id="bls-L0-0rc">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1944,7 +1944,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cMW-Ft-Ese" userLabel="Classes">
-                                                    <rect key="frame" x="537" y="20" width="60" height="16"/>
+                                                    <rect key="frame" x="538" y="18" width="60" height="16"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="56" id="cQJ-6Y-pGH"/>
                                                     </constraints>
@@ -2006,7 +2006,7 @@
                                                 <constraint firstItem="Cdp-dK-MDl" firstAttribute="baseline" secondItem="qhC-l8-gex" secondAttribute="baseline" id="825-Ai-azK"/>
                                                 <constraint firstAttribute="trailing" secondItem="GOb-w1-9QU" secondAttribute="trailing" constant="60" id="9rA-v0-tIk"/>
                                                 <constraint firstItem="Q6a-6E-m2M" firstAttribute="centerX" secondItem="Vox-8P-XHa" secondAttribute="centerX" id="AJS-dJ-v7C"/>
-                                                <constraint firstItem="tLs-US-62W" firstAttribute="firstBaseline" secondItem="HiT-1i-N3p" secondAttribute="firstBaseline" id="BMz-Hw-jTM"/>
+                                                <constraint firstItem="tLs-US-62W" firstAttribute="firstBaseline" secondItem="HiT-1i-N3p" secondAttribute="firstBaseline" constant="4" id="BMz-Hw-jTM"/>
                                                 <constraint firstItem="NO1-GB-wJY" firstAttribute="leading" secondItem="N1p-Jj-8kH" secondAttribute="leading" id="Bxm-md-ftL"/>
                                                 <constraint firstAttribute="trailing" secondItem="Uo3-PW-fQz" secondAttribute="trailing" constant="73" id="CDI-rx-LnD"/>
                                                 <constraint firstItem="w1S-rf-b7s" firstAttribute="bottom" secondItem="exf-L4-EBY" secondAttribute="bottom" id="CKk-Q3-xew"/>
@@ -2019,7 +2019,7 @@
                                                 <constraint firstItem="exf-L4-EBY" firstAttribute="baseline" secondItem="VyL-Hh-erV" secondAttribute="firstBaseline" id="Opy-k1-UqB"/>
                                                 <constraint firstItem="ICa-bR-OiZ" firstAttribute="baseline" secondItem="h8I-FY-zDu" secondAttribute="baseline" id="QjN-C7-nHg"/>
                                                 <constraint firstItem="E48-BQ-8XI" firstAttribute="baseline" secondItem="Uo3-PW-fQz" secondAttribute="baseline" id="SBq-nF-6ic"/>
-                                                <constraint firstItem="HiT-1i-N3p" firstAttribute="leading" secondItem="h8I-FY-zDu" secondAttribute="leading" id="Sbz-ag-m9W"/>
+                                                <constraint firstItem="HiT-1i-N3p" firstAttribute="leading" secondItem="h8I-FY-zDu" secondAttribute="leading" constant="-1" id="Sbz-ag-m9W"/>
                                                 <constraint firstAttribute="trailing" secondItem="N1p-Jj-8kH" secondAttribute="trailing" constant="43" id="Uh7-Zp-Jyp"/>
                                                 <constraint firstAttribute="trailing" secondItem="Vox-8P-XHa" secondAttribute="trailing" constant="97" id="Up3-9g-CIf"/>
                                                 <constraint firstItem="cKk-f8-LJF" firstAttribute="leading" secondItem="Vox-8P-XHa" secondAttribute="leading" id="YTG-xM-jA8"/>
@@ -2034,7 +2034,7 @@
                                                 <constraint firstItem="h8I-FY-zDu" firstAttribute="leading" secondItem="ICa-bR-OiZ" secondAttribute="trailing" constant="29" id="h2W-Ma-2NO"/>
                                                 <constraint firstAttribute="trailing" secondItem="HiT-1i-N3p" secondAttribute="trailing" constant="58" id="iKx-lY-w0V"/>
                                                 <constraint firstItem="E48-BQ-8XI" firstAttribute="top" secondItem="Q6a-6E-m2M" secondAttribute="bottom" constant="64" id="j1p-ex-hOW"/>
-                                                <constraint firstItem="HiT-1i-N3p" firstAttribute="leading" secondItem="exf-L4-EBY" secondAttribute="trailing" constant="12" id="oyu-vb-n6y"/>
+                                                <constraint firstItem="HiT-1i-N3p" firstAttribute="leading" secondItem="exf-L4-EBY" secondAttribute="trailing" constant="11" id="oyu-vb-n6y"/>
                                                 <constraint firstItem="h8I-FY-zDu" firstAttribute="centerX" secondItem="cMW-Ft-Ese" secondAttribute="centerX" id="qd4-0Y-1Vm"/>
                                                 <constraint firstItem="Cdp-dK-MDl" firstAttribute="top" secondItem="tLs-US-62W" secondAttribute="bottom" constant="4" id="rfh-fe-5EP"/>
                                                 <constraint firstItem="VyL-Hh-erV" firstAttribute="baseline" secondItem="w1S-rf-b7s" secondAttribute="baseline" id="rhq-5V-cr8"/>
@@ -2192,7 +2192,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="156"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="154"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="154"/>
