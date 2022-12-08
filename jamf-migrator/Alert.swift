@@ -16,19 +16,19 @@ class Alert: NSObject {
         dialog.messageText = header
         dialog.informativeText = message
         dialog.alertStyle = NSAlert.Style.warning
-        let okButton = dialog.addButton(withTitle: "OK")
         if secondButton != "" {
             let otherButton = dialog.addButton(withTitle: secondButton)
             otherButton.keyEquivalent = "\r"
-            okButton.keyEquivalent = "o"
         }
+        let okButton = dialog.addButton(withTitle: "OK")
+        okButton.keyEquivalent = "o"
         
         let theButton = dialog.runModal()
         switch theButton {
         case .alertFirstButtonReturn:
-            selected = "OK"
-        default:
             selected = secondButton
+        default:
+            selected = "OK"
         }
         return selected
     }   // func alert_dialog - end

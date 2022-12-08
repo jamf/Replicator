@@ -1081,7 +1081,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Migration Mode (startMigration): \(migrationMode).\n") }
                         
                 // list the items in the order they need to be migrated
-            print("[\(#line)-startMigrating] migrationMode: \(migrationMode)")
             if migrationMode == "bulk" {
                 // initialize list of items to migrate then add what we want - start
                 objectsToMigrate.removeAll()
@@ -1286,7 +1285,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }
                 } else {
-                    print("[\(#line)-startMigrating] setting.migrate: \(setting.migrate)")
                     if setting.migrate {
                         // set migration order
                         let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
@@ -1296,7 +1294,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                     } else {
-                        print("[\(#line)-startMigrating] full export")
                         // define objects to export
                         let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patchpolicies", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
                         for theObject in exportObjects {
@@ -1746,8 +1743,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
 
-                                print("\(#line) rawEndpoint: \(rawEndpoint), selectedObject: \(selectedObject)")
-                                print("\(#line) currentEPDict: \(currentEPDict)")
                                 if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
                                     theAction     = "update"
                                     theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
@@ -1839,7 +1834,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     JamfProServer.source = JamfProServer.source + "/"
                 }
                 do {
-                    print("[\(#line)-readModes] source: file://\(JamfProServer.source)")
                     if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
                         if let data = bookmarks[URL(fileURLWithPath: "\(JamfProServer.source)")] {
                             var isStale = false
@@ -2268,8 +2262,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 
                                                 endpointsRead += 1
                                                 // print("[endpointsRead += 1] \(endpoint)")
-                                                print("[\(#line)]      endpoint: \(endpoint)")
-                                                print("[\(#line)] endpointCount: \(endpointCount)")
                                                 
                                                 endpointCountDict[endpoint] = endpointCount
                                                 for i in (0..<endpointCount) {
@@ -3363,7 +3355,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                             } else {
                                 // check progress
-                                print("[\(#line)] endpointCountDict[endpoint]: \(String(describing: endpointCountDict[endpoint]))")
 //                                print("[endpointById] node: \(endpoint)")
 //                                // print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
                                 endpointCountDict[endpoint]! -= 1
@@ -5091,7 +5082,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         existingEndpointNode = endpointDependencyArray[completed]   // endpoint to look up
                         existingDestUrl      = "\(JamfProServer.destination)/JSSResource/\(existingEndpointNode)"
                         existingDestUrl      = existingDestUrl.urlFix
-                        print("[\(#line)-existingEndpoints] existingEndpointsUrl: \(existingDestUrl)")
                         
                         let destEncodedURL = URL(string: existingDestUrl)
                         let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -6374,15 +6364,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let totalCount = (fileImport && activeTab(fn: "getStatusUpdate2") == "selective") ? targetDataArray.count:total
         
-//        if getNodesComplete == 0 {
-//            print("[\(#line)-getStatusUpdate2] objectsToMigrate: \(objectsToMigrate)")
-//        }
-        
         if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
             getNodesComplete += 1
-            print("[\(#line)-getStatusUpdate2] \(adjEndpoint) get: \(getNodesComplete) of \(totalObjectsToMigrate) complete")
             if getNodesComplete == totalObjectsToMigrate && export.saveOnly {
-                print("[\(#line)-getStatusUpdate2] run complete")
                 runComplete()
             }
         }
@@ -6425,10 +6409,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         let theTask = wipeData.on ? "removal":"create/update"
             if newPutTotal == totalCount || total == 0 {
                 nodesComplete += 1
-                print("[\(#line)-putStatusUpdate2] \(adjEndpoint) \(theTask): \(nodesComplete) of \(totalObjectsToMigrate) complete")
                 WriteToLog().message(stringOfText: "[ViewController.putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(totalObjectsToMigrate) complete\n")
                 if nodesComplete == totalObjectsToMigrate {
-                    print("[\(#line)-putStatusUpdate2] run complete")
                     runComplete()
                 }
             }
@@ -6742,6 +6724,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         var moveIcon     = true
         var savedURL:URL!
+        
+        iconNotification()
 
         switch action {
         case "GET":
@@ -6876,7 +6860,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         // start upload process
                         URLCache.shared.removeAllCachedResponses()
-                        let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+                        let task = session.dataTask(with: request, completionHandler: { [self] (data, response, error) -> Void in
                             session.finishTasksAndInvalidate()
             //                if let httpResponse = response as? HTTPURLResponse {
                             if let _ = (response as? HTTPURLResponse)?.statusCode {
@@ -6901,10 +6885,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             newId = jsonResponse?["id"] as? Int ?? 0
                                         }
                                         
-                                        self.uploadedIcons[ssIconId.fixOptional] = newId
+                                        uploadedIcons[ssIconId.fixOptional] = newId
                                         
                                     } else {
-                                        newId = Int(self.tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
+                                        newId = Int(tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
                                     }
                                 }
                                 iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
@@ -6924,8 +6908,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
                             let (m,s) = r.quotientAndRemainder(dividingBy: 60)
 
-                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(self.dd(value: h)):\(self.dd(value: m)):\(self.dd(value: s)) (h:m:s)\n")
+                            WriteToLog().message(stringOfText: "[iconMigrate.\(action)] upload time: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                             
+                            iconNotification()
+
                             completion(newId)
                             // upload checksum - end
                             
@@ -6967,7 +6953,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                     (data, response, error) -> Void in
                     session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
@@ -6989,6 +6975,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[iconMigrate.\(action)] POST or PUT Operation: \(request.httpMethod)\n") }
                     
+                    iconNotification()
+                    
                     semaphore.signal()
                 })
                 task.resume()
@@ -7003,6 +6991,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(200)
         }
      
+    }
+    
+    func iconNotification() {
+        DispatchQueue.main.async { [self] in
+            if setting.fullGUI {
+                uploadingIcons_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
+                uploadingIcons2_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
+            }
+        }
     }
     
     // hold icon migrations while icon is being cached/uploaded to the new server
