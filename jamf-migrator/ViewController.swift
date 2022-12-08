@@ -5889,108 +5889,95 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func runComplete() {
         DispatchQueue.main.async { [self] in
-//        endpointCountDict.removeAll()
-            nodesComplete = 0
-            AllEndpointsArray.removeAll()
-            availableObjsToMigDict.removeAll()
-            /*
-             if setting.fullGUI {
-                 if activeTab(fn: "runComplete") == "selective" {
-                     sourceDataArray.removeAll()
-                     srcSrvTableView.reloadData()
-                     targetDataArray.removeAll()
-                 }
-             }
-             */
-            iconfiles.policyDict.removeAll()
-            iconfiles.pendingDict.removeAll()
-            
             migrationComplete.isDone = true
-            
-            if setting.fullGUI {
-                let (h,m,s) = timeDiff(forWhat: "runTime")
-                WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                    spinner_progressIndicator.stopAnimation(self)
-                resetAllCheckboxes()
-            }
+            if theIconsQ.operationCount == 0 {
+                nodesComplete = 0
+                AllEndpointsArray.removeAll()
+                availableObjsToMigDict.removeAll()
+                
+                iconfiles.policyDict.removeAll()
+                iconfiles.pendingDict.removeAll()
+                
+                if setting.fullGUI {
+                    let (h,m,s) = timeDiff(forWhat: "runTime")
+                    WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                        spinner_progressIndicator.stopAnimation(self)
+                    resetAllCheckboxes()
+                }
 
-            if wipeData.on {
-                rmDELETE()
-            }
-            goButtonEnabled(button_status: true)
-            
-            if setting.fullGUI {
-                spinner_progressIndicator.stopAnimation(self)
-                go_button.title = "Go!"
-                _ = enableSleep()
-            } else {
-                // silent run complete
-                if export.backupMode {
-    //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
-                    zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))/") { [self]
-                            (result: String) in
-    //                            print("zipIt result: \(result)")
-                            do {
-                                if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"") {
-                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"")!)
-                                }
-                                WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip\n")
-                                
-                                let (h,m,s) = timeDiff(forWhat: "runTime")
-                                WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                            } catch let error as NSError {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
-                            }
-                        }
-                        
-                        logCleanup()
-                        NSApplication.shared.terminate(self)
-    //                }   //zipIt(args: "cd - end
+                if wipeData.on {
+                    rmDELETE()
+                }
+                goButtonEnabled(button_status: true)
+                
+                if setting.fullGUI {
+                    spinner_progressIndicator.stopAnimation(self)
+                    go_button.title = "Go!"
+                    _ = enableSleep()
                 } else {
-                    if nodesMigrated > 0 {
-    //                        print("summaryDict: \(summaryDict)")
-    //                        print("counters: \(counters)")
-                        var summary = ""
-                        var otherLine: Bool = true
-                        var paddingChar = " "
-                        let sortedObjects = objectsToMigrate.sorted()
-                        // find longest length of objects migrated
-                        var column1Padding = ""
-                        for theObject in objectsToMigrate {
-                            if theObject.count+1 > column1Padding.count {
-                                column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
+                    // silent run complete
+                    if export.backupMode {
+        //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
+                        zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))/") { [self]
+                                (result: String) in
+        //                            print("zipIt result: \(result)")
+                                do {
+                                    if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"") {
+                                        try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"")!)
+                                    }
+                                    WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip\n")
+                                    
+                                    let (h,m,s) = timeDiff(forWhat: "runTime")
+                                    WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                                } catch let error as NSError {
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
+                                }
                             }
+                            
+                            logCleanup()
+                            NSApplication.shared.terminate(self)
+        //                }   //zipIt(args: "cd - end
+                    } else {
+                        if nodesMigrated > 0 {
+        //                        print("summaryDict: \(summaryDict)")
+        //                        print("counters: \(counters)")
+                            var summary = ""
+                            var otherLine: Bool = true
+                            var paddingChar = " "
+                            let sortedObjects = objectsToMigrate.sorted()
+                            // find longest length of objects migrated
+                            var column1Padding = ""
+                            for theObject in objectsToMigrate {
+                                if theObject.count+1 > column1Padding.count {
+                                    column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
+                                }
+                            }
+                            let leading = LogLevel.debug ? "                             ":"                 "
+                            
+                            summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
+                                  "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                                  "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                                  "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
+                                  "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
+                            for theObject in sortedObjects {
+                                let counts = counters[theObject]!
+        //                        for (theObject, counts) in counters {
+                                let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
+                                otherLine.toggle()
+                                paddingChar = otherLine ? " ":"."
+                                summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
+                                      "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                                            "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                      "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                      "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+                            }
+                            WriteToLog().message(stringOfText: summary)
+                            let (h,m,s) = timeDiff(forWhat: "runTime")
+                            WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
+                            
+                            logCleanup()
+                            NSApplication.shared.terminate(self)
                         }
-                        let leading = LogLevel.debug ? "                             ":"                 "
-                        
-                        summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
-                              "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
-                        for theObject in sortedObjects {
-                            let counts = counters[theObject]!
-    //                        for (theObject, counts) in counters {
-                            let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
-                            otherLine.toggle()
-                            paddingChar = otherLine ? " ":"."
-                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-    //                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-    //                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-    //                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-    //                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-    //                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-                        }
-                        WriteToLog().message(stringOfText: summary)
-                        let (h,m,s) = timeDiff(forWhat: "runTime")
-                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                        
-                        logCleanup()
-                        NSApplication.shared.terminate(self)
                     }
                 }
             }
@@ -6998,6 +6985,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if setting.fullGUI {
                 uploadingIcons_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
                 uploadingIcons2_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
+            }
+            if migrationComplete.isDone == true && theIconsQ.operationCount == 0 {
+                runComplete()
             }
         }
     }
