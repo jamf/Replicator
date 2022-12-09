@@ -2959,7 +2959,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                self.alert_dialog(header: "Attention:", message: "No files found.  If the folder exists outside the Downloads directory, reselect it with the Browse button and try again.")
 //                            }
 //                        } else {
-                            WriteToLog().message(stringOfText: "[readDataFiles] No files found.  If the folder exists outside the Downloads directory and files are expected, reselect it with the Browse button and try again.")
+                            WriteToLog().message(stringOfText: "[readDataFiles] No files found.  If the import folder exists outside the Downloads directory and files are expected, reselect the import folder with with either the File Imprort or the Browse button and try again.\n")
 //                            DispatchQueue.main.async {
 //                                NSApplication.shared.terminate(self)
 //                            }
@@ -3108,7 +3108,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         */
                     }
                 } else {   // if let allFilePaths - end
-                    WriteToLog().message(stringOfText: "[readDataFiles] No files found.  If the folder exists outside the Downloads directory, reselect it with the Browse button and try again.")
+                    WriteToLog().message(stringOfText: "[readDataFiles] No files found.  If the import folder exists outside the Downloads directory and files are expected, reselect the import folder with with either the File Imprort or the Browse button and try again.\n")
                     completion("no files found for: \(endpoint)")
                 }
             } //catch {
@@ -5960,16 +5960,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                   "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
                                   "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
                             for theObject in sortedObjects {
-                                let counts = counters[theObject]!
-        //                        for (theObject, counts) in counters {
-                                let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
-                                otherLine.toggle()
-                                paddingChar = otherLine ? " ":"."
-                                summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
-                                      "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                                            "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                      "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                      "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+                                if counters[theObject] != nil {
+                                    let counts = counters[theObject]!
+                                    let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
+                                    otherLine.toggle()
+                                    paddingChar = otherLine ? " ":"."
+                                    summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
+                                                                "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                                                "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                                                "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
+                                                                "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
+                                }
                             }
                             WriteToLog().message(stringOfText: summary)
                             let (h,m,s) = timeDiff(forWhat: "runTime")
@@ -6389,9 +6390,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? totalObjectsToMigrate:total
-        
-//        DispatchQueue.main.async { [self] in
-            
+                    
             let newPutTotal = (counters[adjEndpoint]?["create"] ?? 0) + (counters[adjEndpoint]?["update"] ?? 0) + (counters[adjEndpoint]?["fail"] ?? 0)
         let theTask = wipeData.on ? "removal":"create/update"
             if newPutTotal == totalCount || total == 0 {
@@ -6421,7 +6420,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
             }
-//        }
     }
     
     func getIconId(iconUri: String, endpoint: String) -> String {
