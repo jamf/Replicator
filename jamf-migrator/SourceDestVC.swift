@@ -664,24 +664,25 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             while local_serverArray.count > 10 {
                 local_serverArray.removeLast()
             }
+            for theServer in local_serverArray {
+                if theServer == "" || theServer.first == " " || theServer.last == "\n" {
+                    let arrayIndex = local_serverArray.firstIndex(of: theServer)
+                    local_serverArray.remove(at: arrayIndex!)
+                }
+            }
             appInfo.settings[serverList] = local_serverArray as Any?
             NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
             switch serverList {
             case "source_server_array":
                 self.sourceServerList_button.removeAllItems()
                 for theServer in local_serverArray {
-                    if theServer != "" {
-                        self.sourceServerList_button.addItems(withTitles: [theServer])
-                    }
                     self.sourceServerList_button.addItems(withTitles: [theServer])
                 }
                 self.sourceServerArray = local_serverArray
             case "dest_server_array":
                 self.destServerList_button.removeAllItems()
                 for theServer in local_serverArray {
-                    if theServer != "" {
-                        self.destServerList_button.addItems(withTitles: [theServer])
-                    }
+                    self.destServerList_button.addItems(withTitles: [theServer])
                 }
                 self.destServerArray = local_serverArray
             default: break

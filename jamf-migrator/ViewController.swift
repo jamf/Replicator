@@ -1845,27 +1845,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } catch {
                     WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(JamfProServer.source)\n")
                 }
-                
-                
-                /*
-                print("[\(#line)-readNodes] export.saveLocation: \(JamfProServer.source)")
-                importFilesUrl = URL(string: JamfProServer.source)
-                print("[\(#line)-readNodes] exportedFilesUrl: \(String(describing: importFilesUrl))")
-
-                do {
-                    if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] {
-    //                    if let data = bookmarks[importFilesUrl!] {
-                        if let data = bookmarks[URL(fileURLWithPath: JamfProServer.source)] {
-                            var isStale = false
-                            importFilesUrl = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-                            _ = importFilesUrl?.startAccessingSecurityScopedResource()
-                            WriteToLog().message(stringOfText: "[ViewController.readNodes] set permissions to \(String(describing: importFilesUrl))\n")
-                        }
+                if !FileManager.default.isReadableFile(atPath: JamfProServer.source) {
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Unable to read from \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.\n")
+                    pref.stopMigration = true
+                    if setting.fullGUI {
+                        _ = Alert().display(header: "Attention:", message: "Unable to read \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.", secondButton: "")
+                    } else {
+                        NSApplication.shared.terminate(self)
                     }
-                } catch {
-                    WriteToLog().message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed.\n")
                 }
-                */
             }
             if export.saveRawXml {
                 if export.saveLocation.last != "/" {
@@ -1892,7 +1880,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }   // if nodeIndex == 0 - end
             
         
-        if self.fileImport && !wipeData.on {
+        if self.fileImport && !wipeData.on && !pref.stopMigration {
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] reading files for: \(nodesToMigrate)\n") }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes]         nodeIndex: \(nodeIndex)\n") }
@@ -7301,10 +7289,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func stopButton(_ sender: Any) {
-        WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
-        pref.stopMigration = true
+        if setting.fullGUI {
+            WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
+            pref.stopMigration = true
 
-        goButtonEnabled(button_status: true)
+            goButtonEnabled(button_status: true)
+        } else {
+            WriteToLog().message(stringOfText: "Migration was stopped due to an issue.\n\n")
+        }
     }
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
