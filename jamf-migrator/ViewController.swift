@@ -3621,9 +3621,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 if endpoint == "osxconfigurationprofiles" {
-                    // correct issue when an & is in the name of a macOS configuration profiles - real issue is in the encoded payload
-                    PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
-                    //print("\nXML: \(PostXML)")
+                    print("filevault check")
+                    // check for filevault payload
+                    let payload = tagValue2(xmlString: "\(PostXML)", startTag: "<payloads>", endTag: "</payloads>")
+                    
+                    if payload.range(of: "com.apple.security.FDERecoveryKeyEscrow", options: .caseInsensitive) != nil {
+                        let profileName = getName(endpoint: "osxconfigurationprofiles", objectXML: PostXML)
+                        knownEndpoint = false
+                        print("\(profileName) contain a filevault payload")
+
+                        let localTmp = (self.counters[endpoint]?["fail"])!
+                        self.counters[endpoint]?["fail"] = localTmp + 1
+                        if var summaryArray = self.summaryDict[endpoint]?["fail"] {
+                            summaryArray.append(className)
+                            self.summaryDict[endpoint]?["fail"] = summaryArray
+                        }
+                        WriteToLog().message(stringOfText: "[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)\n")
+                        self.postCount += 1
+                        putStatusUpdate2(endpoint: "osxconfigurationprofiles", total: endpointCount)
+                        if self.objectsToMigrate.last == endpoint && endpointCount == endpointCurrent {
+                            //self.go_button.isEnabled = true
+                            self.rmDELETE()
+        //                    self.resetAllCheckboxes()
+                            self.goButtonEnabled(button_status: true)
+                        }
+                    } else {
+                        // correct issue when an & is in the name of a macOS configuration profiles - real issue is in the encoded payload
+                        PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
+                        //print("\nXML: \(PostXML)")
+                    }
                 }
                 // fix limitations/exclusions LDAP issue
                 for xmlTag in ["limit_to_users"] {
