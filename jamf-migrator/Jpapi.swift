@@ -68,8 +68,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
         
-        // sticky session
 //        print("jpapi sticky session for \(serverUrl)")
+        // sticky session
         if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
             URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
         }

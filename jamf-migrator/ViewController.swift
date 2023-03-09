@@ -1667,6 +1667,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     if theId != migratedPkgDependencies[theName] {
                                                         WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] Duplicate references to the same package were found on \(JamfProServer.source).  Package with filename \(theName) has id: \(theId) and \(String(describing: migratedPkgDependencies[theName]!))\n")
                                                         DispatchQueue.main.async {
+                                                            print("[startSelectiveMigration] \(#line) server: \(JamfProServer.source)")
                                                             theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                                             if theButton == "Stop" {
                                                                 self.stopButton(self)
@@ -1730,18 +1731,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
                                 
                                 // remove (policyId) from displayed policy name
-                                if rawEndpoint == "policies" {
-                                    var tmpArray = selectedObject.components(separatedBy: " ")
-                                    selectedObject = ""
-                                    tmpArray.removeLast()
-                                    for i in tmpArray {
-                                        if i != tmpArray.last {
-                                            selectedObject.append("\(i) ")
-                                        } else {
-                                            selectedObject.append("\(i)")
-                                        }
-                                    }
-                                }
+                                /* removed lnh 20230216
+                                 if rawEndpoint == "policies" {
+                                     var tmpArray = selectedObject.components(separatedBy: "-")
+                                     selectedObject = ""
+                                     tmpArray.removeLast()
+                                     for i in tmpArray {
+                                         if i != tmpArray.last {
+                                             selectedObject.append("\(i) ")
+                                         } else {
+                                             selectedObject.append("\(i)")
+                                         }
+                                     }
+                                 }
+                                 */
 
                                 if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
                                     theAction     = "update"
@@ -1749,11 +1752,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                                     
                                 WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
-
+                                
                                 if !fileImport {
                                     self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: self.targetDataArray.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
                                 } else {
 //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
+
                                     let fileToMigrate = displayNameToFilename[selectedObject]
                                     
                                     arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
@@ -2080,6 +2084,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     let packageID   = record["id"] as! Int
                                                     let displayName = record["name"] as! String
                                                     
+                                                    print("[getEndpoint] \(#line) call PackagesDelegate().getFilename for source")
                                                     PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
                                                         (result: (Int,String)) in
                                                         let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
@@ -2116,6 +2121,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 }
                                                                 WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(JamfProServer.source)\n\(message)\n")
                                                                 if setting.fullGUI {
+                                                                    print("[getEndoints] \(#line) server: \(JamfProServer.source)")
+                                                                    print("[getEndoints] \(#line) message: \(message)")
                                                                     let theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                                                     if theButton == "Stop" {
                                                                         stopButton(self)
@@ -3621,19 +3628,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 if endpoint == "osxconfigurationprofiles" {
-                    print("filevault check")
                     // check for filevault payload
                     let payload = tagValue2(xmlString: "\(PostXML)", startTag: "<payloads>", endTag: "</payloads>")
                     
                     if payload.range(of: "com.apple.security.FDERecoveryKeyEscrow", options: .caseInsensitive) != nil {
                         let profileName = getName(endpoint: "osxconfigurationprofiles", objectXML: PostXML)
                         knownEndpoint = false
-                        print("\(profileName) contain a filevault payload")
 
                         let localTmp = (self.counters[endpoint]?["fail"])!
                         self.counters[endpoint]?["fail"] = localTmp + 1
                         if var summaryArray = self.summaryDict[endpoint]?["fail"] {
-                            summaryArray.append(className)
+                            summaryArray.append(profileName)
                             self.summaryDict[endpoint]?["fail"] = summaryArray
                         }
                         WriteToLog().message(stringOfText: "[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)\n")
@@ -3645,15 +3650,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         //                    self.resetAllCheckboxes()
                             self.goButtonEnabled(button_status: true)
                         }
-                    } else {
-                        // correct issue when an & is in the name of a macOS configuration profiles - real issue is in the encoded payload
-                        PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
-                        //print("\nXML: \(PostXML)")
                     }
                 }
-                // fix limitations/exclusions LDAP issue
-                for xmlTag in ["limit_to_users"] {
-                    PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
+                if knownEndpoint {
+                    // correct issue when an & is in the name of a macOS configuration profiles - real issue is in the encoded payload
+                    PostXML = PostXML.replacingOccurrences(of: "&amp;amp;", with: "%26;")
+                    //print("\nXML: \(PostXML)")
+                    // fix limitations/exclusions LDAP issue
+                    for xmlTag in ["limit_to_users"] {
+                        PostXML = self.rmXmlData(theXML: PostXML, theTag: xmlTag, keepTags: false)
+                    }
                 }
                 
             case "usergroups", "smartusergroups", "staticusergroups":
@@ -3705,7 +3711,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
 
         case "computerextensionattributes":
-            if self.tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
+            if tagValue(xmlString: PostXML, xmlTag: "description") == "Extension Attribute provided by JAMF Nation patch service" {
                 knownEndpoint = false
                 // Currently patch EAs are not migrated - handle those here
                 if self.counters[endpoint]?["fail"] != endpointCount-1 {
@@ -3909,9 +3915,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // check for a self service icon and grab name and id if present - start
             // also used for exporting items - iOS
             if PostXML.range(of: "</self_service_icon>") != nil {
-                let selfServiceIconXml = self.tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
-                iconName = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
-                iconUri = self.tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
+                let selfServiceIconXml = tagValue(xmlString: PostXML, xmlTag: "self_service_icon")
+                iconName = tagValue(xmlString: selfServiceIconXml, xmlTag: "filename")
+                iconUri = tagValue(xmlString: selfServiceIconXml, xmlTag: "uri").replacingOccurrences(of: "//iconservlet", with: "/iconservlet")
                 // endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName
                 iconId = getIconId(iconUri: iconUri, endpoint: endpoint)
             }
@@ -4024,11 +4030,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let (_, fullXML) = xmlResult
                 
                 if fullXML != "" {
-                    var destUUID = self.tagValue2(xmlString: fullXML, startTag: "<general>", endTag: "</general>")
-                    destUUID     = self.tagValue2(xmlString: destUUID, startTag: "<uuid>", endTag: "</uuid>")
+                    var destUUID = tagValue2(xmlString: fullXML, startTag: "<general>", endTag: "</general>")
+                    destUUID     = tagValue2(xmlString: destUUID, startTag: "<uuid>", endTag: "</uuid>")
 //                    print ("  destUUID: \(destUUID)")
-                    var sourceUUID = self.tagValue2(xmlString: PostXML, startTag: "<general>", endTag: "</general>")
-                    sourceUUID     = self.tagValue2(xmlString: sourceUUID, startTag: "<uuid>", endTag: "</uuid>")
+                    var sourceUUID = tagValue2(xmlString: PostXML, startTag: "<general>", endTag: "</general>")
+                    sourceUUID     = tagValue2(xmlString: sourceUUID, startTag: "<uuid>", endTag: "</uuid>")
 //                    print ("sourceUUID: \(sourceUUID)")
 
                     // update XML to be posted with original/existing UUID of the configuration profile
@@ -6239,6 +6245,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         // Create folder to store objectString files if needed - end
         
+        print("[ViewController] node: \(node)")
+        
+        
         // Create endpoint type to store objectString files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
@@ -6247,6 +6256,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointPath = saveFolder+"jamfgroups"
         case "accounts/userid":
             endpointPath = saveFolder+"jamfusers"
+        case "computergroups":
+            let isSmart = tagValue2(xmlString: objectString, startTag: "<is_smart>", endTag: "</is_smart>")
+            if isSmart == "true" {
+                endpointPath = saveFolder+"smartcomptergroups"
+            } else {
+                endpointPath = saveFolder+"staticcomptergroups"
+            }
         default:
             endpointPath = saveFolder+node
         }
@@ -6486,7 +6502,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             default:
                 break
             }
-//          print("new policy id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))")
+//          print("new policy id: \(tagValue(xmlString: responseData, xmlTag: "id"))")
 //          print("iconName: "+ssIconName+"\tURL: \(ssIconUri)")
 
             // set icon source
@@ -6504,7 +6520,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 createDestUrl = "\(self.createDestUrlBase)/v1/icon"
                 createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource", with: "/api")
             } else {
-                createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+                createDestUrl = "\(self.createDestUrlBase)/fileuploads/\(iconNode)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))"
             }
             createDestUrl = createDestUrl.urlFix
             
@@ -6595,12 +6611,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     break
                                                 }
                                                 
-                                                let policyUrl = "\(self.createDestUrlBase)/\(endpointType)/id/\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+                                                let policyUrl = "\(self.createDestUrlBase)/\(endpointType)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))"
                                                 self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                                     (result: Int) in
                                                 
                                                     if result > 199 && result < 300 {
-                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] successfully updated policy (id: \(self.tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)\n") }
+                                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] successfully updated policy (id: \(tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)\n") }
 //                                                        print("successfully used new icon id \(newSelfServiceIconId)")
                                                     }
                                                 }
@@ -6624,7 +6640,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                }
 
                                 // destination policy to upload icon to
-                                let thePolicyID = "\(self.tagValue(xmlString: responseData, xmlTag: "id"))"
+                                let thePolicyID = "\(tagValue(xmlString: responseData, xmlTag: "id"))"
                                 let policyUrl   = "\(self.createDestUrlBase)/\(endpointType)/id/\(thePolicyID)"
 //                                print("\n[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
 //                                print("[ViewController.icons] policyUrl: \(policyUrl)\n")
@@ -7565,33 +7581,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         return concurrent
     }
     
-    // extract the value between xml tags - start
-    func tagValue(xmlString:String, xmlTag:String) -> String {
-        var rawValue = ""
-        if let start = xmlString.range(of: "<\(xmlTag)>"),
-            let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
-        } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] tag: \(xmlTag)\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] xml: \(xmlString)\n") }
-        }
-        return rawValue
-    }
-    //  extract the value between xml tags - end
-    // extract the value between (different) tags - start
-    func tagValue2(xmlString:String, startTag:String, endTag:String) -> String {
-        var rawValue = ""
-        if let start = xmlString.range(of: startTag),
-            let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
-        } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.\n") }
-        }
-        return rawValue
-    }
-    //  extract the value between (different) tags - end
-    
     // add notification - run fn in SourceDestVC
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
         switch serverList {
@@ -7978,7 +7967,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             clearSelectiveList()
             clearProcessingFields()
         }
-        JamfProServer.version[JamfProServer.whichServer] = ""
+        JamfProServer.version[JamfProServer.whichServer]    = ""
         JamfProServer.validToken[JamfProServer.whichServer] = false
     }
     // Log Folder - start

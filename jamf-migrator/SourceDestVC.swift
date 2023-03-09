@@ -244,7 +244,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
-    var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
+//    var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
     
     var concurrentThreads = 2
     
@@ -623,33 +623,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
         }
     }
-
-    // extract the value between xml tags - start
-    func tagValue(xmlString:String, xmlTag:String) -> String {
-        var rawValue = ""
-        if let start = xmlString.range(of: "<\(xmlTag)>"),
-            let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
-        } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] tag: \(xmlTag)\n") }
-            if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] xml: \(xmlString)\n") }
-        }
-        return rawValue
-    }
-    // extract the value between xml tags - end
-    // extract the value between (different) tags - start
-    func tagValue2(xmlString:String, startTag:String, endTag:String) -> String {
-        var rawValue = ""
-        if let start = xmlString.range(of: startTag),
-            let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
-            rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
-        } else {
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.\n") }
-        }
-        return rawValue
-    }
-    //  extract the value between (different) tags - end
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
         if url != "" {

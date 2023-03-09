@@ -108,6 +108,9 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         }
         // Create folder to store xml files if needed - end
         
+        print("[XmlDelegate] node: \(node)")
+        
+        
         // Create endpoint type to store xml files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
@@ -117,6 +120,13 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             endpointPath = saveXmlFolder+"jamfgroups"
         case "accounts/userid":
             endpointPath = saveXmlFolder+"jamfusers"
+        case "computergroups":
+            let isSmart = tagValue2(xmlString: xml, startTag: "<is_smart>", endTag: "</is_smart>")
+            if isSmart == "true" {
+                endpointPath = saveXmlFolder+"smartcomptergroups"
+            } else {
+                endpointPath = saveXmlFolder+"staticcomptergroups"
+            }
         default:
             endpointPath = saveXmlFolder+node
         }

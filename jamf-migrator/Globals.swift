@@ -213,6 +213,33 @@ public func storeBookmark(theURL: URL) {
     }
 }
 
+// extract the value between xml tags - start
+public func tagValue(xmlString:String, xmlTag:String) -> String {
+    var rawValue = ""
+    if let start = xmlString.range(of: "<\(xmlTag)>"),
+        let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
+        rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
+    } else {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] tag: \(xmlTag)\n") }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "\t[tagValue] xml: \(xmlString)\n") }
+    }
+    return rawValue
+}
+//  extract the value between xml tags - end
+// extract the value between (different) tags - start
+public func tagValue2(xmlString:String, startTag:String, endTag:String) -> String {
+    var rawValue = ""
+    if let start = xmlString.range(of: startTag),
+        let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
+        rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
+    } else {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.\n") }
+    }
+    return rawValue
+}
+//  extract the value between (different) tags - end
+
 public func timeDiff(forWhat: String) -> (Int,Int,Int) {
     var components:DateComponents?
     switch forWhat {

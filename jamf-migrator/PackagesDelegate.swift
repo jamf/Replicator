@@ -115,7 +115,10 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         var lookupCount = 0
         
         let packageCount = packageIDsNames.count
-            
+        
+        print("filenameIdDict server: \(whichServer)")
+        print("           the server: \(theServer)")
+        
         for (packageID, packageName) in packageIDsNames {
             getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false, currentTry: 3) { [self]
                 (result: (Int,String)) in
@@ -123,6 +126,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
                 let (resultCode,packageFilename) = result
 //                if pref.httpSuccess.contains(resultCode) && !(currentTry == 1 && (packageName == "connection package 2" || packageName == "connection package 3")) { // for testing
+                print("[getFilename] \(#line) server: \(theServer)")
                 if pref.httpSuccess.contains(resultCode) {
                     // found name, remove from list
                     packageIDsNames[packageID] = nil
@@ -165,12 +169,14 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
                             if JamfProServer.pkgsNotFound == 0 || currentTry >= maxTries {
 //                                print("call out dups and completion")
+                                print("[filenameIdDict] \(#line) server: \(theServer)")
                                 self.callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                                 completion(existingNameId)
                             }
                         }
                     } else {
                         // call out duplicates
+                        print("[filenameIdDict] \(#line) server: \(theServer)")
                         callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                         completion(existingNameId)
                     }
@@ -181,6 +187,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     
     func callOutDuplicates(duplicatesDict: [String:[String]], theServer: String) {
         // call out duplicates
+        print("[callOutDuplicates] \(#line) server: \(theServer)")
         var message = ""
         for (pkgFilename, displayNames) in duplicatesDict {
             if displayNames.count > 1 {

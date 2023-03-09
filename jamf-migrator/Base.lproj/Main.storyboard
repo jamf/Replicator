@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21225"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="21225"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="21507"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -931,7 +931,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <tabView ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TbV-JY-cbz">
+                            <tabView translatesAutoresizingMaskIntoConstraints="NO" id="TbV-JY-cbz">
                                 <rect key="frame" x="61" y="50" width="727" height="232"/>
                                 <font key="font" metaFont="system"/>
                                 <tabViewItems>
@@ -946,7 +946,7 @@
                                             </userGuides>
                                             <subviews>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="AFT-cj-oMR" userLabel="Sites">
-                                                    <rect key="frame" x="18" y="142" width="58" height="18"/>
+                                                    <rect key="frame" x="18" y="139" width="58" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="56" id="7aB-3F-ykH"/>
                                                     </constraints>
@@ -959,7 +959,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="119" width="81" height="18"/>
+                                                    <rect key="frame" x="18" y="117.5" width="81" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="79" id="dHQ-Jn-QMF"/>
                                                     </constraints>
@@ -972,7 +972,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="97" width="113" height="18"/>
+                                                    <rect key="frame" x="18" y="96.5" width="113" height="18"/>
                                                     <buttonCell key="cell" type="check" title="LDAP Servers                                   " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -982,7 +982,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="76" width="62" height="17"/>
+                                                    <rect key="frame" x="18" y="75.5" width="62" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="60" id="K51-LZ-CZH"/>
                                                     </constraints>
@@ -995,7 +995,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="189" y="119" width="105" height="18"/>
+                                                    <rect key="frame" x="189" y="117.5" width="105" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Departments" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1005,7 +1005,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="189" y="97" width="92" height="18"/>
+                                                    <rect key="frame" x="189" y="96.5" width="92" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Categories" bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1015,7 +1015,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="360" y="142" width="97" height="18"/>
+                                                    <rect key="frame" x="360" y="139.5" width="97" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="95" id="gZG-qr-lLP"/>
                                                     </constraints>
@@ -1028,7 +1028,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="360" y="119" width="120" height="18"/>
+                                                    <rect key="frame" x="360" y="117.5" width="120" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Jamf Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1038,7 +1038,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="360" y="97" width="142" height="18"/>
+                                                    <rect key="frame" x="360" y="96.5" width="142" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Network Segments" bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1048,7 +1048,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Adv User Search">
-                                                    <rect key="frame" x="531" y="142" width="148" height="18"/>
+                                                    <rect key="frame" x="531" y="139.5" width="148" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Adv. User Searches" bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1058,7 +1058,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="peA-aJ-t5r" userLabel="smart grp button">
-                                                    <rect key="frame" x="531" y="119" width="141" height="18"/>
+                                                    <rect key="frame" x="531" y="117" width="141" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Smart User Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="jlb-Xt-7ge">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -1081,7 +1081,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="189" y="142" width="79" height="18"/>
+                                                    <rect key="frame" x="189" y="139.5" width="79" height="18"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="77" id="rGp-qU-XZn"/>
                                                     </constraints>
@@ -2194,7 +2194,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="156"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="154"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="154"/>
@@ -2333,7 +2333,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <button translatesAutoresizingMaskIntoConstraints="NO" id="04d-d5-wBm" userLabel="clear filter">
-                                                            <rect key="frame" x="185" y="11" width="17" height="13"/>
+                                                            <rect key="frame" x="185" y="11.5" width="17.5" height="13"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="16.5" id="nRm-kx-LWh"/>
                                                             </constraints>
@@ -2397,7 +2397,7 @@
                                 <color key="warningFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                                 <color key="criticalFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                             </levelIndicator>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ih0-OH-DT1">
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ih0-OH-DT1">
                                 <rect key="frame" x="36" y="285" width="345" height="12"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" id="3sD-Us-7AL">
                                     <font key="font" metaFont="miniSystem"/>
@@ -2412,7 +2412,7 @@
                                 <color key="warningFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                                 <color key="criticalFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                             </levelIndicator>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hv1-dW-eem">
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hv1-dW-eem">
                                 <rect key="frame" x="478" y="285" width="331" height="12"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" id="MJ5-D2-DHp">
                                     <font key="font" metaFont="miniSystem"/>
@@ -2458,13 +2458,13 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <progressIndicator ambiguous="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="HH9-el-AHl">
+                            <progressIndicator maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="HH9-el-AHl">
                                 <rect key="frame" x="415" y="287" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="7lw-na-rDf"/>
                                 </constraints>
                             </progressIndicator>
-                            <button verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mhL-ca-YdU">
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mhL-ca-YdU">
                                 <rect key="frame" x="686" y="9" width="75" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="61" id="dn5-62-8yY"/>
@@ -2662,6 +2662,6 @@
     </scenes>
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
-        <image name="NSStopProgressTemplate" width="17" height="15"/>
+        <image name="NSStopProgressTemplate" width="17" height="16"/>
     </resources>
 </document>

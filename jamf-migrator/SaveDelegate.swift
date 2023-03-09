@@ -44,6 +44,8 @@ class SaveDelegate: NSObject, URLSessionDelegate {
         }
         // Create folder to store objectString files if needed - end
         
+        print("[SaveDelegate] node: \(node)")
+        
         // Create endpoint type to store objectString files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
@@ -52,6 +54,13 @@ class SaveDelegate: NSObject, URLSessionDelegate {
             endpointPath = saveFolder+"jamfgroups"
         case "accounts/userid":
             endpointPath = saveFolder+"jamfusers"
+        case "computergroups":
+            let isSmart = tagValue2(xmlString: objectString, startTag: "<is_smart>", endTag: "</is_smart>")
+            if isSmart == "true" {
+                endpointPath = saveFolder+"smartcomptergroups"
+            } else {
+                endpointPath = saveFolder+"staticcomptergroups"
+            }
         default:
             endpointPath = saveFolder+node
         }
