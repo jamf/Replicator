@@ -57,9 +57,9 @@ class SaveDelegate: NSObject, URLSessionDelegate {
         case "computergroups":
             let isSmart = tagValue2(xmlString: objectString, startTag: "<is_smart>", endTag: "</is_smart>")
             if isSmart == "true" {
-                endpointPath = saveFolder+"smartcomptergroups"
+                endpointPath = saveFolder+"smartcomputergroups"
             } else {
-                endpointPath = saveFolder+"staticcomptergroups"
+                endpointPath = saveFolder+"staticcomputergroups"
             }
         default:
             endpointPath = saveFolder+node

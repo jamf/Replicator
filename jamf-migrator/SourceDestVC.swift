@@ -16,7 +16,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     @IBOutlet weak var hideCreds_button: NSButton!
     @IBAction func hideCreds_action(_ sender: Any) {
-        hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
+        hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
         userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
         setWindowSize(setting: hideCreds_button.state.rawValue)
     }
@@ -523,7 +523,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 // credentials not found - blank out username / password fields
                 if setting.fullGUI {
                     hideCreds_button.state = NSControl.StateValue(rawValue: 1)
-                    hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
+                    // NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+                    hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                     hideCreds_action(self)
                     if whichServer == "source" {
                         source_user_field.stringValue = ""
@@ -840,7 +841,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
 //        if !hideGui {
             hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
-            hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
+            hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
 //            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
             setWindowSize(setting: hideCreds_button.state.rawValue)
 //            source_jp_server_field.becomeFirstResponder()
@@ -1020,7 +1021,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             serverOrFiles() { [self]
                 (result: String) in
                 hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
-                hideCreds_button.title = (hideCreds_button.state.rawValue == 0) ? ">":"v"
+                hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                 source_jp_server_field.becomeFirstResponder()
             }
 //            print("initVars - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")

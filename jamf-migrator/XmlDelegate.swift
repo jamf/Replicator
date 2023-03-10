@@ -123,9 +123,9 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         case "computergroups":
             let isSmart = tagValue2(xmlString: xml, startTag: "<is_smart>", endTag: "</is_smart>")
             if isSmart == "true" {
-                endpointPath = saveXmlFolder+"smartcomptergroups"
+                endpointPath = saveXmlFolder+"smartcomputergroups"
             } else {
-                endpointPath = saveXmlFolder+"staticcomptergroups"
+                endpointPath = saveXmlFolder+"staticcomputergroups"
             }
         default:
             endpointPath = saveXmlFolder+node
