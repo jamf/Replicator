@@ -175,6 +175,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.1.1**<br>
+Prevent configuration profiles that include a Filevault payload from migrating.  Fix export of smart comuter/device groups.  Fix color mismatch (issue #88)
+
 **v7.1.0**<br>
 Command line functionality.  Note, -backup has been renamed -export and allows for specific types of objects to be exported.  Exported scripts no longer have characters XML encoded.  Expire tokens when quitting app.
 

@@ -2194,7 +2194,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="156"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="154"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="154"/>
@@ -2407,7 +2407,7 @@
                             </textField>
                             <levelIndicator verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="v1E-Y8-MAn">
                                 <rect key="frame" x="478" y="295" width="331" height="18"/>
-                                <levelIndicatorCell key="cell" controlSize="mini" alignment="left" maxValue="1" warningValue="2" criticalValue="2" levelIndicatorStyle="continuousCapacity" id="3fB-SU-ezm"/>
+                                <levelIndicatorCell key="cell" alignment="left" maxValue="1" warningValue="2" criticalValue="2" levelIndicatorStyle="continuousCapacity" id="3fB-SU-ezm"/>
                                 <color key="fillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                                 <color key="warningFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
                                 <color key="criticalFillColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>

@@ -867,6 +867,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if setting.fullGUI {
             put_levelIndicator.fillColor = .green
+            get_levelIndicator.fillColor = .green
             // which migration mode tab are we on
             if activeTab(fn: "Go") == "selective" {
                 migrationMode = "selective"
@@ -3867,12 +3868,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if tagValue2(xmlString: PostXML, startTag: "<distribution_point>", endTag: "</distribution_point>") == "Cloud Distribution Point" {
                 PostXML = regexDistroUrl.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<url/>")
             }
-            // clear JCDS url from network segments xml - end
-            // if not migrating netboot server remove then from network segments xml - start
-//            if self.objectsToMigrate.firstIndex(of: "netbootservers") == 0 {
-//                PostXML = regexNetBoot.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<netboot_server/>")
-//            }
-            // if not migrating netboot server remove then from network segments xml - end
+            
             // if not migrating software update server remove then from network segments xml - start
             if self.objectsToMigrate.firstIndex(of: "softwareupdateservers") == 0 {
                 PostXML = regexSUS.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<swu_server/>")
@@ -3954,6 +3950,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let regexComp = try! NSRegularExpression(pattern: "<management_password_sha256 since=\"9.23\">(.*?)</management_password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
             //print("\nXML: \(PostXML)")
+            
+            // resets distribution point (to default) used for policies that deploy packages
+//            if endpoint == "policies" {
+//                let regexDistro = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
+//                PostXML = regexDistro.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<distribution_point>default</distribution_point>")
+//            }
             
             // migrating to another site
             if JamfProServer.toSite && destinationSite != "" && endpoint == "policies" {
@@ -5462,21 +5464,28 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                             }
                             
-                            if let _ = exclusions[dependencyNode] {
-                                let scope_excl_dep = exclusions[dependencyNode] as! [AnyObject]
-                                for theObject in scope_excl_dep {
-                                    let local_name = (theObject as! [String:Any])["name"]
-                                    let local_id   = (theObject as! [String:Any])["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                            if dependencyNode == "computer_groups" {
+                                print("check for exclusions: \(exclusions)")
+                                if let _ = exclusions[dependencyNode] {
+                                    let scope_excl_compGrp_dep = exclusions[dependencyNode] as! [[String:Any]]
+                                    //                                let scope_excl_compGrp_dep = scope_excl_dep["computer_groups"] as! [String:Any]
+                                    print("exclusions: \(scope_excl_compGrp_dep)")
+                                    for theObject in scope_excl_compGrp_dep {
+                                        print("theObject: \(theObject)")
+                                        let local_name = theObject["name"] as! String
+                                        let local_id   = theObject["id"] as! Int
+                                        dependencyArray["\(local_name)"] = "\(local_id)"
+                                        print("dependencyArray: \(dependencyArray)")
+                                    }
                                 }
-                            }
-                            
-                            if let _ = limitations[dependencyNode] {
-                                let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
-                                for theObject in scope_excl_dep {
-                                    let local_name = (theObject as! [String:Any])["name"]
-                                    let local_id   = (theObject as! [String:Any])["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                
+                                if let _ = limitations[dependencyNode] {
+                                    let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
+                                    for theObject in scope_excl_dep {
+                                        let local_name = (theObject as! [String:Any])["name"]
+                                        let local_id   = (theObject as! [String:Any])["id"]
+                                        dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                    }
                                 }
                             }
                         }
@@ -8285,6 +8294,9 @@ extension String {
             if fqdn.contains(":") {
                 let fqdnArray = fqdn.components(separatedBy: ":")
                 fqdn = fqdnArray[0]
+            }
+            if fqdn.last == "/" {
+                fqdn = String(fqdn.dropLast())
             }
             return fqdn
         }
