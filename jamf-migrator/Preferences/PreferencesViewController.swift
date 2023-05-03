@@ -108,7 +108,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         prefFsRoPwd_textfield.isEnabled = stateToBool(state: prefFileSharePwd_button.state.rawValue)
     }
     
-    let Creds2           = Credentials2()
+    let Creds2           = Credentials()
     var credentialsArray = [String]()
     let vc               = ViewController()
 //    var plistData:[String:Any] = [:]  //our server/username data

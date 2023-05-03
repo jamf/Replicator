@@ -100,7 +100,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
 
     // keychain access
-    let Creds2           = Credentials2()
+    let Creds2           = Credentials()
     var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedSourcePwd  = ""       // source user account password stored in the keychain
@@ -981,7 +981,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if !wipeData.on {
 //                                        if self.storeCredentials_button.state.rawValue == 1 {
                                 if JamfProServer.storeCreds == 1 {
-                                    self.Creds2.save(service: "migrator - "+JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, data: JamfProServer.sourcePwd)
+                                    self.Creds2.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, data: JamfProServer.sourcePwd)
                                     self.storedSourceUser = JamfProServer.sourceUser
                                 }
                             }
@@ -1001,7 +1001,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 // update keychain, if marked to save creds
                                 if !export.saveOnly && setting.fullGUI {
                                     if JamfProServer.storeCreds == 1 {
-                                        self.Creds2.save(service: "migrator - "+JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, data: JamfProServer.destPwd)
+                                        self.Creds2.save(service: JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, data: JamfProServer.destPwd)
                                         self.storedDestUser = JamfProServer.destUser
                                     }
                                 }
@@ -4125,6 +4125,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         concurrentThreads = setConcurrentThreads()
         theCreateQ.maxConcurrentOperationCount = concurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
+        
+//        print("endPointXML:\n\(endPointXML)")
+        
         let encodedXML = endPointXML.data(using: String.Encoding.utf8)
         var localEndPointType = ""
         var whichError        = ""

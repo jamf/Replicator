@@ -1,5 +1,5 @@
 //
-//  Credentials2.swift
+//  Credentials.swift
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 9/20/19.
@@ -12,21 +12,23 @@ import Security
 let kSecAttrAccountString          = NSString(format: kSecAttrAccount)
 let kSecValueDataString            = NSString(format: kSecValueData)
 let kSecClassGenericPasswordString = NSString(format: kSecClassGenericPassword)
-let keychainQ                      = DispatchQueue(label: "com.jamf.objectinfo", qos: DispatchQoS.background)
+let keychainQ                      = DispatchQueue(label: "com.jamf.creds", qos: DispatchQoS.background)
+let prefix                         = "migrator"
 
-class Credentials2 {
+class Credentials {
     
     func save(service: String, account: String, data: String) {
         if service != "" && service.first != "/" {
-            keychainQ.async { [self] in
-                if let password = data.data(using: String.Encoding.utf8) {
+            let keychainName = "JamfProApps-\(service)"
+            if let password = data.data(using: String.Encoding.utf8) {
+                keychainQ.async { [self] in
                     var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                                        kSecAttrService as String: service,
+                                                        kSecAttrService as String: keychainName,
                                                         kSecAttrAccount as String: account,
                                                         kSecValueData as String: password]
                     
                     // see if credentials already exist for server
-                    let accountCheck = retrieve(service: service)
+                    let accountCheck = retrieve(service: keychainName)
                     if accountCheck.count == 0 {
                         // try to add new credentials, if account exists we'll try updating it
                         let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
@@ -38,22 +40,35 @@ class Credentials2 {
                     } else {
                         // credentials already exist, try to update
                         keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
-                                         kSecAttrService as String: service,
+                                         kSecAttrService as String: keychainName,
                                          kSecMatchLimit as String: kSecMatchLimitOne,
                                          kSecReturnAttributes as String: true]
-                        let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecAttrAccountString:account,kSecValueDataString:password] as CFDictionary)
+                        let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecAttrAccountString:account,kSecValueDataString:password] as [NSString : Any] as CFDictionary)
                         if (updateStatus != errSecSuccess) {
                             if let updateErr = SecCopyErrorMessageString(updateStatus, nil) {
                                 print("[updateStatus] Update failed for existing credentials: \(updateErr)")
                             }
                         }
                     }
-                }
+            }
             }
         }
     }   // func save - end
     
     func retrieve(service: String) -> [String] {
+        var keychainResult = [String]()
+        var keychainName   = "JamfProApps-\(service)"
+        // look for common keychain item
+        keychainResult = itemLookup(service: keychainName)
+        if keychainResult.count < 2 {
+            keychainName   = "\(prefix) - \(service)"
+            keychainResult = itemLookup(service: keychainName)
+        }
+        
+        return keychainResult
+    }
+    
+    private func itemLookup(service: String) -> [String] {
         
         var storedCreds = [String]()
         
@@ -78,5 +93,4 @@ class Credentials2 {
         storedCreds.append(password)
         return storedCreds
     }
-    
 }

@@ -49,7 +49,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     // keychain access
-    let Creds2           = Credentials2()
+    let Creds2           = Credentials()
 //    var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedSourcePwd  = ""       // source user account password stored in the keychain
@@ -475,7 +475,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
         if !(whichServer == "source" && fileImport) {
-            let credentialsArray  = Creds2.retrieve(service: "migrator - "+url.fqdnFromUrl)
+            let credentialsArray  = Creds2.retrieve(service: url.fqdnFromUrl)
             
             if credentialsArray.count == 2 {
                 if whichServer == "source" {
