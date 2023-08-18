@@ -17,9 +17,29 @@ let prefix                         = "migrator"
 
 class Credentials {
     
-    func save(service: String, account: String, data: String) {
+    func save(service: String, account: String, data: String, whichServer: String = "") {
         if service != "" && service.first != "/" {
-            let keychainName = "JamfProApps-\(service)"
+            var theService = service
+            
+            switch whichServer {
+            case "source":
+                if JamfProServer.sourceUseApiClient == 1 {
+                    theService = "apiClient-" + theService
+                }
+            case "dest":
+                if JamfProServer.destUseApiClient == 1 {
+                    theService = "apiClient-" + theService
+                }
+            default:
+                break
+            }
+            
+//            if JamfProServer.sourceApiClient + JamfProServer.destApiClient != 0 {
+//                theService = theService + "-apiClient"
+//            }
+            
+            var keychainName = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
+//            let keychainName = "JamfProApps-\(theService)"
             if let password = data.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
                     var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
@@ -55,13 +75,33 @@ class Credentials {
         }
     }   // func save - end
     
-    func retrieve(service: String) -> [String] {
+    func retrieve(service: String, whichServer: String = "") -> [String] {
         var keychainResult = [String]()
-        var keychainName   = "JamfProApps-\(service)"
+        var theService = service
+        
+//        print("[credentials] JamfProServer.sourceApiClient: \(JamfProServer.sourceUseApiClient)")
+        
+        switch whichServer {
+        case "source":
+            if JamfProServer.sourceUseApiClient == 1 {
+                theService = "apiClient-" + theService
+            }
+        case "dest":
+            if JamfProServer.destUseApiClient == 1 {
+                theService = "apiClient-" + theService
+            }
+        default:
+            break
+        }
+        
+        
+        var keychainName   = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
+//        print("[credentials] keychainName: \(keychainName)")
         // look for common keychain item
         keychainResult = itemLookup(service: keychainName)
+        // look for legacy keychain item
         if keychainResult.count < 2 {
-            keychainName   = "\(prefix) - \(service)"
+            keychainName   = "\(prefix) - \(theService)"
             keychainResult = itemLookup(service: keychainName)
         }
         

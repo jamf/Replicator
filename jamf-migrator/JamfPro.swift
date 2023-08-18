@@ -22,11 +22,11 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     var renewQ = DispatchQueue(label: "com.jamfmigrator.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
     
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool, completion: @escaping (_ authResult: (Int,String)) -> Void) {
        
-        if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "destination" && !export.saveOnly)) {
+        if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "dest" && !export.saveOnly)) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(serverUrl)\n")
             completion((200, "success"))
             return
@@ -43,8 +43,24 @@ class JamfPro: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
                 
         var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
+        var apiClient = false
+            switch whichServer {
+            case "source":
+                if JamfProServer.sourceUseApiClient == 1 {
+                    tokenUrlString = "\(serverUrl)/api/oauth/token"
+                    apiClient = true
+                }
+            case "dest":
+                if JamfProServer.destUseApiClient == 1 {
+                    tokenUrlString = "\(serverUrl)/api/oauth/token"
+                    apiClient = true
+                }
+            default:
+                break
+            }
+        
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
-    //        print("\(tokenUrlString)")
+        print("[getToken] \(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
         let configuration  = URLSessionConfiguration.ephemeral
@@ -54,10 +70,20 @@ class JamfPro: NSObject, URLSessionDelegate {
         let forWhat = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let (_, minutesOld, _) = timeDiff(forWhat: forWhat)
 //        print("[JamfPro] \(whichServer) tokenAge: \(minutesOld) minutes")
-        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || (minutesOld > 25) {
+        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || ( minutesOld > ((JamfProServer.authExpires[whichServer] ?? 35) - 5) ) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+            if apiClient {
+                let clientId = ( whichServer == "source" ) ? JamfProServer.sourceUser:JamfProServer.destUser
+                let secret   = ( whichServer == "source" ) ? JamfProServer.sourcePwd:JamfProServer.destPwd
+                let clientString = "grant_type=client_credentials&client_id=\(String(describing: clientId))&client_secret=\(String(describing: secret))"
+                print("[getToken] clientString: \(clientString)")
+                let requestData = clientString.data(using: .utf8)
+                request.httpBody = requestData
+                configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+            } else {
+                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+            }
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
@@ -65,13 +91,14 @@ class JamfPro: NSObject, URLSessionDelegate {
                 if let httpResponse = response as? HTTPURLResponse {
                     if pref.httpSuccess.contains(httpResponse.statusCode) {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
+//                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
+                        if let endpointJSON = json! as? [String: Any] {
                             JamfProServer.validToken[whichServer]  = true
-                            JamfProServer.authCreds[whichServer]   = endpointJSON["token"] as? String
-                            JamfProServer.authExpires[whichServer] = "\(endpointJSON["expires"] ?? "")"
+                            JamfProServer.authCreds[whichServer]   = apiClient ? endpointJSON["access_token"] as? String:endpointJSON["token"] as? String ?? ""
+                            JamfProServer.authExpires[whichServer] = apiClient ? endpointJSON["expires_in"] as? Int ?? 35:35
                             JamfProServer.authType[whichServer]    = "Bearer"
                             JamfProServer.base64Creds[whichServer] = base64creds
-                            if wipeData.on && whichServer == "destination" {
+                            if wipeData.on && whichServer == "dest" {
                                 JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
                                 JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
                                 JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
@@ -178,24 +205,44 @@ class JamfPro: NSObject, URLSessionDelegate {
         
     }
     
-    func refresh(server: String, whichServer: String, b64Creds: String, localSource: Bool) {
+    func refresh(server: String = "", whichServer: String = "", b64Creds: String, localSource: Bool) {
 //        if controller!.go_button.title == "Stop" {
         DispatchQueue.main.async { [self] in
             if migrationComplete.isDone {
                 JamfProServer.validToken["source"]      = false
-                JamfProServer.validToken["destination"] = false
+                JamfProServer.validToken["dest"] = false
                 WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")
                 return
             }
             WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
             renewQ.async { [self] in
                 sleep(token.refreshInterval)
-                JamfProServer.validToken[whichServer] = false
-                getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
-                    (result: (Int, String)) in
-//                    print("[JamfPro.refresh] returned: \(result)")
+//                JamfProServer.validToken[whichServer] = false
+//                getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource) {
+//                    (result: (Int, String)) in
+////                    print("[JamfPro.refresh] returned: \(result)")
+//                }
+                if JamfProServer.authType["source"] == "Bearer" {
+                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for source server")
+                    JamfProServer.validToken["source"] = false
+                    getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"]!, localSource: localSource) {
+                        (result: (Int, String)) in
+    //                    print("[JamfPro.refresh] returned: \(result)")
+                    }
+                }
+                if JamfProServer.authType["dest"] == "Bearer" {
+                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for destination server")
+                    JamfProServer.validToken["dest"] = false
+                    getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"]!, localSource: localSource) {
+                        (result: (Int, String)) in
+    //                    print("[JamfPro.refresh] returned: \(result)")
+                    }
                 }
             }
         }
+    }
+    
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

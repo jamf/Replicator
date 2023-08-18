@@ -12,7 +12,7 @@ import Foundation
 class XmlDelegate: NSObject, URLSessionDelegate {
 
     let fm           = FileManager()
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
 //    let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
     var baseXmlFolder = ""
     var saveXmlFolder = ""
@@ -43,7 +43,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 xmlRequest.httpMethod = "\(method.uppercased())"
                 let destConf = URLSessionConfiguration.default
 
-                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {

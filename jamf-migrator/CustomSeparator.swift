@@ -1,5 +1,5 @@
 //
-//  SplitViewVC.swift
+//  CustomSeparator.swift
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 10/15/22.

@@ -12,7 +12,7 @@ import Foundation
 class SaveDelegate: NSObject, URLSessionDelegate {
 
     let fm           = FileManager()
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     var baseFolder = ""
     var saveFolder = ""
     var endpointPath  = ""

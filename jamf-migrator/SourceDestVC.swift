@@ -12,30 +12,7 @@ import Foundation
 
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
-    let userDefaults = UserDefaults.standard
-    
-    @IBOutlet weak var hideCreds_button: NSButton!
-    @IBAction func hideCreds_action(_ sender: Any) {
-        hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
-        userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
-        setWindowSize(setting: hideCreds_button.state.rawValue)
-    }
-    func setWindowSize(setting: Int) {
-//        print("setWindowSize - setting: \(setting)")
-        if setting == 0 {
-            preferredContentSize = CGSize(width: 848, height: 55)
-            hideCreds_button.toolTip = "show username/password fields"
-        } else {
-            preferredContentSize = CGSize(width: 848, height: 120)
-            hideCreds_button.toolTip = "hide username/password fields"
-        }
-    }
-    @IBOutlet weak var setDestSite_button: NSPopUpButton!
-    @IBOutlet weak var sitesSpinner_ProgressIndicator: NSProgressIndicator!
-    
-    // Import file variables
-    @IBOutlet weak var fileImport_button: NSButton!
-    @IBOutlet weak var browseFiles_button: NSButton!
+//    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
 //    var exportedFilesUrl = URL(string: "")
     
@@ -55,14 +32,97 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var storedSourcePwd  = ""       // source user account password stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
     var storedDestPwd    = ""       // destination user account password stored in the keychain
-    @IBOutlet weak var storeCredentials_button: NSButton!
-//    var storeCredentials = 0
-    @IBAction func storeCredentials(_ sender: Any) {
-//        storeCredentials = storeCredentials_button.state.rawValue
-        JamfProServer.storeCreds = storeCredentials_button.state.rawValue
+    
+    @IBOutlet weak var hideCreds_button: NSButton!
+    @IBAction func hideCreds_action(_ sender: Any) {
+        hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+        userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
+        setWindowSize(setting: hideCreds_button.state.rawValue)
+    }
+    
+    @IBOutlet weak var sourceUsername_TextField: NSTextField!
+    @IBOutlet weak var destUsername_TextField: NSTextField!
+    @IBOutlet weak var sourcePassword_TextField: NSTextField!
+    @IBOutlet weak var destPassword_TextField: NSTextField!
+    
+    @IBOutlet weak var sourceUseApiClient_button: NSButton!
+    @IBOutlet weak var destUseApiClient_button: NSButton!
+    @IBAction func useApiClient_action(_ sender: NSButton) {
+        switch sender.identifier?.rawValue {
+        case "sourceApiClient":
+            setLabels(whichServer: "source")
+            userDefaults.set(JamfProServer.sourceUseApiClient, forKey: "sourceApiClient")
+            fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
+        case "destApiClient":
+            setLabels(whichServer: "dest")
+            userDefaults.set(JamfProServer.destUseApiClient, forKey: "destApiClient")
+            fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
+        default:
+            break
+            
+        }
+    }
+    
+    func setWindowSize(setting: Int) {
+//        print("setWindowSize - setting: \(setting)")
+        if setting == 0 {
+//            preferredContentSize = CGSize(width: 848, height: 55)
+            preferredContentSize = CGSize(width: 848, height: 67)
+            hideCreds_button.toolTip = "show username/password fields"
+            sourceUsername_TextField.isHidden = true
+            destUsername_TextField.isHidden   = true
+        } else {
+//            preferredContentSize = CGSize(width: 848, height: 120)
+            preferredContentSize = CGSize(width: 848, height: 182)
+            hideCreds_button.toolTip = "hide username/password fields"
+            sourceUsername_TextField.isHidden = false
+            destUsername_TextField.isHidden   = false
+        }
+    }
+    func setLabels(whichServer: String) {
+        switch whichServer {
+        case "source":
+            JamfProServer.sourceUseApiClient = sourceUseApiClient_button.state.rawValue
+            if JamfProServer.sourceUseApiClient == 0 {
+                sourceUsername_TextField.stringValue = "Username"
+                sourcePassword_TextField.stringValue = "Password"
+            } else {
+                sourceUsername_TextField.stringValue = "Client ID"
+                sourcePassword_TextField.stringValue = "Client Secret"
+            }
+        case "dest":
+            JamfProServer.destUseApiClient = destUseApiClient_button.state.rawValue
+            if JamfProServer.destUseApiClient == 0 {
+                destUsername_TextField.stringValue = "Username"
+                destPassword_TextField.stringValue = "Password"
+            } else {
+                destUsername_TextField.stringValue = "Client ID"
+                destPassword_TextField.stringValue = "Client Secret"
+            }
+        default:
+            break
+            
+        }
+    }
+    
+    @IBOutlet weak var setDestSite_button: NSPopUpButton!
+    @IBOutlet weak var sitesSpinner_ProgressIndicator: NSProgressIndicator!
+    
+    // Import file variables
+    @IBOutlet weak var fileImport_button: NSButton!
+    @IBOutlet weak var browseFiles_button: NSButton!
+    
+    @IBOutlet weak var sourceStoreCredentials_button: NSButton!
+    @IBOutlet weak var destStoreCredentials_button: NSButton!
+
+    @IBAction func storeCredentials_action(_ sender: NSButton) {
+        JamfProServer.storeSourceCreds = sourceStoreCredentials_button.state.rawValue
+        JamfProServer.storeDestCreds   = destStoreCredentials_button.state.rawValue
+        
+        userDefaults.set(JamfProServer.storeSourceCreds, forKey: "storeSourceCreds")
+        userDefaults.set(JamfProServer.storeDestCreds, forKey: "storeDestCreds")
     }
      
-    
     @IBOutlet weak var sourceServerList_button: NSPopUpButton!
     @IBOutlet weak var destServerList_button: NSPopUpButton!
     @IBOutlet weak var siteMigrate_button: NSButton!
@@ -285,15 +345,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
      }
     
-//    @IBAction func showLogFolder(_ sender: Any) {
-//        isDir = true
-//        if (self.fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
-//            NSWorkspace.shared.openFile(logPath!)
-//        } else {
-//            _ = Alert().display(header: "Alert", message: "There are currently no log files to display.", secondButton: "")
-//        }
-//    }
-    
     @IBAction func fileImport_action(_ sender: NSButton) {
         if fileImport_button.state.rawValue == 1 {
             userDefaults.set(true, forKey: "fileImport")
@@ -308,8 +359,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 openPanel.begin { [self] (result) in
                     if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
                         importFilesUrl = openPanel.url
-//                        dataFilesRoot = (importFilesUrl?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
-//                        dataFilesRoot = dataFilesRoot.replacingOccurrences(of: "%20", with: " ")
+                        
                         dataFilesRoot = (importFilesUrl!.path.last == "/") ? importFilesUrl!.path:importFilesUrl!.path + "/"
 
                         storeBookmark(theURL: importFilesUrl!)
@@ -388,7 +438,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
             
-            jamfpro!.getToken(whichServer: "destination", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
+            jamfpro!.getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
                 (authResult: (Int,String)) in
                 let (authStatusCode, _) = authResult
 
@@ -461,7 +511,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && !export.saveOnly) {
+        if (whichserver == "source" && !wipeData.on) || (whichserver == "dest" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
             NotificationCenter.default.post(name: .resetListFields, object: nil)
@@ -475,7 +525,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
         if !(whichServer == "source" && fileImport) {
-            let credentialsArray  = Creds2.retrieve(service: url.fqdnFromUrl)
+            let credentialsArray  = Creds2.retrieve(service: url.fqdnFromUrl, whichServer: whichServer)
             
             if credentialsArray.count == 2 {
                 if whichServer == "source" {
@@ -581,10 +631,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             case "destServer", "destUser", "destPassword":
                 if JamfProServer.destination != dest_jp_server_field.stringValue {
-                    serverChanged(whichserver: "destination")
+                    serverChanged(whichserver: "dest")
                 }
                 if textField.identifier!.rawValue == "destServer" {
-                    fetchPassword(whichServer: "destination", url: dest_jp_server_field.stringValue)
+                    fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
                 }
                 JamfProServer.destination = dest_jp_server_field.stringValue
                 JamfProServer.destUser    = dest_user_field.stringValue
@@ -619,7 +669,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 dest_pwd_field.isEnabled            = !export.saveOnly
                 siteMigrate_button.isEnabled        = !export.saveOnly
                 destinationLabel_TextField.isHidden = export.saveOnly
-                setDestSite_button.isHidden         = export.saveOnly
+                if export.saveOnly || siteMigrate_button.state.rawValue == 0 {
+                    setDestSite_button.isHidden = true
+                } else {
+                    setDestSite_button.isHidden = false
+                }
                 disableExportOnly_button.isHidden   = !export.saveOnly
             }
         }
@@ -672,7 +726,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         appInfo.settings["source_user"]        = source_user_field.stringValue as Any?
         appInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
         appInfo.settings["dest_user"]          = dest_user_field.stringValue as Any?
-        appInfo.settings["storeCredentials"]   = JamfProServer.storeCreds as Any?
+        appInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
+        appInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
 
         NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
         _ = readSettings()
@@ -697,17 +752,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 saveSourceDestInfo(info: appInfo.settings)
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
-        case "destination":
+        case "dest":
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
-                JamfProServer.validToken["destination"] = false
-                serverChanged(whichserver: "destination")
+                JamfProServer.validToken["dest"] = false
+                serverChanged(whichserver: "dest")
                 if destServerArray.firstIndex(of: "\(dest_jp_server_field.stringValue)") == nil {
                     updateServerArray(url: "\(dest_jp_server_field.stringValue)", serverList: "dest_server_array", theArray: destServerArray)
                 }
             }
             JamfProServer.destination = destServerList_button.titleOfSelectedItem!
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "destination", url: self.dest_jp_server_field.stringValue)
+            fetchPassword(whichServer: "dest", url: self.dest_jp_server_field.stringValue)
             // reset list of available sites
             if siteMigrate_button.state.rawValue == 1 {
                 siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
@@ -919,34 +974,34 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     }
                 }
             } else {
-                if setting.fullGUI {
+//                if setting.fullGUI {
                     self.browseFiles_button.isHidden = true
-                }
+//                }
             }
             
             if appInfo.settings["source_user"] != nil {
                 source_user = appInfo.settings["source_user"] as! String
-                if setting.fullGUI {
+//                if setting.fullGUI {
                     source_user_field.stringValue = source_user
-                }
+//                }
                 storedSourceUser = source_user
             }
             
             if appInfo.settings["dest_jp_server"] != nil {
                 dest_jp_server = appInfo.settings["dest_jp_server"] as! String
-                if setting.fullGUI {
+//                if setting.fullGUI {
                     dest_jp_server_field.stringValue = dest_jp_server
-                }
+//                }
             }
             
             if appInfo.settings["dest_user"] != nil {
                 dest_user = appInfo.settings["dest_user"] as! String
-                if setting.fullGUI {
+//                if setting.fullGUI {
                     dest_user_field.stringValue = dest_user
-                }
+//                }
             }
             
-            if setting.fullGUI {
+//            if setting.fullGUI {
                 if appInfo.settings["source_server_array"] != nil {
                     sourceServerArray = appInfo.settings["source_server_array"] as! [String]
                     for theServer in sourceServerArray {
@@ -959,13 +1014,32 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         self.destServerList_button.addItems(withTitles: [theServer])
                     }
                 }
-            }
-            if appInfo.settings["storeCredentials"] != nil {
-                JamfProServer.storeCreds = appInfo.settings["storeCredentials"] as! Int
-                if setting.fullGUI {
-                    storeCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeCreds)
-                }
-            }
+//            }
+//            if appInfo.settings["storeSourceCreds"] != nil {
+//                JamfProServer.storeSourceCreds = appInfo.settings["storeSourceCreds"] as! Int
+//                if setting.fullGUI {
+                    JamfProServer.storeSourceCreds = userDefaults.integer(forKey: "storeSourceCreds")
+                    sourceStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeSourceCreds)
+//                }
+//            }
+//            if appInfo.settings["storeDestCreds"] != nil {
+//                JamfProServer.storeDestCreds = appInfo.settings["storeDestCreds"] as! Int
+//                if setting.fullGUI {
+                    JamfProServer.storeDestCreds = userDefaults.integer(forKey: "storeDestCreds")
+                    destStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeDestCreds)
+//                }
+//            }
+            
+            JamfProServer.sourceUseApiClient = userDefaults.integer(forKey: "sourceApiClient")
+//                if setting.fullGUI {
+                    sourceUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.sourceUseApiClient)
+                    setLabels(whichServer: "source")
+//                }
+            JamfProServer.destUseApiClient = userDefaults.integer(forKey: "destApiClient")
+//                if setting.fullGUI {
+                    destUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.destUseApiClient)
+                    setLabels(whichServer: "dest")
+//                }
             
             // read xml settings - start
             if appInfo.settings["xml"] != nil {
@@ -1040,7 +1114,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             fetchPassword(whichServer: "source", url: JamfProServer.source)
         }
         if (dest_jp_server != "") {
-            fetchPassword(whichServer: "destination", url: dest_jp_server)
+            fetchPassword(whichServer: "dest", url: dest_jp_server)
         }
 //        if (storedSourcePwd == "") || (storedDestPwd == "") {
 //            self.validCreds = false

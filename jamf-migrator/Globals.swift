@@ -9,6 +9,8 @@
 import Cocoa
 import Foundation
 
+public let userDefaults = UserDefaults.standard
+
 class appColor: NSColor {
     static let schemes:[String]            = ["casper", "classic"]
     static let background:[String:CGColor] = ["casper":CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0),
@@ -58,7 +60,7 @@ struct JamfProServer {
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0
-    static var version      = ["source":"", "destination":""]
+    static var version      = ["source":"", "dest":""]
     static var build        = ""
     static var source       = ""
     static var destination  = ""
@@ -67,15 +69,20 @@ struct JamfProServer {
     static var destUser     = ""
     static var sourcePwd    = ""
     static var destPwd      = ""
-    static var storeCreds   = 0
+    static var storeSourceCreds = 0
+    static var storeDestCreds   = 0
+    static var sourceUseApiClient  = 0
+    static var destUseApiClient    = 0
     static var toSite       = false
     static var destSite     = ""
     static var importFiles  = 0
-    static var authCreds    = ["source":"", "destination":""]
-    static var authExpires  = ["source":"", "destination":""]
-    static var authType     = ["source":"Bearer", "destination":"Bearer"]
-    static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
-    static var validToken   = ["source":false, "destination":false]
+    static var sourceApiClient  = ["id":"", "secret":""]
+    static var destApiClient  = ["id":"", "secret":""]
+    static var authCreds    = ["source":"", "dest":""]
+    static var authExpires  = ["source":30, "dest":30]
+    static var authType     = ["source":"Bearer", "dest":"Bearer"]
+    static var base64Creds  = ["source":"", "dest":""]               // used if we want to auth with a different account
+    static var validToken   = ["source":false, "dest":false]
     static var tokenCreated = [String:Date?]()
     static var pkgsNotFound = 0
     static var sessionCookie = [HTTPCookie]()
@@ -122,7 +129,7 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 20*60  // 20 minutes
+    static var refreshInterval:UInt32 = 29*60  // 29 minutes
 }
 
 struct wipeData {
@@ -249,7 +256,7 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int) {
         if forWhat == "sourceTokenAge" {
             components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["source"] ?? Date())!, to: Date())
         } else {
-            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["destination"] ?? Date())!, to: Date())
+            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["dest"] ?? Date())!, to: Date())
         }
     default:
         break
@@ -260,4 +267,8 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int) {
     let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)
     return(h,m,s)
+}
+
+func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
 }

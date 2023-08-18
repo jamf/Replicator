@@ -16,7 +16,7 @@ class Json: NSObject, URLSessionDelegate {
             return
         }
         
-        let userDefaults   = UserDefaults.standard
+//        let userDefaults   = UserDefaults.standard
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
     

@@ -12,7 +12,7 @@ import CoreFoundation
 
 class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     
     @IBOutlet weak var copyScopeOCP_button: NSButton!       // os x config profiles
     @IBOutlet weak var copyScopeMA_button: NSButton!        // mac applications
@@ -158,13 +158,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         userDefaults.set(Int(forceBasicAuth_button.state.rawValue), forKey: "forceBasicAuth")
         userDefaults.synchronize()
         if forceBasicAuth_button.state.rawValue == 1 {
-            JamfProServer.authType   = ["source":"Basic", "destination":"Basic"]
-            JamfProServer.validToken = ["source":false, "destination":false]
-            JamfProServer.version    = ["source":"", "destination":""]
+            JamfProServer.authType   = ["source":"Basic", "dest":"Basic"]
+            JamfProServer.validToken = ["source":false, "dest":false]
+            JamfProServer.version    = ["source":"", "dest":""]
         } else {
-            JamfProServer.authType   = ["source":"Bearer", "destination":"Bearer"]
-            JamfProServer.validToken = ["source":false, "destination":false]
-            JamfProServer.version    = ["source":"", "destination":""]
+            JamfProServer.authType   = ["source":"Bearer", "dest":"Bearer"]
+            JamfProServer.validToken = ["source":false, "dest":false]
+            JamfProServer.version    = ["source":"", "dest":""]
         }
     }
     @IBAction func colorScheme_action(_ sender: NSButton) {
@@ -268,7 +268,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
-        var exportFilePath:String? = self.userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        var exportFilePath:String? = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
 
         exportFilePath = exportFilePath?.pathToString
         
@@ -537,8 +537,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             
             export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
             if !(FileManager().fileExists(atPath: export.saveLocation, isDirectory: &isDir)) {
-                self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
-                self.userDefaults.synchronize()
+                userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+                userDefaults.synchronize()
             }
             
             export.saveLocation = export.saveLocation.pathToString

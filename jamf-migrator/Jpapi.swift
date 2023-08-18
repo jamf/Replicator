@@ -144,4 +144,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         task.resume()
         
     }   // func action - end
+    
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
+    }
 }

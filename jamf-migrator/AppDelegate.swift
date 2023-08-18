@@ -12,7 +12,7 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     
     var prefWindowController: NSWindowController?
     
@@ -42,8 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
             WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
-            let destMethod = (JamfProServer.validToken["destination"]!) ? "POST":"SKIP"
-            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: destMethod) {
+            let destMethod = (JamfProServer.validToken["dest"]!) ? "POST":"SKIP"
+            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
                 WriteToLog().message(stringOfText: "destination server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
                 WriteToLog().logFileW?.closeFile()
@@ -136,7 +136,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
         if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
             export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-            self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+            userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString
 //            self.userDefaults.synchronize()

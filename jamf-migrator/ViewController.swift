@@ -10,9 +10,38 @@ import AppKit
 import Cocoa
 import Foundation
 
+// endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool
+class CreateInfo: NSObject {
+    @objc var endpointType    : String
+    @objc var endPointXml     : String
+    @objc var endpointCurrent : Int
+    @objc var endpointCount   : Int
+    @objc var action          : String
+    @objc var sourceEpId      : Int
+    @objc var destEpId        : Int
+    @objc var ssIconName      : String
+    @objc var ssIconId        : String
+    @objc var ssIconUri       : String
+    @objc var retry           : Bool
+    
+    init(endpointType: String, endPointXml: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool) {
+        self.endpointType    = endpointType
+        self.endPointXml     = endPointXml
+        self.endpointCurrent = endpointCurrent
+        self.endpointCount   = endpointCount
+        self.action          = action
+        self.sourceEpId      = sourceEpId
+        self.destEpId        = destEpId
+        self.ssIconName      = ssIconName
+        self.ssIconId        = ssIconId
+        self.ssIconUri       = ssIconUri
+        self.retry           = retry
+    }
+}
+
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
@@ -106,11 +135,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var storedSourcePwd  = ""       // source user account password stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
     var storedDestPwd    = ""       // destination user account password stored in the keychain
-    @IBOutlet weak var storeCredentials_button: NSButton!
-    var storeCredentials = 0
-    @IBAction func storeCredentials(_ sender: Any) {
-        storeCredentials = storeCredentials_button.state.rawValue
-    }
         
     // Buttons
     // general tab
@@ -371,7 +395,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var copyScope               = true
     
     // xml prefs
-    var xmlPrefOptions: Dictionary<String,Bool> = [:]
+    var xmlPrefOptions: [String:Bool] = [:]
     
     // site copy / move pref
     var sitePref = ""
@@ -433,17 +457,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var POSTsuccessCount      = 0
     var failedCount           = 0
     var postCount             = 1
-    var counters    = Dictionary<String, Dictionary<String,Int>>()          // summary counters of created, updated, failed, and deleted objects
-    var getCounters = [String:[String:Int]]()                               // summary counters of created, updated, failed, and deleted objects
-    var putCounters = [String:[String:Int]]()
-//    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()        // used to hold value of counter and avoid simultaneous access when updating
-    var summaryDict = [String: [String:[String]]]()     // summary arrays of created, updated, and failed objects
+    var counters              = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
+    var getCounters           = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
+    var putCounters           = [String:[String:Int]]()
+    var summaryDict           = [String:[String:[String]]]()    // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
     var totalCreated   = 0
     var totalUpdated   = 0
     var totalFailed    = 0
     var totalCompleted = 0
+    var createPending  = 0
+    var create2Pending = 0
+    var createArray    = [CreateInfo]()
+    var create2Array   = [CreateInfo]()
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
     
@@ -738,9 +765,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     @IBAction func Go_action(sender: NSButton) {
         JamfProServer.validToken["source"]      = false
-        JamfProServer.validToken["destination"] = false
+        JamfProServer.validToken["dest"] = false
         JamfProServer.version["source"]         = ""
-        JamfProServer.version["destination"]    = ""
+        JamfProServer.version["dest"]    = ""
         migrationComplete.isDone                = false
         if sender.title == "Go!" {
             go_button.title = "Stop"
@@ -979,15 +1006,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
                             // update keychain, if marked to save creds
                             if !wipeData.on {
-//                                        if self.storeCredentials_button.state.rawValue == 1 {
-                                if JamfProServer.storeCreds == 1 {
-                                    self.Creds2.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, data: JamfProServer.sourcePwd)
+                                if JamfProServer.storeSourceCreds == 1 {
+                                    self.Creds2.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, data: JamfProServer.sourcePwd, whichServer: "source")
                                     self.storedSourceUser = JamfProServer.sourceUser
                                 }
                             }
                         }
                         
-                        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
+                        jamfpro!.getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) {
@@ -1000,15 +1026,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             } else {
                                 // update keychain, if marked to save creds
                                 if !export.saveOnly && setting.fullGUI {
-                                    if JamfProServer.storeCreds == 1 {
-                                        self.Creds2.save(service: JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, data: JamfProServer.destPwd)
+                                    if JamfProServer.storeDestCreds == 1 {
+                                        self.Creds2.save(service: JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, data: JamfProServer.destPwd, whichServer: "dest")
                                         self.storedDestUser = JamfProServer.destUser
                                     }
                                 }
                                 // determine if the cloud services connection is enabled
                                 var csaMethod = "GET"
                                 if export.saveOnly { csaMethod = "skip" }
-                                Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"]!, method: csaMethod) {
+                                Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
                                     (returnedJSON: [String:Any]) in
 //                                            print("CSA: \(returnedJSON)")
                                     if let _ = returnedJSON["scopes"] {
@@ -1026,7 +1052,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.startMigrating()
                                 }
                             } // else dest auth
-                        }   // JamfPro().getToken(whichServer: "destination" - end
+                        }   // JamfPro().getToken(whichServer: "dest" - end
                     }   // else check dest URL auth - end
                 }   // JamfPro().getToken(whichServer: "source" - end
 
@@ -1328,9 +1354,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.sourceBase64Creds = self.destBase64Creds
                     JamfProServer.source  = self.dest_jp_server
                     
-                    JamfProServer.authCreds["source"]   = JamfProServer.authCreds["destination"]
-                    JamfProServer.authExpires["source"] = JamfProServer.authExpires["destination"]
-                    JamfProServer.authType["source"]    = JamfProServer.authType["destination"]
+                    JamfProServer.authCreds["source"]   = JamfProServer.authCreds["dest"]
+                    JamfProServer.authExpires["source"] = JamfProServer.authExpires["dest"]
+                    JamfProServer.authType["source"]    = JamfProServer.authType["dest"]
                         
                     summaryHeader.createDelete = "Delete"
                 } else {   // if wipeData.on - end
@@ -1879,7 +1905,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
                     WriteToLog().message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Migrator/\n")
                     export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-                    self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+                    userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 }
             }   // if export.saveRawXml - end
         }   // if nodeIndex == 0 - end
@@ -2030,9 +2056,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let request = NSMutableURLRequest(url: encodedURL! as URL)
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
-//             ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
             
+            print("[getEndpoints]         myURL: \(myURL)")
+            print("[getEndpoints] Authorization: \(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))")
             configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+            
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                 (data, response, error) -> Void in
@@ -2862,7 +2890,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                         }
                         if httpResponse.statusCode == 401 {
-                            WriteToLog().message(stringOfText: "[readDataFiles] verify \(JamfProServer.sourceUser) has premission to read \(endpoint)\n")
+                            WriteToLog().message(stringOfText: "[readDataFiles] verify \(JamfProServer.sourceUser) has premission to read \(endpoint) on \(myURL)\n")
                         }
                         getStatusUpdate2(endpoint: endpoint, total: 0)
                         putStatusUpdate2(endpoint: endpoint, total: 0)
@@ -2894,21 +2922,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            self.progressCountArray["smartcomputergroups"] = 0
+            self.progressCountArray["smartcomputergroups"]  = 0
             self.progressCountArray["staticcomputergroups"] = 0
-            self.progressCountArray["computergroups"] = 0 // this is the recognized end point
+            self.progressCountArray["computergroups"]       = 0 // this is the recognized end point
         case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
-            self.progressCountArray["smartmobiledevicegroups"] = 0
+            self.progressCountArray["smartmobiledevicegroups"]  = 0
             self.progressCountArray["staticmobiledevicegroups"] = 0
-            self.progressCountArray["mobiledevicegroups"] = 0 // this is the recognized end point
+            self.progressCountArray["mobiledevicegroups"]       = 0 // this is the recognized end point
         case "usergroups", "smartusergroups", "staticusergroups":
-            self.progressCountArray["smartusergroups"] = 0
+            self.progressCountArray["smartusergroups"]  = 0
             self.progressCountArray["staticusergroups"] = 0
-            self.progressCountArray["usergroups"] = 0 // this is the recognized end point
+            self.progressCountArray["usergroups"]       = 0 // this is the recognized end point
         case "accounts", "jamfusers", "jamfgroups":
-            self.progressCountArray["jamfusers"] = 0
+            self.progressCountArray["jamfusers"]  = 0
             self.progressCountArray["jamfgroups"] = 0
-            self.progressCountArray["accounts"] = 0 // this is the recognized end point
+            self.progressCountArray["accounts"]   = 0 // this is the recognized end point
         default:
             self.progressCountArray["\(nodesToMigrate[nodeIndex])"] = 0
         }
@@ -3501,7 +3529,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
 
-        self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+//        self.getStatusUpdate2(endpoint: endpoint, total: endpointCount) -- causing duplicate counts
         
         self.CreateEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
@@ -4017,8 +4045,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] Unknown endpoint: \(endpoint)\n") }
             knownEndpoint = false
         }   // switch - end
-
-//        self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
         
         if knownEndpoint {
 //            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
@@ -4043,7 +4069,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+                self.CreateEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+//                self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] \(result)\n") }
                     if endpointCurrent == endpointCount {
@@ -4054,7 +4081,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         completion("")
                     }
                 }
-                
             }
         } else {    // if knownEndpoint - end
             if endpointCurrent == endpointCount {
@@ -4068,9 +4094,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
     }
-    
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func CreateEndpointsQueue(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+        createArray.append(CreateInfo(endpointType: endpointType, endPointXml: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
         
+        completion("return from CreateEndpointsQueue")
+        
+        destEPQ.async { [self] in
+            
+            while createPending > 0 || createArray.count > 0 {
+                if createPending < setConcurrentThreads() && createArray.count > 0 {
+                    createPending += 1
+                    let nextEndpoint = createArray[0]
+                    createArray.remove(at: 0)
+                    CreateEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
+                        (result: String) in
+                        createPending -= 1
+                    }
+                } else {
+                    sleep(1)
+                }
+            }
+            
+        }
+        
+    }
+    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+                
         if pref.stopMigration {
             stopButton(self)
             completion("stop")
@@ -4211,7 +4260,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 let configuration = URLSessionConfiguration.default
 //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 
                 // sticky session
                 let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
@@ -4459,7 +4508,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }   // if !wipeData.on - end
             
         }   // theCreateQ.addOperation - end
-//        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     }   // func createEndpoints - end
     
     // for the Jamf Pro API - used for buildings
@@ -4578,7 +4626,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
                 
-                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["destination"]!, method: apiAction) { [self]
+                Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"]!, method: apiAction) { [self]
                     (jpapiResonse: [String:Any]) in
 //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                     var jpapiResult = "succeeded"
@@ -4821,7 +4869,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 request.httpMethod = "DELETE"
                 let configuration = URLSessionConfiguration.ephemeral
 //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 //request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -5114,7 +5162,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         destRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.default
 
-                        destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+                        print("[existingEndpoints] existingDestUrl: \(existingDestUrl)")
+                        print("[existingEndpoints]   Authorization: \(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))")
+                        destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
                         
                         // sticky session
 //                        print("[existingEndpoints] JamfProServer.sessionCookie.count: \(JamfProServer.sessionCookie.count)")
@@ -5198,7 +5248,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         //print("package ID: \(destRecord["id"] as! Int)")
                                                     }
                                                     
-                                                    PackagesDelegate().filenameIdDict(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
+                                                    PackagesDelegate().filenameIdDict(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
                                                         (currentDestinationPackages: [String:Int]) in
                                                         self.currentEPs = currentDestinationPackages
                                                         setting.waitingForPackages = false
@@ -5618,7 +5668,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             whichServer = "source"
         } else {
             serverCreds = self.destBase64Creds
-            whichServer = "destination"
+            whichServer = "dest"
         }
 
 //        print("NSURL line 7")
@@ -5874,7 +5924,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        if (whichserver == "source" && !wipeData.on) || (whichserver == "destination" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
+        if (whichserver == "source" && !wipeData.on) || (whichserver == "dest" && wipeData.on) || (srcSrvTableView.isEnabled == false) {
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
             clearSelectiveList()
@@ -6660,8 +6710,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))\n") }
                                     var policyIconDict = iconfiles.policyDict
-//                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
-                                    Json().getRecord(whichServer: "destination", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
+//                                    Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
+                                    Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
 //                                        print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
@@ -6851,11 +6901,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                         
                         var request = URLRequest(url:serverURL)
-                        request.addValue("\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", forHTTPHeaderField: "Authorization")
+                        request.addValue("\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", forHTTPHeaderField: "Authorization")
                         request.addValue("\(appInfo.userAgentHeader)", forHTTPHeaderField: "User-Agent")
                         // add headers for basic authentication - old
 //                        if setting.csa {
-//                            request.addValue("Bearer \(JamfProServer.authCreds["destination"]!)", forHTTPHeaderField: "Authorization")
+//                            request.addValue("Bearer \(JamfProServer.authCreds["dest"]!)", forHTTPHeaderField: "Authorization")
 //                        } else {
 //                            request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
 //                        }
@@ -6977,7 +7027,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                
                 let configuration = URLSessionConfiguration.default
 //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -7588,7 +7638,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
 //        print("[ViewController] ConcurrentThreads: \(concurrent)")
         concurrent = (concurrent > 5) ? 2:concurrent
-        self.userDefaults.set(concurrent, forKey: "concurrentThreads")
+        userDefaults.set(concurrent, forKey: "concurrentThreads")
         userDefaults.synchronize()
         return concurrent
     }
@@ -7973,7 +8023,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @objc func resetListFields(_ notification: Notification) {
-        if (JamfProServer.whichServer == "source" && !wipeData.on) || (JamfProServer.whichServer == "destination" && !export.saveOnly) || (srcSrvTableView.isEnabled == false) {
+        if (JamfProServer.whichServer == "source" && !wipeData.on) || (JamfProServer.whichServer == "dest" && !export.saveOnly) || (srcSrvTableView.isEnabled == false) {
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
             clearSelectiveList()
