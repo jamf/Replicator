@@ -38,7 +38,7 @@ class Credentials {
 //                theService = theService + "-apiClient"
 //            }
             
-            var keychainName = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
+            let keychainName = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
 //            let keychainName = "JamfProApps-\(theService)"
             if let password = data.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
@@ -76,6 +76,16 @@ class Credentials {
     }   // func save - end
     
     func retrieve(service: String, whichServer: String = "") -> [String] {
+        
+        if !setting.fullGUI && (JamfProServer.sourceApiClient["id"] != "" && whichServer == "source" || JamfProServer.destApiClient["id"] != "" && whichServer == "dest") {
+            if whichServer == "source" {
+                return["\(String(describing: JamfProServer.sourceApiClient["id"]!))","\(String(describing: JamfProServer.sourceApiClient["secret"]!))"]
+            } else if whichServer == "dest" {
+                return["\(String(describing: JamfProServer.destApiClient["id"]!))","\(String(describing: JamfProServer.destApiClient["secret"]!))"]
+            }
+            return []
+        }
+        
         var keychainResult = [String]()
         var theService = service
         

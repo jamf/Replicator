@@ -1107,7 +1107,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //            didRun = true
             source_jp_server = JamfProServer.source
             dest_jp_server   = JamfProServer.destination
-        }
+        }   // if setting.fullGUI (else) - end
 
         // check for stored passwords - start
         if (JamfProServer.source != "") && JamfProServer.importFiles == 0 {

@@ -67,7 +67,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var index = 0
         while index < numberOfArgs {
 //                print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
-                switch CommandLine.arguments[index].lowercased() {
+            let cmdLineSwitch = CommandLine.arguments[index].lowercased()
+                switch cmdLineSwitch {
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
@@ -119,6 +120,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
+                case "-sourceuseclientid", "-destuseclientid":
+                    index += 1
+                    let useApiClient = ( "\(CommandLine.arguments[index])".lowercased() == "yes" || "\(CommandLine.arguments[index])".lowercased() == "true" ) ? 1:0
+                    if cmdLineSwitch ==  "-sourceuseclientid" {
+                        JamfProServer.sourceUseApiClient = useApiClient
+                    } else {
+                        JamfProServer.destUseApiClient = useApiClient
+                    }
+                case "-sourceclientid":
+                    index += 1
+                    JamfProServer.sourceApiClient["id"] = CommandLine.arguments[index]
+                    JamfProServer.sourceUser = JamfProServer.sourceApiClient["id"] ?? ""
+                    JamfProServer.sourceUseApiClient = 1
+                case "-destclientid":
+                    index += 1
+                    JamfProServer.destApiClient["id"] = CommandLine.arguments[index]
+                    JamfProServer.destUser = JamfProServer.destApiClient["id"] ?? ""
+                    JamfProServer.destUseApiClient = 1
+                case "-sourceclientsecret":
+                    index += 1
+                    JamfProServer.sourceApiClient["secret"] = CommandLine.arguments[index]
+                    JamfProServer.sourcePwd = JamfProServer.sourceApiClient["secret"] ?? ""
+                case "-destclientsecret":
+                    index += 1
+                    JamfProServer.destApiClient["secret"] = CommandLine.arguments[index]
+                    JamfProServer.destPwd = JamfProServer.destApiClient["secret"] ?? ""
                 case "-silent":
                     setting.fullGUI = false
                 case "-sticky":

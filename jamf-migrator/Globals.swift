@@ -129,7 +129,8 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 29*60  // 29 minutes
+    static let defaultRefresh: UInt32 = 29*60  // 29 minutes
+    static var refreshInterval: [String:UInt32] = ["source": defaultRefresh, "dest": defaultRefresh]
 }
 
 struct wipeData {
@@ -143,16 +144,16 @@ Usage: /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -parameter1 value
 Note: Not all parameters have values.
 
 Parameters:
-         -export: No value needed but -objects must be used.  Exports object listed to a zipped file in the current export location (defined in the UI).  Must define a source server (-source).
+    -export: No value needed but -objects must be used.  Exports object listed to a zipped file in the current export location (defined in the UI).  Must define a source server (-source).
 
-          -debug: No value needed.  Enables debug mode, more verbose logging.
+    -debug: No value needed.  Enables debug mode, more verbose logging.
 
     -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for jamf migrator.
 
-        -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
+    -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
                   saving credentials, between the source and destination before the command line can be successful.  Must also use -objects, -source, and -destination.
 
-        -objects: List of objects to migrate.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
+    -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
                                       networksegments,advancedusersearches,smartusergroups,staticusergroups,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
@@ -161,16 +162,29 @@ Parameters:
                                       mobiledeviceextensionattributes,mobiledevices,smartmobiledevicegroups,staticmobiledevicegroups,
                                       advancedmobiledevicesearches,mobiledeviceapplications,mobiledeviceconfigurationprofiles
 
-                                      You can use 'allobjects' (without quotes) to migrate all objects.
+                                      You can use 'allobjects' (without quotes) to migrate/export all objects.
 
-          -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to
+    -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to
                   anything with a scope; policies, configuration profiles, restrictions...  By default the scope is copied.
 
-         -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
+    -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
                   wrapped in quotes.  Credentials for the source server must be saved in the keychain for jamf migrator.
 
-         -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
+    -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
                   the needed information.  By default sticky sessions are not used.
+
+    ## API client options ##
+    -destUseClientId: true or false.  Whether or not to use Client ID rather than username.  If set to true and -destClientId is not provided the keychain will be queried.
+
+    -destClientId: Client ID from Jamf Pro API Roles and Clients.  If the client ID is provided, -destUseClientId is forced to true.
+
+    -destClientSecret: Client Secret from Jamf Pro API Roles and Clients.
+    
+    -sourceUseClientId: true or false.  Whether or not to use Client ID rather than username.  If set to true and -sourceClientId is not provided the keychain will be queried.
+
+    -sourceClientId: Client ID from Jamf Pro API Roles and Clients.  If the client ID is provided, -sourceUseClientId is forced to true.
+
+    -sourceClientSecret: Client Secret from Jamf Pro API Roles and Clients.
 
 Examples:
     Create an export of all objects:
@@ -188,7 +202,8 @@ Examples:
     Migrate all objects from a folder to a server:
     /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Migrator/raw" -destination prod.jamfpro.server -objects allobjects
 
-
+    Migrate buildings using an API client for the source server and username/password for the destination server:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings
 """
 
 public func readSettings() -> [String:Any] {

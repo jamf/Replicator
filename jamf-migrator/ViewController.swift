@@ -1355,7 +1355,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     JamfProServer.source  = self.dest_jp_server
                     
                     JamfProServer.authCreds["source"]   = JamfProServer.authCreds["dest"]
-                    JamfProServer.authExpires["source"] = JamfProServer.authExpires["dest"]
+//                    JamfProServer.authExpires["source"] = JamfProServer.authExpires["dest"]
                     JamfProServer.authType["source"]    = JamfProServer.authType["dest"]
                         
                     summaryHeader.createDelete = "Delete"
@@ -2057,8 +2057,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
             
-            print("[getEndpoints]         myURL: \(myURL)")
-            print("[getEndpoints] Authorization: \(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))")
             configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -5162,8 +5160,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         destRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.default
 
-                        print("[existingEndpoints] existingDestUrl: \(existingDestUrl)")
-                        print("[existingEndpoints]   Authorization: \(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))")
                         destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
                         
                         // sticky session
