@@ -44,25 +44,30 @@ class JamfPro: NSObject, URLSessionDelegate {
                 
         var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
         var apiClient = false
-            switch whichServer {
-            case "source":
-                if JamfProServer.sourceUseApiClient == 1 {
-                    tokenUrlString = "\(serverUrl)/api/oauth/token"
-                    apiClient = true
-                }
-            case "dest":
-                if JamfProServer.destUseApiClient == 1 {
-                    tokenUrlString = "\(serverUrl)/api/oauth/token"
-                    apiClient = true
-                }
-            default:
-                break
+        switch whichServer {
+        case "source":
+            if JamfProServer.sourceUseApiClient == 1 {
+                tokenUrlString = "\(serverUrl)/api/oauth/token"
+                apiClient = true
             }
+        case "dest":
+            if JamfProServer.destUseApiClient == 1 {
+                tokenUrlString = "\(serverUrl)/api/oauth/token"
+                apiClient = true
+            }
+        default:
+            break
+        }
         
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
 //        print("[getToken] tokenUrlString: \(tokenUrlString)")
 
         let tokenUrl       = URL(string: "\(tokenUrlString)")
+        guard let _ = tokenUrl else {
+            print("problem constructing the URL from \(tokenUrlString)")
+            completion((500, "failed"))
+            return
+        }
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
