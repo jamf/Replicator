@@ -20,6 +20,10 @@ When migrating files be sure to open the 'raw' folder.
   ![alt text](./jamf-migrator/images/migrator2.5b.png "Files")
 </br></br>
 
+Servers can be removed from the (source/destination) list by holding down the option key while selecting the server.  A warning will be presented to verify the removal.</br>
+  ![alt text](./jamf-migrator/images/removeServer.png "Files")
+</br></br>
+
 **Limitations/requirements to be aware of:**
 
 * Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A password can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
