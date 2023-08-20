@@ -69,14 +69,18 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //            preferredContentSize = CGSize(width: 848, height: 55)
             preferredContentSize = CGSize(width: 848, height: 67)
             hideCreds_button.toolTip = "show username/password fields"
-            sourceUsername_TextField.isHidden = true
-            destUsername_TextField.isHidden   = true
+            destUsername_TextField.isHidden = true
+            showHideUserCreds(x: true)
         } else {
 //            preferredContentSize = CGSize(width: 848, height: 120)
             preferredContentSize = CGSize(width: 848, height: 182)
             hideCreds_button.toolTip = "hide username/password fields"
-            sourceUsername_TextField.isHidden = false
-            destUsername_TextField.isHidden   = false
+            destUsername_TextField.isHidden = false
+            if fileImport_button.state.rawValue == 0 {
+                showHideUserCreds(x: false)
+            } else {
+                showHideUserCreds(x: true)
+            }
         }
     }
     func setLabels(whichServer: String) {
@@ -366,8 +370,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         
                         source_jp_server_field.stringValue = dataFilesRoot
                         JamfProServer.source               = dataFilesRoot
-                        source_user_field.isHidden         = true
-                        source_pwd_field.isHidden          = true
+                        showHideUserCreds(x: true)
                         fileImport                         = true
                         
                         source_user_field.stringValue      = ""
@@ -385,8 +388,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         serverChanged(whichserver: "source")
                     } else {
                         if toggleFileImport {
-                            source_user_field.isHidden = false
-                            source_pwd_field.isHidden  = false
+                            showHideUserCreds(x: false)
                             fileImport                 = false
                             fileImport_button.state    = NSControl.StateValue(rawValue: 0)
                             JamfProServer.importFiles  = 0
@@ -403,8 +405,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             userDefaults.set(false, forKey: "fileImport")
             DispatchQueue.main.async { [self] in
                 source_jp_server_field.stringValue = ""
-                source_user_field.isHidden  = false
-                source_pwd_field.isHidden   = false
+                showHideUserCreds(x: false)
+//                source_user_field.isHidden  = false
+//                source_pwd_field.isHidden   = false
                 fileImport                  = false
                 fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
@@ -734,8 +737,47 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
+        let whichServer = sender.identifier!.rawValue
+            if NSEvent.modifierFlags.contains(.option) {
+                switch whichServer {
+                case "source":
+                    let selectedServer =  sourceServerList_button.titleOfSelectedItem!
+                    let response = Alert().display(header: "", message: "Are you sure you want to remove \(selectedServer) from the list?", secondButton: "Cancel")
+                    if response == "Cancel" {
+                        return
+                    }
+                    sourceServerArray.removeAll(where: { $0 == sourceServerList_button.titleOfSelectedItem! })
+                    sourceServerList_button.removeItem(withTitle: sourceServerList_button.titleOfSelectedItem!)
+                    if source_jp_server_field.stringValue == selectedServer {
+                        source_jp_server_field.stringValue = ""
+                        source_user_field.stringValue      = ""
+                        source_pwd_field.stringValue       = ""
+                    }
+                    appInfo.settings["source_server_array"] = sourceServerArray as Any?
+                case "dest":
+                    let selectedServer =  destServerList_button.titleOfSelectedItem!
+                    let response = Alert().display(header: "", message: "Are you sure you want to remove \(selectedServer) from the list?", secondButton: "Cancel")
+                    if response == "Cancel" {
+                        return
+                    }
+                    destServerArray.removeAll(where: { $0 == destServerList_button.titleOfSelectedItem! })
+                    destServerList_button.removeItem(withTitle: destServerList_button.titleOfSelectedItem!)
+                    if dest_jp_server_field.stringValue == selectedServer {
+                        dest_jp_server_field.stringValue = ""
+                        dest_user_field.stringValue      = ""
+                        dest_pwd_field.stringValue       = ""
+                    }
+                    appInfo.settings["dest_server_array"] = destServerArray as Any?
+                default:
+                    break
+                }
+                saveSourceDestInfo(info: appInfo.settings)
+                
+                
+                return
+            }
 //        self.selectiveListCleared = false
-        switch sender.identifier!.rawValue {
+        switch whichServer {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
                 JamfProServer.validToken["source"] = false
@@ -786,8 +828,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //                print("source: server.")
                 fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
-                source_user_field.isHidden  = false
-                source_pwd_field.isHidden   = false
+                showHideUserCreds(x: false)
+//                source_user_field.isHidden  = false
+//                source_pwd_field.isHidden   = false
                 fileImport                  = false
                 sourceType                  = "server"
             } else {
@@ -797,8 +840,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 dataFilesRoot               = source_jp_server_field.stringValue
                 JamfProServer.source        = source_jp_server_field.stringValue
                 importFilesUrl            = URL(string: "file://\(dataFilesRoot.replacingOccurrences(of: " ", with: "%20"))")
-                source_user_field.isHidden  = true
-                source_pwd_field.isHidden   = true
+                showHideUserCreds(x: true)
                 fileImport                  = true
                 sourceType                  = "files"
                 
@@ -813,6 +855,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         userDefaults.synchronize()
         completion(sourceType)
     }   // func serverOrFiles() - end
+    
+    func showHideUserCreds(x: Bool) {
+        sourceUsername_TextField.isHidden = x
+        sourcePassword_TextField.isHidden = x
+        source_user_field.isHidden  = x
+        source_pwd_field.isHidden   = x
+    }
     
     override func viewDidAppear() {
         // set tab order

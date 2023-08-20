@@ -155,7 +155,7 @@ Running the following in Terminal will export all objects (full XML) that can be
 ```
 /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects
 ```
-Before running an export via command line at least one export from the app must be manually run saving the source username and password.<br>
+Before running an export via command line at least one export from the app must be manually run saving the source username and password or client ID and secret.<br>
 
 To migrate object(s) using the command line, something like the following can be used:
 ```
@@ -175,6 +175,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.2.0**<br>
+Add support for API client in both the UI and command line.
+
 **v7.1.1**<br>
 Prevent configuration profiles that include a Filevault payload from migrating.  Fix export of smart comuter/device groups.  Fix color mismatch (issue #88)
 

@@ -488,7 +488,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <popUpButton identifier="destination" focusRingType="none" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="KCT-A6-xGn">
+                            <popUpButton identifier="dest" focusRingType="none" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="KCT-A6-xGn">
                                 <rect key="frame" x="453" y="130" width="367" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="362" id="ngo-4k-BeA"/>
@@ -2163,7 +2163,7 @@
                                                             <rect key="frame" x="218" y="7" width="475" height="156"/>
                                                             <clipView key="contentView" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="473" height="154"/>
-                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="473" height="154"/>

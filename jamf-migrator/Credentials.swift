@@ -34,12 +34,8 @@ class Credentials {
                 break
             }
             
-//            if JamfProServer.sourceApiClient + JamfProServer.destApiClient != 0 {
-//                theService = theService + "-apiClient"
-//            }
-            
             let keychainName = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
-//            let keychainName = "JamfProApps-\(theService)"
+
             if let password = data.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
                     var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
