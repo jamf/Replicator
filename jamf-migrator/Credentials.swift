@@ -34,7 +34,7 @@ class Credentials {
                 break
             }
             
-            let keychainName = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
+            let keychainName = ( whichServer == "" ) ?  theService:"JPMA-\(theService)"
 
             if let password = data.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
@@ -101,7 +101,7 @@ class Credentials {
         }
         
         
-        var keychainName   = ( whichServer == "" ) ?  theService:"JamfProApps-\(theService)"
+        var keychainName   = ( whichServer == "" ) ?  theService:"JPMA-\(theService)"
 //        print("[credentials] keychainName: \(keychainName)")
         // look for common keychain item
         keychainResult = itemLookup(service: keychainName)

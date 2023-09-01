@@ -1035,7 +1035,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="112" width="85" height="18"/>
+                                                    <rect key="frame" x="18" y="111.5" width="85" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="18" id="bbZ-ev-E41"/>
                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="83" id="dJ3-Wo-fht"/>
@@ -1050,7 +1050,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="83" width="113" height="18"/>
+                                                    <rect key="frame" x="18" y="82.5" width="113" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="18" id="mNK-0o-Zqa"/>
                                                         <constraint firstAttribute="width" constant="111" id="sUG-65-uiP"/>
@@ -1064,7 +1064,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="54" width="62" height="18"/>
+                                                    <rect key="frame" x="18" y="53.5" width="62" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="60" id="Aql-3w-ssr"/>
                                                         <constraint firstAttribute="height" constant="18" id="C4O-YY-zxh"/>
@@ -1078,7 +1078,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="189" y="112" width="105" height="18"/>
+                                                    <rect key="frame" x="189" y="111.5" width="105" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="18" id="pGu-y6-hVK"/>
                                                     </constraints>
@@ -1091,7 +1091,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="189" y="83" width="92" height="18"/>
+                                                    <rect key="frame" x="189" y="82.5" width="92" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="18" id="8Ex-VR-sQp"/>
                                                         <constraint firstAttribute="width" constant="90" id="a5n-Te-sta"/>
@@ -1105,7 +1105,7 @@
                                                     </connections>
                                                 </button>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="360" y="140" width="97" height="18"/>
+                                                    <rect key="frame" x="360" y="140.5" width="97" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="Jamf Users" bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1116,7 +1116,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="360" y="112" width="111" height="18"/>
+                                                    <rect key="frame" x="360" y="111.5" width="111" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="18" id="jby-sZ-3iD"/>
                                                     </constraints>
@@ -1129,7 +1129,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="360" y="83" width="142" height="18"/>
+                                                    <rect key="frame" x="360" y="82.5" width="142" height="19"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="140" id="7sC-m3-7ls"/>
                                                         <constraint firstAttribute="height" constant="18" id="aed-A0-DHs"/>
@@ -1143,7 +1143,7 @@
                                                     </connections>
                                                 </button>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Adv User Search">
-                                                    <rect key="frame" x="531" y="140" width="148" height="18"/>
+                                                    <rect key="frame" x="531" y="140.5" width="148" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="Adv. User Searches" bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -1181,8 +1181,8 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="h2j-3G-hdN"/>
                                                     </connections>
                                                 </button>
-                                                <button ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="189" y="140" width="79" height="18"/>
+                                                <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
+                                                    <rect key="frame" x="189" y="140.5" width="79" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Buildings" bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
