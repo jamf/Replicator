@@ -24,7 +24,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     
 //    let userDefaults = UserDefaults.standard
     
-    func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool, completion: @escaping (_ authResult: (Int,String)) -> Void) {
+    func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, completion: @escaping (_ authResult: (Int,String)) -> Void) {
        
         if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "dest" && !export.saveOnly)) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(serverUrl)\n")
@@ -74,7 +74,10 @@ class JamfPro: NSObject, URLSessionDelegate {
         
         let forWhat = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let (_, minutesOld, _) = timeDiff(forWhat: forWhat)
-//        print("[JamfPro] \(whichServer) tokenAge: \(minutesOld) minutes")
+        
+        print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
+        print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 25) minutes")
+        
         if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || ( minutesOld > (token.refreshInterval[whichServer] ?? 29) ) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
             
@@ -86,9 +89,9 @@ class JamfPro: NSObject, URLSessionDelegate {
 
                 let requestData = clientString.data(using: .utf8)
                 request.httpBody = requestData
-                configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             } else {
-                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             }
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -114,7 +117,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                             JamfProServer.tokenCreated[whichServer] = Date()
                             
     //                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
-    //                      print("[JamfPro] result of token request: \(endpointJSON)")
+                          print("[JamfPro] \(whichServer) received a new token")
                             WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(serverUrl)\n")
                             
                             if JamfProServer.version[whichServer] == "" {
@@ -144,7 +147,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                         break
                                                     }
                                                 }
-                                                if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) && !forceBasicAuth {
+                                                if ( JamfProServer.majorVersion > 10 || ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) ) && !forceBasicAuth {
                                                     JamfProServer.authType[whichServer] = "Bearer"
                                                     JamfProServer.validToken[whichServer] = true
                                                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Bearer Token\n")
@@ -155,9 +158,9 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                     JamfProServer.authCreds[whichServer] = base64creds
                                                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic Authentication\n")
                                                 }
-                                                if JamfProServer.authType[whichServer] == "Bearer" {
-                                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
-                                                }
+//                                                if JamfProServer.authType[whichServer] == "Bearer" {
+//                                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
+//                                                }
                                                 completion((200, "success"))
                                                 return
                                             }
@@ -172,10 +175,10 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 }
                                 // get Jamf Pro version - end
                             } else {
-                                if JamfProServer.authType[whichServer] == "Bearer" {
-                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
-                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
-                                }
+//                                if JamfProServer.authType[whichServer] == "Bearer" {
+//                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
+//                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
+//                                }
                                 completion((200, "success"))
                                 return
                             }
@@ -227,7 +230,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                 
                 if JamfProServer.authType["source"] == "Bearer" {
                     sleep(token.refreshInterval["source"] ?? 29)
-                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for source server")
+                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for source server\n")
                     JamfProServer.validToken["source"] = false
                     getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"]!, localSource: localSource) {
                         (result: (Int, String)) in
@@ -236,7 +239,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                 }
                 if JamfProServer.authType["dest"] == "Bearer" {
                     sleep(token.refreshInterval["dest"] ?? 29)
-                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for destination server")
+                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for destination server\n")
                     JamfProServer.validToken["dest"] = false
                     getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"]!, localSource: localSource) {
                         (result: (Int, String)) in

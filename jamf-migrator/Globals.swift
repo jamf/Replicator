@@ -19,7 +19,7 @@ class appColor: NSColor {
                                               "classic":NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)]
 }
 
-struct appInfo {
+struct AppInfo {
     static let dict            = Bundle.main.infoDictionary!
     static let version         = dict["CFBundleShortVersionString"] as! String
     static let name            = dict["CFBundleExecutable"] as! String
@@ -28,7 +28,7 @@ struct appInfo {
     static var settings        = [String:Any]()
     static let plistPath       = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
 
-    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
+    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
 }
 
 struct dependency {
@@ -129,7 +129,7 @@ struct summaryHeader {
 }
 
 struct token {
-    static let defaultRefresh: UInt32 = 29*60  // 29 minutes
+    static let defaultRefresh: UInt32 = 29  // 29 minutes
     static var refreshInterval: [String:UInt32] = ["source": defaultRefresh, "dest": defaultRefresh]
 }
 
@@ -207,29 +207,29 @@ Examples:
 """
 
 public func readSettings() -> [String:Any] {
-    appInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: appInfo.plistPath)) as? [String : Any])!
-    if appInfo.settings.count == 0 {
-        if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist: \(appInfo.plistPath)\n") }
+    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: AppInfo.plistPath)) as? [String : Any])!
+    if AppInfo.settings.count == 0 {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist: \(AppInfo.plistPath)\n") }
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))\n")
-    return(appInfo.settings)
+    return(AppInfo.settings)
 }
 
 public func saveSettings(settings: [String:Any]) {
-    NSDictionary(dictionary: settings).write(toFile: appInfo.plistPath, atomically: true)
+    NSDictionary(dictionary: settings).write(toFile: AppInfo.plistPath, atomically: true)
 }
 
 public func storeBookmark(theURL: URL) {
-    print("[\(#line)-storeBookmark] store \(theURL) in \(appInfo.bookmarksPath)")
-    appInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] ?? [:]
+    print("[\(#line)-storeBookmark] store \(theURL) in \(AppInfo.bookmarksPath)")
+    AppInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] ?? [:]
     print("[\(#line)-storeBookmark] current bookmarks:")
-    for (theBookmark,_) in appInfo.bookmarks {
+    for (theBookmark,_) in AppInfo.bookmarks {
         print("[\(#line)-storeBookmark] \(theBookmark)")
     }
     do {
         let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-        appInfo.bookmarks[theURL] = data
-        NSKeyedArchiver.archiveRootObject(appInfo.bookmarks, toFile: appInfo.bookmarksPath)
+        AppInfo.bookmarks[theURL] = data
+        NSKeyedArchiver.archiveRootObject(AppInfo.bookmarks, toFile: AppInfo.bookmarksPath)
     } catch let error as NSError {
         WriteToLog().message(stringOfText: "[Global] Set Bookmark Failed: \(error.description)\n")
     }

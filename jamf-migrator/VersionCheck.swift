@@ -15,7 +15,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
         
         URLCache.shared.removeAllCachedResponses()
 
-        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: appInfo.version)
+        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: AppInfo.version)
         
         var updateAvailable = false
         var versionTest     = true

@@ -109,7 +109,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     let Creds2           = Credentials()
-    var credentialsArray = [String]()
+    var accountDict      = [String:String]()
+//    var credentialsArray = [String]()
     let vc               = ViewController()
 //    var plistData:[String:Any] = [:]  //our server/username data
     
@@ -196,7 +197,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //    var buttonState = true
     
     @IBAction func updateCopyPrefs_button(_ sender: Any) {
-        appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
+        AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
                               "macapps":["copy":stateToBool(state: copyScopeMA_button.state.rawValue)],
                               "restrictedsoftware":["copy":stateToBool(state: copyScopeRS_button.state.rawValue)],
                               "policies":["copy":stateToBool(state: copyScopePolicy_button.state.rawValue),"disable":stateToBool(state: disablePolicies_button.state.rawValue)],
@@ -206,7 +207,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                               "sig":["copy":stateToBool(state: copyScopeSig_button.state.rawValue)],
                               "users":["copy":stateToBool(state: copyScopeUsers_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
 //        vc.savePrefs(prefs: plistData)
-        saveSettings(settings: appInfo.settings)
+        saveSettings(settings: AppInfo.settings)
     }
     
     
@@ -239,13 +240,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             break
         }
         
-        appInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
+        AppInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
                             "saveTrimmedXml":export.saveTrimmedXml,
                             "saveOnly":export.saveOnly,
                             "saveRawXmlScope":export.rawXmlScope,
                             "saveTrimmedXmlScope":export.trimmedXmlScope]
         
-        saveSettings(settings: appInfo.settings)
+        saveSettings(settings: AppInfo.settings)
         
         NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)
     }
@@ -288,26 +289,26 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //                if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
                     if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
                         userDefaults.set(prefMgmtAcct_textfield.stringValue, forKey: "prefMgmtAcct")
-                        Creds2.save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, data: prefMgmtPwd_textfield.stringValue)
+                        Creds2.save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, credential: prefMgmtPwd_textfield.stringValue)
                     }
 //                }
             case "Passwords":
                 switch "\(textField.identifier!.rawValue)" {
                 case "bind_textfield":
                     if prefBindPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-bind", account: "bind", data: prefBindPwd_textfield.stringValue)
+                        Creds2.save(service: "migrator-bind", account: "bind", credential: prefBindPwd_textfield.stringValue)
                     }
                 case "ldap_textfield":
                     if prefLdapPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-ldap", account: "ldap", data: prefLdapPwd_textfield.stringValue)
+                        Creds2.save(service: "migrator-ldap", account: "ldap", credential: prefLdapPwd_textfield.stringValue)
                     }
                 case "fsrw":
                     if prefFsRwPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-fsrw", account: "FsRw", data: prefFsRwPwd_textfield.stringValue)
+                        Creds2.save(service: "migrator-fsrw", account: "FsRw", credential: prefFsRwPwd_textfield.stringValue)
                     }
                 case "fsro":
                     if prefFsRoPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-fsro", account: "FsRo", data: prefFsRoPwd_textfield.stringValue)
+                        Creds2.save(service: "migrator-fsro", account: "FsRo", credential: prefFsRoPwd_textfield.stringValue)
                     }
                 default:
                     break
@@ -406,8 +407,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         _ = readSettings()
 //        plistData = vc.readSettings()
         
-        if appInfo.settings["scope"] != nil {
-            scopeOptions = appInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+        if AppInfo.settings["scope"] != nil {
+            scopeOptions = AppInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
             if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
                 scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
             }
@@ -452,7 +453,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                     scopeUsersCopy = scopeOptions["users"]!["copy"]!
                 }
             } else {
-                appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
+                AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                       "macapps":["copy":true],
                                       "policies":["copy":true,"disable":false],
                                       "restrictedsoftware":["copy":true],
@@ -462,11 +463,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                       "sig":["copy":true],
                                       "users":["copy":true]] as Any
 //                vc.saveSettings(settings: plistData)
-                saveSettings(settings: appInfo.settings)
+                saveSettings(settings: AppInfo.settings)
             }
         } else {
             // initilize new settings
-            appInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
+            AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
                                   "macapps":["copy":true],
                                   "policies":["copy":true,"disable":false],
                                   "restrictedsoftware":["copy":true],
@@ -476,11 +477,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                   "sig":["copy":true],
                                   "users":["copy":true]] as Any
 //            vc.saveSettings(settings: plistData)
-            saveSettings(settings: appInfo.settings)
+            saveSettings(settings: AppInfo.settings)
         }
         // read xml settings - start
-        if appInfo.settings["xml"] != nil {
-            xmlPrefOptions       = appInfo.settings["xml"] as! [String:Bool]
+        if AppInfo.settings["xml"] != nil {
+            xmlPrefOptions       = AppInfo.settings["xml"] as! [String:Bool]
             saveRawXml           = (xmlPrefOptions["saveRawXml"] != nil) ? xmlPrefOptions["saveRawXml"]!:false
             saveTrimmedXml       = (xmlPrefOptions["saveTrimmedXml"] != nil) ? xmlPrefOptions["saveTrimmedXml"]!:false
             saveOnly             = (xmlPrefOptions["saveOnly"] != nil) ? xmlPrefOptions["saveOnly"]!:false
@@ -488,13 +489,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveTrimmedXmlScope  = (xmlPrefOptions["saveTrimmedXmlScope"] != nil) ? xmlPrefOptions["saveTrimmedXmlScope"]!:true
         } else {
             // set default values
-            appInfo.settings["xml"] = ["saveRawXml":false,
+            AppInfo.settings["xml"] = ["saveRawXml":false,
                                 "saveTrimmedXml":false,
                                 "saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
 //            vc.saveSettings(settings: plistData)
-            saveSettings(settings: appInfo.settings)
+            saveSettings(settings: AppInfo.settings)
             
             saveRawXml           = false
             saveTrimmedXml       = false
@@ -552,16 +553,18 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveLocation_textfield.stringValue = "Export to: \(saveLocationText.replacingOccurrences(of: "/Library/Containers/com.jamf.jamf-migrator/Data", with: ""))"
         }
         if self.title! == "Computer" {
-            credentialsArray.removeAll()
+            
             prefMgmtAcct_textfield.delegate = self
             prefMgmtPwd_textfield.delegate  = self
             migrateAsManaged_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
-            credentialsArray                = Creds2.retrieve(service: "migrator-mgmtAcct")
+            accountDict                     = Creds2.retrieve(service: "migrator-mgmtAcct", account: "")
             removeCA_ID_button.state        = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "removeCA_ID"))
 
-            if credentialsArray.count == 2 {
-                prefMgmtAcct_textfield.stringValue = credentialsArray[0]
-                prefMgmtPwd_textfield.stringValue  = credentialsArray[1]
+            if accountDict.count == 1 {
+                for (username, password) in accountDict {
+                    prefMgmtAcct_textfield.stringValue = username
+                    prefMgmtPwd_textfield.stringValue  = password
+                }
             } else {
                 prefMgmtAcct_textfield.stringValue = ""
                 prefMgmtPwd_textfield.stringValue  = ""
@@ -569,7 +572,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             migrateAsManaged_action("viewDidAppear")
         }
         if self.title! == "Passwords" {
-            credentialsArray.removeAll()
+            
             prefBindPwd_textfield.delegate = self
             prefLdapPwd_textfield.delegate = self
             prefFsRwPwd_textfield.delegate = self
@@ -579,31 +582,39 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefLdapPwd_button.state      = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefLdapPwd"))
             prefFileSharePwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefFileSharePwd"))
 
-            credentialsArray.removeAll()
-            credentialsArray = Creds2.retrieve(service: "migrator-bind")
-            if credentialsArray.count == 2 {
-                prefBindPwd_textfield.stringValue  = credentialsArray[1]
+            
+            accountDict = Creds2.retrieve(service: "migrator-bind", account: "")
+            if accountDict.count == 1 {
+                for (_, password) in accountDict {
+                    prefBindPwd_textfield.stringValue  = password
+                }
             } else {
                 prefBindPwd_textfield.stringValue = ""
             }
-            credentialsArray.removeAll()
-            credentialsArray = Creds2.retrieve(service: "migrator-ldap")
-            if credentialsArray.count == 2 {
-                prefLdapPwd_textfield.stringValue  = credentialsArray[1]
+            
+            accountDict = Creds2.retrieve(service: "migrator-ldap", account: "")
+            if accountDict.count == 1 {
+                for (_, password) in accountDict {
+                    prefLdapPwd_textfield.stringValue = password
+                }
             } else {
                 prefLdapPwd_textfield.stringValue = ""
             }
-            credentialsArray.removeAll()
-            credentialsArray = Creds2.retrieve(service: "migrator-fsrw")
-            if credentialsArray.count == 2 {
-                prefFsRwPwd_textfield.stringValue  = credentialsArray[1]
+            
+            accountDict = Creds2.retrieve(service: "migrator-fsrw", account: "")
+            if accountDict.count == 1 {
+                for (_, password) in accountDict {
+                    prefFsRwPwd_textfield.stringValue = password
+                }
             } else {
                 prefFsRwPwd_textfield.stringValue = ""
             }
-            credentialsArray.removeAll()
-            credentialsArray = Creds2.retrieve(service: "migrator-fsro")
-            if credentialsArray.count == 2 {
-                prefFsRoPwd_textfield.stringValue  = credentialsArray[1]
+            
+            accountDict = Creds2.retrieve(service: "migrator-fsro", account: "")
+            if accountDict.count == 1 {
+                for (_, password) in accountDict {
+                    prefFsRoPwd_textfield.stringValue = password
+                }
             } else {
                 prefFsRoPwd_textfield.stringValue = ""
             }

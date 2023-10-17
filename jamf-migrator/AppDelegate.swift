@@ -41,11 +41,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let sourceMethod = (JamfProServer.validToken["source"]!) ? "POST":"SKIP"
         Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
-            WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
+            WriteToLog().message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
             let destMethod = (JamfProServer.validToken["dest"]!) ? "POST":"SKIP"
             Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
-                WriteToLog().message(stringOfText: "destination server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
+                WriteToLog().message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
                 WriteToLog().logFileW?.closeFile()
                 NSApplication.shared.terminate(self)
             }

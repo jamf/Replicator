@@ -15,6 +15,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
 //    var exportedFilesUrl = URL(string: "")
+    var jamfpro: JamfPro?
     
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
@@ -140,10 +141,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     // Source and destination fields
     @IBOutlet weak var source_jp_server_field: NSTextField!
-    @IBOutlet weak var source_user_field: NSTextField!
+    @IBOutlet weak var sourceUser_TextField: NSTextField!
     @IBOutlet weak var source_pwd_field: NSSecureTextField!
     @IBOutlet weak var dest_jp_server_field: NSTextField!
-    @IBOutlet weak var dest_user_field: NSTextField!
+    @IBOutlet weak var destinationUser_TextField: NSTextField!
     @IBOutlet weak var dest_pwd_field: NSSecureTextField!
     
     // Source and destination buttons
@@ -198,6 +199,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var sourceCreds = ""
     var destCreds   = ""
     var jamfAdminId = 1
+    var accountsDict = [String:String]()
     
     // settings variables
     let safeCharSet                 = CharacterSet.alphanumerics
@@ -326,7 +328,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     browseFiles_button.isEnabled      = false
                     source_jp_server_field.isEnabled  = false
                     sourceServerList_button.isEnabled = false
-                    source_user_field.isEnabled       = false
+                    sourceUser_TextField.isEnabled       = false
                     source_pwd_field.isEnabled        = false
                 }
             }
@@ -338,11 +340,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     browseFiles_button.isEnabled       = true
                     source_jp_server_field.isEnabled   = true
                     sourceServerList_button.isEnabled  = true
-                    source_user_field.isEnabled        = true
+                    sourceUser_TextField.isEnabled        = true
                     source_pwd_field.isEnabled         = true
                     JamfProServer.validToken["source"] = false
                     JamfProServer.source               = source_jp_server_field.stringValue
-                    JamfProServer.sourceUser           = source_user_field.stringValue
+                    JamfProServer.sourceUser           = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd            = source_pwd_field.stringValue
                 }
             }
@@ -373,7 +375,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         showHideUserCreds(x: true)
                         fileImport                         = true
                         
-                        source_user_field.stringValue      = ""
+                        sourceUser_TextField.stringValue      = ""
                         source_pwd_field.stringValue       = ""
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: dataFilesRoot))\n") }
                         userDefaults.set("\(dataFilesRoot)", forKey: "dataFilesRoot")
@@ -384,7 +386,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         
                         userDefaults.synchronize()
                         browseFiles_button.isHidden        = false
-                        saveSourceDestInfo(info: appInfo.settings)
+                        saveSourceDestInfo(info: AppInfo.settings)
                         serverChanged(whichserver: "source")
                     } else {
                         if toggleFileImport {
@@ -425,7 +427,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 _ = Alert().display(header: "Attention", message: "Destination URL is required", secondButton: "")
                 return
             }
-            if self.dest_user_field.stringValue == "" || self.dest_pwd_field.stringValue == "" {
+            if self.destinationUser_TextField.stringValue == "" || self.dest_pwd_field.stringValue == "" {
                 _ = Alert().display(header: "Attention", message: "Credentials for the destination server are required", secondButton: "")
                 return
             }
@@ -433,20 +435,20 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             itemToSite = true
             availableSites_button.removeAllItems()
             
-            self.destCreds = "\(self.dest_user_field.stringValue):\(self.dest_pwd_field.stringValue)"
+            self.destCreds = "\(self.destinationUser_TextField.stringValue):\(self.dest_pwd_field.stringValue)"
             self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
 
             DispatchQueue.main.async {
                 self.siteMigrate_button.isEnabled = false
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
-            
+                    
             jamfpro!.getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
                 (authResult: (Int,String)) in
                 let (authStatusCode, _) = authResult
 
                 if pref.httpSuccess.contains(authStatusCode) {
-                    Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(dest_user_field.stringValue):\(dest_pwd_field.stringValue)") { [self]
+                    Sites().fetch(server: "\(dest_jp_server_field.stringValue)", creds: "\(destinationUser_TextField.stringValue):\(dest_pwd_field.stringValue)") { [self]
                         (result: (Int,[String])) in
                         let (httpStatus, destSitesArray) = result
                         if pref.httpSuccess.contains(httpStatus) {
@@ -528,50 +530,62 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
         if !(whichServer == "source" && fileImport) {
-            let credentialsArray  = Creds2.retrieve(service: url.fqdnFromUrl, whichServer: whichServer)
+            let theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
+            let accountDict = Creds2.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
             
-            if credentialsArray.count == 2 {
-                if whichServer == "source" {
-                    JamfProServer.sourceUser = ""
-                    JamfProServer.sourcePwd  = ""
-                    if (url != "") {
-                        if setting.fullGUI {
-                            source_user_field.stringValue = credentialsArray[0]
-                            source_pwd_field.stringValue  = credentialsArray[1]
-                            self.storedSourceUser         = credentialsArray[0]
-                            self.storedSourcePwd          = credentialsArray[1]
-                        } else {
-                            source_user = credentialsArray[0]
-                            source_pass = credentialsArray[1]
-                        }
-                        JamfProServer.source     = url
-                        JamfProServer.sourceUser = credentialsArray[0]
-                        JamfProServer.sourcePwd  = credentialsArray[1]
-                    }
-                } else {
-                    JamfProServer.destUser   = ""
-                    JamfProServer.destPwd    = ""
-                    if (url != "") {
-                        if setting.fullGUI {
-                            dest_user_field.stringValue = credentialsArray[0]
-                            dest_pwd_field.stringValue  = credentialsArray[1]
-                            self.storedDestUser         = credentialsArray[0]
-                            self.storedDestPwd          = credentialsArray[1]
-                        }
-                        dest_user = credentialsArray[0]
-                        dest_pass = credentialsArray[1]
-                        JamfProServer.destination = url
-                        JamfProServer.destUser    = credentialsArray[0]
-                        JamfProServer.destPwd     = credentialsArray[1]
-                    } else {
-                        if setting.fullGUI {
-                            dest_pwd_field.stringValue = ""
-                            if source_pwd_field.stringValue != "" {
-                                dest_pwd_field.becomeFirstResponder()
+            if accountDict.count > 0 {
+                for (username, password) in accountDict {
+                    if whichServer == "source" {
+                        if username == sourceUser_TextField.stringValue || accountDict.count == 1 {
+                            JamfProServer.sourceUser = ""
+                            JamfProServer.sourcePwd  = ""
+                            if (url != "") {
+                                if setting.fullGUI {
+                                    sourceUser_TextField.stringValue = username
+                                    source_pwd_field.stringValue  = password
+                                    self.storedSourceUser         = username
+                                    self.storedSourcePwd          = password
+                                } else {
+                                    source_user = username
+                                    source_pass = password
+                                }
+                                JamfProServer.source     = url
+                                JamfProServer.sourceUser = username
+                                JamfProServer.sourcePwd  = password
                             }
-                        }
+                            break
+                        }   // if username == source_user_field.stringValue
+                        source_pwd_field.stringValue  = ""
+                    } else {
+                        // destination server
+                        if username == destinationUser_TextField.stringValue || accountDict.count == 1 {
+                            JamfProServer.destUser   = ""
+                            JamfProServer.destPwd    = ""
+                            if (url != "") {
+                                if setting.fullGUI {
+                                    destinationUser_TextField.stringValue = username
+                                    dest_pwd_field.stringValue  = password
+                                    self.storedDestUser         = username
+                                    self.storedDestPwd          = password
+                                }
+                                dest_user = username
+                                dest_pass = password
+                                JamfProServer.destination = url
+                                JamfProServer.destUser    = username
+                                JamfProServer.destPwd     = password
+                            } else {
+                                if setting.fullGUI {
+                                    dest_pwd_field.stringValue = ""
+                                    if source_pwd_field.stringValue != "" {
+                                        dest_pwd_field.becomeFirstResponder()
+                                    }
+                                }
+                            }
+                            break
+                        }   // if username == dest_user_field.stringValue
+                        dest_pwd_field.stringValue  = ""
                     }
-                }   // if whichServer - end
+                }   // for (username, password)
             } else {
                 // credentials not found - blank out username / password fields
                 if setting.fullGUI {
@@ -580,15 +594,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                     hideCreds_action(self)
                     if whichServer == "source" {
-                        source_user_field.stringValue = ""
+//                        source_user_field.stringValue = ""
                         source_pwd_field.stringValue = ""
                         self.storedSourceUser = ""
-                        source_user_field.becomeFirstResponder()
+                        sourceUser_TextField.becomeFirstResponder()
                     } else {
-                        dest_user_field.stringValue = ""
+//                        dest_user_field.stringValue = ""
                         dest_pwd_field.stringValue = ""
                         self.storedSourceUser = ""
-                        dest_user_field.becomeFirstResponder()
+                        destinationUser_TextField.becomeFirstResponder()
                     }
                 } else {
                     WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
@@ -596,7 +610,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             }
         } else {
-            source_user_field.stringValue = ""
+            sourceUser_TextField.stringValue = ""
             source_pwd_field.stringValue = ""
             self.storedSourceUser = ""
         }
@@ -629,7 +643,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
                     }
                     JamfProServer.source     = source_jp_server_field.stringValue
-                    JamfProServer.sourceUser = source_user_field.stringValue
+                    JamfProServer.sourceUser = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd  = source_pwd_field.stringValue
                 }
             case "destServer", "destUser", "destPassword":
@@ -639,8 +653,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 if textField.identifier!.rawValue == "destServer" {
                     fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
                 }
+                if textField.identifier!.rawValue == "destUser" {
+                    fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
+                }
                 JamfProServer.destination = dest_jp_server_field.stringValue
-                JamfProServer.destUser    = dest_user_field.stringValue
+                JamfProServer.destUser    = destinationUser_TextField.stringValue
                 JamfProServer.destPwd     = dest_pwd_field.stringValue
             default:
                 break
@@ -652,12 +669,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         export.saveOnly       = false
         export.saveRawXml     = false
         export.saveTrimmedXml = false
-        appInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
+        AppInfo.settings["xml"] = ["saveRawXml":export.saveRawXml,
                                 "saveTrimmedXml":export.saveTrimmedXml,
                                 "saveOnly":export.saveOnly,
                                 "saveRawXmlScope":export.rawXmlScope,
                                 "saveTrimmedXmlScope":export.trimmedXmlScope]
-        saveSettings(settings: appInfo.settings)
+        saveSettings(settings: AppInfo.settings)
         NotificationCenter.default.post(name: .exportOff, object: nil)
         disableSource()
     }
@@ -668,7 +685,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 dest_jp_server_field.isEnabled      = !export.saveOnly
                 destServerList_button.isEnabled     = !export.saveOnly
-                dest_user_field.isEnabled           = !export.saveOnly
+                destinationUser_TextField.isEnabled           = !export.saveOnly
                 dest_pwd_field.isEnabled            = !export.saveOnly
                 siteMigrate_button.isEnabled        = !export.saveOnly
                 destinationLabel_TextField.isHidden = export.saveOnly
@@ -701,8 +718,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     local_serverArray.remove(at: arrayIndex!)
                 }
             }
-            appInfo.settings[serverList] = local_serverArray as Any?
-            NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
+            AppInfo.settings[serverList] = local_serverArray as Any?
+            NSDictionary(dictionary: AppInfo.settings).write(toFile: AppInfo.plistPath, atomically: true)
             switch serverList {
             case "source_server_array":
                 self.sourceServerList_button.removeAllItems()
@@ -719,20 +736,20 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             default: break
             }
         }
-        saveSourceDestInfo(info: appInfo.settings)
+        saveSourceDestInfo(info: AppInfo.settings)
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
-        appInfo.settings                       = info
+        AppInfo.settings                       = info
 
-        appInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue as Any?
-        appInfo.settings["source_user"]        = source_user_field.stringValue as Any?
-        appInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
-        appInfo.settings["dest_user"]          = dest_user_field.stringValue as Any?
-        appInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
-        appInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
+        AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue as Any?
+        AppInfo.settings["source_user"]        = sourceUser_TextField.stringValue as Any?
+        AppInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
+        AppInfo.settings["dest_user"]          = destinationUser_TextField.stringValue as Any?
+        AppInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
+        AppInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
 
-        NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
+        NSDictionary(dictionary: AppInfo.settings).write(toFile: AppInfo.plistPath, atomically: true)
         _ = readSettings()
     }
     
@@ -742,7 +759,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 switch whichServer {
                 case "source":
                     let selectedServer =  sourceServerList_button.titleOfSelectedItem!
-                    let response = Alert().display(header: "", message: "Are you sure you want to remove \(selectedServer) from the list?", secondButton: "Cancel")
+                    let response = Alert().display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
                     if response == "Cancel" {
                         return
                     }
@@ -750,13 +767,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     sourceServerList_button.removeItem(withTitle: sourceServerList_button.titleOfSelectedItem!)
                     if source_jp_server_field.stringValue == selectedServer {
                         source_jp_server_field.stringValue = ""
-                        source_user_field.stringValue      = ""
+                        sourceUser_TextField.stringValue      = ""
                         source_pwd_field.stringValue       = ""
                     }
-                    appInfo.settings["source_server_array"] = sourceServerArray as Any?
+                    AppInfo.settings["source_server_array"] = sourceServerArray as Any?
                 case "dest":
                     let selectedServer =  destServerList_button.titleOfSelectedItem!
-                    let response = Alert().display(header: "", message: "Are you sure you want to remove \(selectedServer) from the list?", secondButton: "Cancel")
+                    let response = Alert().display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
                     if response == "Cancel" {
                         return
                     }
@@ -764,14 +781,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     destServerList_button.removeItem(withTitle: destServerList_button.titleOfSelectedItem!)
                     if dest_jp_server_field.stringValue == selectedServer {
                         dest_jp_server_field.stringValue = ""
-                        dest_user_field.stringValue      = ""
+                        destinationUser_TextField.stringValue      = ""
                         dest_pwd_field.stringValue       = ""
                     }
-                    appInfo.settings["dest_server_array"] = destServerArray as Any?
+                    AppInfo.settings["dest_server_array"] = destServerArray as Any?
                 default:
                     break
                 }
-                saveSourceDestInfo(info: appInfo.settings)
+                saveSourceDestInfo(info: AppInfo.settings)
                 
                 
                 return
@@ -791,7 +808,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             // see if we're migrating from files or a server
             serverOrFiles() { [self]
                 (result: String) in
-                saveSourceDestInfo(info: appInfo.settings)
+                saveSourceDestInfo(info: AppInfo.settings)
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
         case "dest":
@@ -804,7 +821,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
             JamfProServer.destination = destServerList_button.titleOfSelectedItem!
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
-            fetchPassword(whichServer: "dest", url: self.dest_jp_server_field.stringValue)
+            fetchPassword(whichServer: "dest", url: JamfProServer.destination)
             // reset list of available sites
             if siteMigrate_button.state.rawValue == 1 {
                 siteMigrate_button.state = NSControl.StateValue(rawValue: 0)
@@ -859,18 +876,18 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     func showHideUserCreds(x: Bool) {
         sourceUsername_TextField.isHidden = x
         sourcePassword_TextField.isHidden = x
-        source_user_field.isHidden  = x
+        sourceUser_TextField.isHidden  = x
         source_pwd_field.isHidden   = x
     }
     
     override func viewDidAppear() {
         // set tab order
         // Use interface builder, right click a field and drag nextKeyView to the next
-        source_jp_server_field.nextKeyView  = source_user_field
-        source_user_field.nextKeyView       = source_pwd_field
+        source_jp_server_field.nextKeyView  = sourceUser_TextField
+        sourceUser_TextField.nextKeyView       = source_pwd_field
         source_pwd_field.nextKeyView        = dest_jp_server_field
-        dest_jp_server_field.nextKeyView    = dest_user_field
-        dest_user_field.nextKeyView         = dest_pwd_field
+        dest_jp_server_field.nextKeyView    = destinationUser_TextField
+        destinationUser_TextField.nextKeyView         = dest_pwd_field
         
     }   //viewDidAppear - end
     
@@ -892,22 +909,22 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             self.view.wantsLayer = true
             source_jp_server_field.drawsBackground = true
             source_jp_server_field.backgroundColor = appColor.highlight[whichColorScheme]
-            source_user_field.drawsBackground = true
-            source_user_field.backgroundColor = appColor.highlight[whichColorScheme]
+            sourceUser_TextField.drawsBackground = true
+            sourceUser_TextField.backgroundColor = appColor.highlight[whichColorScheme]
             source_pwd_field.drawsBackground = true
             source_pwd_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_jp_server_field.drawsBackground = true
             dest_jp_server_field.backgroundColor = appColor.highlight[whichColorScheme]
             dest_pwd_field.backgroundColor   = appColor.highlight[whichColorScheme]
-            dest_user_field.drawsBackground  = true
-            dest_user_field.backgroundColor  = appColor.highlight[whichColorScheme]
+            destinationUser_TextField.drawsBackground  = true
+            destinationUser_TextField.backgroundColor  = appColor.highlight[whichColorScheme]
             dest_pwd_field.drawsBackground   = true
             self.view.layer?.backgroundColor = appColor.background[whichColorScheme]
         }
     }
     
     
-    var jamfpro: JamfPro?
+//    var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
 //        hardSetLdapId = false
@@ -915,8 +932,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        debug = true
         
         // Do any additional setup after loading the view
-        if !FileManager.default.fileExists(atPath: appInfo.bookmarksPath) {
-            FileManager.default.createFile(atPath: appInfo.bookmarksPath, contents: nil)
+        if !FileManager.default.fileExists(atPath: AppInfo.bookmarksPath) {
+            FileManager.default.createFile(atPath: AppInfo.bookmarksPath, contents: nil)
         }
         ViewController().rmDELETE()
         
@@ -930,10 +947,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         NotificationCenter.default.post(name: .setColorScheme_sdvc, object: self)
         
         source_jp_server_field.delegate = self
-        source_user_field.delegate      = self
+        sourceUser_TextField.delegate      = self
         source_pwd_field.delegate       = self
         dest_jp_server_field.delegate   = self
-        dest_user_field.delegate        = self
+        destinationUser_TextField.delegate        = self
         dest_pwd_field.delegate         = self
         
         jamfpro = JamfPro(sdController: self)
@@ -993,17 +1010,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
         
         if setting.fullGUI {
-            if !FileManager.default.fileExists(atPath: appInfo.plistPath) {
+            if !FileManager.default.fileExists(atPath: AppInfo.plistPath) {
                 do {
-                    if !FileManager.default.fileExists(atPath: appInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")) {
+                    if !FileManager.default.fileExists(atPath: AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")) {
                         // create directory
-                        try FileManager.default.createDirectory(atPath: appInfo.plistPath.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
+                        try FileManager.default.createDirectory(atPath: AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
                     }
-                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: appInfo.plistPath)
+                    try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: AppInfo.plistPath)
                     WriteToLog().message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(appInfo.plistPath)\n")
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(appInfo.plistPath)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(AppInfo.plistPath)\n")
+                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(AppInfo.plistPath)\n")
                     NSApplication.shared.terminate(self)
                 }
             }
@@ -1012,53 +1029,52 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //            plistData -> appInfo.settings
             _ = readSettings()
 
-            if appInfo.settings["source_jp_server"] as? String != nil {
-                source_jp_server = appInfo.settings["source_jp_server"] as! String
+            if AppInfo.settings["source_jp_server"] as? String != nil {
+                source_jp_server = AppInfo.settings["source_jp_server"] as! String
                 JamfProServer.source = source_jp_server
                 
-                if setting.fullGUI {
+//                if setting.fullGUI {
                     source_jp_server_field.stringValue = source_jp_server
                     if source_jp_server.count > 0 {
                         self.browseFiles_button.isHidden = (source_jp_server.first! == "/") ? false:true
                     }
-                }
+//                }
             } else {
 //                if setting.fullGUI {
                     self.browseFiles_button.isHidden = true
 //                }
             }
             
-            if appInfo.settings["source_user"] != nil {
-                source_user = appInfo.settings["source_user"] as! String
+            if AppInfo.settings["source_user"] != nil {
+                source_user = AppInfo.settings["source_user"] as! String
 //                if setting.fullGUI {
-                    source_user_field.stringValue = source_user
+                    sourceUser_TextField.stringValue = source_user
 //                }
                 storedSourceUser = source_user
             }
             
-            if appInfo.settings["dest_jp_server"] != nil {
-                dest_jp_server = appInfo.settings["dest_jp_server"] as! String
-//                if setting.fullGUI {
-                    dest_jp_server_field.stringValue = dest_jp_server
-//                }
+            if AppInfo.settings["dest_jp_server"] != nil {
+                dest_jp_server = AppInfo.settings["dest_jp_server"] as! String
+                dest_jp_server_field.stringValue = dest_jp_server
+                JamfProServer.destination = dest_jp_server
             }
             
-            if appInfo.settings["dest_user"] != nil {
-                dest_user = appInfo.settings["dest_user"] as! String
+            if AppInfo.settings["dest_user"] != nil {
+                dest_user = AppInfo.settings["dest_user"] as! String
 //                if setting.fullGUI {
-                    dest_user_field.stringValue = dest_user
+                    destinationUser_TextField.stringValue = dest_user
 //                }
             }
             
 //            if setting.fullGUI {
-                if appInfo.settings["source_server_array"] != nil {
-                    sourceServerArray = appInfo.settings["source_server_array"] as! [String]
+                if AppInfo.settings["source_server_array"] != nil {
+                    sourceServerArray = AppInfo.settings["source_server_array"] as! [String]
                     for theServer in sourceServerArray {
                         self.sourceServerList_button.addItems(withTitles: [theServer])
                     }
                 }
-                if appInfo.settings["dest_server_array"] != nil {
-                    destServerArray = appInfo.settings["dest_server_array"] as! [String]
+                if AppInfo.settings["dest_server_array"] != nil {
+                    destServerArray = AppInfo.settings["dest_server_array"] as! [String]
                     for theServer in destServerArray {
                         self.destServerList_button.addItems(withTitles: [theServer])
                     }
@@ -1091,8 +1107,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //                }
             
             // read xml settings - start
-            if appInfo.settings["xml"] != nil {
-                xmlPrefOptions       = appInfo.settings["xml"] as! Dictionary<String,Bool>
+            if AppInfo.settings["xml"] != nil {
+                xmlPrefOptions       = AppInfo.settings["xml"] as! Dictionary<String,Bool>
 
                 if (xmlPrefOptions["saveRawXml"] != nil) {
                     export.saveRawXml = xmlPrefOptions["saveRawXml"]!
@@ -1127,14 +1143,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             } else {
                 // set default values
                 _ = readSettings()
-                appInfo.settings["xml"] = ["saveRawXml":false,
+                AppInfo.settings["xml"] = ["saveRawXml":false,
                                     "saveTrimmedXml":false,
                                     "export.saveOnly":false,
                                     "saveRawXmlScope":true,
                                     "saveTrimmedXmlScope":true] as Any
             }
             // update plist
-            NSDictionary(dictionary: appInfo.settings).write(toFile: appInfo.plistPath, atomically: true)
+            NSDictionary(dictionary: AppInfo.settings).write(toFile: AppInfo.plistPath, atomically: true)
             // read xml settings - end
             // read environment settings - end
             
@@ -1162,8 +1178,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if (JamfProServer.source != "") && JamfProServer.importFiles == 0 {
             fetchPassword(whichServer: "source", url: JamfProServer.source)
         }
-        if (dest_jp_server != "") {
-            fetchPassword(whichServer: "dest", url: dest_jp_server)
+        if (JamfProServer.destination != "") {
+            fetchPassword(whichServer: "dest", url: JamfProServer.destination)
         }
 //        if (storedSourcePwd == "") || (storedDestPwd == "") {
 //            self.validCreds = false
