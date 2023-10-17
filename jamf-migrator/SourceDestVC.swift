@@ -15,7 +15,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
 //    var exportedFilesUrl = URL(string: "")
-    var jamfpro: JamfPro?
+//    var jamfpro: JamfPro?
     
     var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
@@ -443,7 +443,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
                     
-            jamfpro!.getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
+            JamfPro().getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: destBase64Creds, localSource: false) { [self]
                 (authResult: (Int,String)) in
                 let (authStatusCode, _) = authResult
 
@@ -953,7 +953,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         destinationUser_TextField.delegate        = self
         dest_pwd_field.delegate         = self
         
-        jamfpro = JamfPro(sdController: self)
+//        jamfpro = JamfPro(sdController: self)
         fileImport = userDefaults.bool(forKey: "fileImport")
         JamfProServer.stickySession = userDefaults.bool(forKey: "stickySession")
         stickySessions_label.isHidden = !JamfProServer.stickySession

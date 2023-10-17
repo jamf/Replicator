@@ -317,7 +317,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var migrateDependencies: NSButton!
     @IBOutlet weak var srcSrvTableView: NSTableView!
     
-    var jamfpro: JamfPro?
+//    var jamfpro: JamfPro?
     
     // selective migration vars
     var advancedMigrateDict     = [Int:[String:[String:String]]]()    // dictionary of dependencies for the object we're migrating - id:category:dictionary of dependencies
@@ -530,7 +530,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var migrateOrWipe: String = ""
     var httpStatusCode: Int   = 0
     var URLisValid: Bool      = true
-    var processGroup          = DispatchGroup()
+//    var processGroup          = DispatchGroup()
     
      func setTab_fn(selectedTab: String) {
          DispatchQueue.main.async {
@@ -998,7 +998,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 // check authentication - start
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
-                jamfpro!.getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
+                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
                     (authResult: (Int,String)) in
                     let (authStatusCode, _) = authResult
                     if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1020,7 +1020,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-                        jamfpro!.getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
+                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) {
@@ -4133,7 +4133,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints] token check")
@@ -4536,7 +4536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // for the Jamf Pro API - used for buildings
     func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints2] token check")
@@ -4810,7 +4810,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         
-        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[RemoveEndpoints] token check")
@@ -5051,7 +5051,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(("skipping lookup","skipping lookup"))
             return
         }
-        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[existingEndpoints] token check")
@@ -5514,7 +5514,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-        jamfpro!.getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[getDependencies] token check")
@@ -7858,7 +7858,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
         
-        jamfpro = JamfPro(controller: self)
+//        jamfpro = JamfPro(controller: self)
         
         exportedFilesUrl = URL(string: userDefaults.string(forKey: "saveLocation") ?? "")
         

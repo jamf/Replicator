@@ -11,14 +11,15 @@ import Cocoa
 class Jpapi: NSObject, URLSessionDelegate {
     
 //    var theUapiQ = OperationQueue() // create operation queue for API calls
-    var jamfpro: JamfPro?
+//    var jamfpro: JamfPro?
+//    var jamfpro = JamfPro()
     
     func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
-        jamfpro = JamfPro(controller: ViewController())
+//        jamfpro = JamfPro(controller: ViewController())
         
         let whichServer = (serverUrl == JamfProServer.source) ? "source":"destination"
-        jamfpro!.getToken(whichServer: whichServer, serverUrl: serverUrl, base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
+        JamfPro().getToken(whichServer: whichServer, serverUrl: serverUrl, base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[jpapi.action] token check")
