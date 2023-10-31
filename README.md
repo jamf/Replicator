@@ -179,6 +179,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.2.2**<br>
+Fix version lookup with Jamf Pro 11, background threading issue.
+
 **v7.2.1**<br>
 Fix issue logging into Jamf Pro 11, issue #91.  Update token refresh method.
 
