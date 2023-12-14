@@ -70,12 +70,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //            preferredContentSize = CGSize(width: 848, height: 55)
             preferredContentSize = CGSize(width: 848, height: 67)
             hideCreds_button.toolTip = "show username/password fields"
-            destUsername_TextField.isHidden = true
+            sourceUsername_TextField.isHidden = true
+            destUsername_TextField.isHidden   = true
             showHideUserCreds(x: true)
         } else {
 //            preferredContentSize = CGSize(width: 848, height: 120)
             preferredContentSize = CGSize(width: 848, height: 182)
             hideCreds_button.toolTip = "hide username/password fields"
+            sourceUsername_TextField.isHidden = false
             destUsername_TextField.isHidden = false
             if fileImport_button.state.rawValue == 0 {
                 showHideUserCreds(x: false)

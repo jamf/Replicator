@@ -471,9 +471,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var totalFailed    = 0
     var totalCompleted = 0
     var createPending  = 0
-    var create2Pending = 0
+//    var create2Pending = 0
     var createArray    = [CreateInfo]()
-    var create2Array   = [CreateInfo]()
+//    var create2Array   = [CreateInfo]()
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
     
@@ -990,15 +990,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.sourceCreds = ":"
                 }
                 self.sourceBase64Creds = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.base64Creds["source"] = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                 
                 self.destCreds = "\(JamfProServer.destUser):\(JamfProServer.destPwd)"
 //                self.destCreds = "\(self.dest_user):\(self.dest_pass)"
                 self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.base64Creds["dest"] = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                 // set credentials - end
                 
                 // check authentication - start
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
-                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
+                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
                     (authResult: (Int,String)) in
                     let (authStatusCode, _) = authResult
                     if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1020,7 +1022,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
+                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) {
@@ -1359,6 +1361,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.objectsToMigrate.reverse()
                     // set server and credentials used for wipe
                     self.sourceBase64Creds = self.destBase64Creds
+                    JamfProServer.base64Creds["source"] = self.destBase64Creds
                     JamfProServer.source  = self.dest_jp_server
                     
                     JamfProServer.authCreds["source"]   = JamfProServer.authCreds["dest"]
@@ -1626,7 +1629,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)"
         
-        Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: self.sourceBase64Creds, theEndpoint: endpointToLookup)  {
+        Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup)  {
             (result: [String:AnyObject]) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
             
@@ -2064,7 +2067,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+//            print("[getEndpoints] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -2119,7 +2123,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     let displayName = record["name"] as! String
                                                     
                                                     print("[getEndpoint] \(#line) call PackagesDelegate().getFilename for source")
-                                                    PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: sourceBase64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
+                                                    PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
                                                         (result: (Int,String)) in
                                                         let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
 //                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
@@ -3427,8 +3431,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let request = NSMutableURLRequest(url: encodedURL! as URL)
                     request.httpMethod = "GET"
                     let configuration = URLSessionConfiguration.ephemeral
-//                        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                    configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+
+                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                         (data, response, error) -> Void in
@@ -4066,7 +4070,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 destEndpoint = theEndpoint
             }
             
-            XmlDelegate().apiAction(method: "GET", theServer: dest_jp_server, base64Creds: destBase64Creds, theEndpoint: "\(destEndpoint)/id/\(destEpId)") {
+            XmlDelegate().apiAction(method: "GET", theServer: dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(destEndpoint)/id/\(destEpId)") {
                 (xmlResult: (Int,String)) in
                 let (_, fullXML) = xmlResult
                 
@@ -4133,7 +4137,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints] token check")
@@ -4278,8 +4282,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             request.httpMethod = "PUT"
                         }
                         let configuration = URLSessionConfiguration.default
-        //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+
+                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                         
                         // sticky session
                         let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
@@ -4536,7 +4540,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // for the Jamf Pro API - used for buildings
     func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints2] token check")
@@ -4810,7 +4814,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[RemoveEndpoints] token check")
@@ -4907,8 +4911,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let request = NSMutableURLRequest(url: encodedURL! as URL)
                         request.httpMethod = "DELETE"
                         let configuration = URLSessionConfiguration.ephemeral
-        //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+
+                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                         //request.httpBody = encodedXML!
                         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                         let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -5051,7 +5055,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(("skipping lookup","skipping lookup"))
             return
         }
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[existingEndpoints] token check")
@@ -5211,7 +5215,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 destRequest.httpMethod = "GET"
                                 let destConf = URLSessionConfiguration.default
 
-                                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                                destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
                                 
                                 // sticky session
         //                        print("[existingEndpoints] JamfProServer.sessionCookie.count: \(JamfProServer.sessionCookie.count)")
@@ -5295,7 +5299,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 //print("package ID: \(destRecord["id"] as! Int)")
                                                             }
                                                             
-                                                            PackagesDelegate().filenameIdDict(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
+                                                            PackagesDelegate().filenameIdDict(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
                                                                 (currentDestinationPackages: [String:Int]) in
                                                                 self.currentEPs = currentDestinationPackages
                                                                 setting.waitingForPackages = false
@@ -5514,7 +5518,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[getDependencies] token check")
@@ -5631,7 +5635,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         //                             print("lookup package filename for display name \(String(describing: local_name!))")
                                      let local_id   = (theObject as! [String:Any])["id"]
                                      
-                                     PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: self.sourceBase64Creds, theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on, currentTry: 1) {
+                                     PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on, currentTry: 1) {
                                          (result: (Int,String)) in
                                          let (_,packageFilename) = result
                                          if packageFilename != "" {
@@ -6781,7 +6785,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))\n") }
                                     var policyIconDict = iconfiles.policyDict
 //                                    Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "policies/id/\(thePolicyID)/subset/SelfService")  {
-                                    Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: self.destBase64Creds, theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
+                                    Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (result: [String:AnyObject]) in
 //                                        print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.\n") }
@@ -6971,15 +6975,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                         
                         var request = URLRequest(url:serverURL)
-                        request.addValue("\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", forHTTPHeaderField: "Authorization")
+                        request.addValue("\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.base64Creds["dest"] ?? ""))", forHTTPHeaderField: "Authorization")
                         request.addValue("\(AppInfo.userAgentHeader)", forHTTPHeaderField: "User-Agent")
-                        // add headers for basic authentication - old
-//                        if setting.csa {
-//                            request.addValue("Bearer \(JamfProServer.authCreds["dest"]!)", forHTTPHeaderField: "Authorization")
-//                        } else {
-//                            request.addValue("Basic \(self.destBase64Creds)", forHTTPHeaderField: "Authorization")
-//                        }
-                        
                         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
                         
                         // prep the data for uploading
@@ -7096,8 +7093,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 request.httpMethod = action
                
                 let configuration = URLSessionConfiguration.default
-//                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -8145,6 +8142,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         DispatchQueue.main.async {
             self.clearSelectiveList()
         }
+        JamfProServer.validToken["source"] = false
+        JamfProServer.validToken["dest"]   = false
         
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir)) {
             if LogLevel.debug { WriteToLog().message(stringOfText: "Disabling delete mode\n") }

@@ -43,7 +43,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 xmlRequest.httpMethod = "\(method.uppercased())"
                 let destConf = URLSessionConfiguration.default
 
-                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                 
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {

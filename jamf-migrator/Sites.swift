@@ -55,8 +55,8 @@ class Sites: NSObject, URLSessionDelegate {
         //        print("serverRequest: \(serverRequest)")
         serverRequest.httpMethod = "GET"
         let serverConf = URLSessionConfiguration.ephemeral
-//         ["Authorization" : "Basic \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
-        serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+
+        serverConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in
