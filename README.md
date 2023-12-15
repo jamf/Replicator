@@ -78,7 +78,9 @@ Files exported using jamf-migrator can be imported into another Jamf Pro server.
 In addition to scoping options the following are available:
 * Policies can be copied in a disabled state
 * Able to copy only items missing from the destination server - create only
-* Able to copy only items currently on the destination server - update only
+* Able to copy only items currently on the destination server - update only<br>
+
+** object name is used to determine whether or not it is on the destination server **
 
 ![](./jamf-migrator/images/copyPrefs.png)
 </br></br>
