@@ -13,7 +13,7 @@ import CoreFoundation
 class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
 //    let userDefaults = UserDefaults.standard
-    
+    // copy prefs
     @IBOutlet weak var copyScopeOCP_button: NSButton!       // os x config profiles
     @IBOutlet weak var copyScopeMA_button: NSButton!        // mac applications
     @IBOutlet weak var copyScopeRS_button: NSButton!        // restricted software
@@ -24,6 +24,9 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var copyScopeScg_button: NSButton!       // static computer groups
     @IBOutlet weak var copyScopeSig_button: NSButton!       // static ios groups
     @IBOutlet weak var copyScopeUsers_button: NSButton!     // static user groups
+    
+    @IBOutlet weak var onlyCopyMissing_button: NSButton!
+    @IBOutlet weak var onlyCopyExisting_button: NSButton!
     
     // export prefs
     @IBOutlet weak var saveRawXml_button: NSButton!
@@ -66,7 +69,26 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var prefLdapPwd_textfield: NSSecureTextField!
     @IBOutlet weak var prefFsRwPwd_textfield: NSSecureTextField!
     @IBOutlet weak var prefFsRoPwd_textfield: NSSecureTextField!
-
+    
+    
+    @IBAction func onlyCopy_action(_ sender: NSButton) {
+        let whichButton = sender.identifier?.rawValue
+        switch whichButton {
+        case "copyMissing":
+            if onlyCopyMissing_button.state == .on {
+                onlyCopyExisting_button.state = .off
+            }
+        case "copyExisting":
+            if onlyCopyExisting_button.state == .on {
+                onlyCopyMissing_button.state = .off
+            }
+        default:
+            break
+        }
+        userDefaults.set(onlyCopyMissing_button.state.rawValue, forKey: "copyMissing")
+        userDefaults.set(onlyCopyExisting_button.state.rawValue, forKey: "copyExisting")
+    }
+    
     @IBAction func migrateAsManaged_action(_ sender: Any) {
         if "\(sender as AnyObject)" != "viewDidAppear" {
             userDefaults.set(migrateAsManaged_button.state.rawValue, forKey: "migrateAsManaged")
@@ -401,7 +423,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             forceBasicAuth_button.state = NSControl.StateValue(userDefaults.integer(forKey: "forceBasicAuth"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
-            userDefaults.synchronize()
+//            userDefaults.synchronize()
         }
         
         _ = readSettings()
@@ -522,6 +544,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             copyScopeScg_button.state    = boolToState(TF: scopeScgCopy)
             copyScopeSig_button.state    = boolToState(TF: scopeSigCopy)
             copyScopeUsers_button.state  = boolToState(TF: scopeUsersCopy)
+            
+//            print("[Copy]  only copy missing: \(userDefaults.integer(forKey: "copyMissing"))")
+//            print("[Copy] only copy existing: \(userDefaults.integer(forKey: "copyExisting"))")
+            onlyCopyMissing_button.state = (userDefaults.integer(forKey: "copyMissing") == 1) ? .on:.off
+            onlyCopyExisting_button.state = (userDefaults.integer(forKey: "copyExisting") == 1) ? .on:.off
         }
         if self.title! == "Export" {
             var isDir: ObjCBool = true

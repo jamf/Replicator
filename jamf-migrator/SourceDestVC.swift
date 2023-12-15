@@ -558,6 +558,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             break
                         }   // if username == source_user_field.stringValue
                         source_pwd_field.stringValue  = ""
+                        hideCreds_button.state = .on
+                        hideCreds_action(self)
                     } else {
                         // destination server
                         if username == destinationUser_TextField.stringValue || accountDict.count == 1 {
@@ -586,6 +588,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             break
                         }   // if username == dest_user_field.stringValue
                         dest_pwd_field.stringValue  = ""
+                        hideCreds_button.state = .on
+                        hideCreds_action(self)
                     }
                 }   // for (username, password)
             } else {
@@ -769,7 +773,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     sourceServerList_button.removeItem(withTitle: sourceServerList_button.titleOfSelectedItem!)
                     if source_jp_server_field.stringValue == selectedServer {
                         source_jp_server_field.stringValue = ""
-                        sourceUser_TextField.stringValue      = ""
+                        sourceUser_TextField.stringValue   = ""
                         source_pwd_field.stringValue       = ""
                     }
                     AppInfo.settings["source_server_array"] = sourceServerArray as Any?
@@ -876,10 +880,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }   // func serverOrFiles() - end
     
     func showHideUserCreds(x: Bool) {
-        sourceUsername_TextField.isHidden = x
-        sourcePassword_TextField.isHidden = x
-        sourceUser_TextField.isHidden  = x
-        source_pwd_field.isHidden   = x
+        let hideState = hideCreds_button.state == .on ? x:true
+        sourceUsername_TextField.isHidden = hideState
+        sourcePassword_TextField.isHidden = hideState
+        sourceUser_TextField.isHidden     = hideState
+        source_pwd_field.isHidden         = hideState
     }
     
     override func viewDidAppear() {

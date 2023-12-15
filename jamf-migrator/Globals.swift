@@ -10,6 +10,7 @@ import Cocoa
 import Foundation
 
 public let userDefaults = UserDefaults.standard
+public var maxConcurrentThreads = 2
 
 class appColor: NSColor {
     static let schemes:[String]            = ["casper", "classic"]

@@ -33,7 +33,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         
         let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
-        WriteToLog().message(stringOfText: "[JamfPro.getToken] Force basic authentication on \(serverUrl): \(forceBasicAuth)\n")
+//        WriteToLog().message(stringOfText: "[JamfPro.getToken] Force basic authentication on \(serverUrl): \(forceBasicAuth)\n")
         
 //        print("\(serverUrl.prefix(4))")
         if serverUrl.prefix(4) != "http" {
@@ -209,7 +209,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             })
             task.resume()
         } else {
-            WriteToLog().message(stringOfText: "[JamfPro.getToken] Use existing token from \(String(describing: tokenUrl!))\n")
+//            WriteToLog().message(stringOfText: "[JamfPro.getToken] Use existing token from \(String(describing: tokenUrl!))\n")
             completion((200, "success"))
             return
         }

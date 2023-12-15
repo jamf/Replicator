@@ -10,10 +10,10 @@ import AppKit
 import Cocoa
 import Foundation
 
-// endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool
 class CreateInfo: NSObject {
     @objc var endpointType    : String
     @objc var endPointXml     : String
+    @objc var endPointJSON    : [String:Any]
     @objc var endpointCurrent : Int
     @objc var endpointCount   : Int
     @objc var action          : String
@@ -24,9 +24,10 @@ class CreateInfo: NSObject {
     @objc var ssIconUri       : String
     @objc var retry           : Bool
     
-    init(endpointType: String, endPointXml: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool) {
+    init(endpointType: String, endPointXml: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool) {
         self.endpointType    = endpointType
         self.endPointXml     = endPointXml
+        self.endPointJSON    = endPointJSON
         self.endpointCurrent = endpointCurrent
         self.endpointCount   = endpointCount
         self.action          = action
@@ -466,14 +467,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var summaryDict           = [String:[String:[String]]]()    // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
-    var totalCreated   = 0
-    var totalUpdated   = 0
-    var totalFailed    = 0
-    var totalCompleted = 0
-    var createPending  = 0
-//    var create2Pending = 0
-    var createArray    = [CreateInfo]()
-//    var create2Array   = [CreateInfo]()
+    var totalCreated    = 0
+    var totalUpdated    = 0
+    var totalFailed     = 0
+    var totalCompleted  = 0
+    var createPending   = 0
+    var createArray     = [CreateInfo]()
+    var createArrayJson = [CreateInfo]()
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
     
@@ -524,9 +524,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
     var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
-    
-    var concurrentThreads = 2
-    
+        
     var migrateOrWipe: String = ""
     var httpStatusCode: Int   = 0
     var URLisValid: Bool      = true
@@ -1387,14 +1385,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 case "computergroups", "smartcomputergroups", "staticcomputergroups":
                     if self.smartComputerGrpsSelected {
                         self.progressCountArray["smartcomputergroups"] = 0
-                        self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["staticcomputergroups"]       = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartcomputergroups"]        = ["get":0]
                         self.putCounters["smartcomputergroups"]        = ["put":0]
                     }
                     if self.staticComputerGrpsSelected {
                         self.progressCountArray["staticcomputergroups"] = 0
-                        self.counters["staticcomputergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["staticcomputergroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["staticcomputergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticcomputergroups"]        = ["get":0]
                         self.putCounters["staticcomputergroups"]        = ["put":0]
@@ -1403,14 +1401,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 case "mobiledevicegroups":
                     if self.smartIosGrpsSelected {
                         self.progressCountArray["smartmobiledevicegroups"] = 0
-                        self.counters["smartmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["smartmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["smartmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartmobiledevicegroups"]        = ["get":0]
                         self.putCounters["smartmobiledevicegroups"]        = ["put":0]
                     }
                     if self.staticIosGrpsSelected {
                         self.progressCountArray["staticmobiledevicegroups"] = 0
-                        self.counters["staticmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["staticmobiledevicegroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["staticmobiledevicegroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticmobiledevicegroups"]        = ["get":0]
                         self.putCounters["staticmobiledevicegroups"]        = ["put":0]
@@ -1419,14 +1417,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 case "usergroups":
                     if self.smartUserGrpsSelected {
                         self.progressCountArray["smartusergroups"] = 0
-                        self.counters["smartusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["smartusergroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["smartusergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartusergroups"]        = ["get":0]
                         self.putCounters["smartusergroups"]        = ["put":0]
                     }
                     if self.staticUserGrpsSelected {
                         self.progressCountArray["staticusergroups"] = 0
-                        self.counters["staticusergroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["staticusergroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["staticusergroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["staticusergroups"]        = ["get":0]
                         self.putCounters["staticusergroups"]        = ["put":0]
@@ -1435,14 +1433,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 case "accounts":
                     if self.jamfUserAccountsSelected {
                         self.progressCountArray["jamfusers"] = 0
-                        self.counters["jamfusers"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["jamfusers"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["jamfusers"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["jamfusers"]        = ["get":0]
                         self.putCounters["jamfusers"]        = ["put":0]
                     }
                     if self.jamfGroupAccountsSelected {
                         self.progressCountArray["jamfgroups"] = 0
-                        self.counters["jamfgroups"]           = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters["jamfgroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict["jamfgroups"]        = ["create":[], "update":[], "fail":[]]
                         self.getCounters["jamfgroups"]        = ["get":0]
                         self.putCounters["jamfgroups"]        = ["put":0]
@@ -1450,7 +1448,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
                 default:
                     self.progressCountArray["\(currentNode)"] = 0
-                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "total":0]
+                    self.counters[currentNode] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                     self.summaryDict[currentNode] = ["create":[], "update":[], "fail":[]]
                     self.getCounters[currentNode] = ["get":0]
                     self.putCounters[currentNode] = ["put":0]
@@ -2048,8 +2046,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)\n") }
         
-        concurrentThreads = setConcurrentThreads()
-        theOpQ.maxConcurrentOperationCount = concurrentThreads
+        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         if setting.fullGUI {
@@ -2068,7 +2065,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let configuration = URLSessionConfiguration.ephemeral
             
             configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//            print("[getEndpoints] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
+            print("[getEndpoints] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -2115,6 +2112,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 endpointsRead += 1
                                                 // print("[endpointsRead += 1] \(endpoint)")
                                                 endpointCountDict[endpoint] = endpointCount
+                                                
+                                                
                                                 for i in (0..<endpointCount) {
                                                     if i == 0 { availableObjsToMigDict.removeAll() }
 
@@ -2223,6 +2222,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             
                                                                             DispatchQueue.main.async { [self] in
                                                                                 srcSrvTableView.reloadData()
+                                                                                srcSrvTableView.scrollRowToVisible(staticSourceDataArray.count-1)
+                                                                                srcSrvTableView.scrollToEndOfDocument(nil)
                                                                             }
                                                                             // slight delay in building the list - visual effect
                                                                             usleep(delayInt)
@@ -2246,6 +2247,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         }
                                                     }
                                                 } // for i - end
+                                                
+                                                
                                             } // existingEndpoints(skipLookup: false, theDestEndpoint - end
                                         } else {
                                             // no packages were found
@@ -2319,11 +2322,27 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                                             if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                if (userDefaults.integer(forKey: "copyMissing") != 1) {
+                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                } else {
+                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                    createEndpointsQueue(endpointType: endpoint, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        (result: String) in
+                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                    }
+                                                                }
                                                             } else {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                if (userDefaults.integer(forKey: "copyExisting") != 1) {
+                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                } else {
+                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                    createEndpointsQueue(endpointType: endpoint, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        (result: String) in
+                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                    }
+                                                                }
                                                             }
                                                         } else {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -3336,8 +3355,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
-        concurrentThreads = setConcurrentThreads()
-        theOpQ.maxConcurrentOperationCount = concurrentThreads
+        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
@@ -3543,7 +3561,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
 //        self.getStatusUpdate2(endpoint: endpoint, total: endpointCount) -- causing duplicate counts
         
-        self.CreateEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+        self.createEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
             if endpointCurrent == endpointCount {
@@ -4086,7 +4104,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                self.CreateEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+                self.createEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
 //                self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] \(result)\n") }
@@ -4111,31 +4129,63 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
     }
-    func CreateEndpointsQueue(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-        createArray.append(CreateInfo(endpointType: endpointType, endPointXml: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
+    
+    func createEndpointsQueue(endpointType: String, endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        completion("return from CreateEndpointsQueue")
+        completion("return from createEndpointsQueue")
+        
+        if (userDefaults.integer(forKey: "copyExisting") == 1 && action == "create") || (userDefaults.integer(forKey: "copyMissing") == 1 && action == "update") {
+            counters[endpointType]?["skipped"]! += 1
+            putStatusUpdate2(endpoint: endpointType, total: endpointCount)
+            return
+        }
+        
         
         destEPQ.async { [self] in
-            
-            while createPending > 0 || createArray.count > 0 {
-                if createPending < setConcurrentThreads() && createArray.count > 0 {
-                    createPending += 1
-                    let nextEndpoint = createArray[0]
-                    createArray.remove(at: 0)
-                    CreateEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
-                        (result: String) in
-                        createPending -= 1
+            switch endpointType {
+            case "buildings":
+                
+                while createPending > 0 || createArray.count > 0 {
+                    if createPending < maxConcurrentThreads && createArray.count > 0 {
+                        createPending += 1
+                        let nextEndpoint = createArray[0]
+                        createArray.remove(at: 0)
+ 
+                        createEndpoints2(endpointType: endpointType, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                            (result: String) in
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
+                            if endpointCurrent == endpointCount {
+                                completion("last")
+                            } else {
+                                completion("")
+                            }
+                        }
+                    } else {
+                        sleep(1)
                     }
-                } else {
-                    sleep(1)
+                }
+            default:
+                createArray.append(CreateInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
+                
+                while createPending > 0 || createArray.count > 0 {
+                    if createPending < maxConcurrentThreads && createArray.count > 0 {
+                        createPending += 1
+                        let nextEndpoint = createArray[0]
+                        createArray.remove(at: 0)
+                        
+                        createEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
+                                (result: String) in
+                                createPending -= 1
+                        }
+                    } else {
+                        sleep(1)
+                    }
                 }
             }
-            
         }
         
     }
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func createEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
@@ -4154,13 +4204,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)\n") }
 
                 if counters[endpointType] == nil {
-                    counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
         //            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                 } else {
                     counters[endpointType]!["total"] = endpointCount
                 }
                 if summaryDict[endpointType] == nil {
-        //            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+        //            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                     summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                 }
 
@@ -4194,8 +4244,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
                 
-                concurrentThreads = setConcurrentThreads()
-                theCreateQ.maxConcurrentOperationCount = concurrentThreads
+                theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
                 let semaphore = DispatchSemaphore(value: 0)
                 
         //        print("endPointXML:\n\(endPointXML)")
@@ -4403,7 +4452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4414,7 +4463,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["category"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                             }
                                             
@@ -4424,7 +4473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["department"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                             }
                                             
@@ -4434,7 +4483,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["building"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4446,7 +4495,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["distribution_point", "url"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4538,7 +4587,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func createEndpoints - end
     
     // for the Jamf Pro API - used for buildings
-    func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func createEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
@@ -4556,13 +4605,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] enter\n") }
 
                 if counters[endpointType] == nil {
-                    counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
         //            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                 } else {
                     counters[endpointType]!["total"] = endpointCount
                 }
                 if summaryDict[endpointType] == nil {
-        //            counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+        //            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                     summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                 }
 
@@ -4596,8 +4645,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
                 
-                concurrentThreads = setConcurrentThreads()
-                theCreateQ.maxConcurrentOperationCount = concurrentThreads
+                theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
 
                 var localEndPointType = ""
         //        var whichError        = ""
@@ -4717,7 +4765,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 
                                     // ? remove creation of counters dict defined earlier ?
                                     if counters[endpointType] == nil {
-                                        counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                                        counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                                         summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                                     }
                                 
@@ -4835,7 +4883,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 if counters[endpointType] == nil {
-                    counters[endpointType] = ["create":0, "update":0, "fail":0, "total":0]
+                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
         //            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                 } else {
                     counters[endpointType]!["total"] = endpointCount
@@ -4852,8 +4900,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 var totalFailed    = 0
                 var totalCompleted = 0
                 
-                concurrentThreads = setConcurrentThreads()
-                theOpQ.maxConcurrentOperationCount = concurrentThreads
+                theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
                 let semaphore = DispatchSemaphore(value: 0)
                 var localEndPointType = ""
                 switch endpointType {
@@ -5086,7 +5133,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         //            var duplicatePackagesDict  = [String:[String]]()
                     
                     if self.counters[destEndpoint] == nil {
-                        self.counters[destEndpoint] = ["create":0, "update":0, "fail":0, "total":0]
+                        self.counters[destEndpoint] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         self.summaryDict[destEndpoint] = ["create":[], "update":[], "fail":[]]
                     }
 
@@ -6557,7 +6604,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let totalCount = (fileImport && activeTab(fn: "putStatusUpdate2") == "selective") ? totalObjectsToMigrate:total
                     
-            let newPutTotal = (counters[adjEndpoint]?["create"] ?? 0) + (counters[adjEndpoint]?["update"] ?? 0) + (counters[adjEndpoint]?["fail"] ?? 0)
+        var newPutTotal = (counters[adjEndpoint]?["create"] ?? 0) + (counters[adjEndpoint]?["update"] ?? 0) + (counters[adjEndpoint]?["fail"] ?? 0)
+        newPutTotal += (counters[adjEndpoint]?["skipped"] ?? 0)
         let theTask = wipeData.on ? "removal":"create/update"
             if newPutTotal == totalCount || total == 0 {
                 nodesComplete += 1
@@ -7701,13 +7749,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func setConcurrentThreads() -> Int {
-        var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
+    func setConcurrentThreads() {
+        maxConcurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
 //        print("[ViewController] ConcurrentThreads: \(concurrent)")
-        concurrent = (concurrent > 5) ? 2:concurrent
-        userDefaults.set(concurrent, forKey: "concurrentThreads")
-        userDefaults.synchronize()
-        return concurrent
+        maxConcurrentThreads = (maxConcurrentThreads > 5) ? 2:maxConcurrentThreads
+        userDefaults.set(maxConcurrentThreads, forKey: "concurrentThreads")
     }
     
     // add notification - run fn in SourceDestVC
@@ -7860,7 +7906,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         exportedFilesUrl = URL(string: userDefaults.string(forKey: "saveLocation") ?? "")
         
         // read maxConcurrentOperationCount setting
-        concurrentThreads = setConcurrentThreads()
+        setConcurrentThreads()
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
         
