@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22154"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="22154"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="22505"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -628,13 +628,13 @@
                                 </connections>
                             </button>
                             <button identifier="storeDestCreds" translatesAutoresizingMaskIntoConstraints="NO" id="sou-1b-mbc" userLabel="Save Password checkbox">
-                                <rect key="frame" x="780" y="10" width="42" height="16"/>
+                                <rect key="frame" x="777" y="10" width="45" height="16"/>
                                 <buttonCell key="cell" type="check" title="Save" bezelStyle="regularSquare" imagePosition="right" controlSize="small" inset="2" id="kMu-TM-4ik">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="message" size="11"/>
                                 </buttonCell>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="41" id="3SN-tU-1Fe"/>
+                                    <constraint firstAttribute="width" constant="44" id="3SN-tU-1Fe"/>
                                 </constraints>
                                 <connections>
                                     <action selector="storeCredentials_action:" target="eUd-vB-D7a" id="mDC-1l-Ane"/>
@@ -1035,7 +1035,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="5QD-Ga-H9N" userLabel="Users EA button">
-                                                    <rect key="frame" x="18" y="112" width="85" height="18"/>
+                                                    <rect key="frame" x="18" y="111" width="85" height="19"/>
                                                     <buttonCell key="cell" type="check" title="User EAs                             " bezelStyle="regularSquare" imagePosition="left" inset="2" id="hN0-Fe-gk1">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1050,7 +1050,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="d6K-kP-2mQ" userLabel="LDAP Servers button">
-                                                    <rect key="frame" x="18" y="83" width="113" height="18"/>
+                                                    <rect key="frame" x="18" y="82" width="113" height="19"/>
                                                     <buttonCell key="cell" type="check" title="LDAP Servers                                   " bezelStyle="regularSquare" imagePosition="left" inset="2" id="ArP-5h-aaE">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1064,7 +1064,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="ycJ-dt-zVj" userLabel="Users">
-                                                    <rect key="frame" x="18" y="54" width="62" height="18"/>
+                                                    <rect key="frame" x="18" y="53" width="62" height="19"/>
                                                     <buttonCell key="cell" type="check" title="Users" bezelStyle="regularSquare" imagePosition="left" inset="2" id="asM-hy-xl0">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1078,7 +1078,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1gD-S5-cVs" userLabel="Departments">
-                                                    <rect key="frame" x="189" y="112" width="105" height="18"/>
+                                                    <rect key="frame" x="189" y="111" width="105" height="19"/>
                                                     <buttonCell key="cell" type="check" title="Departments" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Jm7-Hu-hDl">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1091,7 +1091,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1fa-TT-14S" userLabel="Categories">
-                                                    <rect key="frame" x="189" y="83" width="92" height="18"/>
+                                                    <rect key="frame" x="189" y="82" width="92" height="19"/>
                                                     <buttonCell key="cell" type="check" title="Categories" bezelStyle="regularSquare" imagePosition="left" inset="2" id="GrB-4C-xKM">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1105,7 +1105,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAd-jA-PuU" userLabel="Jamf Users btn">
-                                                    <rect key="frame" x="360" y="142" width="97" height="16"/>
+                                                    <rect key="frame" x="360" y="143" width="97" height="16"/>
                                                     <buttonCell key="cell" type="check" title="Jamf Users" bezelStyle="regularSquare" imagePosition="left" inset="2" id="hc8-X3-Ps2">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1115,7 +1115,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gkm-20-cSk" userLabel="Jamf Groups btn">
-                                                    <rect key="frame" x="360" y="112" width="111" height="18"/>
+                                                    <rect key="frame" x="360" y="111" width="111" height="19"/>
                                                     <buttonCell key="cell" type="check" title="Jamf Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="lYg-nx-gPZ">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1128,7 +1128,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="veK-Df-07g" userLabel="Network Segments">
-                                                    <rect key="frame" x="360" y="83" width="142" height="18"/>
+                                                    <rect key="frame" x="360" y="82" width="142" height="19"/>
                                                     <buttonCell key="cell" type="check" title="Network Segments" bezelStyle="regularSquare" imagePosition="left" inset="2" id="b1Y-Jl-ijF">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1142,7 +1142,7 @@
                                                     </connections>
                                                 </button>
                                                 <button ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L2Y-Hp-rHS" userLabel="Adv User Search">
-                                                    <rect key="frame" x="535" y="142" width="150" height="16"/>
+                                                    <rect key="frame" x="535" y="143" width="150" height="16"/>
                                                     <buttonCell key="cell" type="check" title="Adv. User Searches" bezelStyle="regularSquare" imagePosition="left" inset="2" id="XFu-OA-RT6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -1180,7 +1180,7 @@
                                                     </connections>
                                                 </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="zSQ-Vt-PWI" userLabel="Buildings">
-                                                    <rect key="frame" x="189" y="141" width="83" height="17"/>
+                                                    <rect key="frame" x="189" y="140" width="83" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Buildings" bezelStyle="regularSquare" imagePosition="left" inset="2" id="gUQ-DN-zZz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>

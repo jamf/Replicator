@@ -7,17 +7,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "418059EC-941B-4F39-85FE-ECC9941F2352"
+            uuid = "BFDFE716-5263-489C-85BE-AE90D0A78949"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "jamf-migrator/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "474"
-            endingLineNumber = "474"
-            landmarkName = "ViewController"
-            landmarkType = "3">
+            startingLineNumber = "3357"
+            endingLineNumber = "3357"
+            landmarkName = "endpointByIdQueue(endpoint:endpointID:endpointCurrent:endpointCount:action:destEpId:destEpName:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

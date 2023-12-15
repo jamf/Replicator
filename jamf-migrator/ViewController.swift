@@ -39,6 +39,26 @@ class CreateInfo: NSObject {
     }
 }
 
+class EndpointByIdInfo: NSObject {
+    @objc var endpoint        : String
+    @objc var endpointID      : Int
+    @objc var endpointCurrent : Int
+    @objc var endpointCount   : Int
+    @objc var action          : String
+    @objc var destEpId        : Int
+    @objc var destEpName      : String
+    
+    init(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        self.endpoint = endpoint
+        self.endpointID = endpointID
+        self.endpointCurrent = endpointCurrent
+        self.endpointCount = endpointCount
+        self.action = action
+        self.destEpId = destEpId
+        self.destEpName = destEpName
+    }
+}
+
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
 //    let userDefaults = UserDefaults.standard
@@ -471,9 +491,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var totalFailed    = 0
     var totalCompleted = 0
     var createPending  = 0
-    var create2Pending = 0
+    var endpointByIdPending  = 0
+//    var create2Pending = 0
     var createArray    = [CreateInfo]()
-    var create2Array   = [CreateInfo]()
+//    var create2Array   = [CreateInfo]()
+    var endpointByIdArray = [EndpointByIdInfo]()
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
     
@@ -521,12 +543,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
     
     var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
+    var sourceEPQ   = DispatchQueue(label: "com.jamf.sourceEPs", qos: DispatchQoS.background)
     var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
     var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
-    
-    var concurrentThreads = 2
-    
+        
     var migrateOrWipe: String = ""
     var httpStatusCode: Int   = 0
     var URLisValid: Bool      = true
@@ -990,15 +1011,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.sourceCreds = ":"
                 }
                 self.sourceBase64Creds = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.base64Creds["source"] = self.sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                 
                 self.destCreds = "\(JamfProServer.destUser):\(JamfProServer.destPwd)"
 //                self.destCreds = "\(self.dest_user):\(self.dest_pass)"
                 self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.base64Creds["dest"] = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
                 // set credentials - end
                 
                 // check authentication - start
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
-                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: self.sourceBase64Creds, localSource: localsource) { [self]
+                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
                     (authResult: (Int,String)) in
                     let (authStatusCode, _) = authResult
                     if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1020,7 +1043,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: self.destBase64Creds, localSource: localsource) { [self]
+                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) {
@@ -1041,7 +1064,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 // determine if the cloud services connection is enabled
                                 var csaMethod = "GET"
                                 if export.saveOnly { csaMethod = "skip" }
-                                Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
+                                Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: csaMethod) {
                                     (returnedJSON: [String:Any]) in
 //                                            print("CSA: \(returnedJSON)")
                                     if let _ = returnedJSON["scopes"] {
@@ -1114,7 +1137,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Migration Mode (startMigration): \(migrationMode).\n") }
                         
-                // list the items in the order they need to be migrated
+            // list the items in the order they need to be migrated
             if migrationMode == "bulk" {
                 // initialize list of items to migrate then add what we want - start
                 objectsToMigrate.removeAll()
@@ -1726,7 +1749,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     
                                                 WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(object): \(theDependencyAction) \(theName)\n")
 
-                                                self.endPointByID(endpoint: object, endpointID: Int(theId)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
+                                                self.endpointByIdQueue(endpoint: object, endpointID: Int(theId)!, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
                                                 
                                                 // update list of dependencies migrated
                                                 switch object {
@@ -1745,7 +1768,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }   // for (object, arrayOfDependencies) in returnedDependencies - end
                             }
 
-                                // migrate the policy or selected object now the dependencies are done
+                            // migrate the policy or selected object now the dependencies are done
                             DispatchQueue.global(qos: .utility).async { [self] in
                                 if !fileImport {
                                     var step = 0
@@ -1788,7 +1811,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
                                 
                                 if !fileImport {
-                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: self.targetDataArray.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
+                                    self.endpointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: self.targetDataArray.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
                                 } else {
 //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
 
@@ -1929,16 +1952,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
             }
         } else {
-            self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
-                (result: [String]) in
-//                print("[ViewController.readNodes] getEndpoints result: \(result)")
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)\n") }
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
-                if setting.fullGUI {
-//                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
-                    if self.activeTab(fn: "readNodes") == "selective" {
-                        self.goButtonEnabled(button_status: true)
+            JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
+                (result: (Int,String)) in
+                let (statusCode, theResult) = result
+                //            print("[endpointByIdQueue] token check")
+                if theResult == "success" {
+                    self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
+                        (result: [String]) in
+        //                print("[ViewController.readNodes] getEndpoints result: \(result)")
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)\n") }
+                        if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
+                        if setting.fullGUI {
+        //                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
+                            if self.activeTab(fn: "readNodes") == "selective" {
+                                self.goButtonEnabled(button_status: true)
+                            }
+                        }
                     }
+                } else {
+                    WriteToLog().message(stringOfText: "[ViewController.readNodes] failed to generate token for \(nodesToMigrate[nodeIndex])\n")
+                    spinner_progressIndicator.stopAnimation(self)
                 }
             }
         }
@@ -1975,68 +2008,68 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         switch endpoint {
-        // macOS items
-        case "advancedcomputersearches":
-            endpointParent = "advanced_computer_searches"
-        case "computerextensionattributes":
-            endpointParent = "computer_extension_attributes"
-        case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            endpoint       = "computergroups"
-            endpointParent = "computer_groups"
-        case "directorybindings":
-            endpointParent = "directory_bindings"
-        case "diskencryptionconfigurations":
-            endpointParent = "disk_encryption_configurations"
-        case "distributionpoints":
-            endpointParent = "distribution_points"
-        case "dockitems":
-            endpointParent = "dock_items"
-        case "macapplications":
-            endpointParent = "mac_applications"
-//        case "netbootservers":
-//            endpointParent = "netboot_servers"
-        case "osxconfigurationprofiles":
-            endpointParent = "os_x_configuration_profiles"
-        case "patches":
-            endpointParent = "patch_management_software_titles"
-        case "patchpolicies":
-            endpointParent = "patch_policies"
-        case "restrictedsoftware":
-            endpointParent = "restricted_software"
-        case "softwareupdateservers":
-            endpointParent = "software_update_servers"
-        // iOS items
-        case "advancedmobiledevicesearches":
-            endpointParent = "advanced_mobile_device_searches"
-        case "mobiledeviceconfigurationprofiles":
-            endpointParent = "configuration_profiles"
-        case "mobiledeviceextensionattributes":
-            endpointParent = "mobile_device_extension_attributes"
-        case "mobiledeviceapplications":
-            endpointParent = "mobile_device_applications"
-        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
-            endpoint       = "mobiledevicegroups"
-            endpointParent = "mobile_device_groups"
-        case "mobiledevices":
-            endpointParent = "mobile_devices"
-        // general items
-        case "advancedusersearches":
-            endpointParent = "advanced_user_searches"
-        case "ldapservers":
-            endpointParent = "ldap_servers"
-        case "networksegments":
-            endpointParent = "network_segments"
-        case "userextensionattributes":
-            endpointParent = "user_extension_attributes"
-        case "usergroups", "smartusergroups", "staticusergroups":
-            endpoint       = "usergroups"
-            endpointParent = "user_groups"
-        case "jamfusers":
-            endpointParent = "users"
-        case "jamfgroups":
-            endpointParent = "groups"
-        default:
-            endpointParent = "\(endpoint)"
+            // general items
+            case "advancedusersearches":
+                endpointParent = "advanced_user_searches"
+            case "ldapservers":
+                endpointParent = "ldap_servers"
+            case "networksegments":
+                endpointParent = "network_segments"
+            case "userextensionattributes":
+                endpointParent = "user_extension_attributes"
+            case "usergroups", "smartusergroups", "staticusergroups":
+                endpoint       = "usergroups"
+                endpointParent = "user_groups"
+            case "jamfusers":
+                endpointParent = "users"
+            case "jamfgroups":
+                endpointParent = "groups"
+            // macOS items
+            case "advancedcomputersearches":
+                endpointParent = "advanced_computer_searches"
+            case "computerextensionattributes":
+                endpointParent = "computer_extension_attributes"
+            case "computergroups", "smartcomputergroups", "staticcomputergroups":
+                endpoint       = "computergroups"
+                endpointParent = "computer_groups"
+            case "directorybindings":
+                endpointParent = "directory_bindings"
+            case "diskencryptionconfigurations":
+                endpointParent = "disk_encryption_configurations"
+            case "distributionpoints":
+                endpointParent = "distribution_points"
+            case "dockitems":
+                endpointParent = "dock_items"
+            case "macapplications":
+                endpointParent = "mac_applications"
+    //        case "netbootservers":
+    //            endpointParent = "netboot_servers"
+            case "osxconfigurationprofiles":
+                endpointParent = "os_x_configuration_profiles"
+            case "patches":
+                endpointParent = "patch_management_software_titles"
+            case "patchpolicies":
+                endpointParent = "patch_policies"
+            case "restrictedsoftware":
+                endpointParent = "restricted_software"
+            case "softwareupdateservers":
+                endpointParent = "software_update_servers"
+            // iOS items
+            case "advancedmobiledevicesearches":
+                endpointParent = "advanced_mobile_device_searches"
+            case "mobiledeviceconfigurationprofiles":
+                endpointParent = "configuration_profiles"
+            case "mobiledeviceextensionattributes":
+                endpointParent = "mobile_device_extension_attributes"
+            case "mobiledeviceapplications":
+                endpointParent = "mobile_device_applications"
+            case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+                endpoint       = "mobiledevicegroups"
+                endpointParent = "mobile_device_groups"
+            case "mobiledevices":
+                endpointParent = "mobile_devices"
+            default:
+                endpointParent = "\(endpoint)"
         }
                 
         (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
@@ -2045,8 +2078,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)\n") }
         
-        concurrentThreads = setConcurrentThreads()
-        theOpQ.maxConcurrentOperationCount = concurrentThreads
+        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         if setting.fullGUI {
@@ -2064,7 +2096,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             request.httpMethod = "GET"
             let configuration = URLSessionConfiguration.ephemeral
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"] ?? ""))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -2107,6 +2139,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 }
                                                 let (resultMessage, _) = result
                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)\n") }
+                                                print("[getEndpoints] current packages: \(currentEPDict)")
                                                 
                                                 endpointsRead += 1
                                                 // print("[endpointsRead += 1] \(endpoint)")
@@ -2183,6 +2216,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process\n") }
 
                                                             var counter = 1
+                                                            print("[getEndpoints] goSender: \(goSender)")
                                                             if goSender == "goButton" || goSender == "silent" {
                                                                 for (l_xmlID, l_xmlName) in availableObjsToMigDict {
                                                                     if !wipeData.on  {
@@ -2190,11 +2224,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                                                         if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                            endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                            endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                                         } else {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                            endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                            endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                         }
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -2219,6 +2253,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             
                                                                             DispatchQueue.main.async { [self] in
                                                                                 srcSrvTableView.reloadData()
+                                                                                srcSrvTableView.scrollRowToVisible(staticSourceDataArray.count-1)
+//                                                                                srcSrvTableView.scrollToEndOfDocument(nil)
                                                                             }
                                                                             // slight delay in building the list - visual effect
                                                                             usleep(delayInt)
@@ -2315,11 +2351,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                                             if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                             } else {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                             }
                                                         } else {
                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -2538,11 +2574,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 //need to call existingEndpoints here to keep proper order?
                                                                 if currentEPs[l_xmlName] != nil {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                    endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
-                                                                    endPointByID(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: localEndpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                 }
                                                             } else {
                                                                 RemoveEndpoints(endpointType: localEndpoint, endPointID: l_xmlID, endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
@@ -2682,11 +2718,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 //                                                        if currentEPs[l_xmlName] != nil {
                                                                 if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                 }
                                                             } else {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -2805,11 +2841,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 if currentEPs[l_xmlName] != nil {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
 
-                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                    endPointByID(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                    endpointByIdQueue(endpoint: endpoint, endpointID: l_xmlID, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                 }
                                                             } else {
                                                                 if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
@@ -3316,8 +3352,40 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
+    
+    
+    func endpointByIdQueue(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        endpointByIdArray.append(EndpointByIdInfo(endpoint: endpoint, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName))
+        
+        sourceEPQ.async { [self] in
+            
+            while endpointByIdPending > 0 || endpointByIdArray.count > 0 {
+                print("[endpointByIdQueue] maxConcurrentThreads: \(maxConcurrentThreads) - endpointByIdPending: \(endpointByIdPending) - endpointByIdArray.count: \(endpointByIdArray.count)")
+                if endpointByIdPending < maxConcurrentThreads && endpointByIdArray.count > 0 {
+                    endpointByIdPending += 1
+                    let nextEndpoint = endpointByIdArray[0]
+                    endpointByIdArray.remove(at: 0)
+                    print("[endpointByIdQueue]     destEpName: \(destEpName)")
+                    
+                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
+                        (result: (Int,String)) in
+                        let (statusCode, theResult) = result
+                        //            print("[endpointByIdQueue] token check")
+                        if theResult == "success" {
+                            endPointByID(endpoint: endpoint, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) { [self]
+                                (result: String) in
+                                endpointByIdPending -= 1
+                        }
+                    }
+                    }
+                } else {
+                    sleep(1)
+                }
+            }
+        }
+    }
     // get full record in XML format
-    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+    func endPointByID(endpoint: String, endpointID: Int, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
         
@@ -3332,8 +3400,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
-        concurrentThreads = setConcurrentThreads()
-        theOpQ.maxConcurrentOperationCount = concurrentThreads
+        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
@@ -3363,8 +3430,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if !( endpoint == "jamfuser" && endpointID == jamfAdminId) {
                 theOpQ.addOperation {
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
-                    Jpapi().action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
+                    Jpapi().action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"] ?? "", method: "GET" ) { [self]
                         (returnedJSON: [String:Any]) in
+                        
+                        completion("[endpointById] return from endpointById")
+                        
 //                        print("returnedJSON: \(returnedJSON)")
                         if returnedJSON.count > 0 {
                             self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
@@ -3428,11 +3498,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     request.httpMethod = "GET"
                     let configuration = URLSessionConfiguration.ephemeral
 //                        configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                    configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                    configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"] ?? ""))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                         (data, response, error) -> Void in
                         session.finishTasksAndInvalidate()
+                        
+                        completion("[endpointById] return from endpointById")
                         
                         if let httpResponse = response as? HTTPURLResponse {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
@@ -4082,7 +4154,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                self.CreateEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+                self.createEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
 //                self.CreateEndpoints(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] \(result)\n") }
@@ -4107,7 +4179,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
     }
-    func CreateEndpointsQueue(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    
+    func createEndpointsQueue(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         createArray.append(CreateInfo(endpointType: endpointType, endPointXml: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
         
         completion("return from CreateEndpointsQueue")
@@ -4115,11 +4188,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         destEPQ.async { [self] in
             
             while createPending > 0 || createArray.count > 0 {
-                if createPending < setConcurrentThreads() && createArray.count > 0 {
+                print("[CreateEndpointsQueue] maxConcurrentThreads: \(maxConcurrentThreads) - createPending: \(createPending) - createArray.count: \(createArray.count)")
+                if createPending <= maxConcurrentThreads && createArray.count > 0 {
                     createPending += 1
                     let nextEndpoint = createArray[0]
                     createArray.remove(at: 0)
-                    CreateEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
+                    print("[CreateEndpointsQueue]     nextEndpoint.endpointType: \(nextEndpoint.endpointType)")
+                    createEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
                         (result: String) in
                         createPending -= 1
                     }
@@ -4131,9 +4206,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
     }
-    func CreateEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func createEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints] token check")
@@ -4190,8 +4265,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
                 
-                concurrentThreads = setConcurrentThreads()
-                theCreateQ.maxConcurrentOperationCount = concurrentThreads
+                theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
                 let semaphore = DispatchSemaphore(value: 0)
                 
         //        print("endPointXML:\n\(endPointXML)")
@@ -4279,7 +4353,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                         let configuration = URLSessionConfiguration.default
         //                 ["Authorization" : "Basic \(self.destBase64Creds)", "Content-Type" : "text/xml", "Accept" : "text/xml"]
-                        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.authCreds["dest"] ?? ""))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                         
                         // sticky session
                         let cookieUrl = self.createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
@@ -4399,7 +4473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4410,7 +4484,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["category"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                             }
                                             
@@ -4420,7 +4494,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["department"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                             }
                                             
@@ -4430,7 +4504,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["building"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4442,7 +4516,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             for xmlTag in ["distribution_point", "url"] {
                                                 tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
                                             }
-                                            CreateEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
                                                 //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
@@ -4536,7 +4610,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // for the Jamf Pro API - used for buildings
     func CreateEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[CreateEndpoints2] token check")
@@ -4592,8 +4666,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints2] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
                 
-                concurrentThreads = setConcurrentThreads()
-                theCreateQ.maxConcurrentOperationCount = concurrentThreads
+                theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
 
                 var localEndPointType = ""
         //        var whichError        = ""
@@ -4810,7 +4883,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func RemoveEndpoints(endpointType: String, endPointID: Int, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[RemoveEndpoints] token check")
@@ -4848,8 +4921,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 var totalFailed    = 0
                 var totalCompleted = 0
                 
-                concurrentThreads = setConcurrentThreads()
-                theOpQ.maxConcurrentOperationCount = concurrentThreads
+                theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
                 let semaphore = DispatchSemaphore(value: 0)
                 var localEndPointType = ""
                 switch endpointType {
@@ -4874,9 +4946,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
                     
                     if export.saveRawXml {
-
-                        endPointByID(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
+                        endpointByIdQueue(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
                     }
+                    
                     if export.saveOnly {
                         if endpointCurrent == endpointCount {
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
@@ -5051,152 +5123,153 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(("skipping lookup","skipping lookup"))
             return
         }
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[existingEndpoints] token check")
-            if theResult == "success" {
+        
                 
-                
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter - destination endpoint: \(theDestEndpoint)\n") }
-                
-                if pref.stopMigration {
-                    stopButton(self)
-                    completion(("",""))
-                    return
-                }
-                
-                if !export.saveOnly {
-                    URLCache.shared.removeAllCachedResponses()
-                    currentEPs.removeAll()
-                    currentEPDict.removeAll()
-                    
-                    var destEndpoint         = theDestEndpoint
-                    var existingDestUrl      = ""
-                    var destXmlName          = ""
-                    var destXmlID:Int?
-                    var existingEndpointNode = ""
-                    var een                  = ""
-                    
-        //            var duplicatePackages      = false
-        //            var duplicatePackagesDict  = [String:[String]]()
-                    
-                    if self.counters[destEndpoint] == nil {
-                        self.counters[destEndpoint] = ["create":0, "update":0, "fail":0, "total":0]
-                        self.summaryDict[destEndpoint] = ["create":[], "update":[], "fail":[]]
-                    }
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter - destination endpoint: \(theDestEndpoint)\n") }
+        
+        if pref.stopMigration {
+            stopButton(self)
+            completion(("",""))
+            return
+        }
+        
+        if !export.saveOnly {
+            URLCache.shared.removeAllCachedResponses()
+            currentEPs.removeAll()
+            currentEPDict.removeAll()
+            
+            var destEndpoint         = theDestEndpoint
+            var existingDestUrl      = ""
+            var destXmlName          = ""
+            var destXmlID:Int?
+            var existingEndpointNode = ""
+            var een                  = ""
+            
+//            var duplicatePackages      = false
+//            var duplicatePackagesDict  = [String:[String]]()
+            
+            if self.counters[destEndpoint] == nil {
+                self.counters[destEndpoint] = ["create":0, "update":0, "fail":0, "total":0]
+                self.summaryDict[destEndpoint] = ["create":[], "update":[], "fail":[]]
+            }
 
-                    switch destEndpoint {
-                    case "smartusergroups", "staticusergroups":
-                        destEndpoint = "usergroups"
-                        existingEndpointNode = "usergroups"
-                    case "smartcomputergroups", "staticcomputergroups":
-                        destEndpoint = "computergroups"
-                        existingEndpointNode = "computergroups"
-                    case "smartmobiledevicegroups", "staticmobiledevicegroups":
-                        destEndpoint = "mobiledevicegroups"
-                        existingEndpointNode = "mobiledevicegroups"
-                    case "jamfusers", "jamfgroups":
-                        existingEndpointNode = "accounts"
-                    default:
-                        existingEndpointNode = destEndpoint
-                    }
+            switch destEndpoint {
+            case "smartusergroups", "staticusergroups":
+                destEndpoint = "usergroups"
+                existingEndpointNode = "usergroups"
+            case "smartcomputergroups", "staticcomputergroups":
+                destEndpoint = "computergroups"
+                existingEndpointNode = "computergroups"
+            case "smartmobiledevicegroups", "staticmobiledevicegroups":
+                destEndpoint = "mobiledevicegroups"
+                existingEndpointNode = "mobiledevicegroups"
+            case "jamfusers", "jamfgroups":
+                existingEndpointNode = "accounts"
+            default:
+                existingEndpointNode = destEndpoint
+            }
+            
+    //        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
+            var destEndpointDict:(Any)? = nil
+            var endpointParent = ""
+            switch destEndpoint {
+            // macOS items
+            case "advancedcomputersearches":
+                endpointParent = "advanced_computer_searches"
+            case "macapplications":
+                endpointParent = "mac_applications"
+            case "computerextensionattributes":
+                endpointParent = "computer_extension_attributes"
+            case "computergroups":
+                endpointParent = "computer_groups"
+//            case "computerconfigurations":
+//                endpointParent = "computer_configurations"
+            case "diskencryptionconfigurations":
+                endpointParent = "disk_encryption_configurations"
+            case "distributionpoints":
+                endpointParent = "distribution_points"
+            case "directorybindings":
+                endpointParent = "directory_bindings"
+            case "dockitems":
+                endpointParent = "dock_items"
+//            case "netbootservers":
+//                endpointParent = "netboot_servers"
+            case "osxconfigurationprofiles":
+                endpointParent = "os_x_configuration_profiles"
+            case "patches":
+                endpointParent = "patch_management_software_titles"
+            case "patchpolicies":
+                endpointParent = "patch_policies"
+            case "restrictedsoftware":
+                endpointParent = "restricted_software"
+            case "softwareupdateservers":
+                endpointParent = "software_update_servers"
+            // iOS items
+            case "advancedmobiledevicesearches":
+                endpointParent = "advanced_mobile_device_searches"
+            case "mobiledeviceconfigurationprofiles":
+                endpointParent = "configuration_profiles"
+            case "mobiledeviceextensionattributes":
+                endpointParent = "mobile_device_extension_attributes"
+            case "mobiledevicegroups":
+                endpointParent = "mobile_device_groups"
+            case "mobiledeviceapplications":
+                endpointParent = "mobile_device_applications"
+            case "mobiledevices":
+                endpointParent = "mobile_devices"
+            // general items
+            case "advancedusersearches":
+                endpointParent = "advanced_user_searches"
+            case "ldapservers":
+                endpointParent = "ldap_servers"
+            case "networksegments":
+                endpointParent = "network_segments"
+            case "userextensionattributes":
+                endpointParent = "user_extension_attributes"
+            case "usergroups":
+                endpointParent = "user_groups"
+            case "jamfusers", "jamfgroups":
+                endpointParent = "accounts"
+            default:
+                endpointParent = "\(destEndpoint)"
+            }
+            
+            var endpointDependencyArray = ordered_dependency_array
+            var completed               = 0
+            var waiting                 = false
+            
+            /*
+            switch endpointParent {
+            case "policies":
+                endpointDependencyArray.append(existingEndpointNode)
+            default:
+                endpointDependencyArray = ["\(existingEndpointNode)"]
+            }
+            */
+            
+            if self.activeTab(fn: "existingEndpoints") == "selective" && endpointParent == "policies" && setting.migrateDependencies && goSender == "goButton" {
+                endpointDependencyArray.append(existingEndpointNode)
+            } else {
+                endpointDependencyArray = ["\(existingEndpointNode)"]
+            }
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] endpointDependencyArray: \(endpointDependencyArray)\n") }
+            
+//            print("                    completed: \(completed)")
+//            print("endpointDependencyArray.count: \(endpointDependencyArray.count)")
+//            print("                      waiting: \(waiting)")
+            
+            let semaphore = DispatchSemaphore(value: 1)
+            destEPQ.async {
+                while (completed < endpointDependencyArray.count) {
                     
-            //        print("\nGetting existing endpoints: \(existingEndpointNode)\n")
-                    var destEndpointDict:(Any)? = nil
-                    var endpointParent = ""
-                    switch destEndpoint {
-                    // macOS items
-                    case "advancedcomputersearches":
-                        endpointParent = "advanced_computer_searches"
-                    case "macapplications":
-                        endpointParent = "mac_applications"
-                    case "computerextensionattributes":
-                        endpointParent = "computer_extension_attributes"
-                    case "computergroups":
-                        endpointParent = "computer_groups"
-        //            case "computerconfigurations":
-        //                endpointParent = "computer_configurations"
-                    case "diskencryptionconfigurations":
-                        endpointParent = "disk_encryption_configurations"
-                    case "distributionpoints":
-                        endpointParent = "distribution_points"
-                    case "directorybindings":
-                        endpointParent = "directory_bindings"
-                    case "dockitems":
-                        endpointParent = "dock_items"
-        //            case "netbootservers":
-        //                endpointParent = "netboot_servers"
-                    case "osxconfigurationprofiles":
-                        endpointParent = "os_x_configuration_profiles"
-                    case "patches":
-                        endpointParent = "patch_management_software_titles"
-                    case "patchpolicies":
-                        endpointParent = "patch_policies"
-                    case "restrictedsoftware":
-                        endpointParent = "restricted_software"
-                    case "softwareupdateservers":
-                        endpointParent = "software_update_servers"
-                    // iOS items
-                    case "advancedmobiledevicesearches":
-                        endpointParent = "advanced_mobile_device_searches"
-                    case "mobiledeviceconfigurationprofiles":
-                        endpointParent = "configuration_profiles"
-                    case "mobiledeviceextensionattributes":
-                        endpointParent = "mobile_device_extension_attributes"
-                    case "mobiledevicegroups":
-                        endpointParent = "mobile_device_groups"
-                    case "mobiledeviceapplications":
-                        endpointParent = "mobile_device_applications"
-                    case "mobiledevices":
-                        endpointParent = "mobile_devices"
-                    // general items
-                    case "advancedusersearches":
-                        endpointParent = "advanced_user_searches"
-                    case "ldapservers":
-                        endpointParent = "ldap_servers"
-                    case "networksegments":
-                        endpointParent = "network_segments"
-                    case "userextensionattributes":
-                        endpointParent = "user_extension_attributes"
-                    case "usergroups":
-                        endpointParent = "user_groups"
-                    case "jamfusers", "jamfgroups":
-                        endpointParent = "accounts"
-                    default:
-                        endpointParent = "\(destEndpoint)"
-                    }
-                    
-                    var endpointDependencyArray = ordered_dependency_array
-                    var completed               = 0
-                    var waiting                 = false
-                    
-                    /*
-                    switch endpointParent {
-                    case "policies":
-                        endpointDependencyArray.append(existingEndpointNode)
-                    default:
-                        endpointDependencyArray = ["\(existingEndpointNode)"]
-                    }
-                    */
-                    
-                    if self.activeTab(fn: "existingEndpoints") == "selective" && endpointParent == "policies" && setting.migrateDependencies && goSender == "goButton" {
-                        endpointDependencyArray.append(existingEndpointNode)
-                    } else {
-                        endpointDependencyArray = ["\(existingEndpointNode)"]
-                    }
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] endpointDependencyArray: \(endpointDependencyArray)\n") }
-                    
-        //            print("                    completed: \(completed)")
-        //            print("endpointDependencyArray.count: \(endpointDependencyArray.count)")
-        //            print("                      waiting: \(waiting)")
-                    
-                    let semaphore = DispatchSemaphore(value: 1)
-                    destEPQ.async {
-                        while (completed < endpointDependencyArray.count) {
-                            
-                            usleep(10)
-                            if !waiting {
+                    usleep(10)
+                    if !waiting {
+                        
+                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                            (result: (Int,String)) in
+                            let (statusCode, theResult) = result
+                            //            print("[existingEndpoints] token check")
+                            if theResult == "success" {
                                 
                                 URLCache.shared.removeAllCachedResponses()
                                 waiting = true
@@ -5485,24 +5558,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 })  // let task = destSession - end
                                 //print("GET")
                                 task.resume()
-                            }   //if !waiting - end
-                            
-                            // single completion after waiting...
-                            
-        //                    print("completed: \(completed) of \(endpointDependencyArray.count) dependencies")
-                        }   // while (completed < endpointDependencyArray.count)
+                                
+                            } else {
+                                // failed to get token
+                                completion(("",""))
+                            }
+                        }
                         
-        //                print("[\(endpointParent)] completed \(completed) of \(endpointDependencyArray.count)")
-                    }   // destEPQ - end
-                } else {
-                    self.currentEPs["_"] = 0
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.\n") }
-                    completion(("Current endpoints - export.saveOnly, not needed.","\(theDestEndpoint)"))
-                }
-            } else {
-                // failed to get token
-                completion(("",""))
-            }
+                    }   //if !waiting - end
+                    
+                    // single completion after waiting...
+                    
+//                    print("completed: \(completed) of \(endpointDependencyArray.count) dependencies")
+                }   // while (completed < endpointDependencyArray.count)
+                
+//                print("[\(endpointParent)] completed \(completed) of \(endpointDependencyArray.count)")
+            }   // destEPQ - end
+        } else {
+            self.currentEPs["_"] = 0
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.\n") }
+            completion(("Current endpoints - export.saveOnly, not needed.","\(theDestEndpoint)"))
         }
     }   // func existingEndpoints - end
 
@@ -5514,7 +5589,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-        JamfPro().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["destination"] ?? "") { [self]
+        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
 //            print("[getDependencies] token check")
@@ -7704,13 +7779,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func setConcurrentThreads() -> Int {
-        var concurrent = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
+    func setConcurrentThreads() {
+//    func setConcurrentThreads() -> Int {
+        maxConcurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
 //        print("[ViewController] ConcurrentThreads: \(concurrent)")
-        concurrent = (concurrent > 5) ? 2:concurrent
-        userDefaults.set(concurrent, forKey: "concurrentThreads")
-        userDefaults.synchronize()
-        return concurrent
+        maxConcurrentThreads = (maxConcurrentThreads > 5) ? 2:maxConcurrentThreads
+        userDefaults.set(maxConcurrentThreads, forKey: "concurrentThreads")
+//        userDefaults.synchronize()
+//        return concurrent
     }
     
     // add notification - run fn in SourceDestVC
@@ -7863,7 +7939,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         exportedFilesUrl = URL(string: userDefaults.string(forKey: "saveLocation") ?? "")
         
         // read maxConcurrentOperationCount setting
-        concurrentThreads = setConcurrentThreads()
+        setConcurrentThreads()
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "----- Debug Mode -----\n") }
         

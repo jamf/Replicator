@@ -17,8 +17,12 @@ class Jpapi: NSObject, URLSessionDelegate {
     func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
 //        jamfpro = JamfPro(controller: ViewController())
+        if method.lowercased() == "skip" {
+            completion(["JPAPI_result":"no valid token found", "JPAPI_response":0])
+            return
+        }
         
-        let whichServer = (serverUrl == JamfProServer.source) ? "source":"destination"
+        let whichServer = (serverUrl == JamfProServer.source) ? "source":"dest"
         JamfPro().getToken(whichServer: whichServer, serverUrl: serverUrl, base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
