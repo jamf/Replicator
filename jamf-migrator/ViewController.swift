@@ -2065,7 +2065,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let configuration = URLSessionConfiguration.ephemeral
             
             configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-            print("[getEndpoints] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -2128,6 +2127,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
 //                                                        print("[ViewController.getEndpoints] result: \(result)")
                                                         lookupCount += 1
+                                                        if lookupCount % 50 == 0 {
+                                                            WriteToLog().message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)\n")
+                                                        }
                                                         if packageFilename != "" && uniquePackages.firstIndex(of: packageFilename) == nil {
                                                             uniquePackages.append(packageFilename)
                                                             availableObjsToMigDict[packageID] = packageFilename
@@ -2147,6 +2149,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             }
                                                         }
                                                         if lookupCount == endpointCount {
+                                                            WriteToLog().message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)\n")
                                                             if duplicatePackages {
                                                                 var message = "\tFilename : Display Name\n"
                                                                 for (pkgFilename, displayNames) in duplicatePackagesDict {
@@ -2222,8 +2225,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             
                                                                             DispatchQueue.main.async { [self] in
                                                                                 srcSrvTableView.reloadData()
-                                                                                srcSrvTableView.scrollRowToVisible(staticSourceDataArray.count-1)
-                                                                                srcSrvTableView.scrollToEndOfDocument(nil)
+                                                                                srcSrvTableView.scrollRowToVisible(sourceDataArray.count-1)
+//                                                                                srcSrvTableView.scrollToEndOfDocument(nil)
                                                                             }
                                                                             // slight delay in building the list - visual effect
                                                                             usleep(delayInt)
