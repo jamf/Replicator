@@ -75,11 +75,11 @@ class JamfPro: NSObject, URLSessionDelegate {
         let forWhat = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let (_, minutesOld, _) = timeDiff(forWhat: forWhat)
         
-        print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
-        print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 25) minutes")
-        
         if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || ( minutesOld > (token.refreshInterval[whichServer] ?? 29) ) {
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
+            
+            print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
+            print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 29) minutes")
             
             if apiClient {
                 let clientId = ( whichServer == "source" ) ? JamfProServer.sourceUser:JamfProServer.destUser
@@ -117,7 +117,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                             JamfProServer.tokenCreated[whichServer] = Date()
                             
     //                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
-                          print("[JamfPro] \(whichServer) received a new token")
+                            print("[JamfPro] \(whichServer) received a new token")
                             WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(serverUrl)\n")
                             
                             if JamfProServer.version[whichServer] == "" {
