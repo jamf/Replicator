@@ -27,32 +27,34 @@ class Credentials {
             
             switch whichServer {
             case "source":
-                if JamfProServer.sourceUseApiClient == 1 {
-                    theService = "\(AppInfo.name)-apiClient-" + theService
-                }
+                theService = ( JamfProServer.sourceUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
+//                if JamfProServer.sourceUseApiClient == 1 {
+//                    theService = "\(AppInfo.name)-apiClient-" + theService
+//                }
             case "dest":
-                if JamfProServer.destUseApiClient == 1 {
-                    theService = "\(AppInfo.name)-apiClient-" + theService
-                }
+                theService = ( JamfProServer.destUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
+//                if JamfProServer.destUseApiClient == 1 {
+//                    theService = "\(AppInfo.name)-apiClient-" + theService
+//                }
             default:
                 break
             }
             
-            let keychainItemName = ( whichServer == "" ) ? theService:"JPMA-\(theService)"
+//            let keychainItemName = ( whichServer == "" ) ? theService:"JPMA-\(theService)"
             
 //            print("[Credentials.save] save/update keychain item \(keychainItemName)")
 
             if let password = credential.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
                     var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                                        kSecAttrService as String: keychainItemName,
+                                                        kSecAttrService as String: theService,
                                                         kSecAttrAccessGroup as String: accessGroup,
                                                         kSecUseDataProtectionKeychain as String: true,
                                                         kSecAttrAccount as String: account,
                                                         kSecValueData as String: password]
                     
                     // see if credentials already exist for server
-                    let accountCheck = retrieve(service: keychainItemName, account: account)
+                    let accountCheck = retrieve(service: theService, account: account)
                     if accountCheck.count == 0 {
                         // try to add new credentials, if account exists we'll try updating it
                         let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
@@ -73,7 +75,7 @@ class Credentials {
                     } else {
                         // credentials already exist, try to update
                         keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
-                                         kSecAttrService as String: keychainItemName,
+                                         kSecAttrService as String: theService,
                                          kSecMatchLimit as String: kSecMatchLimitOne,
                                          kSecReturnAttributes as String: true]
                         
@@ -104,6 +106,7 @@ class Credentials {
         
 //        print("[Credentials.retrieve] start search for: \(service)")
         
+        // running from the command line
         if !setting.fullGUI && (JamfProServer.sourceApiClient["id"] != "" && whichServer == "source" || JamfProServer.destApiClient["id"] != "" && whichServer == "dest") {
             if whichServer == "source" {
                 return["\(String(describing: JamfProServer.sourceApiClient["id"]!))":"\(String(describing: JamfProServer.sourceApiClient["secret"]!))"]
@@ -120,54 +123,62 @@ class Credentials {
         
         switch whichServer {
         case "source":
-            if JamfProServer.sourceUseApiClient == 1 {
-                theService = "apiClient-" + theService
-            }
+            theService = ( JamfProServer.sourceUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
         case "dest":
-            if JamfProServer.destUseApiClient == 1 {
-                theService = "apiClient-" + theService
-            }
+            theService = ( JamfProServer.destUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
         default:
             break
         }
+//        print("[credentials] whichServer: \(whichServer), theService: \(theService)")
         
         userPassDict.removeAll()
         
-        var keychainItemName = ( whichServer == "" ) ?  theService:"JPMA-\(theService)"
+//        var keychainItemName = ( whichServer == "" ) ?  theService:"JPMA-\(theService)"
 //        print("[credentials] keychainItemName: \(keychainItemName)")
         // look for common keychain item
-        keychainResult = itemLookup(service: keychainItemName)
+        keychainResult = itemLookup(service: theService)
         // look for legacy keychain item
         if keychainResult.count == 0 {
-            keychainItemName = "\(prefix) - \(service)"
-            keychainResult   = oldItemLookup(service: keychainItemName)
+            switch whichServer {
+            case "source":
+                if JamfProServer.sourceUseApiClient == 1 {
+                    return keychainResult
+                }
+            case "dest":
+                if JamfProServer.destUseApiClient == 1 {
+                    return keychainResult
+                }
+            default:
+                break
+            }
+            theService = "\(prefix) - \(service)"
+            keychainResult   = oldItemLookup(service: theService)
             if keychainResult.count == 0 {
-                keychainItemName = "\(prefix)-\(service)"
-                keychainResult   = oldItemLookup(service: keychainItemName)
-                if keychainResult.count == 0 {
-                    keychainItemName = "\(prefix)-\(account)-\(service)"
-                    keychainResult   = oldItemLookup(service: keychainItemName)
-                    if keychainResult.count == 0 {
-                        keychainItemName = "JamfProApps-\(theService)"
-                        keychainResult   = itemLookup(service: keychainItemName)
-                        if keychainResult.count == 0 {
-                            keychainItemName = "\(sharedPrefix)-\(service)"
-                            keychainResult   = itemLookup(service: keychainItemName)
-                            if keychainResult.count == 0 {
-                                keychainItemName = "\(sharedPrefix)-\(account)-\(service)"
-                                keychainResult   = itemLookup(service: keychainItemName)
-                                
-                                if keychainResult.count == 0 {
-                                    keychainItemName = "\(sharedPrefix)-\(service)"
-                                    keychainResult   = oldItemLookup(service: keychainItemName)
-                                    if keychainResult.count == 0 {
-                                        keychainItemName = "\(sharedPrefix)-\(account)-\(service)"
-                                        keychainResult   = oldItemLookup(service: keychainItemName)
-                                    }
-                                }
-                            }
-                        }
+                switch whichServer {
+                case "source":
+                    if JamfProServer.sourceUseApiClient == 1 {
+                        return keychainResult
                     }
+                case "dest":
+                    if JamfProServer.destUseApiClient == 1 {
+                        return keychainResult
+                    }
+                default:
+                    break
+                }
+                theService = "\(prefix)-\(account)-\(service)"
+                keychainResult   = oldItemLookup(service: theService)
+                if keychainResult.count == 0 {
+                    switch whichServer {
+                    case "source":
+                        theService = ( JamfProServer.sourceUseApiClient == 1 ) ? "apiClient-" + service:service
+                    case "dest":
+                        theService = ( JamfProServer.destUseApiClient == 1 ) ? "apiClient-" + service:service
+                    default:
+                        break
+                    }
+                    theService = "JamfProApps-\(theService)"
+                    keychainResult   = itemLookup(service: theService)
                 }
             }
         }
@@ -177,8 +188,9 @@ class Credentials {
     
     private func itemLookup(service: String) -> [String:String] {
         
-//        print("[Credentials.itemLookup] start search for: \(service)")
-   
+        print("[Credentials.itemLookup] start search for: \(service)")
+        
+        userPassDict.removeAll()
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
                                             kSecAttrService as String: service,
                                             kSecAttrAccessGroup as String: accessGroup,
@@ -215,8 +227,9 @@ class Credentials {
     
     private func oldItemLookup(service: String) -> [String:String] {
         
-    //        print("[Credentials.itemLookup] start search for: \(service)")
-
+        print("[Credentials.oldItemLookup] start search for: \(service)")
+        
+        userPassDict.removeAll()
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
                                             kSecAttrService as String: service,
                                             kSecMatchLimit as String: kSecMatchLimitOne,

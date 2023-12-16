@@ -691,7 +691,7 @@ DQ
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y1Q-0c-cgq">
-                                <rect key="frame" x="34" y="197" width="190" height="16"/>
+                                <rect key="frame" x="34" y="208" width="190" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="186" id="b3G-tv-iiR"/>
                                 </constraints>
@@ -702,14 +702,14 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
-                                <rect key="frame" x="34" y="168" width="190" height="28"/>
+                                <rect key="frame" x="34" y="179" width="190" height="28"/>
                                 <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="2" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
                                 <connections>
                                     <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
                                 </connections>
                             </slider>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mty-65-1H0">
-                                <rect key="frame" x="223" y="198" width="4" height="16"/>
+                                <rect key="frame" x="223" y="209" width="4" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="ZfT-OJ-e9T">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -717,7 +717,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
-                                <rect key="frame" x="34" y="41" width="108" height="16"/>
+                                <rect key="frame" x="34" y="52" width="108" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -725,7 +725,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
-                                <rect key="frame" x="147" y="38" width="41" height="21"/>
+                                <rect key="frame" x="147" y="49" width="41" height="21"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GFB-9j-KGo">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -733,7 +733,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZlP-uk-Rxu">
-                                <rect key="frame" x="34" y="108" width="188" height="18"/>
+                                <rect key="frame" x="34" y="119" width="188" height="18"/>
                                 <buttonCell key="cell" type="check" title="Force Basic Authentication" bezelStyle="regularSquare" imagePosition="left" inset="2" id="0gj-rM-eDb">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -743,7 +743,7 @@ DQ
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7nu-gl-e0B">
-                                <rect key="frame" x="34" y="76" width="92" height="16"/>
+                                <rect key="frame" x="34" y="87" width="92" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Color scheme:" id="0eQ-rJ-zhy">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -751,7 +751,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="afe-0d-eps">
-                                <rect key="frame" x="127" y="68" width="82" height="25"/>
+                                <rect key="frame" x="127" y="79" width="82" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -770,7 +770,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kSv-WF-lic">
-                                <rect key="frame" x="34" y="141" width="148" height="18"/>
+                                <rect key="frame" x="34" y="152" width="148" height="18"/>
                                 <buttonCell key="cell" type="check" title="Use Sticky Sessions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="k0q-qf-jbZ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -779,6 +779,25 @@ DQ
                                     <action selector="stickySession_action:" target="Ojm-Op-AKi" id="z4r-fz-ApN"/>
                                 </connections>
                             </button>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tfZ-9j-G6D">
+                                <rect key="frame" x="34" y="19" width="136" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Servers to remember:" id="ULg-f3-0Eq">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cxh-uB-wNS">
+                                <rect key="frame" x="171" y="13" width="39" height="25"/>
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ifK-rp-GoD">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="cPT-Jj-f5V"/>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="sourceDestListSize_action:" target="Ojm-Op-AKi" id="ATS-m4-xNR"/>
+                                </connections>
+                            </popUpButton>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Zj6-mi-35l" firstAttribute="leading" secondItem="kSv-WF-lic" secondAttribute="leading" id="0TA-Cb-g8g"/>
@@ -786,8 +805,11 @@ DQ
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="trailing" secondItem="Zj6-mi-35l" secondAttribute="trailing" id="4wP-rG-d7V"/>
                             <constraint firstItem="afe-0d-eps" firstAttribute="centerX" secondItem="GJ0-5l-PEg" secondAttribute="centerX" id="59O-pc-yxR"/>
                             <constraint firstItem="Zj6-mi-35l" firstAttribute="top" secondItem="y1Q-0c-cgq" secondAttribute="bottom" constant="3" id="60t-Ue-Iik"/>
+                            <constraint firstItem="tfZ-9j-G6D" firstAttribute="top" secondItem="gi8-H0-WPJ" secondAttribute="bottom" constant="17" id="7qg-OB-DEC"/>
+                            <constraint firstItem="Cxh-uB-wNS" firstAttribute="centerY" secondItem="tfZ-9j-G6D" secondAttribute="centerY" id="7t1-Hf-0XR"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="36" id="ApQ-Fk-cmq"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="leading" secondItem="Zj6-mi-35l" secondAttribute="leading" id="URy-EB-R5w"/>
+                            <constraint firstItem="tfZ-9j-G6D" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="XIp-oB-poZ"/>
                             <constraint firstItem="ZlP-uk-Rxu" firstAttribute="top" secondItem="kSv-WF-lic" secondAttribute="bottom" constant="17" id="Yzb-pQ-uyw"/>
                             <constraint firstItem="kSv-WF-lic" firstAttribute="leading" secondItem="ZlP-uk-Rxu" secondAttribute="leading" id="Z2G-qU-2DE"/>
                             <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="afe-0d-eps" secondAttribute="bottom" constant="13" id="aVh-VD-rbf"/>
@@ -797,10 +819,11 @@ DQ
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="lCR-MU-4Hc"/>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="baseline" secondItem="GJ0-5l-PEg" secondAttribute="baseline" id="laN-7Z-d2P"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="trailing" constant="3" id="n0j-v7-2dv"/>
-                            <constraint firstItem="mty-65-1H0" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="34" id="pmb-xu-xIu"/>
+                            <constraint firstItem="mty-65-1H0" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="23" id="pmb-xu-xIu"/>
                             <constraint firstItem="ZlP-uk-Rxu" firstAttribute="leading" secondItem="7nu-gl-e0B" secondAttribute="leading" id="qT2-Zk-Yyi"/>
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="ZlP-uk-Rxu" secondAttribute="bottom" constant="17" id="rNO-rd-JRI"/>
-                            <constraint firstItem="y1Q-0c-cgq" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="35" id="t32-lQ-rKF"/>
+                            <constraint firstItem="y1Q-0c-cgq" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="24" id="t32-lQ-rKF"/>
+                            <constraint firstItem="Cxh-uB-wNS" firstAttribute="leading" secondItem="tfZ-9j-G6D" secondAttribute="trailing" constant="6" id="vrp-rp-vv7"/>
                         </constraints>
                     </view>
                     <connections>
@@ -809,6 +832,7 @@ DQ
                         <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
                         <outlet property="forceBasicAuth_button" destination="ZlP-uk-Rxu" id="Y8L-B6-QZI"/>
                         <outlet property="logFilesCountPref_textfield" destination="GJ0-5l-PEg" id="DiQ-A8-CZq"/>
+                        <outlet property="sourceDestListSize_button" destination="Cxh-uB-wNS" id="Ju7-TF-lPb"/>
                         <outlet property="stickySession_button" destination="kSv-WF-lic" id="939-ML-Rru"/>
                     </connections>
                 </viewController>

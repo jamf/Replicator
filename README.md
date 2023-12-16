@@ -101,7 +101,7 @@ Options for migrating object(s) (groups, policies, and configuration profiles) t
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
-The number of concurrent API operations (from 1 to 5), number of log files to retain, along with forcing basic authentication can be configured.
+The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
 
 ![](./jamf-migrator/images/appPrefs.png)
 </br></br>
@@ -184,6 +184,12 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.3.1**<br>
+Work to resolve issue (#91), logging in with API clients.
+Add option to copy only items not on the destination server - create only.
+Add option to copy only items currently on both source and destination servers - update only.
+Add option to set the number of servers/folders saved.
+
 **v7.2.2**<br>
 Fix version lookup with Jamf Pro 11, background threading issue.
 

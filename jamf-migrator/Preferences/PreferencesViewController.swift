@@ -51,7 +51,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var stickySession_button: NSButton!
     @IBOutlet weak var forceBasicAuth_button: NSButton!
     @IBOutlet weak var colorScheme_button: NSPopUpButton!
-    
+    @IBOutlet weak var sourceDestListSize_button: NSPopUpButton!
     
     // computer prefs
     @IBOutlet weak var migrateAsManaged_button: NSButton!
@@ -167,6 +167,15 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         userDefaults.set(Int(concurrentThreads_textfield.stringValue), forKey: "concurrentThreads")
         userDefaults.synchronize()
     }
+    
+    @IBAction func sourceDestListSize_action(_ sender: Any) {
+        print("selected size: \(String(describing: sourceDestListSize_button.titleOfSelectedItem))")
+        var listSize = Int(sourceDestListSize_button.titleOfSelectedItem!) ?? -1
+        print("listSize: \(String(describing: listSize))")
+        userDefaults.setValue(listSize, forKey: "sourceDestListSize")
+    }
+    
+    
     @IBAction func stickySession_action(_ sender: NSButton) {
         if sender.state.rawValue == 1 {
             JamfProServer.stickySession = true
@@ -416,6 +425,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
 
         if self.title! == "App" {
+            sourceDestListSize_button.addItem(withTitle: "none")
+            for i in stride(from: 5, to: 55, by: 5) {
+                sourceDestListSize_button.addItem(withTitle: "\(i)")
+            }
+            let theSize = (sourceDestListSize < 5) ? "none":"\(sourceDestListSize)"
+            sourceDestListSize_button.selectItem(withTitle: theSize)
+            
             concurrentThreads_textfield.stringValue = "\((userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads"))"
             concurrentThreads_slider.stringValue = concurrentThreads_textfield.stringValue
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
@@ -545,8 +561,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             copyScopeSig_button.state    = boolToState(TF: scopeSigCopy)
             copyScopeUsers_button.state  = boolToState(TF: scopeUsersCopy)
             
-//            print("[Copy]  only copy missing: \(userDefaults.integer(forKey: "copyMissing"))")
-//            print("[Copy] only copy existing: \(userDefaults.integer(forKey: "copyExisting"))")
             onlyCopyMissing_button.state = (userDefaults.integer(forKey: "copyMissing") == 1) ? .on:.off
             onlyCopyExisting_button.state = (userDefaults.integer(forKey: "copyExisting") == 1) ? .on:.off
         }

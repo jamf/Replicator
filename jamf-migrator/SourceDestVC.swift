@@ -52,10 +52,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         switch sender.identifier?.rawValue {
         case "sourceApiClient":
             setLabels(whichServer: "source")
+            JamfProServer.sourceUseApiClient = sourceUseApiClient_button.state.rawValue
             userDefaults.set(JamfProServer.sourceUseApiClient, forKey: "sourceApiClient")
             fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
         case "destApiClient":
             setLabels(whichServer: "dest")
+            JamfProServer.destUseApiClient = destUseApiClient_button.state.rawValue
             userDefaults.set(JamfProServer.destUseApiClient, forKey: "destApiClient")
             fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
         default:
@@ -66,25 +68,35 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func setWindowSize(setting: Int) {
 //        print("setWindowSize - setting: \(setting)")
+        var hiddenState = true
         if setting == 0 {
-//            preferredContentSize = CGSize(width: 848, height: 55)
             preferredContentSize = CGSize(width: 848, height: 67)
             hideCreds_button.toolTip = "show username/password fields"
-            sourceUsername_TextField.isHidden = true
-            destUsername_TextField.isHidden   = true
             showHideUserCreds(x: true)
         } else {
-//            preferredContentSize = CGSize(width: 848, height: 120)
             preferredContentSize = CGSize(width: 848, height: 182)
             hideCreds_button.toolTip = "hide username/password fields"
-            sourceUsername_TextField.isHidden = false
-            destUsername_TextField.isHidden = false
+            hiddenState = false
             if fileImport_button.state.rawValue == 0 {
                 showHideUserCreds(x: false)
             } else {
                 showHideUserCreds(x: true)
             }
         }
+        
+        sourceUsername_TextField.isHidden      = hiddenState
+        sourceUser_TextField.isHidden          = hiddenState
+        sourcePassword_TextField.isHidden      = hiddenState
+        source_pwd_field.isHidden              = hiddenState
+        sourceStoreCredentials_button.isHidden = hiddenState
+        sourceUseApiClient_button.isHidden     = hiddenState
+        
+        destUsername_TextField.isHidden        = hiddenState
+        destinationUser_TextField.isHidden     = hiddenState
+        destPassword_TextField.isHidden        = hiddenState
+        dest_pwd_field.isHidden                = hiddenState
+        destStoreCredentials_button.isHidden   = hiddenState
+        destUseApiClient_button.isHidden       = hiddenState
     }
     func setLabels(whichServer: String) {
         switch whichServer {
@@ -130,8 +142,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         userDefaults.set(JamfProServer.storeDestCreds, forKey: "storeDestCreds")
     }
      
-    @IBOutlet weak var sourceServerList_button: NSPopUpButton!
-    @IBOutlet weak var destServerList_button: NSPopUpButton!
     @IBOutlet weak var siteMigrate_button: NSButton!
     @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
     @IBOutlet weak var stickySessions_label: NSTextField!
@@ -150,6 +160,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var dest_pwd_field: NSSecureTextField!
     
     // Source and destination buttons
+    @IBOutlet weak var sourceServerList_button: NSPopUpButton!
+    @IBOutlet weak var destServerList_button: NSPopUpButton!
     @IBOutlet weak var sourceServerPopup_button: NSPopUpButton!
     @IBOutlet weak var destServerPopup_button: NSPopUpButton!
     @IBOutlet weak var disableExportOnly_button: NSButton!
@@ -533,7 +545,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
         if !(whichServer == "source" && fileImport) {
             let theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
+//            print("[fetchPassword] url: \(url.fqdnFromUrl), account: \(theUser), whichServer: \(whichServer)")
             let accountDict = Creds2.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
+//            print("[fetchPassword] accountDict: \(accountDict)")
+            
             
             if accountDict.count > 0 {
                 for (username, password) in accountDict {
@@ -645,9 +660,16 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
                 serverOrFiles() { [self]
                     (result: String) in
-                    if textField.identifier!.rawValue == "sourceServer" {
+//                    if textField.identifier!.rawValue == "sourceServer" {
+//                        fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
+//                    }
+                    switch textField.identifier!.rawValue {
+                    case "sourceServer", "sourceUser":
                         fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
+                    default:
+                        break
                     }
+                    
                     JamfProServer.source     = source_jp_server_field.stringValue
                     JamfProServer.sourceUser = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd  = source_pwd_field.stringValue
@@ -656,12 +678,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 if JamfProServer.destination != dest_jp_server_field.stringValue {
                     serverChanged(whichserver: "dest")
                 }
-                if textField.identifier!.rawValue == "destServer" {
+                switch textField.identifier!.rawValue {
+                case "destServer", "destUser":
                     fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
+                default:
+                    break
                 }
-                if textField.identifier!.rawValue == "destUser" {
-                    fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
-                }
+                
                 JamfProServer.destination = dest_jp_server_field.stringValue
                 JamfProServer.destUser    = destinationUser_TextField.stringValue
                 JamfProServer.destPwd     = dest_pwd_field.stringValue
@@ -715,7 +738,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 local_serverArray.remove(at: positionInList!)
                 local_serverArray.insert(url, at: 0)
             }
-            while local_serverArray.count > 10 {
+            while local_serverArray.count > sourceDestListSize {
                 local_serverArray.removeLast()
             }
             for theServer in local_serverArray {
@@ -938,6 +961,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 
 //        debug = true
         
+        print("test defaults: \(userDefaults.integer(forKey: "sourceDestListSize"))")
+        
         // Do any additional setup after loading the view
         if !FileManager.default.fileExists(atPath: AppInfo.bookmarksPath) {
             FileManager.default.createFile(atPath: AppInfo.bookmarksPath, contents: nil)
@@ -1016,6 +1041,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             userDefaults.synchronize()
         }
         
+        let saved_sourceDestListSize = userDefaults.integer(forKey: "sourceDestListSize")
+        sourceDestListSize = (saved_sourceDestListSize == 0) ? 20:saved_sourceDestListSize
+        
         if setting.fullGUI {
             if !FileManager.default.fileExists(atPath: AppInfo.plistPath) {
                 do {
@@ -1086,32 +1114,21 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         self.destServerList_button.addItems(withTitles: [theServer])
                     }
                 }
-//            }
-//            if appInfo.settings["storeSourceCreds"] != nil {
-//                JamfProServer.storeSourceCreds = appInfo.settings["storeSourceCreds"] as! Int
-//                if setting.fullGUI {
-                    JamfProServer.storeSourceCreds = userDefaults.integer(forKey: "storeSourceCreds")
-                    sourceStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeSourceCreds)
-//                }
-//            }
-//            if appInfo.settings["storeDestCreds"] != nil {
-//                JamfProServer.storeDestCreds = appInfo.settings["storeDestCreds"] as! Int
-//                if setting.fullGUI {
-                    JamfProServer.storeDestCreds = userDefaults.integer(forKey: "storeDestCreds")
-                    destStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeDestCreds)
-//                }
-//            }
+            
+            JamfProServer.storeSourceCreds = userDefaults.integer(forKey: "storeSourceCreds")
+            sourceStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeSourceCreds)
+    
+            JamfProServer.storeDestCreds = userDefaults.integer(forKey: "storeDestCreds")
+            destStoreCredentials_button.state = NSControl.StateValue(rawValue: JamfProServer.storeDestCreds)
+            
             
             JamfProServer.sourceUseApiClient = userDefaults.integer(forKey: "sourceApiClient")
-//                if setting.fullGUI {
-                    sourceUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.sourceUseApiClient)
-                    setLabels(whichServer: "source")
-//                }
+            sourceUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.sourceUseApiClient)
+            setLabels(whichServer: "source")
+
             JamfProServer.destUseApiClient = userDefaults.integer(forKey: "destApiClient")
-//                if setting.fullGUI {
-                    destUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.destUseApiClient)
-                    setLabels(whichServer: "dest")
-//                }
+            destUseApiClient_button.state = NSControl.StateValue(rawValue: JamfProServer.destUseApiClient)
+            setLabels(whichServer: "dest")
             
             // read xml settings - start
             if AppInfo.settings["xml"] != nil {
