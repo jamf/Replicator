@@ -1545,19 +1545,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if !setting.migrateDependencies || resultEndpoint == "policies" {
                             self.targetDataArray.removeAll()
                             DispatchQueue.main.async {
-                                // prevent the modification/removal of the account we're using with the destination server
-                                if selectedEndpoint == "jamfusers" {
-                                    self.sourceDataArray.removeAll(where: {$0.lowercased() == self.dest_user.lowercased()})
-                                }
-                                
                                 // create targetDataArray, list of objects to migrate/remove - start
                                 for k in (0..<self.sourceDataArray.count) {
                                     if self.srcSrvTableView.isRowSelected(k) {
-                                        // prevent the modification/removal of the account we're using with the destination server
-//                                        if !(selectedEndpoint == "jamfusers" && self.sourceDataArray[k].lowercased() == self.dest_user.lowercased()) {
-//                                            print("add \(self.sourceDataArray[k]) to selective migration")
-                                            self.targetDataArray.append(self.sourceDataArray[k])
-//                                        }
+//                                      print("add \(self.sourceDataArray[k]) to selective migration")
+                                        self.targetDataArray.append(self.sourceDataArray[k])
                                     }   // if self.srcSrvTableView.isRowSelected(k) - end
                                 }   // for k in - end
                                 // create targetDataArray, list of objects to migrate/remove - end
@@ -1799,6 +1791,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
 
                                     let fileToMigrate = displayNameToFilename[selectedObject]
+                                    print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(fileToMigrate)")
                                     
                                     arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
 
@@ -2221,14 +2214,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 } else {
                                                                     // populate source server under the selective tab - bulk
                                                                     if !pref.stopMigration {
-                                                                        //                                                                    print("-populate (\(endpoint)) source server under the selective tab")
+//                                                                      print("-populate (\(endpoint)) source server under the selective tab")
                                                                         delayInt = (availableObjsToMigDict.count > 1000) ? 0:listDelay(itemCount: availableObjsToMigDict.count)
                                                                         for (l_xmlID, l_xmlName) in availableObjsToMigDict {
                                                                             sortQ.async { [self] in
-                                                                                //                                                            print("adding \(l_xmlName) to array")
+//                                                                              print("adding \(l_xmlName) to array")
                                                                                 availableIDsToMigDict[l_xmlName] = l_xmlID
                                                                                 sourceDataArray.append(l_xmlName)
-                                                                                //                                                        if availableIDsToMigDict.count == sourceDataArray.count {
                                                                                 sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                                 
                                                                                 staticSourceDataArray = sourceDataArray
@@ -2236,7 +2228,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                                 DispatchQueue.main.async { [self] in
                                                                                     srcSrvTableView.reloadData()
                                                                                     srcSrvTableView.scrollRowToVisible(sourceDataArray.count-1)
-                                                                                    //                                                                                srcSrvTableView.scrollToEndOfDocument(nil)
+                                                                                    // srcSrvTableView.scrollToEndOfDocument(nil)
                                                                                 }
                                                                                 // slight delay in building the list - visual effect
                                                                                 usleep(delayInt)
@@ -4289,6 +4281,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 var createDestUrl = "\(createDestUrlBase)/" + localEndPointType + "/id/\(destinationEpId)"
                 
+                // for computers/mobile devices POST to unique identifier
+                let identifier = tagValue2(xmlString:endPointXML, startTag:"<udid>", endTag:"</udid>")
+                if apiAction == "update" && (endpointType == "computers" || endpointType == "mobiledevices") {
+//                    print("[createEndpoints] xml: \(endPointXML)")
+                    createDestUrl = createDestUrl.replacingOccurrences(of: "/id/\(destinationEpId)", with: "/udid/\(identifier)")
+                }
+                print("[createEndpoints] createDestUrl: \(createDestUrl)")
+                
+                
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
                 createDestUrl = createDestUrl.urlFix
         //        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
@@ -4397,7 +4398,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                                                 
                                     if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
                                         
                                         createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
                                         
@@ -4413,9 +4414,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }
                                         
                                         POSTsuccessCount += 1
-                                        
-        //                                whichError = ""
-                                        
+                                                                                
                                         if let _ = progressCountArray["\(endpointType)"] {
                                             progressCountArray["\(endpointType)"] = progressCountArray["\(endpointType)"]!+1
                                         }
@@ -4449,25 +4448,43 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         if !setting.migrateDependencies || endpointType == "policies" {
                                             setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
                                         }
-                                    
-                                        // Write xml for degugging - start
-                                        let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
+                                        
                                         var localErrorMsg = ""
+                                        
+                                        print("[createEndpoints]cc identifier: \(identifier)")
+                                        print("[createEndpoints] responseData: \(responseData)")
+                                        print("[createEndpoints]       status: \(httpResponse.statusCode)")
+                                        
+                                        if httpResponse.statusCode == 404 {
+                                            // retry doing a POST
+                                            whichError = "device not found"
+//                                            return
+                                        } else {
+                                            let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
 
-                                        errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
-                                        
-                                        // Write xml for degugging - end
-                                        
-                                        if whichError != "skip" {
-                                            if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
-                                                whichError = "category"
-                                            } else {
-                                                whichError = errorMsg
+                                            errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
+                                            
+                                            // Write xml for degugging - end
+                                            
+                                            if whichError != "skip" {
+                                                if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
+                                                    whichError = "category"
+                                                } else {
+                                                    whichError = errorMsg
+                                                }
                                             }
                                         }
-                                                                        
+                                        
+                                        print("[createEndpoints] whichError: \(whichError)")
                                         // retry computers with dublicate serial or MAC - start
                                         switch whichError {
+                                        case "device not found":
+                                            print("[createEndpoints] device not found, try to create")
+                                            createEndpoints(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "create", sourceEpId: sourceEpId, destEpId: 0, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                                (result: String) in
+                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+                                            }
+                                            
                                         case "Duplicate serial number", "Duplicate MAC address":
                                             WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
                                             var tmp_endPointXML = endPointXML
@@ -4519,7 +4536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             }
                                             createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                                 (result: String) in
-                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+//                                              if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                             }
 
                                         default:
@@ -4579,6 +4596,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }
                                     }
                                     completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                                
+                                
         //                        }   // DispatchQueue.main.async - end
                             }   // if let httpResponse = response - end
                             
