@@ -17,7 +17,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //    var exportedFilesUrl = URL(string: "")
 //    var jamfpro: JamfPro?
     
-    var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
+//    var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
         
     // determine if we're using dark mode
@@ -74,7 +74,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             hideCreds_button.toolTip = "show username/password fields"
             showHideUserCreds(x: true)
         } else {
-            preferredContentSize = CGSize(width: 848, height: 182)
+            preferredContentSize = CGSize(width: 848, height: 188)
             hideCreds_button.toolTip = "hide username/password fields"
             hiddenState = false
             if fileImport_button.state.rawValue == 0 {
@@ -84,12 +84,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
         }
         
-        sourceUsername_TextField.isHidden      = hiddenState
-        sourceUser_TextField.isHidden          = hiddenState
-        sourcePassword_TextField.isHidden      = hiddenState
-        source_pwd_field.isHidden              = hiddenState
-        sourceStoreCredentials_button.isHidden = hiddenState
-        sourceUseApiClient_button.isHidden     = hiddenState
+//        sourceUsername_TextField.isHidden      = hiddenState
+//        sourceUser_TextField.isHidden          = hiddenState
+//        sourcePassword_TextField.isHidden      = hiddenState
+//        source_pwd_field.isHidden              = hiddenState
+//        sourceStoreCredentials_button.isHidden = hiddenState
+//        sourceUseApiClient_button.isHidden     = hiddenState
         
         destUsername_TextField.isHidden        = hiddenState
         destinationUser_TextField.isHidden     = hiddenState
@@ -398,7 +398,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         // Note, merge this with xportFilesURL
 //                        xportFolderPath = openPanel.url
                         
-                        userDefaults.synchronize()
+//                        userDefaults.synchronize()
                         browseFiles_button.isHidden        = false
                         saveSourceDestInfo(info: AppInfo.settings)
                         serverChanged(whichserver: "source")
@@ -428,7 +428,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
                 JamfProServer.importFiles   = 0
-                userDefaults.synchronize()
+//                userDefaults.synchronize()
             }
         }
     }   // @IBAction func fileImport - end
@@ -904,10 +904,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func showHideUserCreds(x: Bool) {
         let hideState = hideCreds_button.state == .on ? x:true
-        sourceUsername_TextField.isHidden = hideState
-        sourcePassword_TextField.isHidden = hideState
-        sourceUser_TextField.isHidden     = hideState
-        source_pwd_field.isHidden         = hideState
+        sourceUsername_TextField.isHidden      = hideState
+        sourcePassword_TextField.isHidden      = hideState
+        sourceUser_TextField.isHidden          = hideState
+        source_pwd_field.isHidden              = hideState
+        sourceStoreCredentials_button.isHidden = hideState
+        sourceUseApiClient_button.isHidden     = hideState
     }
     
     override func viewDidAppear() {
@@ -992,13 +994,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
         initVars()
         
-//        if !hideGui {
+        if !hideGui {
             hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
             hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
 //            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
             setWindowSize(setting: hideCreds_button.state.rawValue)
 //            source_jp_server_field.becomeFirstResponder()
-//        }
+        }
         
     }   //override func viewDidLoad() - end
     
