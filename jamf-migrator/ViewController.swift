@@ -60,30 +60,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // selective list filter
     func controlTextDidChange(_ obj: Notification) {
-//        sourceDataArray = staticSourceDataArray
-//        clearSelectiveObjectsList()
-//        selectiveObjectList_AC.add(contentsOf: staticSelectiveObjectList)
         if let textField = obj.object as? NSTextField {
             if textField.identifier!.rawValue == "search" {
                 let filter = selectiveFilter_TextField.stringValue
 //                print("filter: \(filter)")
                 let textPredicate = ( filter == "" ) ? NSPredicate(format: "objectName.length > 0"):NSPredicate(format: "objectName CONTAINS[c] %@", filter)
                 
-//                self.srcSrvTableView.deselectAll(self)
-                selectiveObjectList_AC.filterPredicate = textPredicate
+                sourceObjectList_AC.filterPredicate = textPredicate
                 self.selectiveListCleared = true
-//                print("sourceDataArray (filtered): \(sourceDataArray)")
             }
-//            print("sourceDataArray: \(sourceDataArray)")
         }
     }
     
     @IBAction func clearFilter_Action(_ sender: Any) {
         selectiveFilter_TextField.stringValue = ""
         let textPredicate = NSPredicate(format: "objectName.length > 0")
-        selectiveObjectList_AC.filterPredicate = textPredicate
-//        sourceDataArray = staticSourceDataArray
-//        self.srcSrvTableView.reloadData()
+        sourceObjectList_AC.filterPredicate = textPredicate
     }
     
     
@@ -314,7 +306,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet var selectiveTabelHeader_textview: NSTextField!
     @IBOutlet weak var migrateDependencies: NSButton!
     @IBOutlet weak var srcSrvTableView: NSTableView!
-    @IBOutlet var selectiveObjectList_AC: NSArrayController!
+    @IBOutlet var sourceObjectList_AC: NSArrayController!
 
     
     // selective migration vars
@@ -331,12 +323,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var sourceDataArray            = [String]()
     var staticSourceDataArray      = [String]()
     
-    var staticSelectiveObjectList = [SelectiveObject]()
+    var staticSourceObjectList    = [SelectiveObject]()
     var targetSelectiveObjectList = [SelectiveObject]()
     
-    var availableIDsToMigDict:[String:String]  = [:]   // something like xmlName, xmlID
-    var availableObjsToMigDict:[Int:String] = [:]   // something like xmlID, xmlName
-//    var availableIdsToDelArray:[String]        = []   // array of objects' to delete IDs
+    var availableIDsToMigDict:[String:String] = [:]   // something like xmlName, xmlID
+    var availableObjsToMigDict:[Int:String]   = [:]   // something like xmlID, xmlName
+
     var selectiveListCleared                = false
     var delayInt: UInt32                    = 50000
     var createRetryCount                    = [String:Int]()   // objectType-objectID:retryCount
@@ -629,7 +621,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             sourceDataArray.removeAll()
             srcSrvTableView.reloadData()
             
-            clearSelectiveObjectsList()
+            clearSourceObjectsList()
             
             targetSelectiveObjectList.removeAll()
         }
@@ -688,9 +680,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    fileprivate func clearSelectiveObjectsList() {
-        let range = 0..<(selectiveObjectList_AC.arrangedObjects as AnyObject).count
-        selectiveObjectList_AC.remove(atArrangedObjectIndexes: IndexSet(integersIn: range))
+    fileprivate func clearSourceObjectsList() {
+        let textPredicate = NSPredicate(format: "objectName.length > 0")
+        sourceObjectList_AC.filterPredicate = textPredicate
+        
+        let range = 0..<(sourceObjectList_AC.arrangedObjects as AnyObject).count
+        sourceObjectList_AC.remove(atArrangedObjectIndexes: IndexSet(integersIn: range))
+        staticSourceObjectList.removeAll()
     }
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
@@ -744,9 +740,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             targetSelectiveObjectList.removeAll()
             arrayOfSelected.removeAll()
             
-            selectiveObjectList_AC.clearsFilterPredicateOnInsertion = true
+            sourceObjectList_AC.clearsFilterPredicateOnInsertion = true
             
-            clearSelectiveObjectsList()
+            clearSourceObjectsList()
             
             if whichTab == "macOS" {
                 AllEndpointsArray = macOSEndpointArray
@@ -771,6 +767,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             if LogLevel.debug { WriteToLog().message(stringOfText: "Selectively migrating: \(objectsToMigrate) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))\n") }
+            print("[sectionToMigrate] goSender: \(goSender)")
             Go(sender: goSender)
         }
     }
@@ -1560,10 +1557,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             
                             DispatchQueue.main.async { [self] in
                                 // create targetSelectiveObjectList, list of objects to migrate/remove - start
-                                for k in (0..<(selectiveObjectList_AC.arrangedObjects as AnyObject).count) {
+                                for k in (0..<(sourceObjectList_AC.arrangedObjects as AnyObject).count) {
                                     if srcSrvTableView.isRowSelected(k) {
-//                                        print("add \((selectiveObjectList_AC.arrangedObjects as! [SelectiveObject])[k].objectName) to selective migration")
-                                        targetSelectiveObjectList.append((selectiveObjectList_AC.arrangedObjects as! [SelectiveObject])[k])
+//                                        print("add \((sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[k].objectName) to selective migration")
+                                        targetSelectiveObjectList.append((sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[k])
                                     }
                                 }
                                 
@@ -1573,17 +1570,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.goButtonEnabled(button_status: true)
                                     return
                                 }
-                                
-                                // Used if we remove items from the list as they are removed from the server
-//                                if wipeData.on {
-//                                    self.availableIdsToDelArray.removeAll()
-//                                    for k in (0..<(selectiveObjectList_AC.arrangedObjects as AnyObject).count) {
-//                                        availableIdsToDelArray.append((selectiveObjectList_AC.arrangedObjects as! [SelectiveObject])[k].objectId)
-//                                    }
-//    //                                        print("availableIdsToDelArray: \(self.availableIdsToDelArray)")
-//                                }
                             
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Item(s) chosen from selective: \(selectiveObjectList_AC.arrangedObjects as! [SelectiveObject])\n") }
+                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigrating] Item(s) chosen from selective: \(sourceObjectList_AC.arrangedObjects as! [SelectiveObject])\n") }
 
                                 advancedMigrateDict.removeAll()
                                 migratedDependencies.removeAll()
@@ -1945,6 +1933,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.readNodes] exit\n") }
             }
         } else {
+            
+            clearSourceObjectsList()
+            availableObjsToMigDict.removeAll()
+            
             self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
 //                print("[ViewController.readNodes] getEndpoints result: \(result)")
@@ -1962,13 +1954,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     fileprivate func updateSelectiveList(objectName: String, objectId: String, fileContents: String) {
         DispatchQueue.main.async { [self] in
-            selectiveObjectList_AC.addObject(SelectiveObject(objectName: objectName, objectId: objectId, fileContents: fileContents))
+            sourceObjectList_AC.addObject(SelectiveObject(objectName: objectName, objectId: objectId, fileContents: fileContents))
             // sort printer list
-            selectiveObjectList_AC.rearrangeObjects()
-            staticSelectiveObjectList = selectiveObjectList_AC.arrangedObjects as! [SelectiveObject]
+            sourceObjectList_AC.rearrangeObjects()
+            staticSourceObjectList = sourceObjectList_AC.arrangedObjects as! [SelectiveObject]
             
 //            srcSrvTableView.reloadData()
-            srcSrvTableView.scrollRowToVisible(staticSelectiveObjectList.count-1)
+            srcSrvTableView.scrollRowToVisible(staticSourceObjectList.count-1)
             // srcSrvTableView.scrollToEndOfDocument(nil)
         }
     }
@@ -2085,7 +2077,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         self.sourceDataArray.removeAll()
         self.availableIDsToMigDict.removeAll()
         
-        clearSelectiveObjectsList()
+        clearSourceObjectsList()
         
         getEndpointsQ.addOperation {
             
@@ -2275,8 +2267,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             self.sourceDataArray.removeAll(where: {$0.lowercased() == self.dest_user.lowercased()})
                                                                             srcSrvTableView.reloadData()
                                                                             
-                                                                            if let objectIndex = (self.selectiveObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName.lowercased() == self.dest_user.lowercased() }) {
-                                                                                self.selectiveObjectList_AC.remove(atArrangedObjectIndex: objectIndex)
+                                                                            if let objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName.lowercased() == self.dest_user.lowercased() }) {
+                                                                                self.sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex)
                                                                             }
                                                                         }
                                                                         
@@ -2895,7 +2887,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             delayInt = listDelay(itemCount: availableObjsToMigDict.count)
                                                             for (l_xmlID, l_xmlName) in availableObjsToMigDict {
                                                                 sortQ.async { [self] in
-                                                                    //print("adding \(l_xmlName) to array")
+//                                                                    print("adding \(l_xmlName) to array")
                                                                     availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
                                                                     sourceDataArray.append(l_xmlName)
                                                                     
@@ -3032,7 +3024,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            print("[readDataFiles] local_endpointArray: \(local_endpointArray)")
             let local_folder = nodesToMigrate[nodeIndex]
             availableFilesToMigDict.removeAll()
-            clearSelectiveObjectsList()
+            clearSourceObjectsList()
             
             var directoryPath = "\(JamfProServer.source)/\(local_folder)"
             directoryPath = directoryPath.replacingOccurrences(of: "//\(local_folder)", with: "/\(local_folder)")
@@ -3156,7 +3148,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                     staticSourceDataArray = sourceDataArray
                                     
-                                    print("[readDataFiles] add \(name) (id: \(id)) to selectiveObjectList_AC")
+                                    print("[readDataFiles] add \(name) (id: \(id)) to sourceObjectList_AC")
                                     updateSelectiveList(objectName: name, objectId: id, fileContents: fileContents)
                                     
                                     // slight delay in building the list - visual effect
@@ -3218,7 +3210,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                  
 //                 self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
                  getStatusUpdate2(endpoint: endpoint, total: fileCount)
-                 print("\(#line) put count: \(fileCount)")
                  putStatusUpdate2(endpoint: endpoint, total: fileCount)
                  
                  if nodeIndex < nodesToMigrate.count - 1 {
@@ -4160,7 +4151,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if (userDefaults.integer(forKey: "copyExisting") == 1 && action == "create") || (userDefaults.integer(forKey: "copyMissing") == 1 && action == "update") {
             counters[endpointType]?["skipped"]! += 1
-            print("\(#line) put count: \(endpointCount)")
             putStatusUpdate2(endpoint: endpointType, total: endpointCount)
             return
         }
@@ -4595,7 +4585,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && totalCompleted > 0  {
         //                                print("[CreateEndpoints] counters: \(counters)")
                                         if !setting.migrateDependencies || endpointType == "policies" {
-                                            print("\(#line) put count: \(counters[endpointType]!["total"]!)")
                                             putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
                                         }
                                     }
@@ -5028,26 +5017,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     // remove items from the list as they are removed from the server
                                     if self.activeTab(fn: "RemoveEndpoints") == "selective" {
         //                                print("endPointID: \(endPointID)")
-                                        let lineNumber = (self.selectiveObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == endPointID})!
-                                        let objectToRemove = (self.selectiveObjectList_AC.arrangedObjects as! [SelectiveObject])[lineNumber].objectName
-//                                        let lineNumber = self.availableIdsToDelArray.firstIndex(of: "\(endPointID)")!
-                                        
-//                                        let objectToRemove = self.sourceDataArray[lineNumber]
-//                                        self.availableIdsToDelArray.remove(at: lineNumber)
-//                                        self.sourceDataArray.remove(at: lineNumber)
+                                        let lineNumber = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == endPointID})!
+                                        let objectToRemove = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[lineNumber].objectName
+
                                         let staticLineNumber = self.staticSourceDataArray.firstIndex(of: objectToRemove)!
                                         self.staticSourceDataArray.remove(at: staticLineNumber)
                                         
-                                        var objectIndex = (self.selectiveObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
-                                        self.selectiveObjectList_AC.remove(atArrangedObjectIndex: objectIndex!)
-                                        objectIndex = self.staticSelectiveObjectList.firstIndex(where: { $0.objectId == endPointID })
-                                        self.staticSelectiveObjectList.remove(at: objectIndex!)
-                                        
-                                        DispatchQueue.main.async {
-                                            self.srcSrvTableView.beginUpdates()
-                                            self.srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
-                                            self.srcSrvTableView.endUpdates()
-                                            self.srcSrvTableView.isEnabled = false
+                                        DispatchQueue.main.async { [self] in
+                                            
+                                            var objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
+                                            self.sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex!)
+                                            objectIndex = self.staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
+                                            self.staticSourceObjectList.remove(at: objectIndex!)
+//                                            srcSrvTableView.beginUpdates()
+//                                            srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
+//                                            srcSrvTableView.endUpdates()
+                                            srcSrvTableView.isEnabled = false
                                         }
                                     }
                                     
@@ -5093,18 +5078,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                                 totalCompleted = totalDeleted + totalFailed
 
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { [self] in
                                     
                                     if totalCompleted > 0 {
-                                        print("\(#line) put count: \(counters[endpointType]!["total"]!)")
-                                        self.putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
+                                        putStatusUpdate2(endpoint: endpointType, total: self.counters[endpointType]!["total"]!)
                                     }
                                     
-                                    if totalDeleted == endpointCount && self.changeColor {
-                                        self.labelColor(endpoint: endpointType, theColor: self.greenText)
+                                    if totalDeleted == endpointCount && changeColor {
+                                        labelColor(endpoint: endpointType, theColor: greenText)
                                     } else if totalFailed == endpointCount {
-                                        self.labelColor(endpoint: endpointType, theColor: self.redText)
-                                        self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
+                                        labelColor(endpoint: endpointType, theColor: redText)
+                                        setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
                                     }
                                 }
                             }
@@ -5353,8 +5337,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 sourceDataArray.removeAll()
                                                 staticSourceDataArray.removeAll()
                                                 
-                                                clearSelectiveObjectsList()
-                                                staticSelectiveObjectList.removeAll()
+                                                clearSourceObjectsList()
+                                                staticSourceObjectList.removeAll()
         //                                        self.srcSrvTableView.reloadData()
                                                 goButtonEnabled(button_status: true)
                                                 completion(("Failed to get existing \(existingEndpointNode)\nStatus code: \(httpResponse.statusCode)",""))
@@ -6104,7 +6088,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 targetSelectiveObjectList.removeAll()
                 srcSrvTableView.reloadData()
                 
-                clearSelectiveObjectsList()
+                clearSourceObjectsList()
                 
                 selectiveListCleared = true
             } else {
@@ -7968,13 +7952,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         srcSrvTableView.tableColumns.forEach { (column) in
             column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 14)])
         }
-//        selectiveObjectList_AC.sortDescriptors = [NSSortDescriptor(key: "objectName", ascending: true)]
+//        sourceObjectList_AC.sortDescriptors = [NSSortDescriptor(key: "objectName", ascending: true)]
         
         /* test data for selective migration
         let testObjects = SelectiveObjectList(objectName: "iPad", objectId: "iPad-16.xml")
-        selectiveObjectList_AC.addObject(testObjects)
+        sourceObjectList_AC.addObject(testObjects)
         let testObjects2 = SelectiveObjectList(objectName: "iPad", objectId: "iPad-77.xml")
-        selectiveObjectList_AC.addObject(testObjects2)
+        sourceObjectList_AC.addObject(testObjects2)
          */
         
         // Do any additional setup after loading the view.
@@ -8225,7 +8209,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
             clearSelectiveList()
-            clearSelectiveObjectsList()
+            clearSourceObjectsList()
             clearProcessingFields()
         }
         JamfProServer.version[JamfProServer.whichServer]    = ""
@@ -8286,7 +8270,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 srcSrvTableView.reloadData()
                 selectiveListCleared = true
                 
-                clearSelectiveObjectsList()
+                clearSourceObjectsList()
                 
 //                _ = serverOrFiles()
                 
@@ -8322,7 +8306,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     srcSrvTableView.reloadData()
                     selectiveListCleared = true
                     
-                    clearSelectiveObjectsList()
+                    clearSourceObjectsList()
                 }
                 // Set the text for the operation
                 migrateOrRemove_TextField.stringValue = "--- Removing ---"

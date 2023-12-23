@@ -30,8 +30,8 @@
             filePath = "jamf-migrator/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1557"
-            endingLineNumber = "1557"
+            startingLineNumber = "1554"
+            endingLineNumber = "1554"
             landmarkName = "startMigrating()"
             landmarkType = "7">
          </BreakpointContent>
