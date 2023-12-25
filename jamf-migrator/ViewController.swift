@@ -8323,21 +8323,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             break
                         }
-//                        DispatchQueue.main.async { [self] in
-//                            if isRed == false {
-//                                // Set the text for the operation
-//                                migrateOrRemove_TextField.stringValue = "--- Removing ---"
-//                                migrateOrRemove_TextField.textColor = redText
-//                                // Set the text for destination method
-//                                destinationMethod_TextField.stringValue = "DELETE:"
-//                                destinationMethod_TextField.textColor = yellowText
-//                                isRed = true
-//                            } else {
-//                                migrateOrRemove_TextField.textColor = yellowText
-//                                destinationMethod_TextField.textColor = redText
-//                                isRed = false
-//                            }
-//                        }
+                        
                         usleep(500000)  // 0.5 seconds
                     }
 
