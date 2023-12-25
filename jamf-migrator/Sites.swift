@@ -18,7 +18,7 @@ class Sites: NSObject, URLSessionDelegate {
     
     func fetch(server: String, creds: String, completion: @escaping ((Int,[String])) -> Void) {
         
-        jamfpro = JamfPro(controller: ViewController())
+//        jamfpro = JamfPro(controller: ViewController())
         var siteArray = [String]()
 //        var siteDict  = Dictionary<String, Any>()
         base64Creds   = Data("\(creds)".utf8).base64EncodedString()
@@ -37,25 +37,13 @@ class Sites: NSObject, URLSessionDelegate {
         
         // get all the sites - start
         WriteToLog().message(stringOfText: "[Sites] Fetching sites from \(server)\n")
-//        jamfpro!.getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
 
-//        JamfPro(controller: ViewController()).getToken(whichServer: "destination", serverUrl: server, base64creds: base64Creds, localSource: false) { [self]
-//            (authResult: (Int,String)) in
-//            let (authStatusCode, _) = authResult
-
-//            if pref.httpSuccess.contains(authStatusCode) {
-                getSites() {
-                    (result: [String]) in
-                    siteArray = result
-                    completion((200,siteArray))
-//                    completion((authStatusCode,siteArray))
-                    return siteArray
-                }
-//            } else {
-//                WriteToLog().message(stringOfText: "[Sites] Failed to authenticate to \(server), no sites returned\n")
-//                completion((authStatusCode,siteArray))
-//            }
-//        }
+        getSites() {
+            (result: [String]) in
+            siteArray = result
+            completion((200,siteArray))
+            return siteArray
+        }
     }
     
     func getSites(completion: @escaping ([String]) -> [String]) {
@@ -67,8 +55,8 @@ class Sites: NSObject, URLSessionDelegate {
         //        print("serverRequest: \(serverRequest)")
         serverRequest.httpMethod = "GET"
         let serverConf = URLSessionConfiguration.ephemeral
-//         ["Authorization" : "Basic \(token)", "Content-Type" : "application/json", "Accept" : "application/json"]
-        serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+
+        serverConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in

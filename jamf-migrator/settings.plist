@@ -20,7 +20,13 @@
 	<string></string>
 	<key>dest_user</key>
 	<string></string>
-	<key>storeCredentials</key>
+	<key>storeSourceCreds</key>
+	<integer>0</integer>
+	<key>storeDestCreds</key>
+	<integer>0</integer>
+	<key>sourceApiClient</key>
+	<integer>0</integer>
+	<key>destApiClient</key>
 	<integer>0</integer>
 	<key>scope</key>
 	<dict>

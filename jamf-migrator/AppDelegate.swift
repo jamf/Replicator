@@ -12,7 +12,7 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
     
     var prefWindowController: NSWindowController?
     
@@ -32,20 +32,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        self.goButtonEnabled(button_status: true)
         quitNow(sender: self)
         
-//        WriteToLog().logFileW?.closeFile()
-//        NSApplication.shared.terminate(self)
     }
 
     public func quitNow(sender: AnyObject) {
-//        let sourceMethod = (JamfProServer.importFiles == 1 || !JamfProServer.validToken["source"]!) ? "SKIP":"POST"
-        let sourceMethod = (JamfProServer.validToken["source"]!) ? "POST":"SKIP"
+        
+//        print("[quitNow] JamfProServer.validToken[\"source\"]: \(JamfProServer.validToken["source"] ?? false)")
+//        print("[quitNow] JamfProServer.validToken[\"dest\"]: \(JamfProServer.validToken["dest"] ?? false)")
+        let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
+//        print("[quitNow] sourceMethod: \(sourceMethod)")
         Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
-            WriteToLog().message(stringOfText: "source server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
-            let destMethod = (JamfProServer.validToken["destination"]!) ? "POST":"SKIP"
-            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["destination"] ?? "", method: destMethod) {
+            WriteToLog().message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
+            let destMethod = (JamfProServer.validToken["dest"] ?? false) ? "POST":"SKIP"
+//                    print("[quitNow] destMethod: \(destMethod)")
+            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
-                WriteToLog().message(stringOfText: "destination server token task: \(String(describing: returnedJSON["JPAPI_result"]!))\n")
+                WriteToLog().message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
                 WriteToLog().logFileW?.closeFile()
                 NSApplication.shared.terminate(self)
             }
@@ -67,7 +69,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var index = 0
         while index < numberOfArgs {
 //                print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
-                switch CommandLine.arguments[index].lowercased() {
+            let cmdLineSwitch = CommandLine.arguments[index].lowercased()
+                switch cmdLineSwitch {
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
@@ -119,6 +122,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
+                case "-sourceuseclientid", "-destuseclientid":
+                    index += 1
+                    let useApiClient = ( "\(CommandLine.arguments[index])".lowercased() == "yes" || "\(CommandLine.arguments[index])".lowercased() == "true" ) ? 1:0
+                    if cmdLineSwitch ==  "-sourceuseclientid" {
+                        JamfProServer.sourceUseApiClient = useApiClient
+                    } else {
+                        JamfProServer.destUseApiClient = useApiClient
+                    }
+                case "-sourceclientid":
+                    index += 1
+                    JamfProServer.sourceApiClient["id"] = CommandLine.arguments[index]
+                    JamfProServer.sourceUser = JamfProServer.sourceApiClient["id"] ?? ""
+                    JamfProServer.sourceUseApiClient = 1
+                case "-destclientid":
+                    index += 1
+                    JamfProServer.destApiClient["id"] = CommandLine.arguments[index]
+                    JamfProServer.destUser = JamfProServer.destApiClient["id"] ?? ""
+                    JamfProServer.destUseApiClient = 1
+                case "-sourceclientsecret":
+                    index += 1
+                    JamfProServer.sourceApiClient["secret"] = CommandLine.arguments[index]
+                    JamfProServer.sourcePwd = JamfProServer.sourceApiClient["secret"] ?? ""
+                case "-destclientsecret":
+                    index += 1
+                    JamfProServer.destApiClient["secret"] = CommandLine.arguments[index]
+                    JamfProServer.destPwd = JamfProServer.destApiClient["secret"] ?? ""
                 case "-silent":
                     setting.fullGUI = false
                 case "-sticky":
@@ -136,7 +165,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
         if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
             export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
-            self.userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
+            userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString
 //            self.userDefaults.synchronize()

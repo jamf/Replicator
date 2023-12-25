@@ -9,6 +9,10 @@
 import Cocoa
 import Foundation
 
+public let userDefaults = UserDefaults.standard
+public var maxConcurrentThreads = 2
+public var sourceDestListSize   = 20
+
 class appColor: NSColor {
     static let schemes:[String]            = ["casper", "classic"]
     static let background:[String:CGColor] = ["casper":CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0),
@@ -17,7 +21,7 @@ class appColor: NSColor {
                                               "classic":NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)]
 }
 
-struct appInfo {
+struct AppInfo {
     static let dict            = Bundle.main.infoDictionary!
     static let version         = dict["CFBundleShortVersionString"] as! String
     static let name            = dict["CFBundleExecutable"] as! String
@@ -26,7 +30,7 @@ struct appInfo {
     static var settings        = [String:Any]()
     static let plistPath       = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
 
-    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
+    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
 }
 
 struct dependency {
@@ -58,7 +62,7 @@ struct JamfProServer {
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0
-    static var version      = ["source":"", "destination":""]
+    static var version      = ["source":"", "dest":""]
     static var build        = ""
     static var source       = ""
     static var destination  = ""
@@ -67,15 +71,20 @@ struct JamfProServer {
     static var destUser     = ""
     static var sourcePwd    = ""
     static var destPwd      = ""
-    static var storeCreds   = 0
+    static var storeSourceCreds = 0
+    static var storeDestCreds   = 0
+    static var sourceUseApiClient  = 0
+    static var destUseApiClient    = 0
     static var toSite       = false
     static var destSite     = ""
     static var importFiles  = 0
-    static var authCreds    = ["source":"", "destination":""]
-    static var authExpires  = ["source":"", "destination":""]
-    static var authType     = ["source":"Bearer", "destination":"Bearer"]
-    static var base64Creds  = ["source":"", "destination":""]               // used if we want to auth with a different account
-    static var validToken   = ["source":false, "destination":false]
+    static var sourceApiClient  = ["id":"", "secret":""]
+    static var destApiClient  = ["id":"", "secret":""]
+    static var authCreds    = ["source":"", "dest":""]
+    static var authExpires  = ["source":30, "dest":30]
+    static var authType     = ["source":"Bearer", "dest":"Bearer"]
+    static var base64Creds  = ["source":"", "dest":""]               // used if we want to auth with a different account
+    static var validToken   = ["source":false, "dest":false]
     static var tokenCreated = [String:Date?]()
     static var pkgsNotFound = 0
     static var sessionCookie = [HTTPCookie]()
@@ -122,7 +131,8 @@ struct summaryHeader {
 }
 
 struct token {
-    static var refreshInterval:UInt32 = 20*60  // 20 minutes
+    static let defaultRefresh: UInt32 = 29  // 29 minutes
+    static var refreshInterval: [String:UInt32] = ["source": defaultRefresh, "dest": defaultRefresh]
 }
 
 struct wipeData {
@@ -136,16 +146,16 @@ Usage: /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -parameter1 value
 Note: Not all parameters have values.
 
 Parameters:
-         -export: No value needed but -objects must be used.  Exports object listed to a zipped file in the current export location (defined in the UI).  Must define a source server (-source).
+    -export: No value needed but -objects must be used.  Exports object listed to a zipped file in the current export location (defined in the UI).  Must define a source server (-source).
 
-          -debug: No value needed.  Enables debug mode, more verbose logging.
+    -debug: No value needed.  Enables debug mode, more verbose logging.
 
     -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for jamf migrator.
 
-        -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
+    -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
                   saving credentials, between the source and destination before the command line can be successful.  Must also use -objects, -source, and -destination.
 
-        -objects: List of objects to migrate.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
+    -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
                                       networksegments,advancedusersearches,smartusergroups,staticusergroups,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
@@ -154,16 +164,29 @@ Parameters:
                                       mobiledeviceextensionattributes,mobiledevices,smartmobiledevicegroups,staticmobiledevicegroups,
                                       advancedmobiledevicesearches,mobiledeviceapplications,mobiledeviceconfigurationprofiles
 
-                                      You can use 'allobjects' (without quotes) to migrate all objects.
+                                      You can use 'allobjects' (without quotes) to migrate/export all objects.
 
-          -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to
+    -scope: true or false.  Whether or not to migrate the scope/limitations/exclusions of an object.  Option applies to
                   anything with a scope; policies, configuration profiles, restrictions...  By default the scope is copied.
 
-         -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
+    -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
                   wrapped in quotes.  Credentials for the source server must be saved in the keychain for jamf migrator.
 
-         -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
+    -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
                   the needed information.  By default sticky sessions are not used.
+
+    ## API client options ##
+    -destUseClientId: true or false.  Whether or not to use Client ID rather than username.  If set to true and -destClientId is not provided the keychain will be queried.
+
+    -destClientId: Client ID from Jamf Pro API Roles and Clients.  If the client ID is provided, -destUseClientId is forced to true.
+
+    -destClientSecret: Client Secret from Jamf Pro API Roles and Clients.
+    
+    -sourceUseClientId: true or false.  Whether or not to use Client ID rather than username.  If set to true and -sourceClientId is not provided the keychain will be queried.
+
+    -sourceClientId: Client ID from Jamf Pro API Roles and Clients.  If the client ID is provided, -sourceUseClientId is forced to true.
+
+    -sourceClientSecret: Client Secret from Jamf Pro API Roles and Clients.
 
 Examples:
     Create an export of all objects:
@@ -181,33 +204,34 @@ Examples:
     Migrate all objects from a folder to a server:
     /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Migrator/raw" -destination prod.jamfpro.server -objects allobjects
 
-
+    Migrate buildings using an API client for the source server and username/password for the destination server:
+    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings
 """
 
 public func readSettings() -> [String:Any] {
-    appInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: appInfo.plistPath)) as? [String : Any])!
-    if appInfo.settings.count == 0 {
-        if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist: \(appInfo.plistPath)\n") }
+    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: AppInfo.plistPath)) as? [String : Any])!
+    if AppInfo.settings.count == 0 {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "Error reading plist: \(AppInfo.plistPath)\n") }
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))\n")
-    return(appInfo.settings)
+    return(AppInfo.settings)
 }
 
 public func saveSettings(settings: [String:Any]) {
-    NSDictionary(dictionary: settings).write(toFile: appInfo.plistPath, atomically: true)
+    NSDictionary(dictionary: settings).write(toFile: AppInfo.plistPath, atomically: true)
 }
 
 public func storeBookmark(theURL: URL) {
-    print("[\(#line)-storeBookmark] store \(theURL) in \(appInfo.bookmarksPath)")
-    appInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: appInfo.bookmarksPath) as? [URL: Data] ?? [:]
+    print("[\(#line)-storeBookmark] store \(theURL) in \(AppInfo.bookmarksPath)")
+    AppInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] ?? [:]
     print("[\(#line)-storeBookmark] current bookmarks:")
-    for (theBookmark,_) in appInfo.bookmarks {
+    for (theBookmark,_) in AppInfo.bookmarks {
         print("[\(#line)-storeBookmark] \(theBookmark)")
     }
     do {
         let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-        appInfo.bookmarks[theURL] = data
-        NSKeyedArchiver.archiveRootObject(appInfo.bookmarks, toFile: appInfo.bookmarksPath)
+        AppInfo.bookmarks[theURL] = data
+        NSKeyedArchiver.archiveRootObject(AppInfo.bookmarks, toFile: AppInfo.bookmarksPath)
     } catch let error as NSError {
         WriteToLog().message(stringOfText: "[Global] Set Bookmark Failed: \(error.description)\n")
     }
@@ -249,7 +273,7 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int) {
         if forWhat == "sourceTokenAge" {
             components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["source"] ?? Date())!, to: Date())
         } else {
-            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["destination"] ?? Date())!, to: Date())
+            components = Calendar.current.dateComponents([.second, .nanosecond], from: (JamfProServer.tokenCreated["dest"] ?? Date())!, to: Date())
         }
     default:
         break
@@ -260,4 +284,8 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int) {
     let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)
     return(h,m,s)
+}
+
+func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
 }

@@ -1,6 +1,9 @@
 # Jamf Migrator
 
-Current release Download: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/jamf-migrator.zip)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/JamfMigrator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/total)
+ ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/JamfMigrator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/JamfMigrator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/JamfMigrator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
+
+Download the current release: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/jamf-migrator.zip)
 
 A tool to migrate data granularly between Jamf Pro servers
 
@@ -18,6 +21,10 @@ When migrating files be sure to open the 'raw' folder.
   
   Devices (computers and iOS), Groups, Policies, and Configuration Profiles can be targeted to a particular site.</br>
   ![alt text](./jamf-migrator/images/migrator2.5b.png "Files")
+</br></br>
+
+Servers can be removed from the (source/destination) list by holding down the option key while selecting the server.  A warning will be presented to verify the removal.</br>
+  ![alt text](./jamf-migrator/images/removeServer.png "Files")
 </br></br>
 
 **Limitations/requirements to be aware of:**
@@ -46,10 +53,10 @@ When migrating files be sure to open the 'raw' folder.
 The Selective tab provides the ability to select a subset of (or all) items within a collection of objects.  For example you might only want to transfer 4 scripts from a larger pool of existing scripts.
   ![alt text](./jamf-migrator/images/migrator3.png "Selective")
   
-Note: Policies are listed along with the their ID.  They'll be listed with a format of: policy name (ID)
 
 Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.
 ![alt text](./jamf-migrator/images/migrator3Policies.png "Selective")
+Note: The ID of any object can be seen my hovering the mouse over the object.
 
 
 Files exported using jamf-migrator can be imported into another Jamf Pro server.  Be sure to open the 'raw' folder when importing.
@@ -71,7 +78,12 @@ Files exported using jamf-migrator can be imported into another Jamf Pro server.
 * Static Mobile Device Groups 
 * Static User Groups 
 
-In addition, Policies can be copied in a disabled state.
+In addition to scoping options the following are available:
+* Policies can be copied in a disabled state
+* Able to copy only items missing from the destination server - create only
+* Able to copy only items currently on the destination server - update only<br>
+
+** object name is used to determine whether or not it is on the destination server **
 
 ![](./jamf-migrator/images/copyPrefs.png)
 </br></br>
@@ -92,7 +104,7 @@ Options for migrating object(s) (groups, policies, and configuration profiles) t
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
-The number of concurrent API operations (from 1 to 5), number of log files to retain, along with forcing basic authentication can be configured.
+The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
 
 ![](./jamf-migrator/images/appPrefs.png)
 </br></br>
@@ -155,7 +167,7 @@ Running the following in Terminal will export all objects (full XML) that can be
 ```
 /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects
 ```
-Before running an export via command line at least one export from the app must be manually run saving the source username and password.<br>
+Before running an export via command line at least one export from the app must be manually run saving the source username and password or client ID and secret.<br>
 
 To migrate object(s) using the command line, something like the following can be used:
 ```
@@ -175,6 +187,24 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.4.0**<br>
+Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.  Minor layout changes.  Ability to sort ascending or descending object list in selective migration. 
+
+**v7.3.1**<br>
+Work to resolve issue (#91), logging in with API clients.
+Add option to copy only items not on the destination server - create only.
+Add option to copy only items currently on both source and destination servers - update only.
+Add option to set the number of servers/folders saved.
+
+**v7.2.2**<br>
+Fix version lookup with Jamf Pro 11, background threading issue.
+
+**v7.2.1**<br>
+Fix issue logging into Jamf Pro 11, issue #91.  Update token refresh method.
+
+**v7.2.0**<br>
+Add support for API client in both the UI and command line.
+
 **v7.1.1**<br>
 Prevent configuration profiles that include a Filevault payload from migrating.  Fix export of smart comuter/device groups.  Fix color mismatch (issue #88)
 

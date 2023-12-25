@@ -28,7 +28,7 @@
 		B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */; };
 		B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */; };
 		B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */; };
-		B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BD6ADA233510F6001D244A /* Credentials2.swift */; };
+		B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BD6ADA233510F6001D244A /* Credentials.swift */; };
 		B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C25B0627DA0499008E4B0F /* JamfPro.swift */; };
 		B5C993C0230E211100558040 /* Sites.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C993BF230E211100558040 /* Sites.swift */; };
 		B5E179F21F1FDAFA00A20AAA /* images in Resources */ = {isa = PBXBuildFile; fileRef = B5E179F01F1FDAFA00A20AAA /* images */; };
@@ -68,7 +68,7 @@
 		B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
-		B5BD6ADA233510F6001D244A /* Credentials2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials2.swift; sourceTree = "<group>"; };
+		B5BD6ADA233510F6001D244A /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		B5C25B0627DA0499008E4B0F /* JamfPro.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JamfPro.swift; sourceTree = "<group>"; };
 		B5C993BF230E211100558040 /* Sites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sites.swift; sourceTree = "<group>"; };
 		B5E179F01F1FDAFA00A20AAA /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
@@ -118,7 +118,7 @@
 				B556A79D2773A100003CBEE9 /* Alert.swift */,
 				B54509402904D96500094739 /* Awake.swift */,
 				9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */,
-				B5BD6ADA233510F6001D244A /* Credentials2.swift */,
+				B5BD6ADA233510F6001D244A /* Credentials.swift */,
 				B51742D928FB4F2B0058ED55 /* CustomSeparator.swift */,
 				B53ECDF72391F8FB005EE6E5 /* Globals.swift */,
 				B5B6518F1F203C48007D7CE6 /* HelpViewController.swift */,
@@ -293,7 +293,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "newBuildNumber=$(date -u +%Y%m%d.%H%M%S)\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $newBuildNumber\"  \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
+			shellScript = "newMajor=\"$(date -u +%Y%m%d)\"\ndate24H=$(date -u +%H%M)\ntmpMinor=$(printf \"%x\\n\" $(echo $date24H | sed 's/^0*//'))\nnewMinor=$(echo $tmpMinor | tr '[:lower:]' '[:upper:]')\nnewBuildNumber=\"$newMajor-$newMinor\"\n##echo \"dir: ${PROJECT_DIR}\"\n##echo \"plist: ${INFOPLIST_FILE}\"\n##defaults read \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n\n## create folder to hold exported app\nshortVer=\"v${MARKETING_VERSION}\"\nexeName=\"${EXECUTABLE_NAME}\"\nbuildDir=\"/Users/lesliehelou/Documents/Travel/- Projects/$exeName/$shortVer/\"\n\nif [ ! -d \"$buildDir\" ];then\n    mkdir -p \"$buildDir\"\nfi\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $newBuildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -321,7 +321,7 @@
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
 				B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
-				B5BD6ADB233510F6001D244A /* Credentials2.swift in Sources */,
+				B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
@@ -477,8 +477,8 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 7.1.1;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 7.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -502,8 +502,8 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 7.1.1;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 7.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

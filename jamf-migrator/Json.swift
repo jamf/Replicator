@@ -16,7 +16,7 @@ class Json: NSObject, URLSessionDelegate {
             return
         }
         
-        let userDefaults   = UserDefaults.standard
+//        let userDefaults   = UserDefaults.standard
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog().message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
     
@@ -39,8 +39,8 @@ class Json: NSObject, URLSessionDelegate {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
-//           = ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-            destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType[whichServer]!)) \(String(describing: JamfProServer.authCreds[whichServer]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
+
+            destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in

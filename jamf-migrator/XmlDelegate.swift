@@ -12,7 +12,7 @@ import Foundation
 class XmlDelegate: NSObject, URLSessionDelegate {
 
     let fm           = FileManager()
-    let userDefaults = UserDefaults.standard
+//    let userDefaults = UserDefaults.standard
 //    let baseXmlFolder = NSHomeDirectory() + "/Downloads/Jamf Migrator"
     var baseXmlFolder = ""
     var saveXmlFolder = ""
@@ -22,7 +22,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
         
         if theEndpoint.prefix(4) != "skip" {
-            let getRecordQ = OperationQueue()   //DispatchQueue(label: "com.jamf.getRecordQ", qos: DispatchQoS.background)
+            let getRecordQ = OperationQueue()
         
             URLCache.shared.removeAllCachedResponses()
             var existingDestUrl = ""
@@ -43,7 +43,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 xmlRequest.httpMethod = "\(method.uppercased())"
                 let destConf = URLSessionConfiguration.default
 
-                destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["destination"]!)) \(String(describing: JamfProServer.authCreds["destination"]!))", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : appInfo.userAgentHeader]
+                destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                 
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
