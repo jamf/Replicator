@@ -31,5 +31,5 @@ class Alert: NSObject {
             selected = "OK"
         }
         return selected
-    }   // func alert_dialog - end
+    }
 }

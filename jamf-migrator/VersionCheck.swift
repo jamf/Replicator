@@ -6,7 +6,6 @@
 //  Copyright © 2018 jamf. All rights reserved.
 //
 
-//import Cocoa
 import Foundation
 
 class VersionCheck: NSObject, URLSessionDelegate {
