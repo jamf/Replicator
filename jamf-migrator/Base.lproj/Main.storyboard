@@ -2258,14 +2258,14 @@
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="7sv-In-7JH" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="567" height="208"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="568" height="208"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <size key="intercellSpacing" width="3" height="2"/>
                                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                         <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                                                         <color key="gridColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                                         <tableColumns>
-                                                                            <tableColumn identifier="objectName" editable="NO" width="555" minWidth="500" maxWidth="1000" id="EVv-n3-oMc" userLabel="name">
+                                                                            <tableColumn identifier="objectName" editable="NO" width="556" minWidth="556" maxWidth="1000" id="EVv-n3-oMc" userLabel="name">
                                                                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Object name">
                                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2279,11 +2279,11 @@
                                                                                 <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                                                 <prototypeCellViews>
                                                                                     <tableCellView id="4tV-NR-thP">
-                                                                                        <rect key="frame" x="1" y="1" width="564" height="17"/>
+                                                                                        <rect key="frame" x="1" y="1" width="565" height="17"/>
                                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                         <subviews>
                                                                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="oft-XQ-ded">
-                                                                                                <rect key="frame" x="0.0" y="1" width="543" height="16"/>
+                                                                                                <rect key="frame" x="0.0" y="1" width="544" height="16"/>
                                                                                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="h7Z-i4-Lfc">
                                                                                                     <font key="font" usesAppearanceFont="YES"/>
                                                                                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -2291,6 +2291,7 @@
                                                                                                 </textFieldCell>
                                                                                                 <connections>
                                                                                                     <binding destination="4tV-NR-thP" name="value" keyPath="objectValue.objectName" id="cdO-eI-ytV"/>
+                                                                                                    <binding destination="4tV-NR-thP" name="toolTip" keyPath="objectValue.objectId" id="v4i-ei-GZj"/>
                                                                                                 </connections>
                                                                                             </textField>
                                                                                         </subviews>
@@ -2317,7 +2318,7 @@
                                                                 <constraint firstAttribute="width" constant="569" id="mpr-bK-eph"/>
                                                                 <constraint firstAttribute="height" constant="238" id="uVO-oP-eOC"/>
                                                             </constraints>
-                                                            <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="0.1111111111111111" horizontal="YES" id="gEQ-tu-8t7">
+                                                            <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="gEQ-tu-8t7">
                                                                 <rect key="frame" x="1" y="221" width="567" height="16"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </scroller>
@@ -2326,7 +2327,7 @@
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </scroller>
                                                             <tableHeaderView key="headerView" wantsLayer="YES" id="7sv-In-7JH">
-                                                                <rect key="frame" x="0.0" y="0.0" width="567" height="28"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="568" height="28"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </tableHeaderView>
                                                         </scrollView>

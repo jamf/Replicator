@@ -50,10 +50,10 @@ Servers can be removed from the (source/destination) list by holding down the op
 The Selective tab provides the ability to select a subset of (or all) items within a collection of objects.  For example you might only want to transfer 4 scripts from a larger pool of existing scripts.
   ![alt text](./jamf-migrator/images/migrator3.png "Selective")
   
-Note: Policies are listed along with the their ID.  They'll be listed with a format of: policy name (ID)
 
 Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.
 ![alt text](./jamf-migrator/images/migrator3Policies.png "Selective")
+Note: The ID of any object can be seen my hovering the mouse over the object.
 
 
 Files exported using jamf-migrator can be imported into another Jamf Pro server.  Be sure to open the 'raw' folder when importing.
@@ -184,6 +184,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.4.0**<br>
+Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.
+
 **v7.3.1**<br>
 Work to resolve issue (#91), logging in with API clients.
 Add option to copy only items not on the destination server - create only.
