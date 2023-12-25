@@ -185,7 +185,7 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 ## History
 **v7.4.0**<br>
-Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.
+Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.  Minor layout changes.  Ability to sort ascending or descending object list in selective migration. 
 
 **v7.3.1**<br>
 Work to resolve issue (#91), logging in with API clients.
