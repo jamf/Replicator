@@ -10,7 +10,7 @@ import AppKit
 import Cocoa
 import Foundation
 
-class CreateInfo: NSObject {
+class ObjectInfo: NSObject {
     @objc var endpointType    : String
     @objc var endPointXml     : String
     @objc var endPointJSON    : [String:Any]
@@ -463,9 +463,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var totalUpdated    = 0
     var totalFailed     = 0
     var totalCompleted  = 0
-    var createPending   = 0
-    var createArray     = [CreateInfo]()
-    var createArrayJson = [CreateInfo]()
+    var createArray     = [ObjectInfo]()
+    var createArrayJson = [ObjectInfo]()
+    var removeArray     = [ObjectInfo]()
 
     @IBOutlet weak var spinner_progressIndicator: NSProgressIndicator!
     
@@ -681,11 +681,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     fileprivate func clearSourceObjectsList() {
-        let textPredicate = NSPredicate(format: "objectName.length > 0")
-        sourceObjectList_AC.filterPredicate = textPredicate
-        
-        let range = 0..<(sourceObjectList_AC.arrangedObjects as AnyObject).count
-        sourceObjectList_AC.remove(atArrangedObjectIndexes: IndexSet(integersIn: range))
+        if setting.fullGUI {
+            let textPredicate = NSPredicate(format: "objectName.length > 0")
+            sourceObjectList_AC.filterPredicate = textPredicate
+            
+            let range = 0..<(sourceObjectList_AC.arrangedObjects as AnyObject).count
+            sourceObjectList_AC.remove(atArrangedObjectIndexes: IndexSet(integersIn: range))
+        }
         staticSourceObjectList.removeAll()
     }
     
@@ -1625,28 +1627,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 rawEndpoint = selectedEndpoint
         }
         
-        let endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjToMigrateID!))"
+//        let endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjToMigrateID!))"
         
-        Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup)  { [self]
-            (result: [String:AnyObject]) in
-            if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
-            
-            if pref.stopMigration {
-    //            print("[ViewController.readNodes] stopMigration")
-                stopButton(self)
-                return
-            }
-            
+        var endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjToMigrateID!))"
+        if fileImport || wipeData.on {
+            endpointToLookup = "skip"
+        }
+        
 //            put_levelIndicatorFillColor[selectedEndpoint] = .green
 
-            let objToMigrateID = targetSelectiveObjectList[objectIndex].objectId
-
-            if !wipeData.on  {
-//                print("call getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
+        let objToMigrateID = targetSelectiveObjectList[objectIndex].objectId
+        
+//        print("[startSelectiveMigration] wipeData.on: \(wipeData.on)")
+        if !wipeData.on {
+            Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup)  { [self]
+                (result: [String:AnyObject]) in
+                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
+                
+                if pref.stopMigration {
+                    //            print("[ViewController.readNodes] stopMigration")
+                    stopButton(self)
+                    return
+                }
+                //                print("call getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
                 self.getDependencies(object: "\(selectedEndpoint)", json: result) { [self]
                     (returnedDependencies: [String:[String:String]]) in
-//                    print("returned from getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
-//                    print("returned getDependencies: \(returnedDependencies)")
+                    //                    print("returned from getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
+                    //                    print("returned getDependencies: \(returnedDependencies)")
                     if returnedDependencies.count > 0 {
                         advancedMigrateDict[primaryObjToMigrateID!] = returnedDependencies
                     } else {
@@ -1654,187 +1661,198 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                     let selectedObject = targetSelectiveObjectList[objectIndex].objectName
-                            // migrate dependencies - start
-//                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
-
-                        self.destEPQ.async { [self] in
-
-                            // how many dependencies; categories, buildings, scripts, packages,...
-                            var totalDependencies = 0
-                            for (_, arrayOfDependencies) in returnedDependencies {
-                                totalDependencies += arrayOfDependencies.count
-                            }
-//                                print("[ViewController.startSelectiveMigration] total dependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID): \(totalDependencies)")
+                    // migrate dependencies - start
+                    //                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
+                    
+                    self.destEPQ.async { [self] in
+                        
+                        // how many dependencies; categories, buildings, scripts, packages,...
+                        var totalDependencies = 0
+                        for (_, arrayOfDependencies) in returnedDependencies {
+                            totalDependencies += arrayOfDependencies.count
+                        }
+                        //                                print("[ViewController.startSelectiveMigration] total dependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID): \(totalDependencies)")
+                        
+                        if !fileImport {
+                            for (object, arrayOfDependencies) in returnedDependencies {
+                                if nil == self.getCounters[object] {
+                                    getCounters[object]         = ["get":0]
+                                    putCounters[object]         = ["put":0]
+                                    progressCountArray[object]  = 0
+                                    counters[object]?["create"] = 0
+                                    counters[object]?["update"] = 0
+                                    counters[object]?["fail"]   = 0
+                                }
                                 
-                            if !fileImport {
-                                for (object, arrayOfDependencies) in returnedDependencies {
-                                    if nil == self.getCounters[object] {
-                                        getCounters[object]         = ["get":0]
-                                        putCounters[object]         = ["put":0]
-                                        progressCountArray[object]  = 0
-                                        counters[object]?["create"] = 0
-                                        counters[object]?["update"] = 0
-                                        counters[object]?["fail"]   = 0
-                                    }
+                                let dependencyCount = returnedDependencies[object]!.count
+                                
+                                if dependencyCount > 0 {
+                                    var dependencyCounter = 0
                                     
-                                    let dependencyCount = returnedDependencies[object]!.count
-
-                                    if dependencyCount > 0 {
-                                        var dependencyCounter = 0
+                                    for (theName, theId) in arrayOfDependencies {
+                                        let dependencySubcount = arrayOfDependencies[theName]?.count
+                                        alreadyMigrated = false
+                                        //
+                                        var theDependencyAction     = "create"
+                                        var theDependencyEndpointID = 0
+                                        dependencyCounter += 1
+                                        WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] check for existing \(object): \(theName)\n")
                                         
-                                        for (theName, theId) in arrayOfDependencies {
-                                            let dependencySubcount = arrayOfDependencies[theName]?.count
-                                            alreadyMigrated = false
-//
-                                            var theDependencyAction     = "create"
-                                            var theDependencyEndpointID = 0
-                                            dependencyCounter += 1
-                                            WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] check for existing \(object): \(theName)\n")
-                                            
-                                            // see if we've migrated the dependency already
-                                            switch object {
-                                            case "packages":
-                                                if let _ = migratedPkgDependencies[theName] {
-                                                    dependencyMigratedCount[dependencyParentId]! += 1
-                                                    alreadyMigrated = true
-//                                                    print("[dependencies] dependencyMigratedCount incremented: \(String(describing: dependencyMigratedCount[dependencyParentId]))")
-//                                                    print("[dependencies] \(object) \(theName) has already been migrated")
-                                                    if theId != migratedPkgDependencies[theName] {
-                                                        WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] Duplicate references to the same package were found on \(JamfProServer.source).  Package with filename \(theName) has id: \(theId) and \(String(describing: migratedPkgDependencies[theName]!))\n")
-                                                        DispatchQueue.main.async {
-                                                            print("[startSelectiveMigration] \(#line) server: \(JamfProServer.source)")
-                                                            theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
-                                                            if theButton == "Stop" {
-                                                                self.stopButton(self)
-                                                            }
+                                        // see if we've migrated the dependency already
+                                        switch object {
+                                        case "packages":
+                                            if let _ = migratedPkgDependencies[theName] {
+                                                dependencyMigratedCount[dependencyParentId]! += 1
+                                                alreadyMigrated = true
+                                                //                                                    print("[dependencies] dependencyMigratedCount incremented: \(String(describing: dependencyMigratedCount[dependencyParentId]))")
+                                                //                                                    print("[dependencies] \(object) \(theName) has already been migrated")
+                                                if theId != migratedPkgDependencies[theName] {
+                                                    WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] Duplicate references to the same package were found on \(JamfProServer.source).  Package with filename \(theName) has id: \(theId) and \(String(describing: migratedPkgDependencies[theName]!))\n")
+                                                    DispatchQueue.main.async {
+                                                        print("[startSelectiveMigration] \(#line) server: \(JamfProServer.source)")
+                                                        theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                                        if theButton == "Stop" {
+                                                            self.stopButton(self)
                                                         }
                                                     }
                                                 }
-                                            default:
-                                                if let _ = migratedDependencies[object]?.firstIndex(of: Int(theId)!) {
-                                                    dependencyMigratedCount[dependencyParentId]! += 1
-                                                    alreadyMigrated = true
-//                                                    print("[dependencies] dependencyMigratedCount incremented: \(String(describing: dependencyMigratedCount[dependencyParentId]))")
-//                                                    print("[dependencies] \(object) \(theName) has already been migrated")
-                                                }
+                                            }
+                                        default:
+                                            if let _ = migratedDependencies[object]?.firstIndex(of: Int(theId)!) {
+                                                dependencyMigratedCount[dependencyParentId]! += 1
+                                                alreadyMigrated = true
+                                                //                                                    print("[dependencies] dependencyMigratedCount incremented: \(String(describing: dependencyMigratedCount[dependencyParentId]))")
+                                                //                                                    print("[dependencies] \(object) \(theName) has already been migrated")
+                                            }
+                                        }
+                                        
+                                        if !alreadyMigrated {
+                                            if self.currentEPDict[object]?[theName] != nil && !export.saveOnly {
+                                                theDependencyAction     = "update"
+                                                theDependencyEndpointID = Int(self.currentEPDict[object]![theName]!)
                                             }
                                             
-                                            if !alreadyMigrated {
-                                                if self.currentEPDict[object]?[theName] != nil && !export.saveOnly {
-                                                    theDependencyAction     = "update"
-                                                    theDependencyEndpointID = Int(self.currentEPDict[object]![theName]!)
-                                                }
-                                                    
-                                                WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(object): \(theDependencyAction) \(theName)\n")
-
-                                                self.endPointByID(endpoint: object, endpointID: theId, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
-                                                
-                                                // update list of dependencies migrated
-                                                switch object {
-                                                case "packages":
-                                                    migratedPkgDependencies[theName] = theId
-                                                default:
-                                                    if migratedDependencies[object] != nil {
-                                                        migratedDependencies[object]!.append(Int(theId)!)
-                                                    } else {
-                                                        migratedDependencies[object] = [Int(theId)!]
-                                                    }
+                                            WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(object): \(theDependencyAction) \(theName)\n")
+                                            
+                                            self.endPointByID(endpoint: object, endpointID: theId, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
+                                            
+                                            // update list of dependencies migrated
+                                            switch object {
+                                            case "packages":
+                                                migratedPkgDependencies[theName] = theId
+                                            default:
+                                                if migratedDependencies[object] != nil {
+                                                    migratedDependencies[object]!.append(Int(theId)!)
+                                                } else {
+                                                    migratedDependencies[object] = [Int(theId)!]
                                                 }
                                             }
-                                        }   // for (theName, theId) in advancedMigrateDict[object]! - end
-                                    }
-                                }   // for (object, arrayOfDependencies) in returnedDependencies - end
+                                        }
+                                    }   // for (theName, theId) in advancedMigrateDict[object]! - end
+                                }
+                            }   // for (object, arrayOfDependencies) in returnedDependencies - end
+                        }
+                        
+                        // migrate the policy or selected object now the dependencies are done
+                        DispatchQueue.global(qos: .utility).async { [self] in
+                            if !fileImport {
+                                var step = 0
+                                while dependencyMigratedCount[dependencyParentId] != totalDependencies && theButton != "Stop" && setting.migrateDependencies && !export.saveOnly {
+                                    if theButton == "Stop" { setting.migrateDependencies = false }
+                                    //                                        if step % 10 == 0 { print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")}
+                                    usleep(10000)
+                                    step += 1
+                                }
+                                //                                    print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")
+                                dependencyMigratedCount[dependencyParentId] = 0
                             }
-
-                                // migrate the policy or selected object now the dependencies are done
-                            DispatchQueue.global(qos: .utility).async { [self] in
-                                if !fileImport {
-                                    var step = 0
-                                    while dependencyMigratedCount[dependencyParentId] != totalDependencies && theButton != "Stop" && setting.migrateDependencies && !export.saveOnly {
-                                        if theButton == "Stop" { setting.migrateDependencies = false }
-//                                        if step % 10 == 0 { print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")}
-                                        usleep(10000)
-                                        step += 1
-                                    }
-//                                    print("dependencyMigratedCount[\(dependencyParentId)] \(String(describing: dependencyMigratedCount[dependencyParentId]!)) of \(totalDependencies)")
-                                    dependencyMigratedCount[dependencyParentId] = 0
-                                }
+                            
+                            if theButton == "Stop" { return }
+                            var theAction     = "create"
+                            var theEndpointID = 0
+                            if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
+                            
+                            // remove (policyId) from displayed policy name
+                            /* removed lnh 20230216
+                             if rawEndpoint == "policies" {
+                             var tmpArray = selectedObject.components(separatedBy: "-")
+                             selectedObject = ""
+                             tmpArray.removeLast()
+                             for i in tmpArray {
+                             if i != tmpArray.last {
+                             selectedObject.append("\(i) ")
+                             } else {
+                             selectedObject.append("\(i)")
+                             }
+                             }
+                             }
+                             */
+                            
+                            if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
+                                theAction     = "update"
+                                theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
+                            }
+                            
+                            WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
+                            
+                            if !fileImport {
+                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
+                            } else {
+                                //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
                                 
-                                if theButton == "Stop" { return }
-                                var theAction     = "create"
-                                var theEndpointID = 0
-                                if !export.saveOnly { WriteToLog().message(stringOfText: "check destination for existing object: \(selectedObject)\n") }
+                                let fileToMigrate = displayNameToFilename[selectedObject]
+                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
+                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
                                 
-                                // remove (policyId) from displayed policy name
-                                /* removed lnh 20230216
-                                 if rawEndpoint == "policies" {
-                                     var tmpArray = selectedObject.components(separatedBy: "-")
-                                     selectedObject = ""
-                                     tmpArray.removeLast()
-                                     for i in tmpArray {
-                                         if i != tmpArray.last {
-                                             selectedObject.append("\(i) ")
-                                         } else {
-                                             selectedObject.append("\(i)")
-                                         }
-                                     }
-                                 }
-                                 */
-
-                                if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
-                                    theAction     = "update"
-                                    theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
-                                }
-                                    
-                                WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
+                                arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
                                 
-                                if !fileImport {
-                                    self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
-                                } else {
-//                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
-
-                                    let fileToMigrate = displayNameToFilename[selectedObject]
-                                    print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
-                                    print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
-                                    
-                                    arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
-                                    
-//                                    if arrayOfSelected.count == targetSelectiveObjectList.count {
-                                    if objectIndex+1 == targetSelectiveObjectList.count {
-                                        self.processFiles(endpoint: selectedEndpoint, fileCount: targetSelectiveObjectList.count, itemsDict: arrayOfSelected) {
-                                             (result: String) in
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).\n") }
-                                         }
+                                //                                    if arrayOfSelected.count == targetSelectiveObjectList.count {
+                                if objectIndex+1 == targetSelectiveObjectList.count {
+                                    self.processFiles(endpoint: selectedEndpoint, fileCount: targetSelectiveObjectList.count, itemsDict: arrayOfSelected) {
+                                        (result: String) in
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).\n") }
                                     }
                                 }
-                                    
-                                // call next item
-                                if objectIndex+1 < targetSelectiveObjectList.count {
-//                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
-                                    startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
-                                } else if objectIndex+1 == targetSelectiveObjectList.count {
-                                    dependency.isRunning = false
-                                }
+                            }
+                            
+                            // call next item
+                            if objectIndex+1 < targetSelectiveObjectList.count {
+                                //                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
+                                startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
+                            } else if objectIndex+1 == targetSelectiveObjectList.count {
+                                dependency.isRunning = false
                             }
                         }
-                        // migrate dependencies - end
-//                    }
+                    }
+                    // migrate dependencies - end
+                    //                    }
                     
                 }
-            } else {
-                // selective removal
+            }
+        } else {
+            // selective removal
+            for i in 0..<targetSelectiveObjectList.count {
+                let theObject = targetSelectiveObjectList[i]
                 if LogLevel.debug { WriteToLog().message(stringOfText: "remove - endpoint: \(targetSelectiveObjectList[objectIndex].objectName)\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetSelectiveObjectList[objectIndex].objectName)\n") }
                 
-                self.RemoveEndpoints(endpointType: selectedEndpoint, endPointID: "\(objToMigrateID)", endpointName: targetSelectiveObjectList[objectIndex].objectName, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count)
+                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
+            }
+            dependency.isRunning = false
+/*
+            if LogLevel.debug { WriteToLog().message(stringOfText: "remove - endpoint: \(targetSelectiveObjectList[objectIndex].objectName)\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetSelectiveObjectList[objectIndex].objectName)\n") }
+                
+                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(objToMigrateID)", endpointName: targetSelectiveObjectList[objectIndex].objectName, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count)
                 // call next item
                 if objectIndex+1 < targetSelectiveObjectList.count {
 //                    print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
-                    self.startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
+                    startSelectiveMigration(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
                 } else if objectIndex+1 == targetSelectiveObjectList.count {
                     dependency.isRunning = false
                 }
-            }   // if !wipeData.on else - end
-        }   // Json().getRecord - end
+            */
+            
+        }   // if !wipeData.on else - end
+//        }   // Json().getRecord - end
     }
     
     
@@ -2151,8 +2169,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         PackagesDelegate().getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
                                                             (result: (Int,String)) in
                                                             let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
-                                                            //                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
-                                                            //                                                        print("[ViewController.getEndpoints] result: \(result)")
+//                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
+//                                                        print("[ViewController.getEndpoints] result: \(result)")
                                                             lookupCount += 1
                                                             if lookupCount % 50 == 0 {
                                                                 WriteToLog().message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)\n")
@@ -2232,7 +2250,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             }
                                                                         } else {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                                            RemoveEndpoints(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
+                                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
                                                                         }   // if !wipeData.on else - end
                                                                         counter+=1
                                                                     }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -2262,16 +2280,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                                 counter+=1
                                                                             }   // sortQ.async - end
                                                                         }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                        // prevent the modification/removal of the account we're using with the destination server
-                                                                        if endpoint == "jamfusers" {
-                                                                            self.sourceDataArray.removeAll(where: {$0.lowercased() == self.dest_user.lowercased()})
-                                                                            srcSrvTableView.reloadData()
-                                                                            
-                                                                            if let objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName.lowercased() == self.dest_user.lowercased() }) {
-                                                                                self.sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex)
-                                                                            }
-                                                                        }
-                                                                        
                                                                     }   // if !pref.stopMigration
                                                                 }   // if goSender else - end
                                                                 // make into a func - end
@@ -2381,7 +2389,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 }
                                                             } else {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                                RemoveEndpoints(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
+                                                                removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
                                                             }   // if !wipeData.on else - end
                                                             counter+=1
                                                         }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -2605,7 +2613,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                         endPointByID(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                     }
                                                                 } else {
-                                                                    RemoveEndpoints(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
+                                                                    removeEndpointsQueue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
                                                                 }   // if !wipeData.on else - end
                                                                 counter += 1
                                                             } else {
@@ -2751,7 +2759,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     }
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                                    RemoveEndpoints(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
+                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
                                                                 }   // if !wipeData.on else - end
                                                                 counter += 1
                                                             } else {
@@ -2876,7 +2884,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 } else {
                                                                     if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
-                                                                        RemoveEndpoints(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
+                                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
                                                                     }
                                                                     
                                                                 }   // if !wipeData.on else - end
@@ -4157,16 +4165,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         
         destEPQ.async { [self] in
+            
+            createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
+            
             switch endpointType {
             case "buildings":
                 
-                while createPending > 0 || createArray.count > 0 {
-                    if createPending < maxConcurrentThreads && createArray.count > 0 {
-                        createPending += 1
+                while pendingCount > 0 || createArray.count > 0 {
+                    if pendingCount < maxConcurrentThreads && createArray.count > 0 {
+                        pendingCount += 1
                         let nextEndpoint = createArray[0]
                         createArray.remove(at: 0)
  
-                        createEndpoints2(endpointType: endpointType, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: "\(sourceEpId)", destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                        createEndpoints2(endpointType: nextEndpoint.endpointType, endPointJSON: nextEndpoint.endPointJSON, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: "\(nextEndpoint.sourceEpId)", destEpId: nextEndpoint.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
                             (result: String) in
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] \(result)\n") }
                             if endpointCurrent == endpointCount {
@@ -4180,17 +4191,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
             default:
-                createArray.append(CreateInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
+//                createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
                 
-                while createPending > 0 || createArray.count > 0 {
-                    if createPending < maxConcurrentThreads && createArray.count > 0 {
-                        createPending += 1
+                while pendingCount > 0 || createArray.count > 0 {
+                    if pendingCount < maxConcurrentThreads && createArray.count > 0 {
+                        pendingCount += 1
                         let nextEndpoint = createArray[0]
                         createArray.remove(at: 0)
                         
                         createEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
                                 (result: String) in
-                                createPending -= 1
+                                pendingCount -= 1
                         }
                     } else {
                         sleep(1)
@@ -4905,84 +4916,122 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func RemoveEndpoints(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
+    
+//    func removeEndpointsQueue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
+    func removeEndpointsQueue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         
-        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[RemoveEndpoints] token check")
-            if theResult == "success" {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] enter\n") }
-                // this is where we delete the endpoint
-                var removeDestUrl = ""
-                
-                if endpointCurrent == 1 {
-        //            migrationComplete.isDone = false
-                    if !setting.migrateDependencies || endpointType == "policies" {
-                        setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
+        print("[removeEndpointQueue] remove \(endpointType) with id \(endPointID)")
+        removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: Int(endPointID)!, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
+
+
+        destEPQ.async { [self] in
+            while pendingCount > 0 || removeArray.count > 0 {
+                print("[removeEndpointsQueue] 1 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
+                if pendingCount < maxConcurrentThreads && removeArray.count > 0 {
+                    pendingCount += 1
+                    let nextEndpoint = removeArray.removeFirst()
+//                    removeArray.removef
+
+                    removeEndpoints(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) {
+                        (result: String) in
+                        pendingCount -= 1
+                        print("[removeEndpointsQueue] removed id: \(result)")
                     }
                 } else {
-                    if let _ = self.put_levelIndicatorFillColor[endpointType] {
-                        self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: self.put_levelIndicatorFillColor[endpointType]!)
-                    }
+                    print("[removeEndpointsQueue] 2 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
+                    sleep(1)
                 }
-                
-                if counters[endpointType] == nil {
-                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-        //            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-                } else {
-                    counters[endpointType]!["total"] = endpointCount
-                }
-                if summaryDict[endpointType] == nil {
-                    summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-                }
-                
-                // whether the operation was successful or not, either delete or fail
-                var methodResult = "create"
-                
-                // counters for completed objects
-                var totalDeleted   = 0
-                var totalFailed    = 0
-                var totalCompleted = 0
-                
-                theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
-                let semaphore = DispatchSemaphore(value: 0)
-                var localEndPointType = ""
-                switch endpointType {
-                case "smartcomputergroups", "staticcomputergroups":
-                    localEndPointType = "computergroups"
-                case "smartmobiledevicegroups", "staticmobiledevicegroups":
-                    localEndPointType = "mobiledevicegroups"
-                case "smartusergroups", "staticusergroups":
-                    localEndPointType = "usergroups"
-                default:
-                    localEndPointType = endpointType
-                }
+            }
+        }
+    }
+    func removeEndpoints(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
 
-                if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
-                    
-                    removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
-                    removeDestUrl = removeDestUrl.urlFix
-        //            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-                    removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-                    removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                    removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
-                    
-                    if export.saveRawXml {
+        if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] enter\n") }
 
-                        endPointByID(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
+        var removeDestUrl = ""
+                
+        if endpointCurrent == 1 {
+//            migrationComplete.isDone = false
+            if !setting.migrateDependencies || endpointType == "policies" {
+                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: .green)
+            }
+        } else {
+            if let _ = self.put_levelIndicatorFillColor[endpointType] {
+                if setting.migrateDependencies {
+                    self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: self.put_levelIndicatorFillColor[endpointType]!)
+                }
+            }
+        }
+        
+        if counters[endpointType] == nil {
+            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+        } else {
+            counters[endpointType]!["total"] = endpointCount
+        }
+        if summaryDict[endpointType] == nil {
+            summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+        }
+        
+        // whether the operation was successful or not, either delete or fail
+        var methodResult = "create"
+        
+        // counters for completed objects
+        var totalDeleted   = 0
+        var totalFailed    = 0
+        var totalCompleted = 0
+        
+        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        var localEndPointType = ""
+        switch endpointType {
+        case "smartcomputergroups", "staticcomputergroups":
+            localEndPointType = "computergroups"
+        case "smartmobiledevicegroups", "staticmobiledevicegroups":
+            localEndPointType = "mobiledevicegroups"
+        case "smartusergroups", "staticusergroups":
+            localEndPointType = "usergroups"
+        default:
+            localEndPointType = endpointType
+        }
+
+        if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
+            
+            removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
+            if LogLevel.debug { WriteToLog().message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)\n") }
+            removeDestUrl = removeDestUrl.urlFix
+//            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
+            removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
+            
+            if export.saveRawXml {
+
+                endPointByID(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
+            }
+            if export.saveOnly {
+                if endpointCurrent == endpointCount {
+                    if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+                    nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
+                    //            print("remove nodes complete: \(nodesMigrated)")
+                }
+                return
+            }
+            
+            theOpQ.addOperation {
+                
+                JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                    (result: (Int,String)) in
+                    let (statusCode, theResult) = result
+                    if statusCode == 202 {
+                        print("[RemoveEndpoints] getToken theResult: \(theResult)")
                     }
-                    if export.saveOnly {
-                        if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
-                            nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
-                            //            print("remove nodes complete: \(nodesMigrated)")
+                    if theResult == "success" {
+                        
+                        if statusCode == 202 {
+                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
                         }
-                        return
-                    }
-                    
-                    theOpQ.addOperation {
                         
                         DispatchQueue.main.async {
                             // look to see if we are processing the next endpointType - start
@@ -4993,33 +5042,44 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 WriteToLog().message(stringOfText: "[RemoveEndpoints] Removing \(endpointType)\n")
                             }   // look to see if we are processing the next endpointType - end
                         }
-
+                        
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)\n") }
                         if LogLevel.debug { WriteToLog().message(stringOfText: "[RemoveEndpoints] removal URL: \(removeDestUrl)\n") }
                         
-        //                print("NSURL line 5")
-        //                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
+                        //                print("NSURL line 5")
+                        //                if "\(removeDestUrl)" == "" { removeDestUrl = "https://localhost" }
                         let encodedURL = URL(string: removeDestUrl)
                         let request = NSMutableURLRequest(url: encodedURL! as URL)
                         request.httpMethod = "DELETE"
                         let configuration = URLSessionConfiguration.ephemeral
-
+                        
                         configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-                        //request.httpBody = encodedXML!
+
                         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                        let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                        let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                             (data, response, error) -> Void in
                             session.finishTasksAndInvalidate()
+                            
+                            if statusCode == 202 {
+                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+                            }
+                            
+//                            destEPQ.async {
+//                                pendingCount -= 1
+                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+                                completion("\(endPointID)")
+//                            }
+                            
                             if let httpResponse = response as? HTTPURLResponse {
                                 //print(httpResponse.statusCode)
                                 //print(httpResponse)
                                 if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                                     // remove items from the list as they are removed from the server
                                     if self.activeTab(fn: "RemoveEndpoints") == "selective" {
-        //                                print("endPointID: \(endPointID)")
+                                        //                                print("endPointID: \(endPointID)")
                                         let lineNumber = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == endPointID})!
                                         let objectToRemove = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[lineNumber].objectName
-
+                                        
                                         let staticLineNumber = self.staticSourceDataArray.firstIndex(of: objectToRemove)!
                                         self.staticSourceDataArray.remove(at: staticLineNumber)
                                         
@@ -5029,9 +5089,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             self.sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex!)
                                             objectIndex = self.staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
                                             self.staticSourceObjectList.remove(at: objectIndex!)
-//                                            srcSrvTableView.beginUpdates()
-//                                            srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
-//                                            srcSrvTableView.endUpdates()
+                                            //                                            srcSrvTableView.beginUpdates()
+                                            //                                            srcSrvTableView.removeRows(at: IndexSet(integer: lineNumber), withAnimation: .effectFade)
+                                            //                                            srcSrvTableView.endUpdates()
                                             srcSrvTableView.isEnabled = false
                                         }
                                     }
@@ -5044,13 +5104,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if !setting.migrateDependencies || endpointType == "policies" {
                                         self.put_levelIndicatorFillColor[endpointType] = .systemYellow
                                         self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
-        //                                self.put_levelIndicator.fillColor = .systemYellow
+                                        //                                self.put_levelIndicator.fillColor = .systemYellow
                                     }
                                     self.changeColor = false
                                     WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (id: \(endPointID)), statusCode: \(httpResponse.statusCode)\n")
-        //                            if httpResponse.statusCode == 401 {
-        //                                gettoken
-        //                            }
+                                    //                            if httpResponse.statusCode == 401 {
+                                    //                                gettoken
+                                    //                            }
                                     if httpResponse.statusCode == 400 {
                                         WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Verify other items are not dependent on \(endpointName) (id: \(endPointID))\n")
                                         WriteToLog().message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** For example, \(endpointName) is not used in a policy\n")
@@ -5077,7 +5137,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 totalDeleted   = self.counters[endpointType]?["create"] ?? 0
                                 totalFailed    = self.counters[endpointType]?["fail"] ?? 0
                                 totalCompleted = totalDeleted + totalFailed
-
+                                
                                 DispatchQueue.main.async { [self] in
                                     
                                     if totalCompleted > 0 {
@@ -5094,15 +5154,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             
                             if self.activeTab(fn: "RemoveEndpoints") != "selective" {
-        //                        print("localEndPointType: \(localEndPointType) \t count: \(endpointCount)")
+                                //                        print("localEndPointType: \(localEndPointType) \t count: \(endpointCount)")
                                 if self.objectsToMigrate.last == localEndPointType && (endpointCount == endpointCurrent || endpointCount == 0) {
                                     // check for file that allows deleting data from destination server, delete if found - start
                                     self.rmDELETE()
                                     JamfProServer.validToken["source"] = false
                                     JamfProServer.version["source"]    = ""
-        //                            print("[removeEndpoints] endpoint: \(endpointType)")
+                                    //                            print("[removeEndpoints] endpoint: \(endpointType)")
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)\n") }
-        //                            self.resetAllCheckboxes()
+                                    //                            self.resetAllCheckboxes()
                                     // check for file that allows deleting data from destination server, delete if found - end
                                     //self.go_button.isEnabled = true
                                     self.goButtonEnabled(button_status: true)
@@ -5120,8 +5180,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     JamfProServer.validToken["source"] = false
                                     JamfProServer.version["source"]    = ""
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)\n") }
-        //                            print("[removeEndpoints] endpoint: \(endpointType)")
-        //                            self.resetAllCheckboxes()
+                                    //                            print("[removeEndpoints] endpoint: \(endpointType)")
+                                    //                            self.resetAllCheckboxes()
                                     // check for file that allows deleting data from destination server, delete if found - end
                                     //self.go_button.isEnabled = true
                                     self.goButtonEnabled(button_status: true)
@@ -5132,16 +5192,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         })  // let task = session.dataTask - end
                         task.resume()
                         semaphore.wait()
-                    }   // theOpQ.addOperation - end
+                    } else {
+                        WriteToLog().message(stringOfText: "[removeEndpoints] failed to renew token for endpoint: \(endpointType)\n")
+                        stopButton(self)
+                    }
                 }
-                if endpointCurrent == endpointCount {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
-                    nodesMigrated+=1
-                    // print("added node: \(localEndPointType) - removeEndpoints")
-                    //            print("remove nodes complete: \(nodesMigrated)")
-                }
-                
-            }
+            }   // theOpQ.addOperation - end
+        }
+        if endpointCurrent == endpointCount {
+            if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
+            nodesMigrated+=1
+            // print("added node: \(localEndPointType) - removeEndpoints")
+            //            print("remove nodes complete: \(nodesMigrated)")
         }
     }   // func removeEndpoints - end
     
@@ -5434,7 +5496,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             waiting = (completed < endpointDependencyArray.count) ? false:true
                                                             self.destEPQ.resume()
                                                             completion(("[ViewController.existingEndpoints] No packages were found on \(self.dest_jp_server)\n","packages"))
-                                                            
                                                         }
                                                         
                                                     } else {  //if let destEndpointInfo = destEndpointJSON - end
@@ -5446,7 +5507,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                     
                                                 default:
-                                                    if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" { // || destEndpoint == "jamfusers" || destEndpoint == "jamfgroups"
+                                                    if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" {
                                                         let accountsDict = destEndpointJSON as [String: Any]
                                                         let usersGroups = accountsDict["accounts"] as! [String: Any]
                     //                                    print("users: \(String(describing: usersGroups["users"]))")
@@ -5473,8 +5534,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         default:
                                                             destEndpointDict = destEndpointJSON["\(endpointParent)"]
                                                         }
-                                                        
-        //
                                                     }
                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server\n") }
                                                     if let destEndpointInfo = destEndpointDict as? [Any] {
@@ -7576,12 +7635,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
+//        print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
         if setting.fullGUI {
-            DispatchQueue.main.async {
-//                print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
-                if self.put_levelIndicator.fillColor == .green || self.put_levelIndicatorFillColor[endpointType] == .systemRed {
-                    self.put_levelIndicatorFillColor[endpointType] = fillColor
-                    self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
+            DispatchQueue.main.async { [self] in
+                if put_levelIndicator.fillColor == .green || put_levelIndicatorFillColor[endpointType] == .systemRed {
+                    put_levelIndicatorFillColor[endpointType] = fillColor
+                    put_levelIndicator.fillColor = put_levelIndicatorFillColor[endpointType]
                 }
             }
         }

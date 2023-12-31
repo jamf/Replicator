@@ -11,15 +11,6 @@ import AppKit
 
 class JamfPro: NSObject, URLSessionDelegate {
     
-//    var controller: ViewController? = nil
-//    init(controller: ViewController) {
-//      self.controller = controller
-//    }
-//    var sdController: SourceDestVC? = nil
-//    init(sdController: SourceDestVC) {
-//      self.sdController = sdController
-//    }
-    
     var renewQ = DispatchQueue(label: "com.jamfmigrator.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
     
 //    let userDefaults = UserDefaults.standard
@@ -35,7 +26,6 @@ class JamfPro: NSObject, URLSessionDelegate {
         let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
 //        WriteToLog().message(stringOfText: "[JamfPro.getToken] Force basic authentication on \(serverUrl): \(forceBasicAuth)\n")
         
-//        print("\(serverUrl.prefix(4))")
         if serverUrl.prefix(4) != "http" {
             completion((0, "skipped"))
             return
@@ -76,10 +66,13 @@ class JamfPro: NSObject, URLSessionDelegate {
         let (_, minutesOld, _) = timeDiff(forWhat: forWhat)
         
         if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || ( minutesOld > (token.refreshInterval[whichServer] ?? 29) ) {
-            WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up\n")
+            if JamfProServer.authType[whichServer] == "Bearer" {
+                WriteToLog().message(stringOfText: "[JamfPro.getToken] Token for \(whichServer) server is \(minutesOld) minutes old.\n")
+            }
+            WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
             
-            print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
-            print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 29) minutes")
+//            print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
+//            print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 29) minutes")
             
             if apiClient {
                 let clientId = ( whichServer == "source" ) ? JamfProServer.sourceUser:JamfProServer.destUser
@@ -106,10 +99,11 @@ class JamfPro: NSObject, URLSessionDelegate {
                             JamfProServer.validToken[whichServer]  = true
                             JamfProServer.authCreds[whichServer]   = apiClient ? endpointJSON["access_token"] as? String:endpointJSON["token"] as? String ?? ""
 //                            JamfProServer.authExpires[whichServer] = apiClient ? endpointJSON["expires_in"] as? Int ?? 35:35
-                            token.refreshInterval[whichServer]     = UInt32(apiClient ? endpointJSON["expires_in"] as? Int ?? 29:29)
+                            token.refreshInterval[whichServer]     = UInt32(apiClient ? endpointJSON["expires_in"] as? Int ?? Int(token.defaultRefresh):Int(token.defaultRefresh))
                             JamfProServer.authType[whichServer]    = "Bearer"
                             JamfProServer.base64Creds[whichServer] = base64creds
                             if wipeData.on && whichServer == "dest" {
+                                JamfProServer.validToken["source"]  = JamfProServer.validToken[whichServer]
                                 JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
 //                                JamfProServer.authExpires["source"] = JamfProServer.authExpires[whichServer]
                                 JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
@@ -158,9 +152,6 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                     JamfProServer.authCreds[whichServer] = base64creds
                                                     WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic Authentication\n")
                                                 }
-//                                                if JamfProServer.authType[whichServer] == "Bearer" {
-//                                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
-//                                                }
                                                 completion((200, "success"))
                                                 return
                                             }
@@ -175,11 +166,8 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 }
                                 // get Jamf Pro version - end
                             } else {
-//                                if JamfProServer.authType[whichServer] == "Bearer" {
-//                                    WriteToLog().message(stringOfText: "[JamfPro.getVersion] call token refresh process for \(serverUrl)\n")
-//                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds[whichServer]!, localSource: localSource)
-//                                }
-                                completion((200, "success"))
+                                print("[JamfPro] \(whichServer) Jamf Pro version: \(String(describing: JamfProServer.version[whichServer]))")
+                                completion((202, "success"))
                                 return
                             }
                         } else {    // if let endpointJSON error
@@ -216,6 +204,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         
     }
     
+    /*
     func refresh(server: String = "", whichServer: String = "", b64Creds: String, localSource: Bool) {
 //        if controller!.go_button.title == "Stop" {
         DispatchQueue.main.async { [self] in
@@ -249,6 +238,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             }
         }
     }
+    */
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))

@@ -144,6 +144,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     index += 1
                     JamfProServer.sourceApiClient["secret"] = CommandLine.arguments[index]
                     JamfProServer.sourcePwd = JamfProServer.sourceApiClient["secret"] ?? ""
+                case "-sourceuser":
+                    index += 1
+                    JamfProServer.sourceUser = CommandLine.arguments[index]
+//                    JamfProServer.sourcePwd = JamfProServer.sourceApiClient["secret"] ?? ""
+                case "-destuser":
+                    index += 1
+                    JamfProServer.destUser = CommandLine.arguments[index]
                 case "-destclientsecret":
                     index += 1
                     JamfProServer.destApiClient["secret"] = CommandLine.arguments[index]
@@ -180,10 +187,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         else {
             WriteToLog().message(stringOfText: "[AppDelegate] jamf migrator is running silently\n")
-            print("running silently")
             
             SourceDestVC().initVars()
-//            ViewController().initVars()
         }
     }
 

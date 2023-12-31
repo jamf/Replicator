@@ -12,6 +12,7 @@ import Foundation
 public let userDefaults = UserDefaults.standard
 public var maxConcurrentThreads = 2
 public var sourceDestListSize   = 20
+public var pendingCount         = 0
 
 class appColor: NSColor {
     static let schemes:[String]            = ["casper", "classic"]
@@ -78,7 +79,7 @@ struct JamfProServer {
     static var toSite       = false
     static var destSite     = ""
     static var importFiles  = 0
-    static var sourceApiClient  = ["id":"", "secret":""]
+    static var sourceApiClient = ["id":"", "secret":""]
     static var destApiClient  = ["id":"", "secret":""]
     static var authCreds    = ["source":"", "dest":""]
     static var authExpires  = ["source":30, "dest":30]
@@ -131,7 +132,7 @@ struct summaryHeader {
 }
 
 struct token {
-    static let defaultRefresh: UInt32 = 29  // 29 minutes
+    static let defaultRefresh: UInt32 = 1  // 29 minutes
     static var refreshInterval: [String:UInt32] = ["source": defaultRefresh, "dest": defaultRefresh]
 }
 

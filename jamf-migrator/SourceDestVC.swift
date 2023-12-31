@@ -543,17 +543,23 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         } else {
             fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
+        var accountDict = [String:String]()
+        var theUser     = ""
         if !(whichServer == "source" && fileImport) {
-            let theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
-//            print("[fetchPassword] url: \(url.fqdnFromUrl), account: \(theUser), whichServer: \(whichServer)")
-            let accountDict = Creds2.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
+            if setting.fullGUI {
+                theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
+                //            print("[fetchPassword] url: \(url.fqdnFromUrl), account: \(theUser), whichServer: \(whichServer)")
+            } else {
+                theUser = (whichServer == "source") ? JamfProServer.sourceUser:JamfProServer.destUser
+            }
+            accountDict = Creds2.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
 //            print("[fetchPassword] accountDict: \(accountDict)")
             
             
             if accountDict.count > 0 {
                 for (username, password) in accountDict {
                     if whichServer == "source" {
-                        if username == sourceUser_TextField.stringValue || accountDict.count == 1 {
+                        if username == theUser || accountDict.count == 1 {
                             JamfProServer.sourceUser = ""
                             JamfProServer.sourcePwd  = ""
                             if (url != "") {
@@ -572,12 +578,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == source_user_field.stringValue
-                        source_pwd_field.stringValue  = ""
-                        hideCreds_button.state = .on
-                        hideCreds_action(self)
+                        if setting.fullGUI {
+                            source_pwd_field.stringValue  = ""
+                            hideCreds_button.state = .on
+                            hideCreds_action(self)
+                        }
                     } else {
                         // destination server
-                        if username == destinationUser_TextField.stringValue || accountDict.count == 1 {
+                        if username == theUser || accountDict.count == 1 {
                             JamfProServer.destUser   = ""
                             JamfProServer.destPwd    = ""
                             if (url != "") {
@@ -602,9 +610,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == dest_user_field.stringValue
-                        dest_pwd_field.stringValue  = ""
-                        hideCreds_button.state = .on
-                        hideCreds_action(self)
+                        if setting.fullGUI {
+                            dest_pwd_field.stringValue  = ""
+                            hideCreds_button.state = .on
+                            hideCreds_action(self)
+                        }
                     }
                 }   // for (username, password)
             } else {
@@ -631,8 +641,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             }
         } else {
-            sourceUser_TextField.stringValue = ""
-            source_pwd_field.stringValue = ""
+            if setting.fullGUI {
+                sourceUser_TextField.stringValue = ""
+                source_pwd_field.stringValue = ""
+            }
             self.storedSourceUser = ""
         }
     }
@@ -963,7 +975,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 
 //        debug = true
         
-        print("test defaults: \(userDefaults.integer(forKey: "sourceDestListSize"))")
+//        print("test defaults: \(userDefaults.integer(forKey: "sourceDestListSize"))")
         
         // Do any additional setup after loading the view
         if !FileManager.default.fileExists(atPath: AppInfo.bookmarksPath) {
