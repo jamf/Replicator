@@ -4298,9 +4298,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func createEndpointsQueue(endpointType: String, endpointName: String = "", endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         completion("return from createEndpointsQueue")
-        print("[createEndpointsQueue]                   action: \(action)")
-        print("[createEndpointsQueue] setting.onlyCopyExisting: \(setting.onlyCopyExisting)")
-        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(setting.onlyCopyMissing)\n")
+//        print("[createEndpointsQueue]                   action: \(action)")
+//        print("[createEndpointsQueue] setting.onlyCopyExisting: \(setting.onlyCopyExisting)")
+//        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(setting.onlyCopyMissing)\n")
 
         if (setting.onlyCopyExisting && action == "create") || (setting.onlyCopyMissing && action == "update") {
             WriteToLog().message(stringOfText: "[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)\n")
