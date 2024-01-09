@@ -187,6 +187,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
+**v7.4.1**<br>
+Resolve issue with token renewal.  Resolve issue when running from the command line.
+
 **v7.4.0**<br>
 Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.  Minor layout changes.  Ability to sort ascending or descending object list in selective migration. 
 
