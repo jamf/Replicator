@@ -167,6 +167,14 @@ Running the following in Terminal will export all objects (full XML) that can be
 ```
 /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects
 ```
+In the event you have multiple entries in the keychain for a server you'll need to specify which username to use.  For example:
+```/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator  -source dev.jamfcloud.com -destination prod.jamfcloud.com -objects "categories,buildings" -migrate -sourceUser devadmin -destUser prodadmin
+```
+
+
+
+
+
 Before running an export via command line at least one export from the app must be manually run saving the source username and password or client ID and secret.<br>
 
 To migrate object(s) using the command line, something like the following can be used:

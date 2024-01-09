@@ -151,6 +151,8 @@ Parameters:
 
     -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for jamf migrator.
 
+    -destUser: username used with the destination server for authentication.
+
     -migrate: No value needed.  Used if migrating objects from one server/folder to another server.  At least one migration must be performed,
                   saving credentials, between the source and destination before the command line can be successful.  Must also use -objects, -source, and -destination.
 
@@ -170,6 +172,8 @@ Parameters:
 
     -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
                   wrapped in quotes.  Credentials for the source server must be saved in the keychain for jamf migrator.
+
+    -sourceUser: username used with the source server for authentication.
 
     -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
                   the needed information.  By default sticky sessions are not used.
