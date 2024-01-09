@@ -5292,7 +5292,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         let lineNumber = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == endPointID})!
                                         let objectToRemove = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[lineNumber].objectName
                                         
-                                        let staticLineNumber = self.staticSourceDataArray.firstIndex(of: objectToRemove)!
+//                                        print("[removeEndpoints] staticSourceDataArray:\(staticSourceDataArray)")
+                                        let staticLineNumber = ( endpointType == "policies" ) ? self.staticSourceDataArray.firstIndex(of: "\(objectToRemove) (\(endPointID))")!:self.staticSourceDataArray.firstIndex(of: objectToRemove)!
                                         self.staticSourceDataArray.remove(at: staticLineNumber)
                                         
                                         DispatchQueue.main.async { [self] in
@@ -7190,7 +7191,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                         
                         var request = URLRequest(url:serverURL)
-                        request.addValue("\(String(describing: JamfProServer.authType["dest"]!)) \(String(describing: JamfProServer.base64Creds["dest"] ?? ""))", forHTTPHeaderField: "Authorization")
+                        request.addValue("\(String(describing: JamfProServer.authType["dest"] ?? "Bearer")) \(String(describing: JamfProServer.authCreds["dest"] ?? ""))", forHTTPHeaderField: "Authorization")
                         request.addValue("\(AppInfo.userAgentHeader)", forHTTPHeaderField: "User-Agent")
                         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
                         
