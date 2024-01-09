@@ -64,7 +64,7 @@ class Json: NSObject, URLSessionDelegate {
                         completion([:])
                     }
                 } else {
-                    WriteToLog().message(stringOfText: "[Json.getRecord] error parsing JSON for \(existingDestUrl)\n")
+                    WriteToLog().message(stringOfText: "[Json.getRecord] unknown response from \(existingDestUrl)\n")
                     completion([:])
                 }   // if let httpResponse - end
                 semaphore.signal()

@@ -18,11 +18,11 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     var saveXmlFolder = ""
     var endpointPath  = ""
 //    let backupDate    = DateFormatter()
+    let getRecordQ = OperationQueue()
 
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
         
         if theEndpoint.prefix(4) != "skip" {
-            let getRecordQ = OperationQueue()
         
             URLCache.shared.removeAllCachedResponses()
             var existingDestUrl = ""

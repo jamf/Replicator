@@ -834,6 +834,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 
                 return
             }
+        
+        JamfProServer.version[whichServer] = ""
+        
 //        self.selectiveListCleared = false
         switch whichServer {
         case "source":

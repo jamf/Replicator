@@ -87,6 +87,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         userDefaults.set(onlyCopyMissing_button.state.rawValue, forKey: "copyMissing")
         userDefaults.set(onlyCopyExisting_button.state.rawValue, forKey: "copyExisting")
+        setting.onlyCopyMissing  = onlyCopyMissing_button.state.rawValue == 1 ? true:false
+        setting.onlyCopyExisting = onlyCopyExisting_button.state.rawValue == 1 ? true:false
     }
     
     @IBAction func migrateAsManaged_action(_ sender: Any) {

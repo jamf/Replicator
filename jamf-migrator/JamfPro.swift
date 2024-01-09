@@ -5,6 +5,7 @@
 //  Created by Leslie Helou on 12/11/19.
 //  Copyright © 2019 Leslie Helou. All rights reserved.
 //
+// Reference: https://developer.jamf.com/jamf-pro/docs/jamf-pro-api-overview
 
 import Foundation
 import AppKit
@@ -16,9 +17,28 @@ class JamfPro: NSObject, URLSessionDelegate {
 //    let userDefaults = UserDefaults.standard
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, completion: @escaping (_ authResult: (Int,String)) -> Void) {
-       
-        if !((whichServer == "source" && (!wipeData.on && !localSource)) || (whichServer == "dest" && !export.saveOnly)) {
-            WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(serverUrl)\n")
+        
+        let tokenAge = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
+        let tokenAgeInSeconds = timeDiff(forWhat: tokenAge).3
+        
+        
+//        print("\n[getToken] \(Date())")
+//        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
+//        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
+//        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
+//        print("[getToken]           \(whichServer) wipeData.on: \(wipeData.on)")
+//        print("[getToken]           \(whichServer) localSource: \(localSource)")
+//        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
+//        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
+//        print("[getToken]      \(whichServer) !export.saveOnly: \(!export.saveOnly)")
+//        
+//        print("[getToken]                          source test: \( whichServer == "source" && ( wipeData.on || localSource ))")
+//        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
+        
+        
+//        if !((whichServer == "source" && ( !wipeData.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
+        if ((whichServer == "source" && ( wipeData.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
+            WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(whichServer): \(serverUrl)\n")
             completion((200, "success"))
             return
         }
@@ -62,17 +82,13 @@ class JamfPro: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         
-        let forWhat = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
-        let (_, minutesOld, _) = timeDiff(forWhat: forWhat)
-        
-        if !(JamfProServer.validToken[whichServer] ?? false) || (JamfProServer.base64Creds[whichServer] != base64creds) || ( minutesOld > (token.refreshInterval[whichServer] ?? 29) ) {
+        if !(JamfProServer.validToken[whichServer] ?? false) || tokenAgeInSeconds >= JamfProServer.authExpires[whichServer]! || (JamfProServer.base64Creds[whichServer] != base64creds) {
             if JamfProServer.authType[whichServer] == "Bearer" {
-                WriteToLog().message(stringOfText: "[JamfPro.getToken] Token for \(whichServer) server is \(minutesOld) minutes old.\n")
+                WriteToLog().message(stringOfText: "[JamfPro.getToken] Token for \(whichServer) server is \(Int(tokenAgeInSeconds/60)) minutes old.\n")
             }
             WriteToLog().message(stringOfText: "[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))\n")
             
 //            print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
-//            print("[JamfPro] \(whichServer) refresh interval: \(token.refreshInterval[whichServer] ?? 29) minutes")
             
             if apiClient {
                 let clientId = ( whichServer == "source" ) ? JamfProServer.sourceUser:JamfProServer.destUser
@@ -96,10 +112,19 @@ class JamfPro: NSObject, URLSessionDelegate {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
 //                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
                         if let endpointJSON = json! as? [String: Any] {
+//                            print("[getToken] endpointJSON: \(endpointJSON)")
+                            if apiClient {
+                                JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
+                            } else {
+                                JamfProServer.authExpires[whichServer] = (endpointJSON["expires"] as? Double ?? 20.0)!*60
+                            }
+                            // for testing
+//                            JamfProServer.authExpires[whichServer] = 20.0*60
+                            
+                            JamfProServer.authExpires[whichServer] = JamfProServer.authExpires[whichServer]!*0.75
                             JamfProServer.validToken[whichServer]  = true
                             JamfProServer.authCreds[whichServer]   = apiClient ? endpointJSON["access_token"] as? String:endpointJSON["token"] as? String ?? ""
-//                            JamfProServer.authExpires[whichServer] = apiClient ? endpointJSON["expires_in"] as? Int ?? 35:35
-                            token.refreshInterval[whichServer]     = UInt32(apiClient ? endpointJSON["expires_in"] as? Int ?? Int(token.defaultRefresh):Int(token.defaultRefresh))
+
                             JamfProServer.authType[whichServer]    = "Bearer"
                             JamfProServer.base64Creds[whichServer] = base64creds
                             if wipeData.on && whichServer == "dest" {
@@ -112,7 +137,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                             
     //                      if LogLevel.debug { WriteToLog().message(stringOfText: "[JamfPro.getToken] Retrieved token: \(token)") }
                             print("[JamfPro] \(whichServer) received a new token")
-                            WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(serverUrl)\n")
+                            WriteToLog().message(stringOfText: "[JamfPro.getToken] new token created for \(whichServer): \(serverUrl)\n")
                             
                             if JamfProServer.version[whichServer] == "" {
                                 // get Jamf Pro version - start
@@ -121,7 +146,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                     if let versionString = result["version"] as? String {
                                         
                                         if versionString != "" {
-                                            WriteToLog().message(stringOfText: "[JamfPro.getVersion] Jamf Pro Version: \(versionString)\n")
+                                            WriteToLog().message(stringOfText: "[JamfPro.getVersion] \(whichServer) Jamf Pro Version: \(versionString)\n")
                                             JamfProServer.version[whichServer] = versionString
                                             let tmpArray = versionString.components(separatedBy: ".")
                                             if tmpArray.count > 2 {
@@ -203,42 +228,6 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         
     }
-    
-    /*
-    func refresh(server: String = "", whichServer: String = "", b64Creds: String, localSource: Bool) {
-//        if controller!.go_button.title == "Stop" {
-        DispatchQueue.main.async { [self] in
-            if migrationComplete.isDone {
-                JamfProServer.validToken["source"]      = false
-                JamfProServer.validToken["dest"] = false
-                WriteToLog().message(stringOfText: "[JamfPro.refresh] terminated token refresh\n")
-                return
-            }
-            WriteToLog().message(stringOfText: "[JamfPro.refresh] queue token refresh for \(server)\n")
-            renewQ.async { [self] in
-                
-                if JamfProServer.authType["source"] == "Bearer" {
-                    sleep(token.refreshInterval["source"] ?? 29)
-                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for source server\n")
-                    JamfProServer.validToken["source"] = false
-                    getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"]!, localSource: localSource) {
-                        (result: (Int, String)) in
-    //                    print("[JamfPro.refresh] returned: \(result)")
-                    }
-                }
-                if JamfProServer.authType["dest"] == "Bearer" {
-                    sleep(token.refreshInterval["dest"] ?? 29)
-                    WriteToLog().message(stringOfText: "[JamfPro.refresh] new token for destination server\n")
-                    JamfProServer.validToken["dest"] = false
-                    getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"]!, localSource: localSource) {
-                        (result: (Int, String)) in
-    //                    print("[JamfPro.refresh] returned: \(result)")
-                    }
-                }
-            }
-        }
-    }
-    */
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))

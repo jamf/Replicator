@@ -85,15 +85,15 @@ class Credentials {
                                 if account == username {
                                     let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
 //                                    print("[Credentials.save] updateStatus result: \(updateStatus)")
-                                } else {
-//                                    print("[addStatus] save password for: \(account)")
-                                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
-                                    if (addStatus != errSecSuccess) {
-                                        if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                            print("[addStatus] Write failed for new credentials: \(addErr)")
-                                        }
-                                    }
-                                }
+                                } //else {
+////                                    print("[addStatus] save password for: \(account)")
+//                                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
+//                                    if (addStatus != errSecSuccess) {
+//                                        if let addErr = SecCopyErrorMessageString(addStatus, nil) {
+//                                            print("[addStatus] Write failed for new credentials: \(addErr)")
+//                                        }
+//                                    }
+//                                }
                             }
                         }
                     }

@@ -12,6 +12,7 @@ import Foundation
 public let userDefaults = UserDefaults.standard
 public var maxConcurrentThreads = 2
 public var sourceDestListSize   = 20
+public var pendingGetCount      = 0
 public var pendingCount         = 0
 
 class appColor: NSColor {
@@ -82,7 +83,7 @@ struct JamfProServer {
     static var sourceApiClient = ["id":"", "secret":""]
     static var destApiClient  = ["id":"", "secret":""]
     static var authCreds    = ["source":"", "dest":""]
-    static var authExpires  = ["source":30, "dest":30]
+    static var authExpires  = ["source":20.0, "dest":20.0]
     static var authType     = ["source":"Bearer", "dest":"Bearer"]
     static var base64Creds  = ["source":"", "dest":""]               // used if we want to auth with a different account
     static var validToken   = ["source":false, "dest":false]
@@ -124,16 +125,13 @@ struct setting {
     static var migrateDependencies   = false
     static var migrate               = false
     static var objects               = [String]()
+    static var onlyCopyMissing       = false
+    static var onlyCopyExisting      = false
     static var fullGUI               = true
 }
 
 struct summaryHeader {
     static var createDelete = "create"
-}
-
-struct token {
-    static let defaultRefresh: UInt32 = 1  // 29 minutes
-    static var refreshInterval: [String:UInt32] = ["source": defaultRefresh, "dest": defaultRefresh]
 }
 
 struct wipeData {
@@ -265,7 +263,7 @@ public func tagValue2(xmlString:String, startTag:String, endTag:String) -> Strin
 }
 //  extract the value between (different) tags - end
 
-public func timeDiff(forWhat: String) -> (Int,Int,Int) {
+public func timeDiff(forWhat: String) -> (Int,Int,Int,Double) {
     var components:DateComponents?
     switch forWhat {
     case "runTime":
@@ -281,10 +279,10 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int) {
     }
 //          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
 //          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
-    let timeDifference = Int(components?.second! ?? 0)
-    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+    let totalSeconds = Int(components?.second! ?? 0)
+    let (h,r) = totalSeconds.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-    return(h,m,s)
+    return(h,m,s,Double(totalSeconds))
 }
 
 func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

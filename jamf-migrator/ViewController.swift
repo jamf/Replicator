@@ -46,8 +46,8 @@ class SelectiveObject: NSObject {
     @objc var fileContents: String
     
     init(objectName: String, objectId: String, fileContents: String) {
-        self.objectName = objectName
-        self.objectId = objectId
+        self.objectName   = objectName
+        self.objectId     = objectId
         self.fileContents = fileContents
     }
 }
@@ -463,6 +463,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var totalUpdated    = 0
     var totalFailed     = 0
     var totalCompleted  = 0
+    var getArray        = [ObjectInfo]()
+    var getArrayJSON    = [ObjectInfo]()
     var createArray     = [ObjectInfo]()
     var createArrayJson = [ObjectInfo]()
     var removeArray     = [ObjectInfo]()
@@ -500,9 +502,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     let fm            = FileManager()
     var theOpQ        = OperationQueue() // create operation queue for API calls
     var getEndpointsQ = OperationQueue() // create operation queue for API calls
+    var endpointsIdQ  = OperationQueue() // create operation queue for API calls
     var theCreateQ    = OperationQueue() // create operation queue for API POST/PUT calls
     var readFilesQ    = OperationQueue() // for reading in data files
-    var readNodesQ    = OperationQueue()   // for reading in API endpoints
+    var readNodesQ    = OperationQueue() // for reading in API endpoints
+    var removeEPQ     = OperationQueue() //DispatchQueue(label: "com.jamf.removeEPs", qos: DispatchQoS.background)
+    var removeMeterQ  = OperationQueue() //DispatchQueue(label: "com.jamf.removeEPs", qos: DispatchQoS.background)
     let theIconsQ     = OperationQueue() // que to upload/download icons
     
     let theSortQ      = OperationQueue()
@@ -512,10 +517,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
     
-    var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
-    var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
-    var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
-    var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
+    var destEPQ      = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.utility)
+    var getSourceEPQ = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.utility)
+    var idMapQ       = DispatchQueue(label: "com.jamf.idMap")
+    var sortQ        = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
+    var iconHoldQ    = DispatchQueue(label: "com.jamf.iconhold")
         
     var migrateOrWipe: String = ""
     var httpStatusCode: Int   = 0
@@ -1591,7 +1597,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func startMigrating - end
     
     func startSelectiveMigration(objectIndex: Int, selectedEndpoint: String) {
-        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
+//        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
         
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
         var alreadyMigrated    = false
@@ -1645,7 +1651,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)\n") }
                 
                 if pref.stopMigration {
-                    //            print("[ViewController.readNodes] stopMigration")
+//                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
                     return
                 }
@@ -1734,7 +1740,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             
                                             WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(object): \(theDependencyAction) \(theName)\n")
                                             
-                                            self.endPointByID(endpoint: object, endpointID: theId, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
+                                            self.endPointByIDQueue(endpoint: object, endpointID: theId, endpointCurrent: dependencyCounter, endpointCount: dependencySubcount!, action: theDependencyAction, destEpId: theDependencyEndpointID, destEpName: selectedObject)
                                             
                                             // update list of dependencies migrated
                                             switch object {
@@ -1796,7 +1802,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             WriteToLog().message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency\n")
                             
                             if !fileImport {
-                                self.endPointByID(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
+                                self.endPointByIDQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
                             } else {
                                 //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
                                 
@@ -1859,6 +1865,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
         
         if pref.stopMigration {
+//            print("[\(#function)] \(#line) stopMigration")
             stopButton(self)
             return
         }
@@ -1986,9 +1993,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects from source server (query source server) - destination server if removing
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] enter\n") }
+        pendingGetCount = 0
 
         if pref.stopMigration {
-//            print("[ViewController.getEndpoints] stopMigration")
+//            print("[\(#function)] \(#line) stopMigration")
             stopButton(self)
             completion([])
             return
@@ -2084,7 +2092,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)\n") }
         
-        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
+        getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
         let semaphore = DispatchSemaphore(value: 0)
         
         if setting.fullGUI {
@@ -2225,11 +2233,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     }
                                                                 }
                                                                 
-                                                                //                                                            currentEPDict[destEndpoint] = currentEPs
+//                                                              currentEPDict[destEndpoint] = currentEPs
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] returning existing packages endpoints: \(availableObjsToMigDict)\n") }
                                                                 
-                                                                //                                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                                //                                                            return
+//                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+//                                                            return
                                                                 // make into a func - start
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process\n") }
                                                                 
@@ -2242,12 +2250,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                             
                                                                             if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                                endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                                if setting.onlyCopyMissing {
+                                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                        (result: String) in
+                                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                    }
+                                                                                } else {
+                                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                                }
                                                                             } else {
                                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                                endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                                if setting.onlyCopyExisting {
+                                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                        (result: String) in
+                                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                    }
+                                                                                } else {
+                                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                                }
                                                                             }
+                                                                            /*
+                                                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
+                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                            } else {
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
+                                                                                if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
+                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                            }
+                                                                            */
                                                                         } else {
                                                                             if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
                                                                             removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
@@ -2287,7 +2321,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                 if nodeIndex < nodesToMigrate.count - 1 {
                                                                     readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                                                 }
-                                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                                if !(setting.onlyCopyMissing || setting.onlyCopyExisting) {
+                                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                                }
                                                                 
                                                             }
                                                         }
@@ -2360,31 +2396,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     var counter = 1
                                                     if goSender == "goButton" || !setting.fullGUI {
                                                         for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                            if pref.stopMigration { break }
                                                             if !wipeData.on  {
                                                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)\n") }
                                                                 
                                                                 if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                    if (userDefaults.integer(forKey: "copyMissing") != 1) {
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                                    } else {
+                                                                    
+//                                                                    if (userDefaults.integer(forKey: "copyMissing") != 1) {
+                                                                    if setting.onlyCopyMissing {
                                                                         getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                        createEndpointsQueue(endpointType: endpoint, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                                             (result: String) in
                                                                             completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
                                                                         }
+                                                                    } else {
+                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                                     }
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                                    } else {
+//                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
+                                                                    if setting.onlyCopyExisting {
                                                                         getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                        createEndpointsQueue(endpointType: endpoint, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                                             (result: String) in
                                                                             completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
                                                                         }
+                                                                    } else {
+                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                     }
                                                                 }
                                                             } else {
@@ -2606,11 +2646,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     //need to call existingEndpoints here to keep proper order?
                                                                     if currentEPs[l_xmlName] != nil {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                        endPointByID(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                        
+                                                                        if setting.onlyCopyMissing {
+                                                                                getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                    (result: String) in
+                                                                                    completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                }
+                                                                            } else {
+                                                                                endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                            }
+                                                                        
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0\n") }
-                                                                        endPointByID(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        
+                                                                        if setting.onlyCopyExisting {
+                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                (result: String) in
+                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                            }
+                                                                        } else {
+                                                                            endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        }
+                                                                        
                                                                     }
                                                                 } else {
                                                                     removeEndpointsQueue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
@@ -2751,11 +2811,31 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     //                                                        if currentEPs[l_xmlName] != nil {
                                                                     if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                        
+                                                                        if setting.onlyCopyMissing {
+                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                (result: String) in
+                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                            }
+                                                                        } else {
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                        }
+                                                                        
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        
+                                                                        if setting.onlyCopyExisting {
+                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                (result: String) in
+                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                            }
+                                                                        } else {
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        }
+                                                                        
                                                                     }
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)\n") }
@@ -2875,11 +2955,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     if currentEPs[l_xmlName] != nil {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists\n") }
                                                                         
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create\n") }
                                                                         if LogLevel.debug { WriteToLog().message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0\n") }
-                                                                        endPointByID(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                     }
                                                                 } else {
                                                                     if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
@@ -2930,7 +3010,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 }
                                                 
                                             } else {
-                                                //                                            nodesMigrated += 1    // ;print("added node: \(endpoint) - getEndpoints4")
                                                 getStatusUpdate2(endpoint: endpoint, total: 0)
                                                 putStatusUpdate2(endpoint: endpoint, total: 0)
                                                 
@@ -2982,7 +3061,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             }
             
-        }   // theOpQ - end
+        }   // getEndpointsQ - end
     }   // func getEndpoints - end
     
     func readDataFiles(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: String) -> Void) {
@@ -3023,7 +3102,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles]       Data files root: \(JamfProServer.source)\n") }
         if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Working with endpoint: \(endpoint)\n") }
 
-        self.availableFilesToMigDict.removeAll()
+//        self.availableFilesToMigDict.removeAll()
+//        targetSelectiveObjectList.removeAll()
+        
         self.displayNameToFilename.removeAll()
         
         theOpQ.maxConcurrentOperationCount = 1
@@ -3032,6 +3113,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            print("[readDataFiles] local_endpointArray: \(local_endpointArray)")
             let local_folder = nodesToMigrate[nodeIndex]
             availableFilesToMigDict.removeAll()
+            targetSelectiveObjectList.removeAll()
+            
             clearSourceObjectsList()
             
             var directoryPath = "\(JamfProServer.source)/\(local_folder)"
@@ -3075,7 +3158,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let dataFile = xmlFilePaths[i-1]
     //                        let dataFile = dataFiles[i-1]
                             let fileUrl = importFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                            print("readDataFiles] reading: \(String(describing: fileUrl?.path))")
+                            print("[readDataFiles] reading: \(String(describing: fileUrl?.path))")
+                            
                             do {
                                 // remove 'extra' data so we can get name and id from between general tags
                                 var fileContents = try String(contentsOf: fileUrl!)
@@ -3144,6 +3228,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 
                                 displayNameToFilename[name]       = dataFile
                                 availableFilesToMigDict[dataFile] = [id, name, fileContents]
+                                targetSelectiveObjectList.append(SelectiveObject(objectName: name, objectId: id, fileContents: fileContents))
+                                
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] read \(local_folder): file name : object name - \(dataFile)  :  \(name), id: \(id)\n") }
                                 // populate selective list, when appropriate
                                 if goSender == "selectToMigrateButton" {
@@ -3204,6 +3290,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                          if LogLevel.debug { WriteToLog().message(stringOfText: "[readDataFiles] Returned from processFiles.\n") }
  //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
                          self.availableFilesToMigDict.removeAll()
+                         targetSelectiveObjectList.removeAll()
+                         
                          if nodeIndex < nodesToMigrate.count - 1 {
                              self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
                                  (result: String) in
@@ -3256,7 +3344,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let l_xml  = theObject.fileContents
                     
 //                    getStatusUpdate2(endpoint: endpoint, total: fileCount)
-                    getStatusUpdate2(endpoint: endpoint, total: targetSelectiveObjectList.count)
+                    getStatusUpdate2(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
                     if l_id != "" && l_name != "" && l_xml != "" {
@@ -3367,24 +3455,39 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
+    func endPointByIDQueue(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        
+        getSourceEPQ.async { [self] in
+            
+//            print("[endPointByIDQueue] queue \(endpoint) with name \(destEpName) for get")
+            getArray.append(ObjectInfo(endpointType: endpoint, endPointXml: "", endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: Int(destEpId), ssIconName: destEpName, ssIconId: "", ssIconUri: "", retry: false))
+            
+            while pendingGetCount > 0 || getArray.count > 0 {
+                if pendingGetCount < maxConcurrentThreads && getArray.count > 0 {
+                    pendingGetCount += 1
+                    let nextEndpoint = getArray[0]
+                    getArray.remove(at: 0)
+                    
+                    endPointByID(endpoint: nextEndpoint.endpointType, endpointID: "\(nextEndpoint.sourceEpId)", endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, destEpId: nextEndpoint.destEpId, destEpName: nextEndpoint.ssIconName) {
+                            (result: String) in
+                            pendingGetCount -= 1
+                    }
+                } else {
+                    sleep(1)
+                }
+            }
+        }
+    }
     // get full record in XML format
-    func endPointByID(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
-        
+    func endPointByID(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+                
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] enter\n") }
-        
-        // set these when go is clicked or startmigration
-        /*
-        export.saveRawXml      = xmlPrefOptions["saveRawXml"]!
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXml: \(export.saveRawXml)\n") }
-        saveRawXmlScope = xmlPrefOptions["saveRawXmlScope"] ?? false
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] saveRawXmlScope: \(saveRawXmlScope)\n") }
-        */
 
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint)\n") }
         
-        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
-        let semaphore = DispatchSemaphore(value: 0)
+        endpointsIdQ.maxConcurrentOperationCount = maxConcurrentThreads
+//        let semaphore = DispatchSemaphore(value: 0)
         
         var localEndPointType = ""
 //        var theEndpoint       = endpoint
@@ -3411,49 +3514,68 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         case "buildings":
             // Jamf Pro API
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
-                theOpQ.addOperation {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
-                    Jpapi().action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
-                        (returnedJSON: [String:Any]) in
-//                        print("returnedJSON: \(returnedJSON)")
-                        if returnedJSON.count > 0 {
-                            self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
-                            // save source JSON - start
-                            if export.saveRawXml {
-                                DispatchQueue.main.async { [self] in
-                                    let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: returnedJSON, theTag: ""):rmJsonData(rawJSON: returnedJSON, theTag: "scope")
-//                                    print("exportRawJson: \(exportRawJson)")
-                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName)\n")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                    exportItems(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-//                                    SaveDelegate().exportObject(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-                                }
-                            }
-                            // save source JSON - end
+                endpointsIdQ.addOperation {
+                    
+                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                        (result: (Int,String)) in
+                        let (statusCode, theResult) = result
+//                        if statusCode == 202 {
+//                            print("[endPointByID] \(#line) getToken theResult: \(theResult)")
+//                        }
+                        if theResult == "success" {
                             
-                            if !export.saveOnly {
-                                cleanupJSON(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                    (cleanJSON: String) in
-                                }
-                            } else {
-                                // check progress
-//                                print("[endpointById] node: \(endpoint)")
-//                                // print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                                endpointCountDict[endpoint]! -= 1
-//                                print("[endpointById] \(String(describing: endpointCountDict[endpoint])) remaining\n")
-                                if endpointCountDict[endpoint] == 0 {
-//                                     print("[endpointById] saved last \(endpoint)")
-//                                     print("[endpointById] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
-                                 
-                                    if endpointsRead == objectsToMigrate.count {
-                                        // print("[endpointById] zip it up")
-                                        goButtonEnabled(button_status: true)
+//                            if statusCode == 202 {
+//                                print("[endPointByID] \(#line) get \(localEndPointType): \(endpointID)")
+//                            }
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
+                            Jpapi().action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
+                                (returnedJSON: [String:Any]) in
+                                completion(destEpName)
+//                                if statusCode == 202 {
+//                                    print("[endPointByID] \(#line) returnedJSON: \(returnedJSON)")
+//                                }
+                                //                        print("returnedJSON: \(returnedJSON)")
+                                if returnedJSON.count > 0 {
+                                    self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+                                    // save source JSON - start
+                                    if export.saveRawXml {
+                                        DispatchQueue.main.async { [self] in
+                                            let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: returnedJSON, theTag: ""):rmJsonData(rawJSON: returnedJSON, theTag: "scope")
+                                            //                                    print("exportRawJson: \(exportRawJson)")
+                                            WriteToLog().message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName)\n")
+                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                            exportItems(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                            //                                    SaveDelegate().exportObject(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                        }
+                                    }
+                                    // save source JSON - end
+                                    
+                                    if !export.saveOnly {
+                                        cleanupJSON(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                            (cleanJSON: String) in
+                                        }
+                                    } else {
+                                        // check progress
+                                        //                                print("[endpointById] node: \(endpoint)")
+                                        //                                // print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                                        endpointCountDict[endpoint]! -= 1
+                                        //                                print("[endpointById] \(String(describing: endpointCountDict[endpoint])) remaining\n")
+                                        if endpointCountDict[endpoint] == 0 {
+                                            //                                     print("[endpointById] saved last \(endpoint)")
+                                            //                                     print("[endpointById] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
+                                            
+                                            if endpointsRead == objectsToMigrate.count {
+                                                // print("[endpointById] zip it up")
+                                                goButtonEnabled(button_status: true)
+                                            }
+                                        }
                                     }
                                 }
                             }
+                            
                         }
                     }
-                }   // theOpQ - end
+                }   // endpointsIdQ - end
             }
         default:
             // classic API
@@ -3465,94 +3587,114 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
                 myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 
-                theOpQ.addOperation {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
-    //                print("NSURL line 3")
-    //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                    let encodedURL = URL(string: myURL)
-                    let request = NSMutableURLRequest(url: encodedURL! as URL)
-                    request.httpMethod = "GET"
-                    let configuration = URLSessionConfiguration.ephemeral
-
-                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-                    let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                    let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
-                        (data, response, error) -> Void in
-                        session.finishTasksAndInvalidate()
-                        
-                        if let httpResponse = response as? HTTPURLResponse {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
-                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                endpointsIdQ.addOperation {
+                    
+                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                        (result: (Int,String)) in
+                        let (statusCode, theResult) = result
+//                        if statusCode == 202 {
+//                            print("[endPointByID] \(#line) getToken theResult: \(theResult)")
+//                        }
+                        if theResult == "success" {
                             
-                            self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
-                            // save source XML - start
-                            if export.saveRawXml {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
-                                DispatchQueue.main.async { [self] in
-                                    // added option to remove scope
-//                                    print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
-                                    let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                    WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)\n")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-                                }
-                            }
-                            // save source XML - end
-                            if !export.backupMode {
+//                            if statusCode == 202 {
+//                                print("[endPointByID] \(#line) get \(localEndPointType): \(endpointID)")
+//                            }
+                            
+                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
+                            //                print("NSURL line 3")
+                            //                if "\(myURL)" == "" { myURL = "https://localhost" }
+                            let encodedURL = URL(string: myURL)
+                            let request = NSMutableURLRequest(url: encodedURL! as URL)
+                            request.httpMethod = "GET"
+                            let configuration = URLSessionConfiguration.ephemeral
+                            
+                            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                            let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
+                                (data, response, error) -> Void in
+                                session.finishTasksAndInvalidate()
+                                completion(destEpName)
                                 
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
-                                cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                    (result: String) in
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
-                                }
-                            } else {
-                                // to back-up icons
-                                if endpoint == "policies" {
-                                    cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                        (result: String) in
+//                                if statusCode == 202 {
+//                                    print("[endPointByID] \(#line) retrieved object")
+//                                }
+                                
+                                if let httpResponse = response as? HTTPURLResponse {
+                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)\n") }
+                                    let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                                    
+                                    self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+                                    // save source XML - start
+                                    if export.saveRawXml {
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Saving raw XML for \(destEpName) with id: \(endpointID).\n") }
+                                        DispatchQueue.main.async { [self] in
+                                            // added option to remove scope
+                                            //                                    print("[endPointByID] export.rawXmlScope: \(export.rawXmlScope)")
+                                            let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                            WriteToLog().message(stringOfText: "[endPointByID] Exporting raw XML for \(endpoint) - \(destEpName)\n")
+                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                            XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                        }
+                                    }
+                                    // save source XML - end
+                                    if !export.backupMode {
+                                        
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Starting to clean-up the XML.\n") }
+                                        cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                            (result: String) in
+                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[endPointByID] Returned from cleanupXml\n") }
+                                        }
+                                    } else {
+                                        // to back-up icons
+                                        if endpoint == "policies" {
+                                            cleanupXml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                                (result: String) in
+                                            }
+                                        }
+                                        // check progress
+                                        //                                print("[endpointById] node: \(endpoint)")
+                                        //                                // print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                                        endpointCountDict[endpoint]! -= 1
+                                        //                                print("[endpointById] \(String(describing: endpointCountDict[endpoint])) remaining\n")
+                                        if endpointCountDict[endpoint] == 0 {
+                                            //                                     print("[endpointById] saved last \(endpoint)")
+                                            //                                     print("[endpointById] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
+                                            endpointCountDict[endpoint] = nil
+                                            //                                    print("[endpointById] nodes remaining \(endpointCountDict)")
+                                            if endpointCountDict.count == 0 && endpointsRead == objectsToMigrate.count {
+                                                // print("[endpointById] zip it up")
+                                                goButtonEnabled(button_status: true)
+                                            }
+                                        }
+                                    }
+                                } else {   // if let httpResponse - end
+                                    // check progress
+                                    //                            print("[endpointById-error] node: \(endpoint)")
+                                    //                            print("[endpointById-error] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                                    endpointCountDict[endpoint]! -= 1
+                                    //                            print("[endpointById-error] \(String(describing: endpointCountDict[endpoint])) remaining\n")
+                                    if endpointCountDict[endpoint] == 0 {
+                                        //                                print("[endpointById-error] saved last \(endpoint)")
+                                        //                                print("[endpointById-error] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
+                                        endpointCountDict[endpoint] = nil
+                                        //                                print("[endpointById-error] nodes remaining \(endpointCountDict)")
+                                        if endpointCountDict.count == 0 && endpointsRead == objectsToMigrate.count {
+                                            //                                    print("[endpointById-error] zip it up")
+                                            goButtonEnabled(button_status: true)
+                                        }
                                     }
                                 }
-                                // check progress
-//                                print("[endpointById] node: \(endpoint)")
-//                                // print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                                endpointCountDict[endpoint]! -= 1
-//                                print("[endpointById] \(String(describing: endpointCountDict[endpoint])) remaining\n")
-                                if endpointCountDict[endpoint] == 0 {
-//                                     print("[endpointById] saved last \(endpoint)")
-//                                     print("[endpointById] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
-                                    endpointCountDict[endpoint] = nil
-//                                    print("[endpointById] nodes remaining \(endpointCountDict)")
-                                    if endpointCountDict.count == 0 && endpointsRead == objectsToMigrate.count {
-                                        // print("[endpointById] zip it up")
-                                        goButtonEnabled(button_status: true)
-                                    }
+//                                semaphore.signal()
+                                if error != nil {
                                 }
-                            }
-                        } else {   // if let httpResponse - end
-                            // check progress
-//                            print("[endpointById-error] node: \(endpoint)")
-//                            print("[endpointById-error] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                            endpointCountDict[endpoint]! -= 1
-//                            print("[endpointById-error] \(String(describing: endpointCountDict[endpoint])) remaining\n")
-                            if endpointCountDict[endpoint] == 0 {
-//                                print("[endpointById-error] saved last \(endpoint)")
-//                                print("[endpointById-error] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
-                                endpointCountDict[endpoint] = nil
-//                                print("[endpointById-error] nodes remaining \(endpointCountDict)")
-                                if endpointCountDict.count == 0 && endpointsRead == objectsToMigrate.count {
-//                                    print("[endpointById-error] zip it up")
-                                    goButtonEnabled(button_status: true)
-                                }
-                            }
+                            })  // let task = session - end
+                            //print("GET")
+                            task.resume()
+//                            semaphore.wait()
                         }
-                        semaphore.signal()
-                        if error != nil {
-                        }
-                    })  // let task = session - end
-                    //print("GET")
-                    task.resume()
-                    semaphore.wait()
-                }   // theOpQ - end
+                    }
+                }   // endpointsIdQ - end
             }
         }
     }
@@ -3602,7 +3744,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] enter\n") }
 
         if pref.stopMigration {
-//            print("[cleanupXml] stopMigration")
+//            print("[\(#function)] \(#line) stopMigration")
             stopButton(self)
             completion("")
             return
@@ -4128,7 +4270,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
-                self.createEndpointsQueue(endpointType: theEndpoint, endPointXML: PostXML, endpointCurrent: Int(endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
+                self.createEndpointsQueue(endpointType: theEndpoint, endpointName: destEpName, endPointXML: PostXML, endpointCurrent: Int(endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: destEpId, ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
                     if LogLevel.debug { WriteToLog().message(stringOfText: "[cleanUpXml] \(result)\n") }
                     if endpointCurrent == endpointCount {
@@ -4153,11 +4295,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func createEndpointsQueue(endpointType: String, endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func createEndpointsQueue(endpointType: String, endpointName: String = "", endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         completion("return from createEndpointsQueue")
-        
-        if (userDefaults.integer(forKey: "copyExisting") == 1 && action == "create") || (userDefaults.integer(forKey: "copyMissing") == 1 && action == "update") {
+        print("[createEndpointsQueue]                   action: \(action)")
+        print("[createEndpointsQueue] setting.onlyCopyExisting: \(setting.onlyCopyExisting)")
+        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(setting.onlyCopyMissing)\n")
+
+        if (setting.onlyCopyExisting && action == "create") || (setting.onlyCopyMissing && action == "update") {
+            WriteToLog().message(stringOfText: "[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)\n")
             counters[endpointType]?["skipped"]! += 1
             putStatusUpdate2(endpoint: endpointType, total: endpointCount)
             return
@@ -4166,11 +4312,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         destEPQ.async { [self] in
             
+//            print("[createEndpointsQueue] que \(endpointType) with id \(sourceEpId) for upload")
             createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
             
             switch endpointType {
             case "buildings":
-                
                 while pendingCount > 0 || createArray.count > 0 {
                     if pendingCount < maxConcurrentThreads && createArray.count > 0 {
                         pendingCount += 1
@@ -4191,15 +4337,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
             default:
-//                createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
-                
                 while pendingCount > 0 || createArray.count > 0 {
                     if pendingCount < maxConcurrentThreads && createArray.count > 0 {
                         pendingCount += 1
                         let nextEndpoint = createArray[0]
                         createArray.remove(at: 0)
                         
-                        createEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
+                        createEndpoints(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) {
                                 (result: String) in
                                 pendingCount -= 1
                         }
@@ -4220,6 +4364,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if theResult == "success" {
                 
                 if pref.stopMigration {
+//                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
                     completion("stop")
                     return
@@ -4271,7 +4416,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 //if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----\n") }
                 
                 theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
-                let semaphore = DispatchSemaphore(value: 0)
+//                let semaphore = DispatchSemaphore(value: 0)
                 
         //        print("endPointXML:\n\(endPointXML)")
                 
@@ -4299,7 +4444,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                    print("[createEndpoints] xml: \(endPointXML)")
                     createDestUrl = createDestUrl.replacingOccurrences(of: "/id/\(destinationEpId)", with: "/udid/\(identifier)")
                 }
-                print("[createEndpoints] createDestUrl: \(createDestUrl)")
+//                print("[createEndpoints] createDestUrl: \(createDestUrl)")
                 
                 
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)\n") }
@@ -4398,234 +4543,276 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }   // look to see if we are processing the next localEndPointType - end
                                 
         //                        DispatchQueue.main.async {
-                                    if let _ = createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
-                                        createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
-                                        if createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
-                                            whichError = "skip"
-                                            createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.\n")
-                                        }
-                                    } else {
+                                if let _ = createRetryCount["\(localEndPointType)-\(sourceEpId)"] {
+                                    createRetryCount["\(localEndPointType)-\(sourceEpId)"]! += 1
+                                    if createRetryCount["\(localEndPointType)-\(sourceEpId)"]! > 3 {
+                                        whichError = "skip"
                                         createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.\n")
                                     }
-                                                                
-                                    if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
+                                } else {
+                                    createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                }
+                                                            
+                                if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
+                                    WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)\n")
+                                    
+                                    createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                    
+                                    if endpointCurrent == 1 && !retry {
+                                        migrationComplete.isDone = false
+                                        if !setting.migrateDependencies || endpointType == "policies" {
+                                            setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
+                                        }
+                                    } else if !retry {
+                                        if let _ = put_levelIndicatorFillColor[endpointType] {
+                                            setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: put_levelIndicatorFillColor[endpointType]!)
+                                        }
+                                    }
+                                    
+                                    POSTsuccessCount += 1
+                                                                            
+                                    if let _ = progressCountArray["\(endpointType)"] {
+                                        progressCountArray["\(endpointType)"] = progressCountArray["\(endpointType)"]!+1
+                                    }
+                                    
+                                    if localEndPointType != "policies" && dependency.isRunning {
+                                        dependencyMigratedCount[dependencyParentId]! += 1
+                                    }
+                                    
+                                    counters[endpointType]?["\(apiAction)"]! += 1
+                                    
+                                    if var summaryArray = summaryDict[endpointType]?["\(apiAction)"] {
+                                        summaryArray.append(getName(endpoint: endpointType, objectXML: endPointXML))
+                                        summaryDict[endpointType]?["\(apiAction)"] = summaryArray
+                                    }
+                                    
+                                    // currently there is no way to upload mac app store icons; no api endpoint
+                                    // removed check for those -  || (endpointType == "macapplications")
+                                    // mobiledeviceapplication icon data is in the object xml
+    //                                print("setting.csa: \(setting.csa)")
+    //                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
+                                    if (endpointType == "policies") && (action == "create" || setting.csa) {
+                                        sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+
+                                        let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": "\(tagValue2(xmlString: endPointXML, startTag: "<self_service>", endTag: "</self_service>"))"]
+                                        icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                    }
+                                    
+                                } else {
+                                    // create failed
+                                    labelColor(endpoint: endpointType, theColor: yellowText)
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
+                                    }
+                                    
+                                    var localErrorMsg = ""
+                                    
+                                    print("[createEndpoints]   identifier: \(identifier)")
+                                    print("[createEndpoints] responseData: \(responseData)")
+                                    print("[createEndpoints]       status: \(httpResponse.statusCode)")
+                                    
+                                    if httpResponse.statusCode == 404 {
+                                        // retry doing a POST
+                                        whichError = "device not found"
+//                                            return
+                                    } else {
+                                        let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
+
+                                        errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
                                         
-                                        createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                        // Write xml for degugging - end
                                         
-                                        if endpointCurrent == 1 && !retry {
-                                            migrationComplete.isDone = false
-                                            if !setting.migrateDependencies || endpointType == "policies" {
-                                                setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
-                                            }
-                                        } else if !retry {
-                                            if let _ = put_levelIndicatorFillColor[endpointType] {
-                                                setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: put_levelIndicatorFillColor[endpointType]!)
+                                        if whichError != "skip" {
+                                            if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
+                                                whichError = "category"
+                                            } else {
+                                                whichError = errorMsg
                                             }
                                         }
-                                        
-                                        POSTsuccessCount += 1
-                                                                                
-                                        if let _ = progressCountArray["\(endpointType)"] {
-                                            progressCountArray["\(endpointType)"] = progressCountArray["\(endpointType)"]!+1
+                                    }
+                                    
+                                    print("[createEndpoints] whichError: \(whichError)")
+                                    // retry computers with dublicate serial or MAC - start
+                                    switch whichError {
+                                    case "device not found":
+                                        print("[createEndpoints] device not found, try to create")
+                                        createEndpoints(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "create", sourceEpId: sourceEpId, destEpId: 0, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
                                         }
                                         
+                                    case "Duplicate UDID":
+                                        print("[createEndpoints] Duplicate UDID, try to update")
+                                        createEndpoints(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "update", sourceEpId: sourceEpId, destEpId: -1, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+                                        }
+                                            
+                                    case "Duplicate serial number", "Duplicate MAC address":
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
+                                            tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                        }
+                                        createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+                                        }
+                                        
+                                    case "category":
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["category"] {
+                                            tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                        }
+                                        createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                        }
+                                        
+                                    case "Problem with department in location":
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["department"] {
+                                            tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                        }
+                                        createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                        }
+                                        
+                                    case "Problem with building in location":
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["building"] {
+                                            tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
+                                        }
+                                        createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                            //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+                                        }
+
+                                    // retry network segment without distribution point
+                                    case "Problem in assignment to distribution point":
+                                        WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
+                                        var tmp_endPointXML = endPointXML
+                                        for xmlTag in ["distribution_point", "url"] {
+                                            tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
+                                        }
+                                        createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+//                                              if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
+                                        }
+
+                                    default:
+    //                                    createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
+                                        WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n\n")
+                                        
+    //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n\(responseData)\n") }
+                                        if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] -----------------------------------\n\n") }
+                                        // 400 - likely the format of the xml is incorrect or wrong endpoint
+                                        // 401 - wrong username and/or password
+                                        // 409 - unable to create object; already exists or data missing or xml error
+                        
+                        //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                                         if localEndPointType != "policies" && dependency.isRunning {
                                             dependencyMigratedCount[dependencyParentId]! += 1
+                    //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(dependencyMigratedCount[dependencyParentId]!)")
                                         }
                                         
-                                        counters[endpointType]?["\(apiAction)"]! += 1
-                                        
-                                        if var summaryArray = summaryDict[endpointType]?["\(apiAction)"] {
+                                        // update global counters
+                                        let localTmp = (counters[endpointType]?["fail"])!
+                                        counters[endpointType]?["fail"] = localTmp + 1
+                                        if var summaryArray = summaryDict[endpointType]?["fail"] {
                                             summaryArray.append(getName(endpoint: endpointType, objectXML: endPointXML))
-                                            summaryDict[endpointType]?["\(apiAction)"] = summaryArray
+                                            summaryDict[endpointType]?["fail"] = summaryArray
                                         }
-                                        
-                                        // currently there is no way to upload mac app store icons; no api endpoint
-                                        // removed check for those -  || (endpointType == "macapplications")
-                                        // mobiledeviceapplication icon data is in the object xml
-        //                                print("setting.csa: \(setting.csa)")
-        //                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {
-                                        if (endpointType == "policies") && (action == "create" || setting.csa) {
-                                            sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                                    }
+                                }   // create failed - end
 
-                                            let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": "\(tagValue2(xmlString: endPointXML, startTag: "<self_service>", endTag: "</self_service>"))"]
-                                            icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                                        }
-                                        
-                                    } else {
-                                        // create failed
-                                        labelColor(endpoint: endpointType, theColor: yellowText)
+                                totalCreated   = counters[endpointType]?["create"] ?? 0
+                                totalUpdated   = counters[endpointType]?["update"] ?? 0
+                                totalFailed    = counters[endpointType]?["fail"] ?? 0
+                                totalCompleted = totalCreated + totalUpdated + totalFailed
+                                
+                                if createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && totalCompleted > 0  {
+    //                                print("[CreateEndpoints] counters: \(counters)")
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
+                                    }
+                                }
+                                
+                                if setting.fullGUI && totalCompleted == endpointCount {
+    //                                migrationComplete.isDone = true
+
+                                    if totalFailed == 0 {   // removed  && changeColor from if condition
+                                        labelColor(endpoint: endpointType, theColor: greenText)
+                                    } else if totalFailed == endpointCount {
+                                        labelColor(endpoint: endpointType, theColor: redText)
                                         if !setting.migrateDependencies || endpointType == "policies" {
-                                            setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
+                                            put_levelIndicatorFillColor[endpointType] = .systemRed
+                                            put_levelIndicator.fillColor = put_levelIndicatorFillColor[endpointType]
+    //                                        put_levelIndicator.fillColor = .systemRed
                                         }
-                                        
-                                        var localErrorMsg = ""
-                                        
-                                        print("[createEndpoints]   identifier: \(identifier)")
-                                        print("[createEndpoints] responseData: \(responseData)")
-                                        print("[createEndpoints]       status: \(httpResponse.statusCode)")
-                                        
-                                        if httpResponse.statusCode == 404 {
-                                            // retry doing a POST
-                                            whichError = "device not found"
-//                                            return
-                                        } else {
-                                            let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
-
-                                            errorMsg != "" ? (localErrorMsg = "\(action.capitalized) error: \(errorMsg)"):(localErrorMsg = "\(action.capitalized) error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
-                                            
-                                            // Write xml for degugging - end
-                                            
-                                            if whichError != "skip" {
-                                                if errorMsg.lowercased().range(of:"no match found for category") != nil || errorMsg.lowercased().range(of:"problem with category") != nil {
-                                                    whichError = "category"
-                                                } else {
-                                                    whichError = errorMsg
-                                                }
-                                            }
-                                        }
-                                        
-                                        print("[createEndpoints] whichError: \(whichError)")
-                                        // retry computers with dublicate serial or MAC - start
-                                        switch whichError {
-                                        case "device not found":
-                                            print("[createEndpoints] device not found, try to create")
-                                            createEndpoints(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "create", sourceEpId: sourceEpId, destEpId: 0, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
-                                            }
-                                            
-                                        case "Duplicate UDID":
-                                            print("[createEndpoints] Duplicate UDID, try to update")
-                                            createEndpoints(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "update", sourceEpId: sourceEpId, destEpId: -1, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
-                                            }
-                                                
-                                        case "Duplicate serial number", "Duplicate MAC address":
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
-                                            var tmp_endPointXML = endPointXML
-                                            for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
-                                                tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                            }
-                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
-                                            }
-                                            
-                                        case "category":
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
-                                            var tmp_endPointXML = endPointXML
-                                            for xmlTag in ["category"] {
-                                                tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                            }
-                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                            }
-                                            
-                                        case "Problem with department in location":
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
-                                            var tmp_endPointXML = endPointXML
-                                            for xmlTag in ["department"] {
-                                                tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                            }
-                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                            }
-                                            
-                                        case "Problem with building in location":
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
-                                            var tmp_endPointXML = endPointXML
-                                            for xmlTag in ["building"] {
-                                                tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
-                                            }
-                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-                                                //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
-                                            }
-
-                                        // retry network segment without distribution point
-                                        case "Problem in assignment to distribution point":
-                                            WriteToLog().message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(createRetryCount["\(localEndPointType)-\(sourceEpId)"]!)).\n")
-                                            var tmp_endPointXML = endPointXML
-                                            for xmlTag in ["distribution_point", "url"] {
-                                                tmp_endPointXML = rmXmlData(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
-                                            }
-                                            createEndpoints(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
-                                                (result: String) in
-//                                              if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(result)\n") }
-                                            }
-
-                                        default:
-        //                                    createRetryCount["\(localEndPointType)-\(sourceEpId)"] = 0
-                                            WriteToLog().message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n\n")
-                                            
-        //                                    if LogLevel.debug { WriteToLog().message(stringOfText: "\n\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- status code ----------\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n\(responseData)\n") }
-                                            if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] -----------------------------------\n\n") }
-                                            // 400 - likely the format of the xml is incorrect or wrong endpoint
-                                            // 401 - wrong username and/or password
-                                            // 409 - unable to create object; already exists or data missing or xml error
+                                    }
+                                }
+                                completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
                             
-                            //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
-                                            if localEndPointType != "policies" && dependency.isRunning {
-                                                dependencyMigratedCount[dependencyParentId]! += 1
-                        //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(dependencyMigratedCount[dependencyParentId]!)")
-                                            }
-                                            
-                                            // update global counters
-                                            let localTmp = (counters[endpointType]?["fail"])!
-                                            counters[endpointType]?["fail"] = localTmp + 1
-                                            if var summaryArray = summaryDict[endpointType]?["fail"] {
-                                                summaryArray.append(getName(endpoint: endpointType, objectXML: endPointXML))
-                                                summaryDict[endpointType]?["fail"] = summaryArray
-                                            }
-                                        }
-                                    }   // create failed - end
+                            
+    //                        }   // DispatchQueue.main.async - end
+                        } else {  // if let httpResponse = response - end
+                            if localEndPointType != "policies" && dependency.isRunning {
+                                dependencyMigratedCount[dependencyParentId]! += 1
+        //                        print("[CreateEndpoints] dependencyMigratedCount incremented: \(dependencyMigratedCount[dependencyParentId]!)")
+                            }
+                            
+                            // update global counters
+                            let localTmp = (counters[endpointType]?["fail"])!
+                            counters[endpointType]?["fail"] = localTmp + 1
+                            if var summaryArray = summaryDict[endpointType]?["fail"] {
+                                summaryArray.append(getName(endpoint: endpointType, objectXML: endPointXML))
+                                summaryDict[endpointType]?["fail"] = summaryArray
+                            }
+                            
+                            totalCreated   = counters[endpointType]?["create"] ?? 0
+                            totalUpdated   = counters[endpointType]?["update"] ?? 0
+                            totalFailed    = counters[endpointType]?["fail"] ?? 0
+                            totalCompleted = totalCreated + totalUpdated + totalFailed
+                            
+                            if createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && totalCompleted > 0  {
+//                                print("[CreateEndpoints] counters: \(counters)")
+                                if !setting.migrateDependencies || endpointType == "policies" {
+                                    putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
+                                }
+                            }
+                            
+                            if setting.fullGUI && totalCompleted == endpointCount {
+//                                migrationComplete.isDone = true
 
-                                    totalCreated   = counters[endpointType]?["create"] ?? 0
-                                    totalUpdated   = counters[endpointType]?["update"] ?? 0
-                                    totalFailed    = counters[endpointType]?["fail"] ?? 0
-                                    totalCompleted = totalCreated + totalUpdated + totalFailed
-                                    
-                                    if createRetryCount["\(localEndPointType)-\(sourceEpId)"] == 0 && totalCompleted > 0  {
-        //                                print("[CreateEndpoints] counters: \(counters)")
-                                        if !setting.migrateDependencies || endpointType == "policies" {
-                                            putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
-                                        }
+                                if totalFailed == 0 {   // removed  && changeColor from if condition
+                                    labelColor(endpoint: endpointType, theColor: greenText)
+                                } else if totalFailed == endpointCount {
+                                    labelColor(endpoint: endpointType, theColor: redText)
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        put_levelIndicatorFillColor[endpointType] = .systemRed
+                                        put_levelIndicator.fillColor = put_levelIndicatorFillColor[endpointType]
+//                                        put_levelIndicator.fillColor = .systemRed
                                     }
-                                    
-                                    if setting.fullGUI && totalCompleted == endpointCount {
-        //                                migrationComplete.isDone = true
-
-                                        if totalFailed == 0 {   // removed  && changeColor from if condition
-                                            labelColor(endpoint: endpointType, theColor: greenText)
-                                        } else if totalFailed == endpointCount {
-                                            labelColor(endpoint: endpointType, theColor: redText)
-                                            if !setting.migrateDependencies || endpointType == "policies" {
-                                                put_levelIndicatorFillColor[endpointType] = .systemRed
-                                                put_levelIndicator.fillColor = put_levelIndicatorFillColor[endpointType]
-        //                                        put_levelIndicator.fillColor = .systemRed
-                                            }
-                                        }
-                                    }
-                                    completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-                                
-                                
-        //                        }   // DispatchQueue.main.async - end
-                            }   // if let httpResponse = response - end
+                                }
+                            }
+                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                            
+                        }
                             
                             if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)\n") }
                             
                             if endpointCurrent > 0 {
                                 if LogLevel.debug { WriteToLog().message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(POSTsuccessCount)\t Failed: \(totalFailed)\t SuccessArray \(String(describing: progressCountArray["\(localEndPointType)"]!))\n") }
                             }
-                            semaphore.signal()
+//                            semaphore.signal()
                             if error != nil {
                             }
 
@@ -4636,12 +4823,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         })
                         task.resume()
-                        semaphore.wait()
+//                        semaphore.wait()
                     }   // if !wipeData.on - end
                     
                 }   // theCreateQ.addOperation - end
-
-                
+            } else {
+                // failed to authenticate
+                WriteToLog().message(stringOfText: "[CreateEndpoints] failed to authenticate.\n")
+                if setting.fullGUI {
+                    _ = Alert().display(header: "", message: "Failed to authenticate", secondButton: "")
+                } else {
+                    NSApplication.shared.terminate(self)
+                }
+                                     
             }
         }
     }   // func createEndpoints - end
@@ -4656,7 +4850,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if theResult == "success" {
                 
                 if pref.stopMigration {
-        //            print("[CreateEndpoints] stopMigration")
+//                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
                     completion("stop")
                     return
@@ -4920,28 +5114,36 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    func removeEndpointsQueue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
     func removeEndpointsQueue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         
-        print("[removeEndpointQueue] remove \(endpointType) with id \(endPointID)")
+        removeMeterQ.maxConcurrentOperationCount = 3
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
         removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: Int(endPointID)!, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
 
 
-        destEPQ.async { [self] in
-            while pendingCount > 0 || removeArray.count > 0 {
+//        removeEPQ.async { [self] in
+        removeMeterQ.addOperation { [self] in
+            repeat {
                 print("[removeEndpointsQueue] 1 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
                 if pendingCount < maxConcurrentThreads && removeArray.count > 0 {
                     pendingCount += 1
-                    let nextEndpoint = removeArray.removeFirst()
-//                    removeArray.removef
-
+                    usleep(10)
+                    let nextEndpoint = removeArray.remove(at: 0)
+                    
+                    print("[removeEndpointsQueue] call removeEndpoints to removed id: \(nextEndpoint.destEpId)")
                     removeEndpoints(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) {
                         (result: String) in
                         pendingCount -= 1
                         print("[removeEndpointsQueue] removed id: \(result)")
+                        semaphore.signal()
                     }
                 } else {
                     print("[removeEndpointsQueue] 2 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
                     sleep(1)
+                    if pendingCount == 0 && removeArray.count == 0 { break }
                 }
-            }
+                semaphore.wait()
+            } while pendingCount > 0 || removeArray.count > 0
         }
     }
     func removeEndpoints(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
@@ -4965,6 +5167,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if counters[endpointType] == nil {
             counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+            usleep(10)
 //            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             counters[endpointType]!["total"] = endpointCount
@@ -4981,9 +5184,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         var totalFailed    = 0
         var totalCompleted = 0
         
-        theOpQ.maxConcurrentOperationCount = maxConcurrentThreads
+        removeEPQ.maxConcurrentOperationCount = maxConcurrentThreads
         
-        let semaphore = DispatchSemaphore(value: 0)
+//        let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -5008,7 +5211,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             if export.saveRawXml {
 
-                endPointByID(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName)
+                endPointByID(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName) {
+                    (result: String) in
+                }
             }
             if export.saveOnly {
                 if endpointCurrent == endpointCount {
@@ -5019,19 +5224,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 return
             }
             
-            theOpQ.addOperation {
+            removeEPQ.addOperation {
                 
                 JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
                     (result: (Int,String)) in
                     let (statusCode, theResult) = result
-                    if statusCode == 202 {
-                        print("[RemoveEndpoints] getToken theResult: \(theResult)")
-                    }
+//                    if statusCode == 202 {
+//                        print("[RemoveEndpoints] getToken theResult: \(theResult)")
+//                    }
                     if theResult == "success" {
                         
-                        if statusCode == 202 {
-                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
-                        }
+//                        if statusCode == 202 {
+//                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+//                        }
                         
                         DispatchQueue.main.async {
                             // look to see if we are processing the next endpointType - start
@@ -5055,23 +5260,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
 
+                        
+//                        if statusCode == 202 {
+//                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+//                        }
+                        
                         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                         let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                             (data, response, error) -> Void in
                             session.finishTasksAndInvalidate()
+//                            semaphore.signal()
                             
-                            if statusCode == 202 {
-                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
-                            }
+//                            if statusCode == 202 {
+//                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+//                            }
                             
 //                            destEPQ.async {
 //                                pendingCount -= 1
-                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
+//                                print("[RemoveEndpoints] \(#line) removed id: \(endPointID)")
                                 completion("\(endPointID)")
 //                            }
                             
+                            print("[RemoveEndpoints] \(#line) removeEPQ.operationCount: \(removeEPQ.operationCount)")
                             if let httpResponse = response as? HTTPURLResponse {
-                                //print(httpResponse.statusCode)
+                                print("[RemoveEndpoints] \(#line) removed id: \(httpResponse.statusCode)")
                                 //print(httpResponse)
                                 if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                                     // remove items from the list as they are removed from the server
@@ -5168,7 +5380,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.goButtonEnabled(button_status: true)
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Done\n") }
                                 }
-                                semaphore.signal()
                                 if error != nil {
                                 }
                             } else {
@@ -5187,17 +5398,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.goButtonEnabled(button_status: true)
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Done\n") }
                                 }
-                                semaphore.signal()
                             }
                         })  // let task = session.dataTask - end
                         task.resume()
-                        semaphore.wait()
+//                        semaphore.wait()
                     } else {
                         WriteToLog().message(stringOfText: "[removeEndpoints] failed to renew token for endpoint: \(endpointType)\n")
                         stopButton(self)
                     }
                 }
-            }   // theOpQ.addOperation - end
+            }   // removeEPQ.addOperation - end
         }
         if endpointCurrent == endpointCount {
             if LogLevel.debug { WriteToLog().message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.\n") }
@@ -5213,6 +5423,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(("skipping lookup","skipping lookup"))
             return
         }
+        if pref.stopMigration {
+//            print("[\(#function)] \(#line) stopMigration")
+            stopButton(self)
+            completion(("",""))
+            return
+        }
         JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
             (result: (Int,String)) in
             let (statusCode, theResult) = result
@@ -5223,6 +5439,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog().message(stringOfText: "[existingEndpoints] enter - destination endpoint: \(theDestEndpoint)\n") }
                 
                 if pref.stopMigration {
+//                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
                     completion(("",""))
                     return
@@ -5482,6 +5699,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     if endpointParent != "policies" {
                                                                         completion(("[ViewController.existingEndpoints] Migration process was stopped\n","packages"))
                                                                     }
+//                                                                    print("[\(#function)] \(#line) stopMigration")
                                                                     self.stopButton(self)
                                                                 }
                                                                 
@@ -6204,6 +6422,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func runComplete() {
+        print("[runComplete] enter")
+        
         DispatchQueue.main.async { [self] in
             migrationComplete.isDone = true
             if theIconsQ.operationCount == 0 {
@@ -6215,7 +6435,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 iconfiles.pendingDict.removeAll()
                 
                 if setting.fullGUI {
-                    let (h,m,s) = timeDiff(forWhat: "runTime")
+                    let (h,m,s, _) = timeDiff(forWhat: "runTime")
                     WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                         spinner_progressIndicator.stopAnimation(self)
                     resetAllCheckboxes()
@@ -6232,6 +6452,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     _ = enableSleep()
                 } else {
                     // silent run complete
+                    print("[runComplete] nodes migrated: \(nodesMigrated)")
+                    
                     if export.backupMode {
         //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
                         zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))/") { [self]
@@ -6243,7 +6465,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                     WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip\n")
                                     
-                                    let (h,m,s) = timeDiff(forWhat: "runTime")
+                                    let (h,m,s, _) = timeDiff(forWhat: "runTime")
                                     WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                                 } catch let error as NSError {
                                     if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
@@ -6289,7 +6511,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                             }
                             WriteToLog().message(stringOfText: summary)
-                            let (h,m,s) = timeDiff(forWhat: "runTime")
+                            let (h,m,s, _) = timeDiff(forWhat: "runTime")
                             WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
                             
                             logCleanup()
@@ -6312,188 +6534,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                go_button.isEnabled = button_status
             }
         }
-        /*
-        var local_button_status = button_status
-        DispatchQueue.main.async { [self] in
-            theSpinnerQ.async { [self] in
-                
-                if !local_button_status {
-                    if setting.fullGUI {
-                        DispatchQueue.main.async { [self] in
-                            spinner_progressIndicator.startAnimation(self)
-                        }
-                    }
-                }
-
-                if !local_button_status {
-                    print("[\(#line)-goButtonEnabled] local_button_status: \(local_button_status)")
-                    if setting.fullGUI {
-                        DispatchQueue.main.async { [self] in
-                            spinner_progressIndicator.startAnimation(self)
-                        }
-                    }
-                    repeat {
-                        DispatchQueue.main.async { [self] in
-                            if pref.stopMigration {
-                                objectsToMigrate.removeAll()
-                                endpointCountDict.removeAll()
-                                AllEndpointsArray.removeAll()
-                                availableObjsToMigDict.removeAll()
-                                sourceDataArray.removeAll()
-                                srcSrvTableView.reloadData()
-                                targetDataArray.removeAll()
-
-                                getEndpointsQ.cancelAllOperations()
-                                q.getRecord.cancelAllOperations()
-                                readFilesQ.cancelAllOperations()
-                                readNodesQ.cancelAllOperations()
-                                theOpQ.cancelAllOperations()
-                                theCreateQ.cancelAllOperations()
-//                                stopButton(self)
-                            }
-                            
-                            if setting.fullGUI {
-                                if theIconsQ.operationCount > 0 {
-                                    uploadingIcons_textfield.isHidden = false
-                                    uploadingIcons2_textfield.isHidden = false
-                                } else {
-                                    uploadingIcons_textfield.isHidden = true
-                                    uploadingIcons2_textfield.isHidden = true
-                                }
-                            }
-
-                            if ((theCreateQ.operationCount + theOpQ.operationCount + theIconsQ.operationCount + getEndpointsQ.operationCount) == 0 && nodesMigrated >= objectsToMigrate.count && objectsToMigrate.count != 0 && iconDictArray.count == 0 && !dependency.isRunning) || pref.stopMigration {
-                                
-                                if !local_button_status {
-                                    migrationComplete.isDone = true
-                                    
-                                    if setting.fullGUI {
-                                        let (h,m,s) = timeDiff(forWhat: "runTime")
-                                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                                        spinner_progressIndicator.stopAnimation(self)
-                                        resetAllCheckboxes()
-                                    }
-
-                                    goButtonEnabled(button_status: true)
-                                    local_button_status = true
-                                    iconfiles.policyDict.removeAll()
-                                    iconfiles.pendingDict.removeAll()
-    //                                print("go button enabled")
-                                }
-                            }
-                        }
-                        usleep(300000)  // sleep 0.3 seconds
-                    } while !local_button_status  // while !button_status - end
-                }   // if !local_button_status - end
-        
-            }   // theSpinnerQ.async - end
-
-         print("[\(#line)-goButtonEnabled] after theSpinnerQ local_button_status: \(local_button_status)")
-            if setting.fullGUI {
-//                mySpinner_ImageView.isHidden = button_status
-//                stop_button.isHidden = button_status
-//                go_button.isEnabled = button_status
-                if local_button_status {
-                    spinner_progressIndicator.stopAnimation(self)
-                }
-                go_button.title = local_button_status ? "Go!":"Stop"
-                if go_button.title == "Go!" {
-                    _ = enableSleep()
-                }
-            } else {
-                // silent run complete
-                if export.backupMode {
-                    if theOpQ.operationCount == 0 && nodesMigrated > 0 {
-                        zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))/") { [self]
-                            (result: String) in
-//                            print("zipIt result: \(result)")
-                            do {
-                                if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))\"") {
-                                    try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))\"")!)
-                                }
-                                WriteToLog().message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime)).zip\n")
-                                
-                                let (h,m,s) = timeDiff(forWhat: "runTime")
-                                WriteToLog().message(stringOfText: "[Backup Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                            } catch let error as NSError {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)\n") }
-                            }
-                        }
-                        
-                        logCleanup()
-                        NSApplication.shared.terminate(self)
-                    }   //zipIt(args: "cd - end
-                } else {                    
-                    if nodesMigrated > 0 {
-//                        print("summaryDict: \(summaryDict)")
-//                        print("counters: \(counters)")
-                        var summary = ""
-                        var otherLine: Bool = false
-                        var paddingChar = " "
-                        let sortedObjects = objectsToMigrate.sorted()
-                        // find longest length of objects migrated
-                        var column1Padding = ""
-                        for theObject in objectsToMigrate {
-                            if theObject.count+1 > column1Padding.count {
-                                column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
-                            }
-                        }
-                        let leading = LogLevel.debug ? "                             ":"                 "
-                        
-                        summary = " ".padding(toLength: column1Padding.count-7, withPad: " ", startingAt: 0) + "Object".padding(toLength: 7, withPad: " ", startingAt: 0) +
-                              "created".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "updated".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
-                              "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
-                        for theObject in sortedObjects {
-                            let counts = counters[theObject]!
-//                        for (theObject, counts) in counters {
-                            let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
-                            otherLine.toggle()
-                            paddingChar = otherLine ? " ":"."
-                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count-(column1Padding.count-theObject.count-1)), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-//                            summary = summary.appending(rightJustify + "\(theObject)".padding(toLength: column1Padding.count+(7-"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["create"]!))".padding(toLength: (10-"\(counts["update"]!)".count+"\(counts["create"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                                        "\(String(describing: counts["update"]!))".padding(toLength: (9-"\(counts["fail"]!)".count+"\(counts["update"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["fail"]!))".padding(toLength: (9-"\(counts["total"]!)".count+"\(counts["fail"]!)".count), withPad: paddingChar, startingAt: 0) +
-//                                  "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n")
-                        }
-                        WriteToLog().message(stringOfText: summary)
-                        let (h,m,s) = timeDiff(forWhat: "runTime")
-                        WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(dd(value: h)):\(dd(value: m)):\(dd(value: s)) (h:m:s)\n")
-                        
-                        logCleanup()
-                        NSApplication.shared.terminate(self)
-                    }
-                }
-            }
-//        }   // theSpinnerQ.async - end
-        }   // DispatchQueue.main.async
-        
-//        print("button_status: \(button_status)")
-        if button_status {
-            // display summary of created, updated, and failed objects?
-            if counters.count > 0 {
-//                print("summary:\n\(counters)")
-//                print("summary dict:\n\(summaryDict)")
-                // clear objects in selective field
-                DispatchQueue.main.async {
-                    if wipeData.on && self.srcSrvTableView.isEnabled == true {
-    //                        self.sourceDataArray.removeAll()
-                            self.srcSrvTableView.stringValue = ""
-                            self.srcSrvTableView.reloadData()
-                    }
-                }
-            }
-        } else {
-            // clear previous results
-            counters.removeAll()
-        }
-         */
     }
     
     // scale the delay when listing items with selective migrations based on the number of items
@@ -6659,7 +6699,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         return(theName)
     }
     
-    func getStatusUpdate2(endpoint: String, total: Int) {
+    func getStatusUpdate2(endpoint: String, total: Int, index: Int = -1) {
         var adjEndpoint = ""
         switch endpoint {
         case "accounts/userid":
@@ -6670,10 +6710,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             adjEndpoint = endpoint
         }
         
-        if getCounters[adjEndpoint] == nil {
-            getCounters[adjEndpoint] = ["get":1]
+        if index == -1 {
+            if getCounters[adjEndpoint] == nil {
+                getCounters[adjEndpoint] = ["get":1]
+            } else {
+                getCounters[adjEndpoint]!["get"]! += 1
+            }
         } else {
-            getCounters[adjEndpoint]!["get"]! += 1
+                getCounters[adjEndpoint] = ["get":index]
         }
         
         let totalCount = (fileImport && activeTab(fn: "getStatusUpdate2") == "selective") ? targetSelectiveObjectList.count:total
@@ -6687,11 +6731,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if setting.fullGUI && totalCount > 0 {
             DispatchQueue.main.async { [self] in
-                if getCounters[adjEndpoint]!["get"]! > 0 {
+//                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
+                if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
+//                if getCounters[adjEndpoint]!["get"]! > 0 {
                     if !setting.migrateDependencies || adjEndpoint == "policies" {
                         get_name_field.stringValue    = adjEndpoint
-                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
-                        getSummary_label.stringValue  = "\(getCounters[adjEndpoint]!["get"]!) of \(totalCount)"
+                        get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
+//                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
+                        getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
                     }
                 }
             }
@@ -6725,6 +6772,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 nodesComplete += 1
                 WriteToLog().message(stringOfText: "[ViewController.putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(totalObjectsToMigrate) complete\n")
                 if nodesComplete == totalObjectsToMigrate {
+                    if !setting.fullGUI {
+                        nodesMigrated = nodesComplete
+                    }
                     runComplete()
                 }
             }
@@ -6741,7 +6791,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     put_levelIndicatorFillColor[adjEndpoint] = .red
                     put_levelIndicator.fillColor = .red
                 }
-                if putCounters[adjEndpoint]!["put"]! > 0 {
+                if let currentPutCount = putCounters[adjEndpoint]?["put"], currentPutCount > 0 {
+//                if putCounters[adjEndpoint]!["put"]! > 0 {
                     if !setting.migrateDependencies || adjEndpoint == "policies" {
                         put_name_field.stringValue    = adjEndpoint
                         put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
@@ -7624,6 +7675,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func stopButton(_ sender: Any) {
+        getArray.removeAll()
+        createArray.removeAll()
+        objectsToMigrate.removeAll()
+        getEndpointsQ.cancelAllOperations()
+        endpointsIdQ.cancelAllOperations()
+        theCreateQ.cancelAllOperations()
+        theIconsQ.cancelAllOperations()
+        readFilesQ.cancelAllOperations()
+        
+        XmlDelegate().getRecordQ.cancelAllOperations()
+        
         if setting.fullGUI {
             WriteToLog().message(stringOfText: "Migration was manually stopped.\n\n")
             pref.stopMigration = true
@@ -8081,6 +8143,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func initVars() {
         
         if setting.fullGUI {
+            setting.onlyCopyMissing  = (userDefaults.integer(forKey: "copyMissing")  == 1) ? true:false
+            setting.onlyCopyExisting = (userDefaults.integer(forKey: "copyExisting") == 1) ? true:false
+            
             if !FileManager.default.fileExists(atPath: AppInfo.plistPath) {
                 do {
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: AppInfo.plistPath)

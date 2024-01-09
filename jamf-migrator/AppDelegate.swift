@@ -155,6 +155,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     index += 1
                     JamfProServer.destApiClient["secret"] = CommandLine.arguments[index]
                     JamfProServer.destPwd = JamfProServer.destApiClient["secret"] ?? ""
+                case "-onlycopymissing":
+                    index += 1
+                    if "\(CommandLine.arguments[index].lowercased())" == "true" || "\(CommandLine.arguments[index].lowercased())" == "1" {
+                        setting.onlyCopyMissing = true
+                        setting.onlyCopyExisting = false
+                    } else {
+                        setting.onlyCopyMissing = false
+                    }
+                case "-onlycopyexisting":
+                    index += 1
+                    if CommandLine.arguments[index].lowercased() == "true" || CommandLine.arguments[index].lowercased() == "1" {
+                        setting.onlyCopyMissing = false
+                        setting.onlyCopyExisting = true
+                    } else {
+                        setting.onlyCopyExisting = false
+                    }
                 case "-silent":
                     setting.fullGUI = false
                 case "-sticky":
