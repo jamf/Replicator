@@ -68,6 +68,8 @@ class JamfPro: NSObject, URLSessionDelegate {
         default:
             break
         }
+        let clientType = apiClient ? "API client/secret":"username/password"
+        WriteToLog().message(stringOfText: "[JamfPro.getToken] Using \(clientType) to generate token for \(serverUrl.fqdnFromUrl).\n")
         
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
 //        print("[getToken] tokenUrlString: \(tokenUrlString)")
