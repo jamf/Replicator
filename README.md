@@ -193,7 +193,7 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 
 ## History
-**v7.4.1**<br>
+**v7.4.2**<br>
 Resolve authentication impacting command line usage (issue #100) and initial token generation (issue #101).
 
 **v7.4.1**<br>
