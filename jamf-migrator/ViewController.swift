@@ -1015,6 +1015,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 // set credentials - end
                 
                 // check authentication - start
+                
+                let clientType = (JamfProServer.sourceUseApiClient == 1) ? "API client/secret":"username/password"
+                WriteToLog().message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).\n")
+                
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
                 JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
                     (authResult: (Int,String)) in
@@ -1031,13 +1035,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             self.updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
                             // update keychain, if marked to save creds
                             if !wipeData.on {
+                                print("[ViewController.go] JamfProServer.storeSourceCreds: \(JamfProServer.storeSourceCreds)")
                                 if JamfProServer.storeSourceCreds == 1 {
+                                    print("[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)")
                                     self.Creds2.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, credential: JamfProServer.sourcePwd, whichServer: "source")
                                     self.storedSourceUser = JamfProServer.sourceUser
                                 }
                             }
                         }
                         
+                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
+                        WriteToLog().message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).\n")
                         JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
@@ -1051,7 +1059,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             } else {
                                 // update keychain, if marked to save creds
                                 if !export.saveOnly && setting.fullGUI {
+                                    print("[ViewController.go] JamfProServer.storeDestCreds: \(JamfProServer.storeDestCreds)")
                                     if JamfProServer.storeDestCreds == 1 {
+                                        print("[ViewController.go] save credentials for: \(JamfProServer.destination.fqdnFromUrl)")
                                         self.Creds2.save(service: JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, credential: JamfProServer.destPwd, whichServer: "dest")
                                         self.storedDestUser = JamfProServer.destUser
                                     }
@@ -3473,7 +3483,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             pendingGetCount -= 1
                     }
                 } else {
-                    sleep(1)
+//                    sleep(1)
+                    usleep(5000)
                 }
             }
         }
@@ -3516,7 +3527,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
                 endpointsIdQ.addOperation {
                     
-                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
                         (result: (Int,String)) in
                         let (statusCode, theResult) = result
 //                        if statusCode == 202 {
@@ -3589,7 +3600,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 endpointsIdQ.addOperation {
                     
-                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
+                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
                         (result: (Int,String)) in
                         let (statusCode, theResult) = result
 //                        if statusCode == 202 {
@@ -6423,7 +6434,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func runComplete() {
-        print("[runComplete] enter")
+//        print("[runComplete] enter")
         
         DispatchQueue.main.async { [self] in
             migrationComplete.isDone = true
@@ -6453,7 +6464,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     _ = enableSleep()
                 } else {
                     // silent run complete
-                    print("[runComplete] nodes migrated: \(nodesMigrated)")
+//                    print("[runComplete] nodes migrated: \(nodesMigrated+1)")
                     
                     if export.backupMode {
         //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
@@ -6582,8 +6593,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         // Create folder to store objectString files if needed - end
         
-        print("[ViewController] node: \(node)")
-        
+//        print("[ViewController] node: \(node)")
         
         // Create endpoint type to store objectString files if needed - start
         switch node {
