@@ -194,6 +194,9 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 
 ## History
 **v7.4.1**<br>
+Resolve authentication impacting command line usage (issue #100) and initial token generation (issue #101).
+
+**v7.4.1**<br>
 Resolve issue with token renewal.  Resolve issue when running from the command line.  Resolve issue removing policies.  Resolve issue migrating self service icons.
 
 **v7.4.0**<br>
