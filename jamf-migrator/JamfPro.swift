@@ -38,7 +38,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         
 //        if !((whichServer == "source" && ( !wipeData.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
         if ((whichServer == "source" && ( wipeData.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
-            WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(whichServer): \(serverUrl)\n")
+//            WriteToLog().message(stringOfText: "[JamfPro.getToken] Skip getToken for \(whichServer): \(serverUrl)\n")
             completion((200, "success"))
             return
         }
