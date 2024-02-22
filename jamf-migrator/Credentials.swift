@@ -91,7 +91,6 @@ class Credentials {
         }
     }   // func save - end
     
-    
     private func checkExisting(service: String, account: String) -> [String:String] {
         
         print("[Credentials.oldItemLookup] start search for: \(service)")
@@ -159,6 +158,7 @@ class Credentials {
 //        print("[credentials] keychainItemName: \(keychainItemName)")
         // look for common keychain item
         keychainResult = itemLookup(service: theService)
+        /*
         // look for legacy keychain item
         if keychainResult.count == 0 {
             switch whichServer {
@@ -204,6 +204,7 @@ class Credentials {
                 }
             }
         }
+        */
         
         return keychainResult
     }
@@ -224,7 +225,7 @@ class Credentials {
         var items_ref: CFTypeRef?
         
         let status = SecItemCopyMatching(keychainQuery as CFDictionary, &items_ref)
-//        let status = SecItemCopyMatching(keychainQuery as CFDictionary, &item)
+
         guard status != errSecItemNotFound else {
             print("[Credentials.itemLookup] lookup error occurred for \(service): \(status.description)")
             return [:]
