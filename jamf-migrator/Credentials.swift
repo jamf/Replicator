@@ -16,6 +16,7 @@ let keychainQ                      = DispatchQueue(label: "com.jamf.creds", qos:
 let prefix                         = "migrator"
 let sharedPrefix                   = "JPMA"
 let accessGroup                    = "PS2F6S478M.jamfie.SharedJPMA"
+var credentialsWhichServer         = ""
 
 class Credentials {
     
@@ -125,7 +126,13 @@ class Credentials {
     
     func retrieve(service: String, account: String, whichServer: String = "") -> [String:String] {
         
-//        print("[Credentials.retrieve] start search for: \(service)")
+        print("[Credentials.retrieve]     start search for: \(service)")
+        print("[Credentials.retrieve] JamfProServer.source: \(JamfProServer.source)")
+        
+        if JamfProServer.source != JamfProServer.destination {
+            credentialsWhichServer = ( service == JamfProServer.source.fqdnFromUrl ) ? "source":"destination"
+        }
+        JamfProServer.validToken[credentialsWhichServer] = false
         
         // running from the command line
         if !setting.fullGUI && (JamfProServer.sourceApiClient["id"] != "" && whichServer == "source" || JamfProServer.destApiClient["id"] != "" && whichServer == "dest") {
