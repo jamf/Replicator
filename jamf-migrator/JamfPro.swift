@@ -18,6 +18,11 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, completion: @escaping (_ authResult: (Int,String)) -> Void) {
         
+        if JamfProServer.authType[whichServer] == "Basic" {
+            completion((200, "success"))
+            return
+        }
+        
         let tokenAge = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let tokenAgeInSeconds = timeDiff(forWhat: tokenAge).3
         
@@ -114,7 +119,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
 //                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
                         if let endpointJSON = json! as? [String: Any] {
-//                            print("[getToken] endpointJSON: \(endpointJSON)")
+                            print("[getToken] endpointJSON: \(endpointJSON)")
                             if apiClient {
                                 JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
                             } else {
