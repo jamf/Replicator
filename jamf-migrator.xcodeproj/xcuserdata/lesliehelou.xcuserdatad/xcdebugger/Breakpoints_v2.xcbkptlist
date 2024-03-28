@@ -14,8 +14,8 @@
             filePath = "jamf-migrator/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "7688"
-            endingLineNumber = "7688"
+            startingLineNumber = "7689"
+            endingLineNumber = "7689"
             landmarkName = "stopButton(_:)"
             landmarkType = "7">
          </BreakpointContent>

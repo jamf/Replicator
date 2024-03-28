@@ -2128,6 +2128,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let configuration = URLSessionConfiguration.ephemeral
                     
                     configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                    print("[getEndpoints] headers: \(configuration.httpAdditionalHeaders?.description)")
                     
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -3056,7 +3057,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                 }
                                 if httpResponse.statusCode == 401 {
-                                    WriteToLog().message(stringOfText: "[readDataFiles] verify \(JamfProServer.sourceUser) has premission to read \(endpoint) on \(myURL)\n")
+                                    WriteToLog().message(stringOfText: "[readDataFiles] verify \(JamfProServer.sourceUser) has permission to read \(endpoint) on \(myURL)\n")
                                 }
                                 getStatusUpdate2(endpoint: endpoint, total: 0)
                                 putStatusUpdate2(endpoint: endpoint, total: 0)
