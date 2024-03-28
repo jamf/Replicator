@@ -2128,7 +2128,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let configuration = URLSessionConfiguration.ephemeral
                     
                     configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-                    print("[getEndpoints] headers: \(configuration.httpAdditionalHeaders?.description)")
                     
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
