@@ -119,7 +119,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
 //                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
                         if let endpointJSON = json! as? [String: Any] {
-                            print("[getToken] endpointJSON: \(endpointJSON)")
+//                            print("[getToken] endpointJSON: \(endpointJSON)")
                             if apiClient {
                                 JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
                             } else {
