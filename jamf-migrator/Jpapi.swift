@@ -34,7 +34,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                 var cookieName         = "" // name of cookie to look for
                 
                 if method.lowercased() == "skip" {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).\n") }
                     let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
                     completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
                     return
@@ -77,7 +77,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     }
                 }
                 
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).\n") }
         //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
                 
                 configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
@@ -123,7 +123,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 }
                                 
                                 if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
-                                    WriteToLog().message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))\n")
+                                    WriteToLog.shared.message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))\n")
                                     JamfProServer.sessionCookie.append(sessionCookie!)
                                 } else {
                                     HTTPCookieStorage.shared.removeCookies(since: History.startTime)
@@ -132,25 +132,25 @@ class Jpapi: NSObject, URLSessionDelegate {
                             
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let endpointJSON = json as? [String:Any] {
-                                if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).\n") }
+                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).\n") }
                                 completion(endpointJSON)
                                 return
                             } else {    // if let endpointJSON error
                                 if httpResponse.statusCode == 204 && endpoint == "auth/invalidate-token" {
                                     completion(["JPAPI_result":"token terminated", "JPAPI_response":httpResponse.statusCode])
                                 } else {
-                                    if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))\n") }
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))\n") }
                                     completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
                                 }
                                 return
                             }
                         } else {    // if httpResponse.statusCode <200 or >299
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).\n") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).\n") }
                             completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                             return
                         }
                     } else {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[Jpapi.action] GET response error.  Verify url and port.\n") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] GET response error.  Verify url and port.\n") }
                         completion([:])
                         return
                     }
