@@ -391,7 +391,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         
                         sourceUser_TextField.stringValue      = ""
                         source_pwd_field.stringValue       = ""
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[fileImport] Set source folder to: \(String(describing: dataFilesRoot))\n") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[fileImport] Set source folder to: \(String(describing: dataFilesRoot))\n") }
                         userDefaults.set("\(dataFilesRoot)", forKey: "dataFilesRoot")
                         JamfProServer.importFiles = 1
                         
@@ -496,7 +496,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     }
                 } else {
-                    WriteToLog().message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)\n")
+                    WriteToLog.shared.message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)\n")
                     setDestSite_button.isHidden                 = true
                     self.destinationLabel_TextField.stringValue = "Destination"
                     self.availableSites_button.isEnabled = false
@@ -636,7 +636,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         destinationUser_TextField.becomeFirstResponder()
                     }
                 } else {
-                    WriteToLog().message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
+                    WriteToLog.shared.message(stringOfText: "Validate URL and/or credentials are saved for both source and destination Jamf Pro instances.")
                     NSApplication.shared.terminate(self)
                 }
             }
@@ -1069,10 +1069,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         try FileManager.default.createDirectory(atPath: AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
                     }
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: AppInfo.plistPath)
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Unable to find/create \(AppInfo.plistPath)\n")
-                    WriteToLog().message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(AppInfo.plistPath)\n")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Unable to find/create \(AppInfo.plistPath)\n")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(AppInfo.plistPath)\n")
                     NSApplication.shared.terminate(self)
                 }
             }

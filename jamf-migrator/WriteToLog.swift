@@ -9,6 +9,9 @@
 import Foundation
 class WriteToLog {
     
+    static let shared = WriteToLog()
+    private init() { }
+    
     var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
     var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.background)
 

@@ -42,13 +42,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        print("[quitNow] sourceMethod: \(sourceMethod)")
         Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
-            WriteToLog().message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
+            WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
             let destMethod = (JamfProServer.validToken["dest"] ?? false) ? "POST":"SKIP"
 //                    print("[quitNow] destMethod: \(destMethod)")
             Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
-                WriteToLog().message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
-                WriteToLog().logFileW?.closeFile()
+                WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
+                WriteToLog.shared.logFileW?.closeFile()
                 NSApplication.shared.terminate(self)
             }
         }
@@ -202,7 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mainWindowController.showWindow(self)
         }
         else {
-            WriteToLog().message(stringOfText: "[AppDelegate] jamf migrator is running silently\n")
+            WriteToLog.shared.message(stringOfText: "[AppDelegate] jamf migrator is running silently\n")
             
             SourceDestVC().initVars()
         }

@@ -30,7 +30,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)/id/\(theEndpointID)"
             existingDestUrl = existingDestUrl.urlFix
             
-            WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] Get filename for package the following package: \(existingDestUrl)\n")
+            WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] Get filename for package the following package: \(existingDestUrl)\n")
 
             let destEncodedURL = URL(string: existingDestUrl)
             let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -55,10 +55,10 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             destSession.finishTasksAndInvalidate()
                             
                             if LogLevel.debug {
-                                WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] jsonRequest: \(String(describing: jsonRequest.url!))\n")
-                                WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] response: \(String(describing: response))\n")
+                                WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] jsonRequest: \(String(describing: jsonRequest.url!))\n")
+                                WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] response: \(String(describing: response))\n")
                                 if let _ = response as? HTTPURLResponse {
-                                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] data: \(String(describing: String(data:data!, encoding: .utf8)))\n\n")
+                                    WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] data: \(String(describing: String(data:data!, encoding: .utf8)))\n\n")
                                 }
                             }
                             
@@ -81,13 +81,13 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                         }
                                     }
                                 } else {
-                                    WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)\n")
+                                    WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)\n")
                                     //                        print("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)\n")
                                     completion((httpResponse.statusCode,""))
                                     
                                 }
                             } else {
-                                WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))\n")
+                                WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))\n")
                                 //                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)\n")
                                 if currentTry < maxTries {
                                     self.getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: theEndpointID, skip: false, currentTry: currentTry+1) {
@@ -156,7 +156,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             
                             print("[getFilename] looked up: \(lookupCount) of \(packageCount)")
                             print("[getFilename] packageFilename: \(packageFilename) server: \(theServer)")
-                            WriteToLog().message(stringOfText: "[PackagesDelegate.getFilename] fetched \(lookupCount) of \(packageCount) - packageFilename: \(packageFilename) server: \(theServer)\n")
+                            WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] fetched \(lookupCount) of \(packageCount) - packageFilename: \(packageFilename) server: \(theServer)\n")
                             if pref.httpSuccess.contains(resultCode) {
                                 // found name, remove from list
                                 packageIDsNames[packageID] = nil
@@ -167,12 +167,12 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                     existingNameId[packageFilename]        = packageID
                                     // used to check for duplicates: duplicatePackagesDict[packageFilename].count > 1?
                                     duplicatePackagesDict[packageFilename] = [packageName]
-                                    //                      WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
+                                    //                      WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate filename found on \(self.dest_jp_server): \(packageFilename), id: \(packageID)\n")
                                 } else {
                                     if packageFilename != "" {
                                         duplicatePackagesDict[packageFilename]!.append(packageName)
                                     } else {
-                                        WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup filename for \(packageName)\n")
+                                        WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup filename for \(packageName)\n")
                                     }
                                     
                                     if wipeData.on {
@@ -181,7 +181,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                 }
                             } else {  // if pref.httpSuccess.contains(resultCode) - end
                                 //                  print("[PackageDelegate.filenameIdDict] failed looking up \(packageName)")
-                                WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup \(packageName).  Status code: \(resultCode)\n")
+                                WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup \(packageName).  Status code: \(resultCode)\n")
                             }
                             // looked up last package in list
                             //                print("           currentTry: \(currentTry)")
@@ -191,10 +191,10 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             if lookupCount == packageCount {
                                 //                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
                                 if currentTry < maxTries+1 && packageIDsNames.count > 0 {
-                                    WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] \(packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)\n")
+                                    WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] \(packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)\n")
                                     filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
                                         (result: [String:Int]) in
-                                        WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] returned from retry \(currentTry)\n")
+                                        WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] returned from retry \(currentTry)\n")
                                         //                            print("               currentTry1: \(currentTry)")
                                         //                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
                                         if JamfProServer.pkgsNotFound == 0 || currentTry >= maxTries {
@@ -238,13 +238,13 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             message = "\tFilename : Display Name\n\(message)"
             
             if !wipeData.on {
-                WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
+                WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
                 let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                 if theButton == "Stop" {
                     pref.stopMigration = true
                 }
             }
-//                            WriteToLog().message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
+//                            WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
         }
     }
 }

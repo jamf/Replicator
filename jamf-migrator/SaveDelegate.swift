@@ -21,7 +21,7 @@ class SaveDelegate: NSObject, URLSessionDelegate {
         
         var name = rawName.replacingOccurrences(of: ":", with: ";")
         name     = name.replacingOccurrences(of: "/", with: ":")
-        if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] saving \(name), format: \(format), to folder \(node)\n") }
+        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] saving \(name), format: \(format), to folder \(node)\n") }
         // Create folder to store objectString files if needed - start
 //        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil
         baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
@@ -38,7 +38,7 @@ class SaveDelegate: NSObject, URLSessionDelegate {
             do {
                 try fm.createDirectory(atPath: saveFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] Problem creating \(saveFolder) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] Problem creating \(saveFolder) folder: Error \(error)\n") }
                 return
             }
         }
@@ -68,7 +68,7 @@ class SaveDelegate: NSObject, URLSessionDelegate {
             do {
                 try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] Problem creating \(endpointPath) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] Problem creating \(endpointPath) folder: Error \(error)\n") }
                 return
             }
         }
@@ -81,9 +81,9 @@ class SaveDelegate: NSObject, URLSessionDelegate {
             jsonString = "{\(jsonString)}"
             do {
                 try jsonString.write(toFile: endpointPath+"/"+jsonFile, atomically: true, encoding: .utf8)
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] saved to: \(endpointPath)\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] saved to: \(endpointPath)\n") }
             } catch {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] Problem writing \(endpointPath) folder: Error \(error)\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] Problem writing \(endpointPath) folder: Error \(error)\n") }
                 return
             }
 
@@ -96,31 +96,31 @@ class SaveDelegate: NSObject, URLSessionDelegate {
 //            print("copy from \(iconSource) to: \(iconDest)")
             if self.fm.fileExists(atPath: iconDest) {
                 do {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] removing currently saved icon: \(iconDest)\n") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] removing currently saved icon: \(iconDest)\n") }
                     try FileManager.default.removeItem(at: URL(fileURLWithPath: iconDest))
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] unable to delete cached icon: \(iconDest).  Error \(error).\n") }
                     copyIcon = false
                 }
             }
             if copyIcon {
-                if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] saving icon to: \(iconDest)\n") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] saving icon to: \(iconDest)\n") }
                 do {
                     try fm.copyItem(atPath: iconSource, toPath: iconDest)
                     if export.saveOnly {
                         do {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] removing cached icon: \(iconSource)/\n") }
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] removing cached icon: \(iconSource)/\n") }
                             try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(iconSource)/"))
                         }
                         catch let error as NSError {
-                            if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] unable to delete \(iconSource)/.  Error \(error)\n") }
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] unable to delete \(iconSource)/.  Error \(error)\n") }
                         }
                     }
                     
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] unable to save icon: \(iconDest).  Error \(error).\n") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] unable to save icon: \(iconDest).  Error \(error).\n") }
                     copyIcon = false
                 }
             }
@@ -136,9 +136,9 @@ class SaveDelegate: NSObject, URLSessionDelegate {
                     
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] saved to: \(endpointPath)\n") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] saved to: \(endpointPath)\n") }
                     } catch {
-                        if LogLevel.debug { WriteToLog().message(stringOfText: "[SaveDelegate.exportObject] Problem writing \(endpointPath) folder: Error \(error)\n") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[SaveDelegate.exportObject] Problem writing \(endpointPath) folder: Error \(error)\n") }
                         return
                     }
                 }   // if let prettyXml - end

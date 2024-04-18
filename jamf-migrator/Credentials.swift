@@ -62,9 +62,9 @@ class Credentials {
                             let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
                             print("[Credentials.save] updateStatus for \(account) result: \(updateStatus)")
                             if updateStatus == 0 {
-                                WriteToLog().message(stringOfText: "keychain item for service \(theService), account \(account), has been updated.\n")
+                                WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), has been updated.\n")
                             } else {
-                                WriteToLog().message(stringOfText: "keychain item for service \(theService), account \(account), failed to update.\n")
+                                WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), failed to update.\n")
                             }
                         } else {
                             print("[Credentials.save] password for \(account) is up-to-date")
