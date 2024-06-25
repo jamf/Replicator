@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 6/28/18.
-//  Copyright © 2018 jamf. All rights reserved.
+//  Copyright 2018 jamf. All rights reserved.
 //
 
 import Cocoa
@@ -145,7 +145,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             
             var copyIcon   = true
             let iconSource = "\(xml)"
-//            let iconDest   = (export.backupMode) ? "\(JamfProServer.source.urlToFqdn)_export_\(backupDate.string(from: History.startTime))":"\(endpointPath)/\(name)"
+
             let iconDest   = "\(endpointPath)/\(name)"
 
 //            print("copy from \(iconSource) to: \(iconDest)")

@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 9/20/19.
-//  Copyright © 2019 jamf. All rights reserved.
+//  Copyright 2019 jamf. All rights reserved.
 //
 
 import Foundation
@@ -29,21 +29,11 @@ class Credentials {
             switch whichServer {
             case "source":
                 theService = ( JamfProServer.sourceUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
-//                if JamfProServer.sourceUseApiClient == 1 {
-//                    theService = "\(AppInfo.name)-apiClient-" + theService
-//                }
             case "dest":
                 theService = ( JamfProServer.destUseApiClient == 1 ) ? "\(AppInfo.name)-apiClient-" + service:"\(sharedPrefix)-\(service)"
-//                if JamfProServer.destUseApiClient == 1 {
-//                    theService = "\(AppInfo.name)-apiClient-" + theService
-//                }
             default:
                 break
             }
-            
-//            let keychainItemName = ( whichServer == "" ) ? theService:"JPMA-\(theService)"
-            
-//            print("[Credentials.save] save/update keychain item \(keychainItemName)")
 
             if let password = credential.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
@@ -161,57 +151,8 @@ class Credentials {
         
         userPassDict.removeAll()
         
-//        var keychainItemName = ( whichServer == "" ) ?  theService:"JPMA-\(theService)"
-//        print("[credentials] keychainItemName: \(keychainItemName)")
         // look for common keychain item
         keychainResult = itemLookup(service: theService)
-        /*
-        // look for legacy keychain item
-        if keychainResult.count == 0 {
-            switch whichServer {
-            case "source":
-                if JamfProServer.sourceUseApiClient == 1 {
-                    return keychainResult
-                }
-            case "dest":
-                if JamfProServer.destUseApiClient == 1 {
-                    return keychainResult
-                }
-            default:
-                break
-            }
-            theService = "\(prefix) - \(service)"
-            keychainResult   = oldItemLookup(service: theService)
-            if keychainResult.count == 0 {
-                switch whichServer {
-                case "source":
-                    if JamfProServer.sourceUseApiClient == 1 {
-                        return keychainResult
-                    }
-                case "dest":
-                    if JamfProServer.destUseApiClient == 1 {
-                        return keychainResult
-                    }
-                default:
-                    break
-                }
-                theService = "\(prefix)-\(account)-\(service)"
-                keychainResult   = oldItemLookup(service: theService)
-                if keychainResult.count == 0 {
-                    switch whichServer {
-                    case "source":
-                        theService = ( JamfProServer.sourceUseApiClient == 1 ) ? "apiClient-" + service:service
-                    case "dest":
-                        theService = ( JamfProServer.destUseApiClient == 1 ) ? "apiClient-" + service:service
-                    default:
-                        break
-                    }
-                    theService = "JamfProApps-\(theService)"
-                    keychainResult   = itemLookup(service: theService)
-                }
-            }
-        }
-        */
         
         return keychainResult
     }

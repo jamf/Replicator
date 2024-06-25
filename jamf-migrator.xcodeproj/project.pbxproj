@@ -18,6 +18,7 @@
 		B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53796C92273FFBA0006C1E4 /* WebKit.framework */; };
 		B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDF72391F8FB005EE6E5 /* Globals.swift */; };
 		B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53ECDFB2394474B005EE6E5 /* Json.swift */; };
+		B54154FF2BD8597700084439 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54154FE2BD8597700084439 /* Package.swift */; };
 		B54509412904D96500094739 /* Awake.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54509402904D96500094739 /* Awake.swift */; };
 		B556A79E2773A100003CBEE9 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556A79D2773A100003CBEE9 /* Alert.swift */; };
 		B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CA91728E88DE200236A8A /* SourceDestVC.swift */; };
@@ -55,6 +56,7 @@
 		B53796C92273FFBA0006C1E4 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B53ECDF72391F8FB005EE6E5 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B53ECDFB2394474B005EE6E5 /* Json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Json.swift; sourceTree = "<group>"; };
+		B54154FE2BD8597700084439 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		B54438DB25F6224A00465FA5 /* Misc */ = {isa = PBXFileReference; lastKnownFileType = text; path = Misc; sourceTree = "<group>"; };
 		B54509402904D96500094739 /* Awake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Awake.swift; sourceTree = "<group>"; };
 		B556A79D2773A100003CBEE9 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 		9BC01C5E1DFB0C07007E634E /* jamf-migrator */ = {
 			isa = PBXGroup;
 			children = (
+				B54154FD2BD858AB00084439 /* MyModels */,
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B556A79D2773A100003CBEE9 /* Alert.swift */,
 				B54509402904D96500094739 /* Awake.swift */,
@@ -152,6 +155,14 @@
 				B53796C92273FFBA0006C1E4 /* WebKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B54154FD2BD858AB00084439 /* MyModels */ = {
+			isa = PBXGroup;
+			children = (
+				B54154FE2BD8597700084439 /* Package.swift */,
+			);
+			name = MyModels;
 			sourceTree = "<group>";
 		};
 		B55A277F1EAF8CAE00AF8398 /* Images */ = {
@@ -309,6 +320,7 @@
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B51742DA28FB4F2B0058ED55 /* CustomSeparator.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
+				B54154FF2BD8597700084439 /* Package.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,

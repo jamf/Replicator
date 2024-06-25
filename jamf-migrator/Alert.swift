@@ -3,12 +3,16 @@
 //  jamf-migrator
 //
 //  Created by lnh on 12/22/21.
-//  Copyright © 2016 jamf. All rights reserved.
+//  Copyright 2016 jamf. All rights reserved.
 //
 
 import Cocoa
 
 class Alert: NSObject {
+    
+    static let shared = Alert()
+    private override init() { }
+    
     func display(header: String, message: String, secondButton: String) -> String {
         NSApplication.shared.activate(ignoringOtherApps: true)
         var selected = ""

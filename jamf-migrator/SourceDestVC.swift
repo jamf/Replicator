@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by lnh on 12/9/16.
-//  Copyright © 2016 jamf. All rights reserved.
+//  Copyright 2016 jamf. All rights reserved.
 //
 
 import AppKit
@@ -338,11 +338,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 // disable source server, username and password fields (to finish)
                 if source_jp_server_field.isEnabled {
 //                    source_jp_server_field.textColor   = NSColor.white
-                    fileImport_button.isEnabled      = false
+                    fileImport_button.isEnabled       = false
                     browseFiles_button.isEnabled      = false
                     source_jp_server_field.isEnabled  = false
                     sourceServerList_button.isEnabled = false
-                    sourceUser_TextField.isEnabled       = false
+                    sourceUser_TextField.isEnabled    = false
                     source_pwd_field.isEnabled        = false
                 }
             }
@@ -350,11 +350,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 // enable source server, username and password fields (to finish)
                 if !source_jp_server_field.isEnabled {
-                    fileImport_button.isEnabled       = true
+                    fileImport_button.isEnabled        = true
                     browseFiles_button.isEnabled       = true
                     source_jp_server_field.isEnabled   = true
                     sourceServerList_button.isEnabled  = true
-                    sourceUser_TextField.isEnabled        = true
+                    sourceUser_TextField.isEnabled     = true
                     source_pwd_field.isEnabled         = true
                     JamfProServer.validToken["source"] = false
                     JamfProServer.source               = source_jp_server_field.stringValue
@@ -438,11 +438,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         JamfProServer.destSite = "None"
         if siteMigrate_button.state.rawValue == 1 {
             if dest_jp_server_field.stringValue == "" {
-                _ = Alert().display(header: "Attention", message: "Destination URL is required", secondButton: "")
+                _ = Alert.shared.display(header: "Attention", message: "Destination URL is required", secondButton: "")
                 return
             }
             if self.destinationUser_TextField.stringValue == "" || self.dest_pwd_field.stringValue == "" {
-                _ = Alert().display(header: "Attention", message: "Credentials for the destination server are required", secondButton: "")
+                _ = Alert.shared.display(header: "Attention", message: "Credentials for the destination server are required", secondButton: "")
                 return
             }
             
@@ -457,7 +457,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 self.sitesSpinner_ProgressIndicator.startAnimation(self)
             }
                     
-            JamfPro().getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: false) { [self]
+            JamfPro.shared.getToken(whichServer: "dest", serverUrl: "\(dest_jp_server_field.stringValue)", base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: false, renew: false) { [self]
                 (authResult: (Int,String)) in
                 let (authStatusCode, _) = authResult
 
@@ -559,15 +559,16 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             if accountDict.count > 0 {
                 for (username, password) in accountDict {
                     if whichServer == "source" {
-                        if username == theUser || accountDict.count == 1 {
+//                        if username == theUser || accountDict.count == 1 {
+                        if username == "" || (username == theUser) {
                             JamfProServer.sourceUser = ""
                             JamfProServer.sourcePwd  = ""
                             if (url != "") {
                                 if setting.fullGUI {
                                     sourceUser_TextField.stringValue = username
-                                    source_pwd_field.stringValue  = password
-                                    self.storedSourceUser         = username
-                                    self.storedSourcePwd          = password
+                                    source_pwd_field.stringValue     = password
+                                    self.storedSourceUser            = username
+                                    self.storedSourcePwd             = password
                                 } else {
                                     source_user = username
                                     source_pass = password
@@ -585,7 +586,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     } else {
                         // destination server
-                        if username == theUser || accountDict.count == 1 {
+//                        if username == theUser || accountDict.count == 1 {
+                        if username == "" || (username == theUser) {
                             JamfProServer.destUser   = ""
                             JamfProServer.destPwd    = ""
                             if (url != "") {
@@ -651,13 +653,28 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func controlTextDidChange(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
-            switch textField.identifier!.rawValue {
-            case "sourcePassword":
-                JamfProServer.sourcePwd = source_pwd_field.stringValue
-            case "destPassword":
-                JamfProServer.destPwd = dest_pwd_field.stringValue
-            default:
-                break
+            let whichField = textField.identifier!.rawValue
+//            switch whichField {
+//            case "sourcePassword":
+//                JamfProServer.sourcePwd = source_pwd_field.stringValue
+//            case "destPassword":
+//                JamfProServer.destPwd = dest_pwd_field.stringValue
+//            default:
+//                break
+//            }
+            
+            if whichField.range(of: "^source", options: [.regularExpression, .caseInsensitive]) != nil {
+                JamfProServer.sourceUser = sourceUser_TextField.stringValue
+                JamfProServer.sourcePwd  = source_pwd_field.stringValue
+                let sourceCreds = "\(sourceUser_TextField.stringValue):\(source_pwd_field.stringValue)"
+                sourceBase64Creds = sourceCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.validToken["source"] = false
+            } else {
+                JamfProServer.destUser = destinationUser_TextField.stringValue
+                JamfProServer.destPwd  = dest_pwd_field.stringValue
+                let destCreds = "\(destinationUser_TextField.stringValue):\(dest_pwd_field.stringValue)"
+                destBase64Creds = destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+                JamfProServer.validToken["dest"] = false
             }
         }
     }
@@ -665,16 +682,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     func controlTextDidEndEditing(_ obj: Notification) {
 //        print("enter controlTextDidEndEditing")
         if let textField = obj.object as? NSTextField {
-            switch textField.identifier!.rawValue {
+            let whichField = textField.identifier?.rawValue ?? ""
+            switch whichField {
             case "sourceServer", "sourceUser", "sourcePassword":
                 if JamfProServer.source != source_jp_server_field.stringValue {
                     serverChanged(whichserver: "source")
                 }
+                
                 serverOrFiles() { [self]
                     (result: String) in
-//                    if textField.identifier!.rawValue == "sourceServer" {
-//                        fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
-//                    }
                     switch textField.identifier!.rawValue {
                     case "sourceServer", "sourceUser":
                         fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
@@ -682,7 +698,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         break
                     }
                     
-                    JamfProServer.source     = source_jp_server_field.stringValue
+                    JamfProServer.source     = source_jp_server_field.stringValue.baseUrl
                     JamfProServer.sourceUser = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd  = source_pwd_field.stringValue
                 }
@@ -697,7 +713,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     break
                 }
                 
-                JamfProServer.destination = dest_jp_server_field.stringValue
+                JamfProServer.destination = dest_jp_server_field.stringValue.baseUrl
                 JamfProServer.destUser    = destinationUser_TextField.stringValue
                 JamfProServer.destPwd     = dest_pwd_field.stringValue
             default:
@@ -726,7 +742,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             DispatchQueue.main.async { [self] in
                 dest_jp_server_field.isEnabled      = !export.saveOnly
                 destServerList_button.isEnabled     = !export.saveOnly
-                destinationUser_TextField.isEnabled           = !export.saveOnly
+                destinationUser_TextField.isEnabled = !export.saveOnly
                 dest_pwd_field.isEnabled            = !export.saveOnly
                 siteMigrate_button.isEnabled        = !export.saveOnly
                 destinationLabel_TextField.isHidden = export.saveOnly
@@ -783,9 +799,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     func saveSourceDestInfo(info: [String:Any]) {
         AppInfo.settings                       = info
 
-        AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue as Any?
+        AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue.baseUrl as Any?
         AppInfo.settings["source_user"]        = sourceUser_TextField.stringValue as Any?
-        AppInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue as Any?
+        AppInfo.settings["dest_jp_server"]     = dest_jp_server_field.stringValue.baseUrl as Any?
         AppInfo.settings["dest_user"]          = destinationUser_TextField.stringValue as Any?
         AppInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
         AppInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
@@ -800,7 +816,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 switch whichServer {
                 case "source":
                     let selectedServer =  sourceServerList_button.titleOfSelectedItem!
-                    let response = Alert().display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
+                    let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
                     if response == "Cancel" {
                         return
                     }
@@ -814,7 +830,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     AppInfo.settings["source_server_array"] = sourceServerArray as Any?
                 case "dest":
                     let selectedServer =  destServerList_button.titleOfSelectedItem!
-                    let response = Alert().display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
+                    let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
                     if response == "Cancel" {
                         return
                     }
@@ -1037,7 +1053,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             do {
                 try fm.createDirectory(atPath: logPath!, withIntermediateDirectories: true, attributes: nil )
             } catch {
-                _ = Alert().display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.", secondButton: "")
+                _ = Alert.shared.display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.", secondButton: "")
                 exit(0)
             }
         }

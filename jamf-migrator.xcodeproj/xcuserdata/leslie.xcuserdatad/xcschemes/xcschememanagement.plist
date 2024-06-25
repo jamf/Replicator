@@ -9,20 +9,25 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>jamf-migrator headless migrate.xcscheme</key>
+		<key>jamf-migrator debug.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
-		<key>jamf-migrator help.xcscheme</key>
+		<key>jamf-migrator headless migrate.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>4</integer>
 		</dict>
+		<key>jamf-migrator help.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
 		<key>jamf-migrator ldap.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<key>jamf-migrator.xcscheme_^#shared#^_</key>
 		<dict>
