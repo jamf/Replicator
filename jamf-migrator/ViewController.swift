@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by lnh on 12/9/16.
-//  Copyright © 2016 jamf. All rights reserved.
+//  Copyright 2016 jamf. All rights reserved.
 //
 
 import AppKit
@@ -811,12 +811,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if setting.fullGUI {
             if wipeData.on && export.saveOnly {
-                _ = Alert().display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
+                _ = Alert.shared.display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
                 goButtonEnabled(button_status: true)
                 return
             }
             if wipeData.on && sender != "selectToMigrateButton" {
-                let deleteResponse = Alert().display(header: "Attention:", message: "You are about remove data from:\n\n\(JamfProServer.destination)\n\nare you sure you with to continue?", secondButton: "Cancel")
+                let deleteResponse = Alert.shared.display(header: "Attention:", message: "You are about remove data from:\n\n\(JamfProServer.destination)\n\nare you sure you with to continue?", secondButton: "Cancel")
                 if deleteResponse == "Cancel" {
                     rmDELETE()
                     selectiveListCleared = false
@@ -975,6 +975,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             }
             
+            JamfProServer.url["source"] = JamfProServer.source
+            
             self.checkURL2(whichServer: "dest", serverURL: JamfProServer.destination)  { [self]
                 (result: Bool) in
     //            print("checkURL2 returned result: \(result)")
@@ -989,6 +991,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
                 // server is reachable - end
+                
+                JamfProServer.url["dest"] = JamfProServer.destination
                 
                 if setting.fullGUI || setting.migrate {
                     if JamfProServer.toSite {
@@ -1020,7 +1024,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).\n")
                 
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
-                JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
+                JamfPro.shared.getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
                     (authResult: (Int,String)) in
                     let (authStatusCode, _) = authResult
                     if !pref.httpSuccess.contains(authStatusCode) && !wipeData.on {
@@ -1046,7 +1050,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
 //                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
 //                        WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).\n")
-                        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
+                        JamfPro.shared.getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
                             if !pref.httpSuccess.contains(authStatusCode) {
@@ -1069,7 +1073,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 // determine if the cloud services connection is enabled
                                 var csaMethod = "GET"
                                 if export.saveOnly { csaMethod = "skip" }
-                                Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
+                                Jpapi.shared.action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
                                     (returnedJSON: [String:Any]) in
 //                                            print("CSA: \(returnedJSON)")
                                     if let _ = returnedJSON["scopes"] {
@@ -1087,9 +1091,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     self.startMigrating()
                                 }
                             } // else dest auth
-                        }   // JamfPro().getToken(whichServer: "dest" - end
+                        }   // JamfPro.shared.getToken(whichServer: "dest" - end
                     }   // else check dest URL auth - end
-                }   // JamfPro().getToken(whichServer: "source" - end
+                }   // JamfPro.shared.getToken(whichServer: "source" - end
 
         // check authentication - end
             }   // checkURL2 (destination server) - end
@@ -1726,7 +1730,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     WriteToLog.shared.message(stringOfText: "[ViewController.startSelectiveMigration] Duplicate references to the same package were found on \(JamfProServer.source).  Package with filename \(theName) has id: \(theId) and \(String(describing: migratedPkgDependencies[theName]!))\n")
                                                     DispatchQueue.main.async {
                                                         print("[startSelectiveMigration] \(#line) server: \(JamfProServer.source)")
-                                                        theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                                        theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                                         if theButton == "Stop" {
                                                             self.stopButton(self)
                                                         }
@@ -1926,7 +1930,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to read from \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.\n")
                     pref.stopMigration = true
                     if setting.fullGUI {
-                        _ = Alert().display(header: "Attention:", message: "Unable to read \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.", secondButton: "")
+                        _ = Alert.shared.display(header: "Attention:", message: "Unable to read \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.", secondButton: "")
                     } else {
                         NSApplication.shared.terminate(self)
                     }
@@ -2116,11 +2120,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         clearSourceObjectsList()
         
         getEndpointsQ.addOperation {
-            
-            JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
-                (result: (Int,String)) in
-                let (statusCode, theResult) = result
-                if theResult == "success" {
                     
                     let encodedURL = URL(string: myURL)
                     let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -2226,7 +2225,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     if setting.fullGUI {
 //                                                                        print("[getEndoints] \(#line) server: \(JamfProServer.source)")
 //                                                                        print("[getEndoints] \(#line) message: \(message)")
-                                                                        let theButton = Alert().display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                                                        let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                                                         if theButton == "Stop" {
                                                                             stopButton(self)
                                                                         }
@@ -2236,7 +2235,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] 1 or more package filenames on \(JamfProServer.source) could not be verified\n")
                                                                     WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Failed package filename lookup: \(failedPkgNameLookup)\n")
                                                                     if setting.fullGUI {
-                                                                        let theButton = Alert().display(header: "Warning:", message: "1 or more package filenames on \(JamfProServer.source) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
+                                                                        let theButton = Alert.shared.display(header: "Warning:", message: "1 or more package filenames on \(JamfProServer.source) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
                                                                         if theButton == "Stop" {
                                                                             stopButton(self)
                                                                         }
@@ -3068,9 +3067,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     })  // let task = session - end
                     task.resume()
-                }
-            }
-            
         }   // getEndpointsQ - end
     }   // func getEndpoints - end
     
@@ -3527,19 +3523,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
                 endpointsIdQ.addOperation {
                     
-                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
-                        (result: (Int,String)) in
-                        let (statusCode, theResult) = result
-//                        if statusCode == 202 {
-//                            print("[endPointByID] \(#line) getToken theResult: \(theResult)")
-//                        }
-                        if theResult == "success" {
-                            
-//                            if statusCode == 202 {
-//                                print("[endPointByID] \(#line) get \(localEndPointType): \(endpointID)")
-//                            }
                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)\n") }
-                            Jpapi().action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
+                            Jpapi.shared.action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
                                 (returnedJSON: [String:Any]) in
                                 completion(destEpName)
 //                                if statusCode == 202 {
@@ -3584,8 +3569,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }
                             }
                             
-                        }
-                    }
                 }   // endpointsIdQ - end
             }
         default:
@@ -3600,18 +3583,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 endpointsIdQ.addOperation {
                     
-                    JamfPro().getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
-                        (result: (Int,String)) in
-                        let (statusCode, theResult) = result
-//                        if statusCode == 202 {
-//                            print("[endPointByID] \(#line) getToken theResult: \(theResult)")
-//                        }
-                        if theResult == "success" {
-                            
-//                            if statusCode == 202 {
-//                                print("[endPointByID] \(#line) get \(localEndPointType): \(endpointID)")
-//                            }
-                            
                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] fetching XML from: \(myURL)\n") }
                             //                print("NSURL line 3")
                             //                if "\(myURL)" == "" { myURL = "https://localhost" }
@@ -3703,8 +3674,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //print("GET")
                             task.resume()
 //                            semaphore.wait()
-                        }
-                    }
                 }   // endpointsIdQ - end
             }
         }
@@ -4368,12 +4337,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     func createEndpoints(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[CreateEndpoints] token check")
-            if theResult == "success" {
-                
                 if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
@@ -4838,28 +4801,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }   // if !wipeData.on - end
                     
                 }   // theCreateQ.addOperation - end
-            } else {
-                // failed to authenticate
-                WriteToLog.shared.message(stringOfText: "[CreateEndpoints] failed to authenticate.\n")
-                if setting.fullGUI {
-                    _ = Alert().display(header: "", message: "Failed to authenticate", secondButton: "")
-                } else {
-                    NSApplication.shared.terminate(self)
-                }
-                                     
-            }
-        }
     }   // func createEndpoints - end
     
     // for the Jamf Pro API - used for buildings
     func createEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: String, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
-        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[CreateEndpoints2] token check")
-            if theResult == "success" {
-                
                 if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
                     stopButton(self)
@@ -4972,7 +4918,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-                        Jpapi().action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"]!, method: apiAction) { [self]
+                        Jpapi.shared.action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"]!, method: apiAction) { [self]
                             (jpapiResonse: [String:Any]) in
         //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                             var jpapiResult = "succeeded"
@@ -5115,10 +5061,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }   // if !wipeData.on - end
                 }   // theCreateQ.addOperation - end
-
-                
-            }
-        }
     }
     
     
@@ -5176,13 +5118,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
         
-        if counters[endpointType] == nil {
-            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-            usleep(10)
-//            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
-        } else {
+        counters[endpointType] = ["create": counters[endpointType]?["create"] ?? 0, "update": counters[endpointType]?["update"] ?? 0, "fail": counters[endpointType]?["fail"] ?? 0, "skipped": counters[endpointType]?["skipped"] ?? 0, "total": counters[endpointType]?["total"] ?? 0]
+//        if counters[endpointType] == nil {
+//            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//            usleep(10)
+////            self.summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+//        } else {
             counters[endpointType]!["total"] = endpointCount
-        }
+//        }
         if summaryDict[endpointType] == nil {
             summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
@@ -5236,18 +5179,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             removeEPQ.addOperation {
-                
-                JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-                    (result: (Int,String)) in
-                    let (statusCode, theResult) = result
-//                    if statusCode == 202 {
-//                        print("[RemoveEndpoints] getToken theResult: \(theResult)")
-//                    }
-                    if theResult == "success" {
-                        
-//                        if statusCode == 202 {
-//                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
-//                        }
                         
                         DispatchQueue.main.async {
                             // look to see if we are processing the next endpointType - start
@@ -5414,11 +5345,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         })  // let task = session.dataTask - end
                         task.resume()
 //                        semaphore.wait()
-                    } else {
-                        WriteToLog.shared.message(stringOfText: "[removeEndpoints] failed to renew token for endpoint: \(endpointType)\n")
-                        stopButton(self)
-                    }
-                }
             }   // removeEPQ.addOperation - end
         }
         if endpointCurrent == endpointCount {
@@ -5441,12 +5367,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             completion(("",""))
             return
         }
-        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[existingEndpoints] token check")
-            if theResult == "success" {
-                
                 
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] enter - destination endpoint: \(theDestEndpoint)\n") }
                 
@@ -5619,7 +5539,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if let httpResponse = response as? HTTPURLResponse {
                                         if !pref.httpSuccess.contains(httpResponse.statusCode) {
                                             if setting.fullGUI {
-                                                _ = Alert().display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(httpResponse.statusCode)", secondButton: "")
+                                                _ = Alert.shared.display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(httpResponse.statusCode)", secondButton: "")
                                             } else {
                                                 WriteToLog.shared.message(stringOfText: "[existingEndpoints] Failed to get existing \(existingEndpointNode)    Status code: \(httpResponse.statusCode)\n")
                                             }
@@ -5891,11 +5811,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.\n") }
                     completion(("Current endpoints - export.saveOnly, not needed.","\(theDestEndpoint)"))
                 }
-            } else {
-                // failed to get token
-                completion(("",""))
-            }
-        }
     }   // func existingEndpoints - end
 
     func getDependencies(object: String, json: [String:AnyObject], completion: @escaping (_ returnedDependencies: [String:[String:String]]) -> Void) {
@@ -5906,12 +5821,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-        JamfPro().getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "") { [self]
-            (result: (Int,String)) in
-            let (statusCode, theResult) = result
-//            print("[getDependencies] token check")
-            if theResult == "success" {
-                
                 var objectDict           = [String:Any]()
                 var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
         //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
@@ -6098,14 +6007,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         //            print("return fullDependencyDict: \(fullDependencyDict)")
                     completion(fullDependencyDict)
                 }
-
-                
-            } else {
-                // failed to get token
-                completion([:])
-                return
-            }
-        }
     }
     
     /*
@@ -8675,22 +8576,37 @@ extension String {
             } else {
                 fqdn =  self
             }
+            if fqdn.contains("/") {
+                let fqdnArray = fqdn.components(separatedBy: "/")
+                fqdn = fqdnArray[0]
+            }
             if fqdn.contains(":") {
                 let fqdnArray = fqdn.components(separatedBy: ":")
                 fqdn = fqdnArray[0]
             }
-            if fqdn.last == "/" {
-                fqdn = String(fqdn.dropLast())
+            while fqdn.last == "/" {
+                fqdn = "\(fqdn.dropLast(1))"
             }
             return fqdn
         }
     }
-    var noPort: String {
+    var baseUrl: String {
         get {
-            let stringArray = self.components(separatedBy: ":")
-            return stringArray[0]
+            let tmpArray: [Any] = self.components(separatedBy: "/")
+            if tmpArray.count > 2 {
+                if let serverUrl = tmpArray[2] as? String {
+                    return "\(tmpArray[0])//\(serverUrl)"
+                }
+            }
+            return ""
         }
     }
+//    var noPort: String {
+//        get {
+//            let stringArray = self.components(separatedBy: ":")
+//            return stringArray[0]
+//        }
+//    }
     var pathToString: String {
         get {
             var newPath = ""

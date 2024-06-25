@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 6/9/20.
-//  Copyright © 2020 jamf. All rights reserved.
+//  Copyright 2020 jamf. All rights reserved.
 //
 
 import Cocoa

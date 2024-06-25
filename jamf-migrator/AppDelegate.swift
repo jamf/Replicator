@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie N. Helou on 12/9/16.
-//  Copyright © 2016 jamf. All rights reserved.
+//  Copyright 2016 jamf. All rights reserved.
 //
 
 import ApplicationServices
@@ -40,12 +40,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        print("[quitNow] JamfProServer.validToken[\"dest\"]: \(JamfProServer.validToken["dest"] ?? false)")
         let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
 //        print("[quitNow] sourceMethod: \(sourceMethod)")
-        Jpapi().action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
+        Jpapi.shared.action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
             WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
             let destMethod = (JamfProServer.validToken["dest"] ?? false) ? "POST":"SKIP"
 //                    print("[quitNow] destMethod: \(destMethod)")
-            Jpapi().action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
+            Jpapi.shared.action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
                 WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")\n")
                 WriteToLog.shared.logFileW?.closeFile()
@@ -60,17 +60,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var startPos     = 1
         // read commandline args
         numberOfArgs = CommandLine.arguments.count
-//        print("all arguments: \(CommandLine.arguments)")
+        print("all arguments: \(CommandLine.arguments)")
         if CommandLine.arguments.contains("-debug") {
             numberOfArgs -= 1
             startPos+=1
-            LogLevel.debug = true
+//            LogLevel.debug = true
         }
         var index = 0
         while index < numberOfArgs {
-//                print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
+            print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
             let cmdLineSwitch = CommandLine.arguments[index].lowercased()
                 switch cmdLineSwitch {
+                case "-debug":
+                    LogLevel.debug = true
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
@@ -175,8 +177,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     setting.fullGUI = false
                 case "-sticky":
                     JamfProServer.stickySession = true
+                case "-NSDocumentRevisionsDebugMode":
+                    index += 1
+                    break
                 default:
-                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" && CommandLine.arguments[index].lowercased() != "-debug"{
+                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" {
                         print("unknown switch passed: \(CommandLine.arguments[index])")
                     }
                 }

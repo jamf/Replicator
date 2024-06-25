@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 12/1/19.
-//  Copyright © 2019 jamf. All rights reserved.
+//  Copyright 2019 jamf. All rights reserved.
 //
 
 import Cocoa
@@ -16,7 +16,6 @@ class Json: NSObject, URLSessionDelegate {
             return
         }
         
-//        let userDefaults   = UserDefaults.standard
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)\n")
     

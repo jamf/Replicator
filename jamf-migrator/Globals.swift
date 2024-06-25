@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 11/29/19.
-//  Copyright © 2019 jamf. All rights reserved.
+//  Copyright 2019 jamf. All rights reserved.
 //
 
 import Cocoa
@@ -14,6 +14,8 @@ public var maxConcurrentThreads = 2
 public var sourceDestListSize   = 20
 public var pendingGetCount      = 0
 public var pendingCount         = 0
+public var pageSize             = 400
+public let httpSuccess          = 200...299
 
 class appColor: NSColor {
     static let schemes:[String]            = ["casper", "classic"]
@@ -68,6 +70,7 @@ struct JamfProServer {
     static var build        = ""
     static var source       = ""
     static var destination  = ""
+    static var url          = ["source":"", "dest":""]
     static var whichServer  = ""
     static var sourceUser   = ""
     static var destUser     = ""
@@ -83,6 +86,7 @@ struct JamfProServer {
     static var sourceApiClient = ["id":"", "secret":""]
     static var destApiClient  = ["id":"", "secret":""]
     static var authCreds    = ["source":"", "dest":""]
+    static var accessToken  = ["source":"", "dest":""]
     static var authExpires  = ["source":20.0, "dest":20.0]
     static var authType     = ["source":"Bearer", "dest":"Bearer"]
     static var base64Creds  = ["source":"", "dest":""]               // used if we want to auth with a different account

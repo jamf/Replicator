@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 12/13/21.
-//  Copyright © 2021 jamf. All rights reserved.
+//  Copyright 2021 jamf. All rights reserved.
 //
 
 import Foundation
@@ -39,11 +39,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             let semaphore = DispatchSemaphore(value: 0)
             getRecordQ.addOperation {
                 
-                JamfPro().getToken(whichServer: whichServer, serverUrl: theServerUrl, base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
-                    (result: (Int,String)) in
-                    let (statusCode, theResult) = result
-                    //            print("[endpointByIdQueue] token check")
-                    if theResult == "success" {
                         jsonRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.ephemeral
                         
@@ -109,10 +104,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         //print("GET")
                         task.resume()
                         semaphore.wait()
-                    } else {
-                        completion((0,""))
-                    }
-                }
             }   // getRecordQ - end
 //        }
     }
@@ -144,9 +135,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                     let (packageID, packageName) = packageIDsNames.popFirst()!
                     i += 1
                     getsPending += 1
-                    JamfPro().getToken(whichServer: whichServer, serverUrl: theServer, base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
-                        (result: (Int,String)) in
-                        let (statusCode, theResult) = result
+
                         getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false, currentTry: 3) { [self]
                             (result: (Int,String)) in
                             getsPending -= 1
@@ -212,7 +201,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                 }
                             }   // if lookupCount == packageIDsNames.count - end
                         }
-                    }
                 } else {
                     sleep(1)
                 }
@@ -239,7 +227,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             
             if !wipeData.on {
                 WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)\n")
-                let theButton = Alert().display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                 if theButton == "Stop" {
                     pref.stopMigration = true
                 }

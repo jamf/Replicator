@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 11/25/18.
-//  Copyright © 2018 jamf. All rights reserved.
+//  Copyright 2018 jamf. All rights reserved.
 //
 
 import AppKit
@@ -207,7 +207,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         userDefaults.set(sender.title, forKey: "colorScheme")
         userDefaults.synchronize()
         if (currentScheme != newScheme)  && newScheme == "default" {
-            _ = Alert().display(header: "Attention:", message: "App must be restarted to display default color scheme", secondButton: "")
+            _ = Alert.shared.display(header: "Attention:", message: "App must be restarted to display default color scheme", secondButton: "")
         }
         NotificationCenter.default.post(name: .setColorScheme_sdvc, object: self)
         NotificationCenter.default.post(name: .setColorScheme_VC, object: self)

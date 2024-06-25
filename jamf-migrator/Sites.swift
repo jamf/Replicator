@@ -3,7 +3,7 @@
 //  jamf-migrator
 //
 //  Created by Leslie Helou on 8/21/19.
-//  Copyright © 2019 jamf. All rights reserved.
+//  Copyright 2019 jamf. All rights reserved.
 //
 
 import Foundation
