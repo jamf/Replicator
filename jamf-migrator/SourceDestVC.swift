@@ -451,6 +451,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             
             self.destCreds = "\(self.destinationUser_TextField.stringValue):\(self.dest_pwd_field.stringValue)"
             self.destBase64Creds = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
+            JamfProServer.base64Creds["dest"] = self.destCreds.data(using: .utf8)?.base64EncodedString() ?? ""
 
             DispatchQueue.main.async {
                 self.siteMigrate_button.isEnabled = false

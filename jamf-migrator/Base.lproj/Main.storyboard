@@ -2739,6 +2739,6 @@
     </scenes>
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
-        <image name="NSStopProgressTemplate" width="17" height="16"/>
+        <image name="NSStopProgressTemplate" width="17" height="15"/>
     </resources>
 </document>
