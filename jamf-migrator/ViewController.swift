@@ -1376,6 +1376,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 totalObjectsToMigrate = 1
             }
             
+            
+            
             // initialize list of items to migrate then add what we want - end
             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.startMigrating] objects: \(self.objectsToMigrate).\n") }
                     
@@ -1413,6 +1415,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if setting.fullGUI {
                     self.put_levelIndicatorFillColor[currentNode] = .green
                 }
+//                print("[startMigrating] currentNode: \(currentNode)")
                 switch currentNode {
                 case "computergroups", "smartcomputergroups", "staticcomputergroups":
                     if self.smartComputerGrpsSelected {
@@ -1851,6 +1854,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         } else {
             // selective removal
+           
+            
+            print("[removeEndpoints] counters[\(selectedEndpoint)]: \(counters[selectedEndpoint])")
+            counters[selectedEndpoint] = ["create": counters[selectedEndpoint]?["create"] ?? 0, "update": counters[selectedEndpoint]?["update"] ?? 0, "fail": counters[selectedEndpoint]?["fail"] ?? 0, "skipped": counters[selectedEndpoint]?["skipped"] ?? 0, "total": counters[selectedEndpoint]?["total"] ?? 0]
+            
+            counters[selectedEndpoint]!["total"] = targetSelectiveObjectList.count
+
+            if summaryDict[selectedEndpoint] == nil {
+                summaryDict[selectedEndpoint] = ["create":[], "update":[], "fail":[]]
+            }
             for i in 0..<targetSelectiveObjectList.count {
                 let theObject = targetSelectiveObjectList[i]
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "remove - endpoint: \(targetSelectiveObjectList[objectIndex].objectName)\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetSelectiveObjectList[objectIndex].objectName)\n") }
@@ -5099,6 +5112,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             } while pendingCount > 0 || removeArray.count > 0
         }
     }
+    
     func removeEndpoints(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
 
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] enter\n") }
@@ -5118,7 +5132,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
         
-        counters[endpointType] = ["create": counters[endpointType]?["create"] ?? 0, "update": counters[endpointType]?["update"] ?? 0, "fail": counters[endpointType]?["fail"] ?? 0, "skipped": counters[endpointType]?["skipped"] ?? 0, "total": counters[endpointType]?["total"] ?? 0]
+        /*
+        if counters[endpointType] == nil {
+            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+            usleep(10)
+        } //else {
+//            print("[removeEndpoints] counters[\(endpointType)]: \(counters[endpointType])")
+//            counters[endpointType] = ["create": counters[endpointType]?["create"] ?? 0, "update": counters[endpointType]?["update"] ?? 0, "fail": counters[endpointType]?["fail"] ?? 0, "skipped": counters[endpointType]?["skipped"] ?? 0, "total": counters[endpointType]?["total"] ?? 0]
+//        }
 //        if counters[endpointType] == nil {
 //            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
 //            usleep(10)
@@ -5129,6 +5150,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if summaryDict[endpointType] == nil {
             summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
+        */
         
         // whether the operation was successful or not, either delete or fail
         var methodResult = "create"
