@@ -55,6 +55,7 @@ class SelectiveObject: NSObject {
 class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
 //    let userDefaults = UserDefaults.standard
+    private let lockQueue = DispatchQueue(label: "name.lock.queue")
     
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
@@ -417,6 +418,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var createDestUrlBase = ""
     var iconDictArray = [String:[[String:String]]]()
     var uploadedIcons = [String:Int]()
+    
+    var pendingCount = 0
     
     // import file vars
     var fileImport      = false
@@ -1868,7 +1871,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let theObject = targetSelectiveObjectList[i]
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "remove - endpoint: \(targetSelectiveObjectList[objectIndex].objectName)\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetSelectiveObjectList[objectIndex].objectName)\n") }
                 
-                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
+//                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
+                removeEndpoints(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count) {
+                    (result: String) in
+                    print("[startSelectiveMigration] removed id: \(result)")
+                }
             }
             dependency.isRunning = false
 /*
@@ -5083,33 +5090,33 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         removeMeterQ.maxConcurrentOperationCount = 3
         let semaphore = DispatchSemaphore(value: 0)
         
-        print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
-        removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: Int(endPointID)!, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
-
-
-//        removeEPQ.async { [self] in
+//        removeEPQ.addOperation { [self] in
         removeMeterQ.addOperation { [self] in
-            repeat {
-                print("[removeEndpointsQueue] 1 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
-                if pendingCount < maxConcurrentThreads && removeArray.count > 0 {
-                    pendingCount += 1
-                    usleep(10)
-                    let nextEndpoint = removeArray.remove(at: 0)
-                    
-                    print("[removeEndpointsQueue] call removeEndpoints to removed id: \(nextEndpoint.destEpId)")
-                    removeEndpoints(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) {
-                        (result: String) in
-                        pendingCount -= 1
-                        print("[removeEndpointsQueue] removed id: \(result)")
-                        semaphore.signal()
+            lockQueue.async { [self] in
+                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
+                removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: Int(endPointID)!, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
+                repeat {
+                    print("[removeEndpointsQueue] 1 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
+                    if pendingCount < maxConcurrentThreads && removeArray.count > 0 {
+                        pendingCount += 1
+                        usleep(10)
+                        let nextEndpoint = removeArray.remove(at: 0)
+                        
+                        print("[removeEndpointsQueue] call removeEndpoints to removed id: \(nextEndpoint.destEpId)")
+                        removeEndpoints(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) { [self]
+                            (result: String) in
+                            pendingCount -= 1
+                            print("[removeEndpointsQueue] removed id: \(result)")
+                            semaphore.signal()
+                        }
+                    } else {
+                        print("[removeEndpointsQueue] 2 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
+                        sleep(1)
+                        if pendingCount == 0 && removeArray.count == 0 { break }
                     }
-                } else {
-                    print("[removeEndpointsQueue] 2 pendingCount: \(pendingCount), removeArray.count: \(removeArray.count)")
-                    sleep(1)
-                    if pendingCount == 0 && removeArray.count == 0 { break }
-                }
-                semaphore.wait()
-            } while pendingCount > 0 || removeArray.count > 0
+                    semaphore.wait()
+                } while pendingCount > 0 || removeArray.count > 0
+            }
         }
     }
     
@@ -5223,27 +5230,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let configuration = URLSessionConfiguration.ephemeral
                         
                         configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-
-                        
-//                        if statusCode == 202 {
-//                            print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
-//                        }
                         
                         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                         let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                             (data, response, error) -> Void in
                             session.finishTasksAndInvalidate()
-//                            semaphore.signal()
                             
-//                            if statusCode == 202 {
-//                                print("[RemoveEndpoints] \(#line) pendingCount: \(pendingCount)")
-//                            }
-                            
-//                            destEPQ.async {
-//                                pendingCount -= 1
-//                                print("[RemoveEndpoints] \(#line) removed id: \(endPointID)")
-                                completion("\(endPointID)")
-//                            }
+                            completion("\(endPointID)")
                             
                             print("[RemoveEndpoints] \(#line) removeEPQ.operationCount: \(removeEPQ.operationCount)")
                             if let httpResponse = response as? HTTPURLResponse {
