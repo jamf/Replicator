@@ -13,7 +13,6 @@ public let userDefaults = UserDefaults.standard
 public var maxConcurrentThreads = 2
 public var sourceDestListSize   = 20
 public var pendingGetCount      = 0
-public var pendingCount         = 0
 public var pageSize             = 400
 public let httpSuccess          = 200...299
 

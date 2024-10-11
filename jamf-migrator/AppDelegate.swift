@@ -222,14 +222,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         verCheck.versionCheck() {
             (result: Bool, latest: String) in
             if result {
-                self.alert_dialog(header: "A new version (\(latest)) is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
+                self.versionAlert(header: "A new version (\(latest)) is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
             } else {
-                self.alert_dialog(header: "Running Jamf Migrator: \(version)", message: "No updates are currently available.", updateAvail: result)
+                self.versionAlert(header: "Running Jamf Migrator: \(version)", message: "No updates are currently available.", updateAvail: result)
             }
         }
     }
     
-    func alert_dialog(header: String, message: String, updateAvail: Bool) {
+    func versionAlert(header: String, message: String, updateAvail: Bool) {
         
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
@@ -249,8 +249,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     NSWorkspace.shared.open(url)
             }
         }
-
-        //return true
     }   // func alert_dialog - end
     
     // Help Window
