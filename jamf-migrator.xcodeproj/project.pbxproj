@@ -40,6 +40,9 @@
 		B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */; };
 		B5E1912F21AAEFD400A1A9CA /* export.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912E21AAEFD400A1A9CA /* export.png */; };
 		B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DAD27434B890044C321 /* Jpapi.swift */; };
+		CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A2E2CB953BE002AB294 /* Headless.swift */; };
+		CEE65A312CB95527002AB294 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A302CB95521002AB294 /* Utilities.swift */; };
+		CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -81,6 +84,9 @@
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
 		B5FD9DAD27434B890044C321 /* Jpapi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jpapi.swift; sourceTree = "<group>"; };
+		CEE65A2E2CB953BE002AB294 /* Headless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headless.swift; sourceTree = "<group>"; };
+		CEE65A302CB95521002AB294 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +122,9 @@
 		9BC01C5E1DFB0C07007E634E /* jamf-migrator */ = {
 			isa = PBXGroup;
 			children = (
+				CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */,
+				CEE65A302CB95521002AB294 /* Utilities.swift */,
+				CEE65A2E2CB953BE002AB294 /* Headless.swift */,
 				B54154FD2BD858AB00084439 /* MyModels */,
 				B5E1912421AAA5D700A1A9CA /* Preferences */,
 				B556A79D2773A100003CBEE9 /* Alert.swift */,
@@ -315,6 +324,7 @@
 			files = (
 				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
+				CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */,
 				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
@@ -331,10 +341,12 @@
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
 				B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */,
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
+				CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */,
 				B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
+				CEE65A312CB95527002AB294 /* Utilities.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -489,7 +501,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 7.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -514,7 +526,7 @@
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 7.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = "$(TARGET_NAME)";

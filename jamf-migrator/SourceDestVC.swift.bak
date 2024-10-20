@@ -390,7 +390,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         
                         sourceUser_TextField.stringValue      = ""
                         source_pwd_field.stringValue       = ""
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[fileImport] Set source folder to: \(String(describing: dataFilesRoot))") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[fileImport] Set source folder to: \(String(describing: dataFilesRoot))\n") }
                         userDefaults.set("\(dataFilesRoot)", forKey: "dataFilesRoot")
                         JamfProServer.importFiles = 1
                         
@@ -496,7 +496,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     }
                 } else {
-                    WriteToLog.shared.message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)")
+                    WriteToLog.shared.message(stringOfText: "[migrateToSite] authenticate was not successful on \(dest_jp_server_field.stringValue)\n")
                     setDestSite_button.isHidden                 = true
                     self.destinationLabel_TextField.stringValue = "Destination"
                     self.availableSites_button.isEnabled = false
@@ -1085,10 +1085,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         try FileManager.default.createDirectory(atPath: AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: ""), withIntermediateDirectories: true, attributes: nil)
                     }
                     try FileManager.default.copyItem(atPath: Bundle.main.path(forResource: "settings", ofType: "plist")!, toPath: AppInfo.plistPath)
-                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Created default setting from  \(Bundle.main.path(forResource: "settings", ofType: "plist")!)\n")
                 } catch {
-                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Unable to find/create \(AppInfo.plistPath)")
-                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(AppInfo.plistPath)")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Unable to find/create \(AppInfo.plistPath)\n")
+                    WriteToLog.shared.message(stringOfText: "[SourceDestVC] Try to manually copy the file from \(Bundle.main.path(forResource: "settings", ofType: "plist")!) to \(AppInfo.plistPath)\n")
                     NSApplication.shared.terminate(self)
                 }
             }
