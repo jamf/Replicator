@@ -16,7 +16,7 @@ class WriteToLog {
     var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.background)
 
     func message(stringOfText: String) {
-        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
+        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)":"\(TimeDelegate().getCurrent()) \(stringOfText)"
 
         self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
 
@@ -42,13 +42,13 @@ class WriteToLog {
                 // remove old history files
                 if logCount > maxLogFileCount {
                     for i in (0..<logCount-maxLogFileCount) {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Deleting log file: " + logArray[i] + "") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
                         
                         do {
                             try fm.removeItem(atPath: logArray[i])
                         }
                         catch let error as NSError {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)") }
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)\n") }
                         }
                     }
                 }
@@ -61,11 +61,11 @@ class WriteToLog {
                     try fm.removeItem(atPath: logArray[0])
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + History.logPath! + logArray[0] + "\n    \(error)") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + History.logPath! + logArray[0] + "\n    \(error)\n") }
                 }
             }
         } catch {
-            WriteToLog.shared.message(stringOfText: "no log files found")
+            WriteToLog.shared.message(stringOfText: "no log files found\n")
         }
     }
 }

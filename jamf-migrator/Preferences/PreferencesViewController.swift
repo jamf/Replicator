@@ -371,7 +371,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                     
 //                    saveFolderURL = openPanel.url
                     
-                    storeBookmark(theURL: openPanel.url!)
+                    SecurityScopedBookmarks.shared.create(for: openPanel.url!)
+//                    storeBookmark(theURL: openPanel.url!)
                     
                     var theTooltip = "\(openPanel.url!.absoluteString.pathToString)"
                     let homePathArray = NSHomeDirectory().split(separator: "/")

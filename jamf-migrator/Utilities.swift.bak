@@ -38,7 +38,7 @@ class Utilities: NSObject {
         let outdata = pipe.fileHandleForReading.readDataToEndOfFile()
         if var string = String(data: outdata, encoding: .utf8) {
             string = string.trimmingCharacters(in: .newlines)
-            statusArray = string.components(separatedBy: "")
+            statusArray = string.components(separatedBy: "\n")
             status = statusArray[0]
         }
         
