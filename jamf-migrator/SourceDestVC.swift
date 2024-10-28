@@ -1,9 +1,9 @@
 //
 //  SourceDestVC.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by lnh on 12/9/16.
-//  Copyright 2016 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import AppKit
@@ -180,7 +180,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var historyFile: String = ""
     var logFile:     String = ""
     let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    var logFileW:     FileHandle? = FileHandle(forUpdatingAtPath: "")
+//    var logFileW:     FileHandle? = FileHandle(forUpdatingAtPath: "")
     // legacy logging (history) path and file
     let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
     var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
@@ -266,12 +266,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var endpointName          = ""
     var POSTsuccessCount      = 0
     var failedCount           = 0
-    var postCount             = 1
-    var counters    = Dictionary<String, Dictionary<String,Int>>()          // summary counters of created, updated, failed, and deleted objects
-    var getCounters = [String:[String:Int]]()                               // summary counters of created, updated, failed, and deleted objects
-    var putCounters = [String:[String:Int]]()
-//    var tmp_counter = Dictionary<String, Dictionary<String,Int>>()        // used to hold value of counter and avoid simultaneous access when updating
-    var summaryDict = [String: [String:[String]]]()     // summary arrays of created, updated, and failed objects
     
     // used in createEndpoints
     var totalCreated   = 0
@@ -1070,7 +1064,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         sleep(1)
         
         if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Migrator/", forKey: "saveLocation")
+            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Transporter/", forKey: "saveLocation")
             userDefaults.synchronize()
         }
         

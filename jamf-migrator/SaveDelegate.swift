@@ -1,9 +1,9 @@
 //
 //  SaveDelegate.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 12/28/21
-//  Copyright 2018 jamf. All rights reserved
+//  Copyright 2024 Jamf. All rights reserved
 //
 
 import Cocoa
@@ -25,7 +25,7 @@ class SaveDelegate: NSObject, URLSessionDelegate {
 //        let saveURL = userDefaults.url(forKey: "saveLocation") ?? nil
         baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseFolder == "" {
-            baseFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            baseFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
         } else {
             baseFolder = baseFolder.replacingOccurrences(of: "file://", with: "")
             baseFolder = baseFolder.replacingOccurrences(of: "%20", with: " ")

@@ -1,9 +1,9 @@
 //
 //  JamfPro.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 12/11/19.
-//  Copyright 2019 Leslie Helou. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 // Reference: https://developer.jamf.com/jamf-pro/docs/jamf-pro-api-overview
 

@@ -1,9 +1,9 @@
 //
 //  PackagesDelegate.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 12/13/21.
-//  Copyright 2021 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Foundation

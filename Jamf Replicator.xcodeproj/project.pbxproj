@@ -46,7 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "jamf-migrator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jamf Replicator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9BC01C611DFB0C07007E634E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		9BC01C631DFB0C07007E634E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -114,7 +114,7 @@
 		9BC01C5D1DFB0C07007E634E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */,
+				9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -215,9 +215,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9BC01C5B1DFB0C07007E634E /* jamf-migrator */ = {
+		9BC01C5B1DFB0C07007E634E /* Jamf Replicator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "jamf-migrator" */;
+			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Replicator" */;
 			buildPhases = (
 				9BC01C581DFB0C07007E634E /* Sources */,
 				9BC01C591DFB0C07007E634E /* Frameworks */,
@@ -228,9 +228,9 @@
 			);
 			dependencies = (
 			);
-			name = "jamf-migrator";
+			name = "Jamf Replicator";
 			productName = "jamf-migrator";
-			productReference = 9BC01C5C1DFB0C07007E634E /* jamf-migrator.app */;
+			productReference = 9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -241,7 +241,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0810;
 				LastUpgradeCheck = 1400;
-				ORGANIZATIONNAME = jamf;
+				ORGANIZATIONNAME = Jamf;
 				TargetAttributes = {
 					9BC01C5B1DFB0C07007E634E = {
 						CreatedOnToolsVersion = 8.1;
@@ -259,7 +259,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "jamf-migrator" */;
+			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Replicator" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -272,7 +272,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9BC01C5B1DFB0C07007E634E /* jamf-migrator */,
+				9BC01C5B1DFB0C07007E634E /* Jamf Replicator */,
 			);
 		};
 /* End PBXProject section */
@@ -499,12 +499,13 @@
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Jamf Transporter";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 7.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Jamf Replicator";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -524,12 +525,13 @@
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Jamf Transporter";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 7.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Jamf Replicator";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -538,7 +540,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "jamf-migrator" */ = {
+		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Replicator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C691DFB0C07007E634E /* Debug */,
@@ -547,7 +549,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "jamf-migrator" */ = {
+		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Replicator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C6C1DFB0C07007E634E /* Debug */,

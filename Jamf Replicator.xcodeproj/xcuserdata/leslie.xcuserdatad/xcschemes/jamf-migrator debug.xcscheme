@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-               BuildableName = "jamf-migrator.app"
-               BlueprintName = "jamf-migrator"
-               ReferencedContainer = "container:jamf-migrator.xcodeproj">
+               BuildableName = "Jamf Replicator.app"
+               BlueprintName = "Jamf Replicator"
+               ReferencedContainer = "container:Jamf Replicator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,31 +45,15 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "jamf-migrator.app"
-            BlueprintName = "jamf-migrator"
-            ReferencedContainer = "container:jamf-migrator.xcodeproj">
+            BuildableName = "Jamf Replicator.app"
+            BlueprintName = "Jamf Replicator"
+            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-backup"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-export"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-objects scripts,departments,categories,buildings,sites"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-source m.hickoryhillseast.net"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "-debug"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
@@ -84,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "jamf-migrator.app"
-            BlueprintName = "jamf-migrator"
-            ReferencedContainer = "container:jamf-migrator.xcodeproj">
+            BuildableName = "Jamf Replicator.app"
+            BlueprintName = "Jamf Replicator"
+            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

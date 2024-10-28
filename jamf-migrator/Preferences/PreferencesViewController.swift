@@ -1,9 +1,9 @@
 //
 //  PreferencesViewController.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 11/25/18.
-//  Copyright 2018 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import AppKit
@@ -302,7 +302,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
-        var exportFilePath:String? = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+        var exportFilePath:String? = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
 
         exportFilePath = exportFilePath?.pathToString
         
@@ -580,7 +580,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
             
-            export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
             if !(FileManager().fileExists(atPath: export.saveLocation, isDirectory: &isDir)) {
                 userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 userDefaults.synchronize()

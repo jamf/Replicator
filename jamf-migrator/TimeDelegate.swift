@@ -1,6 +1,6 @@
 //
 //  TimeDelegate.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 6/9/20.
 //  Copyright 2020 jamf. All rights reserved.
