@@ -1,9 +1,9 @@
 //
 //  PrefsWindowController.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 11/25/18.
-//  Copyright 2018 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Cocoa

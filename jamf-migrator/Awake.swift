@@ -1,9 +1,9 @@
 //
 //  Awake.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 10/22/22.
-//  Copyright 2022 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Foundation

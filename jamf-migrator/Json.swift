@@ -1,9 +1,9 @@
 //
 //  Json.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 12/1/19.
-//  Copyright 2019 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Cocoa

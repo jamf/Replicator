@@ -1,28 +1,30 @@
 //
 //  WriteToLog.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 2/21/19.
-//  Copyright 2019 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Foundation
+
+var logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
+
 class WriteToLog {
     
     static let shared = WriteToLog()
-    private init() { }
     
-    var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
-    var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.background)
+//    var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
 
     func message(stringOfText: String) {
         let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
 
-        self.logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
+//        logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
 
-        self.logFileW?.seekToEndOfFile()
-        let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-        self.logFileW?.write(historyText!)
+        logFileW?.seekToEndOfFile()
+        if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {
+            logFileW?.write(historyText)
+        }
     }
     
     func logCleanup() {

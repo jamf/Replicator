@@ -1,6 +1,6 @@
 //
 //  SecurityScopedBookmarks.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by leslie on 10/19/24.
 //  Copyright © 2024 jamf. All rights reserved.

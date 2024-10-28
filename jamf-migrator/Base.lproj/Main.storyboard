@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22690"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="22690"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23094"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="23094"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -13,11 +13,11 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="jamf-migrator" id="1Xt-HY-uBw">
+                            <menuItem title="Jamf Replicator" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="jamf-migrator" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="Jamf Replicator" systemMenu="apple" showsStateColumn="NO" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About jamf-migrator" id="5kV-Vb-QxS">
+                                        <menuItem title="About Jamf Replicator" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -41,7 +41,7 @@
                                             <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide jamf-migrator" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide Jamf Replicator" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -59,7 +59,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit jamf-migrator" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit Jamf Replicator" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="quit_menuWithSender:" target="Ady-hI-5gd" id="Dah-XJ-5pX"/>
                                             </connections>
@@ -349,7 +349,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="jamf-migrator Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="Jamf Replicator Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelpWindow:" target="Voe-Tx-rLC" id="pSf-d8-J7u"/>
                                             </connections>
@@ -363,7 +363,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="jamf_migrator" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Jamf_Replicator" customModuleProvider="target"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="532" y="-46"/>
@@ -372,7 +372,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController storyboardIdentifier="Main" id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="jamf-migrator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="Jamf Replicator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -397,7 +397,7 @@
                         <splitViewItem id="iHa-US-HVk"/>
                         <splitViewItem id="oFv-BQ-a5Y"/>
                     </splitViewItems>
-                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomSeparator" customModule="jamf_migrator" customModuleProvider="target">
+                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomSeparator" customModule="Jamf_Replicator" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
@@ -417,7 +417,7 @@
         <!--Source DestVC-->
         <scene sceneID="FXf-33-tPR">
             <objects>
-                <viewController id="eUd-vB-D7a" customClass="SourceDestVC" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="eUd-vB-D7a" customClass="SourceDestVC" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="xCj-67-1hr">
                         <rect key="frame" x="0.0" y="0.0" width="848" height="188"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -898,7 +898,7 @@
         <!--Summary-->
         <scene sceneID="ZID-aS-lwe">
             <objects>
-                <viewController title="Summary" id="hPh-eN-AVY" customClass="SummaryViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Summary" id="hPh-eN-AVY" customClass="SummaryViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="4c1-IQ-bRf">
                         <rect key="frame" x="0.0" y="0.0" width="527" height="288"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -951,7 +951,7 @@
         <!--Help View Controller-->
         <scene sceneID="nc1-VJ-iYF">
             <objects>
-                <viewController id="M0I-3w-TrH" customClass="HelpViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="M0I-3w-TrH" customClass="HelpViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="YIo-Lu-hoF">
                         <rect key="frame" x="0.0" y="0.0" width="1025" height="461"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -977,7 +977,7 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController storyboardIdentifier="migrator" id="XfG-lQ-9wD" customClass="ViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="migrator" id="XfG-lQ-9wD" customClass="ViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="848" height="450"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -2534,7 +2534,7 @@
                                 <rect key="frame" x="408" y="383" width="32" height="32"/>
                             </progressIndicator>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mhL-ca-YdU">
-                                <rect key="frame" x="684" y="16" width="75" height="32"/>
+                                <rect key="frame" x="683" y="16" width="75" height="32"/>
                                 <buttonCell key="cell" type="push" title="Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="TpT-t2-A4S">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -2602,7 +2602,7 @@
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="centerX" secondItem="B8I-Gu-YOQ" secondAttribute="centerX" id="ejA-D9-xsI"/>
                             <constraint firstItem="B8I-Gu-YOQ" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="g1l-N4-iRg"/>
                             <constraint firstItem="hv1-dW-eem" firstAttribute="top" secondItem="v1E-Y8-MAn" secondAttribute="bottom" constant="2" id="gCf-gL-Zd9"/>
-                            <constraint firstItem="zwn-6N-l5Y" firstAttribute="leading" secondItem="mhL-ca-YdU" secondAttribute="trailing" constant="9" id="gFx-p2-dag"/>
+                            <constraint firstItem="zwn-6N-l5Y" firstAttribute="leading" secondItem="mhL-ca-YdU" secondAttribute="trailing" constant="10" id="gFx-p2-dag"/>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="leading" secondItem="UMW-p7-6qE" secondAttribute="leading" id="i1t-nd-vRQ"/>
                             <constraint firstAttribute="bottom" secondItem="zwn-6N-l5Y" secondAttribute="bottom" constant="23" id="jED-kY-kl9"/>
                             <constraint firstItem="UMW-p7-6qE" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="24" id="qxv-dL-TDY"/>
@@ -2730,8 +2730,8 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <userDefaultsController representsSharedInstance="YES" id="v32-il-Xzs"/>
-                <arrayController objectClassName="jamf_migrator.SelectiveObjectList" id="P0M-6n-Zfm">
-                    <classReference key="objectClass" className="SelectiveObjectList" moduleName="jamf_migrator" moduleProvider="target"/>
+                <arrayController objectClassName="Jamf_Transporter.SelectiveObjectList" id="P0M-6n-Zfm">
+                    <classReference key="objectClass" className="SelectiveObjectList" moduleName="Jamf_Replicator" moduleProvider="target"/>
                 </arrayController>
             </objects>
             <point key="canvasLocation" x="1376" y="312"/>

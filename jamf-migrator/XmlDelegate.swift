@@ -1,9 +1,9 @@
 //
 //  XmlDelegate.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 6/28/18.
-//  Copyright 2018 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Cocoa
@@ -87,7 +87,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         // Create folder to store xml files if needed - start
         baseXmlFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseXmlFolder == "" {
-            baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
         } else {
             baseXmlFolder = baseXmlFolder.pathToString
         }

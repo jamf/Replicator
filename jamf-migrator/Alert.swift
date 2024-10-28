@@ -1,9 +1,9 @@
 //
 //  Alert.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by lnh on 12/22/21.
-//  Copyright 2016 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Cocoa

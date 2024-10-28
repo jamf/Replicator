@@ -1,9 +1,9 @@
 //
 //  AppDelegate.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie N. Helou on 12/9/16.
-//  Copyright 2016 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import ApplicationServices
@@ -49,7 +49,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Jpapi.shared.action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
                 WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
-                WriteToLog.shared.logFileW?.closeFile()
+                logFileW?.closeFile()
+//                WriteToLog.shared.logFileW?.closeFile()
                 NSApplication.shared.terminate(self)
             }
         }
@@ -67,7 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             startPos+=1
 //            LogLevel.debug = true
         }
-        var index = 0
+        var index = 1
         while index < numberOfArgs {
             print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
             let cmdLineSwitch = CommandLine.arguments[index].lowercased()
@@ -182,7 +183,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     index += 1
                     break
                 default:
-                    if CommandLine.arguments[index].lowercased().suffix(13) != "jamf-migrator" {
+                    if CommandLine.arguments[index].contains(AppInfo.name) {
                         print("unknown switch passed: \(CommandLine.arguments[index])")
                     }
                 }
@@ -193,7 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
         if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
-            export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Migrator/")
+            export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
             userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString

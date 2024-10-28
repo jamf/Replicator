@@ -1,9 +1,9 @@
 //
 //  Credentials.swift
-//  jamf-migrator
+//  Jamf Transporter
 //
 //  Created by Leslie Helou on 9/20/19.
-//  Copyright 2019 jamf. All rights reserved.
+//  Copyright 2024 Jamf. All rights reserved.
 //
 
 import Foundation
