@@ -3,12 +3,12 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/JamfMigrator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/total) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/latest/total)
  ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/JamfMigrator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/JamfMigrator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/JamfMigrator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
 
-Download the pre-release of [Replicator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)
+Download the pre-release of [Replicator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)</br>
 Download the current release: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)
 
 A tool to synchronize configurations between Jamf Pro servers. Export configurations and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete configurations from a server.
 
-![alt text](./Replicator/images/migrator2.png "Replicator")
+![image](./Replicator/images/migrator2.png "Replicator")
 
 Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
 </br></br>
