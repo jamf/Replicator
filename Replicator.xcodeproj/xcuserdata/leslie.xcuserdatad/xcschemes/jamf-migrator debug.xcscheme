@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-               BuildableName = "Jamf Replicator.app"
-               BlueprintName = "Jamf Replicator"
-               ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+               BuildableName = "Replicator.app"
+               BlueprintName = "Replicator"
+               ReferencedContainer = "container:Replicator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,7 +34,6 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      enableThreadSanitizer = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -46,11 +45,17 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "Jamf Replicator.app"
-            BlueprintName = "Jamf Replicator"
-            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+            BuildableName = "Replicator.app"
+            BlueprintName = "Replicator"
+            ReferencedContainer = "container:Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-debug"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -63,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "Jamf Replicator.app"
-            BlueprintName = "Jamf Replicator"
-            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+            BuildableName = "Replicator.app"
+            BlueprintName = "Replicator"
+            ReferencedContainer = "container:Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
@@ -74,7 +79,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"
-      revealArchiveInOrganizer = "NO">
+      revealArchiveInOrganizer = "YES">
       <PreActions>
          <ExecutionAction
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
@@ -85,9 +90,9 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-                     BuildableName = "Jamf Replicator.app"
-                     BlueprintName = "Jamf Replicator"
-                     ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+                     BuildableName = "Replicator.app"
+                     BlueprintName = "Replicator"
+                     ReferencedContainer = "container:Replicator.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
@@ -103,9 +108,9 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-                     BuildableName = "Jamf Replicator.app"
-                     BlueprintName = "Jamf Replicator"
-                     ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+                     BuildableName = "Replicator.app"
+                     BlueprintName = "Replicator"
+                     ReferencedContainer = "container:Replicator.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>

@@ -11,7 +11,6 @@ import Cocoa
 class SecurityScopedBookmarks: NSObject {
     
     static let shared = SecurityScopedBookmarks()
-    private override init() { }
     
     func allowAccess(for urlString: String) -> Bool {
         

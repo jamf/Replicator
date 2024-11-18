@@ -41,12 +41,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        print("[quitNow] JamfProServer.validToken[\"dest\"]: \(JamfProServer.validToken["dest"] ?? false)")
         let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
 //        print("[quitNow] sourceMethod: \(sourceMethod)")
-        Jpapi.shared.action(serverUrl: JamfProServer.source, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
+        Jpapi.shared.action(whichServer: "source", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
             (returnedJSON: [String:Any]) in
             WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
             let destMethod = (JamfProServer.validToken["dest"] ?? false) ? "POST":"SKIP"
 //                    print("[quitNow] destMethod: \(destMethod)")
-            Jpapi.shared.action(serverUrl: JamfProServer.destination, endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
+            Jpapi.shared.action(whichServer: "dest", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                 (returnedJSON: [String:Any]) in
                 WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
                 logFileW?.closeFile()
@@ -209,7 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mainWindowController.showWindow(self)
         }
         else {
-            WriteToLog.shared.message(stringOfText: "[AppDelegate] jamf migrator is running silently")
+            WriteToLog.shared.message(stringOfText: "[AppDelegate] Replicator is running silently")
             
             SourceDestVC().initVars()
         }
@@ -224,9 +224,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         verCheck.versionCheck() {
             (result: Bool, latest: String) in
             if result {
-                self.versionAlert(header: "A new version (\(latest)) is available.", message: "Running Jamf Migrator: \(version)", updateAvail: result)
+                self.versionAlert(header: "A new version (\(latest)) is available.", message: "Running Replicator: \(version)", updateAvail: result)
             } else {
-                self.versionAlert(header: "Running Jamf Migrator: \(version)", message: "No updates are currently available.", updateAvail: result)
+                self.versionAlert(header: "Running Replicator: \(version)", message: "No updates are currently available.", updateAvail: result)
             }
         }
     }

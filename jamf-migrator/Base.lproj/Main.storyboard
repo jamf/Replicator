@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23094"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="23094"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="23504"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -13,11 +13,11 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="Jamf Replicator" id="1Xt-HY-uBw">
+                            <menuItem title="Replicator" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Jamf Replicator" systemMenu="apple" showsStateColumn="NO" id="uQy-DD-JDr">
+                                <menu key="submenu" title="Replicator" systemMenu="apple" showsStateColumn="NO" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About Jamf Replicator" id="5kV-Vb-QxS">
+                                        <menuItem title="About Replicator" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -41,7 +41,7 @@
                                             <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide Jamf Replicator" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide Replicator" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -59,7 +59,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit Jamf Replicator" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit Replicator" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="quit_menuWithSender:" target="Ady-hI-5gd" id="Dah-XJ-5pX"/>
                                             </connections>
@@ -349,7 +349,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="Jamf Replicator Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="Replicator Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelpWindow:" target="Voe-Tx-rLC" id="pSf-d8-J7u"/>
                                             </connections>
@@ -363,7 +363,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Jamf_Replicator" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Replicator" customModuleProvider="target"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="532" y="-46"/>
@@ -372,7 +372,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController storyboardIdentifier="Main" id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="Jamf Replicator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="Replicator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -397,7 +397,7 @@
                         <splitViewItem id="iHa-US-HVk"/>
                         <splitViewItem id="oFv-BQ-a5Y"/>
                     </splitViewItems>
-                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomSeparator" customModule="Jamf_Replicator" customModuleProvider="target">
+                    <splitView key="splitView" dividerStyle="thin" id="Fzt-3i-F9s" customClass="CustomSeparator" customModule="Replicator" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
@@ -417,7 +417,7 @@
         <!--Source DestVC-->
         <scene sceneID="FXf-33-tPR">
             <objects>
-                <viewController id="eUd-vB-D7a" customClass="SourceDestVC" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="eUd-vB-D7a" customClass="SourceDestVC" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="xCj-67-1hr">
                         <rect key="frame" x="0.0" y="0.0" width="848" height="188"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -898,7 +898,7 @@
         <!--Summary-->
         <scene sceneID="ZID-aS-lwe">
             <objects>
-                <viewController title="Summary" id="hPh-eN-AVY" customClass="SummaryViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Summary" id="hPh-eN-AVY" customClass="SummaryViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="4c1-IQ-bRf">
                         <rect key="frame" x="0.0" y="0.0" width="527" height="288"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -951,7 +951,7 @@
         <!--Help View Controller-->
         <scene sceneID="nc1-VJ-iYF">
             <objects>
-                <viewController id="M0I-3w-TrH" customClass="HelpViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="M0I-3w-TrH" customClass="HelpViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="YIo-Lu-hoF">
                         <rect key="frame" x="0.0" y="0.0" width="1025" height="461"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -977,7 +977,7 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController storyboardIdentifier="migrator" id="XfG-lQ-9wD" customClass="ViewController" customModule="Jamf_Replicator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="migrator" id="XfG-lQ-9wD" customClass="ViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="848" height="450"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1519,6 +1519,17 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="IpP-4y-Yco"/>
                                                     </connections>
                                                 </button>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XEf-hO-Lk9" userLabel="Packages button">
+                                                    <rect key="frame" x="194" y="105" width="148" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="Patch Management" bezelStyle="regularSquare" imagePosition="left" inset="2" id="wYD-Zn-52c">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="m2W-iv-WhC"/>
+                                                    </connections>
+                                                </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="phd-7I-bpv">
                                                     <rect key="frame" x="373" y="225" width="114" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Smart Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="rQL-dP-Rks">
@@ -1589,16 +1600,6 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="R4b-Z1-1U7"/>
                                                     </connections>
                                                 </button>
-                                                <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
-                                                    <rect key="frame" x="557" y="101" width="113" height="17"/>
-                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="oQh-Ig-MX4">
-                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                        <font key="font" size="14" name="Helvetica"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="4MV-FO-JOm"/>
-                                                    </connections>
-                                                </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="iW5-vh-2hL" userLabel="Policies">
                                                     <rect key="frame" x="556" y="135" width="73" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Policies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="h6T-XB-xw7">
@@ -1620,8 +1621,18 @@
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
+                                                <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Ob-ze-NEc" userLabel="Patch Policies btn">
+                                                    <rect key="frame" x="638" y="41" width="113" height="17"/>
+                                                    <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="oQh-Ig-MX4">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="4MV-FO-JOm"/>
+                                                    </connections>
+                                                </button>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b5v-KK-ZKw" userLabel="File Shares (AFP/SMB)">
-                                                    <rect key="frame" x="543" y="96" width="112" height="16"/>
+                                                    <rect key="frame" x="624" y="36" width="112" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="File Shares (local)" id="uPY-59-Z8S" userLabel="File Shares (AFP/SMB)">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1629,7 +1640,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y2r-qc-GSV" userLabel="dock items fld">
-                                                    <rect key="frame" x="544" y="93" width="100" height="16"/>
+                                                    <rect key="frame" x="625" y="33" width="100" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Dock Items" id="MAw-V6-H2m" userLabel="dock items">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1637,7 +1648,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WHx-8J-iwK">
-                                                    <rect key="frame" x="556" y="93" width="77" height="16"/>
+                                                    <rect key="frame" x="637" y="33" width="77" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Computers" id="Jy4-LW-D3v">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1645,7 +1656,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TGh-dy-khY" userLabel="SUS">
-                                                    <rect key="frame" x="634" y="100" width="37" height="16"/>
+                                                    <rect key="frame" x="715" y="40" width="37" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="SUS" id="2U7-3I-wVG" userLabel="SUS">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1653,7 +1664,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gyq-nN-Llg" userLabel="Netboot Servers">
-                                                    <rect key="frame" x="543" y="93" width="103" height="16"/>
+                                                    <rect key="frame" x="624" y="33" width="103" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Netboot Servers" id="tyP-dN-sR7" userLabel="Netboot Servers">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1661,7 +1672,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c4g-bk-XZJ">
-                                                    <rect key="frame" x="531" y="93" width="127" height="16"/>
+                                                    <rect key="frame" x="612" y="33" width="127" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Extension Attributes" id="ak3-bv-jcT">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1669,7 +1680,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kMV-ND-9Kx" userLabel="Scripts">
-                                                    <rect key="frame" x="567" y="100" width="54" height="16"/>
+                                                    <rect key="frame" x="648" y="40" width="54" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scripts" id="ZpL-PA-KAB" userLabel="Scripts">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1677,7 +1688,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VB2-eO-067" userLabel="Printers field">
-                                                    <rect key="frame" x="624" y="100" width="57" height="16"/>
+                                                    <rect key="frame" x="705" y="40" width="57" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Printers" id="OIy-sf-l4M">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1685,7 +1696,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tvH-Q3-0zQ" userLabel="Packages field">
-                                                    <rect key="frame" x="563" y="100" width="63" height="16"/>
+                                                    <rect key="frame" x="644" y="40" width="63" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Packages" id="NYX-6G-Sy2">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1693,7 +1704,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VTB-4B-taj">
-                                                    <rect key="frame" x="549" y="93" width="98" height="16"/>
+                                                    <rect key="frame" x="630" y="33" width="98" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Smart Groups" id="amc-BE-ccT">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1701,7 +1712,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O25-Wj-mUa" userLabel="Static Group fld">
-                                                    <rect key="frame" x="545" y="93" width="98" height="16"/>
+                                                    <rect key="frame" x="626" y="33" width="98" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Static Groups" id="U2a-Hj-2a6">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1709,7 +1720,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2tr-YW-IQ0" userLabel="Restricted Software fld">
-                                                    <rect key="frame" x="532" y="93" width="124" height="16"/>
+                                                    <rect key="frame" x="613" y="33" width="124" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Restricted Software" id="U0T-5A-2wL" userLabel="Restricted Software">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1717,7 +1728,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uAi-xC-0ej" userLabel="Config Profile field">
-                                                    <rect key="frame" x="545" y="93" width="99" height="16"/>
+                                                    <rect key="frame" x="626" y="33" width="99" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Config. Profiles" id="QZL-Gw-khb" userLabel="Config. Profiles">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1725,7 +1736,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Myf-Ot-UmX">
-                                                    <rect key="frame" x="532" y="93" width="124" height="16"/>
+                                                    <rect key="frame" x="613" y="33" width="124" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Disk Encryptions" id="Kcb-Yq-Nrw">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1733,7 +1744,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vif-GW-Rxk" userLabel="Apps field">
-                                                    <rect key="frame" x="555" y="93" width="79" height="16"/>
+                                                    <rect key="frame" x="636" y="33" width="79" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Applications" id="EUY-IK-jiI" userLabel="Apps">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1741,7 +1752,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vHg-RG-3pb" userLabel="Adv Comp Searches">
-                                                    <rect key="frame" x="520" y="93" width="148" height="16"/>
+                                                    <rect key="frame" x="601" y="33" width="148" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Adv. Comp. Searches" id="uck-Ja-k1k">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1749,7 +1760,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TwK-8j-8nD" userLabel="Patch Policies fld">
-                                                    <rect key="frame" x="486" y="93" width="217" height="16"/>
+                                                    <rect key="frame" x="567" y="33" width="217" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Patch Policies" id="GJT-As-0Ty">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1757,7 +1768,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V21-1X-tzz">
-                                                    <rect key="frame" x="562" y="100" width="65" height="16"/>
+                                                    <rect key="frame" x="643" y="40" width="65" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Policies" id="BFj-tq-ijr">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1765,7 +1776,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8U0-Qe-paa" userLabel="Prestages">
-                                                    <rect key="frame" x="557" y="100" width="75" height="16"/>
+                                                    <rect key="frame" x="638" y="40" width="75" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Prestages" id="txW-rc-axB">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1773,7 +1784,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jh1-S4-tyb" userLabel="directory bindings">
-                                                    <rect key="frame" x="496" y="96" width="116" height="16"/>
+                                                    <rect key="frame" x="577" y="36" width="116" height="16"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Directory Bindings" id="zwS-WF-yjC">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1781,7 +1792,7 @@
                                                     </textFieldCell>
                                                 </textField>
                                                 <button hidden="YES" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdm-q1-rol" userLabel="Prestages">
-                                                    <rect key="frame" x="498" y="85" width="190" height="17"/>
+                                                    <rect key="frame" x="579" y="25" width="190" height="17"/>
                                                     <buttonCell key="cell" type="check" title="                                          " bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aj0-i2-NDK">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" size="14" name="Helvetica"/>
@@ -2218,7 +2229,9 @@
                                                                         <menuItem title="Computer Groups (Static)" id="cM8-sM-bL0">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
-                                                                        <menuItem title="Computers" id="ry3-B0-mRx" userLabel="Computers"/>
+                                                                        <menuItem title="Computers" id="ry3-B0-mRx" userLabel="Computers">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Configuration Profiles" id="Hhd-E2-H4G" userLabel="Config. Profiles">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
@@ -2231,19 +2244,36 @@
                                                                         <menuItem title="Dock Items" id="X9I-p1-P7q">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
-                                                                        <menuItem title="Extension Attributes" id="Abg-uI-loX"/>
-                                                                        <menuItem title="File Shares" id="TiA-cD-OrE"/>
-                                                                        <menuItem title="Packages" id="gPQ-gf-J3z"/>
-                                                                        <menuItem title="Policies" id="jwH-Jm-D0E"/>
+                                                                        <menuItem title="Extension Attributes" id="Abg-uI-loX">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="File Shares" id="TiA-cD-OrE">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="Packages" id="gPQ-gf-J3z">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="Patch Management" id="4rI-kw-gz0">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="Policies" id="jwH-Jm-D0E">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Prestages" hidden="YES" id="XWe-5m-1Pa">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
-                                                                        <menuItem title="Printers" id="DYb-Mc-wvX"/>
+                                                                        <menuItem title="Printers" id="DYb-Mc-wvX">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Restricted Software" id="RF3-Oc-qto">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
-                                                                        <menuItem title="Scripts" id="7Kf-1g-czF"/>
-                                                                        <menuItem title="SUS" id="290-Hs-6PA"/>
+                                                                        <menuItem title="Scripts" id="7Kf-1g-czF">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
+                                                                        <menuItem title="SUS" id="290-Hs-6PA">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                     </items>
                                                                 </menu>
                                                             </popUpButtonCell>
@@ -2255,7 +2285,7 @@
                                                             <rect key="frame" x="223" y="-1" width="569" height="238"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="567" height="236"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowHeight="19" rowSizeStyle="automatic" headerView="7sv-In-7JH" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="568" height="208"/>
@@ -2279,7 +2309,7 @@
                                                                                 <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                                                 <prototypeCellViews>
                                                                                     <tableCellView id="4tV-NR-thP">
-                                                                                        <rect key="frame" x="11" y="1" width="565" height="19"/>
+                                                                                        <rect key="frame" x="1" y="1" width="565" height="19"/>
                                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                         <subviews>
                                                                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="oft-XQ-ded">
@@ -2401,8 +2431,8 @@
                                                             </connections>
                                                         </popUpButton>
                                                         <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wiT-wp-Gbk">
-                                                            <rect key="frame" x="628" y="241" width="163" height="18"/>
-                                                            <buttonCell key="cell" type="check" title="Migrate Dependencies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="eNy-iP-zFq">
+                                                            <rect key="frame" x="630" y="241" width="161" height="18"/>
+                                                            <buttonCell key="cell" type="check" title="Include Dependencies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="eNy-iP-zFq">
                                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                 <font key="font" metaFont="system"/>
                                                             </buttonCell>
@@ -2420,7 +2450,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="04d-d5-wBm" userLabel="clear filter">
-                                                            <rect key="frame" x="178" y="53.5" width="18.5" height="22"/>
+                                                            <rect key="frame" x="178" y="54" width="19" height="22"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSStopProgressTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="0MS-vF-zzk">
                                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2573,6 +2603,14 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NBe-hx-gmK">
+                                <rect key="frame" x="86" y="34" width="564" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" alignment="center" id="f9y-jB-lAY">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="trailing" secondItem="UMW-p7-6qE" secondAttribute="trailing" id="04O-U4-5c2"/>
@@ -2588,13 +2626,16 @@
                             <constraint firstAttribute="bottom" secondItem="TbV-JY-cbz" secondAttribute="bottom" constant="70" id="F5c-gH-kMC"/>
                             <constraint firstItem="bKr-H7-03S" firstAttribute="top" secondItem="DjG-yq-DnX" secondAttribute="bottom" constant="4" id="GC0-Gp-yig"/>
                             <constraint firstItem="ih0-OH-DT1" firstAttribute="trailing" secondItem="xlC-Th-zKf" secondAttribute="trailing" id="Hif-vy-07E"/>
+                            <constraint firstItem="NBe-hx-gmK" firstAttribute="leading" secondItem="DjG-yq-DnX" secondAttribute="trailing" constant="42" id="Nya-4V-vmD"/>
                             <constraint firstItem="7oa-bJ-2d1" firstAttribute="centerY" secondItem="1dY-rP-xsl" secondAttribute="centerY" id="Rpk-Cj-QFH"/>
                             <constraint firstAttribute="trailing" secondItem="TbV-JY-cbz" secondAttribute="trailing" constant="21" id="TZ9-8a-SPb"/>
                             <constraint firstItem="v1E-Y8-MAn" firstAttribute="top" secondItem="ynJ-S6-o1y" secondAttribute="bottom" constant="3" id="UE8-N6-mIM"/>
+                            <constraint firstItem="mhL-ca-YdU" firstAttribute="leading" secondItem="NBe-hx-gmK" secondAttribute="trailing" constant="42" id="Vh3-Bx-Jsa"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="WuD-wS-vzl"/>
                             <constraint firstAttribute="trailing" secondItem="zwn-6N-l5Y" secondAttribute="trailing" constant="26" id="X6u-q7-mDD"/>
                             <constraint firstItem="xlC-Th-zKf" firstAttribute="top" secondItem="UMW-p7-6qE" secondAttribute="bottom" constant="3" id="Zmi-ha-8hy"/>
                             <constraint firstItem="ynJ-S6-o1y" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="24" id="Zoe-Wm-tOs"/>
+                            <constraint firstItem="NBe-hx-gmK" firstAttribute="top" secondItem="TbV-JY-cbz" secondAttribute="bottom" constant="20" id="big-aq-pnj"/>
                             <constraint firstItem="ih0-OH-DT1" firstAttribute="leading" secondItem="xlC-Th-zKf" secondAttribute="leading" id="ctP-CT-728"/>
                             <constraint firstItem="1dY-rP-xsl" firstAttribute="centerY" secondItem="B8I-Gu-YOQ" secondAttribute="centerY" id="drs-ph-b5x"/>
                             <constraint firstItem="HH9-el-AHl" firstAttribute="centerY" secondItem="xlC-Th-zKf" secondAttribute="centerY" id="dsi-uy-PXH"/>
@@ -2664,6 +2705,7 @@
                         <outlet property="macPrestages_label_field" destination="8U0-Qe-paa" id="14f-TK-mET"/>
                         <outlet property="macapplications_button" destination="hUv-Gv-ET3" id="X4a-qb-36V"/>
                         <outlet property="macapplications_label_field" destination="vif-GW-Rxk" id="W4r-L0-7jp"/>
+                        <outlet property="message_TextField" destination="NBe-hx-gmK" id="att-q8-13P"/>
                         <outlet property="migrateDependencies" destination="wiT-wp-Gbk" id="IYd-uV-ZTm"/>
                         <outlet property="migrateOrRemove_TextField" destination="1dY-rP-xsl" id="zAM-hS-uho"/>
                         <outlet property="migrator_window" destination="m2S-Jp-Qdl" id="gcn-bM-U52"/>
@@ -2683,6 +2725,7 @@
                         <outlet property="osxconfigurationprofiles_label_field" destination="uAi-xC-0ej" id="1RJ-4N-Mgy"/>
                         <outlet property="packages_button" destination="RJ3-X5-ZGl" id="awj-77-J3n"/>
                         <outlet property="packages_label_field" destination="tvH-Q3-0zQ" id="kDo-VN-6gf"/>
+                        <outlet property="patch_mgmt_button" destination="XEf-hO-Lk9" id="7L7-VK-1zZ"/>
                         <outlet property="patch_policies_button" destination="9Ob-ze-NEc" id="tv4-EN-bFy"/>
                         <outlet property="patch_policies_field" destination="TwK-8j-8nD" id="5tD-Ua-k0r"/>
                         <outlet property="policies_button" destination="iW5-vh-2hL" id="BfU-3B-nDW"/>
@@ -2730,8 +2773,8 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <userDefaultsController representsSharedInstance="YES" id="v32-il-Xzs"/>
-                <arrayController objectClassName="Jamf_Transporter.SelectiveObjectList" id="P0M-6n-Zfm">
-                    <classReference key="objectClass" className="SelectiveObjectList" moduleName="Jamf_Replicator" moduleProvider="target"/>
+                <arrayController objectClassName="Jamf_Replicator.SelectiveObjectList" id="P0M-6n-Zfm">
+                    <classReference key="objectClass" className="SelectiveObjectList" moduleName="Replicator" moduleProvider="target"/>
                 </arrayController>
             </objects>
             <point key="canvasLocation" x="1376" y="312"/>

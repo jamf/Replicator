@@ -13,7 +13,7 @@ public let userDefaults = UserDefaults.standard
 public var maxConcurrentThreads = 2
 public var sourceDestListSize   = 20
 //public var pendingGetCount      = 0
-public var pageSize             = 400
+public var pageSize             = 500
 public let httpSuccess          = 200...299
 public let fm                   = FileManager()
 public var didRun               = false
@@ -31,9 +31,12 @@ struct AppInfo {
     static let version         = dict["CFBundleShortVersionString"] as! String
     static let name            = dict["CFBundleExecutable"] as! String
     static var bookmarks       = [URL: Data]()
-    static let bookmarksPath   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"
+    static let appSupportPath   = NSHomeDirectory() + "/Library/Application Support/replicator"
+    static let bookmarksPathOld   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"
+    static let bookmarksPath   = AppInfo.appSupportPath + "/bookmarks"
     static var settings        = [String:Any]()
-    static let plistPath       = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
+    static let plistPathOld    = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
+    static let plistPath       = AppInfo.appSupportPath + "/settings.plist"
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
 }
@@ -145,7 +148,7 @@ struct wipeData {
 
 public let helpText = """
 
-Usage: /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -parameter1 value(s) -parameter2 values(s)....
+Usage: /path/to/Replicator.app/Contents/MacOS/Replicator -parameter1 value(s) -parameter2 values(s)....
 
 Note: Not all parameters have values.
 
@@ -154,7 +157,7 @@ Parameters:
 
     -debug: No value needed.  Enables debug mode, more verbose logging.
 
-    -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for jamf migrator.
+    -destination: Destination server.  Can be entered as either a fqdn or url.  Credentials for the destination server must be saved in the keychain for Replicator.
 
     -destUser: username used with the destination server for authentication.
 
@@ -176,11 +179,11 @@ Parameters:
                   anything with a scope; policies, configuration profiles, restrictions...  By default the scope is copied.
 
     -source: Source server or folder.  Server can be entered as either a fqdn or url.  If the path to the source folder contains a space the path must be
-                  wrapped in quotes.  Credentials for the source server must be saved in the keychain for jamf migrator.
+                  wrapped in quotes.  Credentials for the source server must be saved in the keychain for Replicator.
 
     -sourceUser: username used with the source server for authentication.
 
-    -sticky: No value needed.  If used jamf migrator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
+    -sticky: No value needed.  If used Replicator will migrate data to the same jamf cloud destination server node, provided the load balancer provides
                   the needed information.  By default sticky sessions are not used.
 
     ## API client options ##
@@ -198,28 +201,29 @@ Parameters:
 
 Examples:
     Create an export of all objects:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -export -source your.jamfpro.server -objects allobjects
+    /path/to/Replicator.app/Contents/MacOS/Replicator -export -source your.jamfpro.server -objects allobjects
 
     Migrate computer configuration profiles from one server to another in debug mode:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects osxconfigurationprofiles -debug
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects osxconfigurationprofiles -debug
 
     Migrate smart/static groups, and computer configuration profiles from one server to the same node on another server:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects samrtcomputergroups,staticcomputergroups,osxconfigurationprofles -sticky
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects samrtcomputergroups,staticcomputergroups,osxconfigurationprofles -sticky
 
     Migrate all policies, scripts, and packages from a folder to a server, without (policy) scope:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects policies,scripts,packages -scope false
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects policies,scripts,packages -scope false
 
     Migrate all objects from a folder to a server:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects allobjects
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects allobjects
 
     Migrate buildings using an API client for the source server and username/password for the destination server:
-    /path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings
 """
 
-public func readSettings() -> [String:Any] {
-    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: AppInfo.plistPath)) as? [String : Any])!
+public func readSettings(thePath: String = "") -> [String:Any] {
+    let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
+    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: settingsPath)) as? [String : Any])!
     if AppInfo.settings.count == 0 {
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error reading plist: \(AppInfo.plistPath)") }
+        WriteToLog.shared.message(stringOfText: "Error reading plist: \(AppInfo.plistPath)")
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))")
     return(AppInfo.settings)
@@ -228,24 +232,6 @@ public func readSettings() -> [String:Any] {
 public func saveSettings(settings: [String:Any]) {
     NSDictionary(dictionary: settings).write(toFile: AppInfo.plistPath, atomically: true)
 }
-
-/*
-public func storeBookmark(theURL: URL) {
-    print("[\(#line)-storeBookmark] store \(theURL) in \(AppInfo.bookmarksPath)")
-    AppInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] ?? [:]
-    print("[\(#line)-storeBookmark] current bookmarks:")
-    for (theBookmark,_) in AppInfo.bookmarks {
-        print("[\(#line)-storeBookmark] \(theBookmark)")
-    }
-    do {
-        let data = try theURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-        AppInfo.bookmarks[theURL] = data
-        NSKeyedArchiver.archiveRootObject(AppInfo.bookmarks, toFile: AppInfo.bookmarksPath)
-    } catch let error as NSError {
-        WriteToLog.shared.message(stringOfText: "[Global] Set Bookmark Failed: \(error.description)")
-    }
-}
- */
 
 // extract the value between xml tags - start
 public func tagValue(xmlString:String, xmlTag:String) -> String {
@@ -260,7 +246,7 @@ public func tagValue(xmlString:String, xmlTag:String) -> String {
     }
     return rawValue
 }
-//  extract the value between xml tags - end
+// extract the value between xml tags - end
 // extract the value between (different) tags - start
 public func tagValue2(xmlString:String, startTag:String, endTag:String) -> String {
     var rawValue = ""
@@ -296,6 +282,6 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int,Double) {
     return(h,m,s,Double(totalSeconds))
 }
 
-func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
     completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
 }

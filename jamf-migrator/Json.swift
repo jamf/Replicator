@@ -9,7 +9,7 @@
 import Cocoa
 
 class Json: NSObject, URLSessionDelegate {
-    func getRecord(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: [String:AnyObject]) -> Void) {
+    func getRecord(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, endpointBase: String = "0", endpointId: String = "0", completion: @escaping (_ objectRecord: Any) -> Void) {
         
         if theEndpoint == "skip" {
             completion([:])
@@ -20,13 +20,28 @@ class Json: NSObject, URLSessionDelegate {
         WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
     
         URLCache.shared.removeAllCachedResponses()
-        var existingDestUrl = ""
+        var existingDestUrl = "\(theServer)"
         
-        existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
+        switch endpointBase {
+        case "patchmanagement":
+            let theRecord = (whichServer == "source") ? PatchTitleConfigurations.source.filter({ $0.id == endpointId }):PatchTitleConfigurations.destination.filter({ $0.id == endpointId })
+            if theRecord.count == 1 {
+                print("[getRecord] [Json.getRecord] theRecord displayName \(theRecord[0].displayName)")
+                completion(theRecord[0])
+            } else {
+                completion([])
+            }
+            return
+
+//            existingDestUrl = existingDestUrl.appending("/api/v2/\(objectEndpoint)").urlFix
+        default:
+            existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)").urlFix
+        }
+//        existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
         existingDestUrl = existingDestUrl.urlFix
         
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)") }
-//      print("existing endpoints URL: \(existingDestUrl)")
+//        print("[getRecord] existing endpoints URL: \(existingDestUrl)")
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
 
@@ -34,7 +49,6 @@ class Json: NSObject, URLSessionDelegate {
         
         let semaphore = DispatchSemaphore(value: 0)
         q.getRecord.addOperation {
-//        getRecordQ.async {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
@@ -49,8 +63,9 @@ class Json: NSObject, URLSessionDelegate {
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                            if let endpointJSON = json as? [String:AnyObject] {
+                            if let endpointJSON = json as? [String: AnyObject] {
                                 WriteToLog.shared.message(stringOfText: "[Json.getRecord] retrieved \(theEndpoint)")
+//                                print("[getRecord] [Json.getRecord] \(endpointJSON)")
                                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] \(endpointJSON)") }
                                 completion(endpointJSON)
                             } else {
@@ -76,7 +91,7 @@ class Json: NSObject, URLSessionDelegate {
         }   // getRecordQ - end
     }
     
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
     

@@ -112,6 +112,43 @@ struct JsonUapiPackageDetail: Codable {
     }
 }
 
+final class ExistingPackages {
+    static let shared = ExistingPackages()
+
+    private let existingQueue       = DispatchQueue(label: "existing.packages", qos: .default, attributes: .concurrent)
+    private var _packageGetsPending = 0
+    private var _packageIDsNames    = [Int: String]()
+    
+    var packageIDsNames: [Int: String] {
+        get {
+            var packageIDsNames: [Int: String] = [:]
+            existingQueue.sync {
+                packageIDsNames = _packageIDsNames
+            }
+            return packageIDsNames
+        }
+        set {
+            existingQueue.async(flags: .barrier) {
+                self._packageIDsNames = newValue
+            }
+        }
+    }
+
+    var packageGetsPending: Int {
+        get {
+            var packageGetsPending: Int?
+            existingQueue.sync {
+                packageGetsPending = _packageGetsPending
+            }
+            return packageGetsPending ?? 0
+        }
+        set {
+            existingQueue.async(flags: .barrier) {
+                self._packageGetsPending = newValue
+            }
+        }
+    }
+}
 
 
 class PackagesDelegate: NSObject, URLSessionDelegate {
@@ -317,29 +354,29 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             return
         }
         
-        var packageIDsNames       = currentPackageIDsNames
+        ExistingPackages.shared.packageIDsNames = currentPackageIDsNames
         var existingNameId        = currentPackageNamesIDs
         var duplicatePackagesDict = currentDuplicates
         
         var lookupCount = 0
         
-        let packageCount = packageIDsNames.count
+        let packageCount = ExistingPackages.shared.packageIDsNames.count
         
         print("filenameIdDict server: \(whichServer)")
         print("           the server: \(theServer)")
         
         var i = 0
-        var getsPending = 0
+        ExistingPackages.shared.packageGetsPending = 0
         packageGetQ.async { [self] in
             while i < packageCount {
-                if getsPending < maxConcurrentThreads && packageIDsNames.count > 0 {
-                    let (packageID, packageName) = packageIDsNames.popFirst()!
+                if ExistingPackages.shared.packageGetsPending < maxConcurrentThreads && ExistingPackages.shared.packageIDsNames.count > 0 {
+                    let (packageID, packageName) = ExistingPackages.shared.packageIDsNames.popFirst()!
                     i += 1
-                    getsPending += 1
+                    ExistingPackages.shared.packageGetsPending += 1
 
                         getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: packageID, skip: false, currentTry: 3) { [self]
                             (result: (Int,String)) in
-                            getsPending -= 1
+                            ExistingPackages.shared.packageGetsPending -= 1
                             lookupCount += 1
                             //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
                             let (resultCode,packageFilename) = result
@@ -349,7 +386,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             WriteToLog.shared.message(stringOfText: "[PackagesDelegate.getFilename] fetched \(lookupCount) of \(packageCount) - packageFilename: \(packageFilename) server: \(theServer)")
                             if pref.httpSuccess.contains(resultCode) {
                                 // found name, remove from list
-                                packageIDsNames[packageID] = nil
+                                ExistingPackages.shared.packageIDsNames[packageID] = nil
                                 
                                 if packageFilename != "" && existingNameId[packageFilename] == nil {
                                     //                        print("add package to dict")
@@ -376,13 +413,13 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             // looked up last package in list
                             //                print("           currentTry: \(currentTry)")
                             //                print("             maxTries: \(maxTries+1)")
-                            //                print("packageIDsNames.count: \(packageIDsNames.count)")
-                            JamfProServer.pkgsNotFound = packageIDsNames.count
+                            //                print("ExistingPackages.shared.packageIDsNames.count: \(ExistingPackages.shared.packageIDsNames.count)")
+                            JamfProServer.pkgsNotFound = ExistingPackages.shared.packageIDsNames.count
                             if lookupCount == packageCount {
                                 //                    print("[PackageDelegate.filenameIdDict] done looking up packages on \(theServer)")
-                                if currentTry < maxTries+1 && packageIDsNames.count > 0 {
-                                    WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] \(packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)")
-                                    filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
+                                if currentTry < maxTries+1 && ExistingPackages.shared.packageIDsNames.count > 0 {
+                                    WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] \(ExistingPackages.shared.packageIDsNames.count) filename(s) were not found.  Retry attempt \(currentTry)")
+                                    filenameIdDict(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, currentPackageIDsNames: ExistingPackages.shared.packageIDsNames, currentPackageNamesIDs: existingNameId, currentDuplicates: duplicatePackagesDict, currentTry: currentTry+1, maxTries: maxTries) {
                                         (result: [String:Int]) in
                                         WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] returned from retry \(currentTry)")
                                         //                            print("               currentTry1: \(currentTry)")
@@ -400,7 +437,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                     callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                                     completion(existingNameId)
                                 }
-                            }   // if lookupCount == packageIDsNames.count - end
+                            }   // if lookupCount == ExistingPackages.shared.packageIDsNames.count - end
                         }
                 } else {
                     sleep(1)

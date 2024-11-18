@@ -1,70 +1,71 @@
-# Jamf Migrator
+# Replicator (formerly known as Jamf Migrator)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/JamfMigrator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/total) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/latest/total)
  ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/JamfMigrator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/JamfMigrator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/JamfMigrator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
 
-Download the current release: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/jamf-migrator.zip)
+Download the pre-release of [Replicator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)
+Download the current release: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)
 
-A tool to migrate data granularly between Jamf Pro servers
+A tool to synchronize configurations between Jamf Pro servers. Export configurations and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete configurations from a server.
 
-![alt text](./jamf-migrator/images/migrator2.png "JamfMigrator")
+![alt text](./Replicator/images/migrator2.png "Replicator")
 
 Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
 </br></br>
 
 Username and password fields can be hidden/shown using the disclosure tringle on the left.
 
-![alt text](./jamf-migrator/images/migrator2.1.png "JamfMigrator")
+![alt text](./Replicator/images/migrator2.1.png "Replicator")
 
-When migrating files be sure to open the 'raw' folder.
-  ![alt text](./jamf-migrator/images/migrator2.5a.png "Files")
+When replicating files be sure to open the 'raw' folder.
+  ![alt text](./Replicator/images/migrator2.5a.png "Files")
   
   Devices (computers and iOS), Groups, Policies, and Configuration Profiles can be targeted to a particular site.</br>
-  ![alt text](./jamf-migrator/images/migrator2.5b.png "Files")
+  ![alt text](./Replicator/images/migrator2.5b.png "Files")
 </br></br>
 
 Servers can be removed from the (source/destination) list by holding down the option key while selecting the server.  A warning will be presented to verify the removal.</br>
-  ![alt text](./jamf-migrator/images/removeServer.png "Files")
+  ![alt text](./Replicator/images/removeServer.png "Files")
 </br></br>
 
 **Limitations/requirements to be aware of:**
 
-* Passwords can not be extracted through the API which impacts migrating distribution points, computer management account, account used for LDAP.  A password can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
-* Certificate used for LDAPS does not migrate.
-* Icons associated with Mac App Store apps are not migrated as the API does not support it.
-* Only AFP and SMB shares can be migrated.
+* Passwords can not be extracted through the API which impacts replicating distribution points, computer management account, account used for LDAP.  A password can be supplied for each service account, but credentials may need to be reset on the destination server for more complex configurations.
+* Certificate used for LDAPS does not replicate.
+* Icons associated with Mac App Store apps are not replicated as the API does not support it.
+* Only AFP and SMB shares can be replicated.
 * Patch management is not available through the API impacting smart groups dependent on patch management extension attributes.
 * If endpoints (computers, policies, configuration profiles...) have duplicate names on the source server issues will arise if the app is used to update those items from the source to destination server.  As each item is migrited it will overwrite the previous item with the same name.
-* Migrating smart/static groups with criteria containing groups will fail if the parent group tries to migrate before the group in the criteria.  Migrating groups several times should allow all the nested groups to migrate before the parent group.
-* Institutional disk encryptions that contain the private key cannot be migrated.
-* Approved System/Kernel Extension payloads do not migrate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
-* Policies - The Software Update payload does not migrate.  Also, within the packages payload, setting for the distribution point will not migrate.
-* Objects with trailing spaces in the name will migrate once but the process of uploading through the API removes those spaces.  This causes issues re-migrating those objects as the names no longer match.
-* Users and usergroups used in policy limitations/exclusions do not migrate as the API does not provide that information.
+* Replicating smart/static groups with criteria containing groups will fail if the parent group tries to replicate before the group in the criteria.  Replicating groups several times should allow all the nested groups to replicate before the parent group.
+* Institutional disk encryptions that contain the private key cannot be replicated.
+* Approved System/Kernel Extension payloads do not replicate properly.  Display names are dropped and additional keys/values are added by the Jamf API that results in a corrupt profile and failure in profile deployment.
+* Policies - The Software Update payload does not replicate.  Also, within the packages payload, setting for the distribution point will not replicate.
+* Objects with trailing spaces in the name will replicate once but the process of uploading through the API removes those spaces.  This causes issues re-replicating those objects as the names no longer match.
+* Users and usergroups used in policy limitations/exclusions do not replicate as the API does not provide that information.
 * Packages <ul>
-  <li>Only package metadata (display name, file name, size, ...) is migrated.  To migrate the actual package either use your browser, Jamf Admin, or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)</li>
+  <li>Only package metadata (display name, file name, size, ...) is replicated.  To replicate the actual package either use your browser, [Jamf Sync](https://github.com/jamf/JamfSync), or [jamfcpr](https://github.com/BIG-RAT/jamfcpr)</li>
   <li>The API allows for the creation of multiple packages, with different display names, to reference the same package file name.  The Jamf Pro console prevents this as there should be a one to one mapping.</li>
   </ul>
 * Saving of objects whos name contains a : (colon) will be saved using a ; (semi-colon).
-* Enabled state of mobile device applications is not handled in the API, as a result all migrated mobile device applications will be enabled on the destination server whether it is enabled or disabled on the source.
-* Configuration Profiles -> Applications & Custom Settings -> External Applications settings will not migrate/export properly.  The form generated by the custom schema is not migrated/exported, rather the current settings from the form are migrated/exported.  The migrated profile will show the current setting for the external applicaton under the 'Upload' section within Application & Custom Settings.
+* Enabled state of mobile device applications is not handled in the API, as a result all replicated mobile device applications will be enabled on the destination server whether it is enabled or disabled on the source.
+* Configuration Profiles -> Applications & Custom Settings -> External Applications settings will not replicate/export properly.  The form generated by the custom schema is not replicated/exported, rather the current settings from the form are replicated/exported.  The replicated profile will show the current setting for the external applicaton under the 'Upload' section within Application & Custom Settings.
 
 <hr>
 
 The Selective tab provides the ability to select a subset of (or all) items within a collection of objects.  For example you might only want to transfer 4 scripts from a larger pool of existing scripts.
-  ![alt text](./jamf-migrator/images/migrator3.png "Selective")
+  ![alt text](./Replicator/images/migrator3.png "Selective")
   
 
-Also, policies may have their dependencies checked/migrated using the Migrate Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.
-![alt text](./jamf-migrator/images/migrator3Policies.png "Selective")
+Also, policies may have their dependencies checked/replicated using the Include Dependencies button.  Only 'top-level' dependencies are checked.  i.e. if the scope is being replicated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy replication will likely fail.
+![alt text](./Replicator/images/migrator3Policies.png "Selective")
 Note: The ID of any object can be seen my hovering the mouse over the object.
 
 
-Files exported using jamf-migrator can be imported into another Jamf Pro server.  Be sure to open the 'raw' folder when importing.
+Files exported using Replicator can be imported into another Jamf Pro server.  Be sure to open the 'raw' folder when importing.
 
-![alt text](./jamf-migrator/images/open.png "Open")
+![alt text](./Replicator/images/open.png "Open")
 </br></br>
-**Important:** Trimmed XML files cannot be used as they are missing data required for the migration. 
+**Important:** Trimmed XML files cannot be used as they are missing data required for the replication. 
 </br></br>
 
 **Preferences:**
@@ -86,11 +87,11 @@ In addition to scoping options the following are available:
 
 ** object name is used to determine whether or not it is on the destination server **
 
-![](./jamf-migrator/images/copyPrefs.png)
+![](./Replicator/images/copyPrefs.png)
 </br></br>
 Options to export XML from the source server are also available.
 
-![](./jamf-migrator/images/exportPrefs.png)
+![](./Replicator/images/exportPrefs.png)
 </br></br>
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
@@ -98,47 +99,47 @@ Options to export XML from the source server are also available.
 * Save the object XML either with or without its scope.  Unchecked removes the scope.
 * Note Save only and Raw Source XML options should not be selected when File Import is being used.
 
-Options for migrating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
+Options for replicating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
 
-![](./jamf-migrator/images/sitePrefs.png)
+![](./Replicator/images/sitePrefs.png)
 </br></br>
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
 
 The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
 
-![](./jamf-migrator/images/appPrefs.png)
+![](./Replicator/images/appPrefs.png)
 </br></br>
 Migrated computers can show as managed by setting the management account.
 
-![](./jamf-migrator/images/computerPrefs.png)
+![](./Replicator/images/computerPrefs.png)
 </br></br>
-Set a password for following migrated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
+Set a password for following replicated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
 
-![](./jamf-migrator/images/passwordPrefs.png)
+![](./Replicator/images/passwordPrefs.png)
 
 Note, the same password will be applied if you have multiple binds, or ldap servers, or file shares coonfigured.  
 </br></br>
 **Migration Summary:**
 
-* To get details on how many items were created/updated or failed to migrate type ⌘S, or select Show Summary under the File menu.
+* To get details on how many items were created/updated or failed to replicate type ⌘S, or select Show Summary under the File menu.
   
-  ![alt text](./jamf-migrator/images/summary1.png "Summary")
+  ![alt text](./Replicator/images/summary1.png "Summary")
    
 * Additional information about each count can be obtained by clicking on the number. For example, if we want to see a list of the 28 failed scripts, click on the 28.
   
-  ![alt text](./jamf-migrator/images/summary2.png "Summary Details")
+  ![alt text](./Replicator/images/summary2.png "Summary Details")
   
   
 Information about successes/failures can be found in the log, located in 
 
 ```
-~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/jamf-migrator/<date>_<time>_migration.log
+~/Library/Containers/com.jamf.Replicator/Data/Library/Logs/Replicator/<date>_<time>_migration.log
 ```
 
-If you have used jamf-migrator and saved passwords you will see the following after launching a new version.
+If you have used Replicator and saved passwords you will see the following after launching a new version.
 
- ![alt text](./jamf-migrator/images/allowAccess.png "Allow Keychain Access")
+ ![alt text](./Replicator/images/allowAccess.png "Allow Keychain Access")
  
  If you'd like the new version to access existing credentials select the desired option.
 
@@ -146,14 +147,14 @@ If you have used jamf-migrator and saved passwords you will see the following af
 
 **Important:**
 
-* There are many dependencies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be migrated before the policy; if a distribution point has a building and/or department defined those need to migrate first...  If everything is migrated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
+* There are many dependencies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be replicated before the policy; if a distribution point has a building and/or department defined those need to replicate first...  If everything is replicated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
 * Summary window doesn't seem to be the most responsive.  May need to click the window or give the cursor some extra motion before the detailed summary appears.
 
 
 **Note:** the app can also be used to clear out a Jamf server.  Typing the following after launching the app will set it into removal mode.  Items from the destination server are deleted once Go is clicked.
 
 ```
-touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Support/jamf-migrator/delete
+touch ~/Library/Containers/com.jamf.Replicator/Data/Library/Application\ Support/Replicator/delete
 ```
 
 * You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.<br><br>
@@ -162,33 +163,33 @@ touch ~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Application\ Supp
 
 Help is available by running:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -help
+/path/to/Replicator.app/Contents/MacOS/Replicator -help
 ```
-Running the following in Terminal will export all objects (full XML) that can be migrated:
+Running the following in Terminal will export all objects (full XML) that can be replicated:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -export -objects allobjects
+/path/to/Replicator.app/Contents/MacOS/Replicator -source your.jamfPro.fqdn -export -objects allobjects
 ```
 
 In the event you have multiple entries in the keychain for a server you'll need to specify which username to use.  For example:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator  -source dev.jamfcloud.com -destination prod.jamfcloud.com -objects "categories,buildings" -migrate -sourceUser devadmin -destUser prodadmin
+/path/to/Replicator.app/Contents/MacOS/Replicator  -source dev.jamfcloud.com -destination prod.jamfcloud.com -objects "categories,buildings" -migrate -sourceUser devadmin -destUser prodadmin
 ```
 
 Before running an export via command line at least one export from the app must be manually run saving the source username and password or client ID and secret.<br>
 
-To migrate object(s) using the command line, something like the following can be used:
+To replicate object(s) using the command line, something like the following can be used:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -source your.jamfPro.fqdn -destination dest.jamfPro.fqdn -objects categories,buildings -migrate
+/path/to/Replicator.app/Contents/MacOS/Replicator -source your.jamfPro.fqdn -destination dest.jamfPro.fqdn -objects categories,buildings -migrate
 ```
 If importing files, the import folder must be selected in the UI before the command line can be successfully run.
 
 To set an ldap id of 3 on jamf user accounts and force that id (also converts local accounts to ldap) use the following:
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3 -source /Users/admin/Desktop/export/raw -migrate -objects jamfusers
+/path/to/Replicator.app/Contents/MacOS/Replicator -ldapid 3 -source /Users/admin/Desktop/export/raw -migrate -objects jamfusers
 ```
-This can also be accomplished using the UI by launching jamf-migrator from Terminal:  
+This can also be accomplished using the UI by launching Replicator from Terminal:  
 ```
-/path/to/jamf-migrator.app/Contents/MacOS/jamf-migrator -ldapid 3
+/path/to/Replicator.app/Contents/MacOS/Replicator -ldapid 3
 ```
 <br><br>
 
@@ -198,10 +199,10 @@ This can also be accomplished using the UI by launching jamf-migrator from Termi
 Resolve authentication impacting command line usage (issue #100) and initial token generation (issue #101).
 
 **v7.4.1**<br>
-Resolve issue with token renewal.  Resolve issue when running from the command line.  Resolve issue removing policies.  Resolve issue migrating self service icons.
+Resolve issue with token renewal.  Resolve issue when running from the command line.  Resolve issue removing policies.  Resolve issue replicating self service icons.
 
 **v7.4.0**<br>
-Resolve scrolling issue with selective migrations.  Better handling of computers/mobile devices with duplicate names.  Minor layout changes.  Ability to sort ascending or descending object list in selective migration. 
+Resolve scrolling issue with selective replications.  Better handling of computers/mobile devices with duplicate names.  Minor layout changes.  Ability to sort ascending or descending object list in selective replication. 
 
 **v7.3.1**<br>
 Work to resolve issue (#91), logging in with API clients.
@@ -219,7 +220,7 @@ Fix issue logging into Jamf Pro 11, issue #91.  Update token refresh method.
 Add support for API client in both the UI and command line.
 
 **v7.1.1**<br>
-Prevent configuration profiles that include a Filevault payload from migrating.  Fix export of smart comuter/device groups.  Fix color mismatch (issue #88)
+Prevent configuration profiles that include a Filevault payload from replicating.  Fix export of smart comuter/device groups.  Fix color mismatch (issue #88)
 
 **v7.1.0**<br>
 Command line functionality.  Note, -backup has been renamed -export and allows for specific types of objects to be exported.  Exported scripts no longer have characters XML encoded.  Expire tokens when quitting app.
@@ -231,17 +232,17 @@ better handling of access to previously selected folders
 better handling of preferences as they are changed
 
 **v7.0.1**<br>
-prevent sleep while migrating
+prevent sleep while replicating
 fix token refresh
 
 **v7.0.0**<br>
-Redesigned UI.  Add ability to show/hide username and password fields.  Migrate locally created classes and delete any class.  Add ability to force basic authentication.
+Redesigned UI.  Add ability to show/hide username and password fields.  Replicate locally created classes and delete any class.  Add ability to force basic authentication.
 
 **v6.3.0**<br>
-Add ability to utilize selective migration while using exported files as the source.  Fix crash (issue #80) when Site is selected.  Show text while icons are being uploaded for self service policies and iOS apps.  Fix issue with selective migration of policies.
+Add ability to utilize selective replication while using exported files as the source.  Fix crash (issue #80) when Site is selected.  Show text while icons are being uploaded for self service policies and iOS apps.  Fix issue with selective replication of policies.
 
 **v6.2.7**<br>
-Fix crash when running on a machine for the first time (#79). Invalidate tokens when switching servers and stop token refresh once migration competes. Better user experience when working with export options and the disable export only button.
+Fix crash when running on a machine for the first time (#79). Invalidate tokens when switching servers and stop token refresh once replication competes. Better user experience when working with export options and the disable export only button.
 
 **v6.2.6**<br>
 Fix issues #77 (self service display name) and #78 (crash when checking for updates)
@@ -261,10 +262,10 @@ Better handling of package filename/display name lookups.
 
 **v6.2.1**<br>
 * Fix site lookups (migrating to a site) when using bearer token.
-* Fix issue where categories were not created when need be during dependency migration (policies).
+* Fix issue where categories were not created when need be during dependency replication (policies).
 * Update version check alert to focus on new version if available.
 * Add warning about not being able to use Save Only while in delete mode.
-* Add ability to migrate iOS devices to a site on the same server.
+* Add ability to replicate iOS devices to a site on the same server.
 
 **v6.2.0**<br>
 * Fix filenames that get characters xml encoded when importing files.
@@ -274,14 +275,14 @@ Better handling of package filename/display name lookups.
 * Misc code cleanup.
 
 **v6.0.1**<br>
-* Allow migration of computers to a site.  
+* Allow replication of computers to a site.  
 * Moved show summary under View in the menu bar.  Add ability to toggle delete mode under View in the menu bar.
 * Progress bar changes color as failurs occur.
 * Provide a warning if a single package filename is referenced by multiple package display names.  Will not create duplicate references on the destination server.
-* Buildings are migrated with full address information.
-* Selective migration of multiple policies with migrate dependencies selected is more reliable.
+* Buildings are replicated with full address information.
+* Selective replication of multiple policies with replicate dependencies selected is more reliable.
 * Handle netboot servers being removed from Jamf Pro.
-* Fix issue with some buttons used with bulk migrations.
+* Fix issue with some buttons used with bulk replications.
 
 **v5.9.3**<br>
 * Fixed issue saving files with names that contain a / (forward slash). Noted the : (colon) is a reserved character and cannot be used in a file name, ; (semi-colon) will be subtituted for it.  This does not impact the name that appears in Jamf Pro.
@@ -290,16 +291,16 @@ Better handling of package filename/display name lookups.
 * Fixed issue with self service icons when cloud services connector is not referenced.
 
 **v5.9.1**<br>
-* Fixed issue self service icon migrations.
+* Fixed issue self service icon replications.
 
 **v5.9.0**<br>
-* With great sadness (computer) configurations have been removed as an object that can be migrated.
+* With great sadness (computer) configurations have been removed as an object that can be replicated.
 * Added ability to select the location of exported files.
 * Fixed crash that would occur when importing files while on the Selective tab.
 * Add command line options for setting an ldap id on jamf user accounts and converting standard jamf accounts to ldap accounts.
 
 **v5.8.3**<br>
-* Fix animation not stopping under certain conditions when no objects are found to migrate.
+* Fix animation not stopping under certain conditions when no objects are found to replicate.
 * Fix issue where policies would list multiple times in selective mode.
 
 **v5.8.2**<br>
@@ -311,7 +312,7 @@ Better handling of package filename/display name lookups.
 **v5.8.0**<br>
 * Chasing down miscellaneous crashes.
 * Test authentication against the restrictedsoftware API endpoint (instead of buildings), allowing site admins to use the app.
-* Add ability to filter objects listed when doing a selective migration.
+* Add ability to filter objects listed when doing a selective replication.
 
 **v5.7.0**<br>
 * Better handling of Help window.
@@ -321,7 +322,7 @@ Better handling of package filename/display name lookups.
 
 **v5.6.2**<br>
 * Resolve crash when importing files located outside the ~/Downloads folder.
-* Resolved issue related to migrating the computer as managed.
+* Resolved issue related to replicating the computer as managed.
 * Added option to remove conditional acccess ID from computer reccord.
 * Better handling of preferences window when it is in the backcground.
 
@@ -332,18 +333,18 @@ Better handling of package filename/display name lookups.
 
 **v5.4.0**<br>
 * Resolve fix issue (#57), app crashing when copy preferences are changed.
-* Removed select all/none checkbox.  Toggle all/none by holding the option key down when selecting a class of objects to migrate.
+* Removed select all/none checkbox.  Toggle all/none by holding the option key down when selecting a class of objects to replicate.
 * Add ability to set concurrent API operations (from 1 to 20) and set the number of log files to keep.
 * Update readme and help.
 
 **v5.3.2**<br>
-* Resolve issue migrating self service icons when using files as the source. 
+* Resolve issue replicating self service icons when using files as the source. 
 
 **v5.3.1**<br>
 * Replaced use of curl to upload icons with native Swift functions. If the same Self Service icon is used on more then one policy, download icon only once. 
 * Fixed jamf user/group lookups and counter status/labeling.
 * Clear current list of objects on the selective tab if the source server changes.
-* Fix issue migrating computers where their inventory contains a volume of size 0 or negative partition size.
+* Fix issue replicating computers where their inventory contains a volume of size 0 or negative partition size.
 
 **v5.2.9**<br>
 * Prevent icon from being deleted before it is saved when using save only.  Note, if saving both raw and trimmed XML the icon will only be saved under the raw folder.  If saving only trimmed XML it will be saved under the trimmed folder.
@@ -352,7 +353,7 @@ Better handling of package filename/display name lookups.
 * Tweaked icon download routine.
 
 **v5.2.7**<br>
-* Changes on icon migration, where they're cached and check for a successful upload, retry if it failed.  
+* Changes on icon replication, where they're cached and check for a successful upload, retry if it failed.  
 * Resolved issue where query would hang when looking to delete policies (and there were none) and saving xml was enabled.
 
 **v5.2.5**<br>
@@ -375,14 +376,14 @@ Better handling of package filename/display name lookups.
 
 **v5.1.0**<br>
 * Addressed several issues around GET and POST counters, including issues #43 and #48.
-* Updated UI.  Replaced POST with either POST/PUT (for migrations) or DELETE (for removals), issue #47.
-* Fixed issue where user/iOS device/computer groups would not migrate if they were the last item to migrate.
+* Updated UI.  Replaced POST with either POST/PUT (for replications) or DELETE (for removals), issue #47.
+* Fixed issue where user/iOS device/computer groups would not replicate if they were the last item to replicate.
 * Allow resizing of summary window.
-* Resolved issues around migrating policies along with their dependencies in the proper order.
+* Resolved issues around replicating policies along with their dependencies in the proper order.
 * Added summary for items removed.
 
 **v5.0.3**<br>
-* Provide additional logging around icon migration.  Slight change in process (issue #46).
+* Provide additional logging around icon replication.  Slight change in process (issue #46).
 * Better handling of Jamf Pro API (UAPI) calls.
 * Use encoding different than what the Jamf server uses for the ampersand in the name of a macOS configuration profile (issue #45).
 
@@ -390,22 +391,22 @@ Better handling of package filename/display name lookups.
 * Fix app crashes during XML export.
 
 **v5.0.0**<br>
-* Introduce smart selective migrations for policies.  When migrating a policy dependent items (scripts, packages, printers, computer groups, ...) will also be migrated/updated, if desired.  Only 'top-level' dependencies are checked.  i.e. if the scope of a policy is being migrated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy migration will likely fail.  Adding smart migrations is planned for other items.
-* Resolve problem of migrating LDAP Jamf User Groups to Jamf Pro v10.17+ (issue #42).
+* Introduce smart selective replications for policies.  When replicating a policy dependent items (scripts, packages, printers, computer groups, ...) will also be replicated/updated, if desired.  Only 'top-level' dependencies are checked.  i.e. if the scope of a policy is being replicated and contains nested computer groups or groups assigned to a site that doesn't exist on the destination server the policy replication will likely fail.  Adding smart replications is planned for other items.
+* Resolve problem of replicating LDAP Jamf User Groups to Jamf Pro v10.17+ (issue #42).
 
 **v4.1.3**<br>
-* Resolved app crash when doing a selective migration on groups.
+* Resolved app crash when doing a selective replication on groups.
 
 **v4.1.2**<br>
-* Added site None to list of available sites to migrate to.  
+* Added site None to list of available sites to replicate to.  
 * Increased concurrent threads for post/put/delete from 1 to 3.  
-* Speedier listing of objects when using selective migration.
+* Speedier listing of objects when using selective replication.
 
 **v4.1.0**<br>
-* Added the ability to migrate disk encryption configurations.  Since passwords cannot be migrated Institutional configurations containing the private key will not migrate.
+* Added the ability to replicate disk encryption configurations.  Since passwords cannot be replicated Institutional configurations containing the private key will not replicate.
 
 **v4.0.0**<br>
-* Added the ability to migrate objects (groups, policies, and configuration profiles) to a particular site, either on the source server or another server.
+* Added the ability to replicate objects (groups, policies, and configuration profiles) to a particular site, either on the source server or another server.
 * Re-added button to bring up preferences.  
 
 **v3.3.5**<br>
@@ -413,13 +414,13 @@ Better handling of package filename/display name lookups.
 
 **v3.3.4**<br>
 * Resovled display issue with High Sierra (issue #31)
-* Resovled issue where blank lines were removed from scripts when migrated (issue #33)
+* Resovled issue where blank lines were removed from scripts when replicated (issue #33)
 
 **v3.3.3**<br>
 * Markdown formatting and spelling corrections.  Thanks @homebysix
 
 **v3.3.2**<br>
-* Fixed issue where icons were not migrating
+* Fixed issue where icons were not replicating
 * Fixed app crash issue (#28) that resulted when running in removal mode and no credentials were entered for the source server.
   
 **v3.3.0**<br>
@@ -429,59 +430,59 @@ Better handling of package filename/display name lookups.
   
 **v3.2.2**<br>
 * Fixed issue #24, group and policy selective removal broken.
-* Changed arrangement of drop-downs on selective to align with suggested migration order.
-* Split selective migration/removal or group items into smart and static.
+* Changed arrangement of drop-downs on selective to align with suggested replication order.
+* Split selective replication/removal or group items into smart and static.
 * Fixed issue where the listing of items in selective mode would not refresh as desired.
 
 **v3.2.0**<br>
-* Tabs reordered, General tab is now first to align with suggested migration order.
+* Tabs reordered, General tab is now first to align with suggested replication order.
 * Updated tabs/buttons used for navigating between General, macOS, iOS, and Selective sections.
-* Buttons for items to migrate are off by default when the app is launched.
-* You can now switch back and forth between removal and migration modes using &#8984;D.
+* Buttons for items to replicate are off by default when the app is launched.
+* You can now switch back and forth between removal and replication modes using &#8984;D.
 * When using the Selective tab, items are removed from the list as they are deleted from the server.  Once all selected items are removed the list is grayed out.
-* Fixed an issue with Policies and Selective migration where the app could become unresponsive.  Policies should be listed much more quickly.
+* Fixed an issue with Policies and Selective replication where the app could become unresponsive.  Policies should be listed much more quickly.
 * Fixed an issue where groups would not be listed when working with the Selective tab.
 * Fixed potential crash when importing a software update server from an XML file.
 * Fixed issue where xxxgroup would be displayed along with staticxxxgroup and smartxxxgroup in the summary.
 * Fixed an issue where a computer record would get resubmitted indefinitely.
 * Fixed issued with log file names.
-* Fixed issue where migration order might not go as designed.
+* Fixed issue where replication order might not go as designed.
 
 **v3.1.0**<br>
 * Resolved app crashes when exporting XML and destination server field is blank.
-* Resolved potential app hanging when migrating extension attributes that include patch policy EAs.
+* Resolved potential app hanging when replicating extension attributes that include patch policy EAs.
 * Re-tool preferences.
 * Removed preferences button and help button to prevent duplicate windows from opening.
-* Resolved issue where scripts could get corrupted when migration.
+* Resolved issue where scripts could get corrupted when replication.
     
 **v3.0.6**<br>
-* Items will now migrate if category, building, or department is missing on the destination server. The field will be blanked out to allow the migration.
+* Items will now replicate if category, building, or department is missing on the destination server. The field will be blanked out to allow the replication.
 
 **v3.0.5**<br>
-* Policies with the Account payload can now be migrated.  **Note:** Account password is set to `jamfchangeme`.
+* Policies with the Account payload can now be replicated.  **Note:** Account password is set to `jamfchangeme`.
 * Resolved an issue where a smart group with thousands of computers would not get cleared.
-* Resolved issue migrating machines with duplicate serial numbers or MAC addresses.  Duplicate addresses are cleared.
+* Resolved issue replicating machines with duplicate serial numbers or MAC addresses.  Duplicate addresses are cleared.
 * Resolved issue trying to copy computers with no serial number.
 * Resolved issue where a policy name starting with a space would lose the leading space when it was posted to the new server.
 * References to the source server in the App Config are now updated to the destination server.
 
 **v3.0.0**<br>
 * Added ability to use locally stored XML files as a source rather than a server.
-* Added ability to migrate macOS and iOS Mac App Store apps.
+* Added ability to replicate macOS and iOS Mac App Store apps.
 
 **v2.8.0**<br>
 * Moved text manipulation to main thread, fixing issues where the endpoint URL was incorrect.
 * **Changed tab order** - tabs through server to username to password.
-* Updated migration order to address issue #18.
+* Updated replication order to address issue #18.
 * Removed forced debug mode accidentally left in the previous beta.
 * Lightly grayed out GET/POST related fields to indicate they are not for user input.
 * Added button for quick access to preferences and help.
-* Help window can now be displayed while running migrations.
-* Changes to the GUI, moved tabs to top of section and added arrows to selective migration subjects.
+* Help window can now be displayed while running replications.
+* Changes to the GUI, moved tabs to top of section and added arrows to selective replication subjects.
 * Added removing the scope from static computer groups/mobile device groups/user groups, addressing issue #19.
 * Grayed out source server when doing removals to make it more clear from which server items get removed.
 * Updated Help.
-* Added 'check for updates...' under jamf-migrator in the menu bar.
+* Added 'check for updates...' under Replicator in the menu bar.
 * Added additional logging, in debug mode. Minor code adjustments.
 * Added ability to export xml. Added cache clearing to authentication / server availability check in an effort to resolve 503 errors when the api is actually available.
 
@@ -489,59 +490,59 @@ Better handling of package filename/display name lookups.
 * Corrected encoding issue (#17) of special characters that caused authentication failures.
 
 **v2.6.3**<br>
-* Corrected an issued with self service icons not migrating if the icon name contained a space.
+* Corrected an issued with self service icons not replicating if the icon name contained a space.
 
 **v2.6.2**<br>
-* Resolve issue #14, items not migrating in the proper order.
+* Resolve issue #14, items not replicating in the proper order.
 
 **v2.6.0**<br>
 * Deferrals no longer stripped from policies.
 * Only log xml from failed items when in debug mode.
 * More informative logging, give reason of failure along with http status code.
-* Move history files to ~/Library/Logs/jamf-migrator and change extension to log. Refer to them as log files now.
-* Added summary to provide count of items created, updated, and failed (&#8984;S) after a migration run.
-* Patch Extension Attributes are no longer migrated.
+* Move history files to ~/Library/Logs/Replicator and change extension to log. Refer to them as log files now.
+* Added summary to provide count of items created, updated, and failed (&#8984;S) after a replication run.
+* Patch Extension Attributes are no longer replicated.
 * Log file naming has been corrected, for future logging. Current logs named incorrectly need to be manually deleted or renamed. Issue#13
-* Added recommended migration and dependencies to help. Issue#12
-* Migration of icons used in self service for newly created policies. Updating an existing policy will not update the existing icon on the destination server.
+* Added recommended replication and dependencies to help. Issue#12
+* Replication of icons used in self service for newly created policies. Updating an existing policy will not update the existing icon on the destination server.
 
 **v2.2.5**<br>
-* Added migration of computer configurations.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be migrated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
+* Added replication of computer configurations.  Note, it is possible to delete the parent of a smart configuration, thus orphaning the 'child' config.  An orphaned child configuration is not accessible through the API, as a result it cannot be replicated.  In the event the orphaned child configuration(s) also has child configuration(s), those child configuration(s) are turned into parent configuration(s).
 * Added ability to select frequently used source/destination servers from the user interface.  Up to 10 server are selectable by using the up/down arrows to the right of the URL text box.
 
 **v2.1.5**<br>
-* Added migration of dock items.
-* Added stop button to stop the migration in progress.
+* Added replication of dock items.
+* Added stop button to stop the replication in progress.
   
 **v2.1.4**<br>
-* Added migration of directory bindings.
+* Added replication of directory bindings.
   
 **v2.1.3**<br>
-* Fixed smart group migration failures when done selectively.
-* Fixed advanced computer search duplication if migrated more then once, they should update now if changed.
+* Fixed smart group replication failures when done selectively.
+* Fixed advanced computer search duplication if replicated more then once, they should update now if changed.
 * Fixed authentication verification when Jamf Server utilizes SSO (thanks @ftiff).
 
 **v2.1.0**<br>
-* Added the ability to migrate Jamf server accounts (users and groups).  Newly created accounts on the destination server will be created without a password (can't migrate passwords).  The account being used to authenticate to the destination server is not migrated if it also exists on the source server.  The migration of accounts depends on the existence of related sites and LDAP servers in order to be successful.
+* Added the ability to replicate Jamf server accounts (users and groups).  Newly created accounts on the destination server will be created without a password (can't replicate passwords).  The account being used to authenticate to the destination server is not replicated if it also exists on the source server.  The replication of accounts depends on the existence of related sites and LDAP servers in order to be successful.
    
 **v2.0.0**<br>
 * Change to the user interface.  Grouped similar categories together.
 * Added iOS items.
-* Selective migration now allows the selection of multiple items, using control and/or shift key.
+* Selective replication now allows the selection of multiple items, using control and/or shift key.
 * Added selective removal of items within a category.
 
 **v1.2.1**<br>
-* fixed issue where app would hang if last/only item migrated had no endpoints.
+* fixed issue where app would hang if last/only item replicated had no endpoints.
 * credentials no longer needed for source server when removing data.
 * UI button improvements for select all/none (thanks @jdhovaland).
 
 **v1.2.0**<br>
-* Fixed the issue migrating computers with the xprotect tag having no value.
-* Selective migration now lists endpoints alpha-numeric.
+* Fixed the issue replicating computers with the xprotect tag having no value.
+* Selective replication now lists endpoints alpha-numeric.
 * Added debug logging. To enable, launch the app from terminal:
 
 ```
-…/jamf-migrator.app/Contents/MacOS/jamf-migrator –debug
+…/Replicator.app/Contents/MacOS/Replicator –debug
 ```
 
 * Debug info is added to the history file

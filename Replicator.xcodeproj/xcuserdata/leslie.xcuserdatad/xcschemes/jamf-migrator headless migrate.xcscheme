@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-               BuildableName = "Jamf Replicator.app"
-               BlueprintName = "Jamf Replicator"
-               ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+               BuildableName = "Replicator.app"
+               BlueprintName = "Replicator"
+               ReferencedContainer = "container:Replicator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "Jamf Replicator.app"
-            BlueprintName = "Jamf Replicator"
-            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+            BuildableName = "Replicator.app"
+            BlueprintName = "Replicator"
+            ReferencedContainer = "container:Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -116,9 +116,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BC01C5B1DFB0C07007E634E"
-            BuildableName = "Jamf Replicator.app"
-            BlueprintName = "Jamf Replicator"
-            ReferencedContainer = "container:Jamf Replicator.xcodeproj">
+            BuildableName = "Replicator.app"
+            BlueprintName = "Replicator"
+            ReferencedContainer = "container:Replicator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
