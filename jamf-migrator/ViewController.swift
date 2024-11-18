@@ -93,6 +93,7 @@ final class ExistingEndpoints {
     private let existingQueue = DispatchQueue(label: "existing.endpoints", qos: .default, attributes: .concurrent)
     private var _completed = 0
     private var _waiting   = false
+    private var _packageGetsPending = 0
 
     private init() {}
 
@@ -192,7 +193,16 @@ class SelectiveObject: NSObject {
     }
 }
 
-class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
+protocol SendMessageDelegate: AnyObject {
+    func sendMessage(_ message: String)
+}
+
+class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate, SendMessageDelegate {
+    
+    func sendMessage(_ message: String) {
+        print("[sendMessage] message: \(message)")
+        message_TextField.stringValue = message
+    }
     
     private let lockQueue = DispatchQueue(label: "lock.queue")
     private let putStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
@@ -263,7 +273,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            isDir = true
             let settingsFolder = AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")
             if (fm.fileExists(atPath: settingsFolder)) {
-                NSWorkspace.shared.openFile(settingsFolder)
+//                NSWorkspace.shared.openFile(settingsFolder)
+                NSWorkspace.shared.open(URL(fileURLWithPath: settingsFolder))
             } else {
                 alert_dialog(header: "Alert", message: "Unable to open \(settingsFolder)")
             }
@@ -308,8 +319,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var sus_button: NSButton!
 //    @IBOutlet weak var netboot_button: NSButton!
     @IBOutlet weak var osxconfigurationprofiles_button: NSButton!
-//    @IBOutlet weak var patch_mgmt_button: NSButton!
-    @IBOutlet weak var patch_policies_button: NSButton!
+    @IBOutlet weak var patch_mgmt_button: NSButton!
+    @IBOutlet weak var patch_policies_button: NSButton! // unused
     @IBOutlet weak var ext_attribs_button: NSButton!
     @IBOutlet weak var scripts_button: NSButton!
     @IBOutlet weak var smart_comp_grps_button: NSButton!
@@ -501,7 +512,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    var didRun                 = false  // used to determine if the Go! button was selected, if not delete the empty log file only.
     var format                 = PropertyListSerialization.PropertyListFormat.xml //format of the property list
 
-//  Log / backup vars
+    @IBOutlet weak var message_TextField: NSTextField!
+    
+    //  Log / backup vars
     let backupDate          = DateFormatter()
     var maxLogFileCount     = 20
     var historyFile: String = ""
@@ -587,7 +600,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
     var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "classes", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "patchmanagement", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
@@ -597,7 +610,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var endpointName          = ""
     var POSTsuccessCount      = 0
     var failedCount           = 0
-//    var postCount             = 1
+
     var counters              = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
     var getCounters           = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
     var putCounters           = [String:[String:Int]]()
@@ -711,53 +724,53 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func inactiveTabDisable(activeTab: String) {
 	    // disable buttons on inactive tabs - start
         if deviceType() != "macOS" {
-            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
-            self.computers_button.state = NSControl.StateValue(rawValue: 0)
-            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
-            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
-            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
-            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
-            self.sus_button.state = NSControl.StateValue(rawValue: 0)
-//            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+            self.advcompsearch_button.state            = NSControl.StateValue(rawValue: 0)
+            self.computers_button.state                = NSControl.StateValue(rawValue: 0)
+            self.directory_bindings_button.state       = NSControl.StateValue(rawValue: 0)
+            self.disk_encryptions_button.state         = NSControl.StateValue(rawValue: 0)
+            self.dock_items_button.state               = NSControl.StateValue(rawValue: 0)
+            self.fileshares_button.state               = NSControl.StateValue(rawValue: 0)
+            self.sus_button.state                      = NSControl.StateValue(rawValue: 0)
+//            self.netboot_button.state                = NSControl.StateValue(rawValue: 0)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
-            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
-            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
-            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
-            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
-            self.packages_button.state = NSControl.StateValue(rawValue: 0)
-            self.printers_button.state = NSControl.StateValue(rawValue: 0)
-            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
-            self.policies_button.state = NSControl.StateValue(rawValue: 0)
-            self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
+            self.patch_mgmt_button.state               = NSControl.StateValue(rawValue: 0)
+            self.patch_policies_button.state           = NSControl.StateValue(rawValue: 0)
+            self.smart_comp_grps_button.state          = NSControl.StateValue(rawValue: 0)
+            self.static_comp_grps_button.state         = NSControl.StateValue(rawValue: 0)
+            self.ext_attribs_button.state              = NSControl.StateValue(rawValue: 0)
+            self.scripts_button.state                  = NSControl.StateValue(rawValue: 0)
+            self.macapplications_button.state          = NSControl.StateValue(rawValue: 0)
+            self.packages_button.state                 = NSControl.StateValue(rawValue: 0)
+            self.printers_button.state                 = NSControl.StateValue(rawValue: 0)
+            self.restrictedsoftware_button.state       = NSControl.StateValue(rawValue: 0)
+            self.policies_button.state                 = NSControl.StateValue(rawValue: 0)
+            self.macPrestages_button.state             = NSControl.StateValue(rawValue: 0)
         }
         if deviceType() != "iOS" {
-            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
-            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            self.advancedmobiledevicesearches_button.state      = NSControl.StateValue(rawValue: 0)
+            self.mobiledevices_button.state                     = NSControl.StateValue(rawValue: 0)
+            self.smart_ios_groups_button.state                  = NSControl.StateValue(rawValue: 0)
+            self.static_ios_groups_button.state                 = NSControl.StateValue(rawValue: 0)
+            self.mobiledevicecApps_button.state                 = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceextensionattributes_button.state   = NSControl.StateValue(rawValue: 0)
             self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-            self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
+            self.iosPrestages_button.state                      = NSControl.StateValue(rawValue: 0)
         }
         if deviceType() != "general" {
-            self.building_button.state = NSControl.StateValue(rawValue: 0)
-            self.categories_button.state = NSControl.StateValue(rawValue: 0)
-            self.classes_button.state = NSControl.StateValue(rawValue: 0)
-            self.dept_button.state = NSControl.StateValue(rawValue: 0)
-            self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
-            self.userEA_button.state = NSControl.StateValue(rawValue: 0)
-            self.ldapservers_button.state = NSControl.StateValue(rawValue: 0)
-            self.sites_button.state = NSControl.StateValue(rawValue: 0)
-            self.networks_button.state = NSControl.StateValue(rawValue: 0)
-            self.jamfUserAccounts_button.state = NSControl.StateValue(rawValue: 0)
+            self.building_button.state          = NSControl.StateValue(rawValue: 0)
+            self.categories_button.state        = NSControl.StateValue(rawValue: 0)
+            self.classes_button.state           = NSControl.StateValue(rawValue: 0)
+            self.dept_button.state              = NSControl.StateValue(rawValue: 0)
+            self.advusersearch_button.state     = NSControl.StateValue(rawValue: 0)
+            self.userEA_button.state            = NSControl.StateValue(rawValue: 0)
+            self.ldapservers_button.state       = NSControl.StateValue(rawValue: 0)
+            self.sites_button.state             = NSControl.StateValue(rawValue: 0)
+            self.networks_button.state          = NSControl.StateValue(rawValue: 0)
+            self.jamfUserAccounts_button.state  = NSControl.StateValue(rawValue: 0)
             self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
-            self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
-            self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
-            self.users_button.state = NSControl.StateValue(rawValue: 0)
+            self.smartUserGrps_button.state     = NSControl.StateValue(rawValue: 0)
+            self.staticUserGrps_button.state    = NSControl.StateValue(rawValue: 0)
+            self.users_button.state             = NSControl.StateValue(rawValue: 0)
         }
         if activeTab == "bulk" {
             generalSectionToMigrate_button.selectItem(at: 0)
@@ -789,7 +802,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.sus_button.state = NSControl.StateValue(rawValue: rawStateValue)
 //            self.netboot_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: rawStateValue)
-//            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.patch_policies_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.static_comp_grps_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -840,9 +853,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
-
+        
         pref.stopMigration  = false
-//        go_button.isEnabled = false
         goButtonEnabled(button_status: false)
 
         inactiveTabDisable(activeTab: "selective")
@@ -967,7 +979,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     resetAllCheckboxes()
                     goButtonEnabled(button_status: true)
                     
-//                    clearSelectiveObjectsList()
                     return
                 }
             }
@@ -1038,7 +1049,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 // verify source and destination are not the same - end
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Migrating data from \(JamfProServer.source) to \(JamfProServer.destination).") }
-                migrateOrWipe = "----------- Starting Migration -----------\n"
+                migrateOrWipe = "----------- Starting Replicating -----------\n"
             } else {
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Exporting data from \(JamfProServer.source).") }
                 if export.saveOnly  {
@@ -1054,6 +1065,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.Go] go sender: \(sender)") }
         // determine if we got here from the Go button, selectToMigrate button, or silently
         goSender = "\(sender)"
+//        print("[Go] sender: \(sender)")
 
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.Go] Go button pressed from: \(goSender)") }
         
@@ -1215,7 +1227,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 // determine if the cloud services connection is enabled
                                 var csaMethod = "GET"
                                 if export.saveOnly { csaMethod = "skip" }
-                                Jpapi.shared.action(serverUrl: JamfProServer.destination, endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
+                                Jpapi.shared.action(whichServer: "dest", endpoint: "csa/token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"]!, method: csaMethod) {
                                     (returnedJSON: [String:Any]) in
 //                                            print("CSA: \(returnedJSON)")
                                     if let _ = returnedJSON["scopes"] {
@@ -1433,9 +1445,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             objectsToMigrate += ["macapplications"]
                         }
                         
-                        if patch_policies_button.state.rawValue == 1 {
+                        if patch_mgmt_button.state.rawValue == 1 {
                             //                    objectsToMigrate += ["patches"]
-                            objectsToMigrate += ["patchpolicies"]
+                            objectsToMigrate += ["patchmanagement"]
                         }
                         
                         if advcompsearch_button.state.rawValue == 1 {
@@ -1558,7 +1570,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PutLevelIndicator.shared.indicatorColor[currentNode] = .green
 //                    self.put_levelIndicatorFillColor[currentNode] = .green
                 }
-//                print("[startMigrating] currentNode: \(currentNode)")
+                print("[startMigrating] currentNode: \(currentNode)")
                 switch currentNode {
                 case "computergroups", "smartcomputergroups", "staticcomputergroups":
                     if self.smartComputerGrpsSelected {
@@ -1624,6 +1636,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         self.putCounters["jamfgroups"]        = ["put":0]
                     }
                     self.progressCountArray["accounts"] = 0 // this is the recognized end point
+                case "patchmanagement":
+                    self.progressCountArray["patch-software-title-configurations"] = 0
+                    self.counters["patch-software-title-configurations"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+                    self.summaryDict["patch-software-title-configurations"]        = ["create":[], "update":[], "fail":[]]
+                    self.getCounters["patch-software-title-configurations"]        = ["get":0]
+                    self.putCounters["patch-software-title-configurations"]        = ["put":0]
                 default:
                     self.progressCountArray["\(currentNode)"] = 0
                     self.counters[currentNode] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -1717,7 +1735,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let (resultMessage, resultEndpoint) = result
                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.startMigrating] Returned from existing endpoints: \(resultMessage)") }
                         
-//                        print("build list for selective migration")
+//                        print("build list of objects selected")
                         
                         // clear targetSelectiveObjectList - needed to handle switching tabs
                         if !setting.migrateDependencies || resultEndpoint == "policies" {
@@ -1764,10 +1782,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         var theButton          = ""
 
 //        print("[startMigrating] availableIDsToMigDict: \(availableIDsToMigDict)")
+        // todo - consolidate these 2 vars
         let primaryObjToMigrateID = Int(targetSelectiveObjectList[objectIndex].objectId)
+        let objToMigrateID        = targetSelectiveObjectList[objectIndex].objectId
+        
         dependencyParentId        = primaryObjToMigrateID!
+        dependency.isRunning      = true
         Counter.shared.dependencyMigrated[dependencyParentId] = 0
-        dependency.isRunning = true
         
         switch selectedEndpoint {
         case "accounts/userid", "accounts/groupid":
@@ -1789,6 +1810,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 rawEndpoint = "jamfusers"
             case "accounts/groupid":
                 rawEndpoint = "jamfgroups"
+            case "patchmanagement":
+                rawEndpoint = "patch-software-title-configurations"
             default:
                 rawEndpoint = selectedEndpoint
         }
@@ -1800,12 +1823,36 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointToLookup = "skip"
         }
         
-        let objToMigrateID = targetSelectiveObjectList[objectIndex].objectId
-        
-//        print("[startSelectiveMigration] wipeData.on: \(wipeData.on)")
+        print("[startSelectiveMigration] selectedEndpoint: \(selectedEndpoint)")
         if !wipeData.on {
-            Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup)  { [self]
-                (result: [String:AnyObject]) in
+            Json().getRecord(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup, endpointBase: selectedEndpoint, endpointId: objToMigrateID)  { [self]
+                (objectRecord: Any) in
+                
+                switch selectedEndpoint {
+                case "patchmanagement":
+                    let existingPatch = objectRecord as? PatchSoftwareTitleConfiguration
+                    print("[startSelectiveMigration] patch management title name: \(existingPatch?.displayName ?? "")")
+                    
+                    let selectedObject = targetSelectiveObjectList[objectIndex].objectName
+                    print("[startSelectiveMigration] patch management selectedEndpoint: \(selectedEndpoint)")
+                    print("[startSelectiveMigration] patch management selectedObject: \(selectedObject)")
+                    print("[startSelectiveMigration] selected currentEPDict: \(self.currentEPDict[selectedEndpoint]?[selectedObject] ?? 0)")
+                    print("[startSelectiveMigration] currentEPDict: \(self.currentEPDict)")
+                    if !fileImport {
+                        // export policy details if export.saveRawXml
+                        if export.saveRawXml {
+                            DispatchQueue.main.async { [self] in
+                                WriteToLog.shared.message(stringOfText: "[getEndpoints] Exporting raw JSON for patch policy details")
+                                let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                ExportItems.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
+                            }
+                        }
+                    }
+                default:
+                    break
+                }
+                let result = objectRecord as? [String: AnyObject] ?? [:]
+                print("[startSelectiveMigration] result.count: \(result.count)")
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.startMigration] Returned from Json.getRecord: \(result)") }
                 
                 if pref.stopMigration {
@@ -1816,8 +1863,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 //                print("call getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
                 self.getDependencies(object: "\(selectedEndpoint)", json: result) { [self]
                     (returnedDependencies: [String:[String:String]]) in
-                    //                    print("returned from getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
-                    //                    print("returned getDependencies: \(returnedDependencies)")
+//                    print("returned from getDependencies for \(rawEndpoint)/\(idPath)\(primaryObjToMigrateID)")
+//                    print("returned getDependencies: \(returnedDependencies)")
                     if returnedDependencies.count > 0 {
                         advancedMigrateDict[primaryObjToMigrateID!] = returnedDependencies
                     } else {
@@ -1825,8 +1872,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                     let selectedObject = targetSelectiveObjectList[objectIndex].objectName
-                    // migrate dependencies - start
-                    //                                                print("advancedMigrateDict with policy: \(advancedMigrateDict)")
+//                    print("[startSelectiveMigration] selectedObject: \(selectedObject)")
+                    // include dependencies - start
+//                    print("advancedMigrateDict with policy: \(advancedMigrateDict)")
                     
                     self.destEPQ.async { [self] in
                         
@@ -1932,46 +1980,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             
                             if theButton == "Stop" { return }
-                            var theAction     = "create"
-                            var theEndpointID = 0
+                            
+                            var theAction = "update"
+
                             if !export.saveOnly { WriteToLog.shared.message(stringOfText: "check destination for existing object: \(selectedObject)") }
                             
-                            // remove (policyId) from displayed policy name
-                            /* removed lnh 20230216
-                             if rawEndpoint == "policies" {
-                             var tmpArray = selectedObject.components(separatedBy: "-")
-                             selectedObject = ""
-                             tmpArray.removeLast()
-                             for i in tmpArray {
-                             if i != tmpArray.last {
-                             selectedObject.append("\(i) ")
-                             } else {
-                             selectedObject.append("\(i)")
-                             }
-                             }
-                             }
-                             */
-                            
-                            if self.currentEPDict[rawEndpoint]?[selectedObject] != nil && !export.saveOnly {
-                                theAction     = "update"
-                                theEndpointID = (self.currentEPDict[rawEndpoint]?[selectedObject])!
+                            let existingObjectId = (selectedEndpoint == "patchmanagement") ? self.currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:self.currentEPDict[rawEndpoint]?[selectedObject] ?? 0
+                            if existingObjectId == 0 && !export.saveOnly {
+                                theAction     = "create"
                             }
+                            print("[startSelectiveMigration] existingObjectId: \(existingObjectId), theAction: \(theAction)")
                             
                             WriteToLog.shared.message(stringOfText: "[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency")
                             
                             if !fileImport {
-                                self.endPointByIDQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: theEndpointID, destEpName: selectedObject)
+                                self.endPointByIDQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: targetSelectiveObjectList.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
                             } else {
                                 //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
                                 
                                 let fileToMigrate = displayNameToFilename[selectedObject]
-                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
-                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
+//                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
+//                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
                                 
                                 arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
+//                                print("[ViewController.startSelectiveMigration] selectedObject: \(selectedObject)")
+//                                print("[ViewController.startSelectiveMigration-fileImport] arrayOfSelected: \(arrayOfSelected[selectedObject] ?? [])")
                                 
                                 //                                    if arrayOfSelected.count == targetSelectiveObjectList.count {
                                 if objectIndex+1 == targetSelectiveObjectList.count {
+//                                    print("[ViewController.startSelectiveMigration] processFiles)")
                                     self.processFiles(endpoint: selectedEndpoint, fileCount: targetSelectiveObjectList.count, itemsDict: arrayOfSelected) {
                                         (result: String) in
                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).") }
@@ -1988,7 +2025,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                     }
-                    // migrate dependencies - end
+                    // include dependencies - end
                     //                    }
                     
                 }
@@ -2064,23 +2101,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } else {
                     WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(JamfProServer.source)")
                 }
-//                do {
-//                    if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] {
-//                        if let data = bookmarks[URL(fileURLWithPath: "\(JamfProServer.source)")] {
-//                            var isStale = false
-//                            let importFileURL = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-//                            _ = importFileURL.startAccessingSecurityScopedResource()
-//                            WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] set access permissions to \(JamfProServer.source)")
-//                        }
-//                    }
-//                } catch {
-//                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(JamfProServer.source)")
-//                }
+                
                 if !FileManager.default.isReadableFile(atPath: JamfProServer.source) {
                     WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to read from \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.")
                     pref.stopMigration = true
                     if setting.fullGUI {
-                        _ = Alert.shared.display(header: "Attention:", message: "Unable to read \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.", secondButton: "")
+                        DispatchQueue.main.async {
+                            _ = Alert.shared.display(header: "Attention:", message: "Unable to read \(JamfProServer.source).  Reselect it using the File Import or Browse button and try again.", secondButton: "")
+                            return
+                        }
                     } else {
                         NSApplication.shared.terminate(self)
                     }
@@ -2096,18 +2125,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } else {
                     WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for \(export.saveLocation)")
                 }
-//                do {
-//                    if let bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] {
-//                        if let data = bookmarks[URL(fileURLWithPath: "\(export.saveLocation)")] {
-//                            var isStale = false
-//                            let exportFileURL = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-//                            _ = exportFileURL.startAccessingSecurityScopedResource()
-//                            WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] set access permissions to file://\(export.saveLocation)")
-//                        }
-//                    }
-//                } catch {
-//                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Bookmark Access Failed for file://\(export.saveLocation)")
-//                }
+                
                 if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
                     WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Transporter/")
                     export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
@@ -2138,7 +2156,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] getEndpoints result: \(result)") }
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] exit") }
                 if setting.fullGUI {
-//                    if self.activeTab(fn: "readNodes") == "selective" && result[1] == "0" {
                     if self.activeTab(fn: "readNodes") == "selective" {
                         self.goButtonEnabled(button_status: true)
                     }
@@ -2162,6 +2179,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects from source server (query source server) - destination server if removing
+        print("[getEndpoints] nodesToMigrate: \(nodesToMigrate)")
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] enter") }
 //        pendingGetCount = 0
         Counter.shared.pendingGet = 0
@@ -2215,10 +2233,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            endpointParent = "netboot_servers"
         case "osxconfigurationprofiles":
             endpointParent = "os_x_configuration_profiles"
-        case "patches":
-            endpointParent = "patch_management_software_titles"
-        case "patchpolicies":
-            endpointParent = "patch_policies"
+        case "patchmanagement":
+            endpoint = "patch-software-title-configurations"
+//        case "patches":
+//            endpointParent = "patch_management_software_titles"
+//        case "patchpolicies":
+//            endpointParent = "patch_policies"
         case "restrictedsoftware":
             endpointParent = "restricted_software"
         case "softwareupdateservers":
@@ -2256,10 +2276,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             endpointParent = "\(endpoint)"
         }
-                
-        (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
-        var myURL = "\(JamfProServer.source)/JSSResource/\(node)"
-        myURL = myURL.urlFix
+        
+        var myURL = "\(JamfProServer.source)"
+            
+        switch endpoint {
+        case "patch-software-title-configurations":
+            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
+        default:
+            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
+            myURL = myURL.appending("/JSSResource/\(node)").urlFix
+        }
+//        print("myURL: \(myURL)")
 
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
         
@@ -2290,541 +2317,425 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         (data, response, error) -> Void in
                         session.finishTasksAndInvalidate()
                         //                print("[getEndpoints] fetched endpoint: \(nodesToMigrate[nodeIndex])")
-                        if nodesToMigrate.last == nodesToMigrate[nodeIndex] {
+//                        if nodesToMigrate.last == nodesToMigrate[nodeIndex] {
                             //                    print("[getEndpoints] last node")
-                        }
+//                        }
                         if let httpResponse = response as? HTTPURLResponse {
-                            //                    print("httpResponse: \(httpResponse.statusCode)")
+//                            print("httpResponse: \(httpResponse.statusCode)")
                             if httpResponse.statusCode > 199 && httpResponse.statusCode < 300 {
-                                //                        do {
+
                                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Getting all endpoints from: \(myURL)") }
-                                let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                                if let endpointJSON = json as? [String: Any] {
-                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] endpointJSON: \(endpointJSON))") }
+                                switch endpoint {
+                                case "patch-software-title-configurations":
+                                    PatchTitleConfigurations.source = try! JSONDecoder().decode(PatchSoftwareTitleConfigurations.self, from: data ?? Data())
+
+                                    availableObjsToMigDict.removeAll()
                                     
-                                    switch endpoint {
-                                    case "packages":
-                                        var lookupCount    = 0
-                                        var uniquePackages = [String]()
+                                    var displayNames = [String]()
+                                    for patchObject in PatchTitleConfigurations.source as [PatchSoftwareTitleConfiguration] {
+                                        var displayName = patchObject.displayName
+                                        if patchObject.softwareTitlePublisher.range(of: "(Deprecated Definition)") != nil {
+                                            displayName.append(" (Deprecated Definition)")
+                                        }
+//                                        print("displayName: \(displayName)")
+                                        displayNames.append(displayName)
                                         
-                                        if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
-                                            endpointCount = endpointInfo.count
-                                            
-                                            
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
-                                            
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
-                                            
-                                            if endpointCount > 0 {
+                                        if displayName.isEmpty {
+                                            availableObjsToMigDict[Int(patchObject.id ?? "") ?? 0] = ""
+                                        } else {
+                                            availableObjsToMigDict[Int(patchObject.id ?? "") ?? 0] = displayName
+                                        }
+                                    }
+                                    endpointsRead += 1
+                                    
+                                    endpointCountDict["patchmanagement"] = availableObjsToMigDict.count
+                                    
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
+                                    
+                                    if endpoint == "patch-software-title-configurations" {
+                                        print("[getEndpoints] fetch patch management dependencies from source server")
+                                        PatchDelegate.shared.getDependencies(whichServer: "source") { [self] result in
+                                            message_TextField.stringValue = ""
+                                            PatchDelegate.shared.getDependencies(whichServer: "dest") { [self] result in
+                                                message_TextField.stringValue = ""
                                                 
-                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
-                                                    (result: (String,String)) in
-                                                    if pref.stopMigration {
-                                                        rmDELETE()
-                                                        completion(["migration stopped", "0"])
-                                                        return
+                                                var counter = 1
+                                                if goSender == "goButton" || !setting.fullGUI {
+                                                    // export policy details if export.saveRawXml
+                                                    if export.saveRawXml {
+                                                        DispatchQueue.main.async { [self] in
+                                                            WriteToLog.shared.message(stringOfText: "[getEndpoints] Exporting raw JSON for patch policy details")
+                                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                                            ExportItems.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
+                                                        }
                                                     }
-                                                    let (resultMessage, _) = result
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)") }
                                                     
-                                                    endpointsRead += 1
-                                                    // print("[endpointsRead += 1] \(endpoint)")
-                                                    endpointCountDict[endpoint] = endpointCount
+                                                    print("[getEndpoints] counters: \(counters)")
+                                                    counters[endpoint]!["total"] = availableObjsToMigDict.count
+                                                    //                                                counters["patchmanagement"]!["total"] = availableObjsToMigDict.count
                                                     
-                                                    
-                                                    for i in (0..<endpointCount) {
-                                                        if i == 0 { availableObjsToMigDict.removeAll() }
-                                                        
-                                                        let record      = endpointInfo[i] as! [String : AnyObject]
-                                                        let packageID   = record["id"] as! Int
-                                                        let displayName = record["name"] as! String
-                                                        
-//                                                        print("[getEndpoint] \(#line) call PackagesDelegate().getFilename for source")
-                                                        PackagesDelegate.shared.getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
-                                                            (result: (Int,String)) in
-                                                            let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
-//                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
-//                                                        print("[ViewController.getEndpoints] result: \(result)")
-                                                            lookupCount += 1
-                                                            if lookupCount % 50 == 0 {
-                                                                WriteToLog.shared.message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)")
-                                                            }
-                                                            if packageFilename != "" && uniquePackages.firstIndex(of: packageFilename) == nil {
-                                                                uniquePackages.append(packageFilename)
-                                                                availableObjsToMigDict[packageID] = packageFilename
-                                                                duplicatePackagesDict[packageFilename] = [displayName]
-                                                            }  else {
-                                                                if endpointCountDict[endpoint]! > 0 {
-                                                                    endpointCountDict[endpoint]! -= 1
-                                                                }
-                                                                if packageFilename != "" {
-                                                                    duplicatePackages = true
-                                                                    duplicatePackagesDict[packageFilename]!.append(displayName)
+                                                    for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                        if pref.stopMigration { break }
+                                                        if !wipeData.on  {
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                                            
+                                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                                
+                                                                if setting.onlyCopyMissing {
+                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        (result: String) in
+                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                    }
                                                                 } else {
-                                                                    // catch packages where the filename could not be looked up
-                                                                    if failedPkgNameLookup.firstIndex(of: displayName) == nil {
-                                                                        failedPkgNameLookup.append(displayName)
+                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                }
+                                                            } else {
+                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                                //                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
+                                                                if setting.onlyCopyExisting {
+                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                        (result: String) in
+                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                    }
+                                                                } else {
+                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                }
+                                                            }
+                                                        } else {
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
+                                                        }   // if !wipeData.on else - end
+                                                        counter+=1
+                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                    if wipeData.on {
+                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                                    }
+                                                } else {
+                                                    // populate source server under the selective tab
+                                                    // print("populate (\(endpoint)) source server under the selective tab")
+                                                    delayInt = listDelay(itemCount: availableObjsToMigDict.count)
+                                                    for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                        sortQ.async { [self] in
+                                                            //                                                                print("adding \(l_xmlName) to array")
+                                                            availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
+                                                            sourceDataArray.append(l_xmlName)
+                                                            
+                                                            sourceDataArray = sourceDataArray.sorted{ $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+                                                            
+                                                            staticSourceDataArray = sourceDataArray
+                                                            updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                            
+                                                            DispatchQueue.main.async { [self] in
+                                                                srcSrvTableView.reloadData()
+                                                            }
+                                                            // slight delay in building the list - visual effect
+                                                            usleep(delayInt)
+                                                            
+                                                            if counter == availableObjsToMigDict.count {
+                                                                nodesMigrated += 1
+                                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                                goButtonEnabled(button_status: true)
+                                                            }
+                                                            counter+=1
+                                                        }   // sortQ.async - end
+                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                }   // if goSender else - end
+                                                
+                                                completion(displayNames)
+                                            }
+                                        }
+                                    }
+                                    
+                                    
+                                default:
+                                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                                    if let endpointJSON = json as? [String: Any] {
+                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] endpointJSON: \(endpointJSON))") }
+                                        
+                                        switch endpoint {
+                                        case "packages":
+                                            var lookupCount    = 0
+                                            var uniquePackages = [String]()
+                                            
+                                            if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
+                                                endpointCount = endpointInfo.count
+                                                
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
+                                                
+                                                if endpointCount > 0 {
+                                                    
+                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
+                                                        (result: (String,String)) in
+                                                        if pref.stopMigration {
+                                                            rmDELETE()
+                                                            completion(["migration stopped", "0"])
+                                                            return
+                                                        }
+                                                        let (resultMessage, _) = result
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)") }
+                                                        
+                                                        endpointsRead += 1
+                                                        // print("[endpointsRead += 1] \(endpoint)")
+                                                        endpointCountDict[endpoint] = endpointCount
+                                                        
+                                                        
+                                                        for i in (0..<endpointCount) {
+                                                            if i == 0 { availableObjsToMigDict.removeAll() }
+                                                            
+                                                            let record      = endpointInfo[i] as! [String : AnyObject]
+                                                            let packageID   = record["id"] as! Int
+                                                            let displayName = record["name"] as! String
+                                                            
+    //                                                        print("[getEndpoint] \(#line) call PackagesDelegate().getFilename for source")
+                                                            PackagesDelegate.shared.getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: packageID, skip: wipeData.on, currentTry: 1) { [self]
+                                                                (result: (Int,String)) in
+                                                                let (_,packageFilename) = wipeData.on ? (packageID,displayName):result
+    //                                                        let (_,packageFilename) = wipeData.on ? (packageID,record["name"] as! String):result
+    //                                                        print("[ViewController.getEndpoints] result: \(result)")
+                                                                lookupCount += 1
+                                                                if lookupCount % 50 == 0 {
+                                                                    WriteToLog.shared.message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)")
+                                                                }
+                                                                if packageFilename != "" && uniquePackages.firstIndex(of: packageFilename) == nil {
+                                                                    uniquePackages.append(packageFilename)
+                                                                    availableObjsToMigDict[packageID] = packageFilename
+                                                                    duplicatePackagesDict[packageFilename] = [displayName]
+                                                                }  else {
+                                                                    if endpointCountDict[endpoint]! > 0 {
+                                                                        endpointCountDict[endpoint]! -= 1
+                                                                    }
+                                                                    if packageFilename != "" {
+                                                                        duplicatePackages = true
+                                                                        duplicatePackagesDict[packageFilename]!.append(displayName)
+                                                                    } else {
+                                                                        // catch packages where the filename could not be looked up
+                                                                        if failedPkgNameLookup.firstIndex(of: displayName) == nil {
+                                                                            failedPkgNameLookup.append(displayName)
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
-                                                            if lookupCount == endpointCount {
-                                                                WriteToLog.shared.message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)")
-                                                                if duplicatePackages {
-                                                                    var message = "\tFilename : Display Name\n"
-                                                                    for (pkgFilename, displayNames) in duplicatePackagesDict {
-                                                                        if displayNames.count > 1 {
-                                                                            for dup in displayNames {
-                                                                                message = "\(message)\t\(pkgFilename) : \(dup)\n"
+                                                                if lookupCount == endpointCount {
+                                                                    WriteToLog.shared.message(stringOfText: "scanned \(lookupCount) of \(endpointCount) packages on \(JamfProServer.source)")
+                                                                    if duplicatePackages {
+                                                                        var message = "\tFilename : Display Name\n"
+                                                                        for (pkgFilename, displayNames) in duplicatePackagesDict {
+                                                                            if displayNames.count > 1 {
+                                                                                for dup in displayNames {
+                                                                                    message = "\(message)\t\(pkgFilename) : \(dup)\n"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(JamfProServer.source)\n\(message)")
+                                                                        if setting.fullGUI {
+    //                                                                        print("[getEndoints] \(#line) server: \(JamfProServer.source)")
+    //                                                                        print("[getEndoints] \(#line) message: \(message)")
+                                                                            let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                                                            if theButton == "Stop" {
+                                                                                stopButton(self)
                                                                             }
                                                                         }
                                                                     }
-                                                                    WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(JamfProServer.source)\n\(message)")
-                                                                    if setting.fullGUI {
-//                                                                        print("[getEndoints] \(#line) server: \(JamfProServer.source)")
-//                                                                        print("[getEndoints] \(#line) message: \(message)")
-                                                                        let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(JamfProServer.source), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
-                                                                        if theButton == "Stop" {
-                                                                            stopButton(self)
+                                                                    if failedPkgNameLookup.count > 0 {
+                                                                        WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] 1 or more package filenames on \(JamfProServer.source) could not be verified")
+                                                                        WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Failed package filename lookup: \(failedPkgNameLookup)")
+                                                                        if setting.fullGUI {
+                                                                            let theButton = Alert.shared.display(header: "Warning:", message: "1 or more package filenames on \(JamfProServer.source) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
+                                                                            if theButton == "Stop" {
+                                                                                stopButton(self)
+                                                                            }
                                                                         }
                                                                     }
-                                                                }
-                                                                if failedPkgNameLookup.count > 0 {
-                                                                    WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] 1 or more package filenames on \(JamfProServer.source) could not be verified")
-                                                                    WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Failed package filename lookup: \(failedPkgNameLookup)")
-                                                                    if setting.fullGUI {
-                                                                        let theButton = Alert.shared.display(header: "Warning:", message: "1 or more package filenames on \(JamfProServer.source) could not be verified and will not be available to migrate.  Check the log for 'Failed package filename lookup' for details.", secondButton: "Stop")
-                                                                        if theButton == "Stop" {
-                                                                            stopButton(self)
-                                                                        }
-                                                                    }
-                                                                }
-                                                                
-//                                                              currentEPDict[destEndpoint] = currentEPs
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] returning existing packages endpoints: \(availableObjsToMigDict)") }
-                                                                
-//                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-//                                                            return
-                                                                // make into a func - start
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
-                                                                
-                                                                var counter = 1
-                                                                print("[getEndpoints] goSender: \(goSender)")
-                                                                if goSender == "goButton" || goSender == "silent" {
                                                                     
-                                                                    counters[endpoint]!["total"] = availableObjsToMigDict.count
+    //                                                              currentEPDict[destEndpoint] = currentEPs
+                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] returning existing packages endpoints: \(availableObjsToMigDict)") }
                                                                     
-                                                                    for (l_xmlID, l_xmlName) in availableObjsToMigDict {
-                                                                        if !wipeData.on  {
-                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
-                                                                            
-                                                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
-                                                                                if setting.onlyCopyMissing {
-                                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                                        (result: String) in
-                                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+    //                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+    //                                                            return
+                                                                    // make into a func - start
+                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
+                                                                    
+                                                                    var counter = 1
+                                                                    print("[getEndpoints] goSender: \(goSender)")
+                                                                    if goSender == "goButton" || goSender == "silent" {
+                                                                        
+                                                                        counters[endpoint]!["total"] = availableObjsToMigDict.count
+                                                                        
+                                                                        for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                                            if !wipeData.on  {
+                                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                                                                
+                                                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                                                    if setting.onlyCopyMissing {
+                                                                                        getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                            (result: String) in
+                                                                                            completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                        }
+                                                                                    } else {
+                                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                                                     }
                                                                                 } else {
-                                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                                                    if setting.onlyCopyExisting {
+                                                                                        getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                            (result: String) in
+                                                                                            completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                        }
+                                                                                    } else {
+                                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                                    }
                                                                                 }
                                                                             } else {
-                                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-                                                                                if setting.onlyCopyExisting {
-                                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                                        (result: String) in
-                                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                                    }
-                                                                                } else {
-                                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                                                if wipeData.on {
+                                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
                                                                                 }
-                                                                            }
-                                                                        } else {
-                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
-                                                                            if wipeData.on {
-                                                                                removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
-                                                                            }
-                                                                        }   // if !wipeData.on else - end
-                                                                        counter+=1
-                                                                    }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                                                } else {
-                                                                    // populate source server under the selective tab - bulk
-                                                                    print("[getEndpoints] availableObjsToMigDict: \(availableObjsToMigDict)")
-                                                                    if !pref.stopMigration {
-//                                                                      print("-populate (\(endpoint)) source server under the selective tab")
-                                                                        delayInt = (availableObjsToMigDict.count > 1000) ? 0:listDelay(itemCount: availableObjsToMigDict.count)
-                                                                        for (l_xmlID, l_xmlName) in availableObjsToMigDict {
-                                                                            sortQ.async { [self] in
-//                                                                              print("[getEndpoints] adding \(l_xmlName) to array")
-                                                                                availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
-                                                                                sourceDataArray.append(l_xmlName)
-                                                                                sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                                
-                                                                                staticSourceDataArray = sourceDataArray
-                                                                                
-                                                                                updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                                                                // slight delay in building the list - visual effect
-                                                                                usleep(delayInt)
-                                                                                
-                                                                                if counter == availableObjsToMigDict.count {
-                                                                                    nodesMigrated += 1
-                                                                                    print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                                                    goButtonEnabled(button_status: true)
-                                                                                }
-                                                                                counter+=1
-                                                                            }   // sortQ.async - end
+                                                                            }   // if !wipeData.on else - end
+                                                                            counter+=1
                                                                         }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                                    }   // if !pref.stopMigration
-                                                                }   // if goSender else - end
-                                                                // make into a func - end
-                                                                
-                                                                if nodeIndex < nodesToMigrate.count - 1 {
-                                                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                                                    } else {
+                                                                        // populate source server under the selective tab - bulk
+//                                                                        print("[getEndpoints] availableObjsToMigDict: \(availableObjsToMigDict)")
+                                                                        if !pref.stopMigration {
+    //                                                                      print("-populate (\(endpoint)) source server under the selective tab")
+                                                                            delayInt = (availableObjsToMigDict.count > 1000) ? 0:listDelay(itemCount: availableObjsToMigDict.count)
+                                                                            for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                                                sortQ.async { [self] in
+    //                                                                              print("[getEndpoints] adding \(l_xmlName) to array")
+                                                                                    availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
+                                                                                    sourceDataArray.append(l_xmlName)
+                                                                                    sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                                    
+                                                                                    staticSourceDataArray = sourceDataArray
+                                                                                    
+                                                                                    updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                                                    // slight delay in building the list - visual effect
+                                                                                    usleep(delayInt)
+                                                                                    
+                                                                                    if counter == availableObjsToMigDict.count {
+                                                                                        nodesMigrated += 1
+                                                                                        print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                                                        goButtonEnabled(button_status: true)
+                                                                                    }
+                                                                                    counter+=1
+                                                                                }   // sortQ.async - end
+                                                                            }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                        }   // if !pref.stopMigration
+                                                                    }   // if goSender else - end
+                                                                    // make into a func - end
+                                                                    
+                                                                    if nodeIndex < nodesToMigrate.count - 1 {
+                                                                        readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                                    }
+                                                                    if !(setting.onlyCopyMissing || setting.onlyCopyExisting) {
+                                                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                                    }
+                                                                    
                                                                 }
-                                                                if !(setting.onlyCopyMissing || setting.onlyCopyExisting) {
-                                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                                }
-                                                                
                                                             }
-                                                        }
-                                                    } // for i - end
-                                                } // existingEndpoints(skipLookup: false, theDestEndpoint - end
-                                            } else {
-                                                // no packages were found
-                                                endpointsRead += 1
-                                                // print("[endpointsRead += 1] \(endpoint)")
-                                                
-                                                //                                            self.nodesMigrated+=1
-                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                
-                                                
-                                                //                                            if endpoint == self.objectsToMigrate.last {
-                                                //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
-                                                //                                                self.rmDELETE()
-                                                //                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                //                                            }
+                                                        } // for i - end
+                                                    } // existingEndpoints(skipLookup: false, theDestEndpoint - end
+                                                } else {
+                                                    // no packages were found
+                                                    endpointsRead += 1
+                                                    // print("[endpointsRead += 1] \(endpoint)")
+                                                    
+                                                    //                                            self.nodesMigrated+=1
+                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    
+                                                    
+                                                    //                                            if endpoint == self.objectsToMigrate.last {
+                                                    //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
+                                                    //                                                self.rmDELETE()
+                                                    //                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                    //                                            }
+                                                    if nodeIndex < nodesToMigrate.count - 1 {
+                                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                    }
+                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                }   // if endpointCount > 0 - end
+                                            } else {   // end if let endpointInfo
                                                 if nodeIndex < nodesToMigrate.count - 1 {
                                                     self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                                 }
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                            }   // if endpointCount > 0 - end
-                                        } else {   // end if let endpointInfo
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                             }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                        
-                                    case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
-                                        if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
-                                            endpointCount = endpointInfo.count
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                                             
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
-                                            
-                                            if endpointCount > 0 {
+                                        case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                                            if let endpointInfo = endpointJSON[endpointParent] as? [Any] {
+                                                endpointCount = endpointInfo.count
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                                                 
-                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
-                                                    (result: (String,String)) in
-                                                    if pref.stopMigration {
-                                                        rmDELETE()
-                                                        completion(["migration stopped", "0"])
-                                                        return
-                                                    }
-                                                    let (resultMessage, _) = result
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)") }
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
+                                                
+                                                if endpointCount > 0 {
                                                     
-                                                    endpointsRead += 1
-                                                    // print("[endpointsRead += 1] \(endpoint)")
-                                                    
-                                                    endpointCountDict[endpoint] = endpointCount
-                                                    for i in (0..<endpointCount) {
-                                                        if i == 0 { availableObjsToMigDict.removeAll() }
-                                                        
-                                                        let record = endpointInfo[i] as! [String : AnyObject]
-                                                        
-                                                        if record["name"] != nil {
-                                                            availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                                        } else {
-                                                            availableObjsToMigDict[record["id"] as! Int] = ""
+                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
+                                                        (result: (String,String)) in
+                                                        if pref.stopMigration {
+                                                            rmDELETE()
+                                                            completion(["migration stopped", "0"])
+                                                            return
                                                         }
+                                                        let (resultMessage, _) = result
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(endpoint): \(resultMessage)") }
                                                         
-                                                    }   // for i in (0..<endpointCount) end
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
-                                                    
-                                                    var counter = 1
-                                                    if goSender == "goButton" || !setting.fullGUI {
+                                                        endpointsRead += 1
+                                                        // print("[endpointsRead += 1] \(endpoint)")
                                                         
-                                                        counters[endpoint]!["total"] = availableObjsToMigDict.count
-                                                        
-                                                        for (l_xmlID, l_xmlName) in availableObjsToMigDict {
-                                                            if pref.stopMigration { break }
-                                                            if !wipeData.on  {
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
-                                                                
-                                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
-                                                                    
-                                                                    if setting.onlyCopyMissing {
-                                                                        getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                            (result: String) in
-                                                                            completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                        }
-                                                                    } else {
-                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                                    }
-                                                                } else {
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-//                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
-                                                                    if setting.onlyCopyExisting {
-                                                                        getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                        createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                            (result: String) in
-                                                                            completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                        }
-                                                                    } else {
-                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                                    }
-                                                                }
+                                                        endpointCountDict[endpoint] = endpointCount
+                                                        for i in (0..<endpointCount) {
+                                                            if i == 0 { availableObjsToMigDict.removeAll() }
+                                                            
+                                                            let record = endpointInfo[i] as! [String : AnyObject]
+                                                            
+                                                            if record["name"] != nil {
+                                                                availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
                                                             } else {
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
-                                                                removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
-                                                            }   // if !wipeData.on else - end
-                                                            counter+=1
-                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                        if wipeData.on {
-                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                                        }
-                                                    } else {
-                                                        // populate source server under the selective tab
-                                                        // print("populate (\(endpoint)) source server under the selective tab")
-                                                        delayInt = listDelay(itemCount: availableObjsToMigDict.count)
-                                                        for (l_xmlID, l_xmlName) in availableObjsToMigDict {
-                                                            sortQ.async { [self] in
-//                                                                print("adding \(l_xmlName) to array")
-                                                                availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
-                                                                sourceDataArray.append(l_xmlName)
-                                                                //                                                        if availableIDsToMigDict.count == sourceDataArray.count {
-                                                                sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                
-                                                                staticSourceDataArray = sourceDataArray
-                                                                updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                                                
-                                                                
-                                                                DispatchQueue.main.async { [self] in
-                                                                    srcSrvTableView.reloadData()
-                                                                }
-                                                                // slight delay in building the list - visual effect
-                                                                usleep(delayInt)
-                                                                
-                                                                if counter == availableObjsToMigDict.count {
-                                                                    nodesMigrated += 1
-                                                                    print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                                    goButtonEnabled(button_status: true)
-                                                                }
-                                                                counter+=1
-                                                            }   // sortQ.async - end
-                                                        }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
-                                                        
-                                                    }   // if goSender else - end
-                                                }   // existingEndpoints - end
-                                            } else {
-                                                //                                            self.nodesMigrated+=1
-                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                
-                                                self.endpointsRead += 1
-                                            }   // if endpointCount > 0 - end
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        } else {   // end if let endpointInfo
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                        
-                                    case "computergroups", "mobiledevicegroups", "usergroups":
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] processing device groups") }
-                                        if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
-                                            
-                                            endpointCount = endpointInfo.count
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] groups found: \(endpointCount)") }
-                                            
-                                            var smartGroupDict: [Int: String] = [:]
-                                            var staticGroupDict: [Int: String] = [:]
-                                            
-                                            if endpointCount > 0 {
-                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
-                                                    (result: (String,String)) in
-                                                    if pref.stopMigration {
-                                                        rmDELETE()
-                                                        completion(["migration stopped", "0"])
-                                                        return
-                                                    }
-                                                    //                                                let (resultMessage, _) = result
-                                                    // find number of groups
-                                                    smartCount = 0
-                                                    staticCount = 0
-                                                    var excludeCount = 0
-                                                    
-                                                    endpointsRead += 1
-                                                    // print("[endpointsRead += 1] \(endpoint)")
-                                                    
-                                                    // split computergroups into smart and static - start
-                                                    for i in (0..<endpointCount) {
-                                                        let record = endpointInfo[i] as! [String : AnyObject]
-                                                        
-                                                        let smart: Bool = (record["is_smart"] as! Bool)
-                                                        if smart {
-                                                            //smartCount += 1
-                                                            if (record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches") || export.backupMode {
-                                                                smartGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                                                availableObjsToMigDict[record["id"] as! Int] = ""
                                                             }
-                                                        } else {
-                                                            //staticCount += 1
-                                                            staticGroupDict[record["id"] as! Int] = record["name"] as! String?
-                                                        }
-                                                    }
-                                                    
-                                                    if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
-                                                        nodesMigrated+=1
-                                                    }
-                                                    // split devicegroups into smart and static - end
-                                                    
-                                                    // groupType is "" for bulk migrations, smart/static for selective
-                                                    switch endpoint {
-                                                    case "computergroups":
-                                                        if (!smartComputerGrpsSelected && groupType == "") || groupType == "static" {
-                                                            excludeCount += smartGroupDict.count
-                                                        }
-                                                        if (!staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
-                                                            excludeCount += staticGroupDict.count
-                                                        }
-                                                        if smartComputerGrpsSelected && staticComputerGrpsSelected && groupType == "" {
-                                                            nodesMigrated-=1
-                                                        }
-                                                    case "mobiledevicegroups":
-                                                        if (!smartIosGrpsSelected && groupType == "") || groupType == "static" {
-                                                            excludeCount += smartGroupDict.count
-                                                        }
-                                                        if (!staticIosGrpsSelected && groupType == "") || groupType == "smart" {
-                                                            excludeCount += staticGroupDict.count
-                                                        }
-                                                        if smartIosGrpsSelected && staticIosGrpsSelected {
-                                                            nodesMigrated-=1
-                                                        }
-                                                    case "usergroups":
-                                                        if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
-                                                            excludeCount += smartGroupDict.count
-                                                        }
-                                                        if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
-                                                            excludeCount += staticGroupDict.count
-                                                        }
-                                                        if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
-                                                            nodesMigrated-=1
-                                                        }
-                                                        
-                                                    default: break
-                                                    }
-                                                    
-                                                    //                                                print(" smart_comp_grps_button.state.rawValue: \(smart_comp_grps_button.state.rawValue)")
-                                                    //                                                print("static_comp_grps_button.state.rawValue: \(static_comp_grps_button.state.rawValue)")
-                                                    //                                                print("                                  groupType: \(groupType)")
-                                                    //                                                print("                               excludeCount: \(excludeCount)")
-                                                    
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(smartGroupDict.count) smart groups") }
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(staticGroupDict.count) static groups") }
-                                                    var currentGroupDict: [Int: String] = [:]
-                                                    
-                                                    // verify we have some groups
-                                                    for g in (0...1) {
-                                                        currentGroupDict.removeAll()
-                                                        var groupCount = 0
-                                                        var localEndpoint = endpoint
-                                                        switch endpoint {
-                                                        case "computergroups":
-                                                            if (smartComputerGrpsSelected || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                                currentGroupDict = smartGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                localEndpoint = "smartcomputergroups"
-                                                            }
-                                                            if (staticComputerGrpsSelected || (goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                                currentGroupDict = staticGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                localEndpoint = "staticcomputergroups"
-                                                            }
-                                                        case "mobiledevicegroups":
-                                                            if ((smartIosGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                                currentGroupDict = smartGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                localEndpoint = "smartmobiledevicegroups"
-                                                            }
-                                                            if ((staticIosGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                                currentGroupDict = staticGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                localEndpoint = "staticmobiledevicegroups"
-                                                            }
-                                                        case "usergroups":
-                                                            if ((smartUserGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                                                currentGroupDict = smartGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                //                                                        DeviceGroupType = "smartcomputergroups"
-                                                                //                                                        print("usergroups smart - DeviceGroupType: \(DeviceGroupType)")
-                                                                localEndpoint = "smartusergroups"
-                                                            }
-                                                            if ((staticUserGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                                                currentGroupDict = staticGroupDict
-                                                                groupCount = currentGroupDict.count
-                                                                //                                                        DeviceGroupType = "staticcomputergroups"
-                                                                //                                                        print("usergroups static - DeviceGroupType: \(DeviceGroupType)")
-                                                                localEndpoint = "staticusergroups"
-                                                            }
-                                                        default: break
-                                                        }
+                                                            
+                                                        }   // for i in (0..<endpointCount) end
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
                                                         
                                                         var counter = 1
-                                                        delayInt = listDelay(itemCount: currentGroupDict.count)
-                                                        
-                                                        endpointCountDict[localEndpoint] = groupCount
-                                                        
-                                                        if currentGroupDict.count == 0 && (localEndpoint == "smartcomputergroups" || localEndpoint == "staticcomputergroups" || localEndpoint == "smartmobiledevicegroups" || localEndpoint == "staticmobiledevicegroups") {
-                                                            getStatusUpdate2(endpoint: localEndpoint, total: 0)
-                                                            putStatusUpdate2(endpoint: localEndpoint, total: 0)
-                                                        }
-                                                        
-                                                        counters[endpoint]!["total"] = currentGroupDict.count
-                                                        
-                                                        for (l_xmlID, l_xmlName) in currentGroupDict {
-                                                            availableObjsToMigDict[l_xmlID] = l_xmlName
-                                                            if goSender == "goButton" || goSender == "silent" {
+                                                        if goSender == "goButton" || !setting.fullGUI {
+                                                            
+                                                            counters[endpoint]!["total"] = availableObjsToMigDict.count
+                                                            
+                                                            for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                                if pref.stopMigration { break }
                                                                 if !wipeData.on  {
-                                                                    //need to call existingEndpoints here to keep proper order?
-                                                                    if currentEPs[l_xmlName] != nil {
+                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                                                    
+                                                                    if currentEPDict[endpoint]?[l_xmlName] != nil {
                                                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
                                                                         
                                                                         if setting.onlyCopyMissing {
-                                                                                getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                                createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                                    (result: String) in
-                                                                                    completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                                }
-                                                                            } else {
-                                                                                endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                (result: String) in
+                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
                                                                             }
-                                                                        
+                                                                        } else {
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                        }
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
-                                                                        
+                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+    //                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
                                                                         if setting.onlyCopyExisting {
                                                                             getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
                                                                             createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
@@ -2832,307 +2743,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                                 completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
                                                                             }
                                                                         } else {
-                                                                            endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                                         }
-                                                                        
-                                                                    }
-                                                                } else {
-                                                                    removeEndpointsQueue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
-                                                                }   // if !wipeData.on else - end
-                                                                counter += 1
-                                                            } else {
-                                                                // populate source server under the selective tab
-                                                                sortQ.async { [self] in
-//                                                                print("adding \(l_xmlName) to array")
-                                                                    availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
-                                                                    sourceDataArray.append(l_xmlName)
-                                                                    
-                                                                    staticSourceDataArray = sourceDataArray
-                                                                    updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                                                    
-//                                                                    DispatchQueue.main.async { [self] in
-//                                                                        srcSrvTableView.reloadData()
-//                                                                    }
-                                                                    // slight delay in building the list - visual effect
-                                                                    usleep(delayInt)
-                                                                    
-                                                                    if counter == sourceDataArray.count {
-                                                                        
-                                                                        sortList(theArray: sourceDataArray) { [self]
-                                                                            (result: [String]) in
-                                                                            sourceDataArray = result
-                                                                            DispatchQueue.main.async { [self] in
-                                                                                srcSrvTableView.reloadData()
-                                                                            }
-                                                                            print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                                            goButtonEnabled(button_status: true)
-                                                                        }
-                                                                    }
-                                                                    counter += 1
-                                                                }   // sortQ.async - end
-                                                            }   // if goSender else - end
-                                                        }   // for (l_xmlID, l_xmlName) - end
-                                                        
-                                                        nodesMigrated+=1
-                                                        if wipeData.on && (goSender == "goButton" || goSender == "silent") {
-                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                                        }
-                                                        
-                                                    }   //for g in (0...1) - end
-                                                }   // existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)") - end
-                                            } else {    //if endpointCount > 0 - end
-                                                //                                            self.nodesMigrated+=1
-                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                
-                                                self.endpointsRead += 1
-                                                // print("[endpointsRead += 1] \(endpoint)")
-                                                //                                            if endpoint == self.objectsToMigrate.last {
-                                                //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
-                                                //                                                self.rmDELETE()
-                                                //                                            }
-                                            }   // else if endpointCount > 0 - end
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                        
-                                    case "policies":
-                                        //                                    print("[ViewController.getEndpoints] processing policies")
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] processing policies") }
-                                        if let endpointInfo = endpointJSON[endpoint] as? [Any] {
-                                            endpointCount = endpointInfo.count
-                                            
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] policies found: \(endpointCount)") }
-                                            
-                                            var computerPoliciesDict: [Int: String] = [:]
-                                            
-                                            if endpointCount > 0 {
-                                                if pref.stopMigration {
-                                                    self.rmDELETE()
-                                                    completion(["migration stopped", "0"])
-                                                    return
-                                                }
-                                                if setting.fullGUI {
-                                                    // display migrateDependencies button
-                                                    DispatchQueue.main.async {
-                                                        if !wipeData.on {
-                                                            self.migrateDependencies.isHidden = false
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                // create dictionary of existing policies
-                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: "policies")  { [self]
-                                                    (result: (String,String)) in
-                                                    let (resultMessage, _) = result
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] policies - returned from existing endpoints: \(resultMessage)") }
-                                                    
-                                                    // filter out policies created from jamf remote (casper remote) - start
-                                                    for i in (0..<endpointCount) {
-                                                        let record = endpointInfo[i] as! [String : AnyObject]
-                                                        let nameCheck = record["name"] as! String
-                                                        
-                                                        if nameCheck.range(of:"[0-9]{4}-[0-9]{2}-[0-9]{2} at [0-9]", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
-                                                            computerPoliciesDict[record["id"] as! Int] = nameCheck
-                                                        }
-                                                    }
-                                                    // filter out policies created from casper remote - end
-                                                    
-                                                    availableObjsToMigDict = computerPoliciesDict
-                                                    let nonRemotePolicies = computerPoliciesDict.count
-                                                    var counter = 1
-                                                    
-                                                    delayInt = listDelay(itemCount: computerPoliciesDict.count)
-                                                    //                                                print("[ViewController.getEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
-                                                    
-                                                    endpointsRead += 1
-                                                    // print("[endpointsRead += 1] \(endpoint)")
-                                                    endpointCountDict[endpoint] = computerPoliciesDict.count
-                                                    if computerPoliciesDict.count == 0 {
-                                                        endpointsRead += 1
-                                                        nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
-                                                        // print("[endpointsRead += 1] \(endpoint)")
-                                                    } else {
-                                                        
-                                                        counters[endpoint]!["total"] = computerPoliciesDict.count
-                                                        
-                                                        for (l_xmlID, l_xmlName) in computerPoliciesDict {
-                                                            if goSender == "goButton" || goSender == "silent" {
-                                                                if !wipeData.on  {
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
-                                                                    //                                                        if currentEPs[l_xmlName] != nil {
-                                                                    if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
-                                                                        
-                                                                        if setting.onlyCopyMissing {
-                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                                (result: String) in
-                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                            }
-                                                                        } else {
-                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                                        }
-                                                                        
-                                                                    } else {
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-                                                                        
-                                                                        if setting.onlyCopyExisting {
-                                                                            getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
-                                                                            createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                                                (result: String) in
-                                                                                completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
-                                                                            }
-                                                                        } else {
-                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                                        }
-                                                                        
                                                                     }
                                                                 } else {
                                                                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
-                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
-                                                                }   // if !wipeData.on else - end
-                                                                counter += 1
-                                                            } else {
-                                                                // populate source server under the selective tab
-                                                                sortQ.async { [self] in
-                                                                    availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = "\(l_xmlID)"
-                                                                    sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
-                                                                    sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
-                                                                    
-                                                                    staticSourceDataArray = sourceDataArray
-                                                                    updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                                                    
-//                                                                    DispatchQueue.main.async { [self] in
-//                                                                        srcSrvTableView.reloadData()
-//                                                                    }
-                                                                    // slight delay in building the list - visual effect
-                                                                    usleep(delayInt)
-                                                                    
-                                                                    if counter == computerPoliciesDict.count {
-                                                                        nodesMigrated += 1
-                                                                        print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                                        goButtonEnabled(button_status: true)
-                                                                    }
-                                                                    counter+=1
-                                                                }   // sortQ.async - end
-                                                                
-                                                            }   // if goSender else - end
-                                                        }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
-                                                    }   // else for (l_xmlID, l_xmlName) - end
-                                                    if wipeData.on && (goSender == "goButton" || goSender == "silent") {
-                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                                    }
-                                                }   // existingEndpoints - end
-                                            } else {
-                                                //                                            self.nodesMigrated+=1
-                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                
-                                                endpointsRead += 1
-                                                // print("[endpointsRead += 1] \(endpoint)")
-                                                //                                            if endpoint == self.objectsToMigrate.last {
-                                                //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
-                                                //                                                self.rmDELETE()
-                                                ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                //                                            }
-                                                if nodeIndex < nodesToMigrate.count - 1 {
-                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                                }
-                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                            }   // if endpointCount > 0
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])") }
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            //                                        print("[ViewController.getEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        } else {   //if let endpointInfo = endpointJSON - end
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])") }
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                            }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                        
-                                    case "jamfusers", "jamfgroups":
-                                        let accountsDict = endpointJSON as [String: Any]
-                                        let usersGroups = accountsDict["accounts"] as! [String: Any]
-                                        
-                                        if let endpointInfo = usersGroups[endpointParent] as? [Any] {
-                                            endpointCount = endpointInfo.count
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
-                                            
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
-                                            
-                                            if endpointCount > 0 {
-                                                
-                                                self.existingEndpoints(skipLookup: false, theDestEndpoint: "ldapservers")  {
-                                                    (result: (String,String)) in
-                                                    if pref.stopMigration {
-                                                        self.rmDELETE()
-                                                        completion(["migration stopped", "0"])
-                                                        return
-                                                    }
-                                                    let (resultMessage, _) = result
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getEndpoints-LDAP] Returned from existing ldapservers: \(resultMessage)") }
-                                                    
-                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: endpoint)  { [self]
-                                                        (result: (String,String)) in
-                                                        let (resultMessage, _) = result
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(node): \(resultMessage)") }
-                                                        
-                                                        endpointsRead += 1
-                                                        // print("[endpointsRead += 1] \(endpoint)")
-                                                        endpointCountDict[endpoint] = endpointCount
-                                                        
-                                                        counters[endpoint]!["total"] = endpointCount
-                                                        
-                                                        for i in (0..<endpointCount) {
-                                                            if i == 0 { availableObjsToMigDict.removeAll() }
-                                                            
-                                                            let record = endpointInfo[i] as! [String : AnyObject]
-                                                            if !(endpoint == "jamfusers" && record["name"] as! String? == dest_user) {
-                                                                availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
-                                                            }
-                                                            
-                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Current number of \(endpoint) to process: \(availableObjsToMigDict.count)") }
-                                                        }   // for i in (0..<endpointCount) end
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
-                                                        
-                                                        var counter = 1
-                                                        if goSender == "goButton" || goSender == "silent" {
-                                                            if availableObjsToMigDict.count == 0 && endpoint == "jamfusers"{
-                                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                            }
-                                                            for (l_xmlID, l_xmlName) in availableObjsToMigDict {
-                                                                if !wipeData.on  {
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
-                                                                    
-                                                                    if currentEPs[l_xmlName] != nil {
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
-                                                                        
-                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                                    } else {
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                                    }
-                                                                } else {
-                                                                    if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
-                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
-                                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
-                                                                    }
-                                                                    
+                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
                                                                 }   // if !wipeData.on else - end
                                                                 counter+=1
                                                             }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
@@ -3141,22 +2757,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             }
                                                         } else {
                                                             // populate source server under the selective tab
+                                                            // print("populate (\(endpoint)) source server under the selective tab")
                                                             delayInt = listDelay(itemCount: availableObjsToMigDict.count)
                                                             for (l_xmlID, l_xmlName) in availableObjsToMigDict {
                                                                 sortQ.async { [self] in
-//                                                                    print("adding \(l_xmlName) to array")
+    //                                                                print("adding \(l_xmlName) to array")
                                                                     availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
                                                                     sourceDataArray.append(l_xmlName)
-                                                                    
+                                                                    //                                                        if availableIDsToMigDict.count == sourceDataArray.count {
                                                                     sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
                                                                     
                                                                     staticSourceDataArray = sourceDataArray
-                                                                    
                                                                     updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
                                                                     
-//                                                                    DispatchQueue.main.async { [self] in
-//                                                                        srcSrvTableView.reloadData()
-//                                                                    }
+                                                                    
+                                                                    DispatchQueue.main.async { [self] in
+                                                                        srcSrvTableView.reloadData()
+                                                                    }
                                                                     // slight delay in building the list - visual effect
                                                                     usleep(delayInt)
                                                                     
@@ -3168,44 +2785,583 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     counter+=1
                                                                 }   // sortQ.async - end
                                                             }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                            
                                                         }   // if goSender else - end
-                                                        
-                                                        // fix reading next endpoint for other endpoints - lnh
-                                                        if nodeIndex < nodesToMigrate.count - 1 {
-                                                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                                        }
-                                                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                        
                                                     }   // existingEndpoints - end
-                                                }
-                                                
-                                            } else {
-                                                getStatusUpdate2(endpoint: endpoint, total: 0)
-                                                putStatusUpdate2(endpoint: endpoint, total: 0)
-                                                
-                                                endpointsRead += 1
-                                                // print("[endpointsRead += 1] \(endpoint)")
-                                                //                                            if endpoint == self.objectsToMigrate.last {
-                                                //                                                self.rmDELETE()
-                                                ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                                //                                            }
+                                                } else {
+                                                    //                                            self.nodesMigrated+=1
+                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    
+                                                    self.endpointsRead += 1
+                                                }   // if endpointCount > 0 - end
                                                 if nodeIndex < nodesToMigrate.count - 1 {
                                                     self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
                                                 }
                                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                            }   // if endpointCount > 0 - end
-                                        } else {   // end if let buildings, departments...
-                                            if nodeIndex < nodesToMigrate.count - 1 {
-                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                            } else {   // end if let endpointInfo
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                             }
-                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                                        }
-                                    default:
-                                        break
-                                    }   // switch - end
-                                }   // if let endpointJSON - end
-                                //                        }
-                                
+                                            
+                                        case "computergroups", "mobiledevicegroups", "usergroups":
+                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] processing device groups") }
+                                            if let endpointInfo = endpointJSON[self.endpointDefDict["\(endpoint)"]!] as? [Any] {
+                                                
+                                                endpointCount = endpointInfo.count
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] groups found: \(endpointCount)") }
+                                                
+                                                var smartGroupDict: [Int: String] = [:]
+                                                var staticGroupDict: [Int: String] = [:]
+                                                
+                                                if endpointCount > 0 {
+                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
+                                                        (result: (String,String)) in
+                                                        if pref.stopMigration {
+                                                            rmDELETE()
+                                                            completion(["migration stopped", "0"])
+                                                            return
+                                                        }
+                                                        //                                                let (resultMessage, _) = result
+                                                        // find number of groups
+                                                        smartCount = 0
+                                                        staticCount = 0
+                                                        var excludeCount = 0
+                                                        
+                                                        endpointsRead += 1
+                                                        // print("[endpointsRead += 1] \(endpoint)")
+                                                        
+                                                        // split computergroups into smart and static - start
+                                                        for i in (0..<endpointCount) {
+                                                            let record = endpointInfo[i] as! [String : AnyObject]
+                                                            
+                                                            let smart: Bool = (record["is_smart"] as! Bool)
+                                                            if smart {
+                                                                //smartCount += 1
+                                                                if (record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches") || export.backupMode {
+                                                                    smartGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                                                }
+                                                            } else {
+                                                                //staticCount += 1
+                                                                staticGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                                            }
+                                                        }
+                                                        
+                                                        if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
+                                                            nodesMigrated+=1
+                                                        }
+                                                        // split devicegroups into smart and static - end
+                                                        
+                                                        // groupType is "" for bulk migrations, smart/static for selective
+                                                        switch endpoint {
+                                                        case "computergroups":
+                                                            if (!smartComputerGrpsSelected && groupType == "") || groupType == "static" {
+                                                                excludeCount += smartGroupDict.count
+                                                            }
+                                                            if (!staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
+                                                                excludeCount += staticGroupDict.count
+                                                            }
+                                                            if smartComputerGrpsSelected && staticComputerGrpsSelected && groupType == "" {
+                                                                nodesMigrated-=1
+                                                            }
+                                                        case "mobiledevicegroups":
+                                                            if (!smartIosGrpsSelected && groupType == "") || groupType == "static" {
+                                                                excludeCount += smartGroupDict.count
+                                                            }
+                                                            if (!staticIosGrpsSelected && groupType == "") || groupType == "smart" {
+                                                                excludeCount += staticGroupDict.count
+                                                            }
+                                                            if smartIosGrpsSelected && staticIosGrpsSelected {
+                                                                nodesMigrated-=1
+                                                            }
+                                                        case "usergroups":
+                                                            if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
+                                                                excludeCount += smartGroupDict.count
+                                                            }
+                                                            if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
+                                                                excludeCount += staticGroupDict.count
+                                                            }
+                                                            if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
+                                                                nodesMigrated-=1
+                                                            }
+                                                            
+                                                        default: break
+                                                        }
+                                                        
+                                                        //                                                print(" smart_comp_grps_button.state.rawValue: \(smart_comp_grps_button.state.rawValue)")
+                                                        //                                                print("static_comp_grps_button.state.rawValue: \(static_comp_grps_button.state.rawValue)")
+                                                        //                                                print("                                  groupType: \(groupType)")
+                                                        //                                                print("                               excludeCount: \(excludeCount)")
+                                                        
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(smartGroupDict.count) smart groups") }
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(staticGroupDict.count) static groups") }
+                                                        var currentGroupDict: [Int: String] = [:]
+                                                        
+                                                        // verify we have some groups
+                                                        for g in (0...1) {
+                                                            currentGroupDict.removeAll()
+                                                            var groupCount = 0
+                                                            var localEndpoint = endpoint
+                                                            switch endpoint {
+                                                            case "computergroups":
+                                                                if (smartComputerGrpsSelected || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                                    currentGroupDict = smartGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    localEndpoint = "smartcomputergroups"
+                                                                }
+                                                                if (staticComputerGrpsSelected || (goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                                    currentGroupDict = staticGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    localEndpoint = "staticcomputergroups"
+                                                                }
+                                                            case "mobiledevicegroups":
+                                                                if ((smartIosGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                                    currentGroupDict = smartGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    localEndpoint = "smartmobiledevicegroups"
+                                                                }
+                                                                if ((staticIosGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                                    currentGroupDict = staticGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    localEndpoint = "staticmobiledevicegroups"
+                                                                }
+                                                            case "usergroups":
+                                                                if ((smartUserGrpsSelected) || (goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                                                    currentGroupDict = smartGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    //                                                        DeviceGroupType = "smartcomputergroups"
+                                                                    //                                                        print("usergroups smart - DeviceGroupType: \(DeviceGroupType)")
+                                                                    localEndpoint = "smartusergroups"
+                                                                }
+                                                                if ((staticUserGrpsSelected) || (goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                                                    currentGroupDict = staticGroupDict
+                                                                    groupCount = currentGroupDict.count
+                                                                    //                                                        DeviceGroupType = "staticcomputergroups"
+                                                                    //                                                        print("usergroups static - DeviceGroupType: \(DeviceGroupType)")
+                                                                    localEndpoint = "staticusergroups"
+                                                                }
+                                                            default: break
+                                                            }
+                                                            
+                                                            var counter = 1
+                                                            delayInt = listDelay(itemCount: currentGroupDict.count)
+                                                            
+                                                            endpointCountDict[localEndpoint] = groupCount
+                                                            
+                                                            if currentGroupDict.count == 0 && (localEndpoint == "smartcomputergroups" || localEndpoint == "staticcomputergroups" || localEndpoint == "smartmobiledevicegroups" || localEndpoint == "staticmobiledevicegroups") {
+                                                                getStatusUpdate2(endpoint: localEndpoint, total: 0)
+                                                                putStatusUpdate2(endpoint: localEndpoint, total: 0)
+                                                            }
+                                                            
+                                                            counters[endpoint]!["total"] = currentGroupDict.count
+                                                            
+                                                            for (l_xmlID, l_xmlName) in currentGroupDict {
+                                                                availableObjsToMigDict[l_xmlID] = l_xmlName
+                                                                if goSender == "goButton" || goSender == "silent" {
+                                                                    if !wipeData.on  {
+                                                                        //need to call existingEndpoints here to keep proper order?
+                                                                        if currentEPs[l_xmlName] != nil {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                                            
+                                                                            if setting.onlyCopyMissing {
+                                                                                    getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                        (result: String) in
+                                                                                        completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                    }
+                                                                                } else {
+                                                                                    endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                                }
+                                                                            
+                                                                        } else {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
+                                                                            
+                                                                            if setting.onlyCopyExisting {
+                                                                                getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                    (result: String) in
+                                                                                    completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                }
+                                                                            } else {
+                                                                                endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                            }
+                                                                            
+                                                                        }
+                                                                    } else {
+                                                                        removeEndpointsQueue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
+                                                                    }   // if !wipeData.on else - end
+                                                                    counter += 1
+                                                                } else {
+                                                                    // populate source server under the selective tab
+                                                                    sortQ.async { [self] in
+    //                                                                print("adding \(l_xmlName) to array")
+                                                                        availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
+                                                                        sourceDataArray.append(l_xmlName)
+                                                                        
+                                                                        staticSourceDataArray = sourceDataArray
+                                                                        updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                                        
+    //                                                                    DispatchQueue.main.async { [self] in
+    //                                                                        srcSrvTableView.reloadData()
+    //                                                                    }
+                                                                        // slight delay in building the list - visual effect
+                                                                        usleep(delayInt)
+                                                                        
+                                                                        if counter == sourceDataArray.count {
+                                                                            
+                                                                            sortList(theArray: sourceDataArray) { [self]
+                                                                                (result: [String]) in
+                                                                                sourceDataArray = result
+                                                                                DispatchQueue.main.async { [self] in
+                                                                                    srcSrvTableView.reloadData()
+                                                                                }
+                                                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                                                goButtonEnabled(button_status: true)
+                                                                            }
+                                                                        }
+                                                                        counter += 1
+                                                                    }   // sortQ.async - end
+                                                                }   // if goSender else - end
+                                                            }   // for (l_xmlID, l_xmlName) - end
+                                                            
+                                                            nodesMigrated+=1
+                                                            if wipeData.on && (goSender == "goButton" || goSender == "silent") {
+                                                                removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                                            }
+                                                            
+                                                        }   //for g in (0...1) - end
+                                                    }   // existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)") - end
+                                                } else {    //if endpointCount > 0 - end
+                                                    //                                            self.nodesMigrated+=1
+                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    
+                                                    self.endpointsRead += 1
+                                                    // print("[endpointsRead += 1] \(endpoint)")
+                                                    //                                            if endpoint == self.objectsToMigrate.last {
+                                                    //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
+                                                    //                                                self.rmDELETE()
+                                                    //                                            }
+                                                }   // else if endpointCount > 0 - end
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                            
+                                        case "policies":
+                                            //                                    print("[ViewController.getEndpoints] processing policies")
+                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] processing policies") }
+                                            if let endpointInfo = endpointJSON[endpoint] as? [Any] {
+                                                endpointCount = endpointInfo.count
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] policies found: \(endpointCount)") }
+                                                
+                                                var computerPoliciesDict: [Int: String] = [:]
+                                                
+                                                if endpointCount > 0 {
+                                                    if pref.stopMigration {
+                                                        self.rmDELETE()
+                                                        completion(["migration stopped", "0"])
+                                                        return
+                                                    }
+                                                    if setting.fullGUI {
+                                                        // display migrateDependencies button
+                                                        DispatchQueue.main.async {
+                                                            if !wipeData.on {
+                                                                self.migrateDependencies.isHidden = false
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    // create dictionary of existing policies
+                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "policies")  { [self]
+                                                        (result: (String,String)) in
+                                                        let (resultMessage, _) = result
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] policies - returned from existing endpoints: \(resultMessage)") }
+                                                        
+                                                        // filter out policies created from jamf remote (casper remote) - start
+                                                        for i in (0..<endpointCount) {
+                                                            let record = endpointInfo[i] as! [String : AnyObject]
+                                                            let nameCheck = record["name"] as! String
+                                                            
+                                                            if nameCheck.range(of:"[0-9]{4}-[0-9]{2}-[0-9]{2} at [0-9]", options: .regularExpression) == nil && nameCheck != "Update Inventory" {
+                                                                computerPoliciesDict[record["id"] as! Int] = nameCheck
+                                                            }
+                                                        }
+                                                        // filter out policies created from casper remote - end
+                                                        
+                                                        availableObjsToMigDict = computerPoliciesDict
+                                                        let nonRemotePolicies = computerPoliciesDict.count
+                                                        var counter = 1
+                                                        
+                                                        delayInt = listDelay(itemCount: computerPoliciesDict.count)
+                                                        //                                                print("[ViewController.getEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
+                                                        
+                                                        endpointsRead += 1
+                                                        // print("[endpointsRead += 1] \(endpoint)")
+                                                        endpointCountDict[endpoint] = computerPoliciesDict.count
+                                                        if computerPoliciesDict.count == 0 {
+                                                            endpointsRead += 1
+                                                            nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints2")
+                                                            // print("[endpointsRead += 1] \(endpoint)")
+                                                        } else {
+                                                            
+                                                            counters[endpoint]!["total"] = computerPoliciesDict.count
+                                                            
+                                                            for (l_xmlID, l_xmlName) in computerPoliciesDict {
+                                                                if goSender == "goButton" || goSender == "silent" {
+                                                                    if !wipeData.on  {
+                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
+                                                                        //                                                        if currentEPs[l_xmlName] != nil {
+                                                                        if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                                            
+                                                                            if setting.onlyCopyMissing {
+                                                                                getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                    (result: String) in
+                                                                                    completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                }
+                                                                            } else {
+                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                                            }
+                                                                            
+                                                                        } else {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                                            
+                                                                            if setting.onlyCopyExisting {
+                                                                                getStatusUpdate2(endpoint: endpoint, total: availableObjsToMigDict.count)
+                                                                                createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                                                    (result: String) in
+                                                                                    completion(["skipped endpoint - \(endpoint)", "\(self.availableObjsToMigDict.count)"])
+                                                                                }
+                                                                            } else {
+                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                            }
+                                                                            
+                                                                        }
+                                                                    } else {
+                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                                        removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
+                                                                    }   // if !wipeData.on else - end
+                                                                    counter += 1
+                                                                } else {
+                                                                    // populate source server under the selective tab
+                                                                    sortQ.async { [self] in
+                                                                        availableIDsToMigDict[l_xmlName+" (\(l_xmlID))"] = "\(l_xmlID)"
+                                                                        sourceDataArray.append(l_xmlName+" (\(l_xmlID))")
+                                                                        sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                        
+                                                                        staticSourceDataArray = sourceDataArray
+                                                                        updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                                        
+    //                                                                    DispatchQueue.main.async { [self] in
+    //                                                                        srcSrvTableView.reloadData()
+    //                                                                    }
+                                                                        // slight delay in building the list - visual effect
+                                                                        usleep(delayInt)
+                                                                        
+                                                                        if counter == computerPoliciesDict.count {
+                                                                            nodesMigrated += 1
+                                                                            print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                                            goButtonEnabled(button_status: true)
+                                                                        }
+                                                                        counter+=1
+                                                                    }   // sortQ.async - end
+                                                                    
+                                                                }   // if goSender else - end
+                                                            }   // for (l_xmlID, l_xmlName) in computerPoliciesDict - end
+                                                        }   // else for (l_xmlID, l_xmlName) - end
+                                                        if wipeData.on && (goSender == "goButton" || goSender == "silent") {
+                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                                        }
+                                                    }   // existingEndpoints - end
+                                                } else {
+                                                    //                                            self.nodesMigrated+=1
+                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    
+                                                    endpointsRead += 1
+                                                    // print("[endpointsRead += 1] \(endpoint)")
+                                                    //                                            if endpoint == self.objectsToMigrate.last {
+                                                    //                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
+                                                    //                                                self.rmDELETE()
+                                                    ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                    //                                            }
+                                                    if nodeIndex < nodesToMigrate.count - 1 {
+                                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                    }
+                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                }   // if endpointCount > 0
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])") }
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                //                                        print("[ViewController.getEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            } else {   //if let endpointInfo = endpointJSON - end
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])") }
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                            
+                                        case "jamfusers", "jamfgroups":
+                                            let accountsDict = endpointJSON as [String: Any]
+                                            let usersGroups = accountsDict["accounts"] as! [String: Any]
+                                            
+                                            if let endpointInfo = usersGroups[endpointParent] as? [Any] {
+                                                endpointCount = endpointInfo.count
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Verify empty dictionary of objects - availableObjsToMigDict count: \(self.availableObjsToMigDict.count)") }
+                                                
+                                                if endpointCount > 0 {
+                                                    
+                                                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "ldapservers")  {
+                                                        (result: (String,String)) in
+                                                        if pref.stopMigration {
+                                                            self.rmDELETE()
+                                                            completion(["migration stopped", "0"])
+                                                            return
+                                                        }
+                                                        let (resultMessage, _) = result
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getEndpoints-LDAP] Returned from existing ldapservers: \(resultMessage)") }
+                                                        
+                                                        self.existingEndpoints(skipLookup: false, theDestEndpoint: endpoint)  { [self]
+                                                            (result: (String,String)) in
+                                                            let (resultMessage, _) = result
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Returned from existing \(node): \(resultMessage)") }
+                                                            
+                                                            endpointsRead += 1
+                                                            // print("[endpointsRead += 1] \(endpoint)")
+                                                            endpointCountDict[endpoint] = endpointCount
+                                                            
+                                                            counters[endpoint]!["total"] = endpointCount
+                                                            
+                                                            for i in (0..<endpointCount) {
+                                                                if i == 0 { availableObjsToMigDict.removeAll() }
+                                                                
+                                                                let record = endpointInfo[i] as! [String : AnyObject]
+                                                                if !(endpoint == "jamfusers" && record["name"] as! String? == dest_user) {
+                                                                    availableObjsToMigDict[record["id"] as! Int] = record["name"] as! String?
+                                                                }
+                                                                
+                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Current number of \(endpoint) to process: \(availableObjsToMigDict.count)") }
+                                                            }   // for i in (0..<endpointCount) end
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Found total of \(availableObjsToMigDict.count) \(endpoint) to process") }
+                                                            
+                                                            var counter = 1
+                                                            if goSender == "goButton" || goSender == "silent" {
+                                                                if availableObjsToMigDict.count == 0 && endpoint == "jamfusers"{
+                                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                                }
+                                                                for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                                    if !wipeData.on  {
+                                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
+                                                                        
+                                                                        if currentEPs[l_xmlName] != nil {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                                            
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                                        } else {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: availableObjsToMigDict.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                                        }
+                                                                    } else {
+                                                                        if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
+                                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                                            removeEndpointsQueue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: availableObjsToMigDict.count)
+                                                                        }
+                                                                        
+                                                                    }   // if !wipeData.on else - end
+                                                                    counter+=1
+                                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                                if wipeData.on {
+                                                                    removeEndpointsQueue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                                                }
+                                                            } else {
+                                                                // populate source server under the selective tab
+                                                                delayInt = listDelay(itemCount: availableObjsToMigDict.count)
+                                                                for (l_xmlID, l_xmlName) in availableObjsToMigDict {
+                                                                    sortQ.async { [self] in
+    //                                                                    print("adding \(l_xmlName) to array")
+                                                                        availableIDsToMigDict[l_xmlName] = "\(l_xmlID)"
+                                                                        sourceDataArray.append(l_xmlName)
+                                                                        
+                                                                        sourceDataArray = sourceDataArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                                                        
+                                                                        staticSourceDataArray = sourceDataArray
+                                                                        
+                                                                        updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                                        
+    //                                                                    DispatchQueue.main.async { [self] in
+    //                                                                        srcSrvTableView.reloadData()
+    //                                                                    }
+                                                                        // slight delay in building the list - visual effect
+                                                                        usleep(delayInt)
+                                                                        
+                                                                        if counter == availableObjsToMigDict.count {
+                                                                            nodesMigrated += 1
+                                                                            print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                                            goButtonEnabled(button_status: true)
+                                                                        }
+                                                                        counter+=1
+                                                                    }   // sortQ.async - end
+                                                                }   // for (l_xmlID, l_xmlName) in availableObjsToMigDict
+                                                            }   // if goSender else - end
+                                                            
+                                                            // fix reading next endpoint for other endpoints - lnh
+                                                            if nodeIndex < nodesToMigrate.count - 1 {
+                                                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                            }
+                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                            
+                                                        }   // existingEndpoints - end
+                                                    }
+                                                    
+                                                } else {
+                                                    getStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    putStatusUpdate2(endpoint: endpoint, total: 0)
+                                                    
+                                                    endpointsRead += 1
+                                                    // print("[endpointsRead += 1] \(endpoint)")
+                                                    //                                            if endpoint == self.objectsToMigrate.last {
+                                                    //                                                self.rmDELETE()
+                                                    ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                    //                                            }
+                                                    if nodeIndex < nodesToMigrate.count - 1 {
+                                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                    }
+                                                    completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                                }   // if endpointCount > 0 - end
+                                            } else {   // end if let buildings, departments...
+                                                if nodeIndex < nodesToMigrate.count - 1 {
+                                                    self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+                                                }
+                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            }
+                                        default:
+                                            break
+                                        }   // switch - end
+                                    }   // if let endpointJSON - end
+                                    
+
+                                }
+                                                                
                             } else {
                                 // failed to look-up item
                                 self.nodesMigrated+=1    // ;print("added node: \(endpoint) - getEndpoints4")
@@ -3244,6 +3400,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
+        print("[readDataFiles] endpoint: \(endpoint)")
         
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
@@ -3297,8 +3454,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
 //                        print("[ViewController.files] looking for files in \(local_folder)")
                     switch local_folder {
-                    case "buildings":
+                    case "buildings", "patchmanagement":
                         xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
+                        if local_folder == "patchmanagement" {
+                            PatchPoliciesDetails.source.removeAll()
+                            if fm.fileExists(atPath: "\(JamfProServer.source)/patchPolicyDetails/patch-policies-policy-details.json") {
+                                print("found patch-policies-policy-details.json")
+                                
+                                do {
+                                    let fileUrl = importFilesUrl?.appendingPathComponent("patchPolicyDetails/patch-policies-policy-details.json", isDirectory: false)
+                                    let fileContents = try String(contentsOf: fileUrl!)
+                                    let data = fileContents.data(using: .utf8) ?? Data()
+                                    PatchPoliciesDetails.source = try JSONDecoder().decode([PatchPolicyDetail].self, from: data)
+                                    print("[readDataFiles] patchPolicyDetails.count: \(PatchPoliciesDetails.source.count)")
+                                } catch let error as NSError {
+                                    WriteToLog.shared.message(stringOfText: "[readDataFiles] patch-policies-policy-details.json - issue converting to json")
+                                    print(error)
+                                }
+                                
+                                
+                            } else {
+                                print("\(JamfProServer.source)/patchPolicyDetails/patch-policies-policy-details.json was not found")
+                            }
+                        }
                     default:
                         xmlFilePaths = allFilePathsArray.filter{$0.contains(".xml")}  // filter for only files with xml extension
                     }
@@ -3349,6 +3527,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     } catch let error as NSError {
                                         print(error)
                                     }
+                                case "patchmanagement":
+                                    let data = fileContents.data(using: .utf8) ?? Data()
+                                    do {
+                                        let patchObject = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data)
+//                                        if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
+//                                        {
+//                                                fileJSON = jsonData
+                                            name = patchObject.displayName //"\(jsonData["name"] ?? "")"
+                                            id   = patchObject.id ?? "" //"\(jsonData["id"] ?? "")"
+//                                        } else {
+//                                            WriteToLog.shared.message(stringOfText: "[readDataFiles] buildings - issue with string format, not json")
+//                                        }
+                                    } catch let error as NSError {
+                                        WriteToLog.shared.message(stringOfText: "[readDataFiles] \(endpoint) - issue converting to json")
+                                        print(error)
+                                    }
+                                    
                                 case "advancedcomputersearches", "advancedmobiledevicesearches", "categories", "computerextensionattributes", "computergroups", "distributionpoints", "dockitems", "accounts", "jamfusers", "jamfgroups", "ldapservers", "mobiledeviceextensionattributes", "mobiledevicegroups", "networksegments", "packages", "printers", "scripts", "softwareupdateservers", "usergroups", "users":
                                     local_general = fileContents
                                     for xmlTag in ["site", "criterion", "computers", "mobile_devices", "image", "path", "contents", "privilege_set", "privileges", "members", "groups", "script_contents", "script_contents_encoded"] {
@@ -3388,7 +3583,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
 
-                                if endpoint != "buildings" {
+                                if !["buildings", "patchmanagement"].contains(endpoint) {
                                     id   = tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
                                     name = tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
                                 }
@@ -3450,41 +3645,41 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
          
             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[readDataFiles] Node: \(local_folder) has \(fileCount) files.") }
              
-             if fileCount > 0 {
- //                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                 if self.goSender == "goButton" || self.goSender == "silent" {
-                     self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
-                         (result: String) in
-                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[readDataFiles] Returned from processFiles.") }
- //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
-                         self.availableFilesToMigDict.removeAll()
-                         targetSelectiveObjectList.removeAll()
-                         
-                         if nodeIndex < nodesToMigrate.count - 1 {
-                             self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
-                                 (result: String) in
-                                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readDataFiles] processFiles result: \(result)") }
-                             }
+            if fileCount > 0 {
+            //                    print("[readDataFiles] call processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+             if self.goSender == "goButton" || self.goSender == "silent" {
+                 self.processFiles(endpoint: endpoint, fileCount: fileCount, itemsDict: self.availableFilesToMigDict) {
+                     (result: String) in
+                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[readDataFiles] Returned from processFiles.") }
+            //                        print("[readDataFiles] returned from processFiles for \(endpoint), nodeIndex \(nodeIndex) of \(nodesToMigrate)")
+                     self.availableFilesToMigDict.removeAll()
+                     targetSelectiveObjectList.removeAll()
+                     
+                     if nodeIndex < nodesToMigrate.count - 1 {
+                         self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                             (result: String) in
+                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readDataFiles] processFiles result: \(result)") }
                          }
-                         completion("fetched xml for: \(endpoint)")
                      }
+                     completion("fetched xml for: \(endpoint)")
                  }
-             } else {   // if fileCount - end
-                 WriteToLog.shared.message(stringOfText: "[readDataFiles] \(endpoint) fileCount = 0.")
-                 
-//                 self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
-                 getStatusUpdate2(endpoint: endpoint, total: fileCount)
-                 putStatusUpdate2(endpoint: endpoint, total: fileCount)
-                 
-                 if nodeIndex < nodesToMigrate.count - 1 {
-                     self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
-                         (result: String) in
-                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readDataFiles] no files found for: \(local_folder)") }
-                     }
-                 }
-                 completion("fetched xml for: \(endpoint)")
              }
-             fileCount = 0
+            } else {   // if fileCount - end
+             WriteToLog.shared.message(stringOfText: "[readDataFiles] \(endpoint) fileCount = 0.")
+             
+            //                 self.nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
+             getStatusUpdate2(endpoint: endpoint, total: fileCount)
+             putStatusUpdate2(endpoint: endpoint, total: fileCount)
+             
+             if nodeIndex < nodesToMigrate.count - 1 {
+                 self.readDataFiles(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1) {
+                     (result: String) in
+                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readDataFiles] no files found for: \(local_folder)") }
+                 }
+             }
+             completion("fetched xml for: \(endpoint)")
+            }
+            fileCount = 0
 
         }   // self.theOpQ - end
     }   // func readDataFiles - end
@@ -3502,16 +3697,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
             var l_index = 1
             for theObject in targetSelectiveObjectList {
-//            for (_, objectInfo) in itemsDict {
+//                print("[processFiles] object name: \(theObject.objectName.xmlDecode)")
                 readFilesQ.addOperation { [self] in
-//                    let l_id   = Int(objectInfo[0])         // id of object
-//                    let l_name = objectInfo[1].xmlDecode    // name of object, remove xml encoding
-//                    let l_xml  = objectInfo[2]              // xml of object
                     let l_id   = theObject.objectId         // id of object
                     let l_name = theObject.objectName.xmlDecode    // name of object, remove xml encoding
                     let l_xml  = theObject.fileContents
                     
-//                    getStatusUpdate2(endpoint: endpoint, total: fileCount)
+//                    print("[processFiles] l_id: \(l_id), l_name: \(theObject.objectName.xmlDecode), l_xml: \(l_xml)")
+                    
                     getStatusUpdate2(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
@@ -3521,6 +3714,71 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if currentEPs["\(l_name)"] != nil {
                                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) already exists") }
                                 
+                                print("[processFiles] update endpoint: \(endpoint)")
+                                switch endpoint {
+                                case "buildings":
+                                    let data = l_xml.data(using: .utf8)!
+                                    var jsonData = [String:Any]()
+                                    var action = "update"
+                                    do {
+                                        if let _ = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String: Any] {
+                                            jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String: Any]
+                                            WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file for \(l_name) successfully parsed.")
+                                        } else {
+                                            WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file \(theObject.fileContents) failed to parse.")
+                                            action = "skip"
+                                        }
+                                    } catch let error as NSError {
+                                        WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] file \(theObject.fileContents) failed to parse. Error: \(error.localizedDescription)")
+                                        action = "skip"
+                                    }
+                                    
+                                    cleanupJSON(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: currentEPs[l_name]!, destEpName: l_name) {
+                                        (cleanJSON: String) in
+                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
+                                        if cleanJSON == "last" {
+                                            completion("processed last file")
+                                        }
+                                    }
+                                case "patchmanagement":
+                                    PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
+                                        self.message_TextField.stringValue = ""
+                                        let data = l_xml.data(using: .utf8)!
+                                        var jsonData = [String:Any]()
+                                        var action = "update"
+                                        do {
+                                            if let _ = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String: Any] {
+                                                jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String: Any]
+                                                WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file for \(l_name) successfully parsed.")
+                                            } else {
+                                                WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file \(theObject.fileContents) failed to parse.")
+                                                action = "skip"
+                                            }
+                                        } catch let error as NSError {
+                                            WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] file \(theObject.fileContents) failed to parse.")
+                                            //                                        print(error)
+                                            action = "skip"
+                                        }
+                                        
+                                        cleanupJSON(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: currentEPs[l_name]!, destEpName: l_name) {
+                                            (cleanJSON: String) in
+                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
+                                            if cleanJSON == "last" {
+                                                completion("processed last file")
+                                            }
+                                        }
+                                    }
+                                default:
+                                    cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: currentEPs[l_name]!, destEpName: l_name) {
+                                        (result: String) in
+                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml") }
+                                        if result == "last" {
+                                            completion("processed last file")
+                                        }
+                                    }
+                                }
+                                
+                                /*
                                 if endpoint != "buildings" {
                                     cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: currentEPs[l_name]!, destEpName: l_name) {
                                         (result: String) in
@@ -3555,18 +3813,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }
                                     }
                                 }
+                                */
                             } else {
+                                print("[processFiles] create endpoint: \(endpoint)")
                                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] \(endpoint):\(String(describing: l_name)) - create") }
                                 
-                                if endpoint != "buildings" {
-                                    cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
-                                        (result: String) in
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml") }
-                                        if result == "last" {
-                                            completion("processed last file")
-                                        }
-                                    }
-                                } else {
+                                switch endpoint {
+                                case "buildings":
                                     let data = l_xml.data(using: .utf8)!
                                     var jsonData = [String:Any]()
                                     var action = "create"
@@ -3588,6 +3841,42 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         (cleanJSON: String) in
                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
                                         if cleanJSON == "last" {
+                                            completion("processed last file")
+                                        }
+                                    }
+                                case "patchmanagement":
+                                    PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
+                                        self.message_TextField.stringValue = ""
+                                        let data = l_xml.data(using: .utf8)!
+                                        var jsonData = [String:Any]()
+                                        var action = "create"
+                                        do {
+                                            if let _ = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any] {
+                                                jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String:Any]
+                                                WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file for \(l_name) successfully parsed.")
+                                            } else {
+                                                WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] JSON file \(theObject.fileContents) failed to parse.")
+                                                action = "skip"
+                                            }
+                                        } catch let error as NSError {
+                                            WriteToLog.shared.message(stringOfText: "[ViewController.processFiles] file \(theObject.fileContents) failed to parse.")
+                                            print(error)
+                                            action = "skip"
+                                        }
+                                        
+                                        self.cleanupJSON(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: 0, destEpName: l_name) {
+                                            (cleanJSON: String) in
+                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
+                                            if cleanJSON == "last" {
+                                                completion("processed last file")
+                                            }
+                                        }
+                                    }
+                                default:
+                                    cleanupXml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: 0, destEpName: l_name) {
+                                        (result: String) in
+                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[processFiles] [\(endpoint)]: Returned from cleanupXml") }
+                                        if result == "last" {
                                             completion("processed last file")
                                         }
                                     }
@@ -3648,13 +3937,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
     }
-    // get full record in XML format
+    // get full record
     func endPointByID(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ result: String) -> Void) {
-        
-        // gets are not being queued //
-        // gets are not being queued //
-        // gets are not being queued //
-        // gets are not being queued //
                 
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] endpoint passed to endPointByID: \(endpoint) id \(endpointID)") }
@@ -3678,6 +3962,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             localEndPointType = "jamfusers"
         case "accounts/groupid":
             localEndPointType = "jamfgroups"
+        case "patch-software-title-configurations":
+            localEndPointType = "patchmanagement"
         default:
             localEndPointType = endpoint
         }
@@ -3689,8 +3975,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
                 endpointsIdQ.addOperation {
                     
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType)") }
-                            Jpapi.shared.action(serverUrl: JamfProServer.source, endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
+                    Jpapi.shared.action(whichServer: "source", endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
                                 (returnedJSON: [String:Any]) in
                                 completion(destEpName)
 //                                if statusCode == 202 {
@@ -3738,6 +4024,88 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             
                 }   // endpointsIdQ - end
             }
+        case "patchmanagement":
+            var sourceObject = PatchTitleConfigurations.source.first(where: { $0.id == endpointID })
+            print("[endpointByID] displayName: \(sourceObject?.displayName ?? "unknown")")
+            completion(sourceObject?.displayName ?? "unknown")
+            
+            if !(sourceObject?.id ?? "").isEmpty {
+                self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+                for theSourceObj in JamfProSites.source {
+                    print("[endPointByID] sourceObject?.siteId: \(theSourceObj.id),   name: \(theSourceObj.name)")
+                }
+                print("[endPointByID] sourceObject?.siteId: \(sourceObject?.siteId)")
+                let categoryName = Categories.source.filter { $0.id == sourceObject?.categoryId }.first?.name ?? ""
+                let siteName     = JamfProSites.source.filter { $0.id == sourceObject?.siteId }.first?.name ?? "None"
+                
+                let sourcePatchPackages = sourceObject?.packages ?? []
+                var updatedPatchPackages: [PatchPackage] = []
+                for thePatchPackage in sourcePatchPackages {
+                    if let packageName = PatchPackages.source.filter({ $0.packageId == thePatchPackage.packageId }).first?.packageName, !packageName.isEmpty {
+                        updatedPatchPackages.append(PatchPackage(packageId: thePatchPackage.packageId, version: thePatchPackage.version, displayName: thePatchPackage.displayName, packageName: packageName))
+                    }
+                }
+                sourceObject?.packages = updatedPatchPackages
+                
+                let instance = PatchSoftwareTitleConfiguration(id: sourceObject?.id ?? "0", jamfOfficial: sourceObject?.jamfOfficial ?? false, displayName: sourceObject?.displayName ?? "", categoryId: sourceObject?.categoryId ?? "", categoryName: categoryName, siteId: sourceObject?.siteId ?? "", siteName: siteName, uiNotifications: sourceObject?.uiNotifications ?? false, emailNotifications: sourceObject?.emailNotifications ?? false, softwareTitleId: sourceObject?.softwareTitleId ?? "", extensionAttributes: sourceObject?.extensionAttributes ?? [], softwareTitleName: sourceObject?.softwareTitleName ?? "", softwareTitleNameId: sourceObject?.softwareTitleNameId ?? "", softwareTitlePublisher: sourceObject?.softwareTitlePublisher ?? "", patchSourceName: sourceObject?.patchSourceName ?? "", patchSourceEnabled: sourceObject?.patchSourceEnabled ?? false, packages: sourceObject?.packages ?? [])
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted  // Optional: makes the JSON easier to read
+
+                do {
+                    let jsonData = try encoder.encode(instance)
+                    
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        print("[endPointByID] exported jsonString: \(jsonString)")
+                        
+                        print("[endPointByID] export.saveRawXml: \(export.saveRawXml)")
+                        print("[endPointByID] export.backupMode: \(export.backupMode)")
+                        // save source JSON - start
+                        if export.saveRawXml {
+                            DispatchQueue.main.async { [self] in
+//                                let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: jsonString, theTag: ""):rmJsonData(rawJSON: jsonString, theTag: "scope")
+                                //                                    print("exportRawJson: \(exportRawJson)")
+                                WriteToLog.shared.message(stringOfText: "[endPointByID] Exporting raw JSON for \(endpoint) - \(destEpName)")
+                                let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+//                                exportItems(node: endpoint, objectString: jsonString, rawName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
+                                ExportItems.shared.patchmanagement(node: "patchmanagement", object: instance, rawName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
+                            }
+                        }
+                        // save source JSON - end
+                        
+                        if !export.saveOnly {
+                            do {
+                                let objectJson = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] ?? [:]
+                                cleanupJSON(endpoint: endpoint, JSON: objectJson, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                    (cleanJSON: String) in
+                                }
+                            } catch {
+                                print(error.localizedDescription)
+                            }
+                             
+                        } else {
+                            // check progress
+                            //                                print("[endpointById] node: \(endpoint)")
+                            //                                print("[endpointById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                            endpointCountDict[localEndPointType]! -= 1
+                            //                                print("[endpointById] \(String(describing: endpointCountDict[endpoint])) remaining")
+                            if endpointCountDict[localEndPointType] == 0 {
+                                //                                     print("[endpointById] saved last \(endpoint)")
+                                //                                     print("[endpointById] endpoint \(endpointsRead) of \(objectsToMigrate.count) endpoints complete")
+                                
+                                if endpointsRead == objectsToMigrate.count {
+                                    // print("[endpointById] zip it up")
+                                    print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                    goButtonEnabled(button_status: true)
+                                }
+                            }
+                        }
+                    }
+                } catch {
+                    print("Error encoding JSON: \(error)")
+                }
+
+            }
+            
         default:
             // classic API
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
@@ -3848,7 +4216,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func cleanupJSON(endpoint: String, JSON: [String:Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
+    func cleanupJSON(endpoint: String, JSON: [String: Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
         
         var theEndpoint = endpoint
         
@@ -3860,23 +4228,55 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             theEndpoint = endpoint
         }
+        var JSONData = JSON
         
-        var JSONData   = JSON
-        if action != "skip" {
+        switch endpoint {
+        case "patchmanagement":
             JSONData["id"] = nil
+            print("[cleanJSON - patchmanagement] JSONData[categoryName]: \(JSONData["categoryName"] ?? "")")
+            print("[cleanJSON - patchmanagement] Categories.destination.count: \(Categories.destination.count)")
             
-            for (key, value) in JSONData {
-                if "\(value)" == "<null>" {
-                    JSONData[key] = nil
+            print("[cleanJSON - patchmanagement] JSONData[patchSourceName]: \(JSONData["patchSourceName"] ?? "")")
+            
+            JSONData["categoryId"] = Categories.destination.first(where: { $0.name == JSONData["categoryName"] as? String })?.id ?? "-1"
+            JSONData["categoryName"] = nil
+            JSONData["siteId"] = JamfProSites.destination.first(where: { $0.name == JSONData["siteName"] as? String })?.id ?? "-1"
+            JSONData["siteName"] = nil
+            let patchPackages = JSONData["packages"] as? [[String: Any]]
+            var updatedPackages: [[String: String]] = []
+            for thePackage in patchPackages ?? [] {
+                // get source package (file) name
+                print("[cleanJSON - patchmanagement] thePackage: \(thePackage)")
+                let sourcePackageName = (fileImport) ? thePackage["packageName"] as? String ?? "unknown": PatchPackages.source.first(where: { $0.packageId == thePackage["packageId"] as? String })?.packageName ?? ""
+                print("[cleanJSON - patchmanagement] sourcePackageName: \(sourcePackageName)")
+                let packageId = PatchPackages.destination.first(where: { $0.displayName == sourcePackageName })?.packageId ?? ""
+                
+                if packageId.isEmpty {
+                    WriteToLog.shared.message(stringOfText: "Unable to locate patch package \(sourcePackageName) on the destination server.")
                 } else {
-                    JSONData[key] = "\(value)"
+                    updatedPackages.append(["packageId": packageId, "version": "\(thePackage["version"] ?? "")"])
+                    print("[cleanJSON - patchmanagement] packageName: \(sourcePackageName)")
+                }
+            }
+            JSONData["packages"] = updatedPackages
+            print("[cleanJSON - patchmanagement] JSON: \(JSONData)")
+            
+        default:
+            if action != "skip" {
+                JSONData["id"] = nil
+                
+                for (key, value) in JSONData {
+                    if "\(value)" == "<null>" {
+                        JSONData[key] = nil
+                    } else {
+                        JSONData[key] = "\(value)"
+                    }
                 }
             }
         }
-
-//        self.getStatusUpdate2(endpoint: endpoint, total: endpointCount) -- causing duplicate counts
         
-        self.createEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+        
+        createEndpoints2(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] \(result)") }
             if endpointCurrent == endpointCount {
@@ -4995,7 +5395,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func createEndpoints - end
     
     // for the Jamf Pro API - used for buildings
-    func createEndpoints2(endpointType: String, endPointJSON: [String:Any], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: String, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
+    func createEndpoints2(endpointType: String, endPointJSON: [String: Any], policyDetails: [PatchPolicyDetail] = [], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: String, destEpId: Int, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
@@ -5016,10 +5416,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
             summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
         }
-
+        
         var destinationEpId = destEpId
         var apiAction       = action
-//        var sourcePolicyId  = ""
+        print("[createEndpoints2] destinationEpId: \(destinationEpId) action: \(action)")
         
         // counterts for completed endpoints
         if endpointCurrent == 1 {
@@ -5050,7 +5450,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         theCreateQ.maxConcurrentOperationCount = maxConcurrentThreads
 
         var localEndPointType = ""
-//        var whichError        = ""
         
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -5062,7 +5461,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             localEndPointType = endpointType
         }
-//        var responseData = ""
                 
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)") }
        
@@ -5110,147 +5508,284 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 }
                 
-                Jpapi.shared.action(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"]!, method: apiAction) { [self]
-                    (jpapiResonse: [String:Any]) in
-//                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
-                    var jpapiResult = "succeeded"
-                    if let _ = jpapiResonse["JPAPI_result"] as? String {
-                        jpapiResult = jpapiResonse["JPAPI_result"] as! String
-                    }
-//                    if let httpResponse = response as? HTTPURLResponse {
-                    var apiMethod = apiAction
-                    if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
-                        apiMethod = "fail"
-                        DispatchQueue.main.async {
-                            if setting.fullGUI && apiAction.lowercased() != "skip" {
-                                self.labelColor(endpoint: endpointType, theColor: self.yellowText)
+                if endpointType == "patchmanagement" {
+                    PatchManagementApi.shared.createUpdate(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, sourceEpId: sourceEpId, destEpId: "\(destinationEpId)", token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
+                        (jpapiResonse: [String:Any]) in
+    //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
+                        var jpapiResult = "succeeded"
+                        if let _ = jpapiResonse["JPAPI_result"] as? String {
+                            jpapiResult = jpapiResonse["JPAPI_result"] as! String
+                        }
+    //                    if let httpResponse = response as? HTTPURLResponse {
+                        var apiMethod = apiAction
+                        if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
+                            apiMethod = "fail"
+                            DispatchQueue.main.async {
+                                if setting.fullGUI && apiAction.lowercased() != "skip" {
+                                    self.labelColor(endpoint: endpointType, theColor: self.yellowText)
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
+                                    }
+                                }
+                            }
+                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                        } else {
+                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            
+                            if endpointCurrent == 1 && !retry {
+                                migrationComplete.isDone = false
                                 if !setting.migrateDependencies || endpointType == "policies" {
-                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
+                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
+                                }
+                            } else if !retry {
+                                if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /*self.put_levelIndicatorFillColor[endpointType]*/ {
+                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? .green)
                                 }
                             }
                         }
-                        WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
-                    } else {
-                        WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
                         
-                        if endpointCurrent == 1 && !retry {
-                            migrationComplete.isDone = false
-                            if !setting.migrateDependencies || endpointType == "policies" {
-                                self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
-                            }
-                        } else if !retry {
-                            if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /*self.put_levelIndicatorFillColor[endpointType]*/ {
-                                self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? .green)
-                            }
+                            // look to see if we are processing the next endpointType - start
+                            if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
+                                WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Migrating \(endpointType)")
+                                self.endpointInProgress = endpointType
+                                self.POSTsuccessCount = 0
+                            }   // look to see if we are processing the next localEndPointType - end
+                            
+    //                    DispatchQueue.main.async { [self] in
+                            
+                                // ? remove creation of counters dict defined earlier ?
+                                if counters[endpointType] == nil {
+                                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+                                    summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+                                }
+                            
+                                                            
+                                POSTsuccessCount += 1
+                                
+    //                            print("endpointType: \(endpointType)")
+    //                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
+                                
+                                if let _ = progressCountArray["\(endpointType)"] {
+                                    progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
+                                }
+                                
+                                let localTmp = (counters[endpointType]?["\(apiMethod)"])!
+        //                        print("localTmp: \(localTmp)")
+                                counters[endpointType]?["\(apiMethod)"] = localTmp + 1
+                                
+                                
+                                if var summaryArray = summaryDict[endpointType]?["\(apiMethod)"] {
+                                    summaryArray.append("\(endPointJSON["name"] ?? "unknown")")
+                                    summaryDict[endpointType]?["\(apiMethod)"] = summaryArray
+                                }
+                                /*
+                                // currently there is no way to upload mac app store icons; no api endpoint
+                                // removed check for those -  || (endpointType == "macapplications")
+                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                }
+                                */
+
+                                totalCreated   = counters[endpointType]?["create"] ?? 0
+                                totalUpdated   = counters[endpointType]?["update"] ?? 0
+                                totalFailed    = counters[endpointType]?["fail"] ?? 0
+                                totalCompleted = totalCreated + totalUpdated + totalFailed
+                                
+                                // update counters
+                                if totalCompleted > 0 {
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
+                                    }
+                                }
+                                
+                                if setting.fullGUI && totalCompleted == endpointCount {
+
+                                    if totalFailed == 0 {   // removed  && self.changeColor from if condition
+                                        labelColor(endpoint: endpointType, theColor: self.greenText)
+                                    } else if totalFailed == endpointCount {
+                                        DispatchQueue.main.async {
+                                            self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                            
+                                            if !setting.migrateDependencies || endpointType == "policies" {
+                                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                                self.put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]
+    //                                                    self.put_levelIndicatorFillColor[endpointType] = .systemRed
+    //                                                    self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+    //                        }   // DispatchQueue.main.async - end
+                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+    //                    }   // if let httpResponse = response - end
+                        
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        
+                        if endpointCurrent > 0 {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t Failed: \(totalFailed)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))") }
+                        }
+                        
+                        if localEndPointType != "policies" && dependency.isRunning {
+                            Counter.shared.dependencyMigrated[dependencyParentId]! += 1
+    //                        print("[CreateEndpoints2] Counter.shared.dependencyMigrated incremented: \(Counter.shared.dependencyMigrated[dependencyParentId]!)")
+                        }
+
+        //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
+                        if endpointCurrent == endpointCount {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            self.nodesMigrated+=1
+                            // print("added node: \(localEndPointType) - createEndpoints")
+        //                    print("nodes complete: \(self.nodesMigrated)")
                         }
                     }
-                    
-                    
-                        /*
-                        if let _ = String(data: data!, encoding: .utf8) {
-                            responseData = String(data: data!, encoding: .utf8)!
-    //                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] \n\nfull response from create:\n\(responseData)") }
-    //                        print("create data response: \(responseData)")
-                        } else {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n\n[CreateEndpoints2] No data was returned from post/put.") }
+                } else {
+                    Jpapi.shared.action(whichServer: "dest", endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
+                        (jpapiResonse: [String:Any]) in
+    //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
+                        var jpapiResult = "succeeded"
+                        if let _ = jpapiResonse["JPAPI_result"] as? String {
+                            jpapiResult = jpapiResonse["JPAPI_result"] as! String
                         }
-                        */
-                        // look to see if we are processing the next endpointType - start
-                        if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
-                            WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Migrating \(endpointType)")
-                            self.endpointInProgress = endpointType
-                            self.POSTsuccessCount = 0
-                        }   // look to see if we are processing the next localEndPointType - end
-                        
-//                    DispatchQueue.main.async { [self] in
-                        
-                            // ? remove creation of counters dict defined earlier ?
-                            if counters[endpointType] == nil {
-                                counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                                summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
+    //                    if let httpResponse = response as? HTTPURLResponse {
+                        var apiMethod = apiAction
+                        if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
+                            apiMethod = "fail"
+                            DispatchQueue.main.async {
+                                if setting.fullGUI && apiAction.lowercased() != "skip" {
+                                    self.labelColor(endpoint: endpointType, theColor: self.yellowText)
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemYellow)
+                                    }
+                                }
                             }
+                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                        } else {
+                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            
+                            if endpointCurrent == 1 && !retry {
+                                migrationComplete.isDone = false
+                                if !setting.migrateDependencies || endpointType == "policies" {
+                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: .green)
+                                }
+                            } else if !retry {
+                                if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /*self.put_levelIndicatorFillColor[endpointType]*/ {
+                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? .green)
+                                }
+                            }
+                        }
                         
-                                                        
-                            POSTsuccessCount += 1
-                            
-//                            print("endpointType: \(endpointType)")
-//                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
-                            
-                            if let _ = progressCountArray["\(endpointType)"] {
-                                progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
-                            }
-                            
-                            let localTmp = (counters[endpointType]?["\(apiMethod)"])!
-    //                        print("localTmp: \(localTmp)")
-                            counters[endpointType]?["\(apiMethod)"] = localTmp + 1
-                            
-                            
-                            if var summaryArray = summaryDict[endpointType]?["\(apiMethod)"] {
-                                summaryArray.append("\(endPointJSON["name"] ?? "unknown")")
-                                summaryDict[endpointType]?["\(apiMethod)"] = summaryArray
-                            }
+                        
                             /*
-                            // currently there is no way to upload mac app store icons; no api endpoint
-                            // removed check for those -  || (endpointType == "macapplications")
-                            if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                                sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                                self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                            if let _ = String(data: data!, encoding: .utf8) {
+                                responseData = String(data: data!, encoding: .utf8)!
+        //                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] \n\nfull response from create:\n\(responseData)") }
+        //                        print("create data response: \(responseData)")
+                            } else {
+                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n\n[CreateEndpoints2] No data was returned from post/put.") }
                             }
                             */
-
-                            totalCreated   = counters[endpointType]?["create"] ?? 0
-                            totalUpdated   = counters[endpointType]?["update"] ?? 0
-                            totalFailed    = counters[endpointType]?["fail"] ?? 0
-                            totalCompleted = totalCreated + totalUpdated + totalFailed
+                            // look to see if we are processing the next endpointType - start
+                            if self.endpointInProgress != endpointType || self.endpointInProgress == "" {
+                                WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Migrating \(endpointType)")
+                                self.endpointInProgress = endpointType
+                                self.POSTsuccessCount = 0
+                            }   // look to see if we are processing the next localEndPointType - end
                             
-                            // update counters
-                            if totalCompleted > 0 {
-                                if !setting.migrateDependencies || endpointType == "policies" {
-                                    putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
+    //                    DispatchQueue.main.async { [self] in
+                            
+                                // ? remove creation of counters dict defined earlier ?
+                                if counters[endpointType] == nil {
+                                    counters[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+                                    summaryDict[endpointType] = ["create":[], "update":[], "fail":[]]
                                 }
-                            }
                             
-                            if setting.fullGUI && totalCompleted == endpointCount {
+                                                            
+                                POSTsuccessCount += 1
+                                
+    //                            print("endpointType: \(endpointType)")
+    //                            print("progressCountArray: \(String(describing: self.progressCountArray["\(endpointType)"]))")
+                                
+                                if let _ = progressCountArray["\(endpointType)"] {
+                                    progressCountArray["\(endpointType)"] = self.progressCountArray["\(endpointType)"]!+1
+                                }
+                                
+                                let localTmp = (counters[endpointType]?["\(apiMethod)"])!
+        //                        print("localTmp: \(localTmp)")
+                                counters[endpointType]?["\(apiMethod)"] = localTmp + 1
+                                
+                                
+                                if var summaryArray = summaryDict[endpointType]?["\(apiMethod)"] {
+                                    summaryArray.append("\(endPointJSON["name"] ?? "unknown")")
+                                    summaryDict[endpointType]?["\(apiMethod)"] = summaryArray
+                                }
+                                /*
+                                // currently there is no way to upload mac app store icons; no api endpoint
+                                // removed check for those -  || (endpointType == "macapplications")
+                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                                }
+                                */
 
-                                if totalFailed == 0 {   // removed  && self.changeColor from if condition
-                                    labelColor(endpoint: endpointType, theColor: self.greenText)
-                                } else if totalFailed == endpointCount {
-                                    DispatchQueue.main.async {
-                                        self.labelColor(endpoint: endpointType, theColor: self.redText)
-                                        
-                                        if !setting.migrateDependencies || endpointType == "policies" {
-                                            PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                            self.put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]
-//                                                    self.put_levelIndicatorFillColor[endpointType] = .systemRed
-//                                                    self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
-                                        }
+                                totalCreated   = counters[endpointType]?["create"] ?? 0
+                                totalUpdated   = counters[endpointType]?["update"] ?? 0
+                                totalFailed    = counters[endpointType]?["fail"] ?? 0
+                                totalCompleted = totalCreated + totalUpdated + totalFailed
+                                
+                                // update counters
+                                if totalCompleted > 0 {
+                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                        putStatusUpdate2(endpoint: endpointType, total: counters[endpointType]!["total"]!)
                                     }
-                                    
                                 }
-                            }
-//                        }   // DispatchQueue.main.async - end
-                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-//                    }   // if let httpResponse = response - end
-                    
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
-                    
-                    if endpointCurrent > 0 {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t Failed: \(totalFailed)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))") }
-                    }
-                    
-                    if localEndPointType != "policies" && dependency.isRunning {
-                        Counter.shared.dependencyMigrated[dependencyParentId]! += 1
-//                        print("[CreateEndpoints2] Counter.shared.dependencyMigrated incremented: \(Counter.shared.dependencyMigrated[dependencyParentId]!)")
-                    }
+                                
+                                if setting.fullGUI && totalCompleted == endpointCount {
 
-    //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
-                    if endpointCurrent == endpointCount {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
-                        self.nodesMigrated+=1
-                        // print("added node: \(localEndPointType) - createEndpoints")
-    //                    print("nodes complete: \(self.nodesMigrated)")
+                                    if totalFailed == 0 {   // removed  && self.changeColor from if condition
+                                        labelColor(endpoint: endpointType, theColor: self.greenText)
+                                    } else if totalFailed == endpointCount {
+                                        DispatchQueue.main.async {
+                                            self.labelColor(endpoint: endpointType, theColor: self.redText)
+                                            
+                                            if !setting.migrateDependencies || endpointType == "policies" {
+                                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                                self.put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]
+    //                                                    self.put_levelIndicatorFillColor[endpointType] = .systemRed
+    //                                                    self.put_levelIndicator.fillColor = self.put_levelIndicatorFillColor[endpointType]
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+    //                        }   // DispatchQueue.main.async - end
+                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+    //                    }   // if let httpResponse = response - end
+                        
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        
+                        if endpointCurrent > 0 {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(self.POSTsuccessCount)\t Failed: \(totalFailed)\t SuccessArray \(String(describing: self.progressCountArray["\(localEndPointType)"]!))") }
+                        }
+                        
+                        if localEndPointType != "policies" && dependency.isRunning {
+                            Counter.shared.dependencyMigrated[dependencyParentId]! += 1
+    //                        print("[CreateEndpoints2] Counter.shared.dependencyMigrated incremented: \(Counter.shared.dependencyMigrated[dependencyParentId]!)")
+                        }
+
+        //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(self.nodesMigrated) nodes migrated.")
+                        if endpointCurrent == endpointCount {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            self.nodesMigrated+=1
+                            // print("added node: \(localEndPointType) - createEndpoints")
+        //                    print("nodes complete: \(self.nodesMigrated)")
+                        }
                     }
                 }
+                
+                
+                
             }   // if !wipeData.on - end
         }   // theCreateQ.addOperation - end
     }
@@ -5572,7 +6107,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     currentEPDict.removeAll()
                     
                     var destEndpoint         = theDestEndpoint
-                    var existingDestUrl      = ""
+                    var existingDestUrl      = "\(JamfProServer.destination)"
                     var destXmlName          = ""
                     var destXmlID:Int?
                     var existingEndpointNode = ""
@@ -5598,6 +6133,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         existingEndpointNode = "mobiledevicegroups"
                     case "jamfusers", "jamfgroups":
                         existingEndpointNode = "accounts"
+                    case "patchmanagement":
+                        existingEndpointNode = "patch-software-title-configurations"
                     default:
                         existingEndpointNode = destEndpoint
                     }
@@ -5703,8 +6240,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 ExistingEndpoints.shared.waiting = true
                                 
                                 existingEndpointNode = endpointDependencyArray[ExistingEndpoints.shared.completed]   // endpoint to look up
-                                existingDestUrl      = "\(JamfProServer.destination)/JSSResource/\(existingEndpointNode)"
-                                existingDestUrl      = existingDestUrl.urlFix
+                                                                    
+                                switch existingEndpointNode {
+                                case "patch-software-title-configurations":
+                                    existingDestUrl = existingDestUrl.appending("/api/v2/\(existingEndpointNode)").urlFix
+                                default:
+                                    existingDestUrl = existingDestUrl.appending("/JSSResource/\(existingEndpointNode)").urlFix
+                                }
+                                
+                                print("[\(#function)] \(#line) - existingDestUrl: \(existingDestUrl)")
                                 
                                 let destEncodedURL = URL(string: existingDestUrl)
                                 let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -5727,6 +6271,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     (data, response, error) -> Void in
                                     destSession.finishTasksAndInvalidate()
                                     if let httpResponse = response as? HTTPURLResponse {
+                                        print("[\(#function)] \(#line) - httpResponse.statusCode: \(httpResponse.statusCode)")
                                         if !pref.httpSuccess.contains(httpResponse.statusCode) {
                                             if setting.fullGUI {
                                                 _ = Alert.shared.display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(httpResponse.statusCode)", secondButton: "")
@@ -5740,157 +6285,192 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 
                                                 clearSourceObjectsList()
                                                 staticSourceObjectList.removeAll()
-        //                                        self.srcSrvTableView.reloadData()
+
                                                 print("[\(#function)] \(#line) - finished getting \(existingEndpointNode)")
                                                 goButtonEnabled(button_status: true)
                                                 completion(("Failed to get existing \(existingEndpointNode)\nStatus code: \(httpResponse.statusCode)",""))
                                                 return
                                             }
                                         }
+                                                                                
                                         do {
-                                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                                            if let destEndpointJSON = json as? [String: Any] {
-        //                                        print("destEndpointJSON: \(destEndpointJSON)")
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------") }
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON))") }
-                                                switch existingEndpointNode {
+                                            
+                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints]  --------------- Getting all \(destEndpoint) ---------------") }
+                                            
+                                            print("[\(#function)] \(#line) - existingEndpointNode: \(existingEndpointNode)")
+                                            switch existingEndpointNode {
+                                            case "patch-software-title-configurations":
+                                                PatchTitleConfigurations.destination = try! JSONDecoder().decode(PatchSoftwareTitleConfigurations.self, from: data ?? Data())
+                                                
+                                                // add site name to patch title config
+                                                for i in 0..<PatchTitleConfigurations.destination.count {
+                                                    PatchTitleConfigurations.destination[i].siteName = JamfProSites.destination.first(where: {$0.id == PatchTitleConfigurations.destination[i].siteId})?.name ?? "NONE"
+                                                }
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] Found \(PatchTitleConfigurations.destination.count) patch configurations.") }
+                                                
+                                                for patchObject in PatchTitleConfigurations.destination as [PatchSoftwareTitleConfiguration] {
+//                                                    let displayName = patchObject.displayName
+                                                    let softwareTitleName = patchObject.softwareTitleName
+//                                                    if patchObject.softwareTitlePublisher.range(of: "(Deprecated Definition)") != nil {
+//                                                        displayName.append(" (Deprecated Definition)")
+//                                                    }
+                                                    print("[existingEndpoints] softwareTitleName: \(softwareTitleName)")
+//                                                    displayNames.append(displayName)
                                                     
-                                                /*
-                                                // need to revisit as name isn't the best indicatory on whether or not a computer exists
-                                                case "-computers":
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current computers") }
-                                                    if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
-                                                        let destEndpointCount: Int = destEndpointInfo.count
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)") }
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)") }
-                                                        
-                                                        if destEndpointCount > 0 {
-                                                            for i in (0..<destEndpointCount) {
-                                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                                destXmlID = (destRecord["id"] as! Int)
-                                                                //                                            print("computer ID: \(destXmlID)")
-                                                                if let destEpGeneral = destEndpointJSON["computers/id/\(String(describing: destXmlID))/subset/General"] as? [Any] {
-                //                                                    print("destEpGeneral: \(destEpGeneral)")
-                                                                    let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
-                //                                                    print("destRecordGeneral: \(destRecordGeneral)")
-                                                                    let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
-                                                                    self.currentEPs[destXmlUdid] = destXmlID
-                                                                }
-                                                                //print("Dest endpoint name: \(destXmlName)")
-                                                            }
-                                                        }   // if destEndpointCount > 0
-                                                    }   //if let destEndpointInfo = destEndpointJSON - end
-                                                    */
-                                                case "packages":
-                                                    self.destEPQ.suspend()
-                                                    var destRecord      = [String:AnyObject]()
-                                                    var packageIDsNames = [Int:String]()
-                                                    setting.waitingForPackages = true
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current packages") }
-                                                    if let destEndpointInfo = destEndpointJSON["packages"] as? [Any] {
-                                                        let destEndpointCount: Int = destEndpointInfo.count
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)") }
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)") }
-                                                        
-                                                        if destEndpointCount > 0 {
-                                                            for i in (0..<destEndpointCount) {
-                                                                destRecord = destEndpointInfo[i] as! [String : AnyObject]
-        //                                                        packageIDs.append(destRecord["id"] as! Int)
-                                                                packageIDsNames[destRecord["id"] as! Int] = destRecord["name"] as? String
-                                                                //print("package ID: \(destRecord["id"] as! Int)")
-                                                            }
-                                                            
-                                                            PackagesDelegate.shared.filenameIdDict(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
-                                                                (currentDestinationPackages: [String:Int]) in
-                                                                self.currentEPs = currentDestinationPackages
-                                                                setting.waitingForPackages = false
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] returning existing packages: \(currentDestinationPackages)") }
-                                                                
-                                                                ExistingEndpoints.shared.completed += 1
-//                                                                self.updateExistingCounter(change: 1)
-                                                                ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-                                                                
-                                                                if !pref.stopMigration {
-                                                                    self.currentEPDict["packages"] = currentDestinationPackages
-        //                                                            self.currentEPDict["packages"] = self.currentEPs
-        //                                                            self.currentEPs.removeAll()
-                                                                    if endpointParent != "policies" {
-                                                                        completion(
-                                                                            ("[ViewController.existingEndpoints] Current packages on \(self.dest_jp_server) - \(currentDestinationPackages)\n","packages"))
-                                                                    }
-                                                                } else {
-                                                                    self.currentEPDict["packages"] = [:]
-                                                                    if endpointParent != "policies" {
-                                                                        completion(("[ViewController.existingEndpoints] Migration process was stopped\n","packages"))
-                                                                    }
-//                                                                    print("[\(#function)] \(#line) stopMigration")
-                                                                    self.stopButton(self)
-                                                                }
-                                                                
-                                                                self.destEPQ.resume()
-            //                                                    return
-                                                            }
-                                                            
-                                                        } else {   // if destEndpointCount > 0
-                                                            // no packages were found
-                                                            self.currentEPDict["packages"] = [:]
-                                                            ExistingEndpoints.shared.completed += 1
-//                                                            self.updateExistingCounter(change: 1)
-                                                            
-                                                            ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-                                                            self.destEPQ.resume()
-                                                            completion(("[ViewController.existingEndpoints] No packages were found on \(self.dest_jp_server)\n","packages"))
-                                                        }
-                                                        
-                                                    } else {  //if let destEndpointInfo = destEndpointJSON - end
-                                                        WriteToLog.shared.message(stringOfText: "[existingEndpoints] failed to get packages")
-                                                        self.destEPQ.resume()
-                                                        ExistingEndpoints.shared.completed += 1
-//                                                        self.updateExistingCounter(change: 1)
-                                                        ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-                                                        completion(("[ViewController.existingEndpoints] failed to get packages\n","packages"))
-                                                    }
-                                                    
-                                                default:
-                                                    if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" {
-                                                        let accountsDict = destEndpointJSON as [String: Any]
-                                                        let usersGroups = accountsDict["accounts"] as! [String: Any]
-                    //                                    print("users: \(String(describing: usersGroups["users"]))")
-                    //                                    print("groups: \(String(describing: usersGroups["groups"]))")
-                                                        destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
+                                                    if softwareTitleName.isEmpty {
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] skipping id: \(Int(patchObject.id ?? "") ?? 0), could not determine the display name.") }
                                                     } else {
-                                                        switch endpointParent {
-                                                        case "policies":
-                                                            switch existingEndpointNode {
-                                                            case "computergroups":
-                                                                een = "computer_groups"
-                                                            case "directorybindings":
-                                                                een = "directory_bindings"
-                                                            case "distributionpoints":
-                                                                een = "distribution_points"
-                                                            case "dockitems":
-                                                                een = "dock_items"
-                                                            case "networksegments":
-                                                                een = "network_segments"
-                                                            default:
-                                                                een = existingEndpointNode
-                                                            }
-                                                            destEndpointDict = destEndpointJSON["\(een)"]
-                                                        default:
-                                                            destEndpointDict = destEndpointJSON["\(endpointParent)"]
-                                                        }
+                                                        self.currentEPs[softwareTitleName] = Int(patchObject.id ?? "") ?? 0
                                                     }
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server") }
-                                                    if let destEndpointInfo = destEndpointDict as? [Any] {
-                                                        let destEndpointCount: Int = destEndpointInfo.count
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server") }
+                                                }
+                                                
+                                                self.currentEPDict[destEndpoint] = self.currentEPs
+//                                                print("[existingEndpoints] \(destEndpoint) current endpoints: \(self.currentEPDict[destEndpoint] ?? [:])")
+                                                
+                                            default:
+                                                let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                                                if let destEndpointJSON = json as? [String: Any] {
+            //                                        print("destEndpointJSON: \(destEndpointJSON)")
+                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing destEndpointJSON: \(destEndpointJSON)") }
+                                                    switch existingEndpointNode {
                                                         
-                                                        if destEndpointCount > 0 {
-                                                            for i in (0..<destEndpointCount) {
+                                                    /*
+                                                    // need to revisit as name isn't the best indicatory on whether or not a computer exists
+                                                    case "-computers":
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current computers") }
+                                                        if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
+                                                            let destEndpointCount: Int = destEndpointInfo.count
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)") }
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)") }
+                                                            
+                                                            if destEndpointCount > 0 {
+                                                                for i in (0..<destEndpointCount) {
+                                                                    let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                                    destXmlID = (destRecord["id"] as! Int)
+                                                                    //                                            print("computer ID: \(destXmlID)")
+                                                                    if let destEpGeneral = destEndpointJSON["computers/id/\(String(describing: destXmlID))/subset/General"] as? [Any] {
+                    //                                                    print("destEpGeneral: \(destEpGeneral)")
+                                                                        let destRecordGeneral = destEpGeneral[0] as! [String : AnyObject]
+                    //                                                    print("destRecordGeneral: \(destRecordGeneral)")
+                                                                        let destXmlUdid: String = (destRecordGeneral["udid"] as! String)
+                                                                        self.currentEPs[destXmlUdid] = destXmlID
+                                                                    }
+                                                                    //print("Dest endpoint name: \(destXmlName)")
+                                                                }
+                                                            }   // if destEndpointCount > 0
+                                                        }   //if let destEndpointInfo = destEndpointJSON - end
+                                                        */
+                                                    case "packages":
+                                                        self.destEPQ.suspend()
+                                                        var destRecord      = [String:AnyObject]()
+                                                        var packageIDsNames = [Int:String]()
+                                                        setting.waitingForPackages = true
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current packages") }
+                                                        if let destEndpointInfo = destEndpointJSON["packages"] as? [Any] {
+                                                            let destEndpointCount: Int = destEndpointInfo.count
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(destEndpoint) found: \(destEndpointCount)") }
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] destEndpointInfo: \(destEndpointInfo)") }
+                                                            
+                                                            if destEndpointCount > 0 {
+                                                                for i in (0..<destEndpointCount) {
+                                                                    destRecord = destEndpointInfo[i] as! [String : AnyObject]
+            //                                                        packageIDs.append(destRecord["id"] as! Int)
+                                                                    packageIDsNames[destRecord["id"] as! Int] = destRecord["name"] as? String
+                                                                    //print("package ID: \(destRecord["id"] as! Int)")
+                                                                }
                                                                 
-                                                                let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] Processing: \(destRecord).") }
-                                                                destXmlID = (destRecord["id"] as! Int)
+                                                                PackagesDelegate.shared.filenameIdDict(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", currentPackageIDsNames: packageIDsNames, currentPackageNamesIDs: [:], currentDuplicates: [:], currentTry: 1, maxTries: 3) {
+                                                                    (currentDestinationPackages: [String:Int]) in
+                                                                    self.currentEPs = currentDestinationPackages
+                                                                    setting.waitingForPackages = false
+                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] returning existing packages: \(currentDestinationPackages)") }
+                                                                    
+                                                                    ExistingEndpoints.shared.completed += 1
+    //                                                                self.updateExistingCounter(change: 1)
+                                                                    ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
+                                                                    
+                                                                    if !pref.stopMigration {
+                                                                        self.currentEPDict["packages"] = currentDestinationPackages
+            //                                                            self.currentEPDict["packages"] = self.currentEPs
+            //                                                            self.currentEPs.removeAll()
+                                                                        if endpointParent != "policies" {
+                                                                            completion(
+                                                                                ("[ViewController.existingEndpoints] Current packages on \(self.dest_jp_server) - \(currentDestinationPackages)\n","packages"))
+                                                                        }
+                                                                    } else {
+                                                                        self.currentEPDict["packages"] = [:]
+                                                                        if endpointParent != "policies" {
+                                                                            completion(("[ViewController.existingEndpoints] Migration process was stopped\n","packages"))
+                                                                        }
+    //                                                                    print("[\(#function)] \(#line) stopMigration")
+                                                                        self.stopButton(self)
+                                                                    }
+                                                                    
+                                                                    self.destEPQ.resume()
+                //                                                    return
+                                                                }
+                                                                
+                                                            } else {   // if destEndpointCount > 0
+                                                                // no packages were found
+                                                                self.currentEPDict["packages"] = [:]
+                                                                ExistingEndpoints.shared.completed += 1
+    //                                                            self.updateExistingCounter(change: 1)
+                                                                
+                                                                ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
+                                                                self.destEPQ.resume()
+                                                                completion(("[ViewController.existingEndpoints] No packages were found on \(self.dest_jp_server)\n","packages"))
+                                                            }
+                                                            
+                                                        } else {  //if let destEndpointInfo = destEndpointJSON - end
+                                                            WriteToLog.shared.message(stringOfText: "[existingEndpoints] failed to get packages")
+                                                            self.destEPQ.resume()
+                                                            ExistingEndpoints.shared.completed += 1
+    //                                                        self.updateExistingCounter(change: 1)
+                                                            ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
+                                                            completion(("[ViewController.existingEndpoints] failed to get packages\n","packages"))
+                                                        }
+                                                        
+                                                    default:
+                                                        if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" {
+                                                            let accountsDict = destEndpointJSON as [String: Any]
+                                                            let usersGroups = accountsDict["accounts"] as! [String: Any]
+                        //                                    print("users: \(String(describing: usersGroups["users"]))")
+                        //                                    print("groups: \(String(describing: usersGroups["groups"]))")
+                                                            destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
+                                                        } else {
+                                                            switch endpointParent {
+                                                            case "policies":
+                                                                switch existingEndpointNode {
+                                                                case "computergroups":
+                                                                    een = "computer_groups"
+                                                                case "directorybindings":
+                                                                    een = "directory_bindings"
+                                                                case "distributionpoints":
+                                                                    een = "distribution_points"
+                                                                case "dockitems":
+                                                                    een = "dock_items"
+                                                                case "networksegments":
+                                                                    een = "network_segments"
+                                                                default:
+                                                                    een = existingEndpointNode
+                                                                }
+                                                                destEndpointDict = destEndpointJSON["\(een)"]
+                                                            default:
+                                                                destEndpointDict = destEndpointJSON["\(endpointParent)"]
+                                                            }
+                                                        }
+                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] getting current \(existingEndpointNode) on destination server") }
+                                                        if let destEndpointInfo = destEndpointDict as? [Any] {
+                                                            let destEndpointCount: Int = destEndpointInfo.count
+                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server") }
+                                                            
+                                                            if destEndpointCount > 0 {
+                                                                for i in (0..<destEndpointCount) {
+                                                                    
+                                                                    let destRecord = destEndpointInfo[i] as! [String : AnyObject]
+                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] Processing: \(destRecord).") }
+                                                                    destXmlID = (destRecord["id"] as! Int)
                                                                     if destRecord["name"] != nil {
                                                                         destXmlName = destRecord["name"] as! String
                                                                     } else {
@@ -5914,33 +6494,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                                     } else {
                                                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] skipping id: \(String(describing: destXmlID)), could not determine its name.") }
                                                                     }
-                                                                
-                                                            }   // for i in (0..<destEndpointCount) - end
-                                                        } else {   // if destEndpointCount > 0 - end
-                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] No endpoints found, clearing entries.") }
-                                                            self.currentEPs.removeAll()
-                                                        }
-                                                        
-        //                                                print("\n[existingEndpoints] endpointParent: \(endpointParent) \t existingEndpointNode: \(existingEndpointNode) \t destEndpoint: \(destEndpoint)\ncurrentEPs: \(self.currentEPs)")
-                                                        switch endpointParent {
-                                                        case "policies":
-                                                            self.currentEPDict[existingEndpointNode] = self.currentEPs
-                                                        default:
-                                                            self.currentEPDict[destEndpoint] = self.currentEPs
-                                                        }
-                                                        
-//                                                        self.currentEPs.removeAll()
-                                                        
-                                                    }   // if let destEndpointInfo - end
-                                                }   // switch - end
-                                            } else {
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] current endpoint dict: \(self.currentEPs)") }
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] clearing existing current endpoints: \(existingEndpointNode)") }
-                                                self.currentEPs.removeAll()
-                                                self.currentEPDict[existingEndpointNode] = [:]
-        //                                        completion("error parsing JSON")
-                                            }   // if let destEndpointJSON - end
+                                                                    
+                                                                }   // for i in (0..<destEndpointCount) - end
+                                                            } else {   // if destEndpointCount > 0 - end
+                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] No endpoints found, clearing entries.") }
+                                                                self.currentEPs.removeAll()
+                                                            }
+                                                            
+            //                                                print("\n[existingEndpoints] endpointParent: \(endpointParent) \t existingEndpointNode: \(existingEndpointNode) \t destEndpoint: \(destEndpoint)\ncurrentEPs: \(self.currentEPs)")
+                                                            switch endpointParent {
+                                                            case "policies":
+                                                                self.currentEPDict[existingEndpointNode] = self.currentEPs
+                                                            default:
+                                                                self.currentEPDict[destEndpoint] = self.currentEPs
+                                                            }
+                                                            
+    //                                                        self.currentEPs.removeAll()
+                                                            
+                                                        }   // if let destEndpointInfo - end
+                                                    }   // switch - end
+                                                } else {
+                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] current endpoint dict: \(self.currentEPs)") }
+                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[existingEndpoints] clearing existing current endpoints: \(existingEndpointNode)") }
+                                                    self.currentEPs.removeAll()
+                                                    self.currentEPDict[existingEndpointNode] = [:]
+            //                                        completion("error parsing JSON")
+                                                }   // if let destEndpointJSON - end
+
+                                            }
+
                                             
+                                                                                        
                                         }   // end do/catch
                                         
                                         if existingEndpointNode != "packages" {
@@ -6023,347 +6607,192 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             return
         }
         
-                var objectDict           = [String:Any]()
-                var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
-        //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
-                var dependencyArray      = [String:String]()
-                var waitForPackageLookup = false
+        var objectDict           = [String:Any]()
+        var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
+//        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
+        var dependencyArray      = [String:String]()
+        var waitForPackageLookup = false
+        
+        if setting.migrateDependencies {
+            var dependencyNode = ""
+            
+//            print("look up dependencies for \(object)")
+            
+            switch object {
+            case "policies":
+                objectDict      = json["policy"] as! [String:Any]
+                let general     = objectDict["general"] as! [String:Any]
+                let bindings    = objectDict["account_maintenance"] as! [String:Any]
+                let scope       = objectDict["scope"] as! [String:Any]
+                let scripts     = objectDict["scripts"] as! [[String:Any]]
+                let packages    = objectDict["package_configuration"] as! [String:Any]
+                let exclusions  = scope["exclusions"] as! [String:Any]
+                let limitations = scope["limitations"] as! [String:Any]
                 
-                if setting.migrateDependencies {
-                    var dependencyNode = ""
+                for the_dependency in ordered_dependency_array {
+                    switch the_dependency {
+                    case "categories":
+                        dependencyNode = "category"
+                    case "computergroups":
+                        dependencyNode = "computer_groups"
+                    case "directorybindings":
+                        dependencyNode = "directory_bindings"
+                    case "diskencryption":
+                        dependencyNode = "disk_encryption"
+                    case "dockitems":
+                        dependencyNode = "dock_items"
+                    case "networksegments":
+                        dependencyNode = "network_segments"
+                    case "sites":
+                        dependencyNode = "site"
+                    default:
+                        dependencyNode = the_dependency
+                    }
                     
-        //            print("look up dependencies for \(object)")
-                    
-                    switch object {
-                    case "policies":
-                        objectDict      = json["policy"] as! [String:Any]
-                        let general     = objectDict["general"] as! [String:Any]
-                        let bindings    = objectDict["account_maintenance"] as! [String:Any]
-                        let scope       = objectDict["scope"] as! [String:Any]
-                        let scripts     = objectDict["scripts"] as! [[String:Any]]
-                        let packages    = objectDict["package_configuration"] as! [String:Any]
-                        let exclusions  = scope["exclusions"] as! [String:Any]
-                        let limitations = scope["limitations"] as! [String:Any]
-                        
-                        for the_dependency in ordered_dependency_array {
-                            switch the_dependency {
-                            case "categories":
-                                dependencyNode = "category"
-                            case "computergroups":
-                                dependencyNode = "computer_groups"
-                            case "directorybindings":
-                                dependencyNode = "directory_bindings"
-                            case "diskencryption":
-                                dependencyNode = "disk_encryption"
-                            case "dockitems":
-                                dependencyNode = "dock_items"
-                            case "networksegments":
-                                dependencyNode = "network_segments"
-                            case "sites":
-                                dependencyNode = "site"
-                            default:
-                                dependencyNode = the_dependency
+                    dependencyArray.removeAll()
+                    switch dependencyNode {
+                    case "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
+                        if (self.scopePoliciesCopy && dependencyNode == "computer_groups") || (dependencyNode != "computer_groups") {
+                            if let _ = scope[dependencyNode] {
+                                let scope_dep = scope[dependencyNode] as! [AnyObject]
+                                for theObject in scope_dep {
+                                    let local_name = (theObject as! [String:Any])["name"]
+                                    let local_id   = (theObject as! [String:Any])["id"]
+                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                }
                             }
                             
-                            dependencyArray.removeAll()
-                            switch dependencyNode {
-                            case "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
-                                if (self.scopePoliciesCopy && dependencyNode == "computer_groups") || (dependencyNode != "computer_groups") {
-                                    if let _ = scope[dependencyNode] {
-                                        let scope_dep = scope[dependencyNode] as! [AnyObject]
-                                        for theObject in scope_dep {
-                                            let local_name = (theObject as! [String:Any])["name"]
-                                            let local_id   = (theObject as! [String:Any])["id"]
-                                            dependencyArray["\(local_name!)"] = "\(local_id!)"
-                                        }
-                                    }
-                                    
-                                    if dependencyNode == "computer_groups" {
-                                        print("check for exclusions: \(exclusions)")
-                                        if let _ = exclusions[dependencyNode] {
-                                            let scope_excl_compGrp_dep = exclusions[dependencyNode] as! [[String:Any]]
-                                            //                                let scope_excl_compGrp_dep = scope_excl_dep["computer_groups"] as! [String:Any]
-                                            print("exclusions: \(scope_excl_compGrp_dep)")
-                                            for theObject in scope_excl_compGrp_dep {
-                                                print("theObject: \(theObject)")
-                                                let local_name = theObject["name"] as! String
-                                                let local_id   = theObject["id"] as! Int
-                                                dependencyArray["\(local_name)"] = "\(local_id)"
-                                                print("dependencyArray: \(dependencyArray)")
-                                            }
-                                        }
-                                        
-                                        if let _ = limitations[dependencyNode] {
-                                            let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
-                                            for theObject in scope_excl_dep {
-                                                let local_name = (theObject as! [String:Any])["name"]
-                                                let local_id   = (theObject as! [String:Any])["id"]
-                                                dependencyArray["\(local_name!)"] = "\(local_id!)"
-                                            }
-                                        }
+                            if dependencyNode == "computer_groups" {
+                                print("check for exclusions: \(exclusions)")
+                                if let _ = exclusions[dependencyNode] {
+                                    let scope_excl_compGrp_dep = exclusions[dependencyNode] as! [[String:Any]]
+                                    //                                let scope_excl_compGrp_dep = scope_excl_dep["computer_groups"] as! [String:Any]
+                                    print("exclusions: \(scope_excl_compGrp_dep)")
+                                    for theObject in scope_excl_compGrp_dep {
+                                        print("theObject: \(theObject)")
+                                        let local_name = theObject["name"] as! String
+                                        let local_id   = theObject["id"] as! Int
+                                        dependencyArray["\(local_name)"] = "\(local_id)"
+                                        print("dependencyArray: \(dependencyArray)")
                                     }
                                 }
                                 
-                            case "directory_bindings":
-                            if let _ = bindings[dependencyNode] {
-                                let scope_limit_dep = bindings[dependencyNode] as! [AnyObject]
-                                for theObject in scope_limit_dep {
-                                    let local_name = (theObject as! [String:Any])["name"]
-                                    let local_id   = (theObject as! [String:Any])["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                if let _ = limitations[dependencyNode] {
+                                    let scope_excl_dep = limitations[dependencyNode] as! [AnyObject]
+                                    for theObject in scope_excl_dep {
+                                        let local_name = (theObject as! [String:Any])["name"]
+                                        let local_id   = (theObject as! [String:Any])["id"]
+                                        dependencyArray["\(local_name!)"] = "\(local_id!)"
+                                    }
                                 }
                             }
+                        }
+                        
+                    case "directory_bindings":
+                    if let _ = bindings[dependencyNode] {
+                        let scope_limit_dep = bindings[dependencyNode] as! [AnyObject]
+                        for theObject in scope_limit_dep {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
+                    }
 
-                            case "dock_items", "disk_encryption":
-                            if let _ = objectDict[dependencyNode] {
-                                let scope_item = objectDict[dependencyNode] as! [AnyObject]
-                                for theObject in scope_item {
-                                    let local_name = (theObject as! [String:Any])["name"]
-                                    let local_id   = (theObject as! [String:Any])["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
-                                }
-                            }
-                                 
-                             case "packages":
-                             if let _ = packages[dependencyNode] {
-                                 let packages_dep = packages[dependencyNode] as! [AnyObject]
-                                 if packages_dep.count > 0 { waitForPackageLookup = true }
-                                 var completedPackageLookups = 0
-                                 for theObject in packages_dep {
-        //                             let local_name = (theObject as! [String:Any])["name"]
-        //                             print("lookup package filename for display name \(String(describing: local_name!))")
-                                     let local_id   = (theObject as! [String:Any])["id"]
-                                     
-                                     PackagesDelegate.shared.getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on, currentTry: 1) {
-                                         (result: (Int,String)) in
-                                         let (_,packageFilename) = result
-                                         if packageFilename != "" {
-                                             dependencyArray["\(packageFilename)"] = "\(local_id!)"
-                                         } else {
-                                             WriteToLog.shared.message(stringOfText: "[getDependencies] package filename lookup failed for package ID \(String(describing: local_id))")
-                                         }
-                                         completedPackageLookups += 1
-                                         if completedPackageLookups == packages_dep.count {
-                                             waitForPackageLookup = false
-                                             fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
-                                         }
-                                     }
+                    case "dock_items", "disk_encryption":
+                    if let _ = objectDict[dependencyNode] {
+                        let scope_item = objectDict[dependencyNode] as! [AnyObject]
+                        for theObject in scope_item {
+                            let local_name = (theObject as! [String:Any])["name"]
+                            let local_id   = (theObject as! [String:Any])["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
+                    }
+                         
+                     case "packages":
+                     if let _ = packages[dependencyNode] {
+                         let packages_dep = packages[dependencyNode] as! [AnyObject]
+                         if packages_dep.count > 0 { waitForPackageLookup = true }
+                         var completedPackageLookups = 0
+                         for theObject in packages_dep {
+//                             let local_name = (theObject as! [String:Any])["name"]
+//                             print("lookup package filename for display name \(String(describing: local_name!))")
+                             let local_id   = (theObject as! [String:Any])["id"]
+                             
+                             PackagesDelegate.shared.getFilename(whichServer: "source", theServer: JamfProServer.source, base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: "packages", theEndpointID: local_id as! Int, skip: wipeData.on, currentTry: 1) {
+                                 (result: (Int,String)) in
+                                 let (_,packageFilename) = result
+                                 if packageFilename != "" {
+                                     dependencyArray["\(packageFilename)"] = "\(local_id!)"
+                                 } else {
+                                     WriteToLog.shared.message(stringOfText: "[getDependencies] package filename lookup failed for package ID \(String(describing: local_id))")
+                                 }
+                                 completedPackageLookups += 1
+                                 if completedPackageLookups == packages_dep.count {
+                                     waitForPackageLookup = false
+                                     fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
                                  }
                              }
+                         }
+                     }
 
-                             case "printers":
-                             let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
-                             for i in 0..<jsonPrinterArray.count {
-                                if "\(jsonPrinterArray[i])" != "" {
-                                    let scope_item = jsonPrinterArray[i] as! [String:Any]
-                                    let local_name = scope_item["name"]
-                                    let local_id   = scope_item["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
-                                }
-                            }
-                                
-                            case "scripts":
-                                for theObject in scripts {
-                                    let local_name = theObject["name"]
-                                    let local_id   = theObject["id"]
-                                    dependencyArray["\(local_name!)"] = "\(local_id!)"
-                                }
-
-                                
-                            default:
-                                if let _ = general[dependencyNode] {
-                                    let general_dep = general[dependencyNode]! as! [String:Any]
-                                    let local_name = general_dep["name"] as! String
-                                    let local_id   = general_dep["id"] as! Int
-                                    if local_id != -1 {
-                                        dependencyArray["\(local_name)"] = "\(local_id)"
-                                    }
-                                }
-                            }
-                            if the_dependency != "buildings" {
-                                fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
-                            }
-            //                fullDependencyDict[the_dependency] = dependencyArray
-            //                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
+                     case "printers":
+                     let jsonPrinterArray = objectDict[dependencyNode] as! [Any]
+                     for i in 0..<jsonPrinterArray.count {
+                        if "\(jsonPrinterArray[i])" != "" {
+                            let scope_item = jsonPrinterArray[i] as! [String:Any]
+                            let local_name = scope_item["name"]
+                            let local_id   = scope_item["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
                         }
-        //              print("fullDependencyDict: \(fullDependencyDict)")
+                    }
+                        
+                    case "scripts":
+                        for theObject in scripts {
+                            let local_name = theObject["name"]
+                            let local_id   = theObject["id"]
+                            dependencyArray["\(local_name!)"] = "\(local_id!)"
+                        }
 
+                        
                     default:
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getDependencies] not implemented for \(object).") }
-        //                print("return empty fullDependencyDict")
-                        completion([:])
-                    }
-                    
-                }
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getDependencies] dependencies: \(fullDependencyDict)") }
-                WriteToLog.shared.message(stringOfText: "[getDependencies] complete")
-                var tmpCount = 1
-                DispatchQueue.global(qos: .utility).async {
-                    while waitForPackageLookup && tmpCount <= 60 {
-        //                print("trying to resolve package filename(s), attempt \(tmpCount)")
-                        sleep(1)
-                        tmpCount += 1
-                    }
-                    
-        //            return fullDependencyDict
-        //            print("return fullDependencyDict: \(fullDependencyDict)")
-                    completion(fullDependencyDict)
-                }
-    }
-    
-    /*
-    func nameIdDict(server: String, endPoint: String, id: String, completion: @escaping (_ result: [String:[String:Int]]) -> Void) {
-        // matches the id to name of objects in a configuration (imaging)
-        
-        
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[nameIdDict] start matching \(endPoint) (by name) that exist on both servers") }
-        URLCache.shared.removeAllCachedResponses()
-        var serverUrl     = "\(server)/JSSResource/\(endPoint)"
-        serverUrl         = serverUrl.urlFix
-//        serverUrl         = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        var recordName    = ""
-        var endpointCount = 0
-        
-        var serverCreds = ""
-        var whichServer = ""
-        let serverConf = URLSessionConfiguration.ephemeral
-        if id == "sourceId" {
-            serverCreds = self.sourceBase64Creds
-            whichServer = "source"
-        } else {
-            serverCreds = self.destBase64Creds
-            whichServer = "dest"
-        }
-
-//        print("NSURL line 7")
-//        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = URL(string: serverUrl)
-        let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
-        
-        let semaphore = DispatchSemaphore(value: 1)
-        idMapQ.async {
-            
-            serverRequest.httpMethod = "GET"
-//             ["Authorization" : "Basic \(serverCreds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-            serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType[whichServer]!)) \(String(describing: JamfProServer.authCreds[whichServer]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-            let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
-            let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                serverSession.finishTasksAndInvalidate()
-                if let httpResponse = response as? HTTPURLResponse {
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json as? [String: Any] {
-                        
-                        if let endpointInfo = endpointJSON[self.endpointDefDict[endPoint]!] as? [Any] {
-                            endpointCount = endpointInfo.count
-                            
-                            if endpointCount > 0 {
-                                for i in (0..<endpointCount) {
-                                    let record = endpointInfo[i] as! [String : AnyObject]
-                                    let recordId = (record["id"] != nil) ? record["id"] as? Int:0
-//                                    print("[nameIdDict] record: \(record ) \t recordId: \(recordId!)")
-                                    
-//                                    if endPoint == "computerconfigurations" {
-//                                        self.configInfo(server: "\(server)", endPoint: "computerconfigurations", recordId: recordId!) {
-//                                            (result: Dictionary<String,Dictionary<String,String>>) in
-//                                            //                                            print("ordered config IDs: \(result)")
-//                                        }
-//                                        
-//                                    } else {
-                                        recordName = record["name"] as! String
-                                        if self.idDict[recordName]?.count == nil || recordId == 0 {
-                                            self.idDict[recordName] = ["sourceId":0, "destId":0]
-                                            WriteToLog.shared.message(stringOfText: "[nameIdDict] \(String(describing: recordName)): new object.")
-                                        }
-                                        self.idDict[recordName]?[id] = recordId
-                                        if LogLevel.debug {
-                                            WriteToLog.shared.message(stringOfText: "[nameIdDict] \(String(describing: recordName)): existing object.")
-                                            WriteToLog.shared.message(stringOfText: "[nameIdDict] \(String(describing: self.idDict[recordName]!)) ID matching dictionary :")
-                                        }
-
-//                                    }
-                                }  // for i in (0..<endpointCount) end
-                                
-                            }   //if endpointCount > 0 - end
-                        }   // if let endpointInfo = endpointJSON - end
-                    }   // if let serverEndpointJSON - end
-                    
-                    if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                        completion(self.idDict)
-                    } else {
-                        // something went wrong
-//                        print("[nameIdDict] status code: \(httpResponse.statusCode)")
-                        completion([:])
-                        
-                    }   // if httpResponse/else - end
-                }   // if let httpResponse - end
-                semaphore.signal()
-                if error != nil {
-                }
-            })  // let task = destSession - end
-            task.resume()
-        }   // idMapQ - end
-    }   // func nameIdDict - end
-    
-    func configInfo(server: String, endPoint: String, recordId: Int, completion: @escaping (_ result: Dictionary<String,Dictionary<String,String>>) -> Void) {
-        URLCache.shared.removeAllCachedResponses()
-        
-        var serverUrl = "\(server)/JSSResource/\(endPoint)/id/\(recordId)"
-        serverUrl = serverUrl.urlFix
-//        serverUrl = serverUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-
-//        print("NSURL line 8")
-//        if "\(serverUrl)" == "" { serverUrl = "https://localhost" }
-        let serverEncodedURL = URL(string: serverUrl)
-        let serverRequest = NSMutableURLRequest(url: serverEncodedURL! as URL)
-
-        let semaphore = DispatchSemaphore(value: 0)
-        idMapQ.async {
-            
-            serverRequest.httpMethod = "GET"
-            let serverConf = URLSessionConfiguration.ephemeral
-//             ["Authorization" : "Basic \(self.sourceBase64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
-            serverConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType["source"]!)) \(String(describing: JamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-            let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
-            let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                serverSession.finishTasksAndInvalidate()
-                if let httpResponse = response as? HTTPURLResponse {
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                    if let endpointJSON = json as? [String: Any] {
-                        
-                        let endpointInfo = endpointJSON["computer_configuration"] as! [String:Any]
-                        let record = endpointInfo["general"] as! [String:Any]
-                        let configName = record["name"] as? String
-                        self.configObjectsDict[configName!] = [:]
-                        self.configObjectsDict[configName!]?["id"] = "\(recordId)"
-                        self.configObjectsDict[configName!]?["type"] = record["type"] as? String
-                        if self.configObjectsDict[configName!]?["type"] == "Smart" {
-                            self.configObjectsDict[configName!]?["parent"] = record["parent"] as? String
-                        } else {
-                            self.configObjectsDict[configName!]?["parent"] = ""
+                        if let _ = general[dependencyNode] {
+                            let general_dep = general[dependencyNode]! as! [String:Any]
+                            let local_name = general_dep["name"] as! String
+                            let local_id   = general_dep["id"] as! Int
+                            if local_id != -1 {
+                                dependencyArray["\(local_name)"] = "\(local_id)"
+                            }
                         }
-                    }   // if let endpointInfo = endpointJSON - end
-                    
-                    if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-//                      print(httpResponse.statusCode)
-//                        print("\nconfig \(recordId): \(self.configObjectsDict)")
-                        completion(self.configObjectsDict)
-                    } else {
-                        // something went wrong
-//                        print("[configInfo] status code: \(httpResponse.statusCode)")
-                        completion([:])
-                        
-                    }   // if httpResponse/else - end
-                }   // if let httpResponse - end
-                semaphore.signal()
-                if error != nil {
+                    }
+                    if the_dependency != "buildings" {
+                        fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
+                    }
+    //                fullDependencyDict[the_dependency] = dependencyArray
+    //                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
                 }
-            })  // let task = destSession - end
-            task.resume()
-        }   // theOpQ - end
+//              print("fullDependencyDict: \(fullDependencyDict)")
+
+            default:
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getDependencies] not implemented for \(object).") }
+//                print("return empty fullDependencyDict")
+                completion([:])
+            }
+            
+        }
+        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getDependencies] dependencies: \(fullDependencyDict)") }
+        WriteToLog.shared.message(stringOfText: "[getDependencies] complete")
+        var tmpCount = 1
+        DispatchQueue.global(qos: .utility).async {
+            while waitForPackageLookup && tmpCount <= 60 {
+//                print("trying to resolve package filename(s), attempt \(tmpCount)")
+                sleep(1)
+                tmpCount += 1
+            }
+            
+//            print("return fullDependencyDict: \(fullDependencyDict)")
+            completion(fullDependencyDict)
+        }
     }
-    */
     
     @IBAction func migrateDependencies_fn(_ sender: Any) {
         setting.migrateDependencies = migrateDependencies.state.rawValue == 1 ? true:false
@@ -6755,6 +7184,43 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.exportItems] Problem writing \(endpointPath) folder: Error \(error)") }
                 return
             }
+            
+        case "patchmanagement":
+            print("[exportItems] should not see this")
+//            let jsonFile = "\(name)-\(id).json"
+//            var jsonString = objectString.dropFirst().dropLast()
+//            jsonString = "{\(jsonString)}"
+//            print("[exportItems] jsonString: \(jsonString)")
+//            do {
+//                let data = jsonString.data(using: .utf8) ?? Data()
+////                let objectJson = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+//                
+//                let objectJson = try! JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data)
+//                
+//                let patchSoftwareTitle = """
+//                        <patch_software_title>
+//                            <name>"\(objectJson.softwareTitleName)"</name>
+//                            <name_id>"\(objectJson.softwareTitleNameId)"</name_id>
+//                            <source_id>"\(objectJson.id)"</source_id>
+//                            <notifications>
+//                                <web_notification>"\(objectJson.uiNotifications)"</web_notification>
+//                                <email_notification>"\(objectJson.emailNotifications)"</email_notification>
+//                            </notifications>
+//                            <categories>
+//                                <id>-1</id>
+//                                <name>"\(objectJson.categoryId)"</name>
+//                            </categories>
+//                        </patch_software_title>
+//                        """
+//                print("[exportItems] patchSoftwareTitle: \(patchSoftwareTitle)")
+//                
+//                
+//                try jsonString.write(toFile: endpointPath+"/"+jsonFile, atomically: true, encoding: .utf8)
+//                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.exportItems] saved to: \(endpointPath)") }
+//            } catch {
+//                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.exportItems] Problem writing \(endpointPath) folder: Error \(error)") }
+//                return
+//            }
 
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
             
@@ -7132,7 +7598,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     var policyIconDict = iconfiles.policyDict
 
                                     Json().getRecord(whichServer: "dest", theServer: self.dest_jp_server, base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
-                                        (result: [String:AnyObject]) in
+                                        (objectRecord: Any) in
+                                        let result = objectRecord as? [String: AnyObject] ?? [:]
 //                                        print("[icons] result of Json().getRecord: \(result)")
                                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.") }
                                         
@@ -7592,6 +8059,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     self.osxconfigurationprofiles_label_field.textColor = theColor
                 case "patchpolicies":
                     self.patch_policies_field.textColor = theColor
+//                case "patchManagement":
+//                    self.patch_mgmt_button.textColor = theColor
                 case "computerextensionattributes":
                     self.extension_attributes_label_field.textColor = theColor
                 case "scripts":
@@ -8151,15 +8620,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        hardSetLdapId = false
         
-//        LogLevel.debug = true
+        PatchDelegate.shared.messageDelegate = self
+//        PatchDelegate.shared.updateViewController("")
         
         srcSrvTableView.delegate = self
         srcSrvTableView.tableColumns.forEach { (column) in
             column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 14)])
         }
-//        sourceObjectList_AC.sortDescriptors = [NSSortDescriptor(key: "objectName", ascending: true)]
         
         /* test data for selective migration
         let testObjects = SelectiveObjectList(objectName: "iPad", objectId: "iPad-16.xml")
@@ -8406,7 +8874,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let appVersion = AppInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog.shared.message(stringOfText: "jamf-migrator Version: \(appVersion) Build: \(appBuild )")
+        WriteToLog.shared.message(stringOfText: "\(AppInfo.name) Version: \(appVersion) Build: \(appBuild )")
         
         if !setting.fullGUI {
             WriteToLog.shared.message(stringOfText: "Running silently")
@@ -8429,7 +8897,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @objc func showLogFolder(_ notification: Notification) {
         isDir = true
         if (fm.fileExists(atPath: logPath!, isDirectory: &isDir)) {
-            NSWorkspace.shared.openFile(logPath!)
+//            NSWorkspace.shared.openFile(logPath!)
+            NSWorkspace.shared.open(URL(fileURLWithPath: logPath!))
         } else {
             alert_dialog(header: "Alert", message: "There are currently no log files to display.")
         }
@@ -8709,7 +9178,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         completion(newArray)
     }
     
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
     
@@ -8803,8 +9272,9 @@ extension String {
     }
     var urlFix: String {
         get {
-            var fixedUrl = self.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-            fixedUrl = fixedUrl.replacingOccurrences(of: "/?failover", with: "")
+            var fixedUrl = self.replacingOccurrences(of: "//api", with: "/api")
+            fixedUrl     = self.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+            fixedUrl     = fixedUrl.replacingOccurrences(of: "/?failover", with: "")
             return fixedUrl
         }
     }

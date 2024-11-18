@@ -408,7 +408,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //                serverOrFiles() {
 //                    (result: String) in
 //                }
-                userDefaults.synchronize()
+//                userDefaults.synchronize()
             }   // DispatchQueue.main.async - end
         } else {    // if fileImport_button.state - end
             userDefaults.set(false, forKey: "fileImport")
@@ -1005,12 +1005,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
         NotificationCenter.default.post(name: .setColorScheme_sdvc, object: self)
         
-        source_jp_server_field.delegate = self
+        source_jp_server_field.delegate    = self
         sourceUser_TextField.delegate      = self
-        source_pwd_field.delegate       = self
-        dest_jp_server_field.delegate   = self
-        destinationUser_TextField.delegate        = self
-        dest_pwd_field.delegate         = self
+        source_pwd_field.delegate          = self
+        dest_jp_server_field.delegate      = self
+        destinationUser_TextField.delegate = self
+        dest_pwd_field.delegate            = self
         
 //        jamfpro = JamfPro(sdController: self)
         fileImport = userDefaults.bool(forKey: "fileImport")
@@ -1052,6 +1052,15 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
         }
         // create log directory if missing - end
+                
+        if !fm.fileExists(atPath: AppInfo.plistPath) {
+            _ = readSettings(thePath: AppInfo.plistPathOld)
+            isDir = true
+            if !fm.fileExists(atPath: AppInfo.appSupportPath, isDirectory: &isDir) {
+                try? fm.createDirectory(atPath: AppInfo.appSupportPath, withIntermediateDirectories: true)
+            }
+            saveSettings(settings: AppInfo.settings)
+        }
         
         maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
         logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
@@ -1088,7 +1097,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
             
             // read environment settings from plist - start
-//            plistData -> appInfo.settings
             _ = readSettings()
 
             if AppInfo.settings["source_jp_server"] as? String != nil {
@@ -1242,7 +1250,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

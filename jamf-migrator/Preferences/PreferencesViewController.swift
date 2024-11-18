@@ -308,8 +308,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
 //            print("open exportFilePath: \(exportFilePath!)")
-            NSWorkspace.shared.openFile("\(exportFilePath!)")
-//            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: "\(exportFilePath!)")
+//            NSWorkspace.shared.openFile("\(exportFilePath!)")
+            NSWorkspace.shared.open(URL(fileURLWithPath: exportFilePath!))
         } else {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
         }

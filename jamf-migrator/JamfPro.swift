@@ -17,6 +17,18 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
             
+    fileprivate func renewToken(renew: Bool, whichServer: String, baseUrl: String, base64creds: String) {
+        if !migrationComplete.isDone && renew && JamfProServer.authType[whichServer] == "Bearer" {
+            WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer]! + 1) seconds")
+            DispatchQueue.main.asyncAfter(deadline: .now() + JamfProServer.authExpires[whichServer]! + 1) { [self] in
+                WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] renewing \(whichServer.localizedCapitalized) token")
+                getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
+                    (result: (Int, String)) in
+                }
+            }
+        }
+    }
+    
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, renew: Bool = true, completion: @escaping (_ authResult: (Int,String)) -> Void) {
         
         if JamfProServer.authType[whichServer] == "Basic" {
@@ -86,9 +98,9 @@ class JamfPro: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
         
-        if !(JamfProServer.validToken[whichServer] ?? false) || tokenAgeInSeconds >= JamfProServer.authExpires[whichServer]! || (JamfProServer.base64Creds[whichServer] != base64creds) {
+        if !(JamfProServer.validToken[whichServer] ?? false) || tokenAgeInSeconds >= JamfProServer.authExpires[whichServer] ?? 0 || (JamfProServer.base64Creds[whichServer] != base64creds) {
             if JamfProServer.authType[whichServer] == "Bearer" {
-                WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] Token for \(whichServer) server is \(Int(tokenAgeInSeconds/60)) minutes old.")
+                WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] Token for \(whichServer) server is \(Int(tokenAgeInSeconds/60)) minutes old. Expires in \(JamfProServer.authExpires[whichServer] ?? 0) seconds.")
             }
             
             if apiClient {
@@ -116,128 +128,127 @@ class JamfPro: NSObject, URLSessionDelegate {
 //            print("[getToken] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-            let task = session.dataTask(with: request as URLRequest, completionHandler: {
+            let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                 (data, response, error) -> Void in
                 session.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     if pref.httpSuccess.contains(httpResponse.statusCode) {
-                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-//                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
-                        if let endpointJSON = json! as? [String: Any] {
-//                            print("[getToken] endpointJSON: \(endpointJSON)")
-                            if apiClient {
-                                JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
-                            } else {
-                                JamfProServer.authExpires[whichServer] = (endpointJSON["expires"] as? Double ?? 20.0)!*60
-                            }
-                            // for testing
-//                            JamfProServer.authExpires[whichServer] = 20.0*60
-                            
-                            JamfProServer.authExpires[whichServer] = JamfProServer.authExpires[whichServer]!*0.75
-                            JamfProServer.validToken[whichServer]  = true
-                            JamfProServer.authCreds[whichServer]   = apiClient ? endpointJSON["access_token"] as? String:endpointJSON["token"] as? String ?? ""
-                            JamfProServer.accessToken[whichServer] = JamfProServer.authCreds[whichServer]
-
-                            JamfProServer.authType[whichServer]    = "Bearer"
-                            JamfProServer.base64Creds[whichServer] = base64creds
-                            if wipeData.on && whichServer == "dest" {
-                                JamfProServer.validToken["source"]  = JamfProServer.validToken[whichServer]
-                                JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
-                                JamfProServer.accessToken["source"] = JamfProServer.accessToken[whichServer]
-                                JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
-                            }
-                            JamfProServer.tokenCreated[whichServer] = Date()
-                            
-                            print("[JamfPro] \(whichServer) received a new token")
-                            WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] new token created for \(whichServer): \(baseUrl)")
-                            
-                            if JamfProServer.version[whichServer] == "" {
-                                if whichServer == "source" {
-                                    JamfProServer.source = baseUrl
+                        do {
+                            let json = try JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                            if let endpointJSON = json as? [String: Any] {
+                                //                            print("[getToken] endpointJSON: \(endpointJSON)")
+                                if apiClient {
+                                    JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
                                 } else {
-                                    JamfProServer.destination = baseUrl
+                                    JamfProServer.authExpires[whichServer] = (endpointJSON["expires"] as? Double ?? 20.0)!*60
                                 }
-                                // get Jamf Pro version - start
-                                Jpapi.shared.action(serverUrl: baseUrl, endpoint: "jamf-pro-version", apiData: [:], id: "", token: JamfProServer.authCreds[whichServer]!, method: "GET") {
-                                    (result: [String:Any]) in
-                                    if let versionString = result["version"] as? String {
-                                        
-                                        if versionString != "" {
-                                            WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer) Jamf Pro Version: \(versionString)")
-                                            JamfProServer.version[whichServer] = versionString
-                                            let tmpArray = versionString.components(separatedBy: ".")
-                                            if tmpArray.count > 2 {
-                                                for i in 0...2 {
-                                                    switch i {
-                                                    case 0:
-                                                        JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
-                                                    case 1:
-                                                        JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
-                                                    case 2:
-                                                        let tmp = tmpArray[i].components(separatedBy: "-")
-                                                        JamfProServer.patchVersion = Int(tmp[0]) ?? 0
-                                                        if tmp.count > 1 {
-                                                            JamfProServer.build = tmp[1]
+                                // for testing
+                                //                            JamfProServer.authExpires[whichServer] = 20.0*60
+                                
+                                JamfProServer.authExpires[whichServer] = JamfProServer.authExpires[whichServer]!*0.75
+                                JamfProServer.validToken[whichServer]  = true
+                                JamfProServer.authCreds[whichServer]   = apiClient ? endpointJSON["access_token"] as? String:endpointJSON["token"] as? String ?? ""
+                                JamfProServer.accessToken[whichServer] = JamfProServer.authCreds[whichServer]
+                                
+                                JamfProServer.authType[whichServer]    = "Bearer"
+                                JamfProServer.base64Creds[whichServer] = base64creds
+                                if wipeData.on && whichServer == "dest" {
+                                    JamfProServer.validToken["source"]  = JamfProServer.validToken[whichServer]
+                                    JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
+                                    JamfProServer.accessToken["source"] = JamfProServer.accessToken[whichServer]
+                                    JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
+                                }
+                                JamfProServer.tokenCreated[whichServer] = Date()
+                                
+                                print("[JamfPro] \(whichServer) received a new token")
+                                WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] new token created for \(whichServer): \(baseUrl)")
+                                
+                                if JamfProServer.version[whichServer] == "" {
+                                    if whichServer == "source" {
+                                        JamfProServer.source = baseUrl
+                                    } else {
+                                        JamfProServer.destination = baseUrl
+                                    }
+                                    // get Jamf Pro version - start
+                                    Jpapi.shared.action(whichServer: whichServer, endpoint: "jamf-pro-version", apiData: [:], id: "", token: JamfProServer.authCreds[whichServer]!, method: "GET") { [self]
+                                        (result: [String:Any]) in
+                                        if let versionString = result["version"] as? String {
+                                            
+                                            if versionString != "" {
+                                                WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer) Jamf Pro Version: \(versionString)")
+                                                JamfProServer.version[whichServer] = versionString
+                                                let tmpArray = versionString.components(separatedBy: ".")
+                                                if tmpArray.count > 2 {
+                                                    for i in 0...2 {
+                                                        switch i {
+                                                        case 0:
+                                                            JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
+                                                        case 1:
+                                                            JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
+                                                        case 2:
+                                                            let tmp = tmpArray[i].components(separatedBy: "-")
+                                                            JamfProServer.patchVersion = Int(tmp[0]) ?? 0
+                                                            if tmp.count > 1 {
+                                                                JamfProServer.build = tmp[1]
+                                                            }
+                                                        default:
+                                                            break
                                                         }
-                                                    default:
-                                                        break
                                                     }
-                                                }
-                                                if ( JamfProServer.majorVersion > 10 || ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) ) && !forceBasicAuth {
-                                                    JamfProServer.authType[whichServer] = "Bearer"
-                                                    JamfProServer.validToken[whichServer] = true
-                                                    WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(baseUrl) set to use Bearer Token")
+                                                    if ( JamfProServer.majorVersion > 10 || ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) ) && !forceBasicAuth {
+                                                        JamfProServer.authType[whichServer] = "Bearer"
+                                                        JamfProServer.validToken[whichServer] = true
+                                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(baseUrl) set to use Bearer Token")
+                                                        
+                                                        
+                                                    } else {
+                                                        JamfProServer.authType[whichServer]  = "Basic"
+                                                        JamfProServer.validToken[whichServer] = false
+                                                        JamfProServer.authCreds[whichServer] = base64creds
+                                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(baseUrl) set to use Basic Authentication")
+                                                    }
                                                     
-                                                } else {
-                                                    JamfProServer.authType[whichServer]  = "Basic"
-                                                    JamfProServer.validToken[whichServer] = false
-                                                    JamfProServer.authCreds[whichServer] = base64creds
-                                                    WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(baseUrl) set to use Basic Authentication")
+                                                    print("[JamfPro] migrationComplete.isDone: \(migrationComplete.isDone)")
+                                                    print("[JamfPro] renew: \(renew)")
+                                                    renewToken(renew: renew, whichServer: whichServer, baseUrl: baseUrl, base64creds: base64creds)
+                                                    
+                                                    completion((200, "success"))
+                                                    return
+                                                    
                                                 }
-                                                
-                                                if !migrationComplete.isDone && renew {
-                                                    WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer]! + 1) seconds")
-                                                    DispatchQueue.main.asyncAfter(deadline: .now() + JamfProServer.authExpires[whichServer]! + 1) { [self] in
-                                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] renewing \(whichServer.localizedCapitalized) token")
-                                                        getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
-                                                            (result: (Int, String)) in
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                completion((200, "success"))
-                                                return
-                                                
                                             }
-                                        }
-                                    } else {   // if let versionString - end
-                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] failed to get version information from \(String(describing: baseUrl))")
-                                        JamfProServer.validToken[whichServer]  = false
-                                        _ = Alert.shared.display(header: "Attention", message: "Failed to get version information from \(String(describing: baseUrl))", secondButton: "")
-                                        completion((httpResponse.statusCode, "failed"))
-                                        return
-                                    }
-                                }
-                                // get Jamf Pro version - end
-                            } else {
-                                if !migrationComplete.isDone && renew {
-                                    WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer]! + 1) seconds")
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + JamfProServer.authExpires[whichServer]! + 1) { [self] in
-                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] renewing \(whichServer.localizedCapitalized) token")
-                                        getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
-                                            (result: (Int, String)) in
+                                        } else {   // if let versionString - end
+                                            WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] failed to get version information from \(String(describing: baseUrl))")
+                                            JamfProServer.validToken[whichServer]  = false
+                                            _ = Alert.shared.display(header: "Attention", message: "Failed to get version information from \(String(describing: baseUrl))", secondButton: "")
+                                            completion((httpResponse.statusCode, "failed"))
+                                            return
                                         }
                                     }
+                                    // get Jamf Pro version - end
+                                } else {
+                                    renewToken(renew: renew, whichServer: whichServer, baseUrl: baseUrl, base64creds: base64creds)
+                                    //                                if !migrationComplete.isDone && renew {
+                                    //                                    WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer]! + 1) seconds")
+                                    //                                    DispatchQueue.main.asyncAfter(deadline: .now() + JamfProServer.authExpires[whichServer]! + 1) { [self] in
+                                    //                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] renewing \(whichServer.localizedCapitalized) token")
+                                    //                                        getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
+                                    //                                            (result: (Int, String)) in
+                                    //                                        }
+                                    //                                    }
+                                    //                                }
+                                    //                                print("[JamfPro] \(whichServer) Jamf Pro version: \(String(describing: JamfProServer.version[whichServer]))")
+                                    completion((202, "success"))
+                                    return
                                 }
-//                                print("[JamfPro] \(whichServer) Jamf Pro version: \(String(describing: JamfProServer.version[whichServer]))")
-                                completion((202, "success"))
+                            } else {    // if let endpointJSON error
+                                WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] JSON error.\n\(String(describing: json))")
+                                JamfProServer.validToken[whichServer]  = false
+                                completion((httpResponse.statusCode, "failed"))
                                 return
                             }
-                        } else {    // if let endpointJSON error
-                            WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] JSON error.\n\(String(describing: json))")
-                            JamfProServer.validToken[whichServer]  = false
-                            completion((httpResponse.statusCode, "failed"))
-                            return
+                        } catch {
+                            WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] failed to parse JSON from token request. Returned data: \(String(decoding: data ?? Data(), as: UTF8.self))")
                         }
                     } else {    // if httpResponse.statusCode <200 or >299
                         WriteToLog.shared.message(stringOfText: "[JamfPro.getToken] Failed to authenticate to \(baseUrl).  Response error: \(httpResponse.statusCode).")
@@ -316,7 +327,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
     }   // func checkURL2 - end
     
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

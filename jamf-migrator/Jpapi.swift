@@ -27,164 +27,287 @@ var existingObjects = [ExistingObject]()
 class Jpapi: NSObject, URLSessionDelegate {
     
     static let shared = Jpapi()
-    private override init() { }
     
-//    var theUapiQ = OperationQueue() // create operation queue for API calls
-    
-    func action(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
+    func action(whichServer: String, endpoint: String, apiData: [String: Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
         if method.lowercased() == "skip" {
             completion(["JPAPI_result":"no valid token found", "JPAPI_response":0])
             return
         }
         
-        let whichServer = (serverUrl == JamfProServer.source) ? "source":"dest"
+        let serverUrl = (whichServer == "source") ? JamfProServer.source:JamfProServer.destination
                 
-                // cookie stuff
-                var sessionCookie: HTTPCookie?
-                var cookieName         = "" // name of cookie to look for
-                
-                if method.lowercased() == "skip" {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
-                    let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
-                    completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
-                    return
-                }
-                
-                URLCache.shared.removeAllCachedResponses()
-                var path = ""
+        // cookie stuff
+        var sessionCookie: HTTPCookie?
+        var cookieName         = "" // name of cookie to look for
+        
+        if method.lowercased() == "skip" {
+            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
+            let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
+            completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
+            return
+        }
+        
+        URLCache.shared.removeAllCachedResponses()
+        var path = ""
 
-                switch endpoint {
-                case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token":
-                    path = "v1/\(endpoint)"
-                default:
-                    path = "v2/\(endpoint)"
-                }
+        print("[Jpaapi.action] endpoint: \(endpoint)")
+        switch endpoint {
+        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites":
+            path = "api/v1/\(endpoint)"
+        case "patchinternalsources":
+            path = "JSSResource/patchinternalsources"
+        default:
+            path = "api/v2/\(endpoint)"
+        }
 
-                var urlString = "\(serverUrl)/api/\(path)"
-                urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
-                if id != "" && id != "0" {
-                    urlString = urlString + "/\(id)"
-                }
-        //        print("[Jpapi] urlString: \(urlString)")
-                
-                let url            = URL(string: "\(urlString)")
-                let configuration  = URLSessionConfiguration.default
-                var request        = URLRequest(url: url!)
-                switch method.lowercased() {
-                case "get":
-                    request.httpMethod = "GET"
-                case "create", "post":
-                    request.httpMethod = "POST"
-                default:
-                    request.httpMethod = "PUT"
-                }
-                
-                if apiData.count > 0 {
-                    do {
-                        request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
-                    } catch let error {
-                        print(error.localizedDescription)
+        var urlString = "\(serverUrl)/\(path)"
+        urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
+        urlString     = urlString.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        if id != "" && id != "0" {
+            urlString = urlString + "/\(id)"
+        }
+        print("[Jpaapi.action] \(endpoint) id \(id)")
+        
+        let url            = URL(string: "\(urlString)")
+        let configuration  = URLSessionConfiguration.default
+        var request        = URLRequest(url: url!)
+        switch method.lowercased() {
+        case "get":
+            request.httpMethod = "GET"
+        case "create", "post":
+            request.httpMethod = "POST"
+        default:
+            request.httpMethod = "PUT"
+        }
+        print("[Jpaapi.action] Perform \(request.httpMethod ?? "") on urlString: \(urlString)")
+        
+        if apiData.count > 0 {
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+        
+        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).") }
+//        print("[Jpapi.action] Attempting \(method) on \(urlString).")
+        
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        
+//        print("jpapi sticky session for \(serverUrl)")
+        // sticky session
+        if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
+            URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
+        }
+        
+        let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
+        let task = session.dataTask(with: request as URLRequest, completionHandler: {
+            (data, response, error) -> Void in
+            session.finishTasksAndInvalidate()
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                    
+//                    print("[jpapi] endpoint: \(endpoint)")
+
+                    if endpoint == "jamf-pro-version" {
+                        JamfProServer.sessionCookie.removeAll()
+            //            let cookies = HTTPCookieStorage.shared.cookies!
+            //            print("total cookies: \(cookies.count)")
+                        
+                        for theCookie in HTTPCookieStorage.shared.cookies! {
+//                            print("cookie name \(theCookie.name)")
+                            if ["jpro-ingress", "APBALANCEID"].contains(theCookie.name) {
+                                sessionCookie = theCookie
+                                cookieName    = theCookie.name
+                                break
+                            }
+                        }
+                        // look for alternalte cookie to use with sticky sessions
+                        if sessionCookie == nil {
+                            for theCookie in HTTPCookieStorage.shared.cookies! {
+//                                print("cookie name \(theCookie.name)")
+                                if ["AWSALB"].contains(theCookie.name) {
+                                    sessionCookie = theCookie
+                                    cookieName    = theCookie.name
+                                    break
+                                }
+                            }
+                        }
+                        
+                        if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
+                            WriteToLog.shared.message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
+                            JamfProServer.sessionCookie.append(sessionCookie!)
+                        } else {
+                            HTTPCookieStorage.shared.removeCookies(since: History.startTime)
+                        }
                     }
-                }
-                
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).") }
-        //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
-                
-                configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-                
-        //        print("jpapi sticky session for \(serverUrl)")
-                // sticky session
-                if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
-                    URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
-                }
-                
-                let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {
-                    (data, response, error) -> Void in
-                    session.finishTasksAndInvalidate()
-                    if let httpResponse = response as? HTTPURLResponse {
-                        if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                            
-        //                    print("[jpapi] endpoint: \(endpoint)")
-
-                            if endpoint == "jamf-pro-version" {
-                                JamfProServer.sessionCookie.removeAll()
-                    //            let cookies = HTTPCookieStorage.shared.cookies!
-                    //            print("total cookies: \(cookies.count)")
-                                
-                                for theCookie in HTTPCookieStorage.shared.cookies! {
-        //                            print("cookie name \(theCookie.name)")
-                                    if ["jpro-ingress", "APBALANCEID"].contains(theCookie.name) {
-                                        sessionCookie = theCookie
-                                        cookieName    = theCookie.name
-                                        break
-                                    }
-                                }
-                                // look for alternalte cookie to use with sticky sessions
-                                if sessionCookie == nil {
-                                    for theCookie in HTTPCookieStorage.shared.cookies! {
-        //                                print("cookie name \(theCookie.name)")
-                                        if ["AWSALB"].contains(theCookie.name) {
-                                            sessionCookie = theCookie
-                                            cookieName    = theCookie.name
-                                            break
-                                        }
-                                    }
-                                }
-                                
-                                if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
-                                    WriteToLog.shared.message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
-                                    JamfProServer.sessionCookie.append(sessionCookie!)
-                                } else {
-                                    HTTPCookieStorage.shared.removeCookies(since: History.startTime)
-                                }
-                            }
-                            
-                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                            if let endpointJSON = json as? [String:Any] {
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).") }
-                                completion(endpointJSON)
-                                return
-                            } else {    // if let endpointJSON error
-                                if httpResponse.statusCode == 204 && endpoint == "auth/invalidate-token" {
-                                    completion(["JPAPI_result":"token terminated", "JPAPI_response":httpResponse.statusCode])
-                                } else {
-                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))") }
-                                    completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
-                                }
-                                return
-                            }
-                        } else {    // if httpResponse.statusCode <200 or >299
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).") }
-                            completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
+                    
+                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                    if endpoint == "sites" {
+                        if let allSites = json as? [[String: Any]] {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).") }
+                            completion(["sites":allSites])
+                            return
+                        } else {
+                            completion(["JPAPI_result":"sites failed", "JPAPI_response":httpResponse.statusCode])
                             return
                         }
-                    } else {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] GET response error.  Verify url and port.") }
-                        completion([:])
+                    }
+                    if let endpointJSON = json as? [String: Any] {
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).") }
+                        completion(endpointJSON)
+                        return
+                    } else {    // if let endpointJSON error
+                        if httpResponse.statusCode == 204 && endpoint == "auth/invalidate-token" {
+                            completion(["JPAPI_result":"token terminated", "JPAPI_response":httpResponse.statusCode])
+                        } else {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))") }
+                            completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
+                        }
                         return
                     }
-                })
-                task.resume()
+                } else {    // if httpResponse.statusCode <200 or >299
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).") }
+                    completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
+                    return
+                }
+            } else {
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] GET response error.  Verify url and port.") }
+                completion([:])
+                return
+            }
+        })
+        task.resume()
     }   // func action - end
     
+    func getAllDelegate(whichServer: String, theEndpoint: String, whichPage: Int, lastPage: Bool = false, completion: @escaping (_ result: [Any]) -> Void) {
+        
+        if whichPage == 0 {
+            
+        }
+        
+        if !lastPage {
+            getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) {
+                returnedResults in
+                DispatchQueue.main.async {
+//                    if lastPage {
+                        completion(returnedResults)
+//                    }
+                }
+            }
+        }
+    }
+    
     func getAll(whichServer: String, theEndpoint: String, whichPage: Int, completion: @escaping (_ result: [Any]) -> Void) {
-        var fetchedAllRecords = false
-        var pendingCalls  = 0
-        let maxConcurrent = 3
-        var currentPage   = 0
         
         switch theEndpoint {
-        case "packages":
+        case "categories", "policy-details", "packages", "sites":
             print("[getAll] look for \(theEndpoint)")
             DispatchQueue.global(qos: .background).async { [self] in
+                
+                pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
+                    returnedResults in
+//                    pendingCalls -= 1
+                    let returnedJson = returnedResults as? [String: Any] ?? [:]
+//                    print("[getAll] pending calls: \(pendingCalls)")
+                    let totalRecords = returnedJson["totalCount"] as? Int ?? 0
+                    let pages = (totalRecords + (pageSize - 1)) / pageSize
+                    
+                    if let returnedRecords = returnedJson["results"] as? [[String: Any]], returnedRecords.count > 0 {
+                        for theObject in returnedRecords {
+                            switch theEndpoint {
+                            case "categories":
+                                if whichServer == "source" {
+                                    Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+                                } else {
+                                    Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+                                }
+                            case "packages":
+                                if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
+                                    print("[getAll] add destination package id: \(id), packageName: \(fileName)")
+                                    if whichServer == "source" {
+                                            PatchPackages.source.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
+                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
+                                    } else {
+                                            PatchPackages.destination.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
+                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
+                                    }
+                                } else {
+                                    print("[getAll] failed to add package id: \(String(describing: theObject["id"] as? Int)), packageName: \(theObject["packageName"] as? String ?? "unknown"), fileName: \(theObject["fileName"] as? String ?? "unknown")")
+                                }
+                            case "policy-details":
+                                if let id = theObject["id"] as? String, let name = theObject["name"] as? String, let enabled = theObject["enabled"] as? Bool, let targetPatchVersion = theObject["targetPatchVersion"] as? String, let deploymentMethod = theObject["deploymentMethod"] as? String, let softwareTitleId = theObject["softwareTitleId"] as? String, let softwareTitleConfigurationId = theObject["softwareTitleConfigurationId"] as? String, let killAppsDelayMinutes = theObject["killAppsDelayMinutes"] as? Int, let killAppsMessage = theObject["killAppsMessage"] as? String, let downgrade = theObject["downgrade"] as? Bool, let patchUnknownVersion = theObject["patchUnknownVersion"] as? Bool, let notificationHeader = theObject["notificationHeader"] as? String, let selfServiceEnforceDeadline = theObject["selfServiceEnforceDeadline"] as? Bool, let selfServiceDeadline = theObject["selfServiceDeadline"] as? Int, let installButtonText = theObject["installButtonText"] as? String, let selfServiceDescription = theObject["selfServiceDescription"] as? String, let iconId = theObject["iconId"] as? String, let reminderFrequency = theObject["reminderFrequency"] as? Int, let reminderEnabled = theObject["reminderEnabled"] as? Bool {
+                                    print("[Jpapi] adding patch policy \(name) for targetPatchVersion \(targetPatchVersion) to \(whichServer) server")
+                                    if whichServer == "source" {
+                                        PatchPoliciesDetails.source.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))
+                                    } else {
+                                        PatchPoliciesDetails.destination.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))                                    }
+                                }
+                            case "sites":
+                                if whichServer == "source" {
+                                    JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                } else {
+                                    JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                }
+                            default:
+                                break
+                            }
+                            
+//                            if theEndpoint == "packages" {
+//                                if let id = theObject["id"] as? Int, id != 0, let name = theObject["displayName"] as? String, name != "", let fileName = theObject["fileName"] as? String, fileName != "" {
+//                                        existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name, fileName: fileName))
+//                                }
+//                            } else {
+//                                if whichServer == "source" {
+//                                    if theEndpoint == "categories" {
+//                                        Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+//                                    } else {
+//                                        JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+//                                    }
+//                                } else {
+//                                    if theEndpoint == "categories" {
+//                                        Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+//                                    } else {
+//                                        JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "None"))
+//                                    }
+//                                }
+//                            }
+                        }
+                        print("[getAll] records (\(theEndpoint)) added: \(returnedRecords.count)")
+                        WriteToLog.shared.message(stringOfText: "[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
+                    }
+                    print("[getAll] page \(whichPage + 1) of \(pages) complete")
+                    
+                    if (whichPage + 1 >= pages ) {
+                        print("[getAll] return to caller, record count: \(existingObjects.count)")
+                        completion(existingObjects)
+                    }
+                    
+                    if whichPage < pages - 1 {
+                        getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage + 1) {
+                            returnedResults in
+//                            print("[getAll] page \(whichPage + 1) of \(pages) complete")
+//                            print("[getAll] finished fetching all \(theEndpoint)")
+                            print("[getAll] call page \(whichPage + 1) for \(theEndpoint)")
+                                completion(existingObjects)
+                        }
+//                    } else {
+//                        print("[getAll] finished fetching all \(theEndpoint), there were \(pages) page(s)")
+//                        print("[getAll] return to caller, record count: \(existingObjects.count)")
+//                        completion(existingObjects)
+                    }
+                    
+                }
+                
+                /*
                 repeat {
                     if pendingCalls < maxConcurrent {
                         pendingCalls += 1
                         pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: currentPage) {
-                            returnedJson in
+                            returnedResults in
                             pendingCalls -= 1
+                            let returnedJson = returnedResults as? [String: Any] ?? [:]
                             print("[getAll] pending calls: \(pendingCalls)")
                             if let returnedRecords = returnedJson["results"] as? [[String: Any]], returnedRecords.count > 0 {
                                 for theObject in returnedRecords {
@@ -209,6 +332,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     }
                     usleep(10000)
                 } while !fetchedAllRecords
+                */
             }
         default:
             print("[getAll] look for \(theEndpoint)")
@@ -246,7 +370,7 @@ class Jpapi: NSObject, URLSessionDelegate {
            endpointVersion = "v3"
         case "patch-software-title-configurations","patchsoftwaretitles":
            endpointVersion = "v2"
-        case "packages", "jcds/files":
+        case "categories", "packages", "jcds/files", "sites":
            endpointVersion = "v1"
         default:
             break
@@ -311,16 +435,24 @@ class Jpapi: NSObject, URLSessionDelegate {
             endpointParent = "\(theEndpoint)"
         }
         
-        var endpoint = "\(String(describing: JamfProServer.url[whichServer]))/api/\(endpointVersion)/\(theEndpoint)"
+        print("[ExistingObjects.get] JamfProServer.url: \(JamfProServer.url)")
+        var endpoint = (JamfProServer.url[whichServer] ?? "") + "/api/\(endpointVersion)/\(theEndpoint)"
         
         endpoint = endpoint.replacingOccurrences(of: "//api", with: "/api")
         print("[ExistingObjects.get] endpoint: \(endpoint)")
         
-        let endpointUrl    = URL(string: "\(endpoint)")
+        guard let endpointUrl = URL(string: endpoint) else {
+            completion([])
+            return
+        }
+        
+//        let endpointUrl = tmpUrl.appending(path: "/api/\(endpointVersion)/\(theEndpoint)")
+        print("[ExistingObjects.get] endpointUrl: \(endpointUrl.path())")
+//        let endpointUrl    = URL(string: "\(endpoint)")
         let configuration  = URLSessionConfiguration.ephemeral
-        var request        = URLRequest(url: endpointUrl!)
+        var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(String(describing: JamfProServer.accessToken[whichServer]))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
 //        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
@@ -349,6 +481,9 @@ class Jpapi: NSObject, URLSessionDelegate {
                             completion([])
                         }
                     }
+                } else {
+                    WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
+                    completion([])
                 }
             } else {
                 WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] unable to read the response from the GET.")
@@ -356,42 +491,56 @@ class Jpapi: NSObject, URLSessionDelegate {
             }
         })
         task.resume()
-        
     }
     
     
-    func pagedGet(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
+    func pagedGet(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, completion: @escaping (_ returnedResults:  Any) -> Void) {
+        if export.saveOnly && whichServer == "dest" {
+            completion([:])
+            return
+        }
         var endpointVersion = ""
+        
         switch theEndpoint {
         case "test3":
            endpointVersion = "v3"
         case "patch-software-title-configurations","patchsoftwaretitles":
            endpointVersion = "v2"
-        case "packages":
+        case "policy-details":
+            endpointVersion = "v2/patch-policies"
+        case "categories", "packages", "sites":
            endpointVersion = "v1"
         default:
             break
         }
         
-        var endpoint = "\(String(describing: JamfProServer.url[whichServer]))/api/\(endpointVersion)/\(theEndpoint)"
-        if id == "" {
-            endpoint = endpoint + "?page=\(whichPage)&page-size=\(pageSize)&sort=id%3Aasc"
+        guard let url = URL(string: JamfProServer.url[whichServer] ?? "") else {
+            completion([] as Any)
+            print("[ExistingObjects.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
+            return
         }
-        endpoint = endpoint.replacingOccurrences(of: "//api", with: "/api")
-        print("[ExistingObjects.get] endpoint: \(endpoint)")
         
-        let endpointUrl    = URL(string: "\(endpoint)")
+        var endpointUrl = url.appendingPathComponent("/api/\(endpointVersion)/\(theEndpoint)")
+        if theEndpoint != "sites" {
+            let pageParameters = [URLQueryItem(name: "page", value: "\(whichPage)"), URLQueryItem(name: "page-size", value: "\(pageSize)")]
+            endpointUrl = endpointUrl.appending(queryItems: pageParameters)
+        }
+
+//        print("[ExistingObjects.getAll] whichServer: \(whichServer)")
+//        print("[ExistingObjects.getAll] accessToken: \(JamfProServer.accessToken[whichServer] ?? "")")
+        print("[ExistingObjects.pagedGet] endpointUrl: \(endpointUrl.absoluteString)")
+        
         let configuration  = URLSessionConfiguration.ephemeral
-        var request        = URLRequest(url: endpointUrl!)
+        var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(String(describing: JamfProServer.accessToken[whichServer]))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
 //        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                print("[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
+                print("[ExistingObjects.pagedGet] response statusCode: \(httpResponse.statusCode)")
                 if httpSuccess.contains(httpResponse.statusCode) {
 //                    print("[ExistingObjects.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
@@ -400,7 +549,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                         //                           print("[ExistingObjects.get] endpointJSON for page \(whichPage): \(endpointJSON)")
                         return
                     } else {
-                        WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] No data was returned from the GET.")
+                        WriteToLog.shared.message(stringOfText: "[ExistingObjects.pagedGet] No data was returned from the GET.")
                         completion([:])
                     }
                 }
@@ -412,7 +561,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         task.resume()
     }
     
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

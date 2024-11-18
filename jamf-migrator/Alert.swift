@@ -11,7 +11,6 @@ import Cocoa
 class Alert: NSObject {
     
     static let shared = Alert()
-    private override init() { }
     
     func display(header: String, message: String, secondButton: String) -> String {
         NSApplication.shared.activate(ignoringOtherApps: true)

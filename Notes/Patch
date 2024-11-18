@@ -1,0 +1,108 @@
+
+  {
+    "id": "18",
+    "jamfOfficial": true,
+    "displayName": "Adium",
+    "categoryId": "15",
+    "siteId": "-1",
+    "uiNotifications": true,
+    "emailNotifications": false,
+    "softwareTitleId": "18",
+    "extensionAttributes": [],
+    "softwareTitleName": "Adium",
+    "softwareTitleNameId": "1EC",
+    "softwareTitlePublisher": "The Adium Team",
+    "patchSourceName": "Jamf",
+    "patchSourceEnabled": true,
+    "packages": [
+      {
+        "packageId": "115",
+        "version": "1.5.10.4",
+        "displayName": "Adium"
+      }
+    ]
+  }
+
+
+
+create patch title (classic API) POST XML to: /JSSResource/patchsoftwaretitles/id/0
+Sample XML:
+let patchSoftwareTitle = """
+        <patch_software_title>
+            <name>\(object.softwareTitleName)</name>
+            <name_id>\(object.softwareTitleNameId)</name_id>
+            <source_id>\(object.id)</source_id>
+            <notifications>
+                <web_notification>\(object.uiNotifications)</web_notification>
+                <email_notification>\(object.emailNotifications)</email_notification>
+            </notifications>
+            <categories>
+                <id>-1</id>
+                <name>\(categoryName)</name>
+            </categories>
+        </patch_software_title>
+        """
+
+Add package to title using PATCH JSON to Jamf Pro API: /api/v2/patch-software-title-configurations/5
+let patchSoftwarePackages = """
+        "{"softwareTitleId": "5",
+         "packages": [
+            {
+             "packageId": "2",
+             "version": "1.5.10.4"
+            }
+          ]
+        }
+        """
+
+Create Patch Policy by POSTing XML to the Classic API: /JSSResource/patchpolicies/softwaretitleconfig/id/5
+<?xml version="1.0" encoding="UTF-8"?>
+  <patch_policy>
+    <general>
+      <name>latest</name>
+      <enabled>true</enabled>
+      <target_version>1.5.10.4</target_version>
+      <release_date>1493321474000</release_date>
+      <incremental_update>false</incremental_update>
+      <reboot>false</reboot>
+      <minimum_os>10.7.0</minimum_os>
+      <kill_apps>
+        <kill_app>
+          <kill_app_name>Adium.app</kill_app_name>
+          <kill_app_bundle_id>com.adiumX.adiumX</kill_app_bundle_id>
+        </kill_app>
+      </kill_apps>
+      <distribution_method>prompt</distribution_method>
+      <allow_downgrade>false</allow_downgrade>
+      <patch_unknown>false</patch_unknown>
+    </general>
+    <scope>
+      <all_computers>true</all_computers>
+      <computers/>
+      <computer_groups/>
+      <users/>
+      <buildings/>
+      <departments/>
+      <limitations>
+        <network_segments/>
+        <ibeacons/>
+      </limitations>
+      <exclusions>
+        <computers/>
+        <computer_groups/>
+        <users/>
+        <buildings/>
+        <departments/>
+        <network_segments/>
+        <ibeacons/>
+      </exclusions>
+    </scope>
+    <user_interaction>
+      <grace_period>
+        <grace_period_duration>15</grace_period_duration>
+        <notification_center_subject>Important</notification_center_subject>
+        <message>$APP_NAMES will quit in $DELAY_MINUTES minutes so that $SOFTWARE_TITLE can be updated. Save anything you are working on and quit the app(s).</message>
+      </grace_period>
+    </user_interaction>
+    <software_title_configuration_id>18</software_title_configuration_id>
+  </patch_policy>

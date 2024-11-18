@@ -40,13 +40,17 @@
 		B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */; };
 		B5E1912F21AAEFD400A1A9CA /* export.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912E21AAEFD400A1A9CA /* export.png */; };
 		B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DAD27434B890044C321 /* Jpapi.swift */; };
+		CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */; };
+		CEDB6A112CDBD2B300171FB0 /* ExportItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */; };
+		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
+		CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */; };
 		CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A2E2CB953BE002AB294 /* Headless.swift */; };
 		CEE65A312CB95527002AB294 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A302CB95521002AB294 /* Utilities.swift */; };
 		CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jamf Replicator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BC01C5C1DFB0C07007E634E /* Replicator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Replicator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BC01C5F1DFB0C07007E634E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9BC01C611DFB0C07007E634E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		9BC01C631DFB0C07007E634E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -84,9 +88,15 @@
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
 		B5FD9DAD27434B890044C321 /* Jpapi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jpapi.swift; sourceTree = "<group>"; };
+		CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
+		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
+		CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportItems.swift; sourceTree = "<group>"; };
+		CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDelegate.swift; sourceTree = "<group>"; };
+		CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchManagementApi.swift; sourceTree = "<group>"; };
 		CEE65A2E2CB953BE002AB294 /* Headless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headless.swift; sourceTree = "<group>"; };
 		CEE65A302CB95521002AB294 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; };
+		CEF52FD32CD7DB7A000F1E5A /* Functions */ = {isa = PBXFileReference; lastKnownFileType = text; path = Functions; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,7 +124,7 @@
 		9BC01C5D1DFB0C07007E634E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */,
+				9BC01C5C1DFB0C07007E634E /* Replicator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,6 +132,9 @@
 		9BC01C5E1DFB0C07007E634E /* jamf-migrator */ = {
 			isa = PBXGroup;
 			children = (
+				CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */,
+				CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */,
+				CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */,
 				CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */,
 				CEE65A302CB95521002AB294 /* Utilities.swift */,
 				CEE65A2E2CB953BE002AB294 /* Headless.swift */,
@@ -169,6 +182,7 @@
 		B54154FD2BD858AB00084439 /* MyModels */ = {
 			isa = PBXGroup;
 			children = (
+				CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */,
 				B54154FE2BD8597700084439 /* Package.swift */,
 			);
 			name = MyModels;
@@ -187,6 +201,8 @@
 		B56CA91B28EA742200236A8A /* Notes */ = {
 			isa = PBXGroup;
 			children = (
+				CEDB6A0F2CDBAF6700171FB0 /* Patch */,
+				CEF52FD32CD7DB7A000F1E5A /* Functions */,
 				B54438DB25F6224A00465FA5 /* Misc */,
 				B56CA91C28EA74EB00236A8A /* Call function in another VC that updates UI.md */,
 			);
@@ -215,9 +231,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9BC01C5B1DFB0C07007E634E /* Jamf Replicator */ = {
+		9BC01C5B1DFB0C07007E634E /* Replicator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Replicator" */;
+			buildConfigurationList = 9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Replicator" */;
 			buildPhases = (
 				9BC01C581DFB0C07007E634E /* Sources */,
 				9BC01C591DFB0C07007E634E /* Frameworks */,
@@ -228,9 +244,9 @@
 			);
 			dependencies = (
 			);
-			name = "Jamf Replicator";
+			name = Replicator;
 			productName = "jamf-migrator";
-			productReference = 9BC01C5C1DFB0C07007E634E /* Jamf Replicator.app */;
+			productReference = 9BC01C5C1DFB0C07007E634E /* Replicator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -259,7 +275,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Replicator" */;
+			buildConfigurationList = 9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Replicator" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -272,7 +288,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9BC01C5B1DFB0C07007E634E /* Jamf Replicator */,
+				9BC01C5B1DFB0C07007E634E /* Replicator */,
 			);
 		};
 /* End PBXProject section */
@@ -322,9 +338,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEDB6A112CDBD2B300171FB0 /* ExportItems.swift in Sources */,
 				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
 				CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */,
+				CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */,
 				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
@@ -343,8 +361,10 @@
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
 				CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */,
 				B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */,
+				CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */,
+				CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
 				CEE65A312CB95527002AB294 /* Utilities.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
@@ -499,13 +519,13 @@
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Jamf Transporter";
+				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 7.4.3;
+				MARKETING_VERSION = "8.0.0-a1";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
-				PRODUCT_NAME = "Jamf Replicator";
+				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -525,13 +545,13 @@
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
 				INFOPLIST_FILE = "jamf-migrator/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Jamf Transporter";
+				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 7.4.3;
+				MARKETING_VERSION = "8.0.0-a1";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
-				PRODUCT_NAME = "Jamf Replicator";
+				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -540,7 +560,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Jamf Replicator" */ = {
+		9BC01C571DFB0C07007E634E /* Build configuration list for PBXProject "Replicator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C691DFB0C07007E634E /* Debug */,
@@ -549,7 +569,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Jamf Replicator" */ = {
+		9BC01C6B1DFB0C07007E634E /* Build configuration list for PBXNativeTarget "Replicator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BC01C6C1DFB0C07007E634E /* Debug */,
