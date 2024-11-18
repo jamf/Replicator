@@ -67,7 +67,7 @@
 		B54438DB25F6224A00465FA5 /* Misc */ = {isa = PBXFileReference; lastKnownFileType = text; path = Misc; sourceTree = "<group>"; };
 		B54509402904D96500094739 /* Awake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Awake.swift; sourceTree = "<group>"; };
 		B556A79D2773A100003CBEE9 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
-		B562410D215151C4007F8144 /* jamf-migrator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jamf-migrator.entitlements"; sourceTree = "<group>"; };
+		B562410D215151C4007F8144 /* Replicator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Replicator.entitlements; sourceTree = "<group>"; };
 		B56CA91728E88DE200236A8A /* SourceDestVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SourceDestVC.swift; sourceTree = "<group>"; };
 		B56CA91C28EA74EB00236A8A /* Call function in another VC that updates UI.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Call function in another VC that updates UI.md"; sourceTree = "<group>"; };
 		B56CBA89277B939100F26E8C /* SaveDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveDelegate.swift; sourceTree = "<group>"; };
@@ -82,8 +82,8 @@
 		B5C993BF230E211100558040 /* Sites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sites.swift; sourceTree = "<group>"; };
 		B5E179F01F1FDAFA00A20AAA /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		B5E179F11F1FDAFA00A20AAA /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
-		B5E1912621AAA63400A1A9CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "jamf-migrator/Base.lproj/Preferences.storyboard"; sourceTree = SOURCE_ROOT; };
-		B5E1912821AAA8EC00A1A9CA /* PrefsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrefsWindowController.swift; path = "jamf-migrator/PrefsWindowController.swift"; sourceTree = SOURCE_ROOT; };
+		B5E1912621AAA63400A1A9CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Replicator/Base.lproj/Preferences.storyboard; sourceTree = SOURCE_ROOT; };
+		B5E1912821AAA8EC00A1A9CA /* PrefsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrefsWindowController.swift; path = Replicator/PrefsWindowController.swift; sourceTree = SOURCE_ROOT; };
 		B5E1912A21AAD5AB00A1A9CA /* copy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copy.png; sourceTree = "<group>"; };
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
@@ -115,7 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				B56CA91B28EA742200236A8A /* Notes */,
-				9BC01C5E1DFB0C07007E634E /* jamf-migrator */,
+				9BC01C5E1DFB0C07007E634E /* Replicator */,
 				9BC01C5D1DFB0C07007E634E /* Products */,
 				B53796C82273FFBA0006C1E4 /* Frameworks */,
 			);
@@ -129,7 +129,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9BC01C5E1DFB0C07007E634E /* jamf-migrator */ = {
+		9BC01C5E1DFB0C07007E634E /* Replicator */ = {
 			isa = PBXGroup;
 			children = (
 				CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */,
@@ -160,7 +160,7 @@
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
 				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
 				B5165E1520E580A00086E31D /* XmlDelegate.swift */,
-				B562410D215151C4007F8144 /* jamf-migrator.entitlements */,
+				B562410D215151C4007F8144 /* Replicator.entitlements */,
 				9BC01C651DFB0C07007E634E /* Main.storyboard */,
 				9BC01C631DFB0C07007E634E /* Assets.xcassets */,
 				B55A277F1EAF8CAE00AF8398 /* Images */,
@@ -168,7 +168,7 @@
 				9BC01C6E1DFBC564007E634E /* settings.plist */,
 				B5E179EF1F1FDACF00A20AAA /* help */,
 			);
-			path = "jamf-migrator";
+			path = Replicator;
 			sourceTree = "<group>";
 		};
 		B53796C82273FFBA0006C1E4 /* Frameworks */ = {
@@ -245,7 +245,7 @@
 			dependencies = (
 			);
 			name = Replicator;
-			productName = "jamf-migrator";
+			productName = Replicator;
 			productReference = 9BC01C5C1DFB0C07007E634E /* Replicator.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -509,7 +509,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Replicator/Replicator.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -518,7 +518,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
-				INFOPLIST_FILE = "jamf-migrator/Info.plist";
+				INFOPLIST_FILE = Replicator/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -535,7 +535,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "jamf-migrator/jamf-migrator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Replicator/Replicator.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -544,7 +544,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj Notes";
 				EXCLUDED_SOURCE_FILE_NAMES = Notes;
-				INFOPLIST_FILE = "jamf-migrator/Info.plist";
+				INFOPLIST_FILE = Replicator/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
