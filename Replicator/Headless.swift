@@ -42,10 +42,10 @@ class Headless: NSObject {
                 var summary = ""
                 var otherLine: Bool = true
                 var paddingChar = " "
-                let sortedObjects = objectsToMigrate.sorted()
+                let sortedObjects = ToMigrate.objects.sorted()
                 // find longest length of objects migrated
                 var column1Padding = ""
-                for theObject in objectsToMigrate {
+                for theObject in ToMigrate.objects {
                     if theObject.count+1 > column1Padding.count {
                         column1Padding = "".padding(toLength: theObject.count+1, withPad: " ", startingAt: 0)
                     }
@@ -58,8 +58,8 @@ class Headless: NSObject {
                       "failed".padding(toLength: 10, withPad: " ", startingAt: 0) +
                       "total".padding(toLength: 10, withPad: " ", startingAt: 0) + "\n"
                 for theObject in sortedObjects {
-                    if counters[theObject] != nil {
-                        let counts = counters[theObject]!
+                    if Counter.shared.crud[theObject] != nil {
+                        let counts = Counter.shared.crud[theObject]!
                         let rightJustify = leading.padding(toLength: leading.count+(column1Padding.count-theObject.count-2), withPad: " ", startingAt: 0)
                         otherLine.toggle()
                         paddingChar = otherLine ? " ":"."

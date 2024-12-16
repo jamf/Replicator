@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct Package: Identifiable {
+struct Package: Codable, Identifiable {
     var id = UUID()
     var jamfProId: Int?
     var displayName: String
@@ -100,32 +100,33 @@ struct Package: Identifiable {
         if let sizeString = uapiPackageDetail.size {
             self.size = Int64(sizeString)
         }
-        info                 = uapiPackageDetail.info
-        notes                = uapiPackageDetail.notes
-        priority             = uapiPackageDetail.priority
-        osRequirements       = uapiPackageDetail.osRequirements
-        fillUserTemplate     = uapiPackageDetail.fillUserTemplate
-        indexed              = uapiPackageDetail.indexed
-        uninstall            = uapiPackageDetail.uninstall
-        fillExistingUsers    = uapiPackageDetail.fillExistingUsers
-        swu                  = uapiPackageDetail.swu
-        rebootRequired       = uapiPackageDetail.rebootRequired
-        selfHealNotify       = uapiPackageDetail.selfHealNotify
-        selfHealingAction    = uapiPackageDetail.selfHealingAction
-        osInstall            = uapiPackageDetail.osInstall
-        serialNumber         = uapiPackageDetail.serialNumber
-        parentPackageId      = uapiPackageDetail.parentPackageId
-        basePath             = uapiPackageDetail.basePath
-        suppressUpdates      = uapiPackageDetail.suppressUpdates
-        cloudTransferStatus  = uapiPackageDetail.cloudTransferStatus
-        ignoreConflicts      = uapiPackageDetail.ignoreConflicts
-        suppressFromDock     = uapiPackageDetail.suppressFromDock
-        suppressEula         = uapiPackageDetail.suppressEula
-        suppressRegistration = uapiPackageDetail.suppressRegistration
-        installLanguage      = uapiPackageDetail.installLanguage
-        osInstallerVersion   = uapiPackageDetail.osInstallerVersion
-        manifest             = uapiPackageDetail.manifest
-        manifestFileName     = uapiPackageDetail.manifestFileName
-        format               = uapiPackageDetail.format
+        self.info                 = uapiPackageDetail.info
+        self.notes                = uapiPackageDetail.notes
+        self.priority             = uapiPackageDetail.priority
+        self.osRequirements       = uapiPackageDetail.osRequirements
+        self.fillUserTemplate     = uapiPackageDetail.fillUserTemplate
+        self.indexed              = uapiPackageDetail.indexed
+        self.uninstall            = uapiPackageDetail.uninstall
+        self.fillExistingUsers    = uapiPackageDetail.fillExistingUsers
+        self.swu                  = uapiPackageDetail.swu
+        self.rebootRequired       = uapiPackageDetail.rebootRequired
+        self.selfHealNotify       = uapiPackageDetail.selfHealNotify
+        self.selfHealingAction    = uapiPackageDetail.selfHealingAction
+        self.osInstall            = uapiPackageDetail.osInstall
+        self.serialNumber         = uapiPackageDetail.serialNumber
+        self.parentPackageId      = uapiPackageDetail.parentPackageId
+        self.basePath             = uapiPackageDetail.basePath
+        self.suppressUpdates      = uapiPackageDetail.suppressUpdates
+        self.cloudTransferStatus  = uapiPackageDetail.cloudTransferStatus
+        self.ignoreConflicts      = uapiPackageDetail.ignoreConflicts
+        self.suppressFromDock     = uapiPackageDetail.suppressFromDock
+        self.suppressEula         = uapiPackageDetail.suppressEula
+        self.suppressRegistration = uapiPackageDetail.suppressRegistration
+        self.installLanguage      = uapiPackageDetail.installLanguage
+        self.osInstallerVersion   = uapiPackageDetail.osInstallerVersion
+        self.manifest             = uapiPackageDetail.manifest
+        self.manifestFileName     = uapiPackageDetail.manifestFileName
+        self.format               = uapiPackageDetail.format
     }
 }
+

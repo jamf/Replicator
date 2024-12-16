@@ -111,6 +111,10 @@ struct JsonUapiPackageDetail: Codable {
         format = package.format
     }
 }
+class Packages {
+    static var source      = [JsonUapiPackageDetail]()
+    static var destination = [JsonUapiPackageDetail]()
+}
 
 final class ExistingPackages {
     static let shared = ExistingPackages()
@@ -153,32 +157,27 @@ final class ExistingPackages {
 
 class PackagesDelegate: NSObject, URLSessionDelegate {
     
-    // curl -X 'GET' \
-//    'https://lhelou.jamfcloud.com/api/v1/packages?page=0&page-size=100&sort=id%3Aasc' \
-//    -H 'accept: application/json' \
-//    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdXRoZW50aWNhdGVkLWFwcCI6IkdFTkVSSUMiLCJhdXRoZW50aWNhdGlvbi10eXBlIjoiSlNTIiwiZ3JvdXBzIjpbXSwic3ViamVjdC10eXBlIjoiSlNTX1VTRVJfSUQiLCJ0b2tlbi11dWlkIjoiMjQwZDMyYjAtZGQ1ZC00YjE5LWE2OTItMjZhNThkNjQwYmM0IiwibGRhcC1zZXJ2ZXItaWQiOi0xLCJzdWIiOiIxIiwiZXhwIjoxNzI4ODQxMTY4fQ.XRi7meSBWE_1jIRG5O-_RuwMs_mwgtkhAKrl1RsUoaY'
-    
     static let shared = PackagesDelegate()
     private override init() { }
     
     var packageGetQ     = DispatchQueue(label: "com.jamf.packageGetQ", qos: DispatchQoS.background)
     // get the package filename, rather than display name
-    
+    /*
     func uapiGetAll(whichServer: String, skip: Bool = false, currentTry: Int = 1, completion: @escaping (_ result: [Package]) -> Void) {
         
-        if skip || wipeData.on {
+        if skip || WipeData.state.on {
             completion([])
             print("[PackagesDelegate.getFilename] skip filename lookup")
             return
         }
         
         var packages: [Package] = []
-        guard var url = URL(string: JamfProServer.url[whichServer] ?? "!") else {
+        guard let url = URL(string: JamfProServer.url[whichServer] ?? "!") else {
             completion([])
             return
         }
         
-        let pageParameters = [URLQueryItem(name: "page", value: "0"), URLQueryItem(name: "page-size", value: "2000"), URLQueryItem(name: "sort", value: "id%3Aasc")]
+        let pageParameters = [URLQueryItem(name: "page", value: "0"), URLQueryItem(name: "page-size", value: "\(pageSize)"), URLQueryItem(name: "sort", value: "id%3Aasc")]
         let packagesUrl = url.appendingPathComponent("/api/v1/packages").appending(queryItems: pageParameters)
         
         
@@ -244,6 +243,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
 //        return packages
         
     }
+    */
     
     private func convertToPackage(jsonPackage: JsonUapiPackageDetail) -> Package? {
         guard let jamfProIdString = jsonPackage.id, let _ = Int(jamfProIdString), let _ = jsonPackage.packageName, let _ = jsonPackage.fileName else { return nil }
@@ -252,7 +252,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     
     func getFilename(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, currentTry: Int, completion: @escaping (_ result: (Int,String)) -> Void) {
 
-        if skip || wipeData.on {
+        if skip || WipeData.state.on {
             completion((theEndpointID,""))
             print("[PackagesDelegate.getFilename] skip filename lookup")
             return
@@ -349,7 +349,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     func filenameIdDict(whichServer: String, theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
         
 //        print("[PackageDelegate.filenameIdDict] lookup attempt \(currentTry) of \(maxTries)")
-        if wipeData.on {
+        if WipeData.state.on {
             completion(currentPackageNamesIDs)
             return
         }
@@ -402,7 +402,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                         WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Failed to lookup filename for \(packageName)")
                                     }
                                     
-                                    if wipeData.on {
+                                    if WipeData.state.on {
                                         existingNameId[packageName] = packageID
                                     }
                                 }
@@ -463,7 +463,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         if message != "" {
             message = "\tFilename : Display Name\n\(message)"
             
-            if !wipeData.on {
+            if !WipeData.state.on {
                 WriteToLog.shared.message(stringOfText: "[PackageDelegate.filenameIdDict] Duplicate references to the same package were found on \(theServer)\n\(message)")
                 let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                 if theButton == "Stop" {

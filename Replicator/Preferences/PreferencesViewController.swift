@@ -132,24 +132,22 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         prefFsRoPwd_textfield.isEnabled = stateToBool(state: prefFileSharePwd_button.state.rawValue)
     }
     
-    let Creds2           = Credentials()
-    var accountDict      = [String:String]()
 //    var credentialsArray = [String]()
     let vc               = ViewController()
 //    var plistData:[String:Any] = [:]  //our server/username data
     
     // default scope preferences
-    var scopeOptions:           Dictionary<String,Dictionary<String,Bool>> = [:]
-    var scopeMcpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
-    var scopePoliciesCopy:      Bool = true   // policies copy scope
-    var scopeMaCopy:            Bool = true   // macapps copy scope
-    var policyPoliciesDisable:  Bool = false  // policies disable on copy
-    var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
-    var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
-    var scopeIaCopy:            Bool = true   // iosapps copy scope
-    var scopeScgCopy:           Bool = true   // static computer groups copy scope
-    var scopeSigCopy:           Bool = true   // static iOS device groups copy scope
-    var scopeUsersCopy:         Bool = true   // static user groups copy scope
+    var scope_Options:           Dictionary<String,Dictionary<String,Bool>> = [:]
+    var scope_McpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
+    var scope_PoliciesCopy:      Bool = true   // policies copy scope
+    var scope_MaCopy:            Bool = true   // macapps copy scope
+    var policy_PoliciesDisable:  Bool = false  // policies disable on copy
+    var scope_OcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
+    var scope_RsCopy:            Bool = true   // restrictedsoftware copy scope
+    var scope_IaCopy:            Bool = true   // iosapps copy scope
+    var scope_ScgCopy:           Bool = true   // static computer groups copy scope
+    var scope_SigCopy:           Bool = true   // static iOS device groups copy scope
+    var scope_UsersCopy:         Bool = true   // static user groups copy scope
     
     var saveRawXml:             Bool = false
     var saveTrimmedXml:         Bool = false
@@ -322,26 +320,26 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //                if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
                     if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
                         userDefaults.set(prefMgmtAcct_textfield.stringValue, forKey: "prefMgmtAcct")
-                        Creds2.save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, credential: prefMgmtPwd_textfield.stringValue)
+                        Credentials.shared.save(service: "migrator-mgmtAcct", account: prefMgmtAcct_textfield.stringValue, credential: prefMgmtPwd_textfield.stringValue)
                     }
 //                }
             case "Passwords":
                 switch "\(textField.identifier!.rawValue)" {
                 case "bind_textfield":
                     if prefBindPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-bind", account: "bind", credential: prefBindPwd_textfield.stringValue)
+                        Credentials.shared.save(service: "migrator-bind", account: "bind", credential: prefBindPwd_textfield.stringValue)
                     }
                 case "ldap_textfield":
                     if prefLdapPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-ldap", account: "ldap", credential: prefLdapPwd_textfield.stringValue)
+                        Credentials.shared.save(service: "migrator-ldap", account: "ldap", credential: prefLdapPwd_textfield.stringValue)
                     }
                 case "fsrw":
                     if prefFsRwPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-fsrw", account: "FsRw", credential: prefFsRwPwd_textfield.stringValue)
+                        Credentials.shared.save(service: "migrator-fsrw", account: "FsRw", credential: prefFsRwPwd_textfield.stringValue)
                     }
                 case "fsro":
                     if prefFsRoPwd_textfield.stringValue != "" {
-                        Creds2.save(service: "migrator-fsro", account: "FsRo", credential: prefFsRoPwd_textfield.stringValue)
+                        Credentials.shared.save(service: "migrator-fsro", account: "FsRo", credential: prefFsRoPwd_textfield.stringValue)
                     }
                 default:
                     break
@@ -449,49 +447,49 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 //        plistData = vc.readSettings()
         
         if AppInfo.settings["scope"] != nil {
-            scopeOptions = AppInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
-            if scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
-                scopeMcpCopy = scopeOptions["mobiledeviceconfigurationprofiles"]!["copy"]!
+            Scope.options = AppInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
+            if Scope.options["mobiledeviceconfigurationprofiles"]!["copy"] != nil {
+                Scope.mcpCopy = Scope.options["mobiledeviceconfigurationprofiles"]!["copy"]!
             }
-            if self.scopeOptions["macapps"] != nil {
-                if self.scopeOptions["macapps"]!["copy"] != nil {
-                    self.scopeMaCopy = self.scopeOptions["macapps"]!["copy"]!
+            if Scope.options["macapps"] != nil {
+                if Scope.options["macapps"]!["copy"] != nil {
+                    Scope.maCopy = Scope.options["macapps"]!["copy"]!
                 } else {
-                    self.scopeMaCopy = true
+                    Scope.maCopy = true
                 }
             } else {
-                self.scopeMaCopy = true
+                Scope.maCopy = true
             }
-            if scopeOptions["policies"]!["copy"] != nil {
-                scopePoliciesCopy = scopeOptions["policies"]!["copy"]!
+            if Scope.options["policies"]!["copy"] != nil {
+                Scope.policiesCopy = Scope.options["policies"]!["copy"]!
             }
-            if scopeOptions["policies"]!["disable"] != nil {
-                policyPoliciesDisable = scopeOptions["policies"]!["disable"]!
+            if Scope.options["policies"]!["disable"] != nil {
+                Scope.policiesDisable = Scope.options["policies"]!["disable"]!
             }
-            if scopeOptions["osxconfigurationprofiles"]!["copy"] != nil {
-                scopeOcpCopy = scopeOptions["osxconfigurationprofiles"]!["copy"]!
+            if Scope.options["osxconfigurationprofiles"]!["copy"] != nil {
+                Scope.ocpCopy = Scope.options["osxconfigurationprofiles"]!["copy"]!
             }
-            if scopeOptions["restrictedsoftware"]!["copy"] != nil {
-                scopeRsCopy = scopeOptions["restrictedsoftware"]!["copy"]!
+            if Scope.options["restrictedsoftware"]!["copy"] != nil {
+                Scope.rsCopy = Scope.options["restrictedsoftware"]!["copy"]!
             }
-            if self.scopeOptions["iosapps"] != nil {
-                if self.scopeOptions["iosapps"]!["copy"] != nil {
-                    self.scopeIaCopy = self.scopeOptions["iosapps"]!["copy"]!
+            if Scope.options["iosapps"] != nil {
+                if Scope.options["iosapps"]!["copy"] != nil {
+                    Scope.iaCopy = Scope.options["iosapps"]!["copy"]!
                 } else {
-                    self.scopeIaCopy = true
+                    Scope.iaCopy = true
                 }
             } else {
-                self.scopeIaCopy = true
+                Scope.iaCopy = true
             }
-            if scopeOptions["scg"] != nil {
-                if scopeOptions["scg"]!["copy"] != nil {
-                    scopeScgCopy = scopeOptions["scg"]!["copy"]!
+            if Scope.options["scg"] != nil {
+                if Scope.options["scg"]!["copy"] != nil {
+                    Scope.scgCopy = Scope.options["scg"]!["copy"]!
                 }
-                if scopeOptions["sig"]!["copy"] != nil {
-                    scopeSigCopy = scopeOptions["sig"]!["copy"]!
+                if Scope.options["sig"]!["copy"] != nil {
+                    Scope.sigCopy = Scope.options["sig"]!["copy"]!
                 }
-                if scopeOptions["users"]!["copy"] != nil {
-                    scopeUsersCopy = scopeOptions["users"]!["copy"]!
+                if Scope.options["users"]!["copy"] != nil {
+                    Scope.usersCopy = Scope.options["users"]!["copy"]!
                 }
             } else {
                 AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":true],
@@ -553,16 +551,16 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         // read xml settings - end
 
         if self.title! == "Copy" {
-            copyScopeMCP_button.state    = boolToState(TF: scopeMcpCopy)
-            copyScopeMA_button.state     = boolToState(TF: scopeMaCopy)
-            copyScopeRS_button.state     = boolToState(TF: scopeRsCopy)
-            copyScopePolicy_button.state = boolToState(TF: scopePoliciesCopy)
-            disablePolicies_button.state = boolToState(TF: policyPoliciesDisable)
-            copyScopeOCP_button.state    = boolToState(TF: scopeOcpCopy)
-            copyScopeIA_button.state     = boolToState(TF: scopeIaCopy)
-            copyScopeScg_button.state    = boolToState(TF: scopeScgCopy)
-            copyScopeSig_button.state    = boolToState(TF: scopeSigCopy)
-            copyScopeUsers_button.state  = boolToState(TF: scopeUsersCopy)
+            copyScopeMCP_button.state    = boolToState(TF: Scope.mcpCopy)
+            copyScopeMA_button.state     = boolToState(TF: Scope.maCopy)
+            copyScopeRS_button.state     = boolToState(TF: Scope.rsCopy)
+            copyScopePolicy_button.state = boolToState(TF: Scope.policiesCopy)
+            disablePolicies_button.state = boolToState(TF: Scope.policiesDisable)
+            copyScopeOCP_button.state    = boolToState(TF: Scope.ocpCopy)
+            copyScopeIA_button.state     = boolToState(TF: Scope.iaCopy)
+            copyScopeScg_button.state    = boolToState(TF: Scope.scgCopy)
+            copyScopeSig_button.state    = boolToState(TF: Scope.sigCopy)
+            copyScopeUsers_button.state  = boolToState(TF: Scope.usersCopy)
             
             onlyCopyMissing_button.state = (userDefaults.integer(forKey: "copyMissing") == 1) ? .on:.off
             onlyCopyExisting_button.state = (userDefaults.integer(forKey: "copyExisting") == 1) ? .on:.off
@@ -601,7 +599,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefMgmtAcct_textfield.delegate = self
             prefMgmtPwd_textfield.delegate  = self
             migrateAsManaged_button.state   = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "migrateAsManaged"))
-            accountDict                     = Creds2.retrieve(service: "migrator-mgmtAcct", account: "")
+            accountDict                     = Credentials.shared.retrieve(service: "migrator-mgmtAcct", account: "")
             removeCA_ID_button.state        = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "removeCA_ID"))
 
             if accountDict.count == 1 {
@@ -627,7 +625,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefFileSharePwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefFileSharePwd"))
 
             
-            accountDict = Creds2.retrieve(service: "migrator-bind", account: "")
+            accountDict = Credentials.shared.retrieve(service: "migrator-bind", account: "")
             if accountDict.count == 1 {
                 for (_, password) in accountDict {
                     prefBindPwd_textfield.stringValue  = password
@@ -636,7 +634,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 prefBindPwd_textfield.stringValue = ""
             }
             
-            accountDict = Creds2.retrieve(service: "migrator-ldap", account: "")
+            accountDict = Credentials.shared.retrieve(service: "migrator-ldap", account: "")
             if accountDict.count == 1 {
                 for (_, password) in accountDict {
                     prefLdapPwd_textfield.stringValue = password
@@ -645,7 +643,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 prefLdapPwd_textfield.stringValue = ""
             }
             
-            accountDict = Creds2.retrieve(service: "migrator-fsrw", account: "")
+            accountDict = Credentials.shared.retrieve(service: "migrator-fsrw", account: "")
             if accountDict.count == 1 {
                 for (_, password) in accountDict {
                     prefFsRwPwd_textfield.stringValue = password
@@ -654,7 +652,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 prefFsRwPwd_textfield.stringValue = ""
             }
             
-            accountDict = Creds2.retrieve(service: "migrator-fsro", account: "")
+            accountDict = Credentials.shared.retrieve(service: "migrator-fsro", account: "")
             if accountDict.count == 1 {
                 for (_, password) in accountDict {
                     prefFsRoPwd_textfield.stringValue = password

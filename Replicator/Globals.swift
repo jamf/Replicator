@@ -18,7 +18,59 @@ public let httpSuccess          = 200...299
 public let fm                   = FileManager()
 public var didRun               = false
 
-class AppColor: NSColor {
+var jamfAdminId                 = 1
+var fileImport                  = false
+let backupDate                  = DateFormatter()
+
+// site copy / move pref
+var sitePref                    = ""
+
+var dependencyParentId          = 0
+var createArray                 = [ObjectInfo]()
+var accountDict                 = [String:String]()
+//var counters                    = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
+//var summaryDict                 = [String:[String:[String]]]()    // summary arrays of created, updated, and failed objects
+var staticSourceObjectList      = [SelectiveObject]()
+var endpointInProgress          = ""     // end point currently in the POST queue (create and remove objects)
+var currentEPs                  = [String:Int]()
+var currentEPDict               = [String:[String:Int]]()
+//let ordered_dependency_array    = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
+
+var nodesMigrated               = 0
+var currentLDAPServers          = [String:Int]()
+var createDestUrlBase           = ""
+
+class Dependencies: NSObject {
+    static let orderedArray = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
+    static var current      = [String]()
+}
+
+class SourceObjects: NSObject {
+    static var list = [SelectiveObject]()
+}
+
+// source / destination array / dictionary of items
+class DataArray: NSObject {
+    static var source       = [String]()
+    static var staticSource = [String]()
+}
+
+class AvailableObjsToMig: NSObject {
+    static var byId   = [Int: String]()
+    static var byName = [String: String]()
+}
+
+class ToMigrate: NSObject {
+    static var total      = 0
+    static var objects    = [String]()
+}
+
+class Endpoints: NSObject {
+    static var countDict = [String:Int]()
+    static var read      = 0
+}
+
+class AppColor: NSColor, @unchecked Sendable {
     static let schemes:[String]            = ["casper", "classic"]
     static let background:[String:CGColor] = ["casper":CGColor(red: 0x5D/255.0, green: 0x94/255.0, blue: 0x20/255.0, alpha: 1.0),
                                               "classic":CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 1.0)]
@@ -26,12 +78,18 @@ class AppColor: NSColor {
                                               "classic":NSColor(calibratedRed: 0x6C/255.0, green:0x86/255.0, blue:0x9E/255.0, alpha:0xFF/255.0)]
 }
 
+class UiVar: NSObject {
+    static var activeTab    = ""
+    static var goSender     = ""
+    static var changeColor  = true
+}
+
 struct AppInfo {
     static let dict            = Bundle.main.infoDictionary!
     static let version         = dict["CFBundleShortVersionString"] as! String
     static let name            = dict["CFBundleExecutable"] as! String
     static var bookmarks       = [URL: Data]()
-    static let appSupportPath   = NSHomeDirectory() + "/Library/Application Support/replicator"
+    static let appSupportPath   = NSHomeDirectory() + "/Library/Application Support/Replicator"
     static let bookmarksPathOld   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"
     static let bookmarksPath   = AppInfo.appSupportPath + "/bookmarks"
     static var settings        = [String:Any]()
@@ -56,9 +114,9 @@ struct export {
 }
 
 struct History {
-    static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-    static var logFile          = ""
-    static var startTime        = Date()
+    static var logPath   = (NSHomeDirectory() + "/Library/Logs/Replicator/")
+    static var logFile   = ""
+    static var startTime = Date()
 }
 
 struct iconfiles {
@@ -221,6 +279,10 @@ Examples:
 
 public func readSettings(thePath: String = "") -> [String:Any] {
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
+    if !FileManager.default.fileExists(atPath: settingsPath) {
+        WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
+        return([:])
+    }
     AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: settingsPath)) as? [String : Any])!
     if AppInfo.settings.count == 0 {
         WriteToLog.shared.message(stringOfText: "Error reading plist: \(AppInfo.plistPath)")
@@ -231,6 +293,42 @@ public func readSettings(thePath: String = "") -> [String:Any] {
 
 public func saveSettings(settings: [String:Any]) {
     NSDictionary(dictionary: settings).write(toFile: AppInfo.plistPath, atomically: true)
+}
+
+public func getIconId(iconUri: String, endpoint: String) -> String {
+    var iconId = "0"
+    if iconUri != "" {
+        if let index = iconUri.firstIndex(of: "=") {
+            let iconId_string = iconUri.suffix(from: index).dropFirst()
+//                    print("iconId_string: \(iconId_string)")
+            if endpoint != "policies" {
+                if let index = iconId_string.firstIndex(of: "&") {
+                    iconId = String(iconId_string.prefix(upTo: index))
+                }
+            } else {
+                iconId = String(iconId_string)
+            }
+        } else {
+            let iconUriArray = iconUri.split(separator: "/")
+            iconId = String("\(iconUriArray.last!)")
+        }
+    }
+    return iconId
+}
+
+// replace with tagValue function?
+public func getName(endpoint: String, objectXML: String) -> String {
+    var theName: String = ""
+    var dropChars: Int = 0
+    if let nameTemp = objectXML.range(of: "<name>") {
+        let firstPart = String(objectXML.prefix(through: nameTemp.upperBound).dropLast())
+        dropChars = firstPart.count
+    }
+    if let nameTmp = objectXML.range(of: "</name>") {
+        let nameTmp2 = String(objectXML.prefix(through: nameTmp.lowerBound))
+        theName = String(nameTmp2.dropFirst(dropChars).dropLast())
+    }
+    return(theName)
 }
 
 // extract the value between xml tags - start

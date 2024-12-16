@@ -43,17 +43,17 @@ class JamfPro: NSObject, URLSessionDelegate {
 //        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
 //        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
 //        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
-//        print("[getToken]           \(whichServer) wipeData.on: \(wipeData.on)")
+//        print("[getToken]           \(whichServer) WipeData.state.on: \(WipeData.state.on)")
 //        print("[getToken]           \(whichServer) localSource: \(localSource)")
 //        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
 //        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
 //        print("[getToken]      \(whichServer) !export.saveOnly: \(!export.saveOnly)")
 //        
-//        print("[getToken]                          source test: \( whichServer == "source" && ( wipeData.on || localSource ))")
+//        print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
 //        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
         
-//        if !((whichServer == "source" && ( !wipeData.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
-        if ((whichServer == "source" && ( wipeData.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
+//        if !((whichServer == "source" && ( !WipeData.state.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
+        if ((whichServer == "source" && ( WipeData.state.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
             completion((200, "success"))
             return
         }
@@ -152,7 +152,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 
                                 JamfProServer.authType[whichServer]    = "Bearer"
                                 JamfProServer.base64Creds[whichServer] = base64creds
-                                if wipeData.on && whichServer == "dest" {
+                                if WipeData.state.on && whichServer == "dest" {
                                     JamfProServer.validToken["source"]  = JamfProServer.validToken[whichServer]
                                     JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
                                     JamfProServer.accessToken["source"] = JamfProServer.accessToken[whichServer]
@@ -280,7 +280,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
-        if (whichServer == "dest" && export.saveOnly) || (whichServer == "source" && (wipeData.on || JamfProServer.importFiles == 1)) {
+        if (whichServer == "dest" && export.saveOnly) || (whichServer == "source" && (WipeData.state.on || JamfProServer.importFiles == 1)) {
             completion(true)
         } else {
             var available:Bool = false

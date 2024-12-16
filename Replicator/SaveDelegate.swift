@@ -6,6 +6,7 @@
 //  Copyright 2024 Jamf. All rights reserved
 //
 
+/*
 import Cocoa
 import Foundation
 
@@ -14,7 +15,7 @@ class SaveDelegate: NSObject, URLSessionDelegate {
 //    let userDefaults = UserDefaults.standard
     var baseFolder = ""
     var saveFolder = ""
-    var endpointPath  = ""
+    var endpointPath = ""
  
     func exportObject(node: String, objectString: String, rawName: String, id: String, format: String) {
         
@@ -150,3 +151,4 @@ class SaveDelegate: NSObject, URLSessionDelegate {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }
+*/

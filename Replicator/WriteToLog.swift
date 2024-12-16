@@ -8,18 +8,14 @@
 
 import Foundation
 
-var logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
+var logFileW = FileHandle(forUpdatingAtPath: (History.logPath + History.logFile))
 
 class WriteToLog {
     
     static let shared = WriteToLog()
     
-//    var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
-
     func message(stringOfText: String) {
         let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
-
-//        logFileW = FileHandle(forUpdatingAtPath: (History.logPath! + History.logFile))
 
         logFileW?.seekToEndOfFile()
         if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {
@@ -32,10 +28,10 @@ class WriteToLog {
         var logArray: [String] = []
         var logCount: Int = 0
         do {
-            let logFiles = try fm.contentsOfDirectory(atPath: History.logPath!)
+            let logFiles = try fm.contentsOfDirectory(atPath: History.logPath)
             
             for logFile in logFiles {
-                let filePath: String = History.logPath! + logFile
+                let filePath: String = History.logPath + logFile
                 logArray.append(filePath)
             }
             logArray.sort()
@@ -63,7 +59,7 @@ class WriteToLog {
                     try fm.removeItem(atPath: logArray[0])
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + History.logPath! + logArray[0] + "\n    \(error)") }
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + History.logPath + logArray[0] + "\n    \(error)") }
                 }
             }
         } catch {

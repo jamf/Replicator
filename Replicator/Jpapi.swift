@@ -28,6 +28,11 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     static let shared = Jpapi()
     
+    var updateUiDelegate: UpdateUiDelegate?
+    func updateView(_ info: [String: Any]) {
+        updateUiDelegate?.updateUi(info: info)
+    }
+    
     func action(whichServer: String, endpoint: String, apiData: [String: Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
         if method.lowercased() == "skip" {
@@ -50,6 +55,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         URLCache.shared.removeAllCachedResponses()
         var path = ""
+        var contentType: String = "application/json"
+        var accept: String      = "application/json"
 
         print("[Jpaapi.action] endpoint: \(endpoint)")
         switch endpoint {
@@ -57,6 +64,10 @@ class Jpapi: NSObject, URLSessionDelegate {
             path = "api/v1/\(endpoint)"
         case "patchinternalsources":
             path = "JSSResource/patchinternalsources"
+        case "patchpolicies":
+            path        = "JSSResource/patchpolicies"
+            contentType = "text/xml"
+            accept      = "text/xml"
         default:
             path = "api/v2/\(endpoint)"
         }
@@ -65,7 +76,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
         urlString     = urlString.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         if id != "" && id != "0" {
-            urlString = urlString + "/\(id)"
+            urlString = (urlString.contains("/api/")) ? urlString + "/\(id)":urlString + "/id/\(id)"
         }
         print("[Jpaapi.action] \(endpoint) id \(id)")
         
@@ -93,7 +104,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).") }
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
         
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
@@ -106,6 +117,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
+//                print("[Jpaapi.action] Api response for \(endpoint): \(String(data: data ?? Data(), encoding: .utf8))")
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     
 //                    print("[jpapi] endpoint: \(endpoint)")
@@ -143,6 +155,12 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                     }
                     
+                    if accept == "text/xml" {
+                        let objectXml = String(data: data ?? Data(), encoding: .utf8) ?? ""
+                        completion(["objectXml": objectXml])
+                        return
+                    }
+                    
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if endpoint == "sites" {
                         if let allSites = json as? [[String: Any]] {
@@ -169,7 +187,11 @@ class Jpapi: NSObject, URLSessionDelegate {
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).") }
-                    completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
+                    if endpoint == "sites" {
+                        completion(["sites":[]])
+                    } else {
+                        completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
+                    }
                     return
                 }
             } else {
@@ -188,13 +210,36 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
         if !lastPage {
-            getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) {
+            getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
                 returnedResults in
-                DispatchQueue.main.async {
-//                    if lastPage {
-                        completion(returnedResults)
-//                    }
+//                DispatchQueue.main.async {
+                if theEndpoint == "packages" {
+                    if duplicatePackages {
+                        print("[getAllDelegate] duplicate packages found on \(whichServer) server.")
+                        
+                            var message = "\tFilename : Display Name\n"
+                            for (pkgFilename, displayNames) in duplicatePackagesDict {
+                                if displayNames.count > 1 {
+                                    for dup in displayNames {
+                                        message = "\(message)\t\(pkgFilename) : \(dup)\n"
+                                    }
+                                }
+                            }
+                        let theServer = (whichServer == "source") ? JamfProServer.source : JamfProServer.destination
+                        WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(theServer)\n\(message)")
+                            if setting.fullGUI {
+                                let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
+                                if theButton == "Stop" {
+                                    updateView(["function": "stopButton"])
+//                                    stopButton(self)
+                                }
+                            }
+                    }
+                    duplicatePackages = false
+                    duplicatePackagesDict.removeAll()
                 }
+                completion(returnedResults)
+//                }
             }
         }
     }
@@ -215,43 +260,88 @@ class Jpapi: NSObject, URLSessionDelegate {
                     let pages = (totalRecords + (pageSize - 1)) / pageSize
                     
                     if let returnedRecords = returnedJson["results"] as? [[String: Any]], returnedRecords.count > 0 {
-                        for theObject in returnedRecords {
-                            switch theEndpoint {
-                            case "categories":
+                        if theEndpoint == "packages" {
+                            
+                            do {
+                                let jsonData = try JSONSerialization.data(withJSONObject: returnedRecords as Any)
+                                let somePackages = try JSONDecoder().decode([JsonUapiPackageDetail].self, from: jsonData)
                                 if whichServer == "source" {
-                                    Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
-                                } else {
-                                    Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
-                                }
-                            case "packages":
-                                if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
-                                    print("[getAll] add destination package id: \(id), packageName: \(fileName)")
-                                    if whichServer == "source" {
-                                            PatchPackages.source.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
-                                    } else {
-                                            PatchPackages.destination.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
+//                                    print("getAll: somePackages count: \(somePackages.count)")
+                                    Packages.source.append(contentsOf: somePackages)
+                                    print("getAll: package count: \(Packages.source.count)")
+                                    for thePackage in somePackages {
+                                        if let id = thePackage.id, let idNum = Int(id), let packageName = thePackage.packageName, let fileName = thePackage.fileName {
+                                            // looking for duplicates
+                                            if duplicatePackagesDict[fileName] == nil {
+//                                                AvailableObjsToMig.byId[idNum] = fileName
+                                                duplicatePackagesDict[fileName] = [packageName]
+                                            } else {
+                                                duplicatePackages = true
+                                                duplicatePackagesDict[fileName]!.append(packageName)
+                                            }
+                                            PatchPackages.source.append(PatchPackage(packageId: id, version: "", displayName: packageName, packageName: fileName))
+                                            existingObjects.append(ExistingObject(type: theEndpoint, id: idNum, name: packageName, fileName: fileName))
+                                        }
                                     }
                                 } else {
-                                    print("[getAll] failed to add package id: \(String(describing: theObject["id"] as? Int)), packageName: \(theObject["packageName"] as? String ?? "unknown"), fileName: \(theObject["fileName"] as? String ?? "unknown")")
+                                    Packages.destination.append(contentsOf: somePackages)
+//                                    print("getAll: somePackages destination count: \(Packages.destination.count)")
+                                    for thePackage in somePackages {
+                                        if let id = thePackage.id, let packageName = thePackage.packageName, let fileName = thePackage.fileName {
+                                            // looking for duplicates
+                                            if duplicatePackagesDict[fileName] == nil {
+                                                duplicatePackagesDict[fileName] = [packageName]
+                                            } else {
+                                                duplicatePackages = true
+                                                duplicatePackagesDict[fileName]!.append(packageName)
+                                            }
+                                            PatchPackages.destination.append(PatchPackage(packageId: id, version: "", displayName: packageName, packageName: fileName))
+                                        }
+                                    }
                                 }
-                            case "policy-details":
-                                if let id = theObject["id"] as? String, let name = theObject["name"] as? String, let enabled = theObject["enabled"] as? Bool, let targetPatchVersion = theObject["targetPatchVersion"] as? String, let deploymentMethod = theObject["deploymentMethod"] as? String, let softwareTitleId = theObject["softwareTitleId"] as? String, let softwareTitleConfigurationId = theObject["softwareTitleConfigurationId"] as? String, let killAppsDelayMinutes = theObject["killAppsDelayMinutes"] as? Int, let killAppsMessage = theObject["killAppsMessage"] as? String, let downgrade = theObject["downgrade"] as? Bool, let patchUnknownVersion = theObject["patchUnknownVersion"] as? Bool, let notificationHeader = theObject["notificationHeader"] as? String, let selfServiceEnforceDeadline = theObject["selfServiceEnforceDeadline"] as? Bool, let selfServiceDeadline = theObject["selfServiceDeadline"] as? Int, let installButtonText = theObject["installButtonText"] as? String, let selfServiceDescription = theObject["selfServiceDescription"] as? String, let iconId = theObject["iconId"] as? String, let reminderFrequency = theObject["reminderFrequency"] as? Int, let reminderEnabled = theObject["reminderEnabled"] as? Bool {
-                                    print("[Jpapi] adding patch policy \(name) for targetPatchVersion \(targetPatchVersion) to \(whichServer) server")
+                            } catch {
+                                print("[getAll] error decoding \(theEndpoint): \(error)")
+                            }
+                        } else {
+                            for theObject in returnedRecords {
+                                switch theEndpoint {
+                                case "categories":
                                     if whichServer == "source" {
-                                        PatchPoliciesDetails.source.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))
+                                        Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
                                     } else {
-                                        PatchPoliciesDetails.destination.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))                                    }
+                                        Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+                                    }
+                                case "packages-":
+                                    if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
+                                        //                                    print("[getAll] add destination package id: \(id), packageName: \(fileName)")
+                                        if whichServer == "source" {
+                                            PatchPackages.source.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
+                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
+                                        } else {
+                                            PatchPackages.destination.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
+                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
+                                        }
+                                    } else {
+                                        print("[getAll] failed to add package id: \(String(describing: theObject["id"] as? Int)), packageName: \(theObject["packageName"] as? String ?? "unknown"), fileName: \(theObject["fileName"] as? String ?? "unknown")")
+                                    }
+                                case "policy-details":
+                                    if let id = theObject["id"] as? String, let name = theObject["name"] as? String, let enabled = theObject["enabled"] as? Bool, let targetPatchVersion = theObject["targetPatchVersion"] as? String, let deploymentMethod = theObject["deploymentMethod"] as? String, let softwareTitleId = theObject["softwareTitleId"] as? String, let softwareTitleConfigurationId = theObject["softwareTitleConfigurationId"] as? String, let killAppsDelayMinutes = theObject["killAppsDelayMinutes"] as? Int, let killAppsMessage = theObject["killAppsMessage"] as? String, let downgrade = theObject["downgrade"] as? Bool, let patchUnknownVersion = theObject["patchUnknownVersion"] as? Bool, let notificationHeader = theObject["notificationHeader"] as? String, let selfServiceEnforceDeadline = theObject["selfServiceEnforceDeadline"] as? Bool, let selfServiceDeadline = theObject["selfServiceDeadline"] as? Int, let installButtonText = theObject["installButtonText"] as? String, let selfServiceDescription = theObject["selfServiceDescription"] as? String, let iconId = theObject["iconId"] as? String, let reminderFrequency = theObject["reminderFrequency"] as? Int, let reminderEnabled = theObject["reminderEnabled"] as? Bool {
+                                        //                                    print("[Jpapi] adding patch policy \(name) for targetPatchVersion \(targetPatchVersion) to \(whichServer) server")
+                                        if whichServer == "source" {
+                                            PatchPoliciesDetails.source.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))
+                                        } else {
+                                            PatchPoliciesDetails.destination.append(PatchPolicyDetail(id: id, name: name, enabled: enabled, targetPatchVersion: targetPatchVersion, deploymentMethod: deploymentMethod, softwareTitleId: softwareTitleId, softwareTitleConfigurationId: softwareTitleConfigurationId, killAppsDelayMinutes: killAppsDelayMinutes, killAppsMessage: killAppsMessage, downgrade: downgrade, patchUnknownVersion: patchUnknownVersion, notificationHeader: notificationHeader, selfServiceEnforceDeadline: selfServiceEnforceDeadline, selfServiceDeadline: selfServiceDeadline, installButtonText: installButtonText, selfServiceDescription: selfServiceDescription, iconId: iconId, reminderFrequency: reminderFrequency, reminderEnabled: reminderEnabled))
+                                        }
+                                    }
+                                case "sites":
+                                    if whichServer == "source" {
+                                        JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                    } else {
+                                        JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                    }
+                                default:
+                                    break
                                 }
-                            case "sites":
-                                if whichServer == "source" {
-                                    JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
-                                } else {
-                                    JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
-                                }
-                            default:
-                                break
                             }
                             
 //                            if theEndpoint == "packages" {
@@ -274,6 +364,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                                }
 //                            }
                         }
+                        
                         print("[getAll] records (\(theEndpoint)) added: \(returnedRecords.count)")
                         WriteToLog.shared.message(stringOfText: "[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
                     }
@@ -282,57 +373,16 @@ class Jpapi: NSObject, URLSessionDelegate {
                     if (whichPage + 1 >= pages ) {
                         print("[getAll] return to caller, record count: \(existingObjects.count)")
                         completion(existingObjects)
-                    }
-                    
-                    if whichPage < pages - 1 {
+                    } else {
                         getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage + 1) {
                             returnedResults in
 //                            print("[getAll] page \(whichPage + 1) of \(pages) complete")
 //                            print("[getAll] finished fetching all \(theEndpoint)")
                             print("[getAll] call page \(whichPage + 1) for \(theEndpoint)")
-                                completion(existingObjects)
+                            completion(existingObjects)
                         }
-//                    } else {
-//                        print("[getAll] finished fetching all \(theEndpoint), there were \(pages) page(s)")
-//                        print("[getAll] return to caller, record count: \(existingObjects.count)")
-//                        completion(existingObjects)
                     }
-                    
                 }
-                
-                /*
-                repeat {
-                    if pendingCalls < maxConcurrent {
-                        pendingCalls += 1
-                        pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: currentPage) {
-                            returnedResults in
-                            pendingCalls -= 1
-                            let returnedJson = returnedResults as? [String: Any] ?? [:]
-                            print("[getAll] pending calls: \(pendingCalls)")
-                            if let returnedRecords = returnedJson["results"] as? [[String: Any]], returnedRecords.count > 0 {
-                                for theObject in returnedRecords {
-                                    if let id = theObject["id"] as? Int, id != 0, let name = theObject["displayName"] as? String, name != "", let fileName = theObject["fileName"] as? String, fileName != "" {
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name, fileName: fileName))
-                                    } else {
-                                        
-                                    }
-                                }
-                                print("[getAll] records added: \(returnedRecords.count)")
-                                WriteToLog.shared.message(stringOfText: "[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
-                            } else {
-                                fetchedAllRecords = true
-                            }
-                            if fetchedAllRecords && pendingCalls == 0 {
-                                completion(existingObjects)
-                            }
-                        }
-                        currentPage += 1
-                    } else {
-                        usleep(10000)
-                    }
-                    usleep(10000)
-                } while !fetchedAllRecords
-                */
             }
         default:
             print("[getAll] look for \(theEndpoint)")
@@ -464,7 +514,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                    print("[ExistingObjects.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     
-                    if ["patch-software-title-configurations","patchsoftwaretitles"].contains(theEndpoint) {
+                    if ["patch-software-title-configurations","patchsoftwaretitles","patchmanagement"].contains(theEndpoint) {
                         if let recordsArray = responseData as? [[String: Any]] {
 //                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
                             completion(recordsArray)

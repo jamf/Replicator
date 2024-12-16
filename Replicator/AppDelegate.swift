@@ -6,6 +6,7 @@
 //  Copyright 2024 Jamf. All rights reserved.
 //
 
+import AppKit
 import ApplicationServices
 import Cocoa
 
@@ -27,31 +28,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.post(name: .deleteMode, object: self)
     }
     @IBAction func quit_menu(sender: AnyObject) {
-        // check for file that sets mode to delete data from destination server, delete if found - start
-        ViewController().rmDELETE()
-        // check for file that allows deleting data from destination server, delete if found - end
-//        self.goButtonEnabled(button_status: true)
         quitNow(sender: self)
-        
     }
 
     public func quitNow(sender: AnyObject) {
-        
-//        print("[quitNow] JamfProServer.validToken[\"source\"]: \(JamfProServer.validToken["source"] ?? false)")
-//        print("[quitNow] JamfProServer.validToken[\"dest\"]: \(JamfProServer.validToken["dest"] ?? false)")
-        let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
-//        print("[quitNow] sourceMethod: \(sourceMethod)")
-        Jpapi.shared.action(whichServer: "source", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
-            (returnedJSON: [String:Any]) in
-            WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
+        DispatchQueue.main.async {
+            NSApp.hide(nil)
+            let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
             let destMethod = (JamfProServer.validToken["dest"] ?? false) ? "POST":"SKIP"
-//                    print("[quitNow] destMethod: \(destMethod)")
-            Jpapi.shared.action(whichServer: "dest", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
+            
+            // check for file that sets mode to delete data from destination server, delete if found - start
+            ViewController().rmDELETE()
+
+            Jpapi.shared.action(whichServer: "source", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
                 (returnedJSON: [String:Any]) in
-                WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
-                logFileW?.closeFile()
-//                WriteToLog.shared.logFileW?.closeFile()
-                NSApplication.shared.terminate(self)
+                WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
+
+                Jpapi.shared.action(whichServer: "dest", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
+                    (returnedJSON: [String:Any]) in
+                    WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
+                    logFileW?.closeFile()
+                    NSApplication.shared.terminate(self)
+                }
             }
         }
     }
