@@ -8,5 +8,5 @@ func Go(sender: String)
         or (start selective migration)
         func existingEndpoints: gets objects from destination server
             func startSelectiveMigration(objectIndex: 0, selectedEndpoint: selectedEndpoint)
-                func Json().getRecord(whichServer: "source",
+                func Json.shared.getRecord(whichServer: "source",
 

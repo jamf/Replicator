@@ -55,7 +55,8 @@ let patchSoftwarePackages = """
         }
         """
 
-Create Patch Policy by POSTing XML to the Classic API: /JSSResource/patchpolicies/softwaretitleconfig/id/5
+Update Patch Policy with PUT XML to classic api: /JSSResource/patchpolicies/id/<id>
+Create Patch Policy with POST XML to the classic api: /JSSResource/patchpolicies/softwaretitleconfig/id/5
 <?xml version="1.0" encoding="UTF-8"?>
   <patch_policy>
     <general>
