@@ -116,6 +116,21 @@ struct ExtensionAttribute: Codable {
     }
 }
 
+struct ObjectAndDependency: Codable {
+    let objectType: String
+    let objectName: String
+    let objectId: String
+    
+    enum CodingKeys: String, CodingKey {
+        case objectType
+        case objectName
+        case objectId
+    }
+}
+struct ObjectAndDependencies {
+    static var records: [ObjectAndDependency] = []
+}
+
 // MARK: - PatchPackage
 struct PatchPackage: Codable {
     let packageId, version: String
@@ -168,32 +183,6 @@ class PatchPoliciesDetails {
     static var source      = [PatchPolicyDetail]()
     static var destination = [PatchPolicyDetail]()
 }
-
-//// MARK: - PatchPolicyDetails
-//struct PatchPolicyDetails: Codable {
-//    let id, name: String
-//    let enabled: Bool
-//    let targetPatchVersion, deploymentMethod, softwareTitleId, softwareTitleConfigurationId: String
-//    let killAppsDelayMinutes: Int
-//    let killAppsMessage: String
-//    let downgrade, patchUnknownVersion: Bool
-//    let notificationHeader: String
-//    let selfServiceEnforceDeadline: Bool
-//    let selfServiceDeadline: Int
-//    let installButtonText, selfServiceDescription, iconId: String
-//    let reminderFrequency: Int
-//    let reminderEnabled: Bool
-//
-//    enum CodingKeys: String, CodingKey {
-//        case id, name, enabled, targetPatchVersion, deploymentMethod
-//        case softwareTitleId
-//        case softwareTitleConfigurationId
-//        case killAppsDelayMinutes, killAppsMessage, downgrade, patchUnknownVersion, notificationHeader, selfServiceEnforceDeadline, selfServiceDeadline, installButtonText, selfServiceDescription
-//        case iconId
-//        case reminderFrequency, reminderEnabled
-//    }
-//}
-
 
 typealias PatchSoftwareTitleConfigurations = [PatchSoftwareTitleConfiguration]
 class PatchTitleConfigurations {

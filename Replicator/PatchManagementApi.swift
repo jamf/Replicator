@@ -61,6 +61,9 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             let sourceSiteName = sourceTitle?.siteName ?? "NONE"
             let destTitle = PatchTitleConfigurations.destination.filter( { ($0.softwareTitleNameId == "\(tagValue(xmlString: patchTitle, xmlTag: "name_id"))") && ($0.siteName == sourceSiteName) } ).first
             let destSiteName = destTitle?.siteName ?? "NONE"
+            
+            let sourceCategoryName = sourceTitle?.categoryName
+            let destCategoryId = Categories.destination.first(where: {$0.name == sourceCategoryName})?.id ?? nil
             //print("dest config name: \(destTitle?.displayName ?? "unknown")")
             //print("source site name: \(sourceTitle?.siteName ?? "NONE")")
             //print("  dest site name: \(destTitle?.siteName ?? "NONE")")
@@ -72,8 +75,8 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                 let _Title = PatchTitleConfigurations.source.filter( { $0.id == sourceEpId } ).first
                 if let jamfOfficial = destTitle?.jamfOfficial,
                    let displayName = _Title?.displayName,
-//                   let categoryId = destTitle?.categoryId,
-//                   let siteId = destTitle?.siteId,
+                   let categoryId = destCategoryId,
+//                   let siteId = _Title?.siteId,
                    let uiNotifications = _Title?.uiNotifications,
                    let emailNotifications = _Title?.emailNotifications,
                    let softwareTitleId = destTitle?.softwareTitleId,
@@ -84,8 +87,8 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                    let patchSourceEnabled = _Title?.patchSourceEnabled {
                    let putTitle: [String: Any] = ["jamfOfficial": jamfOfficial,
                           "displayName": displayName,
-                          "categoryId": objectId(xml: patchTitle, object: "categories"),
-                          "siteId": objectId(xml: patchTitle, object: "site"),
+                          "categoryId": categoryId,
+                          "siteId": siteId,  //objectId(xml: patchTitle, object: "site"),
                           "uiNotifications": uiNotifications,
                           "emailNotifications": emailNotifications,
                           "softwareTitleId": softwareTitleId,
@@ -162,15 +165,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             request.httpMethod = createUpdateMethod.uppercased()
         }
         
-        /* move this
-        if apiData.count > 0 {
-            do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
-         */
         request.httpBody = requestBody
         
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).") }
@@ -196,13 +190,13 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     if endpoint == "patchmanagement" {
                         if let stringResponse = String(data: data!, encoding: .utf8) {
                             print("[createUpdate] patchmanagement stringResponse: \(stringResponse)")
-                            let newId = (createUpdateMethod.uppercased() == "PATCH") ? tagValue2(xmlString: stringResponse, startTag: "<id>", endTag: "</id>"):tagValue2(xmlString: stringResponse, startTag: "\"id\" : \"", endTag: "\",")
+                            let newId = (createUpdateMethod.uppercased() == "PATCH") ? tagValue2(xmlString: stringResponse, startTag: "\"id\" : \"", endTag: "\","):tagValue2(xmlString: stringResponse, startTag: "<id>", endTag: "</id>")
                             if !newId.isEmpty || createUpdateMethod.uppercased() == "PATCH" {
-                                // patch-software-title-configurations
-                                print("[createUpdate] patch-software-title-configurations")
+                                // patch-software-title-configurations - handle packages
+                                print("[createUpdate] patch-software-title-configurations - add packages")
                                 createUpdate(serverUrl: serverUrl, endpoint: "patch-software-title-configurations", apiData: apiData, sourceEpId: sourceEpId, destEpId: "\(newId)", token: JamfProServer.authCreds["dest"]!, method: "PATCH") {
                                     (jpapiResonse: [String:Any]) in
-                                    print("[createUpdate] resulst of patch-software-title-configurations: \(jpapiResonse)")
+                                    print("[createUpdate] result of patch-software-title-configurations: \(jpapiResonse)")
                                     
                                 }
                             }
@@ -216,6 +210,67 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         print("patch policies count: \(PatchPoliciesDetails.source.count)")
                         let patchPolicies = PatchPoliciesDetails.source.filter( {$0.softwareTitleConfigurationId == sourceEpId} )
                         print("patchPolicies count: \(patchPolicies.count)")
+                        
+                        let existingPatchPolicies = PatchPoliciesDetails.destination.filter( {$0.softwareTitleConfigurationId == destEpId} )
+                        print("software title (id: \(destEpId)) has existing patch policies count: \(existingPatchPolicies.count)")
+                        for patchPolicy in patchPolicies {
+//                            let patchPolicyId = patchPolicy.id
+                            print("patch version: \(patchPolicy.targetPatchVersion)")
+                            let patchExists = existingPatchPolicies.filter( {$0.targetPatchVersion == patchPolicy.targetPatchVersion} ).count > 0
+                            var apiAction = "create"
+                            var objectId = destEpId
+                            if patchExists {
+                                apiAction = "update"
+                                objectId = existingPatchPolicies.filter( {$0.targetPatchVersion == patchPolicy.targetPatchVersion} ).first!.id
+                            }
+                            // need to query capi to get full patch policy config
+                            Jpapi.shared.action(whichServer: "source", endpoint: "patchpolicies", apiData: [:], id: patchPolicy.id, token: JamfProServer.authCreds["source"] ?? "", method: "GET") {
+                                (returnedJson: [String:Any]) in
+//                                    print("patch policy Dictionary: \(returnedJson.description)")
+                                
+                                var objectXml = returnedJson["objectXml"] as? String ?? ""
+                                print("\nadd patch policy to software title id: \(destEpId)")
+                                print("patch policy XML: \(objectXml.prettyPrint)")
+                                
+
+                                if let titleId = Int(destEpId), !objectXml.isEmpty {
+                                    // remove id from xml
+                                    
+//                                    let idPattern = "\(NSRegularExpression.escapedPattern(for: "<id>")).*?\(NSRegularExpression.escapedPattern(for: "</id>"))"
+                                    do {
+//                                        let regex = try NSRegularExpression(pattern: idPattern, options: [])
+                                        let regex = try NSRegularExpression(pattern: "<id>(.*?)</id>", options:.caseInsensitive)
+                                        
+                                        // remove id
+                                        let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
+                                        objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "")
+                                        objectXml = objectXml.replacingOccurrences(of: "\n\n", with: "\n")
+                                        
+                                    } catch {
+                                        print("Invalid regex: \(error.localizedDescription)")
+                                    }
+//                                    let titlePattern = "\(NSRegularExpression.escapedPattern(for: "<software_title_configuration_id>")).*?\(NSRegularExpression.escapedPattern(for: "</software_title_configuration_id>"))"
+                                    do {
+//                                        let regex = try NSRegularExpression(pattern: titlePattern, options: [])
+                                        let regex = try NSRegularExpression(pattern: "<software_title_configuration_id>(.*?)</software_title_configuration_id>", options:.caseInsensitive)
+                                        
+                                        // update software_title_configuration_id to id on destination server
+                                        let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
+                                        objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "<software_title_configuration_id>\(titleId)</software_title_configuration_id>")
+
+                                        
+                                    } catch {
+                                        print("Invalid regex: \(error.localizedDescription)")
+                                    }
+                                    objectXml = objectXml.prettyPrint
+                                    print("updated patch policy XML: \(objectXml)")
+                                    CreateEndpoints.shared.queue(endpointType: "patchpolicies", endPointXML: objectXml, endpointCurrent: 0, endpointCount: patchPolicies.count, action: apiAction, sourceEpId: -1, destEpId: objectId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                                        (result: String) in
+                                    }
+                                }
+                                
+                            }
+                        }
                         print("")
                         
                         do {
@@ -259,7 +314,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
     
     private func createPatchsoftwaretitleXml(objectInstance: PatchSoftwareTitleConfiguration) -> String {
         
-//        let categoryName = Categories.destination.filter { $0.id == objectInstance.categoryId }.first?.name ?? ""
         let patchSourceId = PatchSource.destination.filter { $0.name == objectInstance.patchSourceName }.first?.id ?? 0
 
         let patchSoftwareTitle = """
@@ -274,17 +328,38 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         <web_notification>\(objectInstance.uiNotifications)</web_notification>
                         <email_notification>\(objectInstance.emailNotifications)</email_notification>
                     </notifications>
-                    <categories>
+                    <category>
                         <id>\(objectInstance.categoryId)</id>
-                    </categories>
+                    </category>
                 </patch_software_title>
                 """
         return patchSoftwareTitle
     }
     
-    private func createUpdatePatchPolicy() {
-        
+    /*
+    private func createPatchPolicyXml(from dictionary: [String: Any]) -> XMLElement {
+        let root = XMLElement(name: "patch_policy")
+        for (key, value) in dictionary {
+            let element = XMLElement(name: key)
+            if let nestedDictionary = value as? [String: Any] {
+                element.addChild(createPatchPolicyXml(from: nestedDictionary))
+            } else if let array = value as? [Any] {
+                for item in array {
+                    if let nestedDictionary = item as? [String: Any] {
+                        element.addChild(createPatchPolicyXml(from:nestedDictionary))
+                    } else {
+                        let itemElement = XMLElement(name: "item", stringValue: "\(item)")
+                        element.addChild(itemElement)
+                    }
+                }
+            } else {
+                element.stringValue = "\(value)"
+            }
+            root.addChild(element)
+        }
+        return root
     }
+    */
     
     private func objectId(xml: String, object: String) -> String {
         let trimmed = tagValue(xmlString: xml, xmlTag: object)

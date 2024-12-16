@@ -9,18 +9,21 @@
 import Cocoa
 
 class Json: NSObject, URLSessionDelegate {
-    func getRecord(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, endpointBase: String = "0", endpointId: String = "0", completion: @escaping (_ objectRecord: Any) -> Void) {
+    
+    static let shared = Json()
+    
+    func getRecord(whichServer: String, base64Creds: String, theEndpoint: String, endpointBase: String = "0", endpointId: String = "0", completion: @escaping (_ objectRecord: Any) -> Void) {
         
         if theEndpoint == "skip" {
             completion([:])
             return
         }
         
+        var existingDestUrl = (whichServer == "source") ? JamfProServer.source : JamfProServer.destination
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
-        WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
+        WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(existingDestUrl)")
     
         URLCache.shared.removeAllCachedResponses()
-        var existingDestUrl = "\(theServer)"
         
         switch endpointBase {
         case "patchmanagement":
@@ -37,23 +40,24 @@ class Json: NSObject, URLSessionDelegate {
         default:
             existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)").urlFix
         }
-//        existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
+
         existingDestUrl = existingDestUrl.urlFix
         
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)") }
-//        print("[getRecord] existing endpoints URL: \(existingDestUrl)")
+        print("[Json.getRecord] existing endpoints URL: \(existingDestUrl)")
+        
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
+        
+        jsonRequest.httpMethod = "GET"
+        let destConf = URLSessionConfiguration.ephemeral
+
+        destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
 
         q.getRecord.maxConcurrentOperationCount = userDefaults.integer(forKey: "concurrentThreads")
         
         let semaphore = DispatchSemaphore(value: 0)
         q.getRecord.addOperation {
-            
-            jsonRequest.httpMethod = "GET"
-            let destConf = URLSessionConfiguration.ephemeral
-
-            destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in

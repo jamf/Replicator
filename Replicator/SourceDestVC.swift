@@ -27,7 +27,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     // keychain access
-    let Creds2           = Credentials()
+//    let Creds2           = Credentials()
 //    var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedSourcePwd  = ""       // source user account password stored in the keychain
@@ -147,7 +147,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var stickySessions_label: NSTextField!
     
     var itemToSite      = false
-    var destinationSite = ""
     
     @IBOutlet weak var destinationLabel_TextField: NSTextField!
     
@@ -175,36 +174,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var hideGui             = false
     
 //  Log / backup vars
-    let backupDate          = DateFormatter()
     var maxLogFileCount     = 20
     var historyFile: String = ""
     var logFile:     String = ""
-    let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-//    var logFileW:     FileHandle? = FileHandle(forUpdatingAtPath: "")
-    // legacy logging (history) path and file
-    let historyPath:String? = (NSHomeDirectory() + "/Library/Application Support/jamf-migrator/history/")
-    var historyFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
-    
-    // scope preferences
-    var scopeOptions:           [String:[String: Bool]] = [:]
-    var scopeOcpCopy:           Bool = true   // osxconfigurationprofiles copy scope
-    var scopeMaCopy:            Bool = true   // macapps copy scope
-    var scopeRsCopy:            Bool = true   // restrictedsoftware copy scope
-    var scopePoliciesCopy:      Bool = true   // policies copy scope
-    var policyPoliciesDisable:  Bool = false  // policies disable on copy
-    var scopeMcpCopy:           Bool = true   // mobileconfigurationprofiles copy scope
-    var scopeIaCopy:            Bool = true   // iOSapps copy scope
-    //    var policyMcpDisable:       Bool = false  // mobileconfigurationprofiles disable on copy
-    //    var policyOcpDisable:       Bool = false  // osxconfigurationprofiles disable on copy
-    var scopeScgCopy:           Bool = true // static computer groups copy scope
-    var scopeSigCopy:           Bool = true // static iOS device groups copy scope
-    var scopeUsersCopy:         Bool = true // static user groups copy scope
+    let logPathOld: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
+//    let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/Replicator/")
     
     // xml prefs
     var xmlPrefOptions: Dictionary<String,Bool> = [:]
-    
-    // site copy / move pref
-    var sitePref = ""
     
     var sourceServerArray   = [String]()
     var destServerArray     = [String]()
@@ -212,7 +189,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     // credentials
     var sourceCreds = ""
     var destCreds   = ""
-    var jamfAdminId = 1
     var accountsDict = [String:String]()
     
     // settings variables
@@ -225,96 +201,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var dest_pass: String           = ""
     var sourceBase64Creds: String   = ""
     var destBase64Creds: String     = ""
-    
-    var sourceURL = ""
-//    var destURL = ""
-    var createDestUrlBase = ""
-    var iconDictArray = [String:[[String:String]]]()
-    var uploadedIcons = [String:Int]()
-    
+        
     // import file vars
-    var fileImport      = false
     var dataFilesRoot   = ""
-    
-    var endpointDefDict = ["computergroups":"computer_groups", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patches":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
-    let ordered_dependency_array = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
-    var xmlName             = ""
-    var destEPs             = [String:Int]()
-    var currentEPs          = [String:Int]()
-    var currentLDAPServers  = [String:Int]()
-    
-    var currentEPDict       = [String:[String:Int]]()
-    
-    var currentEndpointID   = 0
-    var progressCountArray  = [String:Int]() // track if post/put was successful
-    
-    var whiteText:NSColor   = NSColor.white
-    var greenText:NSColor   = NSColor.green
-    var yellowText:NSColor  = NSColor.yellow
-    var redText:NSColor     = NSColor.red
-    var changeColor:Bool    = true
-    
-    // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
-    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
-    var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
-    var AllEndpointsArray = [String]()
-    
-    
-    var getEndpointInProgress = ""     // end point currently in the GET queue
-    var endpointInProgress    = ""     // end point currently in the POST queue
-    var endpointName          = ""
-    var POSTsuccessCount      = 0
-    var failedCount           = 0
-    
-    // used in createEndpoints
-    var totalCreated   = 0
-    var totalUpdated   = 0
-    var totalFailed    = 0
-    var totalCompleted = 0
-
-//    @IBOutlet weak var mySpinner_ImageView: NSImageView!
-//    var theImage:[NSImage] = [NSImage(named: "0.png")!,
-//                              NSImage(named: "1.png")!,
-//                              NSImage(named: "2.png")!]
-//    var showSpinner = false
-    
-    // group counters
-    var smartCount      = 0
-    var staticCount     = 0
-    //var DeviceGroupType = ""  // either smart or static
-    // var groupCheckArray: [Bool] = []
-    
-    
-    // define list of items to migrate
-    var objectsToMigrate: [String] = []
-    var nodesMigrated              = 0
-    var objectNode                 = "" // link dependency type to object endpoint. ex. (dependency) category to (endpoint) categories
-
-    // dictionaries to map id of object on source server to id of same object on destination server
-//    var computerconfigs_id_map = [String:Dictionary<String,Int>]()
-    var bindings_id_map   = [String:Dictionary<String,Int>]()
-    var packages_id_map   = [String:Dictionary<String,Int>]()
-    var printers_id_map   = [String:Dictionary<String,Int>]()
-    var scripts_id_map    = [String:Dictionary<String,Int>]()
-    var configObjectsDict = [String:Dictionary<String,String>]()
-    var orphanIds         = [String]()
-    var idDict            = [String:Dictionary<String,Int>]()
-    
-    var theOpQ        = OperationQueue() // create operation queue for API calls
-    var getEndpointsQ = OperationQueue() // create operation queue for API calls
-    var theCreateQ    = OperationQueue() // create operation queue for API POST/PUT calls
-    var readFilesQ    = OperationQueue() // for reading in data files
-    var readNodesQ    = OperationQueue()   // for reading in API endpoints
-    let theIconsQ     = OperationQueue() // que to upload/download icons
-    
-    let theSortQ      = OperationQueue()
-    
-    var authQ       = DispatchQueue(label: "com.jamf.auth")
-    var theModeQ    = DispatchQueue(label: "com.jamf.addRemove")
-    var theSpinnerQ = DispatchQueue(label: "com.jamf.spinner")
-    var destEPQ     = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.background)
-    var idMapQ      = DispatchQueue(label: "com.jamf.idMap")
+        
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
 //    var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
     
@@ -325,7 +215,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var URLisValid: Bool = true
     
     @objc func deleteMode_sdvc(_ sender: Any) {
-        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/jamf-migrator/DELETE", isDirectory: &isDir))  {
+        if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE", isDirectory: &isDir))  {
             DispatchQueue.main.async { [self] in
                 // disable source server, username and password fields (to finish)
                 if source_jp_server_field.isEnabled {
@@ -480,7 +370,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             setDestSite_button.isHidden                 = true
                             self.destinationLabel_TextField.stringValue = "Destination"
                             self.availableSites_button.isEnabled = false
-                            self.destinationSite = ""
                             itemToSite = false
                             DispatchQueue.main.async {
                                 self.sitesSpinner_ProgressIndicator.stopAnimation(self)
@@ -494,7 +383,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     setDestSite_button.isHidden                 = true
                     self.destinationLabel_TextField.stringValue = "Destination"
                     self.availableSites_button.isEnabled = false
-                    self.destinationSite = ""
                     itemToSite = false
                     DispatchQueue.main.async {
                         self.sitesSpinner_ProgressIndicator.stopAnimation(self)
@@ -509,7 +397,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             destinationLabel_TextField.stringValue = "Destination"
             self.availableSites_button.isEnabled = false
             self.availableSites_button.removeAllItems()
-            destinationSite = ""
             itemToSite = false
             DispatchQueue.main.async {
                 self.sitesSpinner_ProgressIndicator.stopAnimation(self)
@@ -524,7 +411,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
-        if (whichserver == "source" && !wipeData.on) || (whichserver == "dest" && !export.saveOnly) {
+        if (whichserver == "source" && !WipeData.state.on) || (whichserver == "dest" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
             NotificationCenter.default.post(name: .resetListFields, object: nil)
@@ -537,7 +424,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         } else {
             fileImport = (JamfProServer.importFiles == 1) ? true:false
         }
-        var accountDict = [String:String]()
+
         var theUser     = ""
         if !(whichServer == "source" && fileImport) {
             if setting.fullGUI {
@@ -546,7 +433,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             } else {
                 theUser = (whichServer == "source") ? JamfProServer.sourceUser:JamfProServer.destUser
             }
-            accountDict = Creds2.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
+            accountDict = Credentials.shared.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
 //            print("[fetchPassword] accountDict: \(accountDict)")
             
             
@@ -882,7 +769,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 availableSites_button.isEnabled = false
                 availableSites_button.removeAllItems()
                 destinationLabel_TextField.stringValue = "Destination"
-                destinationSite = ""
                 itemToSite = false
             }
         default: break
@@ -1043,11 +929,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func initVars() {
         // create log directory if missing - start
-        if !fm.fileExists(atPath: logPath!) {
+        if !fm.fileExists(atPath: History.logPath) {
             do {
-                try fm.createDirectory(atPath: logPath!, withIntermediateDirectories: true, attributes: nil )
+                try fm.createDirectory(atPath: History.logPath, withIntermediateDirectories: true, attributes: nil )
             } catch {
-                _ = Alert.shared.display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: logPath))\nTry creating it manually.", secondButton: "")
+                _ = Alert.shared.display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: History.logPath))\nTry creating it manually.", secondButton: "")
                 exit(0)
             }
         }
@@ -1063,12 +949,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
         
         maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
-        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
-        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_migration.log"
+        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
+        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
 
         isDir = false
-        if !(fm.fileExists(atPath: logPath! + logFile, isDirectory: &isDir)) {
-            fm.createFile(atPath: logPath! + logFile, contents: nil, attributes: nil)
+        if !(fm.fileExists(atPath: History.logPath + logFile, isDirectory: &isDir)) {
+            fm.createFile(atPath: History.logPath + logFile, contents: nil, attributes: nil)
         }
         sleep(1)
         

@@ -20,6 +20,8 @@ var credentialsWhichServer         = ""
 
 class Credentials {
     
+    static let shared = Credentials()
+    
     var userPassDict = [String:String]()
     
     func save(service: String, account: String, credential: String, whichServer: String = "") {

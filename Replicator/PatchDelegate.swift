@@ -18,11 +18,15 @@ class PatchDelegate: NSObject {
     }
     
     func getDependencies(whichServer: String, completion: @escaping (_ result: String) -> Void) {
-        print("[getEndpoints] fetch categories from \(whichServer) server")
-        self.updateViewController("fetching categories from \(whichServer) server")
+        if WipeData.state.on {
+            completion("skipped")
+            return
+        }
+        print("[getEndpoints] fetching category records from \(whichServer) server")
+        self.updateViewController("fetching category records from \(whichServer) server")
         Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: "categories", whichPage: 0) { result in
-            print("[getEndpoints] fetch sites from \(whichServer) server")
-            self.updateViewController("fetching sites from \(whichServer) server")
+            print("[getEndpoints] fetching site records from \(whichServer) server")
+            self.updateViewController("fetching site records from \(whichServer) server")
             Jpapi.shared.action(whichServer: whichServer, endpoint: "sites", apiData: [:], id: "", token: "", method: "GET") { result in
                 
 //                print("[getEndpoints] sites from \(whichServer) server: \(result["sites"])")
@@ -33,25 +37,32 @@ class PatchDelegate: NSObject {
                         JamfProSites.source = try JSONDecoder().decode([Site].self, from: jsonData)
                         for i in 0..<PatchTitleConfigurations.source.count {
                             PatchTitleConfigurations.source[i].siteName = JamfProSites.source.first(where: {$0.id == PatchTitleConfigurations.source[i].siteId})?.name ?? "NONE"
+                            PatchTitleConfigurations.source[i].categoryName = Categories.source.first(where: {$0.id == PatchTitleConfigurations.source[i].categoryId})?.name ?? ""
                         }
                     } else {
-                        JamfProSites.destination = try JSONDecoder().decode([Site].self, from: jsonData)
+                        if let destSites = try? JSONDecoder().decode([Site].self, from: jsonData) {
+                            JamfProSites.destination = destSites    // try JSONDecoder().decode([Site].self, from: jsonData)
+                            for i in 0..<PatchTitleConfigurations.destination.count {
+                                PatchTitleConfigurations.destination[i].siteName = JamfProSites.destination.first(where: {$0.id == PatchTitleConfigurations.destination[i].siteId})?.name ?? "NONE"
+                                PatchTitleConfigurations.destination[i].categoryName = Categories.source.first(where: {$0.id == PatchTitleConfigurations.destination[i].categoryId})?.name ?? ""
+                            }
+                        }
                     }
                 } catch {
-                    print("[getEndpoints] sites failed from \(whichServer) server")
+                    print("[getEndpoints] site records failed from \(whichServer) server")
                 }
-                print("[getEndpoints] fetch policy-details from \(whichServer) server")
+                print("[getEndpoints] fetching policy-details records from \(whichServer) server")
                 self.updateViewController("fetching policy-details from \(whichServer) server")
                 Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: "policy-details", whichPage: 0) { result in
-                    self.updateViewController("fetching packages from \(whichServer) server")
+                    self.updateViewController("fetching package records from \(whichServer) server")
                     Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: "packages", whichPage: 0) { result in
                         if whichServer == "source" || export.saveOnly {
                             completion("finished getting patch dependencies from the \(whichServer) server")
                         } else {
                             // patchinternalsources
-                            print("[getEndpoints] fetch patchinternalsources from \(whichServer) server")
+                            print("[getEndpoints] fetch patchinternalsource records from \(whichServer) server")
                             Jpapi.shared.action(whichServer: "dest", endpoint: "patchinternalsources", apiData: [:], id: "", token: "", method: "GET") { result in
-                                print("[getEndpoints] result of patchinternalsources: \(result)")
+//                                print("[getEndpoints] result of patchinternalsources: \(result)")
                                 let decoder = JSONDecoder()
                                 if let patchInternalSources = result["patch_internal_sources"] as? [[String: Any]] {
                                     for theSourceJson in patchInternalSources {
