@@ -86,7 +86,7 @@ class ExportItem: NSObject {
                 let t = object as? [PatchPolicyDetail]
                 let prettyPrintedData = try encoder.encode(t)
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
-            case "patchmanagement":
+            case "patch-software-title-configurations":
                 if let displayName = (object as? PatchSoftwareTitleConfiguration)?.displayName, let id = (object as? PatchSoftwareTitleConfiguration)?.id {
                     exportFilename = "\(displayName)-\(id).json"
                 }

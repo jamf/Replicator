@@ -58,7 +58,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         var contentType: String = "application/json"
         var accept: String      = "application/json"
 
-        print("[Jpaapi.action] endpoint: \(endpoint)")
+        print("[Jpapi.action] endpoint: \(endpoint)")
         switch endpoint {
         case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites":
             path = "api/v1/\(endpoint)"
@@ -209,10 +209,10 @@ class Jpapi: NSObject, URLSessionDelegate {
             
         }
         
+        print("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server.")
         if !lastPage {
             getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
                 returnedResults in
-//                DispatchQueue.main.async {
                 if theEndpoint == "packages" {
                     if duplicatePackages {
                         print("[getAllDelegate] duplicate packages found on \(whichServer) server.")
@@ -239,7 +239,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                     duplicatePackagesDict.removeAll()
                 }
                 completion(returnedResults)
-//                }
             }
         }
     }
@@ -285,7 +284,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     }
                                 } else {
                                     Packages.destination.append(contentsOf: somePackages)
-//                                    print("getAll: somePackages destination count: \(Packages.destination.count)")
+                                    print("getAll: somePackages destination count: \(Packages.destination.count)")
                                     for thePackage in somePackages {
                                         if let id = thePackage.id, let packageName = thePackage.packageName, let fileName = thePackage.fileName {
                                             // looking for duplicates
@@ -310,6 +309,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                         Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
                                     } else {
                                         Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+//                                        print("[Jpapi.getAll] category id: \(theObject["id"] as? String ?? "-1"), category name: \(theObject["name"] as? String ?? "-1")")
                                     }
                                 case "packages-":
                                     if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
@@ -343,26 +343,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     break
                                 }
                             }
-                            
-//                            if theEndpoint == "packages" {
-//                                if let id = theObject["id"] as? Int, id != 0, let name = theObject["displayName"] as? String, name != "", let fileName = theObject["fileName"] as? String, fileName != "" {
-//                                        existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name, fileName: fileName))
-//                                }
-//                            } else {
-//                                if whichServer == "source" {
-//                                    if theEndpoint == "categories" {
-//                                        Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
-//                                    } else {
-//                                        JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
-//                                    }
-//                                } else {
-//                                    if theEndpoint == "categories" {
-//                                        Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
-//                                    } else {
-//                                        JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "None"))
-//                                    }
-//                                }
-//                            }
                         }
                         
                         print("[getAll] records (\(theEndpoint)) added: \(returnedRecords.count)")
@@ -514,7 +494,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                    print("[ExistingObjects.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     
-                    if ["patch-software-title-configurations","patchsoftwaretitles","patchmanagement"].contains(theEndpoint) {
+                    if ["patch-software-title-configurations","patchsoftwaretitles"].contains(theEndpoint) {
                         if let recordsArray = responseData as? [[String: Any]] {
 //                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
                             completion(recordsArray)

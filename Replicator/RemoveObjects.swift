@@ -30,20 +30,20 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             Counter.shared.crud[endpointType]!["total"] = endpointCount
         }
         
-        removeMeterQ.maxConcurrentOperationCount = 3
+        removeMeterQ.maxConcurrentOperationCount = 4
         let semaphore = DispatchSemaphore(value: 0)
         
         removeMeterQ.addOperation { [self] in
             lockQueue.async { [self] in
-                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
+//                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
                 removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
-                print("[removeEndpointQueue] added \(endpointType) with id \(endPointID) to removeArray, removeArray.count: \(removeArray.count)")
+//                print("[removeEndpointQueue] added \(endpointType) with id \(endPointID) to removeArray, removeArray.count: \(removeArray.count)")
             }
             var breakQueue = false
             lockQueue.async { [self] in
                 while removeArray.count > 0 {
-                    print("[removeEndpointsQueue] 1 Counter.shared.pendingSend: \(Counter.shared.pendingSend), removeArray.count: \(removeArray.count)")
-                    if Counter.shared.pendingSend < maxConcurrentThreads /*&& removeArray.count > 0*/ {
+//                    print("[removeEndpointsQueue] 1 Counter.shared.pendingSend: \(Counter.shared.pendingSend), removeArray.count: \(removeArray.count)")
+                    if Counter.shared.pendingSend < removeMeterQ.maxConcurrentOperationCount && removeArray.count > 0 {
                         Counter.shared.pendingSend += 1
 //                        updatePendingCounter(caller: #function.short, change: 1)
                         usleep(10)
@@ -58,7 +58,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             } else {
                                 Counter.shared.pendingSend -= 1
 //                                updatePendingCounter(caller: #function.short, change: -1)
-                                print("[removeEndpointsQueue] removed id: \(result)")
                             }
                             semaphore.signal()
                         }
@@ -86,7 +85,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         var removeDestUrl = ""
                 
         if endpointCurrent == 1 {
-            if !setting.migrateDependencies || endpointType == "policies" {
+            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                 updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
 //                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: .green)
             }
@@ -102,11 +101,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         // whether the operation was successful or not, either delete or fail
         var methodResult = "create"
         
-        // counters for completed objects
-//        var totalDeleted   = 0
-//        var totalFailed    = 0
-//        var totalCompleted = 0
-        
         removeObjectQ.maxConcurrentOperationCount = maxConcurrentThreads
         
 //        let semaphore = DispatchSemaphore(value: 0)
@@ -119,7 +113,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         case "smartusergroups", "staticusergroups":
             localEndPointType = "usergroups"
         case "patch-software-title-configurations":
-            localEndPointType = "patchmanagement"
+            localEndPointType = "patch-software-title-configurations"
         default:
             localEndPointType = endpointType
         }
@@ -127,11 +121,11 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
             
             switch localEndPointType {
-            case "patchmanagement":
+            case "patch-software-title-configurations":
                 removeDestUrl = "\(JamfProServer.destination)/api/v2/patch-software-title-configurations/\(endPointID)"
             default:
                 removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n[RemoveEndpoints] [CreateEndpoints] raw removal URL: \(removeDestUrl)") }
+                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] raw removal URL: \(removeDestUrl)") }
                 removeDestUrl = removeDestUrl.urlFix
     //            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                 removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
@@ -159,7 +153,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             
             removeObjectQ.addOperation {
                         
-                DispatchQueue.main.async { [self] in
+                DispatchQueue.main.async {
                     // look to see if we are processing the next endpointType - start
                     if endpointInProgress != endpointType || endpointInProgress == "" {
                         endpointInProgress = endpointType
@@ -194,23 +188,24 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             // remove items from the list as they are removed from the server
                             if UiVar.activeTab == "Selective" {
                                 //                                print("endPointID: \(endPointID)")
-//                                let lineNumber = (sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == endPointID})!
-//                                let objectToRemove = (sourceObjectList_AC.arrangedObjects as! [SelectiveObject])[lineNumber].objectName
                                 
                                 let lineNumber = SourceObjects.list.firstIndex(where: {$0.objectId == endPointID})!
                                 let objectToRemove = SourceObjects.list[lineNumber].objectName
                                 
-                                
+                                DataArray.staticSource.removeAll(where: { $0 == objectToRemove})
 //                                        print("[removeEndpoints] DataArray.staticSource:\(DataArray.staticSource)")
-                                let staticLineNumber = ( endpointType == "policies" ) ? DataArray.staticSource.firstIndex(of: "\(objectToRemove) (\(endPointID))")!:DataArray.staticSource.firstIndex(of: objectToRemove)!
-                                DataArray.staticSource.remove(at: staticLineNumber)
+                                /*
+                                if let staticLineNumber = ( endpointType == "policies" ) ? DataArray.staticSource.firstIndex(of: "\(objectToRemove) (\(endPointID))"):DataArray.staticSource.firstIndex(of: objectToRemove) {
+                                    DataArray.staticSource.remove(at: staticLineNumber)
+                                }
+                                 */
                                 
                                 DispatchQueue.main.async { [self] in
                                     
 //                                    var objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
-//                                    sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex!)
                                     var objectIndex = SourceObjects.list.firstIndex(where: { $0.objectName == objectToRemove })
-                                    updateView(["function": "sourceObjectList_AC.remove", "objectIndex": objectIndex])
+                                    updateView(["function": "sourceObjectList_AC.remove", "objectId": endPointID as Any])
+//                                    updateView(["function": "sourceObjectList_AC.remove", "objectIndex": objectIndex as Any])
 
                                     objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
                                     staticSourceObjectList.remove(at: objectIndex!)
@@ -225,9 +220,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             methodResult = "fail"
                             updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
 //                            labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            if !setting.migrateDependencies || endpointType == "policies" {
+                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 PutLevelIndicator.shared.indicatorColor[endpointType]  = .systemYellow
-                                updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType]])
+                                updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                             }
                             UiVar.changeColor  = false
                             WriteToLog.shared.message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (id: \(endPointID)), statusCode: \(httpResponse.statusCode)")
@@ -248,8 +243,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         }
                         
                         // update global counters
-                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
-                        Counter.shared.crud[endpointType]?[methodResult] = localTmp + 1
+//                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
+                        Counter.shared.crud[endpointType]?[methodResult]! += 1
                         if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
                             if summaryArray.firstIndex(of: endpointName) == nil {
                                 summaryArray.append(endpointName)

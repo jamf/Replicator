@@ -10,10 +10,10 @@ import Cocoa
 import Foundation
 
 public let userDefaults = UserDefaults.standard
-public var maxConcurrentThreads = 2
+public var maxConcurrentThreads = 4
 public var sourceDestListSize   = 20
 //public var pendingGetCount      = 0
-public var pageSize             = 500
+public var pageSize             = 1000
 public let httpSuccess          = 200...299
 public let fm                   = FileManager()
 public var didRun               = false

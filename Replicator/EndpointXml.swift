@@ -71,8 +71,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
             localEndPointType = "jamfusers"
         case "accounts/groupid":
             localEndPointType = "jamfgroups"
-        case "patch-software-title-configurations":
-            localEndPointType = "patchmanagement"
+//        case "patch-software-title-configurations":
+//            localEndPointType = "patch-software-title-configurations"
         default:
             localEndPointType = endpoint
         }
@@ -133,7 +133,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         }
                     }
                 }   // endpointsIdQ - end
-        case "patchmanagement":
+        case "patch-software-title-configurations":
             var sourceObject = PatchTitleConfigurations.source.first(where: { $0.id == endpointID })
             print("[getById] displayName: \(sourceObject?.displayName ?? "unknown")")
             completion(sourceObject?.displayName ?? "unknown")
@@ -174,13 +174,13 @@ class EndpointXml: NSObject, URLSessionDelegate {
 //                        print("[getById] export.backupMode: \(export.backupMode)")
                         // save source JSON - start
                         if export.saveRawXml {
-                            DispatchQueue.main.async { [self] in
+                            DispatchQueue.main.async {
 //                                let exportRawJson = (export.rawXmlScope) ? rmJsonData(rawJSON: jsonString, theTag: ""):rmJsonData(rawJSON: jsonString, theTag: "scope")
                                 //                                    print("exportRawJson: \(exportRawJson)")
                                 WriteToLog.shared.message(stringOfText: "[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
                                 let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
 //                                exportItems(node: endpoint, objectString: jsonString, rawName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
-                                ExportItem.shared.export(node: "patchmanagement", object: instance, theName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
+                                ExportItem.shared.export(node: "patch-software-title-configurations", object: instance, theName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
                             }
                         }
                         // save source JSON - end

@@ -40,8 +40,18 @@
 		B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */; };
 		B5E1912F21AAEFD400A1A9CA /* export.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912E21AAEFD400A1A9CA /* export.png */; };
 		B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DAD27434B890044C321 /* Jpapi.swift */; };
+		CE310A612D10BACD007C2C6F /* Cleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A602D10BACD007C2C6F /* Cleanup.swift */; };
+		CE310A632D10BAD9007C2C6F /* CreateEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */; };
+		CE310A652D10BAEC007C2C6F /* EndpointXml.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A642D10BAEC007C2C6F /* EndpointXml.swift */; };
+		CE310A672D10BAFC007C2C6F /* ExistingObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */; };
+		CE310A692D10BB49007C2C6F /* ExportItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A682D10BB49007C2C6F /* ExportItem.swift */; };
+		CE310A6B2D10BB87007C2C6F /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */; };
+		CE310A6D2D10BB95007C2C6F /* ObjectDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */; };
+		CE310A6F2D10BBB5007C2C6F /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6E2D10BBB5007C2C6F /* Package.swift */; };
+		CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A702D10BBE6007C2C6F /* RemoveData.swift */; };
+		CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */; };
+		CE310A752D10BC3A007C2C6F /* IconDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A742D10BC3A007C2C6F /* IconDelegate.swift */; };
 		CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */; };
-		CEDB6A112CDBD2B300171FB0 /* ExportItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */; };
 		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
 		CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */; };
 		CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A2E2CB953BE002AB294 /* Headless.swift */; };
@@ -88,9 +98,19 @@
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
 		B5FD9DAD27434B890044C321 /* Jpapi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jpapi.swift; sourceTree = "<group>"; };
+		CE310A602D10BACD007C2C6F /* Cleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cleanup.swift; sourceTree = "<group>"; };
+		CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEndpoints.swift; sourceTree = "<group>"; };
+		CE310A642D10BAEC007C2C6F /* EndpointXml.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointXml.swift; sourceTree = "<group>"; };
+		CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingObjects.swift; sourceTree = "<group>"; };
+		CE310A682D10BB49007C2C6F /* ExportItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportItem.swift; sourceTree = "<group>"; };
+		CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
+		CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDelegate.swift; sourceTree = "<group>"; };
+		CE310A6E2D10BBB5007C2C6F /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		CE310A702D10BBE6007C2C6F /* RemoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveData.swift; sourceTree = "<group>"; };
+		CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveObjects.swift; sourceTree = "<group>"; };
+		CE310A742D10BC3A007C2C6F /* IconDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDelegate.swift; sourceTree = "<group>"; };
 		CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
 		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
-		CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportItems.swift; sourceTree = "<group>"; };
 		CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDelegate.swift; sourceTree = "<group>"; };
 		CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchManagementApi.swift; sourceTree = "<group>"; };
 		CEE65A2E2CB953BE002AB294 /* Headless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headless.swift; sourceTree = "<group>"; };
@@ -132,9 +152,19 @@
 		9BC01C5E1DFB0C07007E634E /* Replicator */ = {
 			isa = PBXGroup;
 			children = (
-				CEDB6A102CDBD2AB00171FB0 /* ExportItems.swift */,
+				CE310A602D10BACD007C2C6F /* Cleanup.swift */,
+				CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */,
+				CE310A642D10BAEC007C2C6F /* EndpointXml.swift */,
+				CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */,
+				CE310A682D10BB49007C2C6F /* ExportItem.swift */,
+				CE310A742D10BC3A007C2C6F /* IconDelegate.swift */,
+				CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */,
+				CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */,
+				CE310A6E2D10BBB5007C2C6F /* Package.swift */,
 				CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */,
 				CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */,
+				CE310A702D10BBE6007C2C6F /* RemoveData.swift */,
+				CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */,
 				CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */,
 				CEE65A302CB95521002AB294 /* Utilities.swift */,
 				CEE65A2E2CB953BE002AB294 /* Headless.swift */,
@@ -338,8 +368,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEDB6A112CDBD2B300171FB0 /* ExportItems.swift in Sources */,
 				B5165E1620E580A00086E31D /* XmlDelegate.swift in Sources */,
+				CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */,
+				CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
 				CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */,
 				CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */,
@@ -347,13 +378,17 @@
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B51742DA28FB4F2B0058ED55 /* CustomSeparator.swift in Sources */,
+				CE310A672D10BAFC007C2C6F /* ExistingObjects.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
 				B54154FF2BD8597700084439 /* Package.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
 				B53ECDF82391F8FB005EE6E5 /* Globals.swift in Sources */,
+				CE310A692D10BB49007C2C6F /* ExportItem.swift in Sources */,
+				CE310A752D10BC3A007C2C6F /* IconDelegate.swift in Sources */,
 				B53ECDFC2394474B005EE6E5 /* Json.swift in Sources */,
 				B54509412904D96500094739 /* Awake.swift in Sources */,
+				CE310A612D10BACD007C2C6F /* Cleanup.swift in Sources */,
 				9BC01C601DFB0C07007E634E /* AppDelegate.swift in Sources */,
 				B56CA91828E88DE200236A8A /* SourceDestVC.swift in Sources */,
 				B5B4FAFC1FF0B21C0007BD34 /* SummaryViewController.swift in Sources */,
@@ -361,11 +396,16 @@
 				B5E1912921AAA8EC00A1A9CA /* PrefsWindowController.swift in Sources */,
 				CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */,
 				B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */,
+				CE310A652D10BAEC007C2C6F /* EndpointXml.swift in Sources */,
+				CE310A632D10BAD9007C2C6F /* CreateEndpoints.swift in Sources */,
 				CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
+				CE310A6D2D10BB95007C2C6F /* ObjectDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */,
 				CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */,
+				CE310A6F2D10BBB5007C2C6F /* Package.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
+				CE310A6B2D10BB87007C2C6F /* JsonObjects.swift in Sources */,
 				CEE65A312CB95527002AB294 /* Utilities.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
@@ -523,7 +563,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = "8.0.0-a1";
+				MARKETING_VERSION = "8.0.0-b1";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -549,7 +589,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = "8.0.0-a1";
+				MARKETING_VERSION = "8.0.0-b1";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

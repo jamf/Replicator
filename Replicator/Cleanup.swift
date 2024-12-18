@@ -30,16 +30,34 @@ class Cleanup: NSObject {
         
         print("[cleanJSON - \(endpoint)] JSONData: \(JSONData)")
         switch endpoint {
-        case "patchmanagement":
+        case "patch-software-title-configurations":
             JSONData["id"] = nil
+            print("[cleanJSON - patchmanagement] JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
             print("[cleanJSON - patchmanagement] JSONData[categoryName]: \(JSONData["categoryName"] ?? "")")
             print("[cleanJSON - patchmanagement] Categories.destination.count: \(Categories.destination.count)")
             
             print("[cleanJSON - patchmanagement] JSONData[patchSourceName]: \(JSONData["patchSourceName"] ?? "")")
+            // adjust ids to destination server
+            for c in Categories.destination {
+                print("[Cleanup - patchmanagement] id: \(c.id), name: \(c.name), source categoryName: \(JSONData["categoryName"] ?? "")")
+                if c.name == JSONData["categoryName"] as! String {
+                    print("[cleanJSON - patchmanagement]     match categoryName: \(c.name), id: \(c.id)")
+                }
+            }
+            if let categoryName = JSONData["categoryName"] as? String {
+                print("[cleanJSON - patchmanagement] categoryName: \(categoryName)")
+                JSONData["categoryId"] = Categories.destination.first(where: { $0.name == categoryName })?.id
+            } else {
+                JSONData["categoryId"] = "-1"
+            }
+            print("[cleanJSON - patchmanagement] destination JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
             
             JSONData["categoryId"] = Categories.destination.first(where: { $0.name == JSONData["categoryName"] as? String })?.id ?? "-1"
             JSONData["categoryName"] = nil
+            print("[cleanJSON - patchmanagement] destination JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
+            print("[cleanJSON - patchmanagement] destination JSONData[siteId]: \(JSONData["siteId"] ?? "")")
             JSONData["siteId"] = JamfProSites.destination.first(where: { $0.name == JSONData["siteName"] as? String })?.id ?? "-1"
+            print("[cleanJSON - patchmanagement] destination JSONData[siteId]: \(JSONData["siteId"] ?? "")")
             JSONData["siteName"] = nil
             let patchPackages = JSONData["packages"] as? [[String: Any]]
             var updatedPackages: [[String: String]] = []
@@ -206,8 +224,8 @@ class Cleanup: NSObject {
                         let profileName = getName(endpoint: "osxconfigurationprofiles", objectXML: PostXML)
                         knownEndpoint = false
 
-                        let localTmp = (Counter.shared.crud[endpoint]?["fail"])!
-                        Counter.shared.crud[endpoint]?["fail"] = localTmp + 1
+//                        let localTmp = (Counter.shared.crud[endpoint]?["fail"])!
+                        Counter.shared.crud[endpoint]?["fail"]! += 1 /*localTmp + 1*/
                         if var summaryArray = Counter.shared.summary[endpoint]?["fail"] {
                             if summaryArray.contains(profileName) == false {
                                 summaryArray.append(profileName)
@@ -488,7 +506,7 @@ class Cleanup: NSObject {
             for xmlTag in ["hash_type", "hash_value"] {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
-            //print("\nXML: \(PostXML)")
+//            print("\nXML: \(PostXML)\n")
             
         case "policies", "macapplications", "mobiledeviceapplications":
             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing \(endpoint) - verbose") }

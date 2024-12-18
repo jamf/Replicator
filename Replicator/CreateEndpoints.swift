@@ -272,7 +272,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                         // look to see if we are processing the next endpointType - start
                         if endpointInProgress != endpointType || endpointInProgress == "" {
-                            WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Migrating \(endpointType)")
+                            WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Replicating \(endpointType)")
                             endpointInProgress = endpointType
                             Counter.shared.postSuccess = 0
                         }   // look to see if we are processing the next localEndPointType - end
@@ -296,7 +296,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
-                                if !setting.migrateDependencies || endpointType == "policies" {
+                                if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
                                 }
                             } else if !retry {
@@ -310,18 +310,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             if let _ = Counter.shared.progressArray["\(endpointType)"] {
                                 Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
                             }
-                            
-                            /*
-                            print("[\(#function.short)] dependency.isRunning \(dependency.isRunning)")
-                            if localEndPointType != "policies" && dependency.isRunning {
-                                print("dependency \(dependencyParentId)")
-                                if counter.dependencyMigrated[dependencyParentId] == nil {
-                                    counter.dependencyMigrated[dependencyParentId] = 0
-                                }
-                                counter.dependencyMigrated[dependencyParentId]! += 1
-                            }
-                             */
-                            
+                            print("[CreateEndpoints.capi] crud counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
                             Counter.shared.crud[endpointType]?["\(apiAction)"]! += 1
                             
                             if var summaryArray = Counter.shared.summary[endpointType]?["\(apiAction)"] {
@@ -347,7 +336,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         } else {
                             // create failed
                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-                            if !setting.migrateDependencies || endpointType == "policies" {
+                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
                             }
                             
@@ -489,8 +478,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                         
                         if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
-//                                print("[CreateEndpoints] counters: \(counters)")
-                            if !setting.migrateDependencies || endpointType == "policies" {
+
+                            print("[CreateEndpoints] endpointType: \(endpointType)")
+                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
 //                                        putStatusUpdate2(endpoint: endpointType, total: Counter.shared.crud[endpointType]!["total"]!)
                             }
@@ -503,7 +493,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                             } else if Summary.totalFailed == endpointCount {
                                 updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                if !setting.migrateDependencies || endpointType == "policies" {
+                                if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
                                     updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType]])
 //                                            put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]
@@ -540,7 +530,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     
                     if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
 //                                print("[CreateEndpoints] counters: \(counters)")
-                        if !setting.migrateDependencies || endpointType == "policies" {
+                        if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
 //                                    putStatusUpdate2(endpoint: endpointType, total: Counter.shared.crud[endpointType]!["total"]!)
                         }
@@ -553,9 +543,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                         } else if Summary.totalFailed == endpointCount {
                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                            if !setting.migrateDependencies || endpointType == "policies" {
+                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType]])
+                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                             }
                         }
                     }
@@ -566,7 +556,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)") }
                     
                     if endpointCurrent > 0 {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
+                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
                     }
 //                            semaphore.signal()
                     if error != nil {
@@ -609,7 +599,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         var destinationEpId = destEpId
         var apiAction       = action
-        print("[createEndpoints2] destinationEpId: \(destinationEpId) action: \(action)")
+        print("[createEndpoints2] endpointType: \(endpointType), destinationEpId: \(destinationEpId) action: \(action)")
         
         // counterts for completed endpoints
         if endpointCurrent == 1 {
@@ -699,7 +689,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     }
                 }
                 
-                if endpointType == "patchmanagement" {
+                if endpointType == "patch-software-title-configurations" {
                     PatchManagementApi.shared.createUpdate(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, sourceEpId: sourceEpId, destEpId: destinationEpId, token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
                         (jpapiResonse: [String:Any]) in
     //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
@@ -714,7 +704,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             DispatchQueue.main.async {
                                 if setting.fullGUI && apiAction.lowercased() != "skip" {
                                     updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
                                     }
                                 }
@@ -725,7 +715,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
-                                if !setting.migrateDependencies || endpointType == "policies" {
+                                if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
 //                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
                                 }
@@ -788,10 +778,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                                 
                                 // update counters
+//                                print("[CreateEndpoints.jpapi] endpointType: \(endpointType)")
                                 if Summary.totalCompleted > 0 {
-                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                                        putStatusUpdate2(endpoint: endpointType, total: Counter.shared.crud[endpointType]!["total"]!)
                                     }
                                 }
                                 
@@ -800,12 +790,11 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
                                         updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                                     } else if Summary.totalFailed == endpointCount {
-                                        DispatchQueue.main.async {
+                                        DispatchQueue.main.async { [self] in
                                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                            
-                                            if !setting.migrateDependencies || endpointType == "policies" {
+                                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                                 PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType]])
+                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                                             }
                                         }
                                         
@@ -848,10 +837,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         var apiMethod = apiAction
                         if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
                             apiMethod = "fail"
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { [self] in
                                 if setting.fullGUI && apiAction.lowercased() != "skip" {
                                     updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
 //                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.systemYellow)
                                     }
@@ -863,7 +852,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
-                                if !setting.migrateDependencies || endpointType == "policies" {
+                                if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
 //                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
                                 }
@@ -938,7 +927,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 
                                 // update counters
                                 if Summary.totalCompleted > 0 {
-                                    if !setting.migrateDependencies || endpointType == "policies" {
+                                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
 //                                        putStatusUpdate2(endpoint: endpointType, total: Counter.shared.crud[endpointType]!["total"]!)
                                     }
@@ -949,12 +938,12 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
                                         updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                                     } else if Summary.totalFailed == endpointCount {
-                                        DispatchQueue.main.async {
+                                        DispatchQueue.main.async { [self] in
                                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
                                             
-                                            if !setting.migrateDependencies || endpointType == "policies" {
+                                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                                 PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType]])
+                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                                             }
                                         }
                                         
