@@ -17,7 +17,7 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
     static let shared    = ObjectDelegate()
  
     func getAll(whichServer: String, endpoint: String, completion: @escaping (_ result: [Any]) -> Void) {
-        
+        print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint))")
         if Counter.shared.crud[endpoint] == nil {
             Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
             Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]
@@ -27,24 +27,22 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
         case "packages":
             duplicatePackages = false
             duplicatePackagesDict.removeAll()
-            Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: endpoint, whichPage: 0) {
+            Jpapi.shared.getAllDelegate(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint, whichPage: 0) {
                 result in
-                
                 completion(result)
             }
-        case "patch-software-title-configurations", "patchmanagement":
-            Jpapi.shared.get(whichServer: whichServer, theEndpoint: endpoint) {
+        case "patch-software-title-configurations":
+            Jpapi.shared.get(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint) {
                 result in
                 completion(result as [Any])
             }
         default:
-            Json.shared.getRecord(whichServer: whichServer, base64Creds: "", theEndpoint: endpoint) {
+            Json.shared.getRecord(whichServer: (WipeData.state.on ? "dest":whichServer), base64Creds: "", theEndpoint: endpoint) {
                 (result: Any) in
 //                print("[ObjectDelegate.getAll] default - \(endpoint): \(result)")
                 completion([result])
             }
         }
     }
-    
 }
 

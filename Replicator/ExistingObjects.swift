@@ -22,7 +22,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
         existingObjectsQ.maxConcurrentOperationCount = 2
         // query destination server
         if skipLookup {
-            completion(("skipping lookup","skipping lookup"))
+            completion(("skipping lookup",theDestEndpoint))
             return
         }
         if pref.stopMigration {
@@ -73,8 +73,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                 existingEndpointNode = "mobiledevicegroups"
             case "jamfusers", "jamfgroups":
                 existingEndpointNode = "accounts"
-            case "patchmanagement":
-                existingEndpointNode = "patch-software-title-configurations"
+//            case "patch-software-title-configurations":
+//                existingEndpointNode = "patch-software-title-configurations"
             default:
                 existingEndpointNode = destEndpoint
             }
@@ -169,34 +169,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                         URLCache.shared.removeAllCachedResponses()
                         ExistingEndpoints.shared.waiting = true
                         
-//                        existingEndpointNode = theDestEndpoint  //endpointDependencyArray[ExistingEndpoints.shared.completed]   // endpoint to look up
-                
-        /*
-                        switch existingEndpointNode {
-                        case "patch-software-title-configurations":
-                            existingDestUrl = existingDestUrl.appending("/api/v2/\(existingEndpointNode)").urlFix
-                        default:
-                            existingDestUrl = existingDestUrl.appending("/JSSResource/\(existingEndpointNode)").urlFix
-                        }
-                        
-                        print("[\(#function)] \(#line) - existingDestUrl: \(existingDestUrl)")
-                        
-                        let destEncodedURL = URL(string: existingDestUrl)
-                        let destRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
-                        
-                        destRequest.httpMethod = "GET"
-                        let destConf = URLSessionConfiguration.default
-                        
-                        destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-                        
-                        // sticky session
-                        //                        print("[ExistingObjects.capi] JamfProServer.sessionCookie.count: \(JamfProServer.sessionCookie.count)")
-                        //                        print("[ExistingObjects.capi]       JamfProServer.stickySession: \(JamfProServer.stickySession)")
-                        if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
-                            //                            print("[ExistingObjects.capi] sticky session for \(JamfProServer.destination)")
-                            URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: JamfProServer.destination), mainDocumentURL: URL(string: JamfProServer.destination))
-                        }
-                 */
                         print("[ExistingObjects.capi] line: \(#line) get all \(existingEndpointNode)")
                         ObjectDelegate.shared.getAll(whichServer: "dest", endpoint: existingEndpointNode) { [self]
                             (result: [Any]) in
@@ -248,7 +220,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                     if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] Found \(PatchTitleConfigurations.destination.count) patch configurations.") }
                                     
                                     for patchObject in PatchTitleConfigurations.destination as [PatchSoftwareTitleConfiguration] {
-                                        //                                                    let displayName = patchObject.displayName
+                                                                                            let displayName = patchObject.displayName
                                         let softwareTitleName = patchObject.softwareTitleName
                                         //                                                    if patchObject.softwareTitlePublisher.range(of: "(Deprecated Definition)") != nil {
                                         //                                                        displayName.append(" (Deprecated Definition)")
@@ -282,6 +254,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                         ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
                                             
                                         if !pref.stopMigration {
+                                            print("[ExistingObjects.capi] \(destEndpoint) current endpoints: \(currentEPs)")
                                             currentEPDict["packages"] = currentEPs
                                             
                                             if endpointParent != "policies" {

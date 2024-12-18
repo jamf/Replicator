@@ -26,7 +26,7 @@ class Json: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
         
         switch endpointBase {
-        case "patchmanagement":
+        case "patch-software-title-configurations":
             let theRecord = (whichServer == "source") ? PatchTitleConfigurations.source.filter({ $0.id == endpointId }):PatchTitleConfigurations.destination.filter({ $0.id == endpointId })
             if theRecord.count == 1 {
                 print("[getRecord] [Json.getRecord] theRecord displayName \(theRecord[0].displayName)")

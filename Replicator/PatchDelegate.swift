@@ -38,13 +38,14 @@ class PatchDelegate: NSObject {
                         for i in 0..<PatchTitleConfigurations.source.count {
                             PatchTitleConfigurations.source[i].siteName = JamfProSites.source.first(where: {$0.id == PatchTitleConfigurations.source[i].siteId})?.name ?? "NONE"
                             PatchTitleConfigurations.source[i].categoryName = Categories.source.first(where: {$0.id == PatchTitleConfigurations.source[i].categoryId})?.name ?? ""
+                            
                         }
                     } else {
                         if let destSites = try? JSONDecoder().decode([Site].self, from: jsonData) {
                             JamfProSites.destination = destSites    // try JSONDecoder().decode([Site].self, from: jsonData)
                             for i in 0..<PatchTitleConfigurations.destination.count {
                                 PatchTitleConfigurations.destination[i].siteName = JamfProSites.destination.first(where: {$0.id == PatchTitleConfigurations.destination[i].siteId})?.name ?? "NONE"
-                                PatchTitleConfigurations.destination[i].categoryName = Categories.source.first(where: {$0.id == PatchTitleConfigurations.destination[i].categoryId})?.name ?? ""
+                                PatchTitleConfigurations.destination[i].categoryName = Categories.destination.first(where: {$0.id == PatchTitleConfigurations.destination[i].categoryId})?.name ?? ""
                             }
                         }
                     }
