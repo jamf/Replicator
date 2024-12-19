@@ -85,7 +85,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         var removeDestUrl = ""
                 
         if endpointCurrent == 1 {
-            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+            if (!setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                 updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
 //                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: .green)
             }
@@ -220,7 +220,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             methodResult = "fail"
                             updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
 //                            labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                            if (!setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 PutLevelIndicator.shared.indicatorColor[endpointType]  = .systemYellow
                                 updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                             }
@@ -242,36 +242,38 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] ---------- response ----------\n") }
                         }
                         
-                        // update global counters
-//                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
-                        Counter.shared.crud[endpointType]?[methodResult]! += 1
-                        if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
-                            if summaryArray.firstIndex(of: endpointName) == nil {
-                                summaryArray.append(endpointName)
-                                Counter.shared.summary[endpointType]?[methodResult] = summaryArray
-                            }
-                        }
                         
-                        Summary.totalDeleted   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                        Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
-                        
-                        putStatusLockQueue.async { [self] in
-//                        DispatchQueue.main.async { [self] in
-                            if Summary.totalCompleted > 0 {
-                                print("[\(#function)] total: \(Counter.shared.crud[endpointType]!["total"]!)")
-                                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                                putStatusUpdate2(endpoint: endpointType, total: Counter.shared.crud[endpointType]!["total"]!)
+                        if endPointID != "-1" {
+                            // update global counters
+                            //                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
+                            Counter.shared.crud[endpointType]?[methodResult]! += 1
+                            if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
+                                if summaryArray.firstIndex(of: endpointName) == nil {
+                                    summaryArray.append(endpointName)
+                                    Counter.shared.summary[endpointType]?[methodResult] = summaryArray
+                                }
                             }
                             
-                            if Summary.totalDeleted == endpointCount && UiVar.changeColor  {
-                                updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-//                                labelColor(endpoint: endpointType, theColor: greenText)
-                            } else if Summary.totalFailed == endpointCount {
-                                updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-//                                labelColor(endpoint: endpointType, theColor: redText)
-                                updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemRed])
-//                                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
+                            Summary.totalDeleted   = Counter.shared.crud[endpointType]?["create"] ?? 0
+                            Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+                            Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
+                            
+                            putStatusLockQueue.async { [self] in
+                                //                        DispatchQueue.main.async { [self] in
+                                if Summary.totalCompleted > 0 {
+                                    print("[\(#function)] total: \(Counter.shared.crud[endpointType]!["total"]!)")
+                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                }
+                                
+                                if Summary.totalDeleted == endpointCount && UiVar.changeColor  {
+                                    updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
+                                    //                                labelColor(endpoint: endpointType, theColor: greenText)
+                                } else if Summary.totalFailed == endpointCount {
+                                    updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
+                                    //                                labelColor(endpoint: endpointType, theColor: redText)
+                                    updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemRed])
+                                    //                                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
+                                }
                             }
                         }
                     }

@@ -200,12 +200,16 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
 //                print("[PatchManagementApi.createUpdate] httpResponse: \(httpResponse)")
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let method = createUpdateMethod.lowercased() == "patch" ? "update" : "create"
+                    
                     Counter.shared.crud[endpoint]?[method]! += 1
+                    Summary.totalCreated   = Counter.shared.crud[endpoint]?["create"] ?? 0
+                    Summary.totalUpdated   = Counter.shared.crud[endpoint]?["update"] ?? 0
+                    Summary.totalFailed    = Counter.shared.crud[endpoint]?["fail"] ?? 0
+                    Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                    
                     if endpoint == "patch-software-title-configurations" {
                         if Summary.totalCompleted > 0 {
-    //                        if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
-    //                        }
                         }
                         
                         if let stringResponse = String(data: data!, encoding: .utf8) {
