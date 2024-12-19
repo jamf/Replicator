@@ -4,6 +4,7 @@
  ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/JamfMigrator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/JamfMigrator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/JamfMigrator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
 
 Download the v8.0.0-b1 beta of [Replicator](https://github.com/jamf/Replicator/releases/tag/v8.0.0-b1)</br>
+![GitHub all releases](https://img.shields.io/github/downloads/jamf/Replicator/v8.0.0-b1/total)</br>
 Download the current release: [Jamf Migrator](https://github.com/jamf/Replicator/releases/latest/download/jamf-migrator.zip)
 
 A tool to migrate data granularly between Jamf Pro servers
