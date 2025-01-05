@@ -1,6 +1,6 @@
 //
 //  Jpapi.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 12/17/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -313,19 +313,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     } else {
                                         Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
 //                                        print("[Jpapi.getAll] category id: \(theObject["id"] as? String ?? "-1"), category name: \(theObject["name"] as? String ?? "-1")")
-                                    }
-                                case "packages-":
-                                    if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
-                                        //                                    print("[getAll] add destination package id: \(id), packageName: \(fileName)")
-                                        if whichServer == "source" {
-                                            PatchPackages.source.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
-                                        } else {
-                                            PatchPackages.destination.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
-                                        }
-                                    } else {
-                                        print("[getAll] failed to add package id: \(String(describing: theObject["id"] as? Int)), packageName: \(theObject["packageName"] as? String ?? "unknown"), fileName: \(theObject["fileName"] as? String ?? "unknown")")
                                     }
                                 case "policy-details":
                                     if let id = theObject["id"] as? String, let name = theObject["name"] as? String, let enabled = theObject["enabled"] as? Bool, let targetPatchVersion = theObject["targetPatchVersion"] as? String, let deploymentMethod = theObject["deploymentMethod"] as? String, let softwareTitleId = theObject["softwareTitleId"] as? String, let softwareTitleConfigurationId = theObject["softwareTitleConfigurationId"] as? String, let killAppsDelayMinutes = theObject["killAppsDelayMinutes"] as? Int, let killAppsMessage = theObject["killAppsMessage"] as? String, let downgrade = theObject["downgrade"] as? Bool, let patchUnknownVersion = theObject["patchUnknownVersion"] as? Bool, let notificationHeader = theObject["notificationHeader"] as? String, let selfServiceEnforceDeadline = theObject["selfServiceEnforceDeadline"] as? Bool, let selfServiceDeadline = theObject["selfServiceDeadline"] as? Int, let installButtonText = theObject["installButtonText"] as? String, let selfServiceDescription = theObject["selfServiceDescription"] as? String, let iconId = theObject["iconId"] as? String, let reminderFrequency = theObject["reminderFrequency"] as? Int, let reminderEnabled = theObject["reminderEnabled"] as? Bool {

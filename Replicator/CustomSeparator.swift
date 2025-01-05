@@ -1,6 +1,6 @@
 //
 //  CustomSeparator.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 10/15/22.
 //  Copyright 2024 Jamf. All rights reserved.

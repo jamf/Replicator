@@ -1,6 +1,6 @@
 //
 //  Credentials.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 9/20/19.
 //  Copyright 2024 Jamf. All rights reserved.

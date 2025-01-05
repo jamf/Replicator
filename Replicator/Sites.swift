@@ -1,6 +1,6 @@
 //
 //  Sites.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 8/21/19.
 //  Copyright 2024 Jamf. All rights reserved.

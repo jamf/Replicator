@@ -1,6 +1,6 @@
 //
 //  PackagesDelegate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 12/13/21.
 //  Copyright 2024 Jamf. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by lnh on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -2226,8 +2226,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
-                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Transporter/")
-                    export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Replicator/")
+                    export.saveLocation = (NSHomeDirectory() + "/Downloads/Replicator/")
                     userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 }
             }   // if export.saveRawXml - end
@@ -4608,7 +4608,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // Create folder to store objectString files if needed - start
         baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseFolder == "" {
-            baseFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            baseFolder = (NSHomeDirectory() + "/Downloads/Replicator/")
         } else {
             baseFolder = baseFolder.pathToString
         }
