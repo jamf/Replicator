@@ -1920,7 +1920,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                        print("build list of objects selected")
                         
                         // clear targetSelectiveObjectList - needed to handle switching tabs
-//                        if !setting.migrateDependencies || ["policies", "patch-software-title-configurations"].contains(resultEndpoint) /*|| resultEndpoint == "policies"*/ {
                             targetSelectiveObjectList.removeAll()
                             
                             DispatchQueue.main.async { [self] in
@@ -1949,7 +1948,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 print("[startMigrating] call selectiveMigrationDelegate for selectedEndpoint: \(selectedEndpoint)")
                                 selectiveMigrationDelegate(objectIndex: 0, selectedEndpoint: selectedEndpoint)
                             }
-//                        }
                     }
                 }   //  if (UiVar.goSender == "goButton"... - else - end
             // **************************************** selective migration - end ****************************************
@@ -4805,7 +4803,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
                 if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
 //                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         get_name_field.stringValue    = adjEndpoint
                         get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
 //                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
@@ -4852,7 +4850,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
                 if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
 //                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         get_name_field.stringValue    = adjEndpoint
                         get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
 //                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
@@ -4915,7 +4913,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 print("[putStatusUpdate2] \(adjEndpoint) \(newPutTotal) of \(totalCount)\n")
                 if let currentPutCount = putCounters[adjEndpoint]?["put"], currentPutCount > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         put_name_field.stringValue    = adjEndpoint
                         put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
                         putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"

@@ -286,7 +286,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     Packages.destination.append(contentsOf: somePackages)
                                     print("getAll: somePackages destination count: \(Packages.destination.count)")
                                     for thePackage in somePackages {
-                                        if let id = thePackage.id, let packageName = thePackage.packageName, let fileName = thePackage.fileName {
+                                        if let id = thePackage.id, let idNum = Int(id), let packageName = thePackage.packageName, let fileName = thePackage.fileName {
                                             // looking for duplicates
                                             if duplicatePackagesDict[fileName] == nil {
                                                 duplicatePackagesDict[fileName] = [packageName]
@@ -295,6 +295,9 @@ class Jpapi: NSObject, URLSessionDelegate {
                                                 duplicatePackagesDict[fileName]!.append(packageName)
                                             }
                                             PatchPackages.destination.append(PatchPackage(packageId: id, version: "", displayName: packageName, packageName: fileName))
+                                            if WipeData.state.on {
+                                                existingObjects.append(ExistingObject(type: theEndpoint, id: idNum, name: packageName, fileName: fileName))
+                                            }
                                         }
                                     }
                                 }
