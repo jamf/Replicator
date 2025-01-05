@@ -1,6 +1,6 @@
 //
 //  Alert.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by lnh on 12/22/21.
 //  Copyright 2024 Jamf. All rights reserved.

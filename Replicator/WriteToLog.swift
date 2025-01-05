@@ -1,6 +1,6 @@
 //
 //  WriteToLog.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 2/21/19.
 //  Copyright 2024 Jamf. All rights reserved.

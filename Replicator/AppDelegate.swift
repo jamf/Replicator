@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie N. Helou on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -192,7 +192,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
         if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
-            export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            export.saveLocation = (NSHomeDirectory() + "/Downloads/Replicator/")
             userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString

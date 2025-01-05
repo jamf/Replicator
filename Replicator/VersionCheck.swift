@@ -1,6 +1,6 @@
 //
 //  CheckForUpdate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 6/9/18.
 //  Copyright 2024 Jamf. All rights reserved.

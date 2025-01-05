@@ -1,6 +1,6 @@
 //
 //  Globals.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 11/29/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -268,10 +268,10 @@ Examples:
     /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -objects samrtcomputergroups,staticcomputergroups,osxconfigurationprofles -sticky
 
     Migrate all policies, scripts, and packages from a folder to a server, without (policy) scope:
-    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects policies,scripts,packages -scope false
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Replicator/raw" -destination prod.jamfpro.server -objects policies,scripts,packages -scope false
 
     Migrate all objects from a folder to a server:
-    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Jamf Transporter/raw" -destination prod.jamfpro.server -objects allobjects
+    /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source "/Users/admin/Downloads/Replicator/raw" -destination prod.jamfpro.server -objects allobjects
 
     Migrate buildings using an API client for the source server and username/password for the destination server:
     /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings

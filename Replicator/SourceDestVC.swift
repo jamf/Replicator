@@ -1,6 +1,6 @@
 //
 //  SourceDestVC.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by lnh on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -959,7 +959,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         sleep(1)
         
         if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Transporter/", forKey: "saveLocation")
+            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Replicator/", forKey: "saveLocation")
             userDefaults.synchronize()
         }
         

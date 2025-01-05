@@ -1,6 +1,6 @@
 //
 //  HelpViewController.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 7/19/17.
 //  Copyright 2024 Jamf. All rights reserved.
