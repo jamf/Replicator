@@ -6366,7 +6366,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let appVersion = AppInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog.shared.message(stringOfText: "\(AppInfo.name) Version: \(appVersion) Build: \(appBuild )")
+        WriteToLog.shared.message(stringOfText: "Running \(AppInfo.name) v\(appVersion) build: \(appBuild )")
         
         if !setting.fullGUI {
             WriteToLog.shared.message(stringOfText: "Running silently")
