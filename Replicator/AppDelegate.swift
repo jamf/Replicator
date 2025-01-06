@@ -57,15 +57,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // read command line arguments - start
         var numberOfArgs = 0
-        var startPos     = 1
+//        var startPos     = 1
         // read commandline args
         numberOfArgs = CommandLine.arguments.count
         print("all arguments: \(CommandLine.arguments)")
-        if CommandLine.arguments.contains("-debug") {
-            numberOfArgs -= 1
-            startPos+=1
+//        if CommandLine.arguments.contains("-debug") {
+//            numberOfArgs -= 1
+//            startPos+=1
 //            LogLevel.debug = true
-        }
+//        }
         var index = 1
         while index < numberOfArgs {
             print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")

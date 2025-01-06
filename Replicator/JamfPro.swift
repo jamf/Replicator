@@ -13,14 +13,13 @@ import AppKit
 class JamfPro: NSObject, URLSessionDelegate {
     
     static let shared = JamfPro()
-    private override init() { }
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
             
     fileprivate func renewToken(renew: Bool, whichServer: String, baseUrl: String, base64creds: String) {
         if !migrationComplete.isDone && renew && JamfProServer.authType[whichServer] == "Bearer" {
-            WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer]! + 1) seconds")
-            DispatchQueue.main.asyncAfter(deadline: .now() + JamfProServer.authExpires[whichServer]! + 1) { [self] in
+            WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer] ?? 0 + 1) seconds")
+            DispatchQueue.main.asyncAfter(deadline: .now() + (JamfProServer.authExpires[whichServer] ?? 0) + 1) { [self] in
                 WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] renewing \(whichServer.localizedCapitalized) token")
                 getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
                     (result: (Int, String)) in
@@ -39,18 +38,18 @@ class JamfPro: NSObject, URLSessionDelegate {
         let tokenAge = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let tokenAgeInSeconds = timeDiff(forWhat: tokenAge).3
         
-//        print("\n[getToken] \(Date())")
-//        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
-//        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
-//        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
-//        print("[getToken]           \(whichServer) WipeData.state.on: \(WipeData.state.on)")
-//        print("[getToken]           \(whichServer) localSource: \(localSource)")
-//        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
-//        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
-//        print("[getToken]      \(whichServer) !export.saveOnly: \(!export.saveOnly)")
+        print("\n[getToken] \(Date())")
+        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
+        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
+        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
+        print("[getToken]           \(whichServer) WipeData.state.on: \(WipeData.state.on)")
+        print("[getToken]           \(whichServer) localSource: \(localSource)")
+        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
+        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
+        print("[getToken]      \(whichServer) !export.saveOnly: \(!export.saveOnly)")
 //        
-//        print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
-//        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
+        print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
+        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
         
 //        if !((whichServer == "source" && ( !WipeData.state.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
         if ((whichServer == "source" && ( WipeData.state.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
@@ -125,7 +124,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             } else {
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             }
-//            print("[getToken] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders)")
+//            print("[getToken] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
