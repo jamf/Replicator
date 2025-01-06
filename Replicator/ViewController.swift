@@ -1356,8 +1356,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 // check authentication - start
                 
-//                let clientType = (JamfProServer.sourceUseApiClient == 1) ? "API client/secret":"username/password"
-//                WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).")
+                let clientType = (JamfProServer.sourceUseApiClient == 1) ? "API client/secret":"username/password"
+                WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).")
                 
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
                 JamfPro.shared.getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
@@ -1384,8 +1384,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-//                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
-//                        WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).")
+                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
+                        WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).")
                         JamfPro.shared.getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
