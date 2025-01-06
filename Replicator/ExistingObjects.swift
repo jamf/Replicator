@@ -393,6 +393,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                 //                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                                 destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                             } else {
+                                                /*
                                                 switch endpointParent {
 //                                                case "policies":
 //                                                    switch existingEndpointNode {
@@ -409,6 +410,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                     default:
                                                         een = existingEndpointNode
                                                     }
+                                                 */
+                                                een = endpointParent
                                                     destEndpointDict = destEndpointJSON["\(een)"]
 //                                                default:
 //                                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
