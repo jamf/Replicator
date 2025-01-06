@@ -69,7 +69,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         counter.pendingSend += 1
                         let nextEndpoint = createArray[0]
                         createArray.remove(at: 0)
-                        
+
                         capi(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml.prettyPrint, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
                                 (result: String) in
                             counter.pendingSend -= 1
