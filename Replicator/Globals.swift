@@ -278,8 +278,8 @@ Examples:
 """
 
 public func readSettings(thePath: String = "") -> [String:Any] {
-    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)] thePath: \(thePath)") }
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
+    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)] settingsPath: \(settingsPath)") }
     if !FileManager.default.fileExists(atPath: settingsPath) {
         WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
         return([:])
