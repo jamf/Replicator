@@ -1373,13 +1373,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     } else {
                         if setting.fullGUI {
                             self.updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] Updated server array with: \(JamfProServer.source.fqdnFromUrl)") }
                             // update keychain, if marked to save creds
                             if !WipeData.state.on {
                                 print("[ViewController.go] JamfProServer.storeSourceCreds: \(JamfProServer.storeSourceCreds)")
                                 if JamfProServer.storeSourceCreds == 1 {
-                                    print("[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)")
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)") }
                                     Credentials.shared.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, credential: JamfProServer.sourcePwd, whichServer: "source")
                                     self.storedSourceUser = JamfProServer.sourceUser
+                                } else {
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] Not saving credentials for: \(JamfProServer.source.fqdnFromUrl)") }
                                 }
                             }
                         }

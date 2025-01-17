@@ -630,7 +630,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
-        WriteToLog.shared.message(stringOfText: "[updateServerArray] set current server: \(url)")
+        let whichServer = (serverList == "source_server_array") ? "source" : "destination"
+        WriteToLog.shared.message(stringOfText: "[updateServerArray] set current \(whichServer) server: \(url)")
         if url != "" {
             var local_serverArray = theArray
             if let positionInList = local_serverArray.firstIndex(of: url) {
