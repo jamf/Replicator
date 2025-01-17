@@ -278,14 +278,15 @@ Examples:
 """
 
 public func readSettings(thePath: String = "") -> [String:Any] {
+    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)]") }
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
     if !FileManager.default.fileExists(atPath: settingsPath) {
         WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
         return([:])
     }
-    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: settingsPath)) as? [String : Any])!
+    AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: settingsPath)) as? [String : Any] ?? [:])
     if AppInfo.settings.count == 0 {
-        WriteToLog.shared.message(stringOfText: "Error reading plist: \(AppInfo.plistPath)")
+        WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))")
     return(AppInfo.settings)
