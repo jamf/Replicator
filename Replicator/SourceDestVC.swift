@@ -669,7 +669,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)]") }
+        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
         AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue.baseUrl as Any?
