@@ -181,7 +181,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     index += 1
                     break
                 default:
-                    if CommandLine.arguments[index].contains(AppInfo.name) {
+                    if !CommandLine.arguments[index].contains(AppInfo.name) {
                         print("unknown switch passed: \(CommandLine.arguments[index])")
                     }
                 }
