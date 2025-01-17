@@ -151,9 +151,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                             WriteToLog.shared.message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
                             JamfProServer.sessionCookie.append(sessionCookie!)
                         } else {
-                            DispatchQueue.main.async {
-                                HTTPCookieStorage.shared.removeCookies(since: History.startTime)
-                            }
+                            HTTPCookieStorage.shared.removeCookies(since: History.startTime)
                         }
                     }
                     
