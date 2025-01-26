@@ -199,6 +199,16 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         let destConf = URLSessionConfiguration.ephemeral
                         
                         destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                
+                var headers = [String: String]()
+                for (header, value) in destConf.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                        print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
+                        print("[apiCall] \(#function.description) headers: \(headers)")
+                        print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
+                        print("[apiCall]")
+                
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         
                         let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {

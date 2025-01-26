@@ -15,6 +15,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     static let shared = JamfPro()
     
     var authQ       = DispatchQueue(label: "com.jamf.auth")
+//    private var renewing = [String: Bool]()
             
     fileprivate func renewToken(renew: Bool, whichServer: String, baseUrl: String, base64creds: String) {
         
@@ -130,7 +131,16 @@ class JamfPro: NSObject, URLSessionDelegate {
             } else {
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             }
-//            print("[getToken] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+            
+            var headers = [String: String]()
+            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                headers[header as! String] = (header as! String == "Authorization") ? " Basic ************" : value as? String
+            }
+            print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+            print("[apiCall] \(#function.description) headers: \(headers)")
+            print("[apiCall] \(#function.description) endpoint: \(tokenUrl?.absoluteString ?? "")")
+            print("[apiCall]")
+    
             
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
