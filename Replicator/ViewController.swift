@@ -3289,37 +3289,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "jamfusers", "jamfgroups":
-                    print("endpointParent: \(endpointParent)")
-//                    print("result: \(result)")
-                    var endpointInfo = [[String: Any]]()
+//                    var endpointInfo = [[String: Any]]()
                     
-//                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let _ = endpointJson["accounts"] as? [[String: Any]] {
-//                        endpointInfo = endpointJson["accounts"] as! [[String: Any]]
-//                    }
-                    
-//                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any] {
-//                        
-//                        //                    let test = endpointJson[0] as? [String: Any]
-//                        let usersGroups = endpointJson["accounts"] as? [String: Any]
-//                        endpointInfo = usersGroups?[endpointParent] as? [[String: Any]] ?? []
-//                        print("endpointJson: \(endpointJson)")
-//                        print("usersGroups: \(usersGroups)")
-//                    }
-//                    print("endpointJson.count: \(endpointJson?.count)")
-////                    let accountsDict = endpointJson[0] as [AnyHashable : Any]
-//                    let endpointInfo = usersGroups?[endpointParent] as? [[String: AnyObject]]
-                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let usersGroups = endpointJson["accounts"] as? [String: Any] {
+                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let usersGroups = endpointJson["accounts"] as? [String: Any], let endpointInfo = usersGroups[endpointParent] as? [[String: Any]] {
                         
-                        
-                        endpointInfo = usersGroups[endpointParent] as? [[String: Any]] ?? []
+//                        endpointInfo = usersGroups[endpointParent] as? [[String: Any]] ?? []
                         print("endpointInfo: \(endpointInfo)")
-//                    }
-                    
-//                    let accountsDict = /*endpointJSON as? [String: Any] ??*/ ["accounts":[:]]
-//                    let usersGroups = accountsDict["accounts"] as! [String: Any]
-//                    print("usersGroups: \(usersGroups)")
-                    
-//                    if let endpointInfo = usersGroups[endpointParent] as? [Any] {
+                        
                         endpointCount = endpointInfo.count
                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
