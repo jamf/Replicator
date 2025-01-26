@@ -41,6 +41,15 @@ class XmlDelegate: NSObject, URLSessionDelegate {
 
                 destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                 
+                var headers = [String: String]()
+                for (header, value) in destConf.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                print("[apiCall] \(#function.description) method: \(xmlRequest.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
+                print("[apiCall]")
+                
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
 //                    print("xml sticky session for \(theServer)")

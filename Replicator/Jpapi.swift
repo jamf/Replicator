@@ -106,6 +106,15 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
         
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
+        print("[apiCall]")
+        
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
         if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
@@ -473,7 +482,16 @@ class Jpapi: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
+        print("[apiCall]")
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
@@ -554,7 +572,16 @@ class Jpapi: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
+        print("[apiCall]")
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in

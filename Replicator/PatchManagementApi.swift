@@ -184,8 +184,16 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
 //        print("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
-//        print("[PatchManagementApi.createUpdate] headers: \(configuration.httpAdditionalHeaders ?? [:])")
         
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
+        print("[apiCall]")
+
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
         if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {

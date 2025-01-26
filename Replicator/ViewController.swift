@@ -2087,7 +2087,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                     if !export.saveOnly { WriteToLog.shared.message(stringOfText: "check destination for existing object: \(selectedObject)") }
                     
-                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
+//                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
                     let existingObjectId = (selectedEndpoint == "patch-software-title-configurations") ? currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:currentEPDict[rawEndpoint]?[selectedObject] ?? 0
                     if existingObjectId == 0 && !export.saveOnly {
                         theAction = "create"
@@ -2169,6 +2169,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] enter search for \(nodesToMigrate[nodeIndex])") }
         
+        print("node to migrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             Counter.shared.progressArray["smartcomputergroups"]  = 0
@@ -2383,15 +2384,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         var myURL = "\(JamfProServer.source)"
-            
+        
+        print("endpoint: \(endpoint)")
         switch endpoint {
         case "patch-software-title-configurations":
             myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
+//        case "jamfusers", "jamfgroups":
+//            myURL = myURL.appending("/JSSResource/accounts").urlFix
         default:
-            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
+//            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
             myURL = myURL.appending("/JSSResource/\(node)").urlFix
         }
-//        print("myURL: \(myURL)")
+        print("myURL: \(myURL)")
 
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
         
@@ -2416,6 +2420,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             let configuration = URLSessionConfiguration.ephemeral
             
             configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            
+            var headers = [String: String]()
+            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+            }
+            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+            print("[apiCall] \(#function.description) headers: \(headers)")
+            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+            print("[apiCall]")
             
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
@@ -2710,6 +2723,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                    
+                    print("[getEndpoints] result: \(result.description)")
                     
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
@@ -3274,10 +3289,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "jamfusers", "jamfgroups":
-                    let accountsDict = [:] /*endpointJSON as [String: Any]*/
-                    let usersGroups = accountsDict["accounts"] as! [String: Any]
+                    print("endpointParent: \(endpointParent)")
+//                    print("result: \(result)")
+                    var endpointInfo = [[String: Any]]()
                     
-                    if let endpointInfo = usersGroups[endpointParent] as? [Any] {
+//                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let _ = endpointJson["accounts"] as? [[String: Any]] {
+//                        endpointInfo = endpointJson["accounts"] as! [[String: Any]]
+//                    }
+                    
+//                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any] {
+//                        
+//                        //                    let test = endpointJson[0] as? [String: Any]
+//                        let usersGroups = endpointJson["accounts"] as? [String: Any]
+//                        endpointInfo = usersGroups?[endpointParent] as? [[String: Any]] ?? []
+//                        print("endpointJson: \(endpointJson)")
+//                        print("usersGroups: \(usersGroups)")
+//                    }
+//                    print("endpointJson.count: \(endpointJson?.count)")
+////                    let accountsDict = endpointJson[0] as [AnyHashable : Any]
+//                    let endpointInfo = usersGroups?[endpointParent] as? [[String: AnyObject]]
+                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let usersGroups = endpointJson["accounts"] as? [String: Any] {
+                        
+                        
+                        endpointInfo = usersGroups[endpointParent] as? [[String: Any]] ?? []
+                        print("endpointInfo: \(endpointInfo)")
+//                    }
+                    
+//                    let accountsDict = /*endpointJSON as? [String: Any] ??*/ ["accounts":[:]]
+//                    let usersGroups = accountsDict["accounts"] as! [String: Any]
+//                    print("usersGroups: \(usersGroups)")
+                    
+//                    if let endpointInfo = usersGroups[endpointParent] as? [Any] {
                         endpointCount = endpointInfo.count
                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
@@ -5413,6 +5455,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let configuration = URLSessionConfiguration.default
 
                 configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                
+                var headers = [String: String]()
+                for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+                print("[apiCall]")
+                
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -6068,6 +6120,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // selective migration functions - end
 
     override func viewDidAppear() {
+        print("[\(#function.description)] loaded")
         // display app version
         appVersion_TextField.stringValue = "v\(AppInfo.version)"
         
@@ -6106,7 +6159,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        print("[\(#function.description)] loaded")
         // needed for protocols
         PatchDelegate.shared.messageDelegate       = self
         CreateEndpoints.shared.updateUiDelegate    = self

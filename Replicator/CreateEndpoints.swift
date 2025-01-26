@@ -251,6 +251,15 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
                 configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
                 
+                var headers = [String: String]()
+                for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+                print("[apiCall]")
+                
                 // sticky session
                 let cookieUrl = createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {

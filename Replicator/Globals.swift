@@ -124,7 +124,8 @@ struct iconfiles {
     static var pendingDict        = [String:String]()
 }
 
-struct JamfProServer {
+final class JamfProServer {
+//struct JamfProServer {
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0

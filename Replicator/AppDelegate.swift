@@ -55,6 +55,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        print("[\(#function.description)] loaded")
         // read command line arguments - start
         var numberOfArgs = 0
 //        var startPos     = 1
