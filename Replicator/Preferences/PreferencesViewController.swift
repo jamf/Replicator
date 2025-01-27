@@ -170,7 +170,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     @IBAction func sourceDestListSize_action(_ sender: Any) {
         print("selected size: \(String(describing: sourceDestListSize_button.titleOfSelectedItem))")
-        var listSize = Int(sourceDestListSize_button.titleOfSelectedItem!) ?? -1
+        let listSize = Int(sourceDestListSize_button.titleOfSelectedItem!) ?? -1
         print("listSize: \(String(describing: listSize))")
         userDefaults.setValue(listSize, forKey: "sourceDestListSize")
     }

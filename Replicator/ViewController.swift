@@ -367,7 +367,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 setLevelIndicatorFillColor(fn: fn, endpointType: endpointType, fillColor: fillColor)
             }
         case "sourceObjectList_AC.remove":
-                if let arrangedObjects = sourceObjectList_AC.arrangedObjects as? [SelectiveObject], let objectId = info["objectId"] as? String, let objectIndex = arrangedObjects.firstIndex(where: { $0.objectId == info["objectId"] as? String }) {
+                if let arrangedObjects = sourceObjectList_AC.arrangedObjects as? [SelectiveObject], let _ = info["objectId"] as? String, let objectIndex = arrangedObjects.firstIndex(where: { $0.objectId == info["objectId"] as? String }) {
                     // Find the index of the element matching the criteria
                     print("Found element at index: \(objectIndex)")
                     sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex)
@@ -1987,7 +1987,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
         
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
-        var alreadyMigrated    = false
+//        var alreadyMigrated    = false
         var theButton          = ""
 
 //        print("[startMigrating] AvailableObjsToMig.byName: \(AvailableObjsToMig.byName)")
@@ -2302,7 +2302,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         URLCache.shared.removeAllCachedResponses()
         var endpoint       = nodesToMigrate[nodeIndex]
         var endpointParent = ""
-        var node           = ""
+        let node           = ""
         var endpointCount  = 0
         var groupType      = ""
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Getting \(endpoint)") }
@@ -2383,21 +2383,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointParent = "\(endpoint)"
         }
         
-        var myURL = "\(JamfProServer.source)"
+//        var myURL = "\(JamfProServer.source)"
         
-        print("endpoint: \(endpoint)")
-        switch endpoint {
-        case "patch-software-title-configurations":
-            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
-//        case "jamfusers", "jamfgroups":
-//            myURL = myURL.appending("/JSSResource/accounts").urlFix
-        default:
-//            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
-            myURL = myURL.appending("/JSSResource/\(node)").urlFix
-        }
-        print("myURL: \(myURL)")
+//        print("endpoint: \(endpoint)")
+//        switch endpoint {
+//        case "patch-software-title-configurations":
+//            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
+////        case "jamfusers", "jamfgroups":
+////            myURL = myURL.appending("/JSSResource/accounts").urlFix
+//        default:
+////            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
+//            myURL = myURL.appending("/JSSResource/\(node)").urlFix
+//        }
+//        print("myURL: \(myURL)")
 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
+//        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
         
         getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
 //        let semaphore = DispatchSemaphore(value: 0)
@@ -2414,21 +2414,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         getEndpointsQ.addOperation {
             
-            let encodedURL = URL(string: myURL)
-            let request = NSMutableURLRequest(url: encodedURL! as URL)
-            request.httpMethod = "GET"
-            let configuration = URLSessionConfiguration.ephemeral
+//            let encodedURL = URL(string: myURL)
+//            let request = NSMutableURLRequest(url: encodedURL! as URL)
+//            request.httpMethod = "GET"
+//            let configuration = URLSessionConfiguration.ephemeral
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-            
-            var headers = [String: String]()
-            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
-                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
-            }
-            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
-            print("[apiCall] \(#function.description) headers: \(headers)")
-            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-            print("[apiCall]")
+//            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+//            
+//            var headers = [String: String]()
+//            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+//                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+//            }
+//            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+//            print("[apiCall] \(#function.description) headers: \(headers)")
+//            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+//            print("[apiCall]")
             
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
@@ -4044,7 +4044,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
             //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
             var dependencyArray      = [String:String]()
-            var waitForPackageLookup = false
+//            var waitForPackageLookup = false
             
 //            if setting.migrateDependencies {
             var dependencyNode = ""
@@ -4145,7 +4145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let packages = objectDict["package_configuration"] as! [String:Any]
                         if let _ = packages[dependencyNode] {
                             let packages_dep = packages[dependencyNode] as! [AnyObject]
-                            if packages_dep.count > 0 { waitForPackageLookup = true }
+//                            if packages_dep.count > 0 { waitForPackageLookup = true }
                             var completedPackageLookups = 0
                             for theObject in packages_dep {
                                 //                             let local_name = (theObject as! [String:Any])["name"]
@@ -4163,7 +4163,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                     completedPackageLookups += 1
                                     if completedPackageLookups == packages_dep.count {
-                                        waitForPackageLookup = false
+//                                        waitForPackageLookup = false
                                         fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
                                     }
                                 }
