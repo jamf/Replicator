@@ -1,6 +1,6 @@
 //
 //  Sites.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 8/21/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -57,6 +57,16 @@ class Sites: NSObject, URLSessionDelegate {
         let serverConf = URLSessionConfiguration.ephemeral
 
         serverConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        
+        var headers = [String: String]()
+        for (header, value) in serverConf.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(serverRequest.httpMethod)")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(serverEncodedURL?.absoluteString ?? "")")
+        print("[apiCall]")
+
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in

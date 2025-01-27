@@ -1,6 +1,6 @@
 //
 //  Awake.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 10/22/22.
 //  Copyright 2024 Jamf. All rights reserved.

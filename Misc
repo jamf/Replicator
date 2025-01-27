@@ -1,0 +1,63 @@
+## Important ##
+Get warning about failed auth and can't quit.
+
+
+Migrate as managed, to site -> app crashed for Disney
+
+2022-03-09 Done - Need to fix for importing other than default download folder
+2022-03-09 Done - filenames that get xml encoded (import files)
+2022-03-10 Done - Icon uploads.  If cloud servicers connection is enable self service icons will update
+2022-03-10 Done - Bearer authentication
+2022-03-10 Done - Fix permissions issue on importing files from previously selected folder
+
+
+let font = NSFont(name: "HelveticaNeue", size: CGFloat(14))
+let color = NSColor.white
+let paragraph = NSMutableParagraphStyle()
+paragraph.alignment = .center
+let attribText = NSAttributedString(string: "SEND", attributes: [NSAttributedString.Key.paragraphStyle : paragraph, NSAttributedString.Key.font : font!, NSAttributedString.Key.foregroundColor : color, NSAttributedString.Key.underlineStyle : NSUnderlineStyle.single.rawValue])
+self.destinationMethod_TextField.attributedStringValue = attribText
+
+Fix
+migrating mobile device apps - randomly tries to update policies instead
+20220924_115045 [iconMigrate.PUT] setting icon for https://coldmizer.jamfcloud.com/JSSResource/mobiledeviceapplications/id/161
+20220924_115045 [iconMigrate.PUT] **** error code: 404 failed to update icon on https://coldmizer.jamfcloud.com/JSSResource/policies/id/173
+
+
+20220924_115745 [iconMigrate.PUT] icon updated on https://coldmizer.jamfcloud.com/JSSResource/mobiledeviceapplications/id/183
+20220924_115745 [iconMigrate.PUT] **** error code: 404 failed to update icon on https://coldmizer.jamfcloud.com/JSSResource/policies/id/161
+
+## access variables/functions in another view contorller
+    
+class JamfPro: NSObject, URLSessionDelegate {
+    
+    var sdController: SourceDestVC? = nil
+    init(sdController: SourceDestVC) {
+      self.sdController = sdController
+    }
+    
+ ## getToken is defined in (class) JamfPro, drop this in the SourceDestVC
+    var jamfpro: JamfPro?
+    
+    # place within some SourceDestVC function
+    jamfpro = JamfPro(sdController: self)
+    jamfpro!.getToken(whichServer
+  
+  
+  
+## stored passwords
+migrator - jamf.pro.url            (v7.1.1)
+JamfProApps-jamf.pro.url           (v7.2.0)
+JamfProApps-apiClient-jamf.pro.url (v7.2.0)
+
+JPMA-jamf.pro.url                  (v7.2.2)
+JPMA-apiClient-jamf.pro.url        (v7.2.2)
+
+## command line example:
+/jamf-migrator-flipmfvhqxwnkaegvyhsuwhwjgqh/Build/Products/Debug/jamf-migrator.app/Contents/MacOS/jamf-migrator  -source lhelou.jamfcloud.com -destination coldmizer.jamfcloud.com -objects packages -migrate -sourceuser jssadmin -destuser jssadmin
+/jamf-migrator.app/Contents/MacOS/jamf-migrator  -source dev.jamfcloud.com -destination prod.jamfcloud.com -objects "categories,buildings" -migrate -sourceuser devadmin -destuser prodadmin
+
+add note about using escrow buddy to get filevault info
+
+## Name change
+default download folder changed from ~/Downloads/Jamf Migrator to ~/Downloads/Replicator

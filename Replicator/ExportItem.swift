@@ -16,7 +16,7 @@ class ExportItem: NSObject {
         // Create folder to store objectString files if needed - start
         var baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseFolder == "" {
-            baseFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            baseFolder = (NSHomeDirectory() + "/Downloads/Replicator/")
         } else {
             baseFolder = baseFolder.pathToString
         }

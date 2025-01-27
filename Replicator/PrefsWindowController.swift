@@ -1,6 +1,6 @@
 //
 //  PrefsWindowController.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 11/25/18.
 //  Copyright 2024 Jamf. All rights reserved.

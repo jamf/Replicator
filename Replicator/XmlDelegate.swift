@@ -1,6 +1,6 @@
 //
 //  XmlDelegate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 6/28/18.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -40,6 +40,15 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 let destConf = URLSessionConfiguration.default
 
                 destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                
+                var headers = [String: String]()
+                for (header, value) in destConf.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                print("[apiCall] \(#function.description) method: \(xmlRequest.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
+                print("[apiCall]")
                 
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
@@ -87,7 +96,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         // Create folder to store xml files if needed - start
         baseXmlFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseXmlFolder == "" {
-            baseXmlFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            baseXmlFolder = (NSHomeDirectory() + "/Downloads/Replicator/")
         } else {
             baseXmlFolder = baseXmlFolder.pathToString
         }

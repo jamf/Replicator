@@ -1,6 +1,6 @@
 //
 //  PreferencesViewController.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 11/25/18.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -170,7 +170,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     @IBAction func sourceDestListSize_action(_ sender: Any) {
         print("selected size: \(String(describing: sourceDestListSize_button.titleOfSelectedItem))")
-        var listSize = Int(sourceDestListSize_button.titleOfSelectedItem!) ?? -1
+        let listSize = Int(sourceDestListSize_button.titleOfSelectedItem!) ?? -1
         print("listSize: \(String(describing: listSize))")
         userDefaults.setValue(listSize, forKey: "sourceDestListSize")
     }
@@ -300,7 +300,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
-        var exportFilePath:String? = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+        var exportFilePath:String? = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Replicator/")
 
         exportFilePath = exportFilePath?.pathToString
         
@@ -578,7 +578,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveRawXmlScope_button.state     = boolToState(TF: saveRawXmlScope)
             saveTrimmedXmlScope_button.state = boolToState(TF: saveTrimmedXmlScope)
             
-            export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? (NSHomeDirectory() + "/Downloads/Replicator/")
             if !(FileManager().fileExists(atPath: export.saveLocation, isDirectory: &isDir)) {
                 userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 userDefaults.synchronize()

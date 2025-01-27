@@ -280,7 +280,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
 
                                 default:
                                     //                                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                                    print("[ExistingObjects.capi] destEndpointJSON: \(result.description)")
+//                                    print("[ExistingObjects.capi] destEndpointJSON: \(result.description)")
                                     if let objectArray = result as? [[String: Any]] {
                                         let destEndpointJSON = objectArray[0]
 //                                        print("[ExistingObjects.capi] destEndpointJSON: \(destEndpointJSON)")
@@ -393,6 +393,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                 //                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                                 destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                             } else {
+                                                /*
                                                 switch endpointParent {
 //                                                case "policies":
 //                                                    switch existingEndpointNode {
@@ -409,6 +410,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                     default:
                                                         een = existingEndpointNode
                                                     }
+                                                 */
+                                                een = endpointParent
                                                     destEndpointDict = destEndpointJSON["\(een)"]
 //                                                default:
 //                                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
@@ -462,7 +465,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                 default:
                                                     currentEPDict[destEndpoint] = currentEPs
                                                 }
-                                                print("\n[ExistingObjects.capi] currentEPDict: \(currentEPDict)\n")
+//                                                print("\n[ExistingObjects.capi] currentEPDict: \(currentEPDict)\n")
                                                 
                                                 //                                                        currentEPs.removeAll()
                                                 
