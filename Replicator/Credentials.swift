@@ -1,6 +1,6 @@
 //
 //  Credentials.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 9/20/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -39,7 +39,7 @@ class Credentials {
 
             if let password = credential.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
-                    var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                    let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                                         kSecAttrService as String: theService,
                                                         kSecAttrAccessGroup as String: accessGroup,
                                                         kSecUseDataProtectionKeychain as String: true,
@@ -52,14 +52,14 @@ class Credentials {
                         if credential != accountCheck[account] {
                             // credentials already exist, try to update
                             let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
-                            print("[Credentials.save] updateStatus for \(account) result: \(updateStatus)")
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Credentials.save] updateStatus for \(account) result: \(updateStatus)") }
                             if updateStatus == 0 {
                                 WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), has been updated.")
                             } else {
                                 WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), failed to update.")
                             }
                         } else {
-                            print("[Credentials.save] password for \(account) is up-to-date")
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Credentials.save] password for \(account) is up-to-date") }
                         }
                     } else {
                         // try to add new credentials

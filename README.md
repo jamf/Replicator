@@ -1,10 +1,11 @@
 # Replicator (formerly known as Jamf Migrator)
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/JamfMigrator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/total) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/JamfMigrator/latest/total)
- ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/JamfMigrator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/JamfMigrator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/JamfMigrator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/Replicator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/Replicator/total) ![GitHub latest](https://img.shields.io/github/downloads/jamf/Replicator/latest/total)
+ ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/Replicator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/Replicator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/Replicator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
 
-Download the pre-release of [Replicator](https://github.com/jamf/Replicator/releases/tag/v8.0.0-a1)</br>
-Download the current release: [Jamf Migrator](https://github.com/jamf/Replicator/releases/latest/download/jamf-migrator.zip)
+Download the v8.0.0-b3 beta of [Replicator](https://github.com/jamf/JamfMigrator/releases/tag/v8.0.0-b3)</br>
+![GitHub all releases](https://img.shields.io/github/downloads/jamf/Replicator/v8.0.0-b3/total.svg)</br>
+Download the current release: [Jamf Migrator](https://github.com/jamf/JamfMigrator/releases/latest/download/Replicator.zip)
 
 A tool to synchronize configurations between Jamf Pro servers. Export configurations and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete configurations from a server.
 
@@ -195,6 +196,12 @@ This can also be accomplished using the UI by launching Replicator from Terminal
 
 
 ## History
+**v8.0.0-b3**<br>
+Fix issue with Jamf Users and Jamf Groups. Fix issue when objects fail to replicate.
+
+**v8.0.0-b2**<br>
+Fix default download path. Fix existing objects not getting updated.
+
 **v7.4.2**<br>
 Resolve authentication impacting command line usage (issue #100) and initial token generation (issue #101).
 

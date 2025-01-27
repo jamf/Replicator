@@ -230,102 +230,108 @@ class EndpointXml: NSObject, URLSessionDelegate {
                 myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 
                 endpointsIdQ.addOperation {
+            
+                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] fetching XML from: \(myURL)") }
+                    //                print("NSURL line 3")
+                    //                if "\(myURL)" == "" { myURL = "https://localhost" }
+                    let encodedURL = URL(string: myURL)
+                    let request = NSMutableURLRequest(url: encodedURL! as URL)
+                    request.httpMethod = "GET"
+                    let configuration = URLSessionConfiguration.ephemeral
                     
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] fetching XML from: \(myURL)") }
-                            //                print("NSURL line 3")
-                            //                if "\(myURL)" == "" { myURL = "https://localhost" }
-                            let encodedURL = URL(string: myURL)
-                            let request = NSMutableURLRequest(url: encodedURL! as URL)
-                            request.httpMethod = "GET"
-                            let configuration = URLSessionConfiguration.ephemeral
-                            
-                            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-                            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                            let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
-                                (data, response, error) -> Void in
-                                session.finishTasksAndInvalidate()
-                                completion(destEpName)
-                                
-//                                if statusCode == 202 {
-//                                    print("[getById] \(#line) retrieved object")
-//                                }
-                                
-                                if let httpResponse = response as? HTTPURLResponse {
-                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)") }
-                                    let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
-                                    sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
+                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                    
+                    var headers = [String: String]()
+                    for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                        headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                    }
+                    print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+                    print("[apiCall] \(#function.description) headers: \(headers)")
+                    print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+                    print("[apiCall]")
+            
+                    let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                    let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
+                        (data, response, error) -> Void in
+                        session.finishTasksAndInvalidate()
+                        completion(destEpName)
+                        
+                        if let httpResponse = response as? HTTPURLResponse {
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)") }
+                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+                            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
 //                                    self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
-                                    // save source XML - start
-                                    if export.saveRawXml {
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Saving raw XML for \(destEpName) with id: \(endpointID).") }
-                                        DispatchQueue.main.async {
-                                            // added option to remove scope
-                                            //                                    print("[getById] export.rawXmlScope: \(export.rawXmlScope)")
-                                            let exportRawXml = (export.rawXmlScope) ? PostXML:RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
+                            // save source XML - start
+                            if export.saveRawXml {
+                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Saving raw XML for \(destEpName) with id: \(endpointID).") }
+                                DispatchQueue.main.async {
+                                    // added option to remove scope
+                                    //                                    print("[getById] export.rawXmlScope: \(export.rawXmlScope)")
+                                    let exportRawXml = (export.rawXmlScope) ? PostXML:RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
 //                                            let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                            
-                                            WriteToLog.shared.message(stringOfText: "[getById] Exporting raw XML for \(endpoint) - \(destEpName)")
-                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                            XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-                                        }
+                                    
+                                    WriteToLog.shared.message(stringOfText: "[getById] Exporting raw XML for \(endpoint) - \(destEpName)")
+                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                }
+                            }
+                            // save source XML - end
+                            if !export.backupMode {
+                                
+                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Starting to clean-up the XML for \(endpoint) with id \(endpointID).") }
+                                Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                    (result: String) in
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Returned from cleanupXml") }
+                                }
+                            } else {
+                                // to back-up icons
+                                if endpoint == "policies" {
+                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                        (result: String) in
                                     }
-                                    // save source XML - end
-                                    if !export.backupMode {
-                                        
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Starting to clean-up the XML for \(endpoint) with id \(endpointID).") }
-                                        Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                            (result: String) in
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[getById] Returned from cleanupXml") }
-                                        }
-                                    } else {
-                                        // to back-up icons
-                                        if endpoint == "policies" {
-                                            Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                                (result: String) in
-                                            }
-                                        }
-                                        // check progress
-                                        //                                print("[getById] node: \(endpoint)")
-                                        //                                // print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                                        Endpoints.countDict[endpoint]! -= 1
-                                        //                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
-                                        if Endpoints.countDict[endpoint] == 0 {
-                                            //                                     print("[getById] saved last \(endpoint)")
-                                            //                                     print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
-                                            Endpoints.countDict[endpoint] = nil
-                                            //                                    print("[getById] nodes remaining \(Endpoints.countDict)")
+                                }
+                                // check progress
+                                //                                print("[getById] node: \(endpoint)")
+                                //                                // print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                                Endpoints.countDict[endpoint]! -= 1
+                                //                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+                                if Endpoints.countDict[endpoint] == 0 {
+                                    //                                     print("[getById] saved last \(endpoint)")
+                                    //                                     print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+                                    Endpoints.countDict[endpoint] = nil
+                                    //                                    print("[getById] nodes remaining \(Endpoints.countDict)")
 //                                            if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
-                                            if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
-                                                // print("[getById] zip it up")
+                                    if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
+                                        // print("[getById] zip it up")
 //                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-                                            }
-                                        }
+                                        updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
                                     }
-                                } else {   // if let httpResponse - end
-                                    // check progress
-                                    //                            print("[endpointById-error] node: \(endpoint)")
-                                    //                            print("[endpointById-error] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                                    Endpoints.countDict[endpoint]! -= 1
-                                    //                            print("[endpointById-error] \(String(describing: Endpoints.countDict[endpoint])) remaining")
-                                    if Endpoints.countDict[endpoint] == 0 {
-                                        //                                print("[endpointById-error] saved last \(endpoint)")
-                                        //                                print("[endpointById-error] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
-                                        Endpoints.countDict[endpoint] = nil
-                                        //                                print("[endpointById-error] nodes remaining \(Endpoints.countDict)")
-                                        if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
-                                            //                                    print("[endpointById-error] zip it up")
+                                }
+                            }
+                        } else {   // if let httpResponse - end
+                            // check progress
+                            //                            print("[endpointById-error] node: \(endpoint)")
+                            //                            print("[endpointById-error] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                            Endpoints.countDict[endpoint]! -= 1
+                            //                            print("[endpointById-error] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+                            if Endpoints.countDict[endpoint] == 0 {
+                                //                                print("[endpointById-error] saved last \(endpoint)")
+                                //                                print("[endpointById-error] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+                                Endpoints.countDict[endpoint] = nil
+                                //                                print("[endpointById-error] nodes remaining \(Endpoints.countDict)")
+                                if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
+                                    //                                    print("[endpointById-error] zip it up")
 //                                            print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                            updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-                                        }
-                                    }
+                                    updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
                                 }
+                            }
+                        }
 //                                semaphore.signal()
-                                if error != nil {
-                                }
-                            })  // let task = session - end
-                            //print("GET")
-                            task.resume()
+                        if error != nil {
+                        }
+                    })  // let task = session - end
+                    //print("GET")
+                    task.resume()
 //                            semaphore.wait()
                 }   // endpointsIdQ - end
             }

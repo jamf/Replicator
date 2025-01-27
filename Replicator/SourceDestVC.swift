@@ -1,6 +1,6 @@
 //
 //  SourceDestVC.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by lnh on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -319,7 +319,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBAction func migrateToSite_action(_ sender: Any) {
         JamfProServer.toSite   = false
         JamfProServer.destSite = "None"
-        if siteMigrate_button.state.rawValue == 1 {
+        if siteMigrate_button.state == .on {
             if dest_jp_server_field.stringValue == "" {
                 _ = Alert.shared.display(header: "Attention", message: "Destination URL is required", secondButton: "")
                 return
@@ -535,14 +535,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     func controlTextDidChange(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
             let whichField = textField.identifier!.rawValue
-//            switch whichField {
-//            case "sourcePassword":
-//                JamfProServer.sourcePwd = source_pwd_field.stringValue
-//            case "destPassword":
-//                JamfProServer.destPwd = dest_pwd_field.stringValue
-//            default:
-//                break
-//            }
             
             if whichField.range(of: "^source", options: [.regularExpression, .caseInsensitive]) != nil {
                 JamfProServer.sourceUser = sourceUser_TextField.stringValue
@@ -638,15 +630,14 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
+        let whichServer = (serverList == "source_server_array") ? "source" : "destination"
+        WriteToLog.shared.message(stringOfText: "[updateServerArray] set current \(whichServer) server: \(url)")
         if url != "" {
             var local_serverArray = theArray
-            let positionInList = local_serverArray.firstIndex(of: url)
-            if positionInList == nil {
-                    local_serverArray.insert(url, at: 0)
-            } else if positionInList! > 0 {
-                local_serverArray.remove(at: positionInList!)
-                local_serverArray.insert(url, at: 0)
+            if let positionInList = local_serverArray.firstIndex(of: url) {
+                local_serverArray.remove(at: positionInList)
             }
+            local_serverArray.insert(url, at: 0)
             while local_serverArray.count > sourceDestListSize {
                 local_serverArray.removeLast()
             }
@@ -678,6 +669,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
+        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
         AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue.baseUrl as Any?
@@ -959,7 +951,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         sleep(1)
         
         if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
-            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Jamf Transporter/", forKey: "saveLocation")
+            userDefaults.setValue(NSHomeDirectory() + "/Downloads/Replicator/", forKey: "saveLocation")
             userDefaults.synchronize()
         }
         

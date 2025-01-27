@@ -1,6 +1,6 @@
 //
 //  Jpapi.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 12/17/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -24,7 +24,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         var contentType = ""
         var accept      = ""
         var objectInstance: PatchSoftwareTitleConfiguration?
-        let whichServer = (serverUrl == JamfProServer.source) ? "source":"dest"
                 
         print("\n[PatchManagementApi.createUpdate] apiData: \(apiData)\n")
         
@@ -184,8 +183,16 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
 //        print("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
-//        print("[PatchManagementApi.createUpdate] headers: \(configuration.httpAdditionalHeaders ?? [:])")
         
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
+        print("[apiCall]")
+
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
         if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
@@ -200,12 +207,16 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
 //                print("[PatchManagementApi.createUpdate] httpResponse: \(httpResponse)")
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     let method = createUpdateMethod.lowercased() == "patch" ? "update" : "create"
+                    
                     Counter.shared.crud[endpoint]?[method]! += 1
+                    Summary.totalCreated   = Counter.shared.crud[endpoint]?["create"] ?? 0
+                    Summary.totalUpdated   = Counter.shared.crud[endpoint]?["update"] ?? 0
+                    Summary.totalFailed    = Counter.shared.crud[endpoint]?["fail"] ?? 0
+                    Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                    
                     if endpoint == "patch-software-title-configurations" {
                         if Summary.totalCompleted > 0 {
-    //                        if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
-    //                        }
                         }
                         
                         if let stringResponse = String(data: data!, encoding: .utf8) {
@@ -294,7 +305,8 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         print("")
                         
                         do {
-                            let jsonData = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
+//                            let jsonData = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
+                            let _ = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
                         } catch {
                             print("[PatchManagementApi.createUpdate] failed to decode new patch-software-title-configuration")
                         }

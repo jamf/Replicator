@@ -1,6 +1,6 @@
 //
 //  Json.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 12/1/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -36,9 +36,12 @@ class Json: NSObject, URLSessionDelegate {
             }
             return
 
-//            existingDestUrl = existingDestUrl.appending("/api/v2/\(objectEndpoint)").urlFix
         default:
-            existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)").urlFix
+            if ["jamfusers", "jamfgroups"].contains(objectEndpoint) {
+                existingDestUrl = existingDestUrl.appending("/JSSResource/accounts").urlFix
+            } else {
+                existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)").urlFix
+            }
         }
 
         existingDestUrl = existingDestUrl.urlFix
@@ -53,6 +56,16 @@ class Json: NSObject, URLSessionDelegate {
         let destConf = URLSessionConfiguration.ephemeral
 
         destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        
+        var headers = [String: String]()
+        for (header, value) in destConf.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
+        print("[apiCall]")
+        
 
         q.getRecord.maxConcurrentOperationCount = userDefaults.integer(forKey: "concurrentThreads")
         
@@ -94,10 +107,5 @@ class Json: NSObject, URLSessionDelegate {
             semaphore.wait()
         }   // getRecordQ - end
     }
-    
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-    }
-    
 }
 

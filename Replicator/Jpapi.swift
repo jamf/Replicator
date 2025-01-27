@@ -1,6 +1,6 @@
 //
 //  Jpapi.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 12/17/19.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -105,6 +105,15 @@ class Jpapi: NSObject, URLSessionDelegate {
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
+        print("[apiCall]")
         
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
@@ -286,7 +295,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     Packages.destination.append(contentsOf: somePackages)
                                     print("getAll: somePackages destination count: \(Packages.destination.count)")
                                     for thePackage in somePackages {
-                                        if let id = thePackage.id, let packageName = thePackage.packageName, let fileName = thePackage.fileName {
+                                        if let id = thePackage.id, let idNum = Int(id), let packageName = thePackage.packageName, let fileName = thePackage.fileName {
                                             // looking for duplicates
                                             if duplicatePackagesDict[fileName] == nil {
                                                 duplicatePackagesDict[fileName] = [packageName]
@@ -295,6 +304,9 @@ class Jpapi: NSObject, URLSessionDelegate {
                                                 duplicatePackagesDict[fileName]!.append(packageName)
                                             }
                                             PatchPackages.destination.append(PatchPackage(packageId: id, version: "", displayName: packageName, packageName: fileName))
+                                            if WipeData.state.on {
+                                                existingObjects.append(ExistingObject(type: theEndpoint, id: idNum, name: packageName, fileName: fileName))
+                                            }
                                         }
                                     }
                                 }
@@ -310,19 +322,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     } else {
                                         Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
 //                                        print("[Jpapi.getAll] category id: \(theObject["id"] as? String ?? "-1"), category name: \(theObject["name"] as? String ?? "-1")")
-                                    }
-                                case "packages-":
-                                    if let id = theObject["id"] as? String, let packageName = theObject["packageName"] as? String, packageName != "", let fileName = theObject["fileName"] as? String, fileName != "" {
-                                        //                                    print("[getAll] add destination package id: \(id), packageName: \(fileName)")
-                                        if whichServer == "source" {
-                                            PatchPackages.source.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
-                                        } else {
-                                            PatchPackages.destination.append(PatchPackage(packageId: "\(id)", version: "", displayName: packageName, packageName: fileName))
-                                            existingObjects.append(ExistingObject(type: theEndpoint, id: Int(id) ?? -1, name: packageName, fileName: fileName))
-                                        }
-                                    } else {
-                                        print("[getAll] failed to add package id: \(String(describing: theObject["id"] as? Int)), packageName: \(theObject["packageName"] as? String ?? "unknown"), fileName: \(theObject["fileName"] as? String ?? "unknown")")
                                     }
                                 case "policy-details":
                                     if let id = theObject["id"] as? String, let name = theObject["name"] as? String, let enabled = theObject["enabled"] as? Bool, let targetPatchVersion = theObject["targetPatchVersion"] as? String, let deploymentMethod = theObject["deploymentMethod"] as? String, let softwareTitleId = theObject["softwareTitleId"] as? String, let softwareTitleConfigurationId = theObject["softwareTitleConfigurationId"] as? String, let killAppsDelayMinutes = theObject["killAppsDelayMinutes"] as? Int, let killAppsMessage = theObject["killAppsMessage"] as? String, let downgrade = theObject["downgrade"] as? Bool, let patchUnknownVersion = theObject["patchUnknownVersion"] as? Bool, let notificationHeader = theObject["notificationHeader"] as? String, let selfServiceEnforceDeadline = theObject["selfServiceEnforceDeadline"] as? Bool, let selfServiceDeadline = theObject["selfServiceDeadline"] as? Int, let installButtonText = theObject["installButtonText"] as? String, let selfServiceDescription = theObject["selfServiceDescription"] as? String, let iconId = theObject["iconId"] as? String, let reminderFrequency = theObject["reminderFrequency"] as? Int, let reminderEnabled = theObject["reminderEnabled"] as? Bool {
@@ -483,7 +482,16 @@ class Jpapi: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
+        print("[apiCall]")
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
@@ -564,7 +572,16 @@ class Jpapi: NSObject, URLSessionDelegate {
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
+        print("[apiCall]")
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in

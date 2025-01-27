@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie N. Helou on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -55,17 +55,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        print("[\(#function.description)] loaded")
         // read command line arguments - start
         var numberOfArgs = 0
-        var startPos     = 1
+//        var startPos     = 1
         // read commandline args
         numberOfArgs = CommandLine.arguments.count
         print("all arguments: \(CommandLine.arguments)")
-        if CommandLine.arguments.contains("-debug") {
-            numberOfArgs -= 1
-            startPos+=1
+//        if CommandLine.arguments.contains("-debug") {
+//            numberOfArgs -= 1
+//            startPos+=1
 //            LogLevel.debug = true
-        }
+//        }
         var index = 1
         while index < numberOfArgs {
             print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
@@ -181,7 +182,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     index += 1
                     break
                 default:
-                    if CommandLine.arguments[index].contains(AppInfo.name) {
+                    if !CommandLine.arguments[index].contains(AppInfo.name) {
                         print("unknown switch passed: \(CommandLine.arguments[index])")
                     }
                 }
@@ -192,7 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         export.saveLocation = userDefaults.string(forKey: "saveLocation") ?? ""
         if export.saveLocation == "" || !(FileManager().fileExists(atPath: export.saveLocation)) {
-            export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            export.saveLocation = (NSHomeDirectory() + "/Downloads/Replicator/")
             userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
         } else {
             export.saveLocation = export.saveLocation.pathToString

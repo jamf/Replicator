@@ -1,6 +1,6 @@
 //
 //  CheckForUpdate.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by Leslie Helou on 6/9/18.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -26,6 +26,16 @@ class VersionCheck: NSObject, URLSessionDelegate {
         request.httpMethod = "GET"
         
         configuration.httpAdditionalHeaders = ["Accept" : "application/vnd.github.jean-grey-preview+json"]
+        
+        var headers = [String: String]()
+        for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+            headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+        }
+        print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
+        print("[apiCall] \(#function.description) headers: \(headers)")
+        print("[apiCall] \(#function.description) endpoint: \(versionUrl?.absoluteString ?? "")")
+        print("[apiCall]")
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in

@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  Jamf Transporter
+//  Replicator
 //
 //  Created by lnh on 12/9/16.
 //  Copyright 2024 Jamf. All rights reserved.
@@ -367,7 +367,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 setLevelIndicatorFillColor(fn: fn, endpointType: endpointType, fillColor: fillColor)
             }
         case "sourceObjectList_AC.remove":
-                if let arrangedObjects = sourceObjectList_AC.arrangedObjects as? [SelectiveObject], let objectId = info["objectId"] as? String, let objectIndex = arrangedObjects.firstIndex(where: { $0.objectId == info["objectId"] as? String }) {
+                if let arrangedObjects = sourceObjectList_AC.arrangedObjects as? [SelectiveObject], let _ = info["objectId"] as? String, let objectIndex = arrangedObjects.firstIndex(where: { $0.objectId == info["objectId"] as? String }) {
                     // Find the index of the element matching the criteria
                     print("Found element at index: \(objectIndex)")
                     sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex)
@@ -1356,8 +1356,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 // check authentication - start
                 
-//                let clientType = (JamfProServer.sourceUseApiClient == 1) ? "API client/secret":"username/password"
-//                WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).")
+                let clientType = (JamfProServer.sourceUseApiClient == 1) ? "API client/secret":"username/password"
+                WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.source.fqdnFromUrl).")
                 
                 let localsource = (JamfProServer.importFiles == 1) ? true:false
                 JamfPro.shared.getToken(whichServer: "source", serverUrl: JamfProServer.source, base64creds: JamfProServer.base64Creds["source"] ?? "", localSource: localsource) { [self]
@@ -1373,19 +1373,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     } else {
                         if setting.fullGUI {
                             self.updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
+                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] Updated server array with: \(JamfProServer.source.fqdnFromUrl)") }
                             // update keychain, if marked to save creds
                             if !WipeData.state.on {
                                 print("[ViewController.go] JamfProServer.storeSourceCreds: \(JamfProServer.storeSourceCreds)")
                                 if JamfProServer.storeSourceCreds == 1 {
-                                    print("[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)")
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)") }
                                     Credentials.shared.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, credential: JamfProServer.sourcePwd, whichServer: "source")
                                     self.storedSourceUser = JamfProServer.sourceUser
+                                } else {
+                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.go] Not saving credentials for: \(JamfProServer.source.fqdnFromUrl)") }
                                 }
                             }
                         }
                         
-//                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
-//                        WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).")
+                        let clientType = (JamfProServer.destUseApiClient == 1) ? "API client/secret":"username/password"
+                        WriteToLog.shared.message(stringOfText: "[go] Using \(clientType) to generate token for \(JamfProServer.destination.fqdnFromUrl).")
                         JamfPro.shared.getToken(whichServer: "dest", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds["dest"] ?? "", localSource: localsource) { [self]
                             (authResult: (Int,String)) in
                             let (authStatusCode, _) = authResult
@@ -1920,7 +1923,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                        print("build list of objects selected")
                         
                         // clear targetSelectiveObjectList - needed to handle switching tabs
-//                        if !setting.migrateDependencies || ["policies", "patch-software-title-configurations"].contains(resultEndpoint) /*|| resultEndpoint == "policies"*/ {
                             targetSelectiveObjectList.removeAll()
                             
                             DispatchQueue.main.async { [self] in
@@ -1949,7 +1951,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 print("[startMigrating] call selectiveMigrationDelegate for selectedEndpoint: \(selectedEndpoint)")
                                 selectiveMigrationDelegate(objectIndex: 0, selectedEndpoint: selectedEndpoint)
                             }
-//                        }
                     }
                 }   //  if (UiVar.goSender == "goButton"... - else - end
             // **************************************** selective migration - end ****************************************
@@ -1986,7 +1987,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
         
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
-        var alreadyMigrated    = false
+//        var alreadyMigrated    = false
         var theButton          = ""
 
 //        print("[startMigrating] AvailableObjsToMig.byName: \(AvailableObjsToMig.byName)")
@@ -2086,7 +2087,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                     if !export.saveOnly { WriteToLog.shared.message(stringOfText: "check destination for existing object: \(selectedObject)") }
                     
-                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
+//                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
                     let existingObjectId = (selectedEndpoint == "patch-software-title-configurations") ? currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:currentEPDict[rawEndpoint]?[selectedObject] ?? 0
                     if existingObjectId == 0 && !export.saveOnly {
                         theAction = "create"
@@ -2168,6 +2169,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] enter search for \(nodesToMigrate[nodeIndex])") }
         
+        print("node to migrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             Counter.shared.progressArray["smartcomputergroups"]  = 0
@@ -2228,8 +2230,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 if !FileManager.default.isWritableFile(atPath: export.saveLocation) {
-                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Jamf Transporter/")
-                    export.saveLocation = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+                    WriteToLog.shared.message(stringOfText: "[ViewController.readNodes] Unable to write to \(export.saveLocation), setting export location to \(NSHomeDirectory())/Downloads/Replicator/")
+                    export.saveLocation = (NSHomeDirectory() + "/Downloads/Replicator/")
                     userDefaults.set("\(export.saveLocation)", forKey: "saveLocation")
                 }
             }   // if export.saveRawXml - end
@@ -2300,7 +2302,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         URLCache.shared.removeAllCachedResponses()
         var endpoint       = nodesToMigrate[nodeIndex]
         var endpointParent = ""
-        var node           = ""
+        let node           = ""
         var endpointCount  = 0
         var groupType      = ""
         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Getting \(endpoint)") }
@@ -2381,18 +2383,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointParent = "\(endpoint)"
         }
         
-        var myURL = "\(JamfProServer.source)"
-            
-        switch endpoint {
-        case "patch-software-title-configurations":
-            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
-        default:
-            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
-            myURL = myURL.appending("/JSSResource/\(node)").urlFix
-        }
+//        var myURL = "\(JamfProServer.source)"
+        
+//        print("endpoint: \(endpoint)")
+//        switch endpoint {
+//        case "patch-software-title-configurations":
+//            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
+////        case "jamfusers", "jamfgroups":
+////            myURL = myURL.appending("/JSSResource/accounts").urlFix
+//        default:
+////            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
+//            myURL = myURL.appending("/JSSResource/\(node)").urlFix
+//        }
 //        print("myURL: \(myURL)")
 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
+//        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] URL: \(myURL)") }
         
         getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
 //        let semaphore = DispatchSemaphore(value: 0)
@@ -2409,12 +2414,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         getEndpointsQ.addOperation {
             
-            let encodedURL = URL(string: myURL)
-            let request = NSMutableURLRequest(url: encodedURL! as URL)
-            request.httpMethod = "GET"
-            let configuration = URLSessionConfiguration.ephemeral
+//            let encodedURL = URL(string: myURL)
+//            let request = NSMutableURLRequest(url: encodedURL! as URL)
+//            request.httpMethod = "GET"
+//            let configuration = URLSessionConfiguration.ephemeral
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+//            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+//            
+//            var headers = [String: String]()
+//            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+//                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+//            }
+//            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+//            print("[apiCall] \(#function.description) headers: \(headers)")
+//            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+//            print("[apiCall]")
             
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
@@ -2709,6 +2723,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                    
+                    print("[getEndpoints] result: \(result.description)")
                     
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
@@ -3273,10 +3289,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "jamfusers", "jamfgroups":
-                    let accountsDict = [:] /*endpointJSON as [String: Any]*/
-                    let usersGroups = accountsDict["accounts"] as! [String: Any]
+//                    var endpointInfo = [[String: Any]]()
                     
-                    if let endpointInfo = usersGroups[endpointParent] as? [Any] {
+                    if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let usersGroups = endpointJson["accounts"] as? [String: Any], let endpointInfo = usersGroups[endpointParent] as? [[String: Any]] {
+                        
+//                        endpointInfo = usersGroups[endpointParent] as? [[String: Any]] ?? []
+                        print("endpointInfo: \(endpointInfo)")
+                        
                         endpointCount = endpointInfo.count
                         if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
@@ -4025,7 +4044,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
             //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
             var dependencyArray      = [String:String]()
-            var waitForPackageLookup = false
+//            var waitForPackageLookup = false
             
 //            if setting.migrateDependencies {
             var dependencyNode = ""
@@ -4126,7 +4145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let packages = objectDict["package_configuration"] as! [String:Any]
                         if let _ = packages[dependencyNode] {
                             let packages_dep = packages[dependencyNode] as! [AnyObject]
-                            if packages_dep.count > 0 { waitForPackageLookup = true }
+//                            if packages_dep.count > 0 { waitForPackageLookup = true }
                             var completedPackageLookups = 0
                             for theObject in packages_dep {
                                 //                             let local_name = (theObject as! [String:Any])["name"]
@@ -4144,7 +4163,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                     completedPackageLookups += 1
                                     if completedPackageLookups == packages_dep.count {
-                                        waitForPackageLookup = false
+//                                        waitForPackageLookup = false
                                         fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
                                     }
                                 }
@@ -4610,7 +4629,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // Create folder to store objectString files if needed - start
         baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseFolder == "" {
-            baseFolder = (NSHomeDirectory() + "/Downloads/Jamf Transporter/")
+            baseFolder = (NSHomeDirectory() + "/Downloads/Replicator/")
         } else {
             baseFolder = baseFolder.pathToString
         }
@@ -4805,7 +4824,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
                 if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
 //                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         get_name_field.stringValue    = adjEndpoint
                         get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
 //                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
@@ -4852,7 +4871,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
                 if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
 //                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         get_name_field.stringValue    = adjEndpoint
                         get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
 //                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
@@ -4915,7 +4934,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 print("[putStatusUpdate2] \(adjEndpoint) \(newPutTotal) of \(totalCount)\n")
                 if let currentPutCount = putCounters[adjEndpoint]?["put"], currentPutCount > 0 {
-                    if !setting.migrateDependencies || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
                         put_name_field.stringValue    = adjEndpoint
                         put_levelIndicator.floatValue = Float(newPutTotal)/Float(totalCount)
                         putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
@@ -5412,6 +5431,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 let configuration = URLSessionConfiguration.default
 
                 configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                
+                var headers = [String: String]()
+                for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+                }
+                print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+                print("[apiCall]")
+                
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
@@ -6067,6 +6096,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // selective migration functions - end
 
     override func viewDidAppear() {
+        print("[\(#function.description)] loaded")
         // display app version
         appVersion_TextField.stringValue = "v\(AppInfo.version)"
         
@@ -6105,7 +6135,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        print("[\(#function.description)] loaded")
         // needed for protocols
         PatchDelegate.shared.messageDelegate       = self
         CreateEndpoints.shared.updateUiDelegate    = self
@@ -6368,7 +6398,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         let appVersion = AppInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog.shared.message(stringOfText: "\(AppInfo.name) Version: \(appVersion) Build: \(appBuild )")
+        WriteToLog.shared.message(stringOfText: "Running \(AppInfo.name) v\(appVersion) build: \(appBuild )")
         
         if !setting.fullGUI {
             WriteToLog.shared.message(stringOfText: "Running silently")
