@@ -49,7 +49,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         let nextEndpoint = createArray[0]
                         createArray.remove(at: 0)
  
-                        jpapi(endpointType: nextEndpoint.endpointType, endPointJSON: nextEndpoint.endPointJSON, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: "\(nextEndpoint.sourceEpId)", destEpId: nextEndpoint.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                        jpapi(endpointType: nextEndpoint.endpointType, endPointJSON: nextEndpoint.endPointJSON, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: "\(nextEndpoint.sourceEpId)", destEpId: nextEndpoint.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) { [self]
                             (result: String) in
                             counter.pendingSend -= 1
                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] \(result)") }
@@ -473,8 +473,11 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                  */
                                 
                                 // update global counters
-                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
-                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
+                                counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                
+//                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
+//                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
+                                Counter.shared.crud[endpointType]?["fail"]! += 1
                                 if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
                                     let objectName = getName(endpoint: endpointType, objectXML: endPointXML)
                                     if !summaryArray.contains(objectName) {

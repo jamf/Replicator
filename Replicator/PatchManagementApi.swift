@@ -24,7 +24,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         var contentType = ""
         var accept      = ""
         var objectInstance: PatchSoftwareTitleConfiguration?
-        let whichServer = (serverUrl == JamfProServer.source) ? "source":"dest"
                 
         print("\n[PatchManagementApi.createUpdate] apiData: \(apiData)\n")
         
@@ -306,7 +305,8 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         print("")
                         
                         do {
-                            let jsonData = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
+//                            let jsonData = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
+                            let _ = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
                         } catch {
                             print("[PatchManagementApi.createUpdate] failed to decode new patch-software-title-configuration")
                         }
