@@ -24,9 +24,86 @@ class Credentials {
     
     var userPassDict = [String:String]()
     
+    private func theKeychainQuery(operation: String, theService: String, account: String = "", password: Data = Data()) -> [String: Any] {
+        let useLoginKeychainPref = userDefaults.integer(forKey: "useLoginKeychain") == 1 ? true : false
+        var useLoginKeychain = false
+        var keychainQuery = [String: Any]()
+        
+        var loginKeychain: SecKeychain?
+        let statusKeychain = SecKeychainOpen("login.keychain-db", &loginKeychain)
+        
+        if let loginKeychain = loginKeychain, statusKeychain == errSecSuccess, useLoginKeychainPref {
+            useLoginKeychain = true
+        }
+        
+        switch operation {
+        case "save":
+            if useLoginKeychain {
+                print("[Credentials] Saving to Login Keychain...")
+                keychainQuery = [kSecClass as String: kSecClassGenericPassword,
+                                kSecAttrService as String: theService,
+//                                kSecAttrAccessGroup as String: accessGroup,
+                                kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked, // Ensure access after login
+                                kSecUseKeychain as String: loginKeychain as Any, // Explicitly store in Login Keychain
+                                kSecAttrAccount as String: account,
+                                kSecValueData as String: password]
+            } else {
+                print("[Credentials] Saving to default Keychain...")
+                keychainQuery = [kSecClass as String: kSecClassGenericPassword,
+                                kSecAttrService as String: theService,
+                                kSecAttrAccessGroup as String: accessGroup,
+                                kSecUseDataProtectionKeychain as String: true,
+                                kSecAttrAccount as String: account,
+                                kSecValueData as String: password]
+            }
+        case "lookup", "checkExisting":
+            if useLoginKeychain {
+                print("[Credentials] check Login Keychain...")
+                keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
+                                 kSecAttrService as String: theService,
+//                                 kSecAttrAccessGroup as String: accessGroup,
+//                                 kSecUseKeychain as String: loginKeychain as Any, // use Login Keychain
+//                                 kSecMatchLimit as String: kSecMatchLimitAll,
+                                 kSecReturnAttributes as String: true,
+                                 kSecReturnData as String: true]
+            } else {
+                print("[Credentials] check default Keychain...")
+                keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
+                                 kSecAttrService as String: theService,
+                                 kSecAttrAccessGroup as String: accessGroup,
+                                 kSecUseDataProtectionKeychain as String: true,
+//                                 kSecMatchLimit as String: kSecMatchLimitAll,
+                                 kSecReturnAttributes as String: true,
+                                 kSecReturnData as String: true]
+                if operation == "lookup"{
+                    keychainQuery[kSecMatchLimit as String] = kSecMatchLimitAll
+                } else {
+                    keychainQuery[kSecMatchLimit as String] = kSecMatchLimitOne
+                }
+            }
+        default:
+            break
+        }
+        
+        if !account.isEmpty {
+            keychainQuery[kSecAttrAccount as String] = account
+        }
+        return keychainQuery
+    }
+    
     func save(service: String, account: String, credential: String, whichServer: String = "") {
         if service != "" && account != "" && service.first != "/" {
             var theService = service
+//            var useLoginKeychainPref = userDefaults.integer(forKey: "useLoginKeychain") == 1 ? true : false
+//            var useLoginKeychain = false
+//            var keychainQuery = [String: Any]()
+//            
+//            var loginKeychain: SecKeychain?
+//            let statusKeychain = SecKeychainOpen("login.keychain-db", &loginKeychain)
+//            
+//            if let loginKeychain = loginKeychain, statusKeychain == errSecSuccess, useLoginKeychainPref {
+//                useLoginKeychain = true
+//            }
             
             switch whichServer {
             case "source":
@@ -38,13 +115,26 @@ class Credentials {
             }
 
             if let password = credential.data(using: String.Encoding.utf8) {
+//                if useLoginKeychain {
+//                    print("[Credentials] Saving to Login Keychain...")
+//                    keychainQuery = [kSecClass as String: kSecClassGenericPassword,
+//                                    kSecAttrService as String: theService,
+//                                    kSecAttrAccessGroup as String: accessGroup,
+//                                    kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked, // Ensure access after login
+//                                    kSecUseKeychain as String: loginKeychain as Any, // Explicitly store in Login Keychain
+//                                    kSecAttrAccount as String: account,
+//                                    kSecValueData as String: password]
+//                } else {
+//                    print("[Credentials] Saving to default Keychain...")
+//                    keychainQuery = [kSecClass as String: kSecClassGenericPassword,
+//                                                        kSecAttrService as String: theService,
+//                                                        kSecAttrAccessGroup as String: accessGroup,
+//                                                        kSecUseDataProtectionKeychain as String: true,
+//                                                        kSecAttrAccount as String: account,
+//                                                        kSecValueData as String: password]
+//                }
+                let keychainQuery = theKeychainQuery(operation: "save", theService: theService, account: account, password: password)
                 keychainQ.async { [self] in
-                    let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                                        kSecAttrService as String: theService,
-                                                        kSecAttrAccessGroup as String: accessGroup,
-                                                        kSecUseDataProtectionKeychain as String: true,
-                                                        kSecAttrAccount as String: account,
-                                                        kSecValueData as String: password]
                     
                     // see if credentials already exist for server
                     let accountCheck = checkExisting(service: theService, account: account)
@@ -89,18 +179,20 @@ class Credentials {
         print("[Credentials.oldItemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
-        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
-                                            kSecAttrAccessGroup as String: accessGroup,
-                                            kSecAttrService as String: service,
-                                            kSecAttrAccount as String: account,
-                                            kSecMatchLimit as String: kSecMatchLimitOne,
-                                            kSecReturnAttributes as String: true,
-                                            kSecReturnData as String: true]
+//        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
+//                                            kSecAttrAccessGroup as String: accessGroup,
+//                                            kSecAttrService as String: service,
+//                                            kSecAttrAccount as String: account,
+//                                            kSecMatchLimit as String: kSecMatchLimitOne,
+//                                            kSecReturnAttributes as String: true,
+//                                            kSecReturnData as String: true]
+//        
+        let keychainQuery = theKeychainQuery(operation: "checkExisting", theService: service, account: account)
         
         var item: CFTypeRef?
         let status = SecItemCopyMatching(keychainQuery as CFDictionary, &item)
         guard status != errSecItemNotFound else {
-            print("[Credentials.oldItemLookup] lookup error occurred: \(status.description)")
+            print("[Credentials.checkExisting] lookup error occurred: \(status.description)")
             return [:]
         }
         guard status == errSecSuccess else { return [:] }
@@ -164,13 +256,16 @@ class Credentials {
         print("[Credentials.itemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
-        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
-                                            kSecAttrService as String: service,
-                                            kSecAttrAccessGroup as String: accessGroup,
-                                            kSecUseDataProtectionKeychain as String: true,
-                                            kSecMatchLimit as String: kSecMatchLimitAll,
-                                            kSecReturnAttributes as String: true,
-                                            kSecReturnData as String: true]
+//        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
+//                                            kSecAttrService as String: service,
+//                                            kSecAttrAccessGroup as String: accessGroup,
+//                                            kSecUseDataProtectionKeychain as String: true,
+//                                            kSecMatchLimit as String: kSecMatchLimitAll,
+//                                            kSecReturnAttributes as String: true,
+//                                            kSecReturnData as String: true]
+        
+        let keychainQuery = theKeychainQuery(operation: "lookup", theService: service)
+        print("[Credentials.itemLookup] keychainQuery: \(keychainQuery)")
         
         var items_ref: CFTypeRef?
         
@@ -181,20 +276,35 @@ class Credentials {
             return [:]
             
         }
-        guard status == errSecSuccess else { return [:] }
-        
-        guard let items = items_ref as? [[String: Any]] else {
-            print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+        guard status == errSecSuccess else {
+            print("[Credentials.itemLookup] status error occurred for \(service): \(status.description)")
             return [:]
         }
-        for item in items {
-            if let account = item[kSecAttrAccount as String] as? String, let passwordData = item[kSecValueData as String] as? Data {
+        
+        if userDefaults.integer(forKey: "useLoginKeychain") == 1 {
+            guard let items = items_ref as? [String: Any] else {
+                print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+                return [:]
+            }
+            if let account = items[kSecAttrAccount as String] as? String, let passwordData = items[kSecValueData as String] as? Data {
                 let password = String(data: passwordData, encoding: String.Encoding.utf8)
                 userPassDict[account] = password ?? ""
             }
+        } else {
+            guard let items = items_ref as? [[String: Any]] else {
+                print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+                return [:]
+            }
+            for item in items {
+                if let account = item[kSecAttrAccount as String] as? String, let passwordData = item[kSecValueData as String] as? Data {
+                    let password = String(data: passwordData, encoding: String.Encoding.utf8)
+                    userPassDict[account] = password ?? ""
+                }
+            }
         }
 
-//        print("[Credentials.itemLookup] keychain item count: \(userPassDict.count) for \(service)")
+        print("[Credentials.itemLookup] keychain item count: \(userPassDict.count) for \(service)")
+//        print("[Credentials.itemLookup] userPassDict: \(userPassDict)")
         return userPassDict
     }
     
