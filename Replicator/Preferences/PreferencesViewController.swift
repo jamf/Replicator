@@ -62,6 +62,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var removeCA_ID_button: NSButton!
 
     // passwords prefs
+    @IBOutlet weak var useLoginKeychain_button: NSButton!
     @IBOutlet weak var prefBindPwd_button: NSButton!
     @IBOutlet weak var prefLdapPwd_button: NSButton!
     @IBOutlet weak var prefFileSharePwd_button: NSButton!
@@ -280,6 +281,14 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         saveSettings(settings: AppInfo.settings)
         
         NotificationCenter.default.post(name: .saveOnlyButtonToggle, object: self)
+    }
+    
+    @IBAction func useLoginKeychain_Action(_ sender: NSButton) {
+        if sender.state.rawValue == 1 {
+            userDefaults.set(true, forKey: "useLoginKeychain")
+        } else {
+            userDefaults.set(false, forKey: "useLoginKeychain")
+        }
     }
     
     func boolToState(TF: Bool) -> NSControl.StateValue {
@@ -620,6 +629,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             prefFsRwPwd_textfield.delegate = self
             prefFsRoPwd_textfield.delegate = self
 
+            useLoginKeychain_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "useLoginKeychain"))
             prefBindPwd_button.state      = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefBindPwd"))
             prefLdapPwd_button.state      = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefLdapPwd"))
             prefFileSharePwd_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "prefFileSharePwd"))

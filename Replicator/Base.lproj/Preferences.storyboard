@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Window Controller-->
         <scene sceneID="p7h-JB-9lM">
             <objects>
-                <windowController storyboardIdentifier="PrefsWindowController" id="416-qt-7e7" customClass="PrefsWindowController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <windowController storyboardIdentifier="PrefsWindowController" id="416-qt-7e7" customClass="PrefsWindowController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <window key="window" title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="sxJ-f1-yLB">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
@@ -65,7 +65,7 @@
         <!--Copy-->
         <scene sceneID="geR-qQ-7PU">
             <objects>
-                <viewController title="Copy" id="Lwu-vt-54h" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Copy" id="Lwu-vt-54h" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="RHL-Es-p2H">
                         <rect key="frame" x="0.0" y="0.0" width="400" height="325"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -366,7 +366,7 @@
         <!--Export-->
         <scene sceneID="7h3-eD-AW9">
             <objects>
-                <viewController title="Export" id="zJe-p7-yg6" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Export" id="zJe-p7-yg6" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="RGC-fn-yqI">
                         <rect key="frame" x="0.0" y="0.0" width="400" height="238"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -576,7 +576,7 @@ DQ
         <!--Site-->
         <scene sceneID="KG6-wj-ncu">
             <objects>
-                <viewController title="Site" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Site" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="btl-X1-946">
                         <rect key="frame" x="0.0" y="0.0" width="400" height="248"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -623,7 +623,7 @@ DQ
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="J9F-Fg-eDv" id="T6P-Nd-djx">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="sdO-CZ-wjw">
                                         <items>
                                             <menuItem title="Copy" state="on" id="J9F-Fg-eDv"/>
@@ -640,7 +640,7 @@ DQ
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="eUE-QE-YRg" id="wq4-IH-mem">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="9ej-gp-BwF">
                                         <items>
                                             <menuItem title="Copy" state="on" id="eUE-QE-YRg"/>
@@ -657,7 +657,7 @@ DQ
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UGA-4u-HO2" id="rSW-Xy-J9g">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="1PZ-fc-f3R">
                                         <items>
                                             <menuItem title="Copy" state="on" id="UGA-4u-HO2"/>
@@ -685,7 +685,7 @@ DQ
         <!--App-->
         <scene sceneID="XAC-bA-Mde">
             <objects>
-                <viewController title="App" id="Ojm-Op-AKi" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="App" id="Ojm-Op-AKi" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Rdg-70-UCl" userLabel="app View">
                         <rect key="frame" x="0.0" y="0.0" width="400" height="248"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -754,7 +754,7 @@ DQ
                                 <rect key="frame" x="127" y="79" width="82" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="c2R-FR-hj1">
                                         <items>
                                             <menuItem title="default" state="on" id="5f8-q8-Iy9"/>
@@ -791,7 +791,7 @@ DQ
                                 <rect key="frame" x="171" y="13" width="39" height="25"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ifK-rp-GoD">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="cPT-Jj-f5V"/>
                                 </popUpButtonCell>
                                 <connections>
@@ -843,7 +843,7 @@ DQ
         <!--Computer-->
         <scene sceneID="lJ7-RC-Kt4">
             <objects>
-                <viewController title="Computer" id="QIN-ev-Ami" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Computer" id="QIN-ev-Ami" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="pA7-Le-xOX" userLabel="computer View">
                         <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -951,13 +951,13 @@ DQ
         <!--Passwords-->
         <scene sceneID="MUT-R8-cAw">
             <objects>
-                <viewController title="Passwords" id="r9d-Hx-eFt" customClass="PreferencesViewController" customModule="jamf_migrator" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Passwords" id="r9d-Hx-eFt" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="kQ6-jr-Xhm" userLabel="passwords View">
-                        <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="306"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button identifier="bind" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UOr-4y-ts0">
-                                <rect key="frame" x="24" y="257" width="217" height="18"/>
+                                <rect key="frame" x="24" y="237" width="217" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set Directory Binding Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aiw-dO-7Ta">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -967,7 +967,7 @@ DQ
                                 </connections>
                             </button>
                             <button identifier="ldap" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WAS-vF-dwo">
-                                <rect key="frame" x="24" y="202" width="145" height="18"/>
+                                <rect key="frame" x="24" y="182" width="145" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set LDAP Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mxu-KS-PMy">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -977,7 +977,7 @@ DQ
                                 </connections>
                             </button>
                             <button identifier="fileshare" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5bY-os-nBB">
-                                <rect key="frame" x="24" y="146" width="296" height="18"/>
+                                <rect key="frame" x="24" y="126" width="296" height="18"/>
                                 <buttonCell key="cell" type="check" title="Set Passwords for Local Distribution Point(s)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WPR-Cu-AGt">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -987,7 +987,7 @@ DQ
                                 </connections>
                             </button>
                             <secureTextField identifier="bind_textfield" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="h4P-Oe-SQ6">
-                                <rect key="frame" x="46" y="230" width="243" height="21"/>
+                                <rect key="frame" x="46" y="210" width="243" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="243" id="zLg-fo-BpM"/>
                                 </constraints>
@@ -1001,7 +1001,7 @@ DQ
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="ldap_textifeld" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OWG-1V-s0b">
-                                <rect key="frame" x="46" y="175" width="243" height="21"/>
+                                <rect key="frame" x="46" y="155" width="243" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2lp-yr-f8s">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1012,7 +1012,7 @@ DQ
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsrw" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xgj-Ze-Ke8">
-                                <rect key="frame" x="46" y="99" width="250" height="21"/>
+                                <rect key="frame" x="46" y="79" width="250" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="gOb-aU-H4h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1023,7 +1023,7 @@ DQ
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsro" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Lc5-qp-TxJ">
-                                <rect key="frame" x="46" y="49" width="243" height="21"/>
+                                <rect key="frame" x="46" y="29" width="243" height="21"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="hsP-WO-Ouc">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1034,7 +1034,7 @@ DQ
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FAp-KF-ajE">
-                                <rect key="frame" x="44" y="126" width="190" height="16"/>
+                                <rect key="frame" x="44" y="106" width="190" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read/Write Account Password:" id="vdy-6x-HWL">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1042,13 +1042,24 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZbO-yE-rVj">
-                                <rect key="frame" x="44" y="77" width="185" height="16"/>
+                                <rect key="frame" x="44" y="57" width="185" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read-only Account Password:" id="3T8-sJ-ea4">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button toolTip="default behavior is to store credentials in iCloud or Local Items Keychain" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T0e-ef-D6h">
+                                <rect key="frame" x="24" y="269" width="192" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="check" title="Force login Keychain usage" bezelStyle="regularSquare" imagePosition="left" inset="2" id="3eI-74-qOL">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="useLoginKeychain_Action:" target="r9d-Hx-eFt" id="7Oo-XA-YQZ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="h4P-Oe-SQ6" firstAttribute="leading" secondItem="kQ6-jr-Xhm" secondAttribute="leading" constant="46" id="2Id-qD-WkJ"/>
@@ -1059,7 +1070,7 @@ DQ
                             <constraint firstItem="5bY-os-nBB" firstAttribute="leading" secondItem="WAS-vF-dwo" secondAttribute="leading" id="FYH-g4-iV0"/>
                             <constraint firstItem="WAS-vF-dwo" firstAttribute="top" secondItem="h4P-Oe-SQ6" secondAttribute="bottom" constant="11" id="JqH-BU-N12"/>
                             <constraint firstItem="UOr-4y-ts0" firstAttribute="leading" secondItem="WAS-vF-dwo" secondAttribute="leading" id="Lfk-al-saL"/>
-                            <constraint firstItem="UOr-4y-ts0" firstAttribute="top" secondItem="kQ6-jr-Xhm" secondAttribute="top" constant="26" id="PqN-Ob-UNz"/>
+                            <constraint firstItem="UOr-4y-ts0" firstAttribute="top" secondItem="kQ6-jr-Xhm" secondAttribute="top" constant="52" id="PqN-Ob-UNz"/>
                             <constraint firstItem="Xgj-Ze-Ke8" firstAttribute="top" secondItem="FAp-KF-ajE" secondAttribute="bottom" constant="6" id="QRr-I3-pcC"/>
                             <constraint firstItem="ZbO-yE-rVj" firstAttribute="top" secondItem="Xgj-Ze-Ke8" secondAttribute="bottom" constant="6" id="UNM-su-mEj"/>
                             <constraint firstItem="h4P-Oe-SQ6" firstAttribute="trailing" secondItem="OWG-1V-s0b" secondAttribute="trailing" id="ViS-cC-GT4"/>
@@ -1082,11 +1093,12 @@ DQ
                         <outlet property="prefFsRwPwd_textfield" destination="Xgj-Ze-Ke8" id="67W-TF-vrf"/>
                         <outlet property="prefLdapPwd_button" destination="WAS-vF-dwo" id="afq-Ak-g2C"/>
                         <outlet property="prefLdapPwd_textfield" destination="OWG-1V-s0b" id="tLj-dq-1QX"/>
+                        <outlet property="useLoginKeychain_button" destination="T0e-ef-D6h" id="VUP-3e-JaM"/>
                     </connections>
                 </viewController>
                 <customObject id="xD4-Cj-XQT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="702" y="496"/>
+            <point key="canvasLocation" x="702" y="499"/>
         </scene>
     </scenes>
     <resources>
