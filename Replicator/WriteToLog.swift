@@ -16,6 +16,7 @@ class WriteToLog {
     
     func message(stringOfText: String) {
         let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
+//        print("[WriteToLog] \(logString)")
 
         logFileW?.seekToEndOfFile()
         if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {

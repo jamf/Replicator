@@ -56,6 +56,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         print("[\(#function.description)] loaded")
+        
+            // create log directory if missing - start
+            if !fm.fileExists(atPath: History.logPath) {
+                do {
+                    try fm.createDirectory(atPath: History.logPath, withIntermediateDirectories: true, attributes: nil )
+                } catch {
+                    _ = Alert.shared.display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: History.logPath))\nTry creating it manually.", secondButton: "")
+                    exit(0)
+                }
+            }
+            // create log directory if missing - endlogFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
+            History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
+
+//            isDir = false
+            if !(fm.fileExists(atPath: History.logPath + History.logFile/*, isDirectory: &isDir*/)) {
+                fm.createFile(atPath: History.logPath + History.logFile, contents: nil, attributes: nil)
+            }
+            sleep(1)
+            if !(fm.fileExists(atPath: History.logPath + History.logFile/*, isDirectory: &isDir*/)) {
+                print("Unable to create log file:\n\(History.logPath + History.logFile)")
+            }
+                    
+            if !fm.fileExists(atPath: AppInfo.plistPath) {
+                _ = readSettings(thePath: AppInfo.plistPathOld)
+//                isDir = true
+                if !fm.fileExists(atPath: AppInfo.appSupportPath/*, isDirectory: &isDir*/) {
+                    try? fm.createDirectory(atPath: AppInfo.appSupportPath, withIntermediateDirectories: true)
+                }
+                saveSettings(settings: AppInfo.settings)
+            }
+        
         // read command line arguments - start
         var numberOfArgs = 0
 //        var startPos     = 1
@@ -119,12 +150,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     } else if JamfProServer.source.prefix(1) == "/" {
                         JamfProServer.importFiles = 1   // importing files
                     }
+//                    JamfProServer.url["source"] = JamfProServer.source
                 case "-dest","-destination":
                     index += 1
                     JamfProServer.destination = "\(CommandLine.arguments[index])"
                     if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
+//                    JamfProServer.url["destination"] = JamfProServer.source
                 case "-sourceuseclientid", "-destuseclientid":
                     index += 1
                     let useApiClient = ( "\(CommandLine.arguments[index])".lowercased() == "yes" || "\(CommandLine.arguments[index])".lowercased() == "true" ) ? 1:0
