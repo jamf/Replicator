@@ -49,12 +49,12 @@ class JamfPro: NSObject, URLSessionDelegate {
         print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
         print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
         print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
-        print("[getToken]           \(whichServer) WipeData.state.on: \(WipeData.state.on)")
+        print("[getToken]     \(whichServer) WipeData.state.on: \(WipeData.state.on)")
         print("[getToken]           \(whichServer) localSource: \(localSource)")
         print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
         print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
-        print("[getToken]      \(whichServer) !export.saveOnly: \(!export.saveOnly)")
-//        
+        print("[getToken]       \(whichServer) export.saveOnly: \(export.saveOnly)")
+//
         print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
         print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
         
