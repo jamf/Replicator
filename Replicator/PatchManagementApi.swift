@@ -31,7 +31,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         
 
         if method.lowercased() == "skip" {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] skipping \(endpoint) endpoint with id \(destEpId).") }
+            if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] skipping \(endpoint) endpoint with id \(destEpId).") }
             let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
             completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
             return
@@ -179,7 +179,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         
         request.httpBody = requestBody
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).") }
+        if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).") }
 //        print("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
@@ -318,11 +318,11 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = json as? [String:Any] {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] Data retrieved from \(urlString).") }
+                        if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Data retrieved from \(urlString).") }
                         completion(endpointJSON)
                         return
                     } else {    // if let endpointJSON error
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] JSON error.  Returned data: \(String(describing: json))") }
+                        if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] JSON error.  Returned data: \(String(describing: json))") }
                         completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
                         return
                     }
@@ -331,12 +331,12 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         print("[PatchManagementApi.createUpdate] \(endpoint) status code: \(httpResponse.statusCode)")
                         print("[PatchManagementApi.createUpdate] \(endpoint) stringResponse: \(stringResponse)")
                     }
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] Response error: \(httpResponse.statusCode).") }
+                    if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Response error: \(httpResponse.statusCode).") }
                     completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     return
                 }
             } else {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[PatchManagementApi.createUpdate] GET response error.  Verify url and port.") }
+                if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] GET response error.  Verify url and port.") }
                 completion([:])
                 return
             }

@@ -36,7 +36,7 @@ class Sites: NSObject, URLSessionDelegate {
         resourcePath = resourcePath.urlFix
         
         // get all the sites - start
-        WriteToLog.shared.message(stringOfText: "[Sites] Fetching sites from \(server)")
+        WriteToLog.shared.message("[Sites] Fetching sites from \(server)")
 
         getSites() {
             (result: [String]) in
@@ -99,7 +99,7 @@ class Sites: NSObject, URLSessionDelegate {
                     completion(destSiteArray)
                 } else {
                     // something went wrong
-                    WriteToLog.shared.message(stringOfText: "[Sites] Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[Sites] Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
                     self.vc.alert_dialog(header: "Alert", message: "Unable to look up Sites.  Verify the account being used is able to login and view Sites.\nStatus Code: \(httpResponse.statusCode)")
                     
                     //                        self.enableSites_Button.state = convertToNSControlStateValue(0)

@@ -69,7 +69,7 @@ class Cleanup: NSObject {
                 let packageId = PatchPackages.destination.first(where: { $0.packageName == sourcePackageName })?.packageId ?? ""
                 
                 if packageId.isEmpty {
-                    WriteToLog.shared.message(stringOfText: "Unable to locate patch package \(sourcePackageName) on the destination server.")
+                    WriteToLog.shared.message("Unable to locate patch package \(sourcePackageName) on the destination server.")
                 } else {
                     updatedPackages.append(["packageId": packageId, "version": "\(thePackage["version"] ?? "")"])
                     print("[cleanJSON - patchmanagement] packageName: \(sourcePackageName)")
@@ -94,7 +94,7 @@ class Cleanup: NSObject {
         
         CreateEndpoints.shared.jpapi(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: "\(destEpId)", ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] \(result)") }
+            if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
             if endpointCurrent == endpointCount {
                 completion("last")
             } else {
@@ -105,7 +105,7 @@ class Cleanup: NSObject {
     
     func Xml(endpoint: String, Xml: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] enter") }
+        if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] enter") }
 
         if pref.stopMigration {
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
@@ -180,7 +180,7 @@ class Cleanup: NSObject {
         
         switch endpoint {
         case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanupXml] processing \(endpoint) - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanupXml] processing \(endpoint) - verbose") }
             //print("\nXML: \(PostXML)")
             
             // clean up PostXML, remove unwanted/conflicting data
@@ -232,7 +232,7 @@ class Cleanup: NSObject {
                                 Counter.shared.summary[endpoint]?["fail"] = summaryArray
                             }
                         }
-                        WriteToLog.shared.message(stringOfText: "[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)")
+                        WriteToLog.shared.message("[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)")
                         Counter.shared.post += 1
                         updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": "osxconfigurationprofiles", "total": endpointCount])
 //                        putStatusUpdate2(endpoint: "osxconfigurationprofiles", total: endpointCount)
@@ -292,7 +292,7 @@ class Cleanup: NSObject {
                         Counter.shared.summary[endpoint]?["fail"] = summaryArray
                     }
                 }
-                WriteToLog.shared.message(stringOfText: "[cleanUpXml] Apple School Manager classes are not migrated, skipping \(className)")
+                WriteToLog.shared.message("[cleanUpXml] Apple School Manager classes are not migrated, skipping \(className)")
                 Counter.shared.post += 1
                 updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": "classes", "total": endpointCount])
 //                putStatusUpdate2(endpoint: "classes", total: endpointCount)
@@ -335,7 +335,7 @@ class Cleanup: NSObject {
                         Counter.shared.summary[endpoint]?["fail"] = summaryArray
                     }
                 }
-                WriteToLog.shared.message(stringOfText: "[cleanUpXml] Patch EAs are not migrated, skipping \(patchEaName)")
+                WriteToLog.shared.message("[cleanUpXml] Patch EAs are not migrated, skipping \(patchEaName)")
                 Counter.shared.post += 1
                 if ToMigrate.objects.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
@@ -347,7 +347,7 @@ class Cleanup: NSObject {
             }
             
         case "directorybindings", "ldapservers","distributionpoints":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing \(endpoint) - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing \(endpoint) - verbose") }
             var credentialsArray = [String]()
             var newPasswordXml   = ""
 
@@ -401,14 +401,14 @@ class Cleanup: NSObject {
             }
 
         case "advancedcomputersearches":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing advancedcomputersearches - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing advancedcomputersearches - verbose") }
             // clean up some data from XML
             for xmlTag in ["computers"] {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             
         case "computers":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing computers - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing computers - verbose") }
             // clean up some data from XML
             for xmlTag in ["package", "mapped_printers", "plugins", "report_date", "report_date_epoch", "report_date_utc", "running_services", "licensed_software", "computer_group_memberships"] {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
@@ -460,7 +460,7 @@ class Cleanup: NSObject {
             //print("\nXML: \(PostXML)")
             
         case "networksegments":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing network segments - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing network segments - verbose") }
             // remove items not transfered; netboot server, SUS from XML
             let regexDistro1 = try! NSRegularExpression(pattern: "<distribution_server>(.*?)</distribution_server>", options:.caseInsensitive)
 //            let regexDistro2 = try! NSRegularExpression(pattern: "<distribution_point>(.*?)</distribution_point>", options:.caseInsensitive)
@@ -483,7 +483,7 @@ class Cleanup: NSObject {
             //print("\nXML: \(PostXML)")
             
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing \(endpoint) - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing \(endpoint) - verbose") }
             // remove computers that are a member of a smart group
             if (PostXML.range(of:"<is_smart>true</is_smart>") != nil || !Scope.scgCopy) {
                 // groups containing thousands of computers could not be cleared by only using the computers tag
@@ -499,7 +499,7 @@ class Cleanup: NSObject {
             }
             
         case "packages":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing packages - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing packages - verbose") }
             // remove 'No category assigned' from XML
             let regexComp = try! NSRegularExpression(pattern: "<category>No category assigned</category>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<category/>")// clean up some data from XML
@@ -509,7 +509,7 @@ class Cleanup: NSObject {
 //            print("\nXML: \(PostXML)\n")
             
         case "policies", "macapplications", "mobiledeviceapplications":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing \(endpoint) - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing \(endpoint) - verbose") }
             // check for a self service icon and grab name and id if present - start
             // also used for exporting items - iOS
             if PostXML.range(of: "</self_service_icon>") != nil {
@@ -565,7 +565,7 @@ class Cleanup: NSObject {
             }
             
         case "users":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing users - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing users - verbose") }
             
             let regexComp = try! NSRegularExpression(pattern: "<self_service_icon>(.*?)</self_service_icon>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<self_service_icon/>")
@@ -578,7 +578,7 @@ class Cleanup: NSObject {
             }
             
         case "jamfusers", "jamfgroups", "accounts/userid", "accounts/groupid":
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] processing jamf users/groups (\(endpoint)) - verbose") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing jamf users/groups (\(endpoint)) - verbose") }
             // remove password from XML, since it doesn't work on the new server
             let regexComp = try! NSRegularExpression(pattern: "<password_sha256 since=\"9.32\">(.*?)</password_sha256>", options:.caseInsensitive)
             PostXML = regexComp.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "")
@@ -616,7 +616,7 @@ class Cleanup: NSObject {
             }
             
         default:
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] Unknown endpoint: \(endpoint)") }
+            if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] Unknown endpoint: \(endpoint)") }
             knownEndpoint = false
         }   // switch - end
         
@@ -645,7 +645,7 @@ class Cleanup: NSObject {
                 
                 CreateEndpoints.shared.queue(endpointType: theEndpoint, endpointName: destEpName, endPointXML: PostXML, endpointCurrent: Int(endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: "\(destEpId)", ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanUpXml] call to createEndpointsQueue result: \(result)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] call to createEndpointsQueue result: \(result)") }
                     if endpointCurrent == endpointCount {
 //                        print("completed \(endpointCurrent) of \(endpointCount) - created last endpoint")
                         completion("last")
@@ -657,7 +657,7 @@ class Cleanup: NSObject {
             }
         } else {    // if knownEndpoint - end
             if endpointCurrent == endpointCount {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[cleanupXml] Last item in \(theEndpoint) was unkown.") }
+                if LogLevel.debug { WriteToLog.shared.message("[cleanupXml] Last item in \(theEndpoint) was unkown.") }
                 nodesMigrated+=1
                 completion("last")
                 // ;print("added node: \(localEndPointType) - createEndpoints")
@@ -715,7 +715,7 @@ class Cleanup: NSObject {
             sitePref = "Copy"
         }
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[siteSet] site operation for \(endpoint): \(sitePref)") }
+        if LogLevel.debug { WriteToLog.shared.message("[siteSet] site operation for \(endpoint): \(sitePref)") }
         // get copy / move preference - end
         
         switch endpoint {
@@ -734,12 +734,12 @@ class Cleanup: NSObject {
         let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
         
         // update site
-        //WriteToLog.shared.message(stringOfText: "[siteSet] endpoint \(endpoint) to site \(siteEncoded)")
+        //WriteToLog.shared.message("[siteSet] endpoint \(endpoint) to site \(siteEncoded)")
         if endpoint != "users" {
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
             rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[siteSet] changing site from \(currentSiteName) to \(siteEncoded)") }
+            if LogLevel.debug { WriteToLog.shared.message("[siteSet] changing site from \(currentSiteName) to \(siteEncoded)") }
         } else {
             // remove current sites info
             rawValue = RemoveData.shared.Xml(theXML: xmlString, theTag: "sites", keepTags: true)
@@ -749,7 +749,7 @@ class Cleanup: NSObject {
                 rawValue = xmlString.replacingOccurrences(of: "<sites></sites>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
                 rawValue = xmlString.replacingOccurrences(of: "<sites/>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
             }
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[siteSet] changing site to \(siteEncoded)") }
+            if LogLevel.debug { WriteToLog.shared.message("[siteSet] changing site to \(siteEncoded)") }
         }
         
         // do not redeploy profile to existing scope
@@ -824,7 +824,7 @@ class Cleanup: NSObject {
     }
     
     fileprivate func rmBlankLines(theXML: String) -> String {
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Removing blank lines.") }
+        if LogLevel.debug { WriteToLog.shared.message("Removing blank lines.") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")

@@ -71,12 +71,12 @@ class IconDelegate: NSObject, URLSessionDelegate {
             createDestUrl = createDestUrl.urlFix
             
             // Get or skip icon from Jamf Pro
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] before icon download.") }
+            if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] before icon download.") }
 
             if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "pending" {
                 if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "ready" {
                     iconfiles.pendingDict["\(ssIconId)"] = "pending"
-                    WriteToLog.shared.message(stringOfText: "[ViewController.icons] marking icon for \(iconNode) id \(sourcePolicyId) as pending")
+                    WriteToLog.shared.message("[ViewController.icons] marking icon for \(iconNode) id \(sourcePolicyId) as pending")
                 } else {
                     action = "SKIP"
                 }
@@ -86,19 +86,19 @@ class IconDelegate: NSObject, URLSessionDelegate {
                     (result: Int) in
 //                    print("action: \(action)")
 //                    print("Icon url: \(ssIconUri)")
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] after icon download.") }
+                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] after icon download.") }
                     
                     if result > 199 && result < 300 {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] retuned from icon id \(ssIconId) GET with result: \(result)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] retuned from icon id \(ssIconId) GET with result: \(result)") }
 //                        print("\ncreateDestUrl: \(createDestUrl)")
 
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] retrieved icon from \(ssIconUri)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] retrieved icon from \(ssIconUri)") }
                         if export.saveRawXml || export.saveTrimmedXml {
                             var saveFormat = export.saveRawXml ? "raw":"trimmed"
                             if export.backupMode {
                                 saveFormat = "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))"
                             }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).") }
+                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).") }
                             DispatchQueue.main.async {
                                 XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
@@ -112,25 +112,25 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             if downloadedIcon?.fixOptional == nil || downloadedIcon?.fixOptional == "" {
 //                                print("[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
                                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)") }
 //                                        print("createDestUrl: \(createDestUrl)")
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)") }
                                 
                                 self.iconMigrate(action: "POST", ssIconUri: "", ssIconId: ssIconId, ssIconName: ssIconName, _iconToUpload: "\(iconToUpload)", createDestUrl: createDestUrl) {
                                         (iconMigrateResult: Int) in
 
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] result of icon POST: \(iconMigrateResult).") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] result of icon POST: \(iconMigrateResult).") }
                                         // verify icon uploaded successfully
                                         if iconMigrateResult != 0 {
                                             // associate self service icon to new policy id
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).") }
 
 //                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"\(iconMigrateResult)", "destinationIconId":""]
                                             iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
                                             iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
                                             
                                             
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id") }
 //                                            print("iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]!))")
                                             
                                             usleep(100)
@@ -138,11 +138,11 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                             // removed cached icon
                                             if fm.fileExists(atPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") {
                                                 do {
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] removing cached icon: \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/") }
                                                     try FileManager.default.removeItem(at: URL(fileURLWithPath: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/"))
                                                 }
                                                 catch let error as NSError {
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] unable to delete \(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/.  Error \(error).") }
                                                 }
                                             }
                                             
@@ -162,7 +162,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                                     (result: Int) in
                                                 
                                                     if result > 199 && result < 300 {
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] successfully updated policy (id: \(tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)") }
+                                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] successfully updated policy (id: \(tagValue(xmlString: responseData, xmlTag: "id"))) with icon id \(iconMigrateResult)") }
 //                                                        print("successfully used new icon id \(newSelfServiceIconId)")
                                                     }
                                                 }
@@ -170,7 +170,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                             }
                                         } else {
                                             // icon failed to upload
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] source icon (id=\(ssIconId)) failed to upload") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) failed to upload") }
                                             iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                         }
 
@@ -192,14 +192,14 @@ class IconDelegate: NSObject, URLSessionDelegate {
 //                                print("[ViewController.icons] policyUrl: \(policyUrl)")
                                 
                                 if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
-                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
                                     var policyIconDict = iconfiles.policyDict
 
                                     Json.shared.getRecord(whichServer: "dest", base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (objectRecord: Any) in
                                         let result = objectRecord as? [String: AnyObject] ?? [:]
 //                                        print("[icons] result of Json().getRecord: \(result)")
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] Returned from Json.getRecord.  Retreived Self Service info.") }
                                         
 //                                        if !setting.csa {
                                             if result.count > 0 {
@@ -213,11 +213,11 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                                     policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
                                                     iconfiles.policyDict = policyIconDict
             //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] Returned from Json.getRecord: \(result)") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] Returned from Json.getRecord: \(result)") }
                                                                                             
                                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(newSelfServiceIconId)</id></self_service_icon></self_service></policy>"
                                                 } else {
-                                                    WriteToLog.shared.message(stringOfText: "[ViewController.icons] Unable to locate icon on destination server for: policies/id/\(thePolicyID)")
+                                                    WriteToLog.shared.message("[ViewController.icons] Unable to locate icon on destination server for: policies/id/\(thePolicyID)")
                                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon></self_service_icon></self_service></policy>"
                                                 }
                                             } else {
@@ -226,17 +226,17 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                         
                                             self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                             (result: Int) in
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.icons] after updating policy with icon id.") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] after updating policy with icon id.") }
                                             
                                                 if result > 199 && result < 300 {
-                                                    WriteToLog.shared.message(stringOfText: "[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)")
+                                                    WriteToLog.shared.message("[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)")
                                                 }
                                             }
 //                                        }
                                         
                                     }
                                 } else {
-                                    WriteToLog.shared.message(stringOfText: "[ViewController.icons] using new icon id from destination server")
+                                    WriteToLog.shared.message("[ViewController.icons] using new icon id from destination server")
                                     newSelfServiceIconId = Int(iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
                                     
                                         switch endpointType {
@@ -253,24 +253,24 @@ class IconDelegate: NSObject, URLSessionDelegate {
         //                                            print("iconXml: \(iconXml)")
                                     self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                         (result: Int) in
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints.icon] after updating policy with icon id.") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints.icon] after updating policy with icon id.") }
                                         
                                             if result > 199 && result < 300 {
-                                                WriteToLog.shared.message(stringOfText: "[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)")
+                                                WriteToLog.shared.message("[ViewController.icons] successfully used new icon id \(newSelfServiceIconId)")
                                             }
                                         }
                                 }
                             }
                         }  // if !export.saveOnly - end
                     } else {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints.icon] failed to retrieved icon from \(ssIconUri).") }
+                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints.icon] failed to retrieved icon from \(ssIconUri).") }
                     }
                 }   // iconMigrate - end
                 
             } else {
                 // hold processing already used icon until it's been uploaded to the new server
                 if !export.saveOnly {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed") }
+                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints.icon] sending policy id \(sourcePolicyId) to icon queue while icon id \(ssIconId) is processed") }
                     iconMigrationHold(ssIconId: "\(ssIconId)", newIconDict: ["endpointType": endpointType, "action": action, "ssIconId": "\(ssIconId)", "ssIconName": ssIconName, "ssIconUri": ssIconUri, "f_createDestUrl": f_createDestUrl, "responseData": responseData, "sourcePolicyId": sourcePolicyId])
                 }
             }//                }   // if !(iconfiles.policyDict["\(ssIconId)"]?["policyId"] - end
@@ -295,7 +295,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
 //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
                 iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
 //                print("icon id \(ssIconId) is marked for download/cache")
-                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] fetching icon: \(ssIconUri)")
+                WriteToLog.shared.message("[iconMigrate.\(action)] fetching icon: \(ssIconUri)")
                 // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
                 let url = URL(string: "\(ssIconUri)")!
                             
@@ -315,36 +315,36 @@ class IconDelegate: NSObject, URLSessionDelegate {
                         savedURL = documentsURL.appendingPathComponent("Caches/icons/\(ssIconId)/")
                         
                         if !(fm.fileExists(atPath: savedURL.path)) {
-                            do {if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] creating \(savedURL.path) folder to cache icon") }
+                            do {if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] creating \(savedURL.path) folder to cache icon") }
                                 try fm.createDirectory(atPath: savedURL.path, withIntermediateDirectories: true, attributes: nil)
 //                                usleep(1000)
                             } catch {
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] problem creating \(savedURL.path) folder: Error \(error)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] problem creating \(savedURL.path) folder: Error \(error)") }
                                 moveIcon = false
                             }
                         }
                     } catch {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] failed to set cache location: Error \(error)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] failed to set cache location: Error \(error)") }
                     }
                     
                     guard let fileURL = urlOrNil else { return }
                     do {
                         if moveIcon {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] saving icon to \(savedURL.appendingPathComponent("\(ssIconName)"))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] saving icon to \(savedURL.appendingPathComponent("\(ssIconName)"))") }
                             if !FileManager.default.fileExists(atPath: savedURL.appendingPathComponent("\(ssIconName)").path) {
                                 try FileManager.default.moveItem(at: fileURL, to: savedURL.appendingPathComponent("\(ssIconName)"))
                             }
                             
                             // Mark the icon as cached
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] icon id \(ssIconId) is downloaded/cached to \(savedURL.appendingPathComponent("\(ssIconName)"))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] icon id \(ssIconId) is downloaded/cached to \(savedURL.appendingPathComponent("\(ssIconName)"))") }
 //                            usleep(100)
                         }
                     } catch {
-                        WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] Problem moving icon: Error \(error)")
+                        WriteToLog.shared.message("[iconMigrate.\(action)] Problem moving icon: Error \(error)")
                     }
                     let curlResponse = responseOrNil as! HTTPURLResponse
                     curlResult = curlResponse.statusCode
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] result of Swift icon GET: \(curlResult).") }
+                    if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] result of Swift icon GET: \(curlResult).") }
                     completion(curlResult)
                 }
                 downloadTask.resume()
@@ -353,7 +353,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
         case "POST":
             if uploadedIcons[ssIconId.fixOptional] == nil || setting.csa {
                 // upload icon to fileuploads endpoint / icon server
-                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] sending icon: \(ssIconName)")
+                WriteToLog.shared.message("[iconMigrate.\(action)] sending icon: \(ssIconName)")
                
                 var fileURL: URL!
                 
@@ -369,19 +369,19 @@ class IconDelegate: NSObject, URLSessionDelegate {
                 
                     self.theIconsQ.addOperation {
 
-                        WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] uploading icon: \(iconToUpload)")
+                        WriteToLog.shared.message("[iconMigrate.\(action)] uploading icon: \(iconToUpload)")
 
                         let startTime = Date()
                         var postData  = Data()
                         var newId     = 0
                         
-    //                    WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))")
+    //                    WriteToLog.shared.message("[iconMigrate.\(action)] fileURL: \(String(describing: fileURL!))")
                         let fileType = NSURL(fileURLWithPath: "\(String(describing: fileURL!))").pathExtension
                     
-                        WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] uploading \(ssIconName)")
+                        WriteToLog.shared.message("[iconMigrate.\(action)] uploading \(ssIconName)")
                         
                         let serverURL = URL(string: createDestUrl)!
-                        WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] uploading to: \(createDestUrl)")
+                        WriteToLog.shared.message("[iconMigrate.\(action)] uploading to: \(createDestUrl)")
                         
                         let sessionConfig = URLSessionConfiguration.default
                         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
@@ -402,13 +402,13 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             let closingBoundary = "\r\n--\(boundary)--\r\n"
                             if let d = closingBoundary.data(using: .utf8) {
                                 postData.append(d)
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] loaded \(ssIconName) to data.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] loaded \(ssIconName) to data.")
                             }
                             let dataLen = postData.count
                             request.addValue("\(dataLen)", forHTTPHeaderField: "Content-Length")
                             
                         } catch {
-                            WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] unable to get file: \(iconToUpload)")
+                            WriteToLog.shared.message("[iconMigrate.\(action)] unable to get file: \(iconToUpload)")
                         }
 
                         request.httpBody   = postData
@@ -422,17 +422,17 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             if let _ = (response as? HTTPURLResponse)?.statusCode {
                                 httpResponse = response as? HTTPURLResponse
                                 statusCode = httpResponse!.statusCode
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] \(ssIconName) - Response from server - Status code: \(statusCode)")
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] Response data string: \(String(data: data!, encoding: .utf8)!)")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] \(ssIconName) - Response from server - Status code: \(statusCode)")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] Response data string: \(String(data: data!, encoding: .utf8)!)")
                             } else {
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] \(ssIconName) - No response from the server.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] \(ssIconName) - No response from the server.")
                                 
                                 completion(statusCode)
                             }
 
                             switch statusCode {
                             case 200, 201:
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] file successfully uploaded.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] file successfully uploaded.")
                                 if let dataResponse = String(data: data!, encoding: .utf8) {
     //                                print("[ViewController.iconMigrate] dataResponse: \(dataResponse)")
                                     if setting.csa {
@@ -449,12 +449,12 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                 }
                                 iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
                             case 401:
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] **** Authentication failed.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] **** Authentication failed.")
                             case 404:
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] **** server / file not found.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] **** server / file not found.")
                             default:
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] **** unknown error occured.")
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] **** Error took place while uploading a file.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] **** unknown error occured.")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] **** Error took place while uploading a file.")
                             }
 
                             let endTime = Date()
@@ -464,7 +464,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
                             let (m,s) = r.quotientAndRemainder(dividingBy: 60)
 
-                            WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] upload time: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
+                            WriteToLog.shared.message("[iconMigrate.\(action)] upload time: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
                             
                             iconNotification()
 
@@ -491,7 +491,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
             
         case "PUT":
             
-            WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] setting icon for \(createDestUrl)")
+            WriteToLog.shared.message("[iconMigrate.\(action)] setting icon for \(createDestUrl)")
             
             theIconsQ.maxConcurrentOperationCount = 2
             let semaphore    = DispatchSemaphore(value: 0)
@@ -525,21 +525,21 @@ class IconDelegate: NSObject, URLSessionDelegate {
                     if let httpResponse = response as? HTTPURLResponse {
                         
                             if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] icon updated on \(createDestUrl)")
-//                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)")
+                                WriteToLog.shared.message("[iconMigrate.\(action)] icon updated on \(createDestUrl)")
+//                                WriteToLog.shared.message("[iconMigrate.\(action)] posted xml: \(iconToUpload)")
                             } else {
-                                WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)")
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] posted xml: \(iconToUpload)") }
+                                WriteToLog.shared.message("[iconMigrate.\(action)] **** error code: \(httpResponse.statusCode) failed to update icon on \(createDestUrl)")
+                                if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] posted xml: \(iconToUpload)") }
 //                                print("[iconMigrate.\(action)] iconToUpload: \(iconToUpload)")
                                 
                             }
                         completion(httpResponse.statusCode)
                     } else {   // if let httpResponse = response - end
-                        WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] no response from server")
+                        WriteToLog.shared.message("[iconMigrate.\(action)] no response from server")
                         completion(0)
                     }
                     
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] POST or PUT Operation: \(request.httpMethod)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] POST or PUT Operation: \(request.httpMethod)") }
                     
                     iconNotification()
                     
@@ -553,7 +553,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                     
                         
         default:
-            WriteToLog.shared.message(stringOfText: "[iconMigrate.\(action)] skipping icon: \(ssIconName).")
+            WriteToLog.shared.message("[iconMigrate.\(action)] skipping icon: \(ssIconName).")
             completion(200)
         }
      
@@ -577,10 +577,10 @@ class IconDelegate: NSObject, URLSessionDelegate {
     private func iconMigrationHold(ssIconId: String, newIconDict: [String:String]) {
         if iconDictArray["\(ssIconId)"] == nil {
             iconDictArray["\(ssIconId)"] = [newIconDict]
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.iconMigration] first entry for iconDictArray[\(ssIconId)]: \(newIconDict)") }
+            if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] first entry for iconDictArray[\(ssIconId)]: \(newIconDict)") }
         } else {
             iconDictArray["\(ssIconId)"]?.append(contentsOf: [newIconDict])
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.iconMigration] updated iconDictArray[\(ssIconId)]: \(String(describing: iconDictArray["\(ssIconId)"]))") }
+            if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] updated iconDictArray[\(ssIconId)]: \(String(describing: iconDictArray["\(ssIconId)"]))") }
         }
         iconHoldQ.async {
             while iconfiles.pendingDict.count > 0 {
@@ -606,7 +606,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                         }
                     } else {
 //                        print("waiting for icon id \(iconId) to become ready (uploaded to destination server)")
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ViewController.iconMigration] waiting for icon id \(iconId) to become ready (uploaded to destination server)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] waiting for icon id \(iconId) to become ready (uploaded to destination server)") }
                     }
                 }   // for (pending, state) - end
             }   // while - end

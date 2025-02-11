@@ -27,7 +27,7 @@ class ExportItem: NSObject {
             do {
                 try fm.createDirectory(atPath: saveFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] Problem creating \(saveFolder) folder: Error \(error)") }
+                if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem creating \(saveFolder) folder: Error \(error)") }
                 return ""
             }
         }
@@ -76,9 +76,9 @@ class ExportItem: NSObject {
                 }
 //                do {
 //                    try jsonString.write(toFile: endpointPath+"/"+jsonFile, atomically: true, encoding: .utf8)
-//                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] saved to: \(endpointPath)") }
+//                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
 //                } catch {
-//                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
+//                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
 //                    return
 //                }
             case "patchPolicyDetails":
@@ -106,9 +106,9 @@ class ExportItem: NSObject {
                             
 //                            do {
 //                                try formattedXml.write(toFile: endpointPath+"/"+exportFilename, atomically: true, encoding: .utf8)
-//                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] saved to: \(endpointPath)") }
+//                                if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
 //                            } catch {
-//                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
+//                                if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
 //                                return
 //                            }
                         }   // if let prettyXml - end
@@ -131,10 +131,14 @@ class ExportItem: NSObject {
             exportFilename = exportFilename.replacingOccurrences(of: ":", with: ";")
             exportFilename = exportFilename.replacingOccurrences(of: "/", with: "_")
             
+            if !fm.fileExists(atPath: endpointPath) {
+                try? fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
+            }
+            
             try objectAsString.write(toFile: endpointPath+"/"+exportFilename, atomically: true, encoding: .utf8)
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] saved to: \(endpointPath)") }
+            if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
         } catch {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
+            if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
         }
     }
     
@@ -149,7 +153,7 @@ class ExportItem: NSObject {
                 do {
                     try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
                 } catch {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExportItem.export] Problem creating \(endpointPath) folder: Error \(error)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem creating \(endpointPath) folder: Error \(error)") }
                     return
                 }
             }

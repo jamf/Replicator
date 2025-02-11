@@ -80,7 +80,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             return
         }
 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] enter") }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] enter") }
 
         var removeDestUrl = ""
                 
@@ -125,7 +125,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 removeDestUrl = "\(JamfProServer.destination)/api/v2/patch-software-title-configurations/\(endPointID)"
             default:
                 removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] raw removal URL: \(removeDestUrl)") }
+                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] raw removal URL: \(removeDestUrl)") }
                 removeDestUrl = removeDestUrl.urlFix
     //            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                 removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
@@ -144,7 +144,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             }
             if export.saveOnly {
                 if endpointCurrent == endpointCount {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.") }
+                    if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.") }
                     nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
                     //            print("remove nodes complete: \(nodesMigrated)")
                 }
@@ -159,12 +159,12 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         endpointInProgress = endpointType
                         UiVar.changeColor  = true
                         Counter.shared.postSuccess = 0
-                        WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] Removing \(endpointType)")
+                        WriteToLog.shared.message("[RemoveEndpoints] Removing \(endpointType)")
                     }   // look to see if we are processing the next endpointType - end
                 }
                 
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] removal URL: \(removeDestUrl)") }
+                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)") }
+                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] removal URL: \(removeDestUrl)") }
                 
                 let encodedURL = URL(string: removeDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -223,7 +223,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 }
                             }
                             
-                            WriteToLog.shared.message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] \(endpointName) (id: \(endPointID))")
+                            WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] \(endpointName) (id: \(endPointID))")
                             Counter.shared.postSuccess += 1
                         } else {
                             methodResult = "fail"
@@ -234,21 +234,21 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                             }
                             UiVar.changeColor  = false
-                            WriteToLog.shared.message(stringOfText: "    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (id: \(endPointID)), statusCode: \(httpResponse.statusCode)")
+                            WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (id: \(endPointID)), statusCode: \(httpResponse.statusCode)")
                             
                             if httpResponse.statusCode == 400 {
-                                WriteToLog.shared.message(stringOfText: "    [RemoveEndpoints] [\(endpointType)]      Verify other items are not dependent on \(endpointName) (id: \(endPointID))")
-                                WriteToLog.shared.message(stringOfText: "    [RemoveEndpoints] [\(endpointType)]      For example, \(endpointName) is not used in a policy")
+                                WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)]      Verify other items are not dependent on \(endpointName) (id: \(endPointID))")
+                                WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)]      For example, \(endpointName) is not used in a policy")
                             }
                             
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] ---------- endpoint info ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t id: \(endPointID)") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] ---------- status code ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] \(httpResponse.statusCode)") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] ---------- response ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] \(httpResponse)") }
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[RemoveEndpoints] ---------- response ----------\n") }
+                            if LogLevel.debug { WriteToLog.shared.message("\n") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- endpoint info ----------") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t id: \(endPointID)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------\n") }
                         }
                         
                         
@@ -295,36 +295,36 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             JamfProServer.validToken["source"] = false
                             JamfProServer.version["source"]    = ""
                             //                            print("[removeEndpoints] endpoint: \(endpointType)")
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpoint: \(endpointType)") }
                             //                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             print("[\(#function)] bulk - finished removing \(endpointType)")
                             updateView(["function": "goButtonEnabled", "button_status": true])
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Done") }
+                            if LogLevel.debug { WriteToLog.shared.message("Done") }
                         }
                         if error != nil {
                         }
                     } else {
                         // selective
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[removeEndpoints] endpointCount: \(endpointCount)\t endpointCurrent: \(endpointCurrent)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpointCount: \(endpointCount)\t endpointCurrent: \(endpointCurrent)") }
                         
                         if endpointCount == endpointCurrent {
                             // check for file that allows deleting data from destination server, delete if found - start
                             updateView(["function": "rmDELETE"])
                             JamfProServer.validToken["source"] = false
                             JamfProServer.version["source"]    = ""
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[removeEndpoints] endpoint: \(endpointType)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpoint: \(endpointType)") }
                             //                            print("[removeEndpoints] endpoint: \(endpointType)")
                             //                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
                             //self.go_button.isEnabled = true
 //                            print("[\(#function)] \(#line) selective - finished removing \(endpointType)")
                             updateView(["function": "goButtonEnabled", "button_status": true])
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Done") }
+                            if LogLevel.debug { WriteToLog.shared.message("Done") }
                         }
                     }
                     if endpointCurrent == endpointCount {
-                        WriteToLog.shared.message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.")
+                        WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.")
                         nodesMigrated += 1
                         //            print("remove nodes complete: \(nodesMigrated)")
                     }
@@ -334,7 +334,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         }
         // moved 241026
 //        if endpointCurrent == endpointCount {
-//            WriteToLog.shared.message(stringOfText: "[removeEndpoints] Last item in \(localEndPointType) complete.")
+//            WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.")
 //            nodesMigrated += 1
 //            //            print("remove nodes complete: \(nodesMigrated)")
 //        }

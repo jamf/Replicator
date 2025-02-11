@@ -8,19 +8,36 @@
 
 import Foundation
 
-var logFileW = FileHandle(forUpdatingAtPath: (History.logPath + History.logFile))
+//var logFileW = FileHandle(forUpdatingAtPath: (History.logPath + History.logFile))
 
 class WriteToLog {
     
     static let shared = WriteToLog()
     
-    func message(stringOfText: String) {
-        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
+//    func message(stringOfText: String) {
+//        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
+////        print("[WriteToLog] \(logString)")
+//
+//        logFileW?.seekToEndOfFile()
+//        if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {
+//            logFileW?.write(historyText)
+//        }
+//    }
+    func message(_ message: String) {
+        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(message)\n":"\(TimeDelegate().getCurrent()) \(message)\n"
 //        print("[WriteToLog] \(logString)")
 
-        logFileW?.seekToEndOfFile()
-        if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {
-            logFileW?.write(historyText)
+        guard let logData = logString.data(using: .utf8) else { return }
+        let logURL = URL(fileURLWithPath: History.logPath + History.logFile)
+
+        do {
+            let fileHandle = try FileHandle(forWritingTo: logURL)
+            defer { fileHandle.closeFile() } // Ensure file is closed
+            
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(logData)
+        } catch {
+            print("[Log Error] Failed to write to log file: \(error.localizedDescription)")
         }
     }
     
@@ -41,13 +58,13 @@ class WriteToLog {
                 // remove old history files
                 if logCount > maxLogFileCount {
                     for i in (0..<logCount-maxLogFileCount) {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Deleting log file: " + logArray[i] + "") }
+                        if LogLevel.debug { WriteToLog.shared.message("Deleting log file: " + logArray[i] + "") }
                         
                         do {
                             try fm.removeItem(atPath: logArray[i])
                         }
                         catch let error as NSError {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)") }
+                            if LogLevel.debug { WriteToLog.shared.message("Error deleting log file:\n    " + logArray[i] + "\n    \(error)") }
                         }
                     }
                 }
@@ -60,11 +77,11 @@ class WriteToLog {
                     try fm.removeItem(atPath: logArray[0])
                 }
                 catch let error as NSError {
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + History.logPath + logArray[0] + "\n    \(error)") }
+                    if LogLevel.debug { WriteToLog.shared.message("Error deleting log file:    \n" + History.logPath + logArray[0] + "\n    \(error)") }
                 }
             }
         } catch {
-            WriteToLog.shared.message(stringOfText: "no log files found")
+            WriteToLog.shared.message("no log files found")
         }
     }
 }

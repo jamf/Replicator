@@ -44,7 +44,7 @@ class RemoveData: NSObject {
         if (theTag == "script_contents_encoded") || (theTag == "id") {
             newXML_trimmed = newXML
         } else {
-//            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Removing blank lines.") }
+//            if LogLevel.debug { WriteToLog.shared.message("Removing blank lines.") }
             newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
             newXML_trimmed = newXML.replacingOccurrences(of: "\r\r", with: "\r")
         }
