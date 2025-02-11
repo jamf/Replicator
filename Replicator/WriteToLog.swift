@@ -8,21 +8,10 @@
 
 import Foundation
 
-//var logFileW = FileHandle(forUpdatingAtPath: (History.logPath + History.logFile))
-
 class WriteToLog {
     
     static let shared = WriteToLog()
     
-//    func message(stringOfText: String) {
-//        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(stringOfText)\n":"\(TimeDelegate().getCurrent()) \(stringOfText)\n"
-////        print("[WriteToLog] \(logString)")
-//
-//        logFileW?.seekToEndOfFile()
-//        if let historyText = (logString as NSString).data(using: String.Encoding.utf8.rawValue) {
-//            logFileW?.write(historyText)
-//        }
-//    }
     func message(_ message: String) {
         let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(message)\n":"\(TimeDelegate().getCurrent()) \(message)\n"
 //        print("[WriteToLog] \(logString)")
