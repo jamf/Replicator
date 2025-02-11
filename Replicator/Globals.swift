@@ -280,14 +280,14 @@ Examples:
 
 public func readSettings(thePath: String = "") -> [String:Any] {
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
-    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[\(#function.description)] settingsPath: \(settingsPath)") }
+    if LogLevel.debug { WriteToLog.shared.message("[\(#function.description)] settingsPath: \(settingsPath)") }
     if !FileManager.default.fileExists(atPath: settingsPath) {
-        WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
+        WriteToLog.shared.message("Error reading plist: \(settingsPath)")
         return([:])
     }
     AppInfo.settings = (NSDictionary(contentsOf: URL(fileURLWithPath: settingsPath)) as? [String : Any] ?? [:])
     if AppInfo.settings.count == 0 {
-        WriteToLog.shared.message(stringOfText: "Error reading plist: \(settingsPath)")
+        WriteToLog.shared.message("Error reading plist: \(settingsPath)")
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))")
     return(AppInfo.settings)
@@ -340,9 +340,9 @@ public func tagValue(xmlString:String, xmlTag:String) -> String {
         let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
         rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
     } else {
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[tagValue] invalid input for tagValue function or tag not found.") }
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\t[tagValue] tag: \(xmlTag)") }
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\t[tagValue] xml: \(xmlString)") }
+        if LogLevel.debug { WriteToLog.shared.message("[tagValue] invalid input for tagValue function or tag not found.") }
+        if LogLevel.debug { WriteToLog.shared.message("\t[tagValue] tag: \(xmlTag)") }
+        if LogLevel.debug { WriteToLog.shared.message("\t[tagValue] xml: \(xmlString)") }
     }
     return rawValue
 }
@@ -354,7 +354,7 @@ public func tagValue2(xmlString:String, startTag:String, endTag:String) -> Strin
         let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
         rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
     } else {
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[tagValue2] Start, \(startTag), and end, \(endTag), not found.") }
+        if LogLevel.debug { WriteToLog.shared.message("[tagValue2] Start, \(startTag), and end, \(endTag), not found.") }
     }
     return rawValue
 }
@@ -375,7 +375,7 @@ public func timeDiff(forWhat: String) -> (Int,Int,Int,Double) {
         break
     }
 //          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//          WriteToLog.shared.message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds")
+//          WriteToLog.shared.message("[Migration Complete] runtime: \(timeDifference) seconds")
     let totalSeconds = Int(components?.second! ?? 0)
     let (h,r) = totalSeconds.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)

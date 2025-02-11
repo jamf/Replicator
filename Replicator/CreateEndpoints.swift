@@ -26,7 +26,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(setting.onlyCopyMissing)")
 
         if (setting.onlyCopyExisting && action == "create") || (setting.onlyCopyMissing && action == "update") {
-            WriteToLog.shared.message(stringOfText: "[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)")
+            WriteToLog.shared.message("[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)")
             Counter.shared.crud[endpointType]?["skipped"]! += 1
             if destEpId != "-1" {
                 updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": endpointCount])
@@ -37,9 +37,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         destEPQ.async { [self] in
             
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[createEndpointsQueue] que \(endpointType) with id \(sourceEpId) for upload")}
+            if LogLevel.debug { WriteToLog.shared.message("[createEndpointsQueue] que \(endpointType) with id \(sourceEpId) for upload")}
             createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: "\(destEpId)", ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n[createEndpointQueue] createArray.count: \(createArray.count)\n")}
+            if LogLevel.debug { WriteToLog.shared.message("\n[createEndpointQueue] createArray.count: \(createArray.count)\n")}
             
             switch endpointType {
             case "buildings":
@@ -52,7 +52,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         jpapi(endpointType: nextEndpoint.endpointType, endPointJSON: nextEndpoint.endPointJSON, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: "\(nextEndpoint.sourceEpId)", destEpId: nextEndpoint.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) { [self]
                             (result: String) in
                             counter.pendingSend -= 1
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[endPointByID] \(result)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
                             if endpointCurrent == endpointCount {
                                 completion("last")
                             } else {
@@ -93,7 +93,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         setting.createIsRunning = true
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)") }
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)") }
 
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -132,11 +132,11 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         // this is where we create the new endpoint
         if !export.saveOnly {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Creating new: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Creating new: \(endpointType)") }
         } else {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)") }
         }
-        //if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
+        //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         
         Queue.shared.create.maxConcurrentOperationCount = maxConcurrentThreads
 //                let semaphore = DispatchSemaphore(value: 0)
@@ -177,7 +177,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                print("[createEndpoints] createDestUrl: \(createDestUrl)")
         
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Original Dest. URL: \(createDestUrl)") }
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Original Dest. URL: \(createDestUrl)") }
         createDestUrl = createDestUrl.urlFix
 //        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
@@ -188,16 +188,17 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             // save trimmed XML - start
             if export.saveTrimmedXml {
                 let endpointName = getName(endpoint: endpointType, objectXML: endPointXML)
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Saving trimmed XML for \(endpointName) with id: \(sourceEpId).") }
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:RemoveData.shared.Xml(theXML: endPointXML, theTag: "scope", keepTags: false)
-                    WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Exporting trimmed XML for \(endpointType) - \(endpointName).")
+                    WriteToLog.shared.message("[CreateEndpoints] Exporting trimmed XML for \(endpointType) - \(endpointName).")
                     XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
             }
             // save trimmed XML - end
-//            print("[\(#line)-CreateEndpoints] endpointName: \(self.endpointName)")
+//            print("[\(#line)-CreateEndpoints] sourceEpId: \(sourceEpId)")
 //            print("[\(#line)-CreateEndpoints] ToMigrate.objects: \(ToMigrate.objects)")
+//            print("[\(#line)-CreateEndpoints] \(endpointCurrent) of \(endpointCount)")
             if export.saveOnly {
                 if (((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa)) || export.backupMode {
                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
@@ -216,8 +217,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             
             // don't create object if we're removing objects
             if !WipeData.state.on {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Action: \(apiAction)     URL: \(createDestUrl)     Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Object XML: \(endPointXML)") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Action: \(apiAction)     URL: \(createDestUrl)     Object \(endpointCurrent) of \(endpointCount)") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Object XML: \(endPointXML)") }
                 
                 if endpointCurrent == 1 {
                     if !retry {
@@ -230,7 +231,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 }
                 if retry {
                     DispatchQueue.main.async {
-                        WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] retrying: \(getName(endpoint: endpointType, objectXML: endPointXML))")
+                        WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] retrying: \(getName(endpoint: endpointType, objectXML: endPointXML))")
                     }
                 }
                 
@@ -275,15 +276,15 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                         if let _ = String(data: data!, encoding: .utf8) {
                             responseData = String(data: data!, encoding: .utf8)!
-    //                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
+    //                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
     //                        print("create data response: \(responseData)")
                         } else {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n\n[CreateEndpoints] No data was returned from post/put.") }
+                            if LogLevel.debug { WriteToLog.shared.message("\n\n[CreateEndpoints] No data was returned from post/put.") }
                         }
                         
                         // look to see if we are processing the next endpointType - start
                         if endpointInProgress != endpointType || endpointInProgress == "" {
-                            WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Replicating \(endpointType)")
+                            WriteToLog.shared.message("[CreateEndpoints] Replicating \(endpointType)")
                             endpointInProgress = endpointType
                             Counter.shared.postSuccess = 0
                         }   // look to see if we are processing the next localEndPointType - end
@@ -294,14 +295,14 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             if counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
                                 whichError = "skip"
                                 counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.")
                             }
                         } else {
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                         }
                                                     
                         if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)")
+                            WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)")
                             
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                             
@@ -386,29 +387,29 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 print("[createEndpoints] device not found, try to create")
                                 capi(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "create", sourceEpId: sourceEpId, destEpId: "0", ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-                                    //                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(result)") }
+                                    //                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(result)") }
                                 }
                                 
                             case "Duplicate UDID":
                                 print("[createEndpoints] Duplicate UDID, try to update")
                                 capi(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "update", sourceEpId: sourceEpId, destEpId: "-1", ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-                                    //                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(result)") }
+                                    //                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(result)") }
                                 }
                                     
                             case "Duplicate serial number", "Duplicate MAC address":
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                 }
                                 capi(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-                                    //                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(result)") }
+                                    //                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(result)") }
                                 }
                                 
                             case "category":
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -418,7 +419,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with department in location":
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -428,38 +429,38 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with building in location":
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
                                 }
                                 capi(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-                                    //                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(result)") }
+                                    //                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(result)") }
                                 }
 
                             // retry network segment without distribution point
                             case "Problem in assignment to distribution point":
-                                WriteToLog.shared.message(stringOfText: "    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["distribution_point", "url"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
                                 }
                                 capi(endpointType: endpointType, endPointXML: tmp_endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                     (result: String) in
-//                                              if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(result)") }
+//                                              if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(result)") }
                                 }
 
                             default:
 //                                    counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
-                                WriteToLog.shared.message(stringOfText: "[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                                WriteToLog.shared.message("[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                 
-//                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n") }
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)") }
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] ---------- status code ----------") }
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] \(httpResponse.statusCode)") }
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] ---------- response data ----------\n\(responseData)") }
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] -----------------------------------\n") }
+//                                    if LogLevel.debug { WriteToLog.shared.message("\n") }
+                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- status code ----------") }
+                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(httpResponse.statusCode)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- response data ----------\n\(responseData)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] -----------------------------------\n") }
                                 // 400 - likely the format of the xml is incorrect or wrong endpoint
                                 // 401 - wrong username and/or password
                                 // 409 - unable to create object; already exists or data missing or xml error
@@ -564,17 +565,17 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     
                 }
                     
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)") }
                     
                     if endpointCurrent > 0 {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
                     }
 //                            semaphore.signal()
                     if error != nil {
                     }
 
                     if endpointCurrent == endpointCount {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints] Last item in \(localEndPointType) complete.") }
+                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Last item in \(localEndPointType) complete.") }
                         nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
     //                    print("nodes complete: \(nodesMigrated)")
                     }
@@ -595,7 +596,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             return
         }
 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] enter") }
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] enter") }
 
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -632,11 +633,11 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         // this is where we create the new endpoint
         if !export.saveOnly {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Creating new: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Creating new: \(endpointType)") }
         } else {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Save only selected, skipping \(apiAction) for: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Save only selected, skipping \(apiAction) for: \(endpointType)") }
         }
-        //if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
+        //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         
         Queue.shared.create.maxConcurrentOperationCount = maxConcurrentThreads
 
@@ -653,18 +654,18 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             localEndPointType = endpointType
         }
                 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)") }
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)") }
        
         Queue.shared.create.addOperation { [self] in
             
             // save trimmed JSON - start
             if export.saveTrimmedXml {
                 let endpointName = endPointJSON["name"] as! String   //getName(endpoint: endpointType, objectXML: endPointJSON)
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).") }
                 DispatchQueue.main.async {
                     let exportTrimmedJson = (export.trimmedXmlScope) ? RemoveData.shared.Json(rawJSON: endPointJSON, theTag: ""):RemoveData.shared.Json(rawJSON: endPointJSON, theTag: "scope")
 //                    print("exportTrimmedJson: \(exportTrimmedJson)")
-                    WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Exporting raw JSON for \(endpointType) - \(endpointName)")
+                    WriteToLog.shared.message("[CreateEndpoints2] Exporting raw JSON for \(endpointType) - \(endpointName)")
                     ExportItem.shared.export(node: endpointType, object: exportTrimmedJson, theName: endpointName, id: "\(sourceEpId)", format: "trimmed")
 //                    self.exportItems(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
 //                    SaveDelegate().exportObject(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
@@ -686,8 +687,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             
             // don't create object if we're removing objects
             if !WipeData.state.on {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Action: \(apiAction)\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Object JSON: \(endPointJSON)") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Action: \(apiAction)\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)") }
+                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Object JSON: \(endPointJSON)") }
     //            print("[CreateEndpoints2] [\(localEndPointType)] process start: \(getName(endpoint: endpointType, objectXML: endPointXML))")
                 
                 if endpointCurrent == 1 {
@@ -720,9 +721,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     }
                                 }
                             }
-                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
                         } else {
-                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
@@ -740,7 +741,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Migrating \(endpointType)")
+                                WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
                                 endpointInProgress = endpointType
                                 Counter.shared.postSuccess = 0
                             }   // look to see if we are processing the next localEndPointType - end
@@ -817,10 +818,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     //                    }   // if let httpResponse = response - end
                         
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
                         
                         if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
                         
                         /*
@@ -832,7 +833,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
                             nodesMigrated+=1
                             // print("added node: \(localEndPointType) - createEndpoints")
         //                    print("nodes complete: \(nodesMigrated)")
@@ -859,9 +860,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     }
                                 }
                             }
-                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
                         } else {
-                            WriteToLog.shared.message(stringOfText: "    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
@@ -881,15 +882,15 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             /*
                             if let _ = String(data: data!, encoding: .utf8) {
                                 responseData = String(data: data!, encoding: .utf8)!
-        //                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] \n\nfull response from create:\n\(responseData)") }
+        //                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] \n\nfull response from create:\n\(responseData)") }
         //                        print("create data response: \(responseData)")
                             } else {
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "\n\n[CreateEndpoints2] No data was returned from post/put.") }
+                                if LogLevel.debug { WriteToLog.shared.message("\n\n[CreateEndpoints2] No data was returned from post/put.") }
                             }
                             */
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Migrating \(endpointType)")
+                                WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
                                 endpointInProgress = endpointType
                                 Counter.shared.postSuccess = 0
                             }   // look to see if we are processing the next localEndPointType - end
@@ -967,10 +968,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     //                    }   // if let httpResponse = response - end
                         
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
                         
                         if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
                         
                         /*
@@ -982,7 +983,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
                             nodesMigrated+=1
                             // print("added node: \(localEndPointType) - createEndpoints")
         //                    print("nodes complete: \(nodesMigrated)")

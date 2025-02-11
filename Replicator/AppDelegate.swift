@@ -42,12 +42,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             Jpapi.shared.action(whichServer: "source", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["source"] ?? "", method: sourceMethod) {
                 (returnedJSON: [String:Any]) in
-                WriteToLog.shared.message(stringOfText: "source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
+                WriteToLog.shared.message("source server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
 
                 Jpapi.shared.action(whichServer: "dest", endpoint: "auth/invalidate-token", apiData: [:], id: "", token: JamfProServer.authCreds["dest"] ?? "", method: destMethod) {
                     (returnedJSON: [String:Any]) in
-                    WriteToLog.shared.message(stringOfText: "destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
-                    logFileW?.closeFile()
+                    WriteToLog.shared.message("destination server token task: \(returnedJSON["JPAPI_result"] ?? "unknown response")")
+
                     NSApplication.shared.terminate(self)
                 }
             }
@@ -241,7 +241,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mainWindowController.showWindow(self)
         }
         else {
-            WriteToLog.shared.message(stringOfText: "[AppDelegate] Replicator is running silently")
+            WriteToLog.shared.message("[AppDelegate] Replicator is running silently")
             
             SourceDestVC().initVars()
         }

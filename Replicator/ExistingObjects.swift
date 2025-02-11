@@ -32,7 +32,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             return
         }
                 
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] enter - destination endpoint: \(theDestEndpoint)") }
+        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] enter - destination endpoint: \(theDestEndpoint)") }
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
@@ -154,7 +154,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             } else {
                 endpointDependencyArray = ["\(existingEndpointNode)"]
             }
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] endpointDependencyArray: \(endpointDependencyArray)") }
+            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] endpointDependencyArray: \(endpointDependencyArray)") }
             
 //            print("                    completed: \(completed)")
 //            print("endpointDependencyArray.count: \(endpointDependencyArray.count)")
@@ -177,7 +177,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                     if setting.fullGUI {
                                         _ = Alert.shared.display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(statusCode)", secondButton: "")
                                     } else {
-                                        WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] Failed to get existing \(existingEndpointNode)    Status code: \(statusCode)")
+                                        WriteToLog.shared.message("[ExistingObjects.capi] Failed to get existing \(existingEndpointNode)    Status code: \(statusCode)")
                                     }
                                     pref.stopMigration = true
                                     DispatchQueue.main.async { [self] in
@@ -198,7 +198,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                             
                             do {
                                 
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi]  --------------- Getting all \(destEndpoint) ---------------") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi]  --------------- Getting all \(destEndpoint) ---------------") }
                                 
 //                                print("[\(#function)] \(#line) - existingEndpointNode: \(existingEndpointNode)")
                                 switch existingEndpointNode {
@@ -217,7 +217,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                         PatchTitleConfigurations.destination[i].siteName = JamfProSites.destination.first(where: {$0.id == PatchTitleConfigurations.destination[i].siteId})?.name ?? "NONE"
                                     }
                                     
-                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] Found \(PatchTitleConfigurations.destination.count) patch configurations.") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] Found \(PatchTitleConfigurations.destination.count) patch configurations.") }
                                     
                                     for patchObject in PatchTitleConfigurations.destination as [PatchSoftwareTitleConfiguration] {
                                                                                             let displayName = patchObject.displayName
@@ -229,7 +229,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                         //                                                    displayNames.append(displayName)
                                         
                                         if softwareTitleName.isEmpty {
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] skipping id: \(Int(patchObject.id ?? "") ?? 0), could not determine the display name.") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] skipping id: \(Int(patchObject.id ?? "") ?? 0), could not determine the display name.") }
                                         } else {
                                             currentEPs[softwareTitleName] = Int(patchObject.id ?? "") ?? 0
                                         }
@@ -284,17 +284,17 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                     if let objectArray = result as? [[String: Any]] {
                                         let destEndpointJSON = objectArray[0]
 //                                        print("[ExistingObjects.capi] destEndpointJSON: \(destEndpointJSON)")
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] existing destEndpointJSON: \(destEndpointJSON)") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] existing destEndpointJSON: \(destEndpointJSON)") }
 //                                        switch existingEndpointNode {
                                             
                                             /*
                                              // need to revisit as name isn't the best indicatory on whether or not a computer exists
                                              case "-computers":
-                                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] getting current computers") }
+                                             if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] getting current computers") }
                                              if let destEndpointInfo = destEndpointJSON["computers"] as? [Any] {
                                              let destEndpointCount: Int = destEndpointInfo.count
-                                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] existing \(destEndpoint) found: \(destEndpointCount)") }
-                                             if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] destEndpointInfo: \(destEndpointInfo)") }
+                                             if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] existing \(destEndpoint) found: \(destEndpointCount)") }
+                                             if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] destEndpointInfo: \(destEndpointInfo)") }
                                              
                                              if destEndpointCount > 0 {
                                              for i in (0..<destEndpointCount) {
@@ -320,11 +320,11 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                             var destRecord      = [String:AnyObject]()
                                             var packageIDsNames = [Int:String]()
                                             setting.waitingForPackages = true
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] getting current packages") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] getting current packages") }
                                             if let destEndpointInfo = destEndpointJSON["packages"] as? [Any] {
                                                 let destEndpointCount: Int = destEndpointInfo.count
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] existing \(destEndpoint) found: \(destEndpointCount)") }
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] destEndpointInfo: \(destEndpointInfo)") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] existing \(destEndpoint) found: \(destEndpointCount)") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] destEndpointInfo: \(destEndpointInfo)") }
                                                 
 //                                                if destEndpointCount > 0 {
 //                                                    for i in (0..<destEndpointCount) {
@@ -376,7 +376,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                 }
                                                 
                                             } else {  //if let destEndpointInfo = destEndpointJSON - end
-                                                WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] failed to get packages")
+                                                WriteToLog.shared.message("[ExistingObjects.capi] failed to get packages")
 //                                                existingObjectsQ.resume()
                                                 ExistingEndpoints.shared.completed += 1
                                                 //                                                        self.updateExistingCounter(change: 1)
@@ -417,16 +417,16 @@ class ExistingObjects: NSObject, URLSessionDelegate {
 //                                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
 //                                                }
                                             }
-                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] getting current \(existingEndpointNode) on destination server") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] getting current \(existingEndpointNode) on destination server") }
                                             if let destEndpointInfo = destEndpointDict as? [Any] {
                                                 let destEndpointCount: Int = destEndpointInfo.count
-                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] existing \(existingEndpointNode) found: \(destEndpointCount) on destination server") }
                                                 
                                                 if destEndpointCount > 0 {
                                                     for i in (0..<destEndpointCount) {
                                                         
                                                         let destRecord = destEndpointInfo[i] as! [String : AnyObject]
-                                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] Processing: \(destRecord).") }
+                                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] Processing: \(destRecord).") }
                                                         destXmlID = (destRecord["id"] as! Int)
                                                         if destRecord["name"] != nil {
                                                             destXmlName = destRecord["name"] as! String
@@ -439,22 +439,22 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                                 // filter out policies created from casper remote - start
                                                                 if destXmlName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && destXmlName != "Update Inventory" {
                                                                     //                                                                            print("[ExistingObjects.capi] [\(existingEndpointNode)] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.")
-                                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.") }
+                                                                    if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.") }
                                                                     currentEPs[destXmlName] = destXmlID
                                                                 }
                                                                 // filter out policies created from casper remote - end
                                                                 
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi]    Array has \(currentEPs.count) entries.") }
+                                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi]    Array has \(currentEPs.count) entries.") }
                                                             } else {
-                                                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] skipping object: \(destXmlName), could not determine its id.") }
+                                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] skipping object: \(destXmlName), could not determine its id.") }
                                                             }
                                                         } else {
-                                                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] skipping id: \(String(describing: destXmlID)), could not determine its name.") }
+                                                            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] skipping id: \(String(describing: destXmlID)), could not determine its name.") }
                                                         }
                                                         
                                                     }   // for i in (0..<destEndpointCount) - end
                                                 } else {   // if destEndpointCount > 0 - end
-                                                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] No endpoints found, clearing entries.") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] No endpoints found, clearing entries.") }
                                                     currentEPs.removeAll()
                                                 }
                                                 
@@ -472,8 +472,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                             }   // if let destEndpointInfo - end
 //                                        }   // switch - end
                                     } else {
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] current endpoint dict: \(currentEPs)") }
-                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] clearing existing current endpoints: \(existingEndpointNode)") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] current endpoint dict: \(currentEPs)") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] clearing existing current endpoints: \(existingEndpointNode)") }
                                         currentEPs.removeAll()
                                         currentEPDict[existingEndpointNode] = [:]
                                         //                                        completion("error parsing JSON")
@@ -491,7 +491,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                 
                                 //                                if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                                 //                                    print(httpResponse.statusCode)
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] returning existing \(existingEndpointNode) endpoints: \(currentEPs)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] returning existing \(existingEndpointNode) endpoints: \(currentEPs)") }
                                 //                            print("returning existing endpoints: \(currentEPs)")
                                 ExistingEndpoints.shared.completed += 1
                                 //                                                self.updateExistingCounter(change: 1)
@@ -515,9 +515,9 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                 //                                    if ExistingEndpoints.shared.completed == endpointDependencyArray.count {
                                 //                                        //                                        print("status code: \(httpResponse.statusCode)")
                                 //                                        //                                        print("currentEPDict[] - error: \(String(describing: currentEPDict))")
-                                //                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] endpoint: \(destEndpoint)") }
-                                //                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] error - status code: \(httpResponse.statusCode)") }
-                                //                                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] xml: \(String(describing: currentEPDict))") }
+                                //                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] endpoint: \(destEndpoint)") }
+                                //                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] error - status code: \(httpResponse.statusCode)") }
+                                //                                        if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] xml: \(String(describing: currentEPDict))") }
                                 //                                        currentEPs = currentEPDict[destEndpoint]!
                                 //                                        completion(("\ndestination count error","\(existingEndpointNode)"))
                                 //                                    }
@@ -555,7 +555,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             }   // destEPQ - end
         } else {
             currentEPs["_"] = 0
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[ExistingObjects.capi] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.") }
+            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.") }
             completion(("Current endpoints - export.saveOnly, not needed.","\(theDestEndpoint)"))
         }
     }

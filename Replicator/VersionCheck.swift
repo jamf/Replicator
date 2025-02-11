@@ -53,7 +53,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {
-                    WriteToLog.shared.message(stringOfText: "[versionCheck] response error: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[versionCheck] response error: \(httpResponse.statusCode)")
                     completion(false, "")
                     return
                 }

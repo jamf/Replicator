@@ -142,14 +142,14 @@ class Credentials {
                         if credential != accountCheck[account] {
                             // credentials already exist, try to update
                             let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Credentials.save] updateStatus for \(account) result: \(updateStatus)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[Credentials.save] updateStatus for \(account) result: \(updateStatus)") }
                             if updateStatus == 0 {
-                                WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), has been updated.")
+                                WriteToLog.shared.message("keychain item for service \(theService), account \(account), has been updated.")
                             } else {
-                                WriteToLog.shared.message(stringOfText: "keychain item for service \(theService), account \(account), failed to update.")
+                                WriteToLog.shared.message("keychain item for service \(theService), account \(account), failed to update.")
                             }
                         } else {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Credentials.save] password for \(account) is up-to-date") }
+                            if LogLevel.debug { WriteToLog.shared.message("[Credentials.save] password for \(account) is up-to-date") }
                         }
                     } else {
                         // try to add new credentials

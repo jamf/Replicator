@@ -17,7 +17,7 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
     static let shared    = ObjectDelegate()
  
     func getAll(whichServer: String, endpoint: String, completion: @escaping (_ result: [Any]) -> Void) {
-        print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint))")
+        print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint)")
         if Counter.shared.crud[endpoint] == nil {
             Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
             Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]

@@ -21,7 +21,7 @@ class Json: NSObject, URLSessionDelegate {
         
         var existingDestUrl = (whichServer == "source") ? JamfProServer.source : JamfProServer.destination
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
-        WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(existingDestUrl)")
+        WriteToLog.shared.message("[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(existingDestUrl)")
     
         URLCache.shared.removeAllCachedResponses()
         
@@ -46,7 +46,7 @@ class Json: NSObject, URLSessionDelegate {
 
         existingDestUrl = existingDestUrl.urlFix
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)") }
+        if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] Looking up: \(existingDestUrl)") }
         print("[Json.getRecord] existing endpoints URL: \(existingDestUrl)")
         
         let destEncodedURL = URL(string: existingDestUrl)
@@ -81,21 +81,21 @@ class Json: NSObject, URLSessionDelegate {
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let endpointJSON = json as? [String: AnyObject] {
-                                WriteToLog.shared.message(stringOfText: "[Json.getRecord] retrieved \(theEndpoint)")
+                                WriteToLog.shared.message("[Json.getRecord] retrieved \(theEndpoint)")
 //                                print("[getRecord] [Json.getRecord] \(endpointJSON)")
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] \(endpointJSON)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] \(endpointJSON)") }
                                 completion(endpointJSON)
                             } else {
-                                WriteToLog.shared.message(stringOfText: "[Json.getRecord] error parsing JSON for \(existingDestUrl)")
+                                WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
                                 completion([:])
                             }
                         }
                     } else {
-                        WriteToLog.shared.message(stringOfText: "[Json.getRecord] error getting \(theEndpoint), HTTP Status Code: \(httpResponse.statusCode)")
+                        WriteToLog.shared.message("[Json.getRecord] error getting \(theEndpoint), HTTP Status Code: \(httpResponse.statusCode)")
                         completion([:])
                     }
                 } else {
-                    WriteToLog.shared.message(stringOfText: "[Json.getRecord] unknown response from \(existingDestUrl)")
+                    WriteToLog.shared.message("[Json.getRecord] unknown response from \(existingDestUrl)")
                     completion([:])
                 }   // if let httpResponse - end
                 semaphore.signal()

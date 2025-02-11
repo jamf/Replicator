@@ -47,7 +47,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         var cookieName         = "" // name of cookie to look for
         
         if method.lowercased() == "skip" {
-            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
+            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
             let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
             completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
             return
@@ -101,7 +101,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             }
         }
         
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Attempting \(method) on \(urlString).") }
+        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Attempting \(method) on \(urlString).") }
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
@@ -157,7 +157,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                         
                         if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
-                            WriteToLog.shared.message(stringOfText: "[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
+                            WriteToLog.shared.message("[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
                             JamfProServer.sessionCookie.append(sessionCookie!)
                         } else {
                             HTTPCookieStorage.shared.removeCookies(since: History.startTime)
@@ -173,7 +173,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if endpoint == "sites" {
                         if let allSites = json as? [[String: Any]] {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).") }
+                            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Data retrieved from \(urlString).") }
                             completion(["sites":allSites])
                             return
                         } else {
@@ -182,20 +182,20 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                     }
                     if let endpointJSON = json as? [String: Any] {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Data retrieved from \(urlString).") }
+                        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Data retrieved from \(urlString).") }
                         completion(endpointJSON)
                         return
                     } else {    // if let endpointJSON error
                         if httpResponse.statusCode == 204 && endpoint == "auth/invalidate-token" {
                             completion(["JPAPI_result":"token terminated", "JPAPI_response":httpResponse.statusCode])
                         } else {
-                            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] JSON error.  Returned data: \(String(describing: json))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] JSON error.  Returned data: \(String(describing: json))") }
                             completion(["JPAPI_result":"failed", "JPAPI_response":httpResponse.statusCode])
                         }
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] Response error: \(httpResponse.statusCode).") }
+                    if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Response error: \(httpResponse.statusCode).") }
                     if endpoint == "sites" {
                         completion(["sites":[]])
                     } else {
@@ -204,7 +204,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     return
                 }
             } else {
-                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] GET response error.  Verify url and port.") }
+                if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] GET response error.  Verify url and port.") }
                 completion([:])
                 return
             }
@@ -235,7 +235,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 }
                             }
                         let theServer = (whichServer == "source") ? JamfProServer.source : JamfProServer.destination
-                        WriteToLog.shared.message(stringOfText: "[ViewController.getEndpoints] Duplicate references to the same package were found on \(theServer)\n\(message)")
+                        WriteToLog.shared.message("[ViewController.getEndpoints] Duplicate references to the same package were found on \(theServer)\n\(message)")
                             if setting.fullGUI {
                                 let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                 if theButton == "Stop" {
@@ -345,7 +345,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                         
                         print("[getAll] records (\(theEndpoint)) added: \(returnedRecords.count)")
-                        WriteToLog.shared.message(stringOfText: "[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
+                        WriteToLog.shared.message("[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
                     }
                     print("[getAll] page \(whichPage + 1) of \(pages) complete")
                     
@@ -384,7 +384,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     }
                 print("[getAll] records returned: \(returnedJson.count)")
                 print("[getAll]    records added: \(existingObjects.count - currentCount)")
-//                                WriteToLog.shared.message(stringOfText: "[Jpapi.getAll] total records fetched \(allRecords.count) objects")
+//                                WriteToLog.shared.message("[Jpapi.getAll] total records fetched \(allRecords.count) objects")
 //                }
                 completion(existingObjects)
             }
@@ -507,7 +507,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
                             completion(recordsArray)
                         } else {
-                            WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] No data was returned from the GET.")
+                            WriteToLog.shared.message("[ExistingObjects.get] No data was returned from the GET.")
                             completion([])
                         }
                     } else {
@@ -515,16 +515,16 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
                                 completion(recordsArray)
                         } else {
-                            WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] No data was returned from the GET.")
+                            WriteToLog.shared.message("[ExistingObjects.get] No data was returned from the GET.")
                             completion([])
                         }
                     }
                 } else {
-                    WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
                     completion([])
                 }
             } else {
-                WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] unable to read the response from the GET.")
+                WriteToLog.shared.message("[ExistingObjects.get] unable to read the response from the GET.")
                 completion([])
             }
         })
@@ -596,12 +596,12 @@ class Jpapi: NSObject, URLSessionDelegate {
                         //                           print("[ExistingObjects.get] endpointJSON for page \(whichPage): \(endpointJSON)")
                         return
                     } else {
-                        WriteToLog.shared.message(stringOfText: "[ExistingObjects.pagedGet] No data was returned from the GET.")
+                        WriteToLog.shared.message("[ExistingObjects.pagedGet] No data was returned from the GET.")
                         completion([:])
                     }
                 }
             } else {
-                WriteToLog.shared.message(stringOfText: "[ExistingObjects.get] unable to read the response from the GET.")
+                WriteToLog.shared.message("[ExistingObjects.get] unable to read the response from the GET.")
                 completion([:])
             }
         })

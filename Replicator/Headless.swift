@@ -23,12 +23,12 @@ class Headless: NSObject {
                         if fm.fileExists(atPath: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"") {
                             try fm.removeItem(at: URL(string: "\"\(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))\"")!)
                         }
-                        WriteToLog.shared.message(stringOfText: "[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip")
+                        WriteToLog.shared.message("[Backup Complete] Backup created: \(export.saveLocation)\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip")
                         
                         let (h,m,s, _) = timeDiff(forWhat: "runTime")
-                        WriteToLog.shared.message(stringOfText: "[Backup Complete] runtime: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
+                        WriteToLog.shared.message("[Backup Complete] runtime: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
                     } catch let error as NSError {
-                        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Unable to delete backup folder! Something went wrong: \(error)") }
+                        if LogLevel.debug { WriteToLog.shared.message("Unable to delete backup folder! Something went wrong: \(error)") }
                     }
                 }
                 
@@ -70,9 +70,9 @@ class Headless: NSObject {
                                                     "\(String(describing: counts["total"]!))".padding(toLength: 10, withPad: " ", startingAt: 0) + "")
                     }
                 }
-                WriteToLog.shared.message(stringOfText: summary)
+                WriteToLog.shared.message(summary)
                 let (h,m,s, _) = timeDiff(forWhat: "runTime")
-                WriteToLog.shared.message(stringOfText: "[Migration Complete] runtime: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
+                WriteToLog.shared.message("[Migration Complete] runtime: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
                 
                 WriteToLog.shared.logCleanup()
                 NSApplication.shared.terminate(self)

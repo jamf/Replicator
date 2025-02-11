@@ -72,7 +72,7 @@ class PatchDelegate: NSObject {
                                             let theSource = try decoder.decode(NameId.self, from: jsonData)
                                             PatchSource.destination.append(theSource)
                                         } catch {
-                                            WriteToLog.shared.message(stringOfText: "[getDependencies] failed to parse patch internal sources")
+                                            WriteToLog.shared.message("[getDependencies] failed to parse patch internal sources")
                                         }
                                     }
                                 }
