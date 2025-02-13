@@ -2724,9 +2724,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }
                     
-                case "buildings", "advancedcomputersearches", "macapplications", "categories", "classes", "computers", "computerextensionattributes", "departments", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "ldapservers", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "scripts", "sites", "softwareupdateservers", "users", "mobiledeviceconfigurationprofiles", "mobiledeviceapplications", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevices", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+                case "advancedcomputersearches", "advancedmobiledevicesearches", "advancedusersearches", "buildings", "categories", "classes", "computerextensionattributes", "computers", "departments", "directorybindings", "diskencryptionconfigurations", "distributionpoints", "dockitems", "ldapservers", "macapplications", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledeviceextensionattributes", "mobiledevices", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "restrictedsoftware", "scripts", "sites", "softwareupdateservers", "userextensionattributes", "users":
                     
-                    print("[getEndpoints] result: \(result.description)")
+//                    print("[getEndpoints] result: \(result.description)")
                     
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
@@ -2848,7 +2848,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     
                                 }   // if UiVar.goSender else - end
                             }
-                            
                             //                            }   // existingEndpoints - end
                         } else {
                             //                                            nodesMigrated+=1
@@ -2869,14 +2868,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                 case "computergroups", "mobiledevicegroups", "usergroups":
-                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] processing device groups") }
+                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] processing \(endpoint)") }
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
                         //                        if Counter.shared.crud[endpoint] == nil {
                         //                            Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
                         //                            Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]
                         //                        }
-                        
                         endpointCount = endpointInfo.count
                         if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] groups found: \(endpointCount)") }
                         
@@ -2886,222 +2884,229 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if endpointCount > 0 {
                             //                            ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
                             //                                (result: (String,String)) in
-                            if pref.stopMigration {
-                                rmDELETE()
-                                completion(["migration stopped", "0"])
-                                return
-                            }
-                            //                                                let (resultMessage, _) = result
-                            // find number of groups
-                            smartCount = 0
-                            staticCount = 0
-                            var excludeCount = 0
-                            
-                            Endpoints.read += 1
-                            // print("[Endpoints.read += 1] \(endpoint)")
-                            
-                            // split computergroups into smart and static - start
-                            for i in (0..<endpointCount) {
-                                let record = endpointInfo[i]
+                            ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: endpoint)  { [self]
+                                (result: (String,String)) in
+                                let (resultMessage, _) = result
+                                //print("[ViewController.getEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(endpoint) - returned from existing objects: \(resultMessage)") }
                                 
-                                let smart: Bool = (record["is_smart"] as! Bool)
-                                if smart {
-                                    //smartCount += 1
-                                    if (record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches") || export.backupMode {
-                                        smartGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                if pref.stopMigration {
+                                    rmDELETE()
+                                    completion(["migration stopped", "0"])
+                                    return
+                                }
+
+                                // find number of groups
+                                smartCount = 0
+                                staticCount = 0
+                                var excludeCount = 0
+                                
+                                Endpoints.read += 1
+                                // print("[Endpoints.read += 1] \(endpoint)")
+                                
+                                // split computergroups into smart and static - start
+                                for i in (0..<endpointCount) {
+                                    let record = endpointInfo[i]
+                                    
+                                    let smart: Bool = (record["is_smart"] as! Bool)
+                                    if smart {
+                                        //smartCount += 1
+                                        if (record["name"] as! String? != "All Managed Clients" && record["name"] as! String? != "All Managed Servers" && record["name"] as! String? != "All Managed iPads" && record["name"] as! String? != "All Managed iPhones" && record["name"] as! String? != "All Managed iPod touches") || export.backupMode {
+                                            smartGroupDict[record["id"] as! Int] = record["name"] as! String?
+                                        }
+                                    } else {
+                                        //staticCount += 1
+                                        staticGroupDict[record["id"] as! Int] = record["name"] as! String?
                                     }
-                                } else {
-                                    //staticCount += 1
-                                    staticGroupDict[record["id"] as! Int] = record["name"] as! String?
-                                }
-                            }
-                            
-                            if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
-                                nodesMigrated+=1
-                            }
-                            // split devicegroups into smart and static - end
-                            
-                            // groupType is "" for bulk migrations, smart/static for selective
-                            switch endpoint {
-                            case "computergroups":
-                                if (!smartComputerGrpsSelected && groupType == "") || groupType == "static" {
-                                    excludeCount += smartGroupDict.count
-                                }
-                                if (!staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
-                                    excludeCount += staticGroupDict.count
-                                }
-                                if smartComputerGrpsSelected && staticComputerGrpsSelected && groupType == "" {
-                                    nodesMigrated-=1
-                                }
-                            case "mobiledevicegroups":
-                                if (!smartIosGrpsSelected && groupType == "") || groupType == "static" {
-                                    excludeCount += smartGroupDict.count
-                                }
-                                if (!staticIosGrpsSelected && groupType == "") || groupType == "smart" {
-                                    excludeCount += staticGroupDict.count
-                                }
-                                if smartIosGrpsSelected && staticIosGrpsSelected {
-                                    nodesMigrated-=1
-                                }
-                            case "usergroups":
-                                if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
-                                    excludeCount += smartGroupDict.count
-                                }
-                                if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
-                                    excludeCount += staticGroupDict.count
-                                }
-                                if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
-                                    nodesMigrated-=1
                                 }
                                 
-                            default: break
-                            }
-                            
-                            //                                                print(" smart_comp_grps_button.state.rawValue: \(smart_comp_grps_button.state.rawValue)")
-                            //                                                print("static_comp_grps_button.state.rawValue: \(static_comp_grps_button.state.rawValue)")
-                            //                                                print("                                  groupType: \(groupType)")
-                            //                                                print("                               excludeCount: \(excludeCount)")
-                            
-                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(smartGroupDict.count) smart groups") }
-                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(staticGroupDict.count) static groups") }
-                            var currentGroupDict: [Int: String] = [:]
-                            
-                            // verify we have some groups
-                            for g in (0...1) {
-                                currentGroupDict.removeAll()
-                                var groupCount = 0
-                                var localEndpoint = endpoint
+                                if (smartGroupDict.count == 0 || staticGroupDict.count == 0) && !(smartGroupDict.count == 0 && staticGroupDict.count == 0) {
+                                    nodesMigrated+=1
+                                }
+                                // split devicegroups into smart and static - end
+                                
+                                // groupType is "" for bulk migrations, smart/static for selective
                                 switch endpoint {
                                 case "computergroups":
-                                    if (smartComputerGrpsSelected || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                        currentGroupDict = smartGroupDict
-                                        groupCount = currentGroupDict.count
-                                        localEndpoint = "smartcomputergroups"
+                                    if (!smartComputerGrpsSelected && groupType == "") || groupType == "static" {
+                                        excludeCount += smartGroupDict.count
                                     }
-                                    if (staticComputerGrpsSelected || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                        currentGroupDict = staticGroupDict
-                                        groupCount = currentGroupDict.count
-                                        localEndpoint = "staticcomputergroups"
+                                    if (!staticComputerGrpsSelected && groupType == "") || groupType == "smart" {
+                                        excludeCount += staticGroupDict.count
+                                    }
+                                    if smartComputerGrpsSelected && staticComputerGrpsSelected && groupType == "" {
+                                        nodesMigrated-=1
                                     }
                                 case "mobiledevicegroups":
-                                    if ((smartIosGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                        currentGroupDict = smartGroupDict
-                                        groupCount = currentGroupDict.count
-                                        localEndpoint = "smartmobiledevicegroups"
+                                    if (!smartIosGrpsSelected && groupType == "") || groupType == "static" {
+                                        excludeCount += smartGroupDict.count
                                     }
-                                    if ((staticIosGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                        currentGroupDict = staticGroupDict
-                                        groupCount = currentGroupDict.count
-                                        localEndpoint = "staticmobiledevicegroups"
+                                    if (!staticIosGrpsSelected && groupType == "") || groupType == "smart" {
+                                        excludeCount += staticGroupDict.count
+                                    }
+                                    if smartIosGrpsSelected && staticIosGrpsSelected {
+                                        nodesMigrated-=1
                                     }
                                 case "usergroups":
-                                    if ((smartUserGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
-                                        currentGroupDict = smartGroupDict
-                                        groupCount = currentGroupDict.count
-                                        //                                                        DeviceGroupType = "smartcomputergroups"
-                                        //                                                        print("usergroups smart - DeviceGroupType: \(DeviceGroupType)")
-                                        localEndpoint = "smartusergroups"
+                                    if (!smartUserGrpsSelected && groupType == "") || groupType == "static" {
+                                        excludeCount += smartGroupDict.count
                                     }
-                                    if ((staticUserGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
-                                        currentGroupDict = staticGroupDict
-                                        groupCount = currentGroupDict.count
-                                        //                                                        DeviceGroupType = "staticcomputergroups"
-                                        //                                                        print("usergroups static - DeviceGroupType: \(DeviceGroupType)")
-                                        localEndpoint = "staticusergroups"
+                                    if (!staticUserGrpsSelected && groupType == "") || groupType == "smart" {
+                                        excludeCount += staticGroupDict.count
                                     }
+                                    if smartUserGrpsSelected && staticUserGrpsSelected && groupType == "" {
+                                        nodesMigrated-=1
+                                    }
+                                    
                                 default: break
                                 }
                                 
-                                var counter = 1
-                                ListDelay.shared.milliseconds = listDelay(itemCount: currentGroupDict.count)
+                                //                                                print(" smart_comp_grps_button.state.rawValue: \(smart_comp_grps_button.state.rawValue)")
+                                //                                                print("static_comp_grps_button.state.rawValue: \(static_comp_grps_button.state.rawValue)")
+                                //                                                print("                                  groupType: \(groupType)")
+                                //                                                print("                               excludeCount: \(excludeCount)")
                                 
-                                Endpoints.countDict[localEndpoint] = groupCount
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(smartGroupDict.count) smart groups") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(staticGroupDict.count) static groups") }
+                                var currentGroupDict: [Int: String] = [:]
                                 
-                                if currentGroupDict.count == 0 && (localEndpoint == "smartcomputergroups" || localEndpoint == "staticcomputergroups" || localEndpoint == "smartmobiledevicegroups" || localEndpoint == "staticmobiledevicegroups") {
-                                    getStatusUpdate2(endpoint: localEndpoint, total: 0)
-                                    putStatusUpdate2(endpoint: localEndpoint, total: 0)
-                                }
-                                
-                                Counter.shared.crud[endpoint]!["total"] = currentGroupDict.count
-                                
-                                for (l_xmlID, l_xmlName) in currentGroupDict {
-                                    AvailableObjsToMig.byId[l_xmlID] = l_xmlName
-                                    if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
-                                        if !WipeData.state.on  {
-                                            //need to call existingEndpoints here to keep proper order?
-                                            if currentEPs[l_xmlName] != nil {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
-                                                
-                                                if setting.onlyCopyMissing {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
-                                                    CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                        (result: String) in
-                                                        completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                // verify we have some groups
+                                for g in (0...1) {
+                                    currentGroupDict.removeAll()
+                                    var groupCount = 0
+                                    var localEndpoint = endpoint
+                                    switch endpoint {
+                                    case "computergroups":
+                                        if (smartComputerGrpsSelected || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                            currentGroupDict = smartGroupDict
+                                            groupCount = currentGroupDict.count
+                                            localEndpoint = "smartcomputergroups"
+                                        }
+                                        if (staticComputerGrpsSelected || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                            currentGroupDict = staticGroupDict
+                                            groupCount = currentGroupDict.count
+                                            localEndpoint = "staticcomputergroups"
+                                        }
+                                    case "mobiledevicegroups":
+                                        if ((smartIosGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                            currentGroupDict = smartGroupDict
+                                            groupCount = currentGroupDict.count
+                                            localEndpoint = "smartmobiledevicegroups"
+                                        }
+                                        if ((staticIosGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                            currentGroupDict = staticGroupDict
+                                            groupCount = currentGroupDict.count
+                                            localEndpoint = "staticmobiledevicegroups"
+                                        }
+                                    case "usergroups":
+                                        if ((smartUserGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "smart")) && (g == 0) {
+                                            currentGroupDict = smartGroupDict
+                                            groupCount = currentGroupDict.count
+                                            //                                                        DeviceGroupType = "smartcomputergroups"
+                                            //                                                        print("usergroups smart - DeviceGroupType: \(DeviceGroupType)")
+                                            localEndpoint = "smartusergroups"
+                                        }
+                                        if ((staticUserGrpsSelected) || (UiVar.goSender != "goButton" && groupType == "static")) && (g == 1) {
+                                            currentGroupDict = staticGroupDict
+                                            groupCount = currentGroupDict.count
+                                            //                                                        DeviceGroupType = "staticcomputergroups"
+                                            //                                                        print("usergroups static - DeviceGroupType: \(DeviceGroupType)")
+                                            localEndpoint = "staticusergroups"
+                                        }
+                                    default: break
+                                    }
+                                    
+                                    var counter = 1
+                                    ListDelay.shared.milliseconds = listDelay(itemCount: currentGroupDict.count)
+                                    
+                                    Endpoints.countDict[localEndpoint] = groupCount
+                                    
+                                    if currentGroupDict.count == 0 && (localEndpoint == "smartcomputergroups" || localEndpoint == "staticcomputergroups" || localEndpoint == "smartmobiledevicegroups" || localEndpoint == "staticmobiledevicegroups") {
+                                        getStatusUpdate2(endpoint: localEndpoint, total: 0)
+                                        putStatusUpdate2(endpoint: localEndpoint, total: 0)
+                                    }
+                                    
+                                    Counter.shared.crud[endpoint]!["total"] = currentGroupDict.count
+                                    
+                                    for (l_xmlID, l_xmlName) in currentGroupDict {
+                                        AvailableObjsToMig.byId[l_xmlID] = l_xmlName
+                                        if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
+                                            if !WipeData.state.on  {
+                                                //need to call existingEndpoints here to keep proper order?
+                                                if currentEPs[l_xmlName] != nil {
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                    
+                                                    if setting.onlyCopyMissing {
+                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                            (result: String) in
+                                                            completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                        }
+                                                    } else {
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                        //                                                                            endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                     }
+                                                    
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                    //                                                                            endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
+                                                    
+                                                    if setting.onlyCopyExisting {
+                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                            (result: String) in
+                                                            completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                        }
+                                                    } else {
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                        //                                                                        endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                    }
+                                                    
                                                 }
-                                                
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
-                                                
-                                                if setting.onlyCopyExisting {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
-                                                    CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                        (result: String) in
-                                                        completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
-                                                    }
-                                                } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                    //                                                                        endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                }
-                                                
-                                            }
-                                        } else {
-                                            RemoveObjects.shared.queue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
-                                        }   // if !WipeData.state.on else - end
-                                        counter += 1
-                                    } else {
-                                        // populate source server under the selective tab
-                                        sortQ.async { [self] in
-                                            //                                                                print("adding \(l_xmlName) to array")
-                                            AvailableObjsToMig.byName[l_xmlName] = "\(l_xmlID)"
-                                            DataArray.source.append(l_xmlName)
-                                            
-                                            DataArray.staticSource = DataArray.source
-                                            updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                            
-                                            //                                                                    DispatchQueue.main.async { [self] in
-                                            //                                                                        srcSrvTableView.reloadData()
-                                            //                                                                    }
-                                            // slight delay in building the list - visual effect
-                                            usleep(ListDelay.shared.milliseconds)
-                                            
-                                            if counter == DataArray.source.count {
-                                                
-                                                sortList(theArray: DataArray.source) { [self]
-                                                    (result: [String]) in
-                                                    DataArray.source = result
-                                                    DispatchQueue.main.async { [self] in
-                                                        srcSrvTableView.reloadData()
-                                                    }
-                                                    //                                                        print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                    goButtonEnabled(button_status: true)
-                                                }
-                                            }
+                                                RemoveObjects.shared.queue(endpointType: localEndpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: groupCount)
+                                            }   // if !WipeData.state.on else - end
                                             counter += 1
-                                        }   // sortQ.async - end
-                                    }   // if UiVar.goSender else - end
-                                }   // for (l_xmlID, l_xmlName) - end
-                                
-                                nodesMigrated+=1
-                                if WipeData.state.on && (UiVar.goSender == "goButton" || UiVar.goSender == "silent") {
-                                    RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                }
-                                
-                            }   //for g in (0...1) - end
+                                        } else {
+                                            // populate source server under the selective tab
+                                            sortQ.async { [self] in
+                                                //                                                                print("adding \(l_xmlName) to array")
+                                                AvailableObjsToMig.byName[l_xmlName] = "\(l_xmlID)"
+                                                DataArray.source.append(l_xmlName)
+                                                
+                                                DataArray.staticSource = DataArray.source
+                                                updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                
+                                                //                                                                    DispatchQueue.main.async { [self] in
+                                                //                                                                        srcSrvTableView.reloadData()
+                                                //                                                                    }
+                                                // slight delay in building the list - visual effect
+                                                usleep(ListDelay.shared.milliseconds)
+                                                
+                                                if counter == DataArray.source.count {
+                                                    
+                                                    sortList(theArray: DataArray.source) { [self]
+                                                        (result: [String]) in
+                                                        DataArray.source = result
+                                                        DispatchQueue.main.async { [self] in
+                                                            srcSrvTableView.reloadData()
+                                                        }
+                                                        //                                                        print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                        goButtonEnabled(button_status: true)
+                                                    }
+                                                }
+                                                counter += 1
+                                            }   // sortQ.async - end
+                                        }   // if UiVar.goSender else - end
+                                    }   // for (l_xmlID, l_xmlName) - end
+                                    
+                                    nodesMigrated+=1
+                                    if WipeData.state.on && (UiVar.goSender == "goButton" || UiVar.goSender == "silent") {
+                                        RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                    }
+                                    
+                                }   //for g in (0...1) - end
+                            }
                             //                            }   // existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)") - end
                         } else {    //if endpointCount > 0 - end
                             //                                            nodesMigrated+=1
