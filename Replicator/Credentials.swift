@@ -32,7 +32,7 @@ class Credentials {
         var loginKeychain: SecKeychain?
         let statusKeychain = SecKeychainOpen("login.keychain-db", &loginKeychain)
         
-        if let loginKeychain = loginKeychain, statusKeychain == errSecSuccess, useLoginKeychainPref {
+        if let _ = loginKeychain, statusKeychain == errSecSuccess, useLoginKeychainPref {
             useLoginKeychain = true
         }
         
