@@ -43,7 +43,8 @@ class Credentials {
                 keychainQuery = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: theService,
 //                                kSecAttrAccessGroup as String: accessGroup,
-                                kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked, // Ensure access after login
+                                 kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock, // Ensure access after login
+//                                 kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked, // Ensure access after login
                                 kSecUseKeychain as String: loginKeychain as Any, // Explicitly store in Login Keychain
                                 kSecAttrAccount as String: account,
                                 kSecValueData as String: password]
