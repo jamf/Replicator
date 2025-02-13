@@ -4917,7 +4917,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
         var newPutTotal = (Counter.shared.crud[adjEndpoint]?["create"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["update"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)
         newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
-//        let theTask = WipeData.state.on ? "removal":"create/update"
+
+        //        print("[putStatusUpdate2] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
         if newPutTotal == totalCount || total == 0 {
             nodesComplete += 1
             WriteToLog.shared.message("[ViewController.putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
@@ -4929,12 +4930,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
         
-        DispatchQueue.main.async { [self] in
+//        DispatchQueue.main.async { [self] in
             if setting.fullGUI && totalCount > 0 {
                 if Counter.shared.crud[adjEndpoint]?["fail"] == 0 {
                     PutLevelIndicator.shared.indicatorColor[adjEndpoint] = .green
 //                    put_levelIndicatorFillColor[adjEndpoint] = .green
-                    put_levelIndicator.fillColor = .green
+                    DispatchQueue.main.async { [self] in
+                        put_levelIndicator.fillColor = .green
+                    }
                 } else if ((Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)! > 0 && (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)! < totalCount) {
                     PutLevelIndicator.shared.indicatorColor[adjEndpoint]/*put_levelIndicatorFillColor[adjEndpoint]*/ = .yellow
                     put_levelIndicator.fillColor = .yellow
@@ -4950,7 +4953,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         putSummary_label.stringValue  = "\(newPutTotal) of \(totalCount)"
                     }
                 }
-            }
+//            }
         }
     }
     
