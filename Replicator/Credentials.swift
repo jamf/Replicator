@@ -42,7 +42,8 @@ class Credentials {
                 print("[Credentials] Saving to Login Keychain...")
                 keychainQuery = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: theService,
-//                                kSecAttrAccessGroup as String: accessGroup,
+                                kSecAttrAccessGroup as String: accessGroup,
+                                 kSecUseDataProtectionKeychain as String: true,  // required if using Access Group
                                  kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock, // Ensure access after login
 //                                 kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked, // Ensure access after login
                                 kSecUseKeychain as String: loginKeychain as Any, // Explicitly store in Login Keychain
@@ -53,8 +54,8 @@ class Credentials {
                 keychainQuery = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: theService,
                                 kSecAttrAccessGroup as String: accessGroup,
-                                 kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock, // Ensure access after login
-//                                kSecUseDataProtectionKeychain as String: true,
+                                kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock, // Ensure access after login
+                                kSecUseDataProtectionKeychain as String: true,  // required if using Access Group
                                 kSecAttrAccount as String: account,
                                 kSecValueData as String: password]
             }
