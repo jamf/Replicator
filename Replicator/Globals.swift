@@ -17,6 +17,7 @@ public var pageSize             = 1000
 public let httpSuccess          = 200...299
 public let fm                   = FileManager()
 public var didRun               = false
+public var dryRun               = false
 
 var jamfAdminId                 = 1
 var fileImport                  = false
@@ -63,6 +64,7 @@ class AvailableObjsToMig: NSObject {
 class ToMigrate: NSObject {
     static var total      = 0
     static var objects    = [String]()
+    static var rawCount   = 0
 }
 
 class Endpoints: NSObject {
@@ -119,7 +121,7 @@ struct History {
     static var startTime = Date()
 }
 
-struct iconfiles {
+@MainActor struct Iconfiles {
     static public var policyDict  = [String:[String:String]]()
     static var pendingDict        = [String:String]()
 }

@@ -322,7 +322,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             if let _ = Counter.shared.progressArray["\(endpointType)"] {
                                 Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
                             }
-                            print("[CreateEndpoints.capi] crud counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
+                            print("[CreateEndpoints.capi] crud \(endpointType) \(apiAction) counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
                             Counter.shared.crud[endpointType]?["\(apiAction)"]! += 1
                             
                             if var summaryArray = Counter.shared.summary[endpointType]?["\(apiAction)"] {
@@ -739,6 +739,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             }
                         }
                         
+                        print("[CreateEndpoints.jpapi] crud \(endpointType) \(apiAction) counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
+                        
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
                                 WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
@@ -748,11 +750,12 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
     //                    DispatchQueue.main.async { [self] in
                             
+                        
                                 // ? remove creation of counters dict defined earlier ?
-                                if Counter.shared.crud[endpointType] == nil {
-                                    Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                                    Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
-                                }
+//                                if Counter.shared.crud[endpointType] == nil {
+//                                    Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//                                    Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
+//                                }
                             
                                                             
                                 Counter.shared.postSuccess += 1

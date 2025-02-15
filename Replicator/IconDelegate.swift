@@ -20,7 +20,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     var iconDictArray = [String:[[String:String]]]()
     var uploadedIcons = [String:Int]()
     
-    func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
+    @MainActor func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
@@ -73,9 +73,9 @@ class IconDelegate: NSObject, URLSessionDelegate {
             // Get or skip icon from Jamf Pro
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] before icon download.") }
 
-            if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "pending" {
-                if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "ready" {
-                    iconfiles.pendingDict["\(ssIconId)"] = "pending"
+            if Iconfiles.pendingDict["\(ssIconId)"] ?? "" != "pending" {
+                if Iconfiles.pendingDict["\(ssIconId)"] ?? "" != "ready" {
+                    Iconfiles.pendingDict["\(ssIconId)"] = "pending"
                     WriteToLog.shared.message("[ViewController.icons] marking icon for \(iconNode) id \(sourcePolicyId) as pending")
                 } else {
                     action = "SKIP"
@@ -108,10 +108,10 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             
                             // see if the icon has been downloaded
 //                            if iconfiles.policyDict["\(ssIconId)"]?["policyId"] == nil || iconfiles.policyDict["\(ssIconId)"]?["policyId"] == "" {
-                            let downloadedIcon = iconfiles.policyDict["\(ssIconId)"]?["policyId"]
+                            let downloadedIcon = Iconfiles.policyDict["\(ssIconId)"]?["policyId"]
                             if downloadedIcon?.fixOptional == nil || downloadedIcon?.fixOptional == "" {
 //                                print("[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
-                                iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                                Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)") }
 //                                        print("createDestUrl: \(createDestUrl)")
                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)") }
@@ -126,8 +126,8 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).") }
 
 //                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"\(iconMigrateResult)", "destinationIconId":""]
-                                            iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
-                                            iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
+                                            Iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
+                                            Iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
                                             
                                             
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id") }
@@ -171,7 +171,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                         } else {
                                             // icon failed to upload
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) failed to upload") }
-                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                                            Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                         }
 
                                     }
@@ -191,9 +191,9 @@ class IconDelegate: NSObject, URLSessionDelegate {
 //                                print("\n[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
 //                                print("[ViewController.icons] policyUrl: \(policyUrl)")
                                 
-                                if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
-                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
-                                    var policyIconDict = iconfiles.policyDict
+                                if Iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
+                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: Iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
+                                    var policyIconDict = Iconfiles.policyDict
 
                                     Json.shared.getRecord(whichServer: "dest", base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (objectRecord: Any) in
@@ -211,7 +211,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                                 
                                                 if newSelfServiceIconId != 0 {
                                                     policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                                    iconfiles.policyDict = policyIconDict
+                                                    Iconfiles.policyDict = policyIconDict
             //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] Returned from Json.getRecord: \(result)") }
                                                                                             
@@ -237,7 +237,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                     }
                                 } else {
                                     WriteToLog.shared.message("[ViewController.icons] using new icon id from destination server")
-                                    newSelfServiceIconId = Int(iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
+                                    newSelfServiceIconId = Int(Iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
                                     
                                         switch endpointType {
                                         case "policies":
@@ -277,7 +277,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
         }   // if (ssIconName != "") && (ssIconUri != "") - end
     }   // func icons - end
     
-    private func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
+    @MainActor private func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
         
         // fix id/hash being passed as optional
         let iconToUpload = _iconToUpload.fixOptional
@@ -293,7 +293,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
         case "GET":
 
 //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
-                iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
 //                print("icon id \(ssIconId) is marked for download/cache")
                 WriteToLog.shared.message("[iconMigrate.\(action)] fetching icon: \(ssIconUri)")
                 // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
@@ -447,7 +447,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                         newId = Int(tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
                                     }
                                 }
-                                iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
+                                Iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
                             case 401:
                                 WriteToLog.shared.message("[iconMigrate.\(action)] **** Authentication failed.")
                             case 404:
@@ -583,12 +583,12 @@ class IconDelegate: NSObject, URLSessionDelegate {
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] updated iconDictArray[\(ssIconId)]: \(String(describing: iconDictArray["\(ssIconId)"]))") }
         }
         iconHoldQ.async {
-            while iconfiles.pendingDict.count > 0 {
+            while Iconfiles.pendingDict.count > 0 {
                 if pref.stopMigration {
                     break
                 }
                 sleep(1)
-                for (iconId, state) in iconfiles.pendingDict {
+                for (iconId, state) in Iconfiles.pendingDict {
                     if (state == "ready") {
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {

@@ -172,7 +172,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                         print("[ExistingObjects.capi] line: \(#line) get all \(existingEndpointNode)")
                         ObjectDelegate.shared.getAll(whichServer: "dest", endpoint: existingEndpointNode) { [self]
                             (result: [Any]) in
-                            if let responseData = result as? [[String: Int]] {
+                            if let responseData = result as? [[String: Int]], responseData.count > 0 {
                                 if let statusCode = responseData[0]["statusCode"], (statusCode < 200 || statusCode > 299) {
                                     if setting.fullGUI {
                                         _ = Alert.shared.display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(statusCode)", secondButton: "")

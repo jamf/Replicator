@@ -93,7 +93,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         //                        print("returnedJSON: \(returnedJSON)")
                         if returnedJSON.count > 0 {
                             sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
-//                                    self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+//                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
                             // save source JSON - start
                             if export.saveRawXml {
 //                                DispatchQueue.main.async { [self] in
@@ -141,7 +141,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
             
             if !(sourceObject?.id ?? "").isEmpty {
                 sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
-//                self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+//                self.updateGetStatus(endpoint: endpoint, total: endpointCount)
 //                for theSourceObj in JamfProSites.source {
 //                    print("[getById] sourceObject?.siteId: \(theSourceObj.id),   name: \(theSourceObj.name)")
 //                }
@@ -261,7 +261,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                             if LogLevel.debug { WriteToLog.shared.message("[getById] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)") }
                             let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
                             sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
-//                                    self.getStatusUpdate2(endpoint: endpoint, total: endpointCount)
+//                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
                             // save source XML - start
                             if export.saveRawXml {
                                 if LogLevel.debug { WriteToLog.shared.message("[getById] Saving raw XML for \(destEpName) with id: \(endpointID).") }
