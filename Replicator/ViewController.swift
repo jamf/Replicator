@@ -1125,8 +1125,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             go_button.title = "Stop"
             getCounters.removeAll()
             putCounters.removeAll()
-            iconfiles.policyDict.removeAll()
-            iconfiles.pendingDict.removeAll()
+            Iconfiles.policyDict.removeAll()
+            Iconfiles.pendingDict.removeAll()
             uploadedIcons.removeAll()
             Go(sender: "goButton")
         } else {
@@ -1175,8 +1175,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             saveRawXmlScope       = (xmlPrefOptions["saveRawXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
             saveTrimmedXmlScope   = (xmlPrefOptions["saveTrimmedXmlScope"] == nil) ? true:xmlPrefOptions["saveRawXmlScope"]!
             
-            smartUserGrpsSelected      = smartUserGrps_button.state.rawValue == 1
-            staticUserGrpsSelected     = staticUserGrps_button.state.rawValue == 1
+            smartUserGrpsSelected      = smartUserGrps_button.state == .on
+            staticUserGrpsSelected     = staticUserGrps_button.state == .on
             smartComputerGrpsSelected  = smart_comp_grps_button.state.rawValue == 1
             staticComputerGrpsSelected = static_comp_grps_button.state.rawValue == 1
             smartIosGrpsSelected       = smart_ios_groups_button.state.rawValue == 1
@@ -1455,8 +1455,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         pref.stopMigration = false
         Counter.shared.createRetry.removeAll()
         Counter.shared.createRetry.removeAll()
-        nodesComplete    = 0
-        getNodesComplete = 0
+        nodesComplete      = 0
+        getNodesComplete   = 0
+        ToMigrate.rawCount = 0
         
         // make sure the labels can change color when we start
         UiVar.changeColor  = true
@@ -1500,49 +1501,61 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     case "general":
                         if sites_button.state.rawValue == 1 {
                             ToMigrate.objects += ["sites"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if userEA_button.state.rawValue == 1 {
                             ToMigrate.objects += ["userextensionattributes"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if ldapservers_button.state.rawValue == 1 {
                             ToMigrate.objects += ["ldapservers"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if users_button.state.rawValue == 1 {
                             ToMigrate.objects += ["users"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if building_button.state.rawValue == 1 {
                             ToMigrate.objects += ["buildings"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if dept_button.state.rawValue == 1 {
                             ToMigrate.objects += ["departments"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if categories_button.state.rawValue == 1 {
                             ToMigrate.objects += ["categories"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if jamfUserAccounts_button.state.rawValue == 1 {
                             ToMigrate.objects += ["jamfusers"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if jamfGroupAccounts_button.state.rawValue == 1 {
                             ToMigrate.objects += ["jamfgroups"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if networks_button.state.rawValue == 1 {
                             ToMigrate.objects += ["networksegments"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if advusersearch_button.state.rawValue == 1 {
                             ToMigrate.objects += ["advancedusersearches"]
+                            ToMigrate.rawCount += 1
                         }
                         
                         if smartUserGrps_button.state.rawValue == 1 || staticUserGrps_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             smartUserGrps_button.state.rawValue == 1 ? (migrateSmartUserGroups = true):(migrateSmartUserGroups = false)
                             staticUserGrps_button.state.rawValue == 1 ? (migrateStaticUserGroups = true):(migrateStaticUserGroups = false)
                             if !fileImport || WipeData.state.on {
@@ -1559,29 +1572,36 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         if classes_button.state.rawValue == 1 {
                             ToMigrate.objects += ["classes"]
+                            ToMigrate.rawCount += 1
                         }
                     case "macOS":
                         if fileshares_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["distributionpoints"]
                         }
                         
                         if directory_bindings_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["directorybindings"]
                         }
                         
                         if disk_encryptions_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["diskencryptionconfigurations"]
                         }
                         
                         if dock_items_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["dockitems"]
                         }
                         
                         if computers_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["computers"]
                         }
                         
                         if sus_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["softwareupdateservers"]
                         }
                         
@@ -1590,24 +1610,29 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                        }
                         
                         if ext_attribs_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["computerextensionattributes"]
                         }
                         
                         if scripts_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["scripts"]
                         }
                         
                         if printers_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["printers"]
                         }
                         
                         if packages_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["packages"]
                         }
                         
                         if smart_comp_grps_button.state.rawValue == 1 || static_comp_grps_button.state.rawValue == 1 {
-                            smart_comp_grps_button.state.rawValue == 1 ? (migrateSmartComputerGroups = true):(migrateSmartComputerGroups = false)
-                            static_comp_grps_button.state.rawValue == 1 ? (migrateStaticComputerGroups = true):(migrateStaticComputerGroups = false)
+                            ToMigrate.rawCount += 1
+                            smart_comp_grps_button.state == .on ? (migrateSmartComputerGroups = true):(migrateSmartComputerGroups = false)
+                            static_comp_grps_button.state == .on ? (migrateStaticComputerGroups = true):(migrateStaticComputerGroups = false)
                             if !fileImport || WipeData.state.on {
                                 ToMigrate.objects += ["computergroups"]
                             } else {
@@ -1621,38 +1646,47 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                         
                         if restrictedsoftware_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["restrictedsoftware"]
                         }
                         
                         if osxconfigurationprofiles_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["osxconfigurationprofiles"]
                         }
                         
                         if macapplications_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["macapplications"]
                         }
                         
                         if patch_mgmt_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["patch-software-title-configurations"]
                         }
                         
                         if advcompsearch_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["advancedcomputersearches"]
                         }
                         
                         if policies_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["policies"]
                         }
                     case "iOS":
                         if mobiledeviceextensionattributes_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["mobiledeviceextensionattributes"]
                         }
                         
                         if mobiledevices_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["mobiledevices"]
                         }
 
                         if smart_ios_groups_button.state.rawValue == 1 || static_ios_groups_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                              smart_ios_groups_button.state.rawValue == 1 ? (migrateSmartMobileGroups = true):(migrateSmartMobileGroups = false)
                              static_ios_groups_button.state.rawValue == 1 ? (migrateStaticMobileGroups = true):(migrateStaticMobileGroups = false)
                              if !fileImport || WipeData.state.on {
@@ -1668,14 +1702,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                          }
 
                         if advancedmobiledevicesearches_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["advancedmobiledevicesearches"]
                         }
                         
                         if mobiledevicecApps_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["mobiledeviceapplications"]
                         }
                         
                         if mobiledeviceconfigurationprofiles_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
                             ToMigrate.objects += ["mobiledeviceconfigurationprofiles"]
                         }
                     default: break
@@ -2255,7 +2292,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             clearSourceObjectsList()
             AvailableObjsToMig.byId.removeAll()
             
-            self.getEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
+            self.getSourceEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
 //                print("[ViewController.readNodes] getEndpoints result: \(result)")
                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] getEndpoints result: \(result)") }
@@ -2283,10 +2320,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func getEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
+    func getSourceEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects from source server (query source server) - destination server if removing
-        print("[getEndpoints] nodesToMigrate: \(nodesToMigrate)")
-        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] enter") }
+        print("[getSourceEndpoints] nodesToMigrate: \(nodesToMigrate)")
+        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] enter") }
 //        pendingGetCount = 0
         Counter.shared.pendingGet = 0
 
@@ -2307,8 +2344,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         let node           = ""
         var endpointCount  = 0
         var groupType      = ""
-        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Getting \(endpoint)") }
-//        print("[ViewController.getEndpoints] Getting \(endpoint), index \(nodeIndex)")
+        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Getting \(endpoint)") }
+//        print("[ViewController.getSourceEndpoints] Getting \(endpoint), index \(nodeIndex)")
         
         if endpoint.contains("smart") {
             groupType = "smart"
@@ -2399,7 +2436,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        }
 //        print("myURL: \(myURL)")
 
-//        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] URL: \(myURL)") }
+//        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] URL: \(myURL)") }
         
         getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
 //        let semaphore = DispatchSemaphore(value: 0)
@@ -2449,9 +2486,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         endpointCount = endpointInfo.count
                         
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
                         
                         if endpointCount > 0 {
                             for thePackage in endpointInfo {
@@ -2469,12 +2506,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     return
                                 }
                                 
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] returning existing packages endpoints: \(AvailableObjsToMig.byId)") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] returning existing packages endpoints: \(AvailableObjsToMig.byId)") }
                                 
                                 //                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 //                                                            return
                                 // make into a func - start
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
                                 
                                 var counter = 1
                                 if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
@@ -2483,12 +2520,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     
                                     for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
                                         if !WipeData.state.on  {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                             
                                             if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                 if setting.onlyCopyMissing {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                    updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                     CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         (result: String) in
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -2498,10 +2535,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     //                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                 if setting.onlyCopyExisting {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                    updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                     CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         (result: String) in
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -2512,7 +2549,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 }
                                             }
                                         } else {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
                                             if WipeData.state.on {
                                                 RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
                                             }
@@ -2551,9 +2588,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }   // if UiVar.goSender else - end
                                 // make into a func - end
                                 
-                                if nodeIndex < nodesToMigrate.count - 1 {
-                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                }
+//                                if nodeIndex < nodesToMigrate.count - 1 {
+//                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                                }
                                 if !(setting.onlyCopyMissing || setting.onlyCopyExisting) {
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 }
@@ -2564,18 +2601,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             // print("[Endpoints.read += 1] \(endpoint)")
                             
                             //                                            nodesMigrated+=1
-                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                            updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
-                            if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                            }
+//                            if nodeIndex < nodesToMigrate.count - 1 {
+//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                            }
                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0 - end
                     } else {   // end if let endpointInfo
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                 case "patch-software-title-configurations":
@@ -2610,116 +2649,119 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
                     Endpoints.countDict["patch-software-title-configurations"] = AvailableObjsToMig.byId.count
                     
-                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
                     
                     if endpoint == "patch-software-title-configurations" {
-                        print("[getEndpoints] fetch patch management dependencies from source server")
-                        PatchDelegate.shared.getDependencies(whichServer: "source") { [self] result in
-                            message_TextField.stringValue = ""
-                            PatchDelegate.shared.getDependencies(whichServer: "dest") { [self] result in
+                        ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
+                            (result: (String,String)) in
+                            print("[getEndpoints] fetch patch management dependencies from source server")
+                            PatchDelegate.shared.getDependencies(whichServer: "source") { [self] result in
                                 message_TextField.stringValue = ""
-                                
-                                var counter = 1
-                                if UiVar.goSender == "goButton" || !setting.fullGUI {
-                                    // export policy details if export.saveRawXml
-                                    if export.saveRawXml {
-                                        DispatchQueue.main.async {
-                                            WriteToLog.shared.message("[getEndpoints] Exporting raw JSON for patch policy details")
-                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                            ExportItem.shared.export(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
-                                            //                                                            ExportItem.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
-                                        }
-                                    }
+                                PatchDelegate.shared.getDependencies(whichServer: "dest") { [self] result in
+                                    message_TextField.stringValue = ""
                                     
-                                    print("[getEndpoints] counters: \(Counter.shared.crud)")
-                                    Counter.shared.crud[endpoint]!["total"] = AvailableObjsToMig.byId.count
-                                    //                                                Counter.shared.crud["patch-software-title-configurations"]!["total"] = AvailableObjsToMig.byId.count
-                                    
-                                    if setting.fullGUI {
-                                        // display migrateDependencies button
-                                        DispatchQueue.main.async {
-                                            if !WipeData.state.on {
-                                                self.migrateDependencies.isHidden = false
+                                    var counter = 1
+                                    if UiVar.goSender == "goButton" || !setting.fullGUI {
+                                        // export policy details if export.saveRawXml
+                                        if export.saveRawXml {
+                                            DispatchQueue.main.async {
+                                                WriteToLog.shared.message("[getEndpoints] Exporting raw JSON for patch policy details")
+                                                let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                                ExportItem.shared.export(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
+                                                //                                                            ExportItem.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
                                             }
                                         }
-                                    }
-                                    
-                                    for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
-                                        if pref.stopMigration { break }
-                                        if !WipeData.state.on  {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
-                                            
-                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                        
+                                        print("[getEndpoints] \(#line) counters: \(Counter.shared.crud)")
+                                        Counter.shared.crud[endpoint]!["total"] = AvailableObjsToMig.byId.count
+                                        //                                                Counter.shared.crud["patch-software-title-configurations"]!["total"] = AvailableObjsToMig.byId.count
+                                        
+                                        if setting.fullGUI {
+                                            // display migrateDependencies button
+                                            DispatchQueue.main.async {
+                                                if !WipeData.state.on {
+                                                    self.migrateDependencies.isHidden = false
+                                                }
+                                            }
+                                        }
+                                        
+                                        for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
+                                            if pref.stopMigration { break }
+                                            if !WipeData.state.on  {
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                                 
-                                                if setting.onlyCopyMissing {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
-                                                    CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                        (result: String) in
-                                                        completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+                                                    
+                                                    if setting.onlyCopyMissing {
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                            (result: String) in
+                                                            completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                        }
+                                                    } else {
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                        //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                    //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                    //                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
+                                                    if setting.onlyCopyExisting {
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                            (result: String) in
+                                                            completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                        }
+                                                    } else {
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                        //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                    }
                                                 }
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-                                                //                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
-                                                if setting.onlyCopyExisting {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
-                                                    CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                        (result: String) in
-                                                        completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
-                                                    }
-                                                } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                    //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                }
-                                            }
-                                        } else {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
-                                            RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
-                                        }   // if !WipeData.state.on else - end
-                                        counter+=1
-                                    }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
-                                    if WipeData.state.on {
-                                        RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-                                    }
-                                } else {
-                                    // populate source server under the selective tab
-                                    // print("populate (\(endpoint)) source server under the selective tab")
-                                    AvailableObjsToMig.byName.removeAll()
-                                    DataArray.source.removeAll()
-                                    ListDelay.shared.milliseconds = listDelay(itemCount: AvailableObjsToMig.byId.count)
-                                    for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
-                                        sortQ.async { [self] in
-                                            //                                            print("adding \(l_xmlName) to array")
-                                            AvailableObjsToMig.byName[l_xmlName] = "\(l_xmlID)"
-                                            DataArray.source.append(l_xmlName)
-                                            
-                                            DataArray.source = DataArray.source.sorted{ $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-                                            
-                                            DataArray.staticSource = DataArray.source
-                                            updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
-                                            
-                                            DispatchQueue.main.async { [self] in
-                                                srcSrvTableView.reloadData()
-                                            }
-                                            // slight delay in building the list - visual effect
-                                            usleep(ListDelay.shared.milliseconds)
-                                            
-                                            if counter == AvailableObjsToMig.byId.count {
-                                                nodesMigrated += 1
-                                                //                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                                goButtonEnabled(button_status: true)
-                                            }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
+                                            }   // if !WipeData.state.on else - end
                                             counter+=1
-                                        }   // sortQ.async - end
-                                    }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
-                                }   // if UiVar.goSender else - end
-                                
-                                completion(displayNames)
+                                        }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
+                                        if WipeData.state.on {
+                                            RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                        }
+                                    } else {
+                                        // populate source server under the selective tab
+                                        // print("populate (\(endpoint)) source server under the selective tab")
+                                        AvailableObjsToMig.byName.removeAll()
+                                        DataArray.source.removeAll()
+                                        ListDelay.shared.milliseconds = listDelay(itemCount: AvailableObjsToMig.byId.count)
+                                        for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
+                                            sortQ.async { [self] in
+                                                //                                            print("adding \(l_xmlName) to array")
+                                                AvailableObjsToMig.byName[l_xmlName] = "\(l_xmlID)"
+                                                DataArray.source.append(l_xmlName)
+                                                
+                                                DataArray.source = DataArray.source.sorted{ $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+                                                
+                                                DataArray.staticSource = DataArray.source
+                                                updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                                
+                                                DispatchQueue.main.async { [self] in
+                                                    srcSrvTableView.reloadData()
+                                                }
+                                                // slight delay in building the list - visual effect
+                                                usleep(ListDelay.shared.milliseconds)
+                                                
+                                                if counter == AvailableObjsToMig.byId.count {
+                                                    nodesMigrated += 1
+                                                    //                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                    goButtonEnabled(button_status: true)
+                                                }
+                                                counter+=1
+                                            }   // sortQ.async - end
+                                        }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
+                                    }   // if UiVar.goSender else - end
+                                    
+                                    completion(displayNames)
+                                }
                             }
                         }
                     }
@@ -2731,17 +2773,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
                         endpointCount = endpointInfo.count
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
                         
                         if endpointCount > 0 {
                             // get existing (destination server) objects
                             ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: endpoint)  { [self]
                                 (result: (String,String)) in
                                 let (resultMessage, _) = result
-                                //print("[ViewController.getEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(endpoint) - returned from existing objects: \(resultMessage)") }
+                                //print("[ViewController.getSourceEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(endpoint) - returned from existing objects: \(resultMessage)") }
                                 
                                 if pref.stopMigration {
                                     rmDELETE()
@@ -2765,7 +2807,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                     
                                 }   // for i in (0..<endpointCount) end
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
                                 
                                 var counter = 1
                                 if UiVar.goSender == "goButton" || !setting.fullGUI {
@@ -2775,13 +2817,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
                                         if pref.stopMigration { break }
                                         if !WipeData.state.on  {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                             
                                             if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                 
                                                 if setting.onlyCopyMissing {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                    updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                     CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         (result: String) in
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -2791,11 +2833,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                 
                                                 if setting.onlyCopyExisting {
-                                                    getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                    updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                     CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         //                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         (result: String) in
@@ -2807,7 +2849,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 }
                                             }
                                         } else {
-                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
                                             RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
                                         }   // if !WipeData.state.on else - end
                                         counter+=1
@@ -2851,24 +2893,26 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //                            }   // existingEndpoints - end
                         } else {
                             //                                            nodesMigrated+=1
-                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                            updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
                             Endpoints.read += 1
                         }   // if endpointCount > 0 - end
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {   // end if let endpointInfo
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
                 case "computergroups", "mobiledevicegroups", "usergroups":
-                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] processing \(endpoint)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] processing \(endpoint)") }
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
                         
                         //                        if Counter.shared.crud[endpoint] == nil {
@@ -2876,7 +2920,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         //                            Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]
                         //                        }
                         endpointCount = endpointInfo.count
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] groups found: \(endpointCount)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] groups found: \(endpointCount)") }
                         
                         var smartGroupDict: [Int: String] = [:]
                         var staticGroupDict: [Int: String] = [:]
@@ -2887,8 +2931,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: endpoint)  { [self]
                                 (result: (String,String)) in
                                 let (resultMessage, _) = result
-                                //print("[ViewController.getEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(endpoint) - returned from existing objects: \(resultMessage)") }
+                                //print("[ViewController.getSourceEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(endpoint) - returned from existing objects: \(resultMessage)") }
                                 
                                 if pref.stopMigration {
                                     rmDELETE()
@@ -2966,8 +3010,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 //                                                print("                                  groupType: \(groupType)")
                                 //                                                print("                               excludeCount: \(excludeCount)")
                                 
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(smartGroupDict.count) smart groups") }
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(staticGroupDict.count) static groups") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(smartGroupDict.count) smart groups") }
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(staticGroupDict.count) static groups") }
                                 var currentGroupDict: [Int: String] = [:]
                                 
                                 // verify we have some groups
@@ -3022,7 +3066,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     Endpoints.countDict[localEndpoint] = groupCount
                                     
                                     if currentGroupDict.count == 0 && (localEndpoint == "smartcomputergroups" || localEndpoint == "staticcomputergroups" || localEndpoint == "smartmobiledevicegroups" || localEndpoint == "staticmobiledevicegroups") {
-                                        getStatusUpdate2(endpoint: localEndpoint, total: 0)
+                                        updateGetStatus(endpoint: localEndpoint, total: 0)
                                         putStatusUpdate2(endpoint: localEndpoint, total: 0)
                                     }
                                     
@@ -3034,10 +3078,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             if !WipeData.state.on  {
                                                 //need to call existingEndpoints here to keep proper order?
                                                 if currentEPs[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                     
                                                     if setting.onlyCopyMissing {
-                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                         CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                             (result: String) in
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -3048,11 +3092,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                     
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
                                                     
                                                     if setting.onlyCopyExisting {
-                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                         CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                             (result: String) in
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -3110,35 +3154,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //                            }   // existingEndpoints(skipLookup: false, theDestEndpoint: "\(endpoint)") - end
                         } else {    //if endpointCount > 0 - end
                             //                                            nodesMigrated+=1
-                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                            updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
                             Endpoints.read += 1
                             // print("[Endpoints.read += 1] \(endpoint)")
                             //                                            if endpoint == ToMigrate.objects.last {
-                            //                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
+                            //                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Reached last object to migrate: \(endpoint)") }
                             //                                                self.rmDELETE()
                             //                                            }
                         }   // else if endpointCount > 0 - end
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
                 case "policies":
-                    //                                    print("[ViewController.getEndpoints] processing policies")
-                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] processing policies") }
+                    //                                    print("[ViewController.getSourceEndpoints] processing policies")
+                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] processing policies") }
                     if let endpointArray = result as? [[String: Any]], let endpointJson = endpointArray[0] as? [String: Any], let endpointInfo = endpointJson[endpointParent] as? [[String: Any]] /*endpointJSON[endpointParent] as? [Any]*/ {
 //                        print("[getEndpoints] \(endpoint) endpointInfo: \(endpointInfo)")
                         endpointCount = endpointInfo.count
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] policies found: \(endpointCount)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] policies found: \(endpointCount)") }
                         
                         var computerPoliciesDict: [Int: String] = [:]
                         
@@ -3161,8 +3207,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: "policies")  { [self]
                                 (result: (String,String)) in
                                 let (resultMessage, _) = result
-                                //print("[ViewController.getEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] policies - returned from existing endpoints: \(resultMessage)") }
+                                //print("[ViewController.getSourceEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
+                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] policies - returned from existing endpoints: \(resultMessage)") }
                                 
                                 // filter out policies created from jamf remote (casper remote) - start
                                 for i in (0..<endpointCount) {
@@ -3180,7 +3226,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 var counter = 1
                                 
                                 ListDelay.shared.milliseconds = listDelay(itemCount: computerPoliciesDict.count)
-                                //                                                print("[ViewController.getEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
+                                //                                                print("[ViewController.getSourceEndpoints] [policies] policy count: \(nonRemotePolicies)")    // appears 2
                                 
                                 Endpoints.read += 1
                                 // print("[Endpoints.read += 1] \(endpoint)")
@@ -3196,13 +3242,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     for (l_xmlID, l_xmlName) in computerPoliciesDict {
                                         if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
                                             if !WipeData.state.on  {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
                                                 //                                                        if currentEPs[l_xmlName] != nil {
                                                 if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                     
                                                     if setting.onlyCopyMissing {
-                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                         CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                             (result: String) in
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -3213,11 +3259,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                     
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                     
                                                     if setting.onlyCopyExisting {
-                                                        getStatusUpdate2(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                        updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                         CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                             (result: String) in
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
@@ -3229,7 +3275,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     
                                                 }
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
                                                 RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: nonRemotePolicies)
                                             }   // if !WipeData.state.on else - end
                                             counter += 1
@@ -3266,32 +3312,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }   // existingEndpoints - end
                         } else {
                             //                                            nodesMigrated+=1
-                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                            updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
                             Endpoints.read += 1
                             // print("[Endpoints.read += 1] \(endpoint)")
                             //                                            if endpoint == ToMigrate.objects.last {
-                            //                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Reached last object to migrate: \(endpoint)") }
+                            //                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Reached last object to migrate: \(endpoint)") }
                             //                                                self.rmDELETE()
                             ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                             //                                            }
-                            if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                            }
+//                            if nodeIndex < nodesToMigrate.count - 1 {
+//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                            }
                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])") }
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
-                        //                                        print("[ViewController.getEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])") }
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
+                        //                                        print("[ViewController.getSourceEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {   //if let endpointInfo = endpointJSON - end
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])") }
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])") }
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -3304,9 +3352,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         print("endpointInfo: \(endpointInfo)")
                         
                         endpointCount = endpointInfo.count
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Initial count for \(endpoint) found: \(endpointCount)") }
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
                         
                         if endpointCount > 0 {
                             
@@ -3318,14 +3366,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     return
                                 }
                                 let (resultMessage, _) = result
-                                //print("[ViewController.getEndpoints] \(#function.short) ldapservers - returned from existing objects: \(resultMessage)")
+                                //print("[ViewController.getSourceEndpoints] \(#function.short) ldapservers - returned from existing objects: \(resultMessage)")
                                 if LogLevel.debug { WriteToLog.shared.message("[getEndpoints-LDAP] Returned from existing ldapservers: \(resultMessage)") }
                                 
                                 ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: endpoint)  { [self]
                                     (result: (String,String)) in
                                     let (resultMessage, _) = result
-                                    //print("[ViewController.getEndpoints] \(#function.short) \(node) - returned from existing objects: \(resultMessage)")
-                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Returned from existing \(node): \(resultMessage)") }
+                                    //print("[ViewController.getSourceEndpoints] \(#function.short) \(node) - returned from existing objects: \(resultMessage)")
+                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Returned from existing \(node): \(resultMessage)") }
                                     
                                     Endpoints.read += 1
                                     // print("[Endpoints.read += 1] \(endpoint)")
@@ -3341,34 +3389,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             AvailableObjsToMig.byId[record["id"] as! Int] = record["name"] as! String?
                                         }
                                         
-                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Current number of \(endpoint) to process: \(AvailableObjsToMig.byId.count)") }
+                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Current number of \(endpoint) to process: \(AvailableObjsToMig.byId.count)") }
                                     }   // for i in (0..<endpointCount) end
-                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
                                     
                                     var counter = 1
                                     if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
                                         if AvailableObjsToMig.byId.count == 0 && endpoint == "jamfusers"{
-                                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                                            updateGetStatus(endpoint: endpoint, total: 0)
                                             putStatusUpdate2(endpoint: endpoint, total: 0)
                                         }
                                         for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
                                             if !WipeData.state.on  {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
                                                 
                                                 if currentEPs[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) already exists") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                     
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                     //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] \(l_xmlName) - create") }
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
                                                     RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
                                                 }
                                                 
@@ -3409,17 +3457,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
                                     }   // if UiVar.goSender else - end
                                     
-                                    // fix reading next endpoint for other endpoints - lnh
-                                    if nodeIndex < nodesToMigrate.count - 1 {
-                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                                    }
+//                                    if nodeIndex < nodesToMigrate.count - 1 {
+//                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                                    }
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     
                                 }   // existingEndpoints - end
                             }
                             
                         } else {
-                            getStatusUpdate2(endpoint: endpoint, total: 0)
+                            updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
                             Endpoints.read += 1
@@ -3428,15 +3475,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //                                                self.rmDELETE()
                             ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                             //                                            }
-                            if nodeIndex < nodesToMigrate.count - 1 {
-                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                            }
+//                            if nodeIndex < nodesToMigrate.count - 1 {
+//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                            }
                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0 - end
                     } else {   // end if let buildings, departments...
-                        if nodeIndex < nodesToMigrate.count - 1 {
-                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-                        }
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate2(endpoint: endpoint, total: 0)
+//                        if nodeIndex < nodesToMigrate.count - 1 {
+//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                        }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -3729,7 +3778,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
              WriteToLog.shared.message("[readDataFiles] \(endpoint) fileCount = 0.")
              
             //                 nodesMigrated+=1    // ;print("added node: \(endpoint) - readDataFiles2")
-             getStatusUpdate2(endpoint: endpoint, total: fileCount)
+             updateGetStatus(endpoint: endpoint, total: fileCount)
              putStatusUpdate2(endpoint: endpoint, total: fileCount)
              
              if nodeIndex < nodesToMigrate.count - 1 {
@@ -3752,7 +3801,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: "\(endpoint)") { [self]
             (result: (String,String)) in
             let (resultMessage, _) = result
-            //print("[ViewController.getEndpoints] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
+            //print("[ViewController.processFiles] \(#function.short) \(endpoint) - returned from existing objects: \(resultMessage)")
             if LogLevel.debug { WriteToLog.shared.message("[processFiles] Returned from existing \(endpoint): \(resultMessage)") }
             
             readFilesQ.maxConcurrentOperationCount = 1
@@ -3767,7 +3816,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
 //                    print("[processFiles] l_id: \(l_id), l_name: \(theObject.objectName.xmlDecode), l_xml: \(l_xml)")
                     
-                    getStatusUpdate2(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
+                    updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
                     if l_id != "" && l_name != "" && l_xml != "" {
@@ -4488,8 +4537,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 AllEndpointsArray.removeAll()
                 AvailableObjsToMig.byId.removeAll()
                 
-                iconfiles.policyDict.removeAll()
-                iconfiles.pendingDict.removeAll()
+                Iconfiles.policyDict.removeAll()
+                Iconfiles.pendingDict.removeAll()
                 
                 if setting.fullGUI {
                     DispatchQueue.main.async { [self] in
@@ -4818,10 +4867,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        let totalCount = (fileImport && UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         
+        print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
         if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-            getNodesComplete += 1
-            if getNodesComplete == ToMigrate.total && export.saveOnly {
+            
+            let getNext = !(smartComputerGrpsSelected && staticComputerGrpsSelected && endpoint == "smartcomputergroups")
+            if getNext {
+                getNodesComplete += 1
+            }
+            
+            
+            print("[getStatusUpdate2] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
+            if getNodesComplete == ToMigrate.rawCount && export.saveOnly {
                 runComplete()
+            } else {
+                if getNodesComplete < ToMigrate.rawCount && getNext {
+                    readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
+                }
             }
         }
         
@@ -4842,55 +4903,60 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func getStatusUpdate2(endpoint: String, total: Int, index: Int = -1) {
-        var adjEndpoint = ""
-        switch endpoint {
-        case "accounts/userid":
-            adjEndpoint = "jamfusers"
-        case "accounts/groupid":
-            adjEndpoint = "jamfgroups"
-        default:
-            adjEndpoint = endpoint
-        }
-        
-        if index == -1 {
-            if getCounters[adjEndpoint] == nil {
-                getCounters[adjEndpoint] = ["get":1]
-            } else {
-                getCounters[adjEndpoint]!["get"]! += 1
-            }
-        } else {
-                getCounters[adjEndpoint] = ["get":index]
-        }
-        
-        let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
-        
-        print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
-        print("[getStatusUpdate2] Endpoint: \(getNodesComplete+1) of \(ToMigrate.total)")
-        
-        if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-            getNodesComplete += 1
-            if getNodesComplete == ToMigrate.total && export.saveOnly {
-                runComplete()
-            }
-        }
-        
-        if setting.fullGUI && totalCount > 0 {
-            DispatchQueue.main.async { [self] in
-                print("[getStatusUpdate2] adjEndpoint: \(adjEndpoint)")
-//                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
-                if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
-//                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
-                        get_name_field.stringValue    = adjEndpoint
-                        get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
-//                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
-                        getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
-                    }
-                }
-            }
-        }
-    }
+//    func getStatusUpdate2(endpoint: String, total: Int, index: Int = -1) {
+//        var adjEndpoint = ""
+//        switch endpoint {
+//        case "accounts/userid":
+//            adjEndpoint = "jamfusers"
+//        case "accounts/groupid":
+//            adjEndpoint = "jamfgroups"
+//        default:
+//            adjEndpoint = endpoint
+//        }
+//        
+//        if index == -1 {
+//            if getCounters[adjEndpoint] == nil {
+//                getCounters[adjEndpoint] = ["get":1]
+//            } else {
+//                getCounters[adjEndpoint]!["get"]! += 1
+//            }
+//        } else {
+//                getCounters[adjEndpoint] = ["get":index]
+//        }
+//        
+//        let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
+//        
+//        print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
+//        print("[getStatusUpdate2] Endpoint: \(getNodesComplete+1) of \(ToMigrate.total)")
+//        
+//        if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
+//            getNodesComplete += 1
+//            if getNodesComplete == ToMigrate.total && export.saveOnly {
+//                runComplete()
+//            } else {
+//                if getNodesComplete < ToMigrate.total {
+//                    readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
+//                }
+//            }
+//        }
+//        
+//        if setting.fullGUI && totalCount > 0 {
+//            DispatchQueue.main.async { [self] in
+//                print("[getStatusUpdate2] adjEndpoint: \(adjEndpoint)")
+////                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
+//                if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
+////                if getCounters[adjEndpoint]!["get"]! > 0 {
+//                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+//                        get_name_field.stringValue    = adjEndpoint
+//                        get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
+////                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
+//                        getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
+//                    }
+//                }
+//            }
+//        }
+//    }
+    
     func putStatusUpdate2(endpoint: String, total: Int) {
         var adjEndpoint = ""
         
@@ -4918,14 +4984,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         var newPutTotal = (Counter.shared.crud[adjEndpoint]?["create"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["update"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)
         newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
 
-        //        print("[putStatusUpdate2] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
+        print("[putStatusUpdate2] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
         if newPutTotal == totalCount || total == 0 {
             nodesComplete += 1
-            WriteToLog.shared.message("[ViewController.putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
+            WriteToLog.shared.message("[putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
+            print("[putStatusUpdate2] \(adjEndpoint) nodesComplete: \(nodesComplete) - put ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
             if nodesComplete == ToMigrate.total {
                 if !setting.fullGUI {
                     nodesMigrated = nodesComplete
                 }
+                print("[putStatusUpdate2] runComplete")
                 runComplete()
             }
         }
@@ -5010,9 +5078,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // Get or skip icon from Jamf Pro
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] before icon download.") }
 
-            if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "pending" {
-                if iconfiles.pendingDict["\(ssIconId)"] ?? "" != "ready" {
-                    iconfiles.pendingDict["\(ssIconId)"] = "pending"
+            if Iconfiles.pendingDict["\(ssIconId)"] ?? "" != "pending" {
+                if Iconfiles.pendingDict["\(ssIconId)"] ?? "" != "ready" {
+                    Iconfiles.pendingDict["\(ssIconId)"] = "pending"
                     WriteToLog.shared.message("[ViewController.icons] marking icon for \(iconNode) id \(sourcePolicyId) as pending")
                 } else {
                     action = "SKIP"
@@ -5045,10 +5113,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             
                             // see if the icon has been downloaded
 //                            if iconfiles.policyDict["\(ssIconId)"]?["policyId"] == nil || iconfiles.policyDict["\(ssIconId)"]?["policyId"] == "" {
-                            let downloadedIcon = iconfiles.policyDict["\(ssIconId)"]?["policyId"]
+                            let downloadedIcon = Iconfiles.policyDict["\(ssIconId)"]?["policyId"]
                             if downloadedIcon?.fixOptional == nil || downloadedIcon?.fixOptional == "" {
 //                                print("[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
-                                iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                                Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] upload icon (id=\(ssIconId)) to: \(createDestUrl)") }
 //                                        print("createDestUrl: \(createDestUrl)")
                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] POST icon (id=\(ssIconId)) to: \(createDestUrl)") }
@@ -5063,8 +5131,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) successfully uploaded and has id=\(iconMigrateResult).") }
 
 //                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"\(iconMigrateResult)", "destinationIconId":""]
-                                            iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
-                                            iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
+                                            Iconfiles.policyDict["\(ssIconId)"]?["policyId"]          = "\(iconMigrateResult)"
+                                            Iconfiles.policyDict["\(ssIconId)"]?["destinationIconId"] = ""
                                             
                                             
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] future usage of source icon id \(ssIconId) should reference new policy id \(iconMigrateResult) for the icon id") }
@@ -5108,7 +5176,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         } else {
                                             // icon failed to upload
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] source icon (id=\(ssIconId)) failed to upload") }
-                                            iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                                            Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
                                         }
 
                                     }
@@ -5128,9 +5196,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                print("\n[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
 //                                print("[ViewController.icons] policyUrl: \(policyUrl)")
                                 
-                                if iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
-                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
-                                    var policyIconDict = iconfiles.policyDict
+                                if Iconfiles.policyDict["\(ssIconId.fixOptional)"]!["destinationIconId"]! == "" {
+                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] getting downloaded icon id from destination server, policy id: \(String(describing: Iconfiles.policyDict["\(ssIconId.fixOptional)"]!["policyId"]!))") }
+                                    var policyIconDict = Iconfiles.policyDict
 
                                     Json.shared.getRecord(whichServer: "dest", base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(endpointType)/id/\(thePolicyID)/subset/SelfService")  {
                                         (objectRecord: Any) in
@@ -5148,7 +5216,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 
                                                 if newSelfServiceIconId != 0 {
                                                     policyIconDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
-                                                    iconfiles.policyDict = policyIconDict
+                                                    Iconfiles.policyDict = policyIconDict
             //                                        iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"] = "\(newSelfServiceIconId)"
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] Returned from Json.getRecord: \(result)") }
                                                                                             
@@ -5174,7 +5242,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 } else {
                                     WriteToLog.shared.message("[ViewController.icons] using new icon id from destination server")
-                                    newSelfServiceIconId = Int(iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
+                                    newSelfServiceIconId = Int(Iconfiles.policyDict["\(ssIconId)"]!["destinationIconId"]!) ?? 0
                                     
                                         switch endpointType {
                                         case "policies":
@@ -5230,7 +5298,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         case "GET":
 
 //            print("checking iconfiles.policyDict[\(ssIconId)]: \(String(describing: iconfiles.policyDict["\(ssIconId)"]))")
-                iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
+                Iconfiles.policyDict["\(ssIconId)"] = ["policyId":"", "destinationIconId":""]
 //                print("icon id \(ssIconId) is marked for download/cache")
                 WriteToLog.shared.message("[iconMigrate.\(action)] fetching icon: \(ssIconUri)")
                 // https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_from_websites
@@ -5384,7 +5452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         newId = Int(tagValue2(xmlString: dataResponse, startTag: "<id>", endTag: "</id>")) ?? 0
                                     }
                                 }
-                                iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
+                                Iconfiles.pendingDict["\(ssIconId.fixOptional)"] = "ready"
                             case 401:
                                 WriteToLog.shared.message("[iconMigrate.\(action)] **** Authentication failed.")
                             case 404:
@@ -5518,12 +5586,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] updated iconDictArray[\(ssIconId)]: \(String(describing: iconDictArray["\(ssIconId)"]))") }
         }
         iconHoldQ.async {
-            while iconfiles.pendingDict.count > 0 {
+            while Iconfiles.pendingDict.count > 0 {
                 if pref.stopMigration {
                     break
                 }
                 sleep(1)
-                for (iconId, state) in iconfiles.pendingDict {
+                for (iconId, state) in Iconfiles.pendingDict {
                     if (state == "ready") {
                         if let _ = self.iconDictArray["\(iconId)"] {
                             for iconDict in self.iconDictArray["\(iconId)"]! {
@@ -5959,38 +6027,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func resetAllCheckboxes() {
         DispatchQueue.main.async {
-        // Sellect all items to be migrated
-            // macOS tab
-            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
-            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
-            self.computers_button.state = NSControl.StateValue(rawValue: 0)
-            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
-            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
-            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
-//            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
-            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-    //        patch_mgmt_button.state = 1
-            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
-            self.sus_button.state = NSControl.StateValue(rawValue: 0)
-            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
-            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
-            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
-            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
-            self.packages_button.state = NSControl.StateValue(rawValue: 0)
-            self.policies_button.state = NSControl.StateValue(rawValue: 0)
-            self.printers_button.state = NSControl.StateValue(rawValue: 0)
-            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
-            self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
-            // iOS tab
-            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
-            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
-            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
-            self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
             // general tab
             self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
             self.building_button.state = NSControl.StateValue(rawValue: 0)
@@ -6006,6 +6042,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
             self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
             self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            // macOS tab
+            self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
+            self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
+            self.computers_button.state = NSControl.StateValue(rawValue: 0)
+            self.directory_bindings_button.state = NSControl.StateValue(rawValue: 0)
+            self.disk_encryptions_button.state = NSControl.StateValue(rawValue: 0)
+            self.dock_items_button.state = NSControl.StateValue(rawValue: 0)
+//            self.netboot_button.state = NSControl.StateValue(rawValue: 0)
+            self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+            self.patch_policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.sus_button.state = NSControl.StateValue(rawValue: 0)
+            self.fileshares_button.state = NSControl.StateValue(rawValue: 0)
+            self.ext_attribs_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_comp_grps_button.state = NSControl.StateValue(rawValue: 0)
+            self.scripts_button.state = NSControl.StateValue(rawValue: 0)
+            self.packages_button.state = NSControl.StateValue(rawValue: 0)
+            self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
+            self.policies_button.state = NSControl.StateValue(rawValue: 0)
+            self.printers_button.state = NSControl.StateValue(rawValue: 0)
+            self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
+            self.macPrestages_button.state = NSControl.StateValue(rawValue: 0)
+            // iOS tab
+            self.advancedmobiledevicesearches_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevicecApps_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledevices_button.state = NSControl.StateValue(rawValue: 0)
+            self.smart_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.static_ios_groups_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
+            self.mobiledeviceextensionattributes_button.state = NSControl.StateValue(rawValue: 0)
+            self.iosPrestages_button.state = NSControl.StateValue(rawValue: 0)
         }
     }
     

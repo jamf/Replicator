@@ -1519,7 +1519,7 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="IpP-4y-Yco"/>
                                                     </connections>
                                                 </button>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XEf-hO-Lk9" userLabel="Packages button">
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XEf-hO-Lk9" userLabel="Patch Management button">
                                                     <rect key="frame" x="194" y="105" width="148" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="check" title="Patch Management" bezelStyle="regularSquare" imagePosition="left" inset="2" id="wYD-Zn-52c">

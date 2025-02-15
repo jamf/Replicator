@@ -105,6 +105,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 switch cmdLineSwitch {
                 case "-debug":
                     LogLevel.debug = true
+                case "-dryrun":
+                    LogLevel.debug = true
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
