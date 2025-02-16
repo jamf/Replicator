@@ -473,14 +473,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 // 400 - likely the format of the xml is incorrect or wrong endpoint
                                 // 401 - wrong username and/or password
                                 // 409 - unable to create object; already exists or data missing or xml error
-                
-                                /*
-                //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
-                                if localEndPointType != "policies" && dependency.isRunning {
-                                    counter.dependencyMigrated[dependencyParentId]! += 1
-            //                        print("[CreateEndpoints] counter.dependencyMigrated incremented: \(counter.dependencyMigrated[dependencyParentId]!)")
-                                }
-                                 */
                                 
                                 // update global counters
                                 counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
@@ -778,18 +770,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 
 //                                let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
         //                        print("localTmp: \(localTmp)")
-                        
-                            /*
-                                Counter.shared.crud[endpointType]?["\(apiMethod)"]! += 1     //= localTmp + 1
-                                
-                                if var summaryArray = Counter.shared.summary[endpointType]?["\(apiMethod)"] {
-                                    let objectName = "\(endPointJSON["name"] ?? "unknown name")"
-                                    if summaryArray.contains(objectName) == false {
-                                        summaryArray.append(objectName)
-                                        Counter.shared.summary[endpointType]?["\(apiMethod)"] = summaryArray
-                                    }
-                                }
-                             */
+
                         
                                 /*
                                 // currently there is no way to upload mac app store icons; no api endpoint
@@ -839,13 +820,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         if endpointCurrent > 0 {
                             if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
-                        
-                        /*
-                        if localEndPointType != "policies" && dependency.isRunning {
-                            counter.dependencyMigrated[dependencyParentId]! += 1
-    //                        print("[CreateEndpoints2] counter.dependencyMigrated incremented: \(counter.dependencyMigrated[dependencyParentId]!)")
-                        }
-                         */
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
@@ -893,17 +867,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                             }
                         }
-                        
-                        
-                            /*
-                            if let _ = String(data: data!, encoding: .utf8) {
-                                responseData = String(data: data!, encoding: .utf8)!
-        //                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] \n\nfull response from create:\n\(responseData)") }
-        //                        print("create data response: \(responseData)")
-                            } else {
-                                if LogLevel.debug { WriteToLog.shared.message("\n\n[CreateEndpoints2] No data was returned from post/put.") }
-                            }
-                            */
+
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
                                 WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
@@ -989,13 +953,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         if endpointCurrent > 0 {
                             if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
-                        
-                        /*
-                        if localEndPointType != "policies" && dependency.isRunning {
-                            counter.dependencyMigrated[dependencyParentId]! += 1
-    //                        print("[CreateEndpoints2] counter.dependencyMigrated incremented: \(counter.dependencyMigrated[dependencyParentId]!)")
-                        }
-                         */
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
