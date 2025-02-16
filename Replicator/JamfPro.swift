@@ -267,7 +267,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         }
                     } else {    // if httpResponse.statusCode <200 or >299
                         WriteToLog.shared.message("[JamfPro.getToken] Failed to authenticate to \(baseUrl).  Response error: \(httpResponse.statusCode).")
-                        if setting.fullGUI {
+                        if Setting.fullGUI {
                             _ = Alert.shared.display(header: "\(baseUrl)", message: "Failed to authenticate to \(baseUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
                         } else {
                             NSApplication.shared.terminate(self)

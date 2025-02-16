@@ -184,7 +184,7 @@ struct q {
     static var getRecord = OperationQueue() // create operation queue for API GET calls
 }
 
-struct setting {
+struct Setting {
     static var copyScope             = true
     static var createIsRunning       = false
     static var csa                   = true // cloud services connection

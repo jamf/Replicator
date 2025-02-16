@@ -236,7 +236,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                             }
                         let theServer = (whichServer == "source") ? JamfProServer.source : JamfProServer.destination
                         WriteToLog.shared.message("[ViewController.getEndpoints] Duplicate references to the same package were found on \(theServer)\n\(message)")
-                            if setting.fullGUI {
+                            if Setting.fullGUI {
                                 let theButton = Alert.shared.display(header: "Warning:", message: "Several packages on \(theServer), having unique display names, are linked to a single file.  Check the log for 'Duplicate references to the same package' for details.", secondButton: "Stop")
                                 if theButton == "Stop" {
                                     updateView(["function": "stopButton"])
@@ -318,9 +318,9 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 switch theEndpoint {
                                 case "categories":
                                     if whichServer == "source" {
-                                        Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+                                        Categories.source.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown category name", priority: theObject["priority"] as? Int ?? 9))
                                     } else {
-                                        Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown", priority: theObject["priority"] as? Int ?? 9))
+                                        Categories.destination.append(Category(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown category name", priority: theObject["priority"] as? Int ?? 9))
 //                                        print("[Jpapi.getAll] category id: \(theObject["id"] as? String ?? "-1"), category name: \(theObject["name"] as? String ?? "-1")")
                                     }
                                 case "policy-details":
@@ -334,9 +334,9 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     }
                                 case "sites":
                                     if whichServer == "source" {
-                                        JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                        JamfProSites.source.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown site name"))
                                     } else {
-                                        JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown"))
+                                        JamfProSites.destination.append(Site(id: theObject["id"] as? String ?? "-1", name: theObject["name"] as? String ?? "unknown site name"))
                                     }
                                 default:
                                     break

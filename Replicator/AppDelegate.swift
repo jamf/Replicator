@@ -111,7 +111,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     export.backupMode = true
                     export.saveOnly   = true
                     export.saveRawXml = true
-                    setting.fullGUI   = false
+                    Setting.fullGUI   = false
                 case "-saverawxml":
                     export.saveRawXml = true
                 case "-savetrimmedxml":
@@ -126,20 +126,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     NSApplication.shared.terminate(self)
                 case "-ldapid":
                     index += 1
-                    setting.ldapId = Int(CommandLine.arguments[index]) ?? -1
-                    if setting.ldapId > 0 {
-                        setting.hardSetLdapId = true
+                    Setting.ldapId = Int(CommandLine.arguments[index]) ?? -1
+                    if Setting.ldapId > 0 {
+                        Setting.hardSetLdapId = true
                     }
                 case "-migrate":
-                    setting.migrate = true
-                    setting.fullGUI = false
+                    Setting.migrate = true
+                    Setting.fullGUI = false
                 case "-objects":
                     index += 1
                     let objectsString = "\(CommandLine.arguments[index])".lowercased()
-                    setting.objects = objectsString.components(separatedBy: ",")
+                    Setting.objects = objectsString.components(separatedBy: ",")
                 case "-scope":
                     index += 1
-                    setting.copyScope = Bool(CommandLine.arguments[index].lowercased()) ?? true
+                    Setting.copyScope = Bool(CommandLine.arguments[index].lowercased()) ?? true
                 case "-site":
                     index += 1
                     JamfProServer.toSite   = true
@@ -196,21 +196,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 case "-onlycopymissing":
                     index += 1
                     if "\(CommandLine.arguments[index].lowercased())" == "true" || "\(CommandLine.arguments[index].lowercased())" == "1" {
-                        setting.onlyCopyMissing = true
-                        setting.onlyCopyExisting = false
+                        Setting.onlyCopyMissing = true
+                        Setting.onlyCopyExisting = false
                     } else {
-                        setting.onlyCopyMissing = false
+                        Setting.onlyCopyMissing = false
                     }
                 case "-onlycopyexisting":
                     index += 1
                     if CommandLine.arguments[index].lowercased() == "true" || CommandLine.arguments[index].lowercased() == "1" {
-                        setting.onlyCopyMissing = false
-                        setting.onlyCopyExisting = true
+                        Setting.onlyCopyMissing = false
+                        Setting.onlyCopyExisting = true
                     } else {
-                        setting.onlyCopyExisting = false
+                        Setting.onlyCopyExisting = false
                     }
                 case "-silent":
-                    setting.fullGUI = false
+                    Setting.fullGUI = false
                 case "-sticky":
                     JamfProServer.stickySession = true
                 case "-NSDocumentRevisionsDebugMode":
@@ -235,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //            self.userDefaults.synchronize()
         }
         
-        if setting.fullGUI {
+        if Setting.fullGUI {
             NSApp.setActivationPolicy(.regular)
             let storyboard = NSStoryboard(name: "Main", bundle: nil)
             let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController

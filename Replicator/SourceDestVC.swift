@@ -419,7 +419,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
    
     func fetchPassword(whichServer: String, url: String) {
-        if setting.fullGUI {
+        if Setting.fullGUI {
             fileImport = userDefaults.bool(forKey: "fileImport")
         } else {
             fileImport = (JamfProServer.importFiles == 1) ? true:false
@@ -427,7 +427,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 
         var theUser     = ""
         if !(whichServer == "source" && fileImport) {
-            if setting.fullGUI {
+            if Setting.fullGUI {
                 theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
                 //            print("[fetchPassword] url: \(url.fqdnFromUrl), account: \(theUser), whichServer: \(whichServer)")
             } else {
@@ -445,7 +445,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             JamfProServer.sourceUser = ""
                             JamfProServer.sourcePwd  = ""
                             if (url != "") {
-                                if setting.fullGUI {
+                                if Setting.fullGUI {
                                     sourceUser_TextField.stringValue = username
                                     source_pwd_field.stringValue     = password
                                     self.storedSourceUser            = username
@@ -460,7 +460,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == source_user_field.stringValue
-                        if setting.fullGUI {
+                        if Setting.fullGUI {
                             source_pwd_field.stringValue  = ""
                             hideCreds_button.state = .on
                             hideCreds_action(self)
@@ -472,7 +472,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             JamfProServer.destUser   = ""
                             JamfProServer.destPwd    = ""
                             if (url != "") {
-                                if setting.fullGUI {
+                                if Setting.fullGUI {
                                     destinationUser_TextField.stringValue = username
                                     dest_pwd_field.stringValue  = password
                                     self.storedDestUser         = username
@@ -484,7 +484,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                                 JamfProServer.destUser    = username
                                 JamfProServer.destPwd     = password
                             } else {
-                                if setting.fullGUI {
+                                if Setting.fullGUI {
                                     dest_pwd_field.stringValue = ""
                                     if source_pwd_field.stringValue != "" {
                                         dest_pwd_field.becomeFirstResponder()
@@ -493,7 +493,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == dest_user_field.stringValue
-                        if setting.fullGUI {
+                        if Setting.fullGUI {
                             dest_pwd_field.stringValue  = ""
                             hideCreds_button.state = .on
                             hideCreds_action(self)
@@ -502,7 +502,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }   // for (username, password)
             } else {
                 // credentials not found - blank out username / password fields
-                if setting.fullGUI {
+                if Setting.fullGUI {
                     hideCreds_button.state = NSControl.StateValue(rawValue: 1)
                     // NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                     hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
@@ -524,7 +524,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
             }
         } else {
-            if setting.fullGUI {
+            if Setting.fullGUI {
                 sourceUser_TextField.stringValue = ""
                 source_pwd_field.stringValue = ""
             }
@@ -611,7 +611,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     
     func disableSource() {
-        if setting.fullGUI {
+        if Setting.fullGUI {
             DispatchQueue.main.async { [self] in
                 dest_jp_server_field.isEnabled      = !export.saveOnly
                 destServerList_button.isEnabled     = !export.saveOnly
@@ -958,7 +958,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         let saved_sourceDestListSize = userDefaults.integer(forKey: "sourceDestListSize")
         sourceDestListSize = (saved_sourceDestListSize == 0) ? 20:saved_sourceDestListSize
         
-        if setting.fullGUI {
+        if Setting.fullGUI {
             if !FileManager.default.fileExists(atPath: AppInfo.plistPath) {
                 do {
                     if !FileManager.default.fileExists(atPath: AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")) {
@@ -1123,7 +1123,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        }
         // check for stored passwords - end
         
-        if !setting.fullGUI {
+        if !Setting.fullGUI {
             ViewController().initVars()
         }
     }

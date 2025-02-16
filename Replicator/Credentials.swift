@@ -222,7 +222,7 @@ class Credentials {
         JamfProServer.validToken[credentialsWhichServer] = false
         
         // running from the command line
-        if !setting.fullGUI && (JamfProServer.sourceApiClient["id"] != "" && whichServer == "source" || JamfProServer.destApiClient["id"] != "" && whichServer == "dest") {
+        if !Setting.fullGUI && (JamfProServer.sourceApiClient["id"] != "" && whichServer == "source" || JamfProServer.destApiClient["id"] != "" && whichServer == "dest") {
             if whichServer == "source" {
                 return["\(String(describing: JamfProServer.sourceApiClient["id"]!))":"\(String(describing: JamfProServer.sourceApiClient["secret"]!))"]
             } else if whichServer == "dest" {
