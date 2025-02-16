@@ -20,6 +20,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
     
     func queue(endpointType: String, endpointName: String = "", endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         
+        if pref.stopMigration {
+//                    print("[\(#function)] \(#line) stopMigration")
+            Queue.shared.operation.cancelAllOperations()
+            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            completion("stop")
+            return
+        }
         completion("return from createEndpointsQueue")
 //        print("[createEndpointsQueue]                   action: \(action)")
 //        print("[createEndpointsQueue] setting.onlyCopyExisting: \(setting.onlyCopyExisting)")
@@ -86,7 +93,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
+            Queue.shared.operation.cancelAllOperations()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            Setting.createIsRunning = false
             completion("stop")
             return
         }

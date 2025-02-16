@@ -24,6 +24,13 @@ class EndpointXml: NSObject, URLSessionDelegate {
     
     func endPointByIdQueue(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
         
+        if pref.stopMigration {
+//                    print("[\(#function)] \(#line) stopMigration")
+            endpointsIdQ.cancelAllOperations()
+            getArray.removeAll()
+            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            return
+        }
         endpointXmlQ.async { [self] in
             
             print("[EndpointXml.endPointByIDQueue] queue \(endpoint) with name \(destEpName) for get")
@@ -50,6 +57,13 @@ class EndpointXml: NSObject, URLSessionDelegate {
     
     func getById(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
+        if pref.stopMigration {
+//                    print("[\(#function)] \(#line) stopMigration")
+            endpointsIdQ.cancelAllOperations()
+            getArray.removeAll()
+            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            return
+        }
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog.shared.message("[getById] endpoint passed to endPointByID: \(endpoint) id \(endpointID)") }
         
