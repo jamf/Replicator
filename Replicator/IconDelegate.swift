@@ -61,7 +61,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
             }
             
             // set icon destination
-            if setting.csa {
+            if Setting.csa {
                 // cloud connector
                 createDestUrl = "\(createDestUrlBase)/v1/icon"
                 createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource", with: "/api")
@@ -146,7 +146,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                                 }
                                             }
                                             
-                                            if setting.csa {
+                                            if Setting.csa {
                                                 switch endpointType {
                                                 case "policies":
                                                     iconXml = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><policy><self_service>\(ssXml)<self_service_icon><id>\(iconMigrateResult)</id></self_service_icon></self_service></policy>"
@@ -351,7 +351,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                 // swift file download - end
             
         case "POST":
-            if uploadedIcons[ssIconId.fixOptional] == nil || setting.csa {
+            if uploadedIcons[ssIconId.fixOptional] == nil || Setting.csa {
                 // upload icon to fileuploads endpoint / icon server
                 WriteToLog.shared.message("[iconMigrate.\(action)] sending icon: \(ssIconName)")
                
@@ -435,7 +435,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                 WriteToLog.shared.message("[iconMigrate.\(action)] file successfully uploaded.")
                                 if let dataResponse = String(data: data!, encoding: .utf8) {
     //                                print("[ViewController.iconMigrate] dataResponse: \(dataResponse)")
-                                    if setting.csa {
+                                    if Setting.csa {
                                         let jsonResponse = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? [String:Any]
                                         if let _ = jsonResponse?["id"] as? Int {
                                             newId = jsonResponse?["id"] as? Int ?? 0
@@ -561,7 +561,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     
     private func iconNotification() {
         DispatchQueue.main.async { [self] in
-            if setting.fullGUI {
+            if Setting.fullGUI {
                 updateUiDelegate?.updateUi(info: ["function": "uploadingIcons_textfield", "isHidden": (theIconsQ.operationCount > 0) ? false:true])
 //                uploadingIcons_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
 //                uploadingIcons2_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true

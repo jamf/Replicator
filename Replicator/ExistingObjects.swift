@@ -149,7 +149,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             ExistingEndpoints.shared.waiting   = false
             ExistingEndpoints.shared.completed = 0
             
-            if UiVar.activeTab == "Selective" && endpointParent == "policies" && setting.migrateDependencies && UiVar.goSender == "goButton" {
+            if UiVar.activeTab == "Selective" && endpointParent == "policies" && Setting.migrateDependencies && UiVar.goSender == "goButton" {
                 endpointDependencyArray.append(existingEndpointNode)
             } else {
                 endpointDependencyArray = ["\(existingEndpointNode)"]
@@ -174,7 +174,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                             (result: [Any]) in
                             if let responseData = result as? [[String: Int]], responseData.count > 0 {
                                 if let statusCode = responseData[0]["statusCode"], (statusCode < 200 || statusCode > 299) {
-                                    if setting.fullGUI {
+                                    if Setting.fullGUI {
                                         _ = Alert.shared.display(header: "Attention:", message: "Failed to get existing \(existingEndpointNode)\nStatus code: \(statusCode)", secondButton: "")
                                     } else {
                                         WriteToLog.shared.message("[ExistingObjects.capi] Failed to get existing \(existingEndpointNode)    Status code: \(statusCode)")

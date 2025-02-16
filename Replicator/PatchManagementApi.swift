@@ -199,22 +199,45 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: serverUrl), mainDocumentURL: URL(string: serverUrl))
         }
         
+        let method = createUpdateMethod.lowercased() == "patch" ? "update" : "create"
+        
+        let theMethod = (createUpdateMethod.lowercased() == "patch") ? "update" : createUpdateMethod.lowercased()
+        
+        let sourcePatchTitle = PatchTitleConfigurations.source.filter( { $0.id == sourceEpId } ).first
+        let sourceSiteName = sourcePatchTitle?.siteName ?? "NONE"
+        
+        var sourceTitle = objectInstance?.displayName ?? "unknown title"
+        if sourceSiteName != "NONE" {
+            print("[createUpdate] siteName: \(sourceSiteName)")
+            sourceTitle = "\(sourceTitle) (site: \(sourceSiteName))"
+        }
+        
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
 //                print("[PatchManagementApi.createUpdate] httpResponse: \(httpResponse)")
+                Summary.totalCreated   = Counter.shared.crud[endpoint]?["create"] ?? 0
+                Summary.totalUpdated   = Counter.shared.crud[endpoint]?["update"] ?? 0
+                Summary.totalFailed    = Counter.shared.crud[endpoint]?["fail"] ?? 0
+                Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                    let method = createUpdateMethod.lowercased() == "patch" ? "update" : "create"
-                    
-                    Counter.shared.crud[endpoint]?[method]! += 1
-                    Summary.totalCreated   = Counter.shared.crud[endpoint]?["create"] ?? 0
-                    Summary.totalUpdated   = Counter.shared.crud[endpoint]?["update"] ?? 0
-                    Summary.totalFailed    = Counter.shared.crud[endpoint]?["fail"] ?? 0
-                    Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                   
+//                    print("[createUpdate] sourceTitle: \(sourceTitle)")
+//                    print("[createUpdate] endpoint: \(endpoint)")
+//                    print("[createUpdate] theMethod: \(theMethod)")
+//                    print("[createUpdate] Counter.shared.summary[\(endpoint)]?[\(theMethod)]: \(String(describing: Counter.shared.summary[endpoint]?[theMethod]))")
+                    if var summaryArray = Counter.shared.summary[endpoint]?[theMethod] {
+                        if !summaryArray.contains(sourceTitle) {
+                            summaryArray.append(sourceTitle)
+                            Counter.shared.summary[endpoint]?[theMethod] = summaryArray
+                        }
+                    }
                     
                     if endpoint == "patch-software-title-configurations" {
+                        Counter.shared.crud[endpoint]?[method]! += 1
                         if Summary.totalCompleted > 0 {
                             updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
                         }
@@ -236,6 +259,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     }
                     
                     if endpoint == "patch-software-title-packages" {
+                        Counter.shared.crud[endpoint]?[method]! += 1
                         
                         // add patch policies
                         print("patch policies count: \(PatchPoliciesDetails.source.count)")
@@ -244,6 +268,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         
                         let existingPatchPolicies = PatchPoliciesDetails.destination.filter( {$0.softwareTitleConfigurationId == destEpId} )
                         print("software title (id: \(destEpId)) has existing patch policies count: \(existingPatchPolicies.count)")
+                        
                         for patchPolicy in patchPolicies {
 //                            let patchPolicyId = patchPolicy.id
                             print("patch version: \(patchPolicy.targetPatchVersion)")
@@ -299,7 +324,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                         (result: String) in
                                     }
                                 }
-                                
                             }
                         }
                         print("")
@@ -327,6 +351,13 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
+                    Counter.shared.crud[endpoint]?["fail"]! += 1 
+                    if var summaryArray = Counter.shared.summary[endpoint]?["fail"] {
+                        if !summaryArray.contains(sourceTitle) {
+                            summaryArray.append(sourceTitle)
+                            Counter.shared.summary[endpoint]?["fail"] = summaryArray
+                        }
+                    }
                     if let stringResponse = String(data: data!, encoding: .utf8) {
                         print("[PatchManagementApi.createUpdate] \(endpoint) status code: \(httpResponse.statusCode)")
                         print("[PatchManagementApi.createUpdate] \(endpoint) stringResponse: \(stringResponse)")
@@ -336,6 +367,12 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     return
                 }
             } else {
+                if var summaryArray = Counter.shared.summary[endpoint]?["fail"] {
+                    if !summaryArray.contains(sourceTitle) {
+                        summaryArray.append(sourceTitle)
+                        Counter.shared.summary[endpoint]?[theMethod] = summaryArray
+                    }
+                }
                 if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] GET response error.  Verify url and port.") }
                 completion([:])
                 return

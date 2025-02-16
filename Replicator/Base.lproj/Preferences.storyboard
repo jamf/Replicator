@@ -1049,10 +1049,10 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button toolTip="default behavior is to store credentials in iCloud or Local Items Keychain" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T0e-ef-D6h">
+                            <button hidden="YES" toolTip="default behavior is to store credentials in iCloud or Local Items Keychain" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T0e-ef-D6h">
                                 <rect key="frame" x="24" y="269" width="192" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Force login Keychain usage" bezelStyle="regularSquare" imagePosition="left" inset="2" id="3eI-74-qOL">
+                                <buttonCell key="cell" type="check" title="Force login Keychain usage" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="3eI-74-qOL">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1070,10 +1070,10 @@ DQ
                             <constraint firstItem="5bY-os-nBB" firstAttribute="leading" secondItem="WAS-vF-dwo" secondAttribute="leading" id="FYH-g4-iV0"/>
                             <constraint firstItem="WAS-vF-dwo" firstAttribute="top" secondItem="h4P-Oe-SQ6" secondAttribute="bottom" constant="11" id="JqH-BU-N12"/>
                             <constraint firstItem="UOr-4y-ts0" firstAttribute="leading" secondItem="WAS-vF-dwo" secondAttribute="leading" id="Lfk-al-saL"/>
-                            <constraint firstItem="UOr-4y-ts0" firstAttribute="top" secondItem="kQ6-jr-Xhm" secondAttribute="top" constant="52" id="PqN-Ob-UNz"/>
                             <constraint firstItem="Xgj-Ze-Ke8" firstAttribute="top" secondItem="FAp-KF-ajE" secondAttribute="bottom" constant="6" id="QRr-I3-pcC"/>
                             <constraint firstItem="ZbO-yE-rVj" firstAttribute="top" secondItem="Xgj-Ze-Ke8" secondAttribute="bottom" constant="6" id="UNM-su-mEj"/>
                             <constraint firstItem="h4P-Oe-SQ6" firstAttribute="trailing" secondItem="OWG-1V-s0b" secondAttribute="trailing" id="ViS-cC-GT4"/>
+                            <constraint firstAttribute="bottom" secondItem="UOr-4y-ts0" secondAttribute="bottom" constant="238" id="Vy9-j0-bgd"/>
                             <constraint firstItem="5bY-os-nBB" firstAttribute="centerX" secondItem="Xgj-Ze-Ke8" secondAttribute="centerX" constant="2" id="WIz-gS-VHI"/>
                             <constraint firstItem="OWG-1V-s0b" firstAttribute="top" secondItem="WAS-vF-dwo" secondAttribute="bottom" constant="7" id="X8O-6T-X5m"/>
                             <constraint firstItem="FAp-KF-ajE" firstAttribute="top" secondItem="5bY-os-nBB" secondAttribute="bottom" constant="5" id="YbC-tO-RMm"/>

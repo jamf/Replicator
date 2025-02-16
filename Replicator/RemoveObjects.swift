@@ -85,13 +85,13 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         var removeDestUrl = ""
                 
         if endpointCurrent == 1 {
-            if (!setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                 updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
 //                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: .green)
             }
         } else {
             if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /* self.put_levelIndicatorFillColor[endpointType] */{
-                if setting.migrateDependencies {
+                if Setting.migrateDependencies {
                     updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
 //                        self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? .green)
                 }
@@ -101,7 +101,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         // whether the operation was successful or not, either delete or fail
         var methodResult = "create"
         
-        removeObjectQ.maxConcurrentOperationCount = maxConcurrentThreads
+//        removeObjectQ.maxConcurrentOperationCount = maxConcurrentThreads
+        Queue.shared.operation.maxConcurrentOperationCount = maxConcurrentThreads
         
 //        let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
@@ -151,7 +152,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 return
             }
             
-            removeObjectQ.addOperation {
+            Queue.shared.operation.addOperation {
                         
                 DispatchQueue.main.async {
                     // look to see if we are processing the next endpointType - start
@@ -209,27 +210,25 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 }
                                  */
                                 
-                                DispatchQueue.main.async { [self] in
+//                                DispatchQueue.main.async { [self] in
                                     
 //                                    var objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
                                     var objectIndex = SourceObjects.list.firstIndex(where: { $0.objectName == objectToRemove })
                                     updateView(["function": "sourceObjectList_AC.remove", "objectId": endPointID as Any])
-//                                    updateView(["function": "sourceObjectList_AC.remove", "objectIndex": objectIndex as Any])
 
                                     objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
                                     staticSourceObjectList.remove(at: objectIndex!)
                                     
-//                                    srcSrvTableView.isEnabled = false
-                                }
+//                                }
                             }
                             
                             WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] \(endpointName) (id: \(endPointID))")
                             Counter.shared.postSuccess += 1
-                        } else {
+                        } else if endpointCurrent != -1 {
                             methodResult = "fail"
                             updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
 //                            labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            if (!setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 PutLevelIndicator.shared.indicatorColor[endpointType]  = .systemYellow
                                 updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                             }
@@ -263,15 +262,15 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 }
                             }
                             
-                            Summary.totalDeleted   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                            Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                            Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
                             
                             putStatusLockQueue.async { [self] in
+                                Summary.totalDeleted   = Counter.shared.crud[endpointType]?["create"] ?? 0
+                                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+                                Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
                                 //                        DispatchQueue.main.async { [self] in
                                 if Summary.totalCompleted > 0 {
                                     print("[\(#function)] total: \(Counter.shared.crud[endpointType]!["total"]!)")
-                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                    updateView(["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                 }
                                 
                                 if Summary.totalDeleted == endpointCount && UiVar.changeColor  {

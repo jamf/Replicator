@@ -64,7 +64,7 @@ class Cleanup: NSObject {
             for thePackage in patchPackages ?? [] {
                 // get source package (file) name
                 print("[cleanJSON - patchmanagement] thePackage: \(thePackage)")
-                let sourcePackageName = (fileImport) ? thePackage["packageName"] as? String ?? "unknown": PatchPackages.source.first(where: { $0.packageId == thePackage["packageId"] as? String })?.packageName ?? ""
+                let sourcePackageName = (fileImport) ? thePackage["packageName"] as? String ?? "unknown package": PatchPackages.source.first(where: { $0.packageId == thePackage["packageId"] as? String })?.packageName ?? ""
                 print("[cleanJSON - patchmanagement] sourcePackageName: \(sourcePackageName)")
                 let packageId = PatchPackages.destination.first(where: { $0.packageName == sourcePackageName })?.packageId ?? ""
                 
@@ -588,16 +588,16 @@ class Cleanup: NSObject {
                 let ldapServerInfo = tagValue(xmlString: PostXML, xmlTag: "ldap_server")
                 let ldapServerName = tagValue(xmlString: ldapServerInfo, xmlTag: "name")
                 let regexLDAP      = try! NSRegularExpression(pattern: "<ldap_server>(.|\n|\r)*?</ldap_server>", options:.caseInsensitive)
-                if !setting.hardSetLdapId {
-                    setting.ldapId = currentLDAPServers[ldapServerName] ?? -1
+                if !Setting.hardSetLdapId {
+                    Setting.ldapId = currentLDAPServers[ldapServerName] ?? -1
                 }
-                PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(setting.ldapId)</id></ldap_server>")
-            } else if setting.hardSetLdapId && setting.ldapId > 0 {
+                PostXML = regexLDAP.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "<ldap_server><id>\(Setting.ldapId)</id></ldap_server>")
+            } else if Setting.hardSetLdapId && Setting.ldapId > 0 {
                 let ldapObjectUsername = tagValue(xmlString: PostXML, xmlTag: "name").lowercased()
                 // make sure we don't change the account we're authenticated to the destination server with
                 if ldapObjectUsername != JamfProServer.destUser.lowercased() {
                     let regexNoLdap    = try! NSRegularExpression(pattern: "</full_name>", options:.caseInsensitive)
-                    PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(setting.ldapId)</id></ldap_server>")
+                    PostXML = regexNoLdap.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: "</full_name><ldap_server><id>\(Setting.ldapId)</id></ldap_server>")
                 }
             }
 //            print("PostXML: \(PostXML)")

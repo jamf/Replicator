@@ -88,8 +88,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         userDefaults.set(onlyCopyMissing_button.state.rawValue, forKey: "copyMissing")
         userDefaults.set(onlyCopyExisting_button.state.rawValue, forKey: "copyExisting")
-        setting.onlyCopyMissing  = onlyCopyMissing_button.state.rawValue == 1 ? true:false
-        setting.onlyCopyExisting = onlyCopyExisting_button.state.rawValue == 1 ? true:false
+        Setting.onlyCopyMissing  = onlyCopyMissing_button.state.rawValue == 1 ? true:false
+        Setting.onlyCopyExisting = onlyCopyExisting_button.state.rawValue == 1 ? true:false
     }
     
     @IBAction func migrateAsManaged_action(_ sender: Any) {
@@ -623,7 +623,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             migrateAsManaged_action("viewDidAppear")
         }
         if self.title! == "Passwords" {
-            
+            preferredContentSize = CGSize(width: 400, height: 266)
+//            preferredContentSize = CGSize(width: 400, height: 306)    // to include login keychain option
             prefBindPwd_textfield.delegate = self
             prefLdapPwd_textfield.delegate = self
             prefFsRwPwd_textfield.delegate = self
