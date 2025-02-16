@@ -314,78 +314,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                              }   //if let destEndpointInfo = destEndpointJSON - end
                                              */
                                             
-                                            /*
-                                        case "packages-":
-//                                            existingObjectsQ.suspend()
-                                            var destRecord      = [String:AnyObject]()
-                                            var packageIDsNames = [Int:String]()
-                                            setting.waitingForPackages = true
-                                            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] getting current packages") }
-                                            if let destEndpointInfo = destEndpointJSON["packages"] as? [Any] {
-                                                let destEndpointCount: Int = destEndpointInfo.count
-                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] existing \(destEndpoint) found: \(destEndpointCount)") }
-                                                if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] destEndpointInfo: \(destEndpointInfo)") }
-                                                
-//                                                if destEndpointCount > 0 {
-//                                                    for i in (0..<destEndpointCount) {
-                                                currentEPs.removeAll()
-                                                if Packages.destination.count > 0 {
-                                                    for thePackage in Packages.destination {
-//                                                        destRecord = destEndpointInfo[i] as! [String : AnyObject]
-//                                                        packageIDsNames[destRecord["id"] as! Int] = destRecord["name"] as? String
-                                                        if let id = thePackage.id, let idNum = Int(id), let name = thePackage.packageName {
-                                                            packageIDsNames[idNum] = name
-                                                            currentEPs[name] = idNum
-                                                        }
-                                                        
-                                                        //print("package ID: \(destRecord["id"] as! Int)")
-                                                    }
-//                                                        
-                                                        ExistingEndpoints.shared.completed += 1
-                                                        //                                                                self.updateExistingCounter(change: 1)
-                                                        ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-                                                        
-                                                        if !pref.stopMigration {
-                                                            currentEPDict["packages"] = currentEPs /*currentDestinationPackages*/
-                                                            //                                                            currentEPDict["packages"] = currentEPs
-                                                            //                                                            currentEPs.removeAll()
-                                                            if endpointParent != "policies" {
-                                                                completion(
-                                                                    ("[ExistingObjects.capi] Current packages on \(JamfProServer.destination) - \(currentEPs)\n","packages"))
-                                                            }
-                                                        } else {
-                                                            currentEPDict["packages"] = [:]
-                                                            if endpointParent != "policies" {
-                                                                completion(("[ExistingObjects.capi] Migration process was stopped\n","packages"))
-                                                            }
-                                                            updateView(["function": "stopButton"])
-                                                        }
-                                                        
-//                                                        existingObjectsQ.resume()
-//                                                    }
-                                                    
-                                                } else {   // if destEndpointCount > 0
-                                                    // no packages were found
-                                                    currentEPDict["packages"] = [:]
-                                                    ExistingEndpoints.shared.completed += 1
-                                                    //                                                            self.updateExistingCounter(change: 1)
-                                                    
-                                                    ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-//                                                    existingObjectsQ.resume()
-                                                    completion(("[ExistingObjects.capi] No packages were found on \(JamfProServer.destination)\n","packages"))
-                                                }
-                                                
-                                            } else {  //if let destEndpointInfo = destEndpointJSON - end
-                                                WriteToLog.shared.message("[ExistingObjects.capi] failed to get packages")
-//                                                existingObjectsQ.resume()
-                                                ExistingEndpoints.shared.completed += 1
-                                                //                                                        self.updateExistingCounter(change: 1)
-                                                ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-                                                completion(("[ExistingObjects.capi] failed to get packages\n","packages"))
-                                            }
-                                            */
-                                            
-//                                        default:
                                             if destEndpoint == "jamfusers" || destEndpoint == "jamfgroups" {
                                                 let accountsDict = destEndpointJSON as [String: Any]
                                                 let usersGroups = accountsDict["accounts"] as! [String: Any]
@@ -393,29 +321,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                                 //                                    print("groups: \(String(describing: usersGroups["groups"]))")
                                                 destEndpoint == "jamfusers" ? (destEndpointDict = usersGroups["users"] as Any):(destEndpointDict = usersGroups["groups"] as Any)
                                             } else {
-                                                /*
-                                                switch endpointParent {
-//                                                case "policies":
-//                                                    switch existingEndpointNode {
-                                                    case "computergroups":
-                                                        een = "computer_groups"
-                                                    case "directorybindings":
-                                                        een = "directory_bindings"
-                                                    case "distributionpoints":
-                                                        een = "distribution_points"
-                                                    case "dockitems":
-                                                        een = "dock_items"
-                                                    case "networksegments":
-                                                        een = "network_segments"
-                                                    default:
-                                                        een = existingEndpointNode
-                                                    }
-                                                 */
                                                 een = endpointParent
-                                                    destEndpointDict = destEndpointJSON["\(een)"]
-//                                                default:
-//                                                    destEndpointDict = destEndpointJSON["\(endpointParent)"]
-//                                                }
+                                                destEndpointDict = destEndpointJSON["\(een)"]
                                             }
                                             if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] getting current \(existingEndpointNode) on destination server") }
                                             if let destEndpointInfo = destEndpointDict as? [Any] {

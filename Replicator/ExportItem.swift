@@ -141,33 +141,4 @@ class ExportItem: NSObject {
             if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
         }
     }
-    
-    /*
-    func patchmanagement(node: String, object: Any, rawName: String = "", id: String = "", format: String) {
-        let saveFolder = saveLocation(format)
-        var exportFilename = ""
-        
-        let endpointPath = saveFolder+node
-        if endpointPath != node {
-            if !(fm.fileExists(atPath: endpointPath)) {
-                do {
-                    try fm.createDirectory(atPath: endpointPath, withIntermediateDirectories: true, attributes: nil)
-                } catch {
-                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem creating \(endpointPath) folder: Error \(error)") }
-                    return
-                }
-            }
-            if node == "patchPolicyDetails" {
-                exportFilename = "patch-policies-policy-details.json"
-            } else {
-                if let displayName = (object as? PatchSoftwareTitleConfiguration)?.displayName, let id = (object as? PatchSoftwareTitleConfiguration)?.id {
-                    exportFilename = "\(displayName)-\(id).json"
-                }
-            }
-            if !exportFilename.isEmpty {
-                Replicator.export(node: node, object: object, endpointPath: endpointPath, exportFilename: exportFilename)
-            }
-        }
-    }
-     */
 }
