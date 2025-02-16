@@ -47,18 +47,20 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         Counter.shared.pendingSend += 1
 //                        updatePendingCounter(caller: #function.short, change: 1)
                         usleep(10)
+                        removeArray = removeArray.sorted { $0.destEpId > $1.destEpId }
                         let nextEndpoint = removeArray.remove(at: 0)
                         
-                        print("[removeEndpointsQueue] call removeEndpoints to removed id: \(nextEndpoint.destEpId)")
+                        print("[removeEndpointsQueue] call removeEndpoints to remove \(endpointType) with id: \(nextEndpoint.destEpId)")
                         capi(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) {
                             (result: String) in
                             
-                            if result == "-1" {
-                                breakQueue = true
-                            } else {
                                 Counter.shared.pendingSend -= 1
+                            if result == "-1" {
+//                                Counter.shared.pendingSend -= 1
+                                breakQueue = true
+                            } //else {
 //                                updatePendingCounter(caller: #function.short, change: -1)
-                            }
+//                            }
                             semaphore.signal()
                         }
                     } else {
@@ -76,6 +78,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         
         if endPointID == "-1" && UiVar.activeTab == "Selective" {
             print("[removeEndpoints] selective - finished removing \(endpointType)")
+//            sleep(1)
             completion("-1")
             return
         }
@@ -190,9 +193,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                     
                     completion("\(endPointID)")
                     
-                    print("[RemoveEndpoints] \(#line) removeObjectQ.operationCount: \(removeObjectQ.operationCount)")
                     if let httpResponse = response as? HTTPURLResponse {
-                        print("[RemoveEndpoints] \(#line) removed response code: \(httpResponse.statusCode)")
+                        print("[RemoveEndpoints] \(#line) id \(endpointCurrent) removed response code: \(httpResponse.statusCode)")
                         //print(httpResponse)
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             // remove items from the list as they are removed from the server
@@ -204,22 +206,12 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 
                                 DataArray.staticSource.removeAll(where: { $0 == objectToRemove})
 //                                        print("[removeEndpoints] DataArray.staticSource:\(DataArray.staticSource)")
-                                /*
-                                if let staticLineNumber = ( endpointType == "policies" ) ? DataArray.staticSource.firstIndex(of: "\(objectToRemove) (\(endPointID))"):DataArray.staticSource.firstIndex(of: objectToRemove) {
-                                    DataArray.staticSource.remove(at: staticLineNumber)
-                                }
-                                 */
-                                
-//                                DispatchQueue.main.async { [self] in
-                                    
-//                                    var objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
-                                    var objectIndex = SourceObjects.list.firstIndex(where: { $0.objectName == objectToRemove })
-                                    updateView(["function": "sourceObjectList_AC.remove", "objectId": endPointID as Any])
+                                                                    
+                                var objectIndex = SourceObjects.list.firstIndex(where: { $0.objectName == objectToRemove })
+                                updateView(["function": "sourceObjectList_AC.remove", "objectId": endPointID as Any])
 
-                                    objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
-                                    staticSourceObjectList.remove(at: objectIndex!)
-                                    
-//                                }
+                                objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
+                                staticSourceObjectList.remove(at: objectIndex!)
                             }
                             
                             WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] \(endpointName) (id: \(endPointID))")
@@ -249,7 +241,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse)") }
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------\n") }
                         }
-                        
                         
                         if endPointID != "-1" {
                             // update global counters
