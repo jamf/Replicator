@@ -72,7 +72,7 @@ class Json: NSObject, URLSessionDelegate {
         let semaphore = DispatchSemaphore(value: 0)
         q.getRecord.addOperation {
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-            let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
+            let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: { [self]
                 (data, response, error) -> Void in
                 destSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
@@ -83,8 +83,14 @@ class Json: NSObject, URLSessionDelegate {
                             if let endpointJSON = json as? [String: AnyObject] {
                                 WriteToLog.shared.message("[Json.getRecord] retrieved \(theEndpoint)")
 //                                print("[getRecord] [Json.getRecord] \(endpointJSON)")
-                                if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] \(endpointJSON)") }
-                                completion(endpointJSON)
+                                var finalJson = [String: AnyObject]()
+                                if theEndpoint == "policies" {
+                                    finalJson = ["policies": policyCleanup(policies: endpointJSON["policies"] as! [[String : AnyObject]])]
+                                } else {
+                                    finalJson = endpointJSON
+                                }
+                                if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] \(finalJson)") }
+                                completion(finalJson)
                             } else {
                                 WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
                                 completion([:])
@@ -106,6 +112,20 @@ class Json: NSObject, URLSessionDelegate {
             task.resume()
             semaphore.wait()
         }   // getRecordQ - end
+    }
+    
+    private func policyCleanup(policies: [[String: AnyObject]]) -> AnyObject {
+        var cleanPolicies = [[String: AnyObject]]()
+        for thePolicy in policies {
+            if let policyId = thePolicy["id"], let policyName = thePolicy["name"] as? String {
+                if policyName.range(of:"[0-9]{4}-[0-9]{2}-[0-9]{2} at [0-9]", options: .regularExpression) == nil && policyName != "Update Inventory" {
+    //                                                                            print("[ExistingObjects.capi] [\(existingEndpointNode)] adding \(destXmlName) (id: \(String(describing: destXmlID!))) to currentEP array.")
+                    if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] adding \(policyName) (id: \(String(describing: policyId))) to policies array.") }
+                    cleanPolicies.append(thePolicy)
+                }
+            }
+        }
+        return cleanPolicies as AnyObject
     }
 }
 

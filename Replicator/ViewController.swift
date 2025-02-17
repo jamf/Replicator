@@ -1096,7 +1096,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             ToMigrate.objects.append(AllEndpointsArray[itemIndex-1])
             
-            print("\(AllEndpointsArray[itemIndex-1])")
+//            print("[sectiontoMigrate] Selected: \(AllEndpointsArray[itemIndex-1])")
             if (AllEndpointsArray[itemIndex-1] == "policies" || AllEndpointsArray[itemIndex-1] == "patch-software-title-configurations") && !WipeData.state.on {
                 DispatchQueue.main.async {
                     self.migrateDependencies.isHidden = false
@@ -1110,6 +1110,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             if LogLevel.debug { WriteToLog.shared.message("Selectively migrating: \(ToMigrate.objects) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))") }
+            print("[sectiontoMigrate] Selected ToMigrate.objects: \(ToMigrate.objects)")
             print("[sectionToMigrate] goSender: \(UiVar.goSender)")
             Go(sender: UiVar.goSender)
         }
@@ -1750,10 +1751,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 Endpoints.read = 0
             } else {   // if migrationMode == "bulk" - end
                 ToMigrate.total = 1
+                ToMigrate.rawCount = 1
             }
             
             // initialize list of items to migrate then add what we want - end
-            if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] objects: \(ToMigrate.objects).") }
+            if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] objects: \(ToMigrate.objects)") }
+//            print("[ViewController.startMigrating] objects: \(ToMigrate.objects)")
                     
             
             if ToMigrate.objects.count == 0 {
@@ -2295,7 +2298,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.getSourceEndpoints(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex)  {
                 (result: [String]) in
 //                print("[ViewController.readNodes] getEndpoints result: \(result)")
-                if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] getEndpoints result: \(result)") }
+                if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] getEndpoints result for \(nodesToMigrate[nodeIndex]): \(result)") }
                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] exit") }
                 if Setting.fullGUI {
                     if UiVar.activeTab == "Selective" {
@@ -2422,22 +2425,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointParent = "\(endpoint)"
         }
         
-//        var myURL = "\(JamfProServer.source)"
-        
-//        print("endpoint: \(endpoint)")
-//        switch endpoint {
-//        case "patch-software-title-configurations":
-//            myURL = myURL.appending("/api/v2/\(endpoint)").urlFix
-////        case "jamfusers", "jamfgroups":
-////            myURL = myURL.appending("/JSSResource/accounts").urlFix
-//        default:
-////            (endpoint == "jamfusers" || endpoint == "jamfgroups") ? (node = "accounts"):(node = endpoint)
-//            myURL = myURL.appending("/JSSResource/\(node)").urlFix
-//        }
-//        print("myURL: \(myURL)")
-
-//        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] URL: \(myURL)") }
-        
         getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
 //        let semaphore = DispatchSemaphore(value: 0)
         
@@ -2452,22 +2439,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         clearSourceObjectsList()
         
         getEndpointsQ.addOperation {
-            
-//            let encodedURL = URL(string: myURL)
-//            let request = NSMutableURLRequest(url: encodedURL! as URL)
-//            request.httpMethod = "GET"
-//            let configuration = URLSessionConfiguration.ephemeral
-            
-//            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//            
-//            var headers = [String: String]()
-//            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
-//                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
-//            }
-//            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
-//            print("[apiCall] \(#function.description) headers: \(headers)")
-//            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-//            print("[apiCall]")
             
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
@@ -2672,7 +2643,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             }
                                         }
                                         
-                                        print("[getEndpoints] \(#line) counters: \(Counter.shared.crud)")
+//                                        print("[getEndpoints] \(#line) counters: \(Counter.shared.crud)")
                                         Counter.shared.crud[endpoint]!["total"] = AvailableObjsToMig.byId.count
                                         //                                                Counter.shared.crud["patch-software-title-configurations"]!["total"] = AvailableObjsToMig.byId.count
                                         
@@ -2685,6 +2656,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             }
                                         }
                                         
+                                        if AvailableObjsToMig.byId.isEmpty {
+                                            updateGetStatus(endpoint: endpoint, total: 0)
+                                            putStatusUpdate2(endpoint: endpoint, total: 0)
+                                            Endpoints.read += 1
+                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                                            return
+                                        }
                                         for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
                                             if pref.stopMigration { break }
                                             if !WipeData.state.on  {
@@ -3316,30 +3294,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             putStatusUpdate2(endpoint: endpoint, total: 0)
                             
                             Endpoints.read += 1
-                            // print("[Endpoints.read += 1] \(endpoint)")
-                            //                                            if endpoint == ToMigrate.objects.last {
-                            //                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Reached last object to migrate: \(endpoint)") }
-                            //                                                self.rmDELETE()
-                            ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
-                            //                                            }
-//                            if nodeIndex < nodesToMigrate.count - 1 {
-//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                            }
-                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                           
+//                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Read next node: \(nodesToMigrate[nodeIndex+1])") }
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
-                        //                                        print("[ViewController.getSourceEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
+//                        print("[ViewController.getSourceEndpoints] [policies] Got endpoint - \(endpoint)", "\(endpointCount)")
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {   //if let endpointInfo = endpointJSON - end
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate2(endpoint: endpoint, total: 0)
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Unable to read \(endpoint).  Read next node: \(nodesToMigrate[nodeIndex+1])") }
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        Endpoints.read += 1
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -4573,6 +4536,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func updateGetStatus(endpoint: String, total: Int, index: Int = -1) {
+        if WipeData.state.on { return }
         print("[updateGetStatus] endpoint: \(endpoint), total: \(total), index: \(index)")
         var adjEndpoint = ""
         switch endpoint {
@@ -4599,8 +4563,23 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
         if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-            
-            let getNext = !(smartComputerGrpsSelected && staticComputerGrpsSelected && endpoint == "smartcomputergroups")
+            var getNext = true
+            switch endpoint {
+                case "smartcomputergroups":
+                    if smartComputerGrpsSelected && staticComputerGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                case "mobiledevicegroups":
+                    if smartIosGrpsSelected && staticIosGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                case "usergroups":
+                    if smartUserGrpsSelected && staticUserGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                default:
+                    break
+            }
             if getNext {
                 getNodesComplete += 1
             }
@@ -4610,6 +4589,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 runComplete()
             } else {
                 if getNodesComplete < ToMigrate.rawCount && getNext {
+                    print("[getStatusUpdate2] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                 }
             }
@@ -4631,60 +4611,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
         }
     }
-    
-//    func getStatusUpdate2(endpoint: String, total: Int, index: Int = -1) {
-//        var adjEndpoint = ""
-//        switch endpoint {
-//        case "accounts/userid":
-//            adjEndpoint = "jamfusers"
-//        case "accounts/groupid":
-//            adjEndpoint = "jamfgroups"
-//        default:
-//            adjEndpoint = endpoint
-//        }
-//        
-//        if index == -1 {
-//            if getCounters[adjEndpoint] == nil {
-//                getCounters[adjEndpoint] = ["get":1]
-//            } else {
-//                getCounters[adjEndpoint]!["get"]! += 1
-//            }
-//        } else {
-//                getCounters[adjEndpoint] = ["get":index]
-//        }
-//        
-//        let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
-//        
-//        print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
-//        print("[getStatusUpdate2] Endpoint: \(getNodesComplete+1) of \(ToMigrate.total)")
-//        
-//        if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-//            getNodesComplete += 1
-//            if getNodesComplete == ToMigrate.total && export.saveOnly {
-//                runComplete()
-//            } else {
-//                if getNodesComplete < ToMigrate.total {
-//                    readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
-//                }
-//            }
-//        }
-//        
-//        if setting.fullGUI && totalCount > 0 {
-//            DispatchQueue.main.async { [self] in
-//                print("[getStatusUpdate2] adjEndpoint: \(adjEndpoint)")
-////                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
-//                if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
-////                if getCounters[adjEndpoint]!["get"]! > 0 {
-//                    if (!setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
-//                        get_name_field.stringValue    = adjEndpoint
-//                        get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
-////                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
-//                        getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
-//                    }
-//                }
-//            }
-//        }
-//    }
     
     func putStatusUpdate2(endpoint: String, total: Int) {
         var adjEndpoint = ""
@@ -4714,14 +4640,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
 
         print("[putStatusUpdate2] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
+        print("[putStatusUpdate2] ToMigrate.objects: \(ToMigrate.objects.description)")
         if newPutTotal == totalCount || total == 0 {
-            let getNext = !(smartComputerGrpsSelected && staticComputerGrpsSelected && endpoint == "smartcomputergroups")
+            var getNext = true
+            switch endpoint {
+                case "smartcomputergroups":
+                    if smartComputerGrpsSelected && staticComputerGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                case "mobiledevicegroups":
+                    if smartIosGrpsSelected && staticIosGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                case "usergroups":
+                    if smartUserGrpsSelected && staticUserGrpsSelected && total > 0 {
+                        getNext = false
+                    }
+                default:
+                    break
+            }
+//            getNext = !(smartComputerGrpsSelected && staticComputerGrpsSelected && endpoint == "smartcomputergroups") ||
+//            !(smartIosGrpsSelected && staticIosGrpsSelected && endpoint == "mobiledevicegroups") ||
+//            !(smartUserGrpsSelected && staticUserGrpsSelected && endpoint == "usergroups")
             if getNext {
                 nodesComplete += 1
             }
             WriteToLog.shared.message("[putStatusUpdate2] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
             print("[putStatusUpdate2] \(adjEndpoint) nodesComplete: \(nodesComplete) - put ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
-            if nodesComplete == ToMigrate.total {
+            if nodesComplete == ToMigrate.rawCount {
                 if !Setting.fullGUI {
                     nodesMigrated = nodesComplete
                 }
@@ -4730,6 +4676,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             } else {
                 print("[putStatusUpdate2] getNext: \(getNext), WipeData.state.on: \(WipeData.state.on)")
                 if nodesComplete < ToMigrate.rawCount && getNext && WipeData.state.on {
+                    print("[putStatusUpdate2] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: nodesComplete)
                 }
             }
@@ -6519,6 +6466,7 @@ extension String {
             case "computerextensionattributes": return "computer extension attributes"
             case "directorybindings": return "directory bindings"
             case "diskencryptionconfigurations": return "disk encryption configurations"
+            case "distributionpoints": return "distribution points"
             case "macapplications": return "mac applications"
             case "osxconfigurationprofiles": return "mac configuration profiles"
             case "patch-software-title-configurations": return "patch software title configurations"

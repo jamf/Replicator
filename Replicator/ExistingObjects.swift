@@ -220,7 +220,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                     if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] Found \(PatchTitleConfigurations.destination.count) patch configurations.") }
                                     
                                     for patchObject in PatchTitleConfigurations.destination as [PatchSoftwareTitleConfiguration] {
-                                                                                            let displayName = patchObject.displayName
+                                        let displayName = patchObject.displayName
                                         let softwareTitleName = patchObject.softwareTitleName
                                         //                                                    if patchObject.softwareTitlePublisher.range(of: "(Deprecated Definition)") != nil {
                                         //                                                        displayName.append(" (Deprecated Definition)")

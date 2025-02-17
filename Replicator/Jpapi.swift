@@ -373,7 +373,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                     for theObject in returnedJson {
 //                    for thePackage in returnedJson {
                         if let id = theObject["id"] as? Int, id != 0, let name = theObject["name"] as? String, name != "" {
-                            if !(theEndpoint == "policies" && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at ", options: .regularExpression) != nil) {
+                            if !(theEndpoint == "policies" && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) != nil) {
                                 existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name))
 //                                print("[getAll] added type: \(theEndpoint), name: \(name), id: \(id)")
                             }
@@ -464,11 +464,11 @@ class Jpapi: NSObject, URLSessionDelegate {
             endpointParent = "\(theEndpoint)"
         }
         
-        print("[ExistingObjects.get] JamfProServer.url: \(JamfProServer.url)")
+        print("[Jpapi.get] JamfProServer.url: \(JamfProServer.url)")
         var endpoint = (JamfProServer.url[whichServer] ?? "") + "/api/\(endpointVersion)/\(theEndpoint)"
         
         endpoint = endpoint.replacingOccurrences(of: "//api", with: "/api")
-        print("[ExistingObjects.get] endpoint: \(endpoint)")
+        print("[Jpapi.get] endpoint: \(endpoint)")
         
         guard let endpointUrl = URL(string: endpoint) else {
             completion([])
@@ -476,7 +476,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
 //        let endpointUrl = tmpUrl.appending(path: "/api/\(endpointVersion)/\(theEndpoint)")
-        print("[ExistingObjects.get] endpointUrl: \(endpointUrl.path())")
+        print("[Jpapi.get] endpointUrl: \(endpointUrl.path())")
 //        let endpointUrl    = URL(string: "\(endpoint)")
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
@@ -497,34 +497,34 @@ class Jpapi: NSObject, URLSessionDelegate {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                print("[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
+                print("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
                 if httpSuccess.contains(httpResponse.statusCode) {
-//                    print("[ExistingObjects.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
+//                    print("[Jpapi.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     
                     if ["patch-software-title-configurations","patchsoftwaretitles"].contains(theEndpoint) {
                         if let recordsArray = responseData as? [[String: Any]] {
-//                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
+//                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
                             completion(recordsArray)
                         } else {
-                            WriteToLog.shared.message("[ExistingObjects.get] No data was returned from the GET.")
+                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
                             completion([])
                         }
                     } else {
                         if let recordsJson = responseData as? [String: [[String: Any]]], let recordsArray = recordsJson[endpointParent] {
-//                            print("[ExistingObjects.get] \(theEndpoint) - found \(recordsArray.description)")
+//                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
                                 completion(recordsArray)
                         } else {
-                            WriteToLog.shared.message("[ExistingObjects.get] No data was returned from the GET.")
+                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
                             completion([])
                         }
                     }
                 } else {
-                    WriteToLog.shared.message("[ExistingObjects.get] response statusCode: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
                     completion([])
                 }
             } else {
-                WriteToLog.shared.message("[ExistingObjects.get] unable to read the response from the GET.")
+                WriteToLog.shared.message("[Jpapi.get] unable to read the response from the GET.")
                 completion([])
             }
         })
@@ -554,7 +554,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         guard let url = URL(string: JamfProServer.url[whichServer] ?? "") else {
             completion([] as Any)
-            print("[ExistingObjects.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
+            print("[Jpapi.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
             return
         }
         
@@ -564,9 +564,9 @@ class Jpapi: NSObject, URLSessionDelegate {
             endpointUrl = endpointUrl.appending(queryItems: pageParameters)
         }
 
-//        print("[ExistingObjects.getAll] whichServer: \(whichServer)")
-//        print("[ExistingObjects.getAll] accessToken: \(JamfProServer.accessToken[whichServer] ?? "")")
-        print("[ExistingObjects.pagedGet] endpointUrl: \(endpointUrl.absoluteString)")
+//        print("[Jpapi.getAll] whichServer: \(whichServer)")
+//        print("[Jpapi.getAll] accessToken: \(JamfProServer.accessToken[whichServer] ?? "")")
+        print("[Jpapi.pagedGet] endpointUrl: \(endpointUrl.absoluteString)")
         
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
@@ -587,21 +587,21 @@ class Jpapi: NSObject, URLSessionDelegate {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                print("[ExistingObjects.pagedGet] response statusCode: \(httpResponse.statusCode)")
+                print("[Jpapi.pagedGet] response statusCode: \(httpResponse.statusCode)")
                 if httpSuccess.contains(httpResponse.statusCode) {
-//                    print("[ExistingObjects.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
+//                    print("[Jpapi.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if let endpointJSON = responseData! as? [String: Any] {
                         completion(endpointJSON)
-                        //                           print("[ExistingObjects.get] endpointJSON for page \(whichPage): \(endpointJSON)")
+                        //                           print("[Jpapi.get] endpointJSON for page \(whichPage): \(endpointJSON)")
                         return
                     } else {
-                        WriteToLog.shared.message("[ExistingObjects.pagedGet] No data was returned from the GET.")
+                        WriteToLog.shared.message("[Jpapi.pagedGet] No data was returned from the GET.")
                         completion([:])
                     }
                 }
             } else {
-                WriteToLog.shared.message("[ExistingObjects.get] unable to read the response from the GET.")
+                WriteToLog.shared.message("[Jpapi.get] unable to read the response from the GET.")
                 completion([:])
             }
         })
