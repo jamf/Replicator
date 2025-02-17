@@ -6263,9 +6263,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(updateIndex)'>\(values["update"] ?? 0)</a></td>")
                     endpointSummary.append("<td style='text-align:right; width: 20%;'><a class='button' href='#\(failIndex)'>\(values["fail"] ?? 0)</a></td>")
                     endpointSummary.append("</tr>")
-                    cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key)) \(summaryHeader.createDelete)d", values: createHtml))
-                    cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key)) Updated", values: updateHtml))
-                    cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key)) Failed", values: failHtml))
+                    cellDetails.append(popUpHtml(id: createIndex, column: "\(String(describing: key).readable) \(summaryHeader.createDelete.lowercased())d", values: createHtml))
+                    cellDetails.append(popUpHtml(id: updateIndex, column: "\(String(describing: key).readable) updated", values: updateHtml))
+                    cellDetails.append(popUpHtml(id: failIndex, column: "\(String(describing: key).readable) failed", values: failHtml))
                 }
             }
             summaryResult.append("<table style='table-layout:fixed; border-collapse: collapse; margin-left: auto; margin-right: auto; width: 95%;'>" +
