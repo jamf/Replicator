@@ -95,12 +95,12 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                    print("[\(#function)] \(#line) stopMigration")
             Queue.shared.operation.cancelAllOperations()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
-            Setting.createIsRunning = false
+//            Setting.createIsRunning = false
             completion("stop")
             return
         }
         
-        Setting.createIsRunning = true
+//        Setting.createIsRunning = true
         
         if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)") }
 
@@ -315,6 +315,17 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                             
+                            //new
+//                            if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+//
+//                                print("[CreateEndpoints] endpointType: \(endpointType)")
+//                                if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+//                                    if destEpId != "-1" {
+//                                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+//                                    }
+//                                }
+//                            }
+                            
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
                                 if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
@@ -487,6 +498,17 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                         Counter.shared.summary[endpointType]?["fail"] = summaryArray
                                     }
                                 }
+                                
+                                //new
+//                                if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+//
+//                                    print("[CreateEndpoints] endpointType: \(endpointType)")
+//                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+//                                        if destEpId != "-1" {
+//                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+//                                        }
+//                                    }
+//                                }
                             }
                         }   // create failed - end
 

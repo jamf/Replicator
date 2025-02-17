@@ -35,7 +35,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         
         removeMeterQ.addOperation { [self] in
             lockQueue.async { [self] in
-//                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
+                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
                 removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
 //                print("[removeEndpointQueue] added \(endpointType) with id \(endPointID) to removeArray, removeArray.count: \(removeArray.count)")
             }
