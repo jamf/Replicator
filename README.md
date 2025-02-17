@@ -3,6 +3,7 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/Replicator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/Replicator/total) ![GitHub latest](https://img.shields.io/github/downloads/jamf/Replicator/latest/total)
  ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/Replicator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/Replicator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/Replicator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
 
+
 Download [Replicator](https://github.com/jamf/Replicator/releases/latest/download/Replicator.zip)</br>
 
 A tool to synchronize configurations between Jamf Pro servers. Export configurations and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete configurations from a server.
