@@ -246,6 +246,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             // update global counters
                             //                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
                             Counter.shared.crud[endpointType]?[methodResult]! += 1
+                            print("[RemoveEndpoints.capi] Counter.shared.summary: \(Counter.shared.summary)")
                             if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
                                 if summaryArray.firstIndex(of: endpointName) == nil {
                                     summaryArray.append(endpointName)
@@ -260,7 +261,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
                                 //                        DispatchQueue.main.async { [self] in
                                 if Summary.totalCompleted > 0 {
-                                    print("[\(#function)] total: \(Counter.shared.crud[endpointType]!["total"]!)")
+                                    print("[\(#function)] \(endpointType) total: \(Counter.shared.crud[endpointType]!["total"]!)")
                                     updateView(["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                 }
                                 
