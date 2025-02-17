@@ -1799,7 +1799,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if self.smartComputerGrpsSelected {
                         Counter.shared.progressArray["smartcomputergroups"] = 0
                         Counter.shared.crud["smartcomputergroups"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                        Counter.shared.summary["staticcomputergroups"]       = ["create":[], "update":[], "fail":[]]
+                        Counter.shared.summary["smartcomputergroups"]       = ["create":[], "update":[], "fail":[]]
                         self.getCounters["smartcomputergroups"]        = ["get":0]
                         self.putCounters["smartcomputergroups"]        = ["put":0]
                     }
