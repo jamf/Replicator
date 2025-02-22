@@ -18,10 +18,10 @@ class WriteToLog {
         let logString = (LogLevel.debug) ? "\(timeStamp)[- debug -] \(message)\n":"\(timeStamp)\(message)\n"
 //        print("[WriteToLog] \(logString)")
 
-        if !Setting.fullGUI {
-            Logger.writeToLog.info("\(logString, privacy: .public)")
-            return
-        }
+//        if !Setting.fullGUI {
+//            Logger.writeToLog.info("\(logString, privacy: .public)")
+//            return
+//        }
         guard let logData = logString.data(using: .utf8) else { return }
         let logURL = URL(fileURLWithPath: History.logPath + History.logFile)
         
