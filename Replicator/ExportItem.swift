@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import os.log
 
 class ExportItem: NSObject {
     
@@ -34,8 +35,10 @@ class ExportItem: NSObject {
         return saveFolder
     }
     
-//    func export(node: String, objectString: String, rawName: String, id: String, format: String) {
     func export(node: String, object: Any/*, endpointPath: String*/, theName: String = "", id: String = "", format: String = "raw") {
+        
+        Logger.exportItem_export.debug("enter exportItem_export - \(node, privacy: .public)")
+        
         var objectAsString = ""
         var exportFilename = ""
         var endpointPath   = ""

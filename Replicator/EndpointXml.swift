@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 class EndpointXml: NSObject, URLSessionDelegate {
     
@@ -23,6 +24,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
     var getArray     = [ObjectInfo]()
     
     func endPointByIdQueue(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
+        
+        Logger.endpointXml_endPointByIdQueue.debug("enter endpointXml_endPointByIdQueue - \(endpoint, privacy: .public)")
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
@@ -56,6 +59,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
     }
     
     func getById(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+        
+        Logger.endpointXml_getById.debug("enter endpointXml_getById - \(endpoint, privacy: .public)")
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")

@@ -51,6 +51,7 @@
 		CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A702D10BBE6007C2C6F /* RemoveData.swift */; };
 		CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */; };
 		CE310A752D10BC3A007C2C6F /* IconDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A742D10BC3A007C2C6F /* IconDelegate.swift */; };
+		CE7C6BDD2D695FBA000357BA /* LoggerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */; };
 		CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */; };
 		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
 		CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */; };
@@ -109,6 +110,7 @@
 		CE310A702D10BBE6007C2C6F /* RemoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveData.swift; sourceTree = "<group>"; };
 		CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveObjects.swift; sourceTree = "<group>"; };
 		CE310A742D10BC3A007C2C6F /* IconDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDelegate.swift; sourceTree = "<group>"; };
+		CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerExtension.swift; sourceTree = "<group>"; };
 		CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
 		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
 		CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDelegate.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 				CE310A682D10BB49007C2C6F /* ExportItem.swift */,
 				CE310A742D10BC3A007C2C6F /* IconDelegate.swift */,
 				CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */,
+				CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */,
 				CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */,
 				CE310A6E2D10BBB5007C2C6F /* Package.swift */,
 				CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */,
@@ -407,6 +410,7 @@
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
 				CE310A6B2D10BB87007C2C6F /* JsonObjects.swift in Sources */,
 				CEE65A312CB95527002AB294 /* Utilities.swift in Sources */,
+				CE7C6BDD2D695FBA000357BA /* LoggerExtension.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -563,7 +567,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.0.0;
+				MARKETING_VERSION = 8.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -589,7 +593,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.0.0;
+				MARKETING_VERSION = 8.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

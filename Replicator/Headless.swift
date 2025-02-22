@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import os.log
 
 class Headless: NSObject {
     
@@ -15,6 +16,9 @@ class Headless: NSObject {
     
     func runComplete(backupDate: DateFormatter, nodesMigrated: Int, objectsToMigrate: [String], counters: [String:[String:Int]]) {
         if export.backupMode {
+            
+            Logger.headless_runComplete.debug("enter headless_runComplete - \(objectsToMigrate.description, privacy: .public)")
+            
 //                if theOpQ.operationCount == 0 && nodesMigrated > 0 {
             Utilities.shared.zipIt(args: "cd \"\(export.saveLocation)\" ; /usr/bin/zip -rm -o \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime)).zip \(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))/") {
                     (result: String) in

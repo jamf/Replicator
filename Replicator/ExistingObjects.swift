@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class ExistingObjects: NSObject, URLSessionDelegate {
     
@@ -20,6 +21,9 @@ class ExistingObjects: NSObject, URLSessionDelegate {
  
     func capi(skipLookup: Bool, theDestEndpoint: String, completion: @escaping (_ result: (String,String)) -> Void) {
         existingObjectsQ.maxConcurrentOperationCount = 2
+        
+        Logger.existingObjects_capi.debug("enter existingObjects_capi - \(theDestEndpoint, privacy: .public)")
+        
         // query destination server
         if skipLookup {
             completion(("skipping lookup",theDestEndpoint))
