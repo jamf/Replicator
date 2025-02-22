@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class IconDelegate: NSObject, URLSessionDelegate {
     
@@ -21,7 +22,9 @@ class IconDelegate: NSObject, URLSessionDelegate {
     var uploadedIcons = [String:Int]()
     
     @MainActor func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
-
+        
+        Logger.iconDelegate_icons.debug("enter iconDelegate_icons - \(endpointType, privacy: .public)")
+        
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
         var action               = "GET"
@@ -278,6 +281,8 @@ class IconDelegate: NSObject, URLSessionDelegate {
     }   // func icons - end
     
     @MainActor private func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
+        
+        Logger.iconDelegate_iconMigrate.debug("enter iconDelegate_iconMigrate - \(ssIconName, privacy: .public)")
         
         // fix id/hash being passed as optional
         let iconToUpload = _iconToUpload.fixOptional

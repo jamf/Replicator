@@ -57,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         print("[\(#function.description)] loaded")
         
+        if Setting.fullGUI {
             // create log directory if missing - start
             if !fm.fileExists(atPath: History.logPath) {
                 do {
@@ -68,8 +69,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             // create log directory if missing - endlogFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
             History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
-
-//            isDir = false
+            
+            //            isDir = false
             if !(fm.fileExists(atPath: History.logPath + History.logFile/*, isDirectory: &isDir*/)) {
                 fm.createFile(atPath: History.logPath + History.logFile, contents: nil, attributes: nil)
             }
@@ -77,15 +78,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if !(fm.fileExists(atPath: History.logPath + History.logFile/*, isDirectory: &isDir*/)) {
                 print("Unable to create log file:\n\(History.logPath + History.logFile)")
             }
-                    
-            if !fm.fileExists(atPath: AppInfo.plistPath) {
-                _ = readSettings(thePath: AppInfo.plistPathOld)
+        }
+        
+                
+        if !fm.fileExists(atPath: AppInfo.plistPath) {
+            _ = readSettings(thePath: AppInfo.plistPathOld)
 //                isDir = true
-                if !fm.fileExists(atPath: AppInfo.appSupportPath/*, isDirectory: &isDir*/) {
-                    try? fm.createDirectory(atPath: AppInfo.appSupportPath, withIntermediateDirectories: true)
-                }
-                saveSettings(settings: AppInfo.settings)
+            if !fm.fileExists(atPath: AppInfo.appSupportPath/*, isDirectory: &isDir*/) {
+                try? fm.createDirectory(atPath: AppInfo.appSupportPath, withIntermediateDirectories: true)
             }
+            saveSettings(settings: AppInfo.settings)
+        }
         
         // read command line arguments - start
         var numberOfArgs = 0

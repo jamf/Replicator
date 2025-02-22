@@ -7,26 +7,32 @@
 //
 
 import Foundation
+import os.log
 
 class WriteToLog {
     
     static let shared = WriteToLog()
     
     func message(_ message: String) {
-        let logString = (LogLevel.debug) ? "\(TimeDelegate().getCurrent()) [- debug -] \(message)\n":"\(TimeDelegate().getCurrent()) \(message)\n"
+        let timeStamp = Setting.fullGUI ? "\(TimeDelegate().getCurrent()) " : ""
+        let logString = (LogLevel.debug) ? "\(timeStamp)[- debug -] \(message)\n":"\(timeStamp)\(message)\n"
 //        print("[WriteToLog] \(logString)")
 
-        guard let logData = logString.data(using: .utf8) else { return }
-        let logURL = URL(fileURLWithPath: History.logPath + History.logFile)
-
-        do {
-            let fileHandle = try FileHandle(forWritingTo: logURL)
-            defer { fileHandle.closeFile() } // Ensure file is closed
+        if Setting.fullGUI {
+            guard let logData = logString.data(using: .utf8) else { return }
+            let logURL = URL(fileURLWithPath: History.logPath + History.logFile)
             
-            fileHandle.seekToEndOfFile()
-            fileHandle.write(logData)
-        } catch {
-            print("[Log Error] Failed to write to log file: \(error.localizedDescription)")
+            do {
+                let fileHandle = try FileHandle(forWritingTo: logURL)
+                defer { fileHandle.closeFile() } // Ensure file is closed
+                
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(logData)
+            } catch {
+                print("[Log Error] Failed to write to log file: \(error.localizedDescription)")
+            }
+        } else {
+            Logger.writeToLog.info("\(logString, privacy: .public)")
         }
     }
     

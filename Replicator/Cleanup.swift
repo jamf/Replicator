@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class Cleanup: NSObject {
     
@@ -15,6 +16,8 @@ class Cleanup: NSObject {
     var updateUiDelegate: UpdateUiDelegate?
     
     func Json(endpoint: String, JSON: [String: Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
+        
+        Logger.cleanup_json.debug("enter cleanJSON - \(endpoint, privacy: .public)")
         
         var theEndpoint = endpoint
         
@@ -104,6 +107,8 @@ class Cleanup: NSObject {
     }
     
     func Xml(endpoint: String, Xml: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+        
+        Logger.cleanup_xml.debug("enter cleanXML - \(endpoint, privacy: .public)")
         
         if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] enter") }
 

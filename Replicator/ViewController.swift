@@ -1743,6 +1743,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 ToMigrate.objects += [theObject]
                             }
                         }
+                        ToMigrate.rawCount = ToMigrate.objects.count
                     }
 //                    ToMigrate.objects = ["buildings", "departments", "categories", "jamfusers"]    // for testing
                     ToMigrate.total = ToMigrate.objects.count
@@ -2093,7 +2094,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 WriteToLog.shared.message("[getEndpoints] Exporting raw JSON for patch policy details")
                                 let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
                                 ExportItem.shared.export(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
-//                                ExportItem.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
                             }
                         }
                     }
