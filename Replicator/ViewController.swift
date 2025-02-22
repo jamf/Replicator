@@ -756,21 +756,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var sourceURL = ""
     var iconDictArray = [String:[[String:String]]]()
     var uploadedIcons = [String:Int]()
-    
-//    var pendingCount        = 0
-//    var pendingGetCount     = 0
-//    var existingEpCompleted = 0
-    
-//    var endpointDefDict = ["computergroups":"computer_groups", "directorybindings":"directory_bindings", "diskencryptionconfigurations":"disk_encryption_configurations", "dockitems":"dock_items","macapplications":"mac_applications", "mobiledeviceapplications":"mobile_device_application", "mobiledevicegroups":"mobile_device_groups", "packages":"packages", "patch-software-title-configurations":"patch_management_software_titles", "patchpolicies":"patch_policies", "printers":"printers", "scripts":"scripts", "usergroups":"user_groups", "userextensionattributes":"user_extension_attributes", "advancedusersearches":"advanced_user_searches", "restrictedsoftware":"restricted_software"]
 
     var xmlName             = ""
     var destEPs             = [String:Int]()
-//    var currentEPs          = [String:Int]()
-//    var currentEPDict       = [String:[String:Int]]()
     
     var currentEndpointID   = 0
-//    var progressCountArray  = [String:Int]() // track if post/put was successful
-//    var Endpoints.countDict   = [String:Int]() // number of object in a category (sites, buildings, policies...)
     
     var whiteText:NSColor   = NSColor.systemGray
     var greenText:NSColor   = NSColor.green
@@ -785,7 +775,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var AllEndpointsArray = [String]()
     
     let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
-    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    
+    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
     
     var getEndpointInProgress = ""     // end point currently in the GET queue
@@ -1193,14 +1184,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 saveRawXmlScope       = true
                 saveTrimmedXmlScope   = false
                 
-                smartUserGrpsSelected      = true
-                staticUserGrpsSelected     = true
-                smartComputerGrpsSelected  = true
-                staticComputerGrpsSelected = true
-                smartIosGrpsSelected       = true
-                staticIosGrpsSelected      = true
-                jamfUserAccountsSelected   = true
-                jamfGroupAccountsSelected  = true
+                smartUserGrpsSelected      = false
+                staticUserGrpsSelected     = false
+                smartComputerGrpsSelected  = false
+                staticComputerGrpsSelected = false
+                smartIosGrpsSelected       = false
+                staticIosGrpsSelected      = false
+                jamfUserAccountsSelected   = false
+                jamfGroupAccountsSelected  = false
             }
         }
         
@@ -1740,10 +1731,64 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         // define objects to export
                         for theObject in exportObjects {
                             if Setting.objects.firstIndex(of: theObject) != nil || Setting.objects.contains("allobjects") {
-                                ToMigrate.objects += [theObject]
+                                switch theObject {
+                                case "computergroups", "smartcomputergroups", "staticcomputergroups":
+                                    if theObject == "computergroups" || theObject == "smartcomputergroups" {
+                                        migrateSmartComputerGroups = true
+                                        smartComputerGrpsSelected  = true
+                                    }
+                                    if theObject == "computergroups" || theObject == "staticcomputergroups" {
+                                        migrateStaticComputerGroups = true
+                                        staticComputerGrpsSelected  = true
+                                    }
+                                    if !ToMigrate.objects.contains("computergroups") {
+                                        ToMigrate.objects += ["computergroups"]
+                                    }
+                                case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+                                    if theObject == "mobiledevicegroups" || theObject == "smartmobiledevicegroups" {
+                                        migrateSmartMobileGroups = true
+                                        smartIosGrpsSelected  = true
+                                    }
+                                    if theObject == "mobiledevicegroups" || theObject == "staticmobiledevicegroups" {
+                                        migrateStaticMobileGroups = true
+                                        staticIosGrpsSelected  = true
+                                    }
+                                    if !ToMigrate.objects.contains("mobiledevicegroups") {
+                                        ToMigrate.objects += ["mobiledevicegroups"]
+                                    }
+                                case "usergroups", "smartusergroups", "staticusergroups":
+                                    if theObject == "usergroups" || theObject == "smartusergroups" {
+                                        migrateSmartUserGroups = true
+                                        smartUserGrpsSelected  = true
+                                    }
+                                    if theObject == "usergroups" || theObject == "staticusergroups" {
+                                        migrateStaticUserGroups = true
+                                        staticUserGrpsSelected  = true
+                                    }
+                                    if !ToMigrate.objects.contains("usergroups") {
+                                        ToMigrate.objects += ["usergroups"]
+                                    }
+                                case "jamfusers":
+                                    jamfUserAccountsSelected = true
+                                    ToMigrate.objects += [theObject]
+                                case "jamfgroups":
+                                    jamfGroupAccountsSelected = true
+                                    ToMigrate.objects += [theObject]
+                                default:
+                                    ToMigrate.objects += [theObject]
+                                }
                             }
                         }
                         ToMigrate.rawCount = ToMigrate.objects.count
+                        if ToMigrate.objects.contains("smartcomputergroups") && ToMigrate.objects.contains("staticcomputergroups") {
+                            ToMigrate.rawCount -= 1
+                        }
+                        if ToMigrate.objects.contains("smartmobiledevicegroups") && ToMigrate.objects.contains("staticmobiledevicegroups") {
+                            ToMigrate.rawCount -= 1
+                        }
+                        if ToMigrate.objects.contains("smartusergroups") && ToMigrate.objects.contains("staticusergroups") {
+                            ToMigrate.rawCount -= 1
+                        }
                     }
 //                    ToMigrate.objects = ["buildings", "departments", "categories", "jamfusers"]    // for testing
                     ToMigrate.total = ToMigrate.objects.count
@@ -1757,7 +1802,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             // initialize list of items to migrate then add what we want - end
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] objects: \(ToMigrate.objects)") }
-//            print("[ViewController.startMigrating] objects: \(ToMigrate.objects)")
+            print("[ViewController.startMigrating] objects: \(ToMigrate.objects)")
                     
             
             if ToMigrate.objects.count == 0 {
@@ -4569,11 +4614,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if smartComputerGrpsSelected && staticComputerGrpsSelected && total > 0 {
                         getNext = false
                     }
-                case "mobiledevicegroups":
+                case "smartmobiledevicegroups":
                     if smartIosGrpsSelected && staticIosGrpsSelected && total > 0 {
                         getNext = false
                     }
-                case "usergroups":
+                case "smartusergroups":
                     if smartUserGrpsSelected && staticUserGrpsSelected && total > 0 {
                         getNext = false
                     }
