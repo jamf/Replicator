@@ -50,6 +50,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var logFilesCountPref_textfield: NSTextField!
     @IBOutlet weak var stickySession_button: NSButton!
     @IBOutlet weak var forceBasicAuth_button: NSButton!
+    @IBOutlet weak var maskServerNames_button: NSButton!
     @IBOutlet weak var colorScheme_button: NSPopUpButton!
     @IBOutlet weak var sourceDestListSize_button: NSPopUpButton!
     
@@ -189,7 +190,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     @IBAction func forceBasicAuth_action(_ sender: Any) {
         userDefaults.set(Int(forceBasicAuth_button.state.rawValue), forKey: "forceBasicAuth")
-        userDefaults.synchronize()
+//        userDefaults.synchronize()
         if forceBasicAuth_button.state.rawValue == 1 {
             JamfProServer.authType   = ["source":"Basic", "dest":"Basic"]
             JamfProServer.validToken = ["source":false, "dest":false]
@@ -200,11 +201,19 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             JamfProServer.version    = ["source":"", "dest":""]
         }
     }
+    @IBAction func maskServerNames_action(_ sender: Any) {
+        userDefaults.set(Int(maskServerNames_button.state.rawValue), forKey: "maskServerNames")
+        if maskServerNames_button.state == .on {
+            AppInfo.maskServerNames = true
+        } else {
+            AppInfo.maskServerNames = false
+        }
+    }
     @IBAction func colorScheme_action(_ sender: NSButton) {
         let currentScheme = userDefaults.string(forKey: "colorScheme")
         let newScheme     = sender.title
         userDefaults.set(sender.title, forKey: "colorScheme")
-        userDefaults.synchronize()
+//        userDefaults.synchronize()
         if (currentScheme != newScheme)  && newScheme == "default" {
             _ = Alert.shared.display(header: "Attention:", message: "App must be restarted to display default color scheme", secondButton: "")
         }
@@ -431,7 +440,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             } else {
                 userDefaults.set("Copy", forKey: "siteProfilesAction")
             }
-            userDefaults.synchronize()
+//            userDefaults.synchronize()
         }
 
         if self.title! == "App" {
@@ -447,6 +456,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             logFilesCountPref_textfield.stringValue = "\((userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref"))"
             stickySession_button.state = userDefaults.bool(forKey: "stickySession") ? NSControl.StateValue(1):NSControl.StateValue(0)
             forceBasicAuth_button.state = NSControl.StateValue(userDefaults.integer(forKey: "forceBasicAuth"))
+            maskServerNames_button.state = NSControl.StateValue(userDefaults.integer(forKey: "maskServerNames"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
 //            userDefaults.synchronize()

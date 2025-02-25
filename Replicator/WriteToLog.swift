@@ -15,9 +15,13 @@ class WriteToLog {
     
     func message(_ message: String) {
         let timeStamp = Setting.fullGUI ? "\(TimeDelegate().getCurrent()) " : ""
-        let logString = (LogLevel.debug) ? "\(timeStamp)[- debug -] \(message)\n":"\(timeStamp)\(message)\n"
+        var logString = (LogLevel.debug) ? "\(timeStamp)[- debug -] \(message)\n":"\(timeStamp)\(message)\n"
 //        print("[WriteToLog] \(logString)")
 
+        if AppInfo.maskServerNames {
+            logString = logString.replacingOccurrences(of: JamfProServer.url["source"]?.fqdnFromUrl ?? "SourceServer", with: "SourceServer")
+            logString = logString.replacingOccurrences(of: JamfProServer.url["dest"]?.fqdnFromUrl ?? "DestinationServer", with: "DestinationServer")
+        }
 //        if !Setting.fullGUI {
 //            Logger.writeToLog.info("\(logString, privacy: .public)")
 //            return
