@@ -262,7 +262,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 //                        DispatchQueue.main.async { [self] in
                                 if Summary.totalCompleted > 0 {
                                     print("[\(#function)] \(endpointType) total: \(Counter.shared.crud[endpointType]!["total"]!)")
-                                    updateView(["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                    updateView(["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                 }
                                 
                                 if Summary.totalDeleted == endpointCount && UiVar.changeColor  {

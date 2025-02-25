@@ -16,6 +16,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
     func sendGetStatus(endpoint: String, total: Int, index: Int) {
         print("[EndpointXml] call updateGetStatus")
         getStatusDelegate?.updateGetStatus(endpoint: endpoint, total: total, index: index)
+        
+//        updateUiDelegate?.updateUi(info: ["function": "updateGetStatus", "endpoint": endpoint, "total": total, "index": index])
     }
     var updateUiDelegate: UpdateUiDelegate?
     
@@ -122,7 +124,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                                     let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
                                     ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
 //                                            exportItems(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-//                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"]!])
+//                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"]!])
 //                                }
                             }
                             // save source JSON - end

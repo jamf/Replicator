@@ -239,8 +239,8 @@ class Cleanup: NSObject {
                         }
                         WriteToLog.shared.message("[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)")
                         Counter.shared.post += 1
-                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": "osxconfigurationprofiles", "total": endpointCount])
-//                        putStatusUpdate2(endpoint: "osxconfigurationprofiles", total: endpointCount)
+                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": "osxconfigurationprofiles", "total": endpointCount])
+//                        putStatusUpdate(endpoint: "osxconfigurationprofiles", total: endpointCount)
                         if ToMigrate.objects.last == endpoint && endpointCount == endpointCurrent {
                             updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
         //                    self.resetAllCheckboxes()
@@ -299,8 +299,8 @@ class Cleanup: NSObject {
                 }
                 WriteToLog.shared.message("[cleanUpXml] Apple School Manager classes are not migrated, skipping \(className)")
                 Counter.shared.post += 1
-                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": "classes", "total": endpointCount])
-//                putStatusUpdate2(endpoint: "classes", total: endpointCount)
+                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": "classes", "total": endpointCount])
+//                putStatusUpdate(endpoint: "classes", total: endpointCount)
                 if ToMigrate.objects.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
