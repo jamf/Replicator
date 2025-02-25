@@ -325,7 +325,7 @@ protocol SendMessageDelegate: AnyObject {
 }
 
 protocol GetStatusDelegate: AnyObject {
-    func updateGetStatus(endpoint: String, total: Int, index: Int)
+    func updateGetStatus(endpoint: String, total: Int, index: Int) async
 }
 
 protocol UpdateUiDelegate: AnyObject {
@@ -396,7 +396,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     private let lockQueue = DispatchQueue(label: "lock.queue")
-//    private let putStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
+    //    private let putStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
+    private let getStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
     
     @IBOutlet weak var selectiveFilter_TextField: NSTextField!
     
@@ -3823,8 +3824,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let l_xml  = theObject.fileContents
                     
 //                    print("[processFiles] l_id: \(l_id), l_name: \(theObject.objectName.xmlDecode), l_xml: \(l_xml)")
-                    
-                    updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
+                    Task {
+                        await updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
+                    }
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
                     if l_id != "" && l_name != "" && l_xml != "" {
@@ -4593,23 +4595,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             adjEndpoint = endpoint
         }
         
-        if index == -1 {
-            if getCounters[adjEndpoint] == nil {
-                getCounters[adjEndpoint] = ["get":1]
+//        getStatusLockQueue.sync.async {
+            if index == -1 {
+                if getCounters[adjEndpoint] == nil {
+                    getCounters[adjEndpoint] = ["get":1]
+                } else {
+                    getCounters[adjEndpoint]!["get"]! += 1
+                }
             } else {
-                getCounters[adjEndpoint]!["get"]! += 1
-            }
-        } else {
                 getCounters[adjEndpoint] = ["get":index]
-        }
-        
-//        let totalCount = (fileImport && UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
-        let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
-        
-        print("[getStatusUpdate2] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
-        if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
-            var getNext = true
-            switch endpoint {
+            }
+            
+            //        let totalCount = (fileImport && UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
+            let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
+            
+            print("[getStatusUpdate] \(adjEndpoint): retrieved \(getCounters[adjEndpoint]!["get"]!) of \(totalCount)")
+            if getCounters[adjEndpoint]!["get"]! == totalCount || total == 0 {
+                var getNext = true
+                switch endpoint {
                 case "smartcomputergroups":
                     if smartComputerGrpsSelected && staticComputerGrpsSelected && total > 0 {
                         getNext = false
@@ -4624,37 +4627,37 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                 default:
                     break
-            }
-            if getNext {
-                getNodesComplete += 1
-            }
-            
-            print("[getStatusUpdate2] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
-            if getNodesComplete == ToMigrate.rawCount && export.saveOnly {
-                runComplete()
-            } else {
-                if getNodesComplete < ToMigrate.rawCount && getNext {
-                    print("[getStatusUpdate2] nextNode: \(ToMigrate.objects[nodesComplete])")
-                    readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                 }
-            }
-        }
-        
-        if Setting.fullGUI && totalCount > 0 {
-            DispatchQueue.main.async { [self] in
-                print("[getStatusUpdate] adjEndpoint: \(adjEndpoint)")
-//                print("[getStatusUpdate2] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
-                if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
-//                if getCounters[adjEndpoint]!["get"]! > 0 {
-                    if (!Setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
-                        get_name_field.stringValue    = adjEndpoint.readable
-                        get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
-//                        get_levelIndicator.floatValue = Float(getCounters[adjEndpoint]!["get"]!)/Float(totalCount)
-                        getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
+                if getNext {
+                    getNodesComplete += 1
+                }
+                
+                print("[getStatusUpdate] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
+                if getNodesComplete == ToMigrate.rawCount && export.saveOnly {
+                    runComplete()
+                } else {
+                    if getNodesComplete < ToMigrate.rawCount && getNext {
+                        print("[getStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
+                        readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                     }
                 }
             }
-        }
+            
+            if Setting.fullGUI && totalCount > 0 {
+                DispatchQueue.main.async { [self] in
+                    print("[getStatusUpdate] adjEndpoint: \(adjEndpoint)")
+                    //                print("[getStatusUpdate] count: \(String(describing: getCounters[adjEndpoint]?["get"]))")
+                    if let currentCount = getCounters[adjEndpoint]?["get"], currentCount > 0 {
+                        //                if getCounters[adjEndpoint]!["get"]! > 0 {
+                        if (!Setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
+                            get_name_field.stringValue    = adjEndpoint.readable
+                            get_levelIndicator.floatValue = Float(currentCount)/Float(totalCount)
+                            getSummary_label.stringValue  = "\(currentCount) of \(totalCount)"
+                        }
+                    }
+                }
+            }
+//        }
     }
     
     func putStatusUpdate2(endpoint: String, total: Int) {
@@ -4672,20 +4675,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         print("[putStatusUpdate2] adjEndpoint: \(adjEndpoint)")
         
-        if putCounters[adjEndpoint] == nil {
-            putCounters[adjEndpoint] = ["put":1]
-        } else {
-            putCounters[adjEndpoint]!["put"]! += 1
-        }
-        print("[putStatusUpdate2] \(adjEndpoint) put count: \(putCounters[adjEndpoint]!["put"]!)")
         
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
                     
-        var newPutTotal = (Counter.shared.crud[adjEndpoint]?["create"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["update"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)
-        newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
-
+//        var newPutTotal = (Counter.shared.crud[adjEndpoint]?["create"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["update"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)
+//        newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
+        // Counter.shared.summary[endpoint]?["fail"]
+        var newPutTotal = (Counter.shared.summary[adjEndpoint]?["create"]?.count ?? 0) + (Counter.shared.summary[adjEndpoint]?["update"]?.count ?? 0) + (Counter.shared.summary[adjEndpoint]?["fail"]?.count ?? 0)
+        newPutTotal += (Counter.shared.summary[adjEndpoint]?["skipped"]?.count ?? 0)
+        
+        if putCounters[adjEndpoint] == nil {
+            putCounters[adjEndpoint] = ["put": newPutTotal /*1*/]
+        } else {
+            putCounters[adjEndpoint]!["put"]! = newPutTotal /*+= 1*/
+        }
+        
+//        print("[putStatusUpdate2.counter]  create: \(Counter.shared.summary[adjEndpoint]?["create"]?.count ?? 0)")
+//        print("[putStatusUpdate2.counter]  update: \(Counter.shared.summary[adjEndpoint]?["update"]?.count ?? 0)")
+//        print("[putStatusUpdate2.counter]    fail: \(Counter.shared.summary[adjEndpoint]?["fail"]?.count ?? 0)")
+//        print("[putStatusUpdate2.counter] skipped: \(Counter.shared.summary[adjEndpoint]?["skipped"]?.count ?? 0)")
+        
+        print("[putStatusUpdate2] \(adjEndpoint) put count: \(putCounters[adjEndpoint]!["put"]!)")
         print("[putStatusUpdate2] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
         print("[putStatusUpdate2] ToMigrate.objects: \(ToMigrate.objects.description)")
+        
         if newPutTotal == totalCount || total == 0 {
             var getNext = true
             switch endpoint {

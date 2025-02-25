@@ -25,9 +25,9 @@ class JamfPro: NSObject, URLSessionDelegate {
             WriteToLog.shared.message("[JamfPro.renewToken] JamfProServer.authType[\(whichServer)]: \(JamfProServer.authType[whichServer] ?? "unknown server")")
         }
         if !migrationComplete.isDone && renew && JamfProServer.authType[whichServer] == "Bearer" {
-            WriteToLog.shared.message("[JamfPro.renewToken] \(whichServer.localizedCapitalized) server token renews in \(JamfProServer.authExpires[whichServer] ?? 0 + 1) seconds")
-            DispatchQueue.main.asyncAfter(deadline: .now() + (JamfProServer.authExpires[whichServer] ?? 0) + 1) { [self] in
-                WriteToLog.shared.message("[JamfPro.renewToken] renewing \(whichServer.localizedCapitalized) token")
+            WriteToLog.shared.message("[JamfPro.renewToken] \(whichServer.localizedCapitalized) server token renews in \(myFormattedTimeInterval(Int(JamfProServer.authExpires[whichServer] ?? 0)))")
+            DispatchQueue.main.asyncAfter(deadline: .now() + (JamfProServer.authExpires[whichServer] ?? 0)) { [self] in
+                WriteToLog.shared.message("[JamfPro.renewToken] renewing \(whichServer) token")
                 getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
                     (result: (Int, String)) in
                 }
@@ -106,7 +106,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         
         if !(JamfProServer.validToken[whichServer] ?? false) || tokenAgeInSeconds >= JamfProServer.authExpires[whichServer] ?? 0 || (JamfProServer.base64Creds[whichServer] != base64creds) {
             if JamfProServer.authType[whichServer] == "Bearer" {
-                WriteToLog.shared.message("[JamfPro.getToken] Token for \(whichServer) server is \(Int(tokenAgeInSeconds/60)) minutes old. Expires in \(JamfProServer.authExpires[whichServer] ?? 0) seconds.")
+                WriteToLog.shared.message("[JamfPro.getToken] Token for \(whichServer) server is \(myFormattedTimeInterval(Int(tokenAgeInSeconds))) old. Expires in \(myFormattedTimeInterval(Int(JamfProServer.authExpires[whichServer] ?? 0)))")
             }
             
             if apiClient {
@@ -151,14 +151,21 @@ class JamfPro: NSObject, URLSessionDelegate {
                         do {
                             let json = try JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                             if let endpointJSON = json as? [String: Any] {
-                                print("[getToken] endpointJSON: \(endpointJSON)")
+//                                print("[getToken] endpointJSON: \(endpointJSON)")
                                 if apiClient {
                                     JamfProServer.authExpires[whichServer] = (endpointJSON["expires_in"] as? Double ?? 60.0)
                                 } else {
-                                    JamfProServer.authExpires[whichServer] = (endpointJSON["expires"] as? Double ?? 20.0)!*60
+                                    let isoFormatter = ISO8601DateFormatter()
+                                    isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                                    if let dateString = endpointJSON["expires"] as? String, let date = isoFormatter.date(from: dateString) {
+                                        let renewIn = timeDiff(forWhat: "tokenExpires", someDate: date)
+                                        JamfProServer.authExpires[whichServer] = renewIn.3
+                                    } else {
+                                        JamfProServer.authExpires[whichServer] = 20*60
+                                    }
                                 }
                                 // for testing
-                                //                            JamfProServer.authExpires[whichServer] = 20.0*60
+                                //                            JamfProServer.authExpires[whichServer] = 5.0*60
                                 
                                 JamfProServer.authExpires[whichServer] = JamfProServer.authExpires[whichServer]!*0.75
                                 JamfProServer.validToken[whichServer]  = true
@@ -291,6 +298,23 @@ class JamfPro: NSObject, URLSessionDelegate {
             return
         }
         
+    }
+    
+    private func myFormattedTimeInterval(_ interval: Int) -> String {
+        var formattedInterval: Int = 0
+        var unit = ""
+        if interval > 3600 {
+            formattedInterval = interval / 3600
+            unit = "hour"
+        } else if interval > 60 {
+            formattedInterval = interval / 60
+            unit = "minute"
+        } else {
+            formattedInterval = interval
+            unit = "second"
+        }
+        let plural = formattedInterval == 1 ? "" : "s"
+        return "\(formattedInterval) \(unit)\(plural)"
     }
     
     func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {

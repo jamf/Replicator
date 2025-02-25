@@ -97,6 +97,7 @@ struct AppInfo {
     static var settings        = [String:Any]()
     static let plistPathOld    = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/settings.plist"
     static let plistPath       = AppInfo.appSupportPath + "/settings.plist"
+    static var maskServerNames = userDefaults.integer(forKey: "maskServerNames") == 1 ? true : false
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
 }
@@ -362,9 +363,11 @@ public func tagValue2(xmlString:String, startTag:String, endTag:String) -> Strin
 }
 //  extract the value between (different) tags - end
 
-public func timeDiff(forWhat: String) -> (Int,Int,Int,Double) {
+public func timeDiff(forWhat: String, someDate: Date = Date()) -> (Int,Int,Int,Double) {
     var components:DateComponents?
     switch forWhat {
+    case "tokenExpires":
+        components = Calendar.current.dateComponents([.second, .nanosecond], from: Date(), to: someDate)
     case "runTime":
         components = Calendar.current.dateComponents([.second, .nanosecond], from: History.startTime, to: Date())
     case "sourceTokenAge","destTokenAge":

@@ -123,7 +123,7 @@ class Cleanup: NSObject {
         var knownEndpoint = true
 
         var iconName       = ""
-        var iconId_string  = ""
+//        var iconId_string  = ""
         var iconId         = "0"
         var iconUri        = ""
         

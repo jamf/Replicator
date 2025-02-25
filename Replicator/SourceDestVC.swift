@@ -414,6 +414,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if (whichserver == "source" && !WipeData.state.on) || (whichserver == "dest" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
+            JamfProServer.validToken[whichserver] = false
             NotificationCenter.default.post(name: .resetListFields, object: nil)
         }
     }
@@ -977,6 +978,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             // read environment settings from plist - start
             _ = readSettings()
 
+            AppInfo.maskServerNames = userDefaults.integer(forKey: "maskServerNames") == 1
+            print("raw maskServerNames: \(userDefaults.integer(forKey: "maskServerNames"))")
+            print("maskServerNames: \(AppInfo.maskServerNames)")
             if AppInfo.settings["source_jp_server"] as? String != nil {
                 source_jp_server = AppInfo.settings["source_jp_server"] as! String
                 JamfProServer.source = source_jp_server
