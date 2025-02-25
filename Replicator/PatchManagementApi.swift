@@ -239,7 +239,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     if endpoint == "patch-software-title-configurations" {
                         Counter.shared.crud[endpoint]?[method]! += 1
                         if Summary.totalCompleted > 0 {
-                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
+                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
                         }
                         
                         if let stringResponse = String(data: data!, encoding: .utf8) {

@@ -39,7 +39,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             WriteToLog.shared.message("[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)")
             Counter.shared.crud[endpointType]?["skipped"]! += 1
             if destEpId != "-1" {
-                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": endpointCount])
+                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": endpointCount])
             }
             return
         }
@@ -326,7 +326,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                                print("[CreateEndpoints] endpointType: \(endpointType)")
 //                                if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
 //                                    if destEpId != "-1" {
-//                                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+//                                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
 //                                    }
 //                                }
 //                            }
@@ -510,7 +510,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                                    print("[CreateEndpoints] endpointType: \(endpointType)")
 //                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
 //                                        if destEpId != "-1" {
-//                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+//                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
 //                                        }
 //                                    }
 //                                }
@@ -527,7 +527,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             print("[CreateEndpoints] endpointType: \(endpointType)")
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
-                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                 }
                             }
                         }
@@ -571,7 +571,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                                print("[CreateEndpoints] counters: \(counters)")
                         if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             if destEpId != "-1" {
-                                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                             }
                         }
                     }
@@ -820,7 +820,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 if Summary.totalCompleted > 0 {
                                     if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         if destEpId != "-1" {
-                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                         }
                                     }
                                 }
@@ -952,7 +952,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 if Summary.totalCompleted > 0 {
                                     if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         if destEpId != "-1" {
-                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate2", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                         }
                                     }
                                 }
