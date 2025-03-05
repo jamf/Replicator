@@ -18,8 +18,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
         print("[EndpointXml] call updateGetStatus")
         Logger.endpointXml_endPointByIdQueue.debug("call updateGetStatus")
         getStatusDelegate?.updateGetStatus(endpoint: endpoint, total: total, index: index)
-        
-//        updateUiDelegate?.updateUi(info: ["function": "updateGetStatus", "endpoint": endpoint, "total": total, "index": index])
     }
     var updateUiDelegate: UpdateUiDelegate?
     
@@ -113,8 +111,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
 //                                    print("[getById] \(#line) returnedJSON: \(returnedJSON)")
 //                                }
                         //                        print("returnedJSON: \(returnedJSON)")
+                sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
                         if returnedJSON.count > 0 {
-                            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
 //                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
                             // save source JSON - start
                             if export.saveRawXml {
@@ -161,8 +159,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
             print("[getById] displayName: \(sourceObject?.displayName ?? "unknown")")
             completion(sourceObject?.displayName ?? "unknown")
             
+            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
             if !(sourceObject?.id ?? "").isEmpty {
-                sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
 //                self.updateGetStatus(endpoint: endpoint, total: endpointCount)
 //                for theSourceObj in JamfProSites.source {
 //                    print("[getById] sourceObject?.siteId: \(theSourceObj.id),   name: \(theSourceObj.name)")
@@ -262,7 +260,11 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     request.httpMethod = "GET"
                     let configuration = URLSessionConfiguration.ephemeral
                     
-                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+//                    if endpointCurrent % 15 == 0 {
+//                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source1"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+//                    } else {
+                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+//                    }
                     
                     var headers = [String: String]()
                     for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
@@ -279,10 +281,10 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         session.finishTasksAndInvalidate()
                         completion(destEpName)
                         
+                        sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)  // moved outside if
                         if let httpResponse = response as? HTTPURLResponse {
-                            let statusCode = Int((response as? HTTPURLResponse)?.statusCode ?? 0)
+                            let statusCode = httpResponse.statusCode
                             if LogLevel.debug { WriteToLog.shared.message("[getById] HTTP response code of GET for \(destEpName): \(statusCode)") }
-                            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)  // moved outside if
                             if (200...299).contains(statusCode) {
                                 let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
     //                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
@@ -338,7 +340,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                             } else {
                                 // update put (failed) count
                                 updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "EndpointXml-getById", "endpointType": endpoint, "fillColor": NSColor.systemYellow, "indicator": "get"])
-                                if LogLevel.debug { WriteToLog.shared.message("[getById] GET failed for \(endpoint) with id: \(endpointID).") }
+                                if LogLevel.debug { WriteToLog.shared.message("[getById] status code: \(statusCode), GET failed for \(endpoint) with id: \(endpointID).") }
                                 Cleanup.shared.Xml(endpoint: endpoint, Xml: "", endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                                     (result: String) in
                                     if LogLevel.debug { WriteToLog.shared.message("[getById] Returned from cleanupXml") }
@@ -356,6 +358,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         } else {   // if let httpResponse - end
                             updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "EndpointXml-getById", "endpointType": endpoint, "fillColor": NSColor.systemYellow, "indicator": "get"])
                             // update put (failed) count
+                            if LogLevel.debug { WriteToLog.shared.message("[getById] unknown response: \(String(describing: response))") }
                             if LogLevel.debug { WriteToLog.shared.message("[getById] GET failed for \(endpoint) with id: \(endpointID).") }
                             Cleanup.shared.Xml(endpoint: endpoint, Xml: "", endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                                 (result: String) in
