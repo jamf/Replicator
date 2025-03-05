@@ -302,9 +302,14 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Log Folder" keyEquivalent="l" id="oAZ-Op-53a">
+                                        <menuItem title="Logs..." keyEquivalent="l" id="oAZ-Op-53a">
                                             <connections>
                                                 <action selector="showLogFolder:" target="Voe-Tx-rLC" id="pZY-Mx-5wf"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Reset Version Alert" hidden="YES" enabled="NO" keyEquivalent="r" id="8JD-11-uWG">
+                                            <connections>
+                                                <action selector="resetVersionAlert_Action:" target="Voe-Tx-rLC" id="wFF-5A-gwL"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Summary" keyEquivalent="s" id="cVQ-FM-eQy">
@@ -312,7 +317,7 @@
                                                 <action selector="showSummaryWindow:" target="Voe-Tx-rLC" id="RpZ-z2-SIR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Toggle Mode" keyEquivalent="d" toolTip="Switch between migrating and deleting objects" id="ESO-VJ-kqw">
+                                        <menuItem title="Toggle Mode" keyEquivalent="d" toolTip="Switch between replicating and deleting objects" id="ESO-VJ-kqw">
                                             <connections>
                                                 <action selector="deleteMode:" target="Voe-Tx-rLC" id="Cnc-x5-QH0"/>
                                             </connections>
@@ -363,7 +368,11 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Replicator" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Replicator" customModuleProvider="target">
+                    <connections>
+                        <outlet property="resetVersionAlert_MenuItem" destination="8JD-11-uWG" id="vry-3o-Vj6"/>
+                    </connections>
+                </customObject>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="532" y="-46"/>

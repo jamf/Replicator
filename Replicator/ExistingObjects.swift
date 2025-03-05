@@ -26,6 +26,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
         
         // query destination server
         if skipLookup {
+            Logger.existingObjects_capi.debug("[existingObjects_capi] skipping: \(theDestEndpoint, privacy: .public)")
             completion(("skipping lookup",theDestEndpoint))
             return
         }
@@ -283,7 +284,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                     }
 
                                 default:
-                                    //                                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
 //                                    print("[ExistingObjects.capi] destEndpointJSON: \(result.description)")
                                     if let objectArray = result as? [[String: Any]] {
                                         let destEndpointJSON = objectArray[0]

@@ -35,4 +35,38 @@ class Alert: NSObject {
         }
         return selected
     }
+    
+    func versionDialog(header: String, message: String, updateAvail: Bool, manualCheck: Bool = false) {
+        NSApp.activate(ignoringOtherApps: true)
+        if userDefaults.bool(forKey: "hideVersionAlert") == false || manualCheck {
+            let dialog: NSAlert = NSAlert()
+            dialog.messageText = header
+            dialog.informativeText = message
+            dialog.alertStyle = NSAlert.Style.informational
+            dialog.showsSuppressionButton = !manualCheck
+            if updateAvail {
+                dialog.addButton(withTitle: "View")
+                dialog.addButton(withTitle: "Later")
+            } else {
+                dialog.addButton(withTitle: "OK")
+            }
+            
+            let clicked:NSApplication.ModalResponse = dialog.runModal()
+            
+            if let supress = dialog.suppressionButton {
+                let state = supress.state
+                switch state {
+                case .on:
+                    userDefaults.set(true, forKey: "hideVersionAlert")
+                default: break
+                }
+            }
+            
+            if clicked.rawValue == 1000 && updateAvail {
+                if let url = URL(string: "https://github.com/jamf/Replicator/releases") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+        }
+    }
 }

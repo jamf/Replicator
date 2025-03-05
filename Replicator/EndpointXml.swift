@@ -7,6 +7,7 @@
 
 import Foundation
 import os.log
+import AppKit
 
 class EndpointXml: NSObject, URLSessionDelegate {
     
@@ -15,6 +16,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
     var getStatusDelegate: GetStatusDelegate?
     func sendGetStatus(endpoint: String, total: Int, index: Int) {
         print("[EndpointXml] call updateGetStatus")
+        Logger.endpointXml_endPointByIdQueue.debug("call updateGetStatus")
         getStatusDelegate?.updateGetStatus(endpoint: endpoint, total: total, index: index)
         
 //        updateUiDelegate?.updateUi(info: ["function": "updateGetStatus", "endpoint": endpoint, "total": total, "index": index])
@@ -53,7 +55,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         Counter.shared.pendingGet -= 1
                     }
                 } else {
-//                    sleep(1)
                     usleep(5000)
                 }
             }
@@ -279,58 +280,87 @@ class EndpointXml: NSObject, URLSessionDelegate {
                         completion(destEpName)
                         
                         if let httpResponse = response as? HTTPURLResponse {
-                            if LogLevel.debug { WriteToLog.shared.message("[getById] HTTP response code of GET for \(destEpName): \(httpResponse.statusCode)") }
-                            let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
-                            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
-//                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
-                            // save source XML - start
-                            if export.saveRawXml {
-                                if LogLevel.debug { WriteToLog.shared.message("[getById] Saving raw XML for \(destEpName) with id: \(endpointID).") }
-                                DispatchQueue.main.async {
-                                    // added option to remove scope
-                                    //                                    print("[getById] export.rawXmlScope: \(export.rawXmlScope)")
-                                    let exportRawXml = (export.rawXmlScope) ? PostXML:RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
-//                                            let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
-                                    
-                                    WriteToLog.shared.message("[getById] Exporting raw XML for \(endpoint) - \(destEpName)")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                    XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                            let statusCode = Int((response as? HTTPURLResponse)?.statusCode ?? 0)
+                            if LogLevel.debug { WriteToLog.shared.message("[getById] HTTP response code of GET for \(destEpName): \(statusCode)") }
+                            sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)  // moved outside if
+                            if (200...299).contains(statusCode) {
+                                let PostXML = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!
+    //                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
+                                // save source XML - start
+                                if export.saveRawXml {
+                                    if LogLevel.debug { WriteToLog.shared.message("[getById] Saving raw XML for \(destEpName) with id: \(endpointID).") }
+                                    DispatchQueue.main.async {
+                                        // added option to remove scope
+                                        //                                    print("[getById] export.rawXmlScope: \(export.rawXmlScope)")
+                                        let exportRawXml = (export.rawXmlScope) ? PostXML:RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
+    //                                            let exportRawXml = (export.rawXmlScope) ? PostXML:rmXmlData(theXML: PostXML, theTag: "scope", keepTags: false)
+                                        
+                                        WriteToLog.shared.message("[getById] Exporting raw XML for \(endpoint) - \(destEpName)")
+                                        let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                        XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                    }
                                 }
-                            }
-                            // save source XML - end
-                            if !export.backupMode {
+                                // save source XML - end
+                                if !export.backupMode {
+                                    
+                                    if LogLevel.debug { WriteToLog.shared.message("[getById] Starting to clean-up the XML for \(endpoint) with id \(endpointID).") }
+                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                        (result: String) in
+                                        if LogLevel.debug { WriteToLog.shared.message("[getById] Returned from cleanupXml") }
+                                    }
+                                } else {
+                                    // to back-up icons
+                                    if endpoint == "policies" {
+                                        Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                            (result: String) in
+                                        }
+                                    }
+                                    // check progress
+                                    //                                print("[getById] node: \(endpoint)")
+                                    //                                // print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                                    Endpoints.countDict[endpoint]! -= 1
+                                    //                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+                                    if Endpoints.countDict[endpoint] == 0 {
+                                        //                                     print("[getById] saved last \(endpoint)")
+                                        //                                     print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+                                        Endpoints.countDict[endpoint] = nil
+                                        //                                    print("[getById] nodes remaining \(Endpoints.countDict)")
+    //                                            if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
+                                        if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
+                                            // print("[getById] zip it up")
+    //                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                            updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
+                                        }
+                                    }
+                                }
                                 
-                                if LogLevel.debug { WriteToLog.shared.message("[getById] Starting to clean-up the XML for \(endpoint) with id \(endpointID).") }
-                                Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                
+                            } else {
+                                // update put (failed) count
+                                updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "EndpointXml-getById", "endpointType": endpoint, "fillColor": NSColor.systemYellow, "indicator": "get"])
+                                if LogLevel.debug { WriteToLog.shared.message("[getById] GET failed for \(endpoint) with id: \(endpointID).") }
+                                Cleanup.shared.Xml(endpoint: endpoint, Xml: "", endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                                     (result: String) in
                                     if LogLevel.debug { WriteToLog.shared.message("[getById] Returned from cleanupXml") }
                                 }
-                            } else {
-                                // to back-up icons
-                                if endpoint == "policies" {
-                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: PostXML, endpointID: endpointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                        (result: String) in
-                                    }
-                                }
                                 // check progress
-                                //                                print("[getById] node: \(endpoint)")
-                                //                                // print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
                                 Endpoints.countDict[endpoint]! -= 1
-                                //                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
                                 if Endpoints.countDict[endpoint] == 0 {
-                                    //                                     print("[getById] saved last \(endpoint)")
-                                    //                                     print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+
                                     Endpoints.countDict[endpoint] = nil
-                                    //                                    print("[getById] nodes remaining \(Endpoints.countDict)")
-//                                            if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
                                     if Endpoints.countDict.count == 0 && Endpoints.read == ToMigrate.objects.count {
-                                        // print("[getById] zip it up")
-//                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
                                         updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
                                     }
                                 }
                             }
                         } else {   // if let httpResponse - end
+                            updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "EndpointXml-getById", "endpointType": endpoint, "fillColor": NSColor.systemYellow, "indicator": "get"])
+                            // update put (failed) count
+                            if LogLevel.debug { WriteToLog.shared.message("[getById] GET failed for \(endpoint) with id: \(endpointID).") }
+                            Cleanup.shared.Xml(endpoint: endpoint, Xml: "", endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                                (result: String) in
+                                if LogLevel.debug { WriteToLog.shared.message("[getById] Returned from cleanupXml") }
+                            }
                             // check progress
                             //                            print("[endpointById-error] node: \(endpoint)")
                             //                            print("[endpointById-error] endpoint \(endpointCurrent) of \(endpointCount) complete")

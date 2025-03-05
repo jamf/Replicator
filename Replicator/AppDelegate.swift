@@ -18,6 +18,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var prefWindowController: NSWindowController?
     
+    @IBOutlet weak var resetVersionAlert_MenuItem: NSMenuItem!
+    @IBAction func resetVersionAlert_Action(_ sender: Any) {
+        resetVersionAlert_MenuItem.isEnabled = false
+        resetVersionAlert_MenuItem.isHidden = true
+        userDefaults.set(false, forKey: "hideVersionAlert")
+    }
+    
+    
     @IBAction func showSummaryWindow(_ sender: AnyObject) {
         NotificationCenter.default.post(name: .showSummaryWindow, object: self)
     }
@@ -58,6 +66,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("[\(#function.description)] loaded")
         
         if Setting.fullGUI {
+            let hideVersionAlert = userDefaults.bool(forKey: "hideVersionAlert")
+            resetVersionAlert_MenuItem.isEnabled = hideVersionAlert
+            resetVersionAlert_MenuItem.isHidden = !hideVersionAlert
+        
             // create log directory if missing - start
             if !fm.fileExists(atPath: History.logPath) {
                 do {
@@ -244,6 +256,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController
             mainWindowController.window?.hidesOnDeactivate = false
             mainWindowController.showWindow(self)
+            checkForUpdates(self)
         }
         else {
             WriteToLog.shared.message("[AppDelegate] Replicator is running silently")
@@ -255,15 +268,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func checkForUpdates(_ sender: AnyObject) {
         let verCheck = VersionCheck()
         
-        let appInfo = Bundle.main.infoDictionary!
-        let version = appInfo["CFBundleShortVersionString"] as! String
+        var manualCheck = false
+        if let _ = sender as? NSMenuItem {
+            manualCheck = true
+        }
         
         verCheck.versionCheck() {
             (result: Bool, latest: String) in
             if result {
-                self.versionAlert(header: "A new version (\(latest)) is available.", message: "Running Replicator: \(version)", updateAvail: result)
+                if Setting.fullGUI {
+                    Alert.shared.versionDialog(header: "A new version (\(latest)) is available.", message: "Running Replicator: \(AppInfo.version)", updateAvail: result, manualCheck: manualCheck)
+                }
+                WriteToLog.shared.message("A new version (\(latest)) is available")
             } else {
-                self.versionAlert(header: "Running Replicator: \(version)", message: "No updates are currently available.", updateAvail: result)
+                if manualCheck && Setting.fullGUI {
+                    Alert.shared.versionDialog(header: "Running Replicator: \(AppInfo.version)", message: "No updates are currently available.", updateAvail: result, manualCheck: manualCheck)
+                }
             }
         }
     }
@@ -284,7 +304,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let clicked:NSApplication.ModalResponse = dialog.runModal()
 
         if clicked.rawValue == 1000 && updateAvail {
-            if let url = URL(string: "https://github.com/jamf/JamfMigrator/releases") {
+            if let url = URL(string: "https://github.com/jamf/Replicator/releases") {
                     NSWorkspace.shared.open(url)
             }
         }

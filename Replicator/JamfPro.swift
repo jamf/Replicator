@@ -28,6 +28,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             WriteToLog.shared.message("[JamfPro.renewToken] \(whichServer.localizedCapitalized) server token renews in \(myFormattedTimeInterval(Int(JamfProServer.authExpires[whichServer] ?? 0)))")
             DispatchQueue.main.asyncAfter(deadline: .now() + (JamfProServer.authExpires[whichServer] ?? 0)) { [self] in
                 WriteToLog.shared.message("[JamfPro.renewToken] renewing \(whichServer) token")
+                JamfProServer.validToken[whichServer] = false
                 getToken(whichServer: whichServer, serverUrl: baseUrl, base64creds: base64creds) {
                     (result: (Int, String)) in
                 }
