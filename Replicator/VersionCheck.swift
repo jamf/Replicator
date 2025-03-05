@@ -19,7 +19,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
         var updateAvailable = false
 //        var versionTest     = true
         
-        let versionUrl = URL(string: "https://api.github.com/repos/jamf/JamfMigrator/releases/latest")
+        let versionUrl = URL(string: "https://api.github.com/repos/jamf/Replicator/releases/latest")
 
         let configuration = URLSessionConfiguration.ephemeral
         var request = URLRequest(url: versionUrl!)
@@ -58,6 +58,10 @@ class VersionCheck: NSObject, URLSessionDelegate {
                     return
                 }
                 
+            } else {
+                WriteToLog.shared.message("[versionCheck] unknown response for version check")
+                completion(false, "")
+                return
             }
         })
         task.resume()

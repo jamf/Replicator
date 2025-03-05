@@ -248,10 +248,33 @@ final class ExistingEndpoints {
     }
 }
 
+final class GetLevelIndicator {
+    static let shared = GetLevelIndicator()
+
+    private let getIndicatorQueue = DispatchQueue(label: "getIndicator.color", qos: .default, attributes: .concurrent)
+    private var _indicatorColor = [String: NSColor]()
+    
+    var indicatorColor: [String: NSColor] {
+        get {
+            var indicatorColor: [String: NSColor] = [:]
+            getIndicatorQueue.sync {
+                indicatorColor = _indicatorColor
+            }
+
+            return indicatorColor
+        }
+        set {
+            getIndicatorQueue.async(flags: .barrier) {
+                self._indicatorColor = newValue
+            }
+        }
+    }
+}
+
 final class PutLevelIndicator {
     static let shared = PutLevelIndicator()
 
-    private let putIndicatorQueue = DispatchQueue(label: "indicator.color", qos: .default, attributes: .concurrent)
+    private let putIndicatorQueue = DispatchQueue(label: "putIndicator.color", qos: .default, attributes: .concurrent)
     private var _indicatorColor = [String: NSColor]()
     
     var indicatorColor: [String: NSColor] {
@@ -400,8 +423,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 put_levelIndicator.fillColor = fillColor
             }
         case "setLevelIndicatorFillColor":
-            if let fn = info["fn"] as? String, let endpointType = info["endpointType"] as? String, let fillColor = info["fillColor"] as? NSColor {
-                setLevelIndicatorFillColor(fn: fn, endpointType: endpointType, fillColor: fillColor)
+            if let fn = info["fn"] as? String, let endpointType = info["endpointType"] as? String, let fillColor = info["fillColor"] as? NSColor  {
+                setLevelIndicatorFillColor(fn: fn, endpointType: endpointType, fillColor: fillColor, indicator: info["indicator"] as? String ?? "put")
             }
         case "sourceObjectList_AC.remove":
                 if let arrangedObjects = sourceObjectList_AC.arrangedObjects as? [SelectiveObject], let _ = info["objectId"] as? String, let objectIndex = arrangedObjects.firstIndex(where: { $0.objectId == info["objectId"] as? String }) {
@@ -2588,7 +2611,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                 } else {
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                    //                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
@@ -2601,7 +2623,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                 } else {
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                    //                                                                                endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             }
                                         } else {
@@ -2764,7 +2785,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         }
                                                     } else {
                                                         EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                        //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                     }
                                                 } else {
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
@@ -2778,7 +2798,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         }
                                                     } else {
                                                         EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                        //                                                            endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                 }
                                             } else {
@@ -2893,7 +2912,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     }
                                                 } else {
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                    //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
@@ -2902,13 +2920,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 if Setting.onlyCopyExisting {
                                                     updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                     CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
-                                                        //                                                                    createEndpointsQueue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: 0, ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                         (result: String) in
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                    //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             }
                                         } else {
@@ -5609,13 +5625,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor) {
+    func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor, indicator: String = "put") {
 //        print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
         if Setting.fullGUI {
             DispatchQueue.main.async { [self] in
-                if put_levelIndicator.fillColor == .green || /*put_levelIndicatorFillColor[endpointType]*/PutLevelIndicator.shared.indicatorColor[endpointType] == .systemRed {
-                    /*put_levelIndicatorFillColor[endpointType]*/PutLevelIndicator.shared.indicatorColor[endpointType] = fillColor
-                    put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]/*put_levelIndicatorFillColor[endpointType]*/
+                if indicator == "put" {
+                    if put_levelIndicator.fillColor == .green || PutLevelIndicator.shared.indicatorColor[endpointType] == .systemRed {
+                        PutLevelIndicator.shared.indicatorColor[endpointType] = fillColor
+                        put_levelIndicator.fillColor = PutLevelIndicator.shared.indicatorColor[endpointType]
+                    }
+                } else {
+                    GetLevelIndicator.shared.indicatorColor[endpointType] = fillColor
+                    get_levelIndicator.fillColor = GetLevelIndicator.shared.indicatorColor[endpointType]
                 }
             }
         }
