@@ -2210,7 +2210,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 let result = objectRecord as? [String: AnyObject] ?? [:]
                 print("[startSelectiveMigration] result.count: \(result.count)")
-                if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigration] Returned from Json.getRecord: \(result)") }
+                if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigration] Returned from Json.getRecord") }
                 
                 if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
