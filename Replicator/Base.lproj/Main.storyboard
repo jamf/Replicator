@@ -443,7 +443,7 @@
                                     <constraint firstAttribute="height" constant="20" id="coy-wa-Lzr"/>
                                 </constraints>
                                 <connections>
-                                    <action selector="setServerUrl_button:" target="eUd-vB-D7a" id="cnf-m7-YCb"/>
+                                    <action selector="setServerUrl_action:" target="eUd-vB-D7a" id="kJf-IW-6Ge"/>
                                 </connections>
                             </popUpButton>
                             <textField identifier="sourceServer" toolTip="source Jamf Pro server URL" focusRingType="none" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oWq-4n-u3f">
@@ -509,7 +509,7 @@
                                     <constraint firstAttribute="height" constant="20" id="sjs-h1-Znk"/>
                                 </constraints>
                                 <connections>
-                                    <action selector="setServerUrl_button:" target="eUd-vB-D7a" id="vnM-GM-1aD"/>
+                                    <action selector="setServerUrl_action:" target="eUd-vB-D7a" id="I2f-hC-Zaz"/>
                                 </connections>
                             </popUpButton>
                             <textField identifier="destServer" focusRingType="none" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b8g-kK-BoL">

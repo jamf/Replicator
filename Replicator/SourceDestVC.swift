@@ -415,6 +415,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             // post to notification center
             JamfProServer.whichServer = whichserver
             JamfProServer.validToken[whichserver] = false
+            if whichserver == "source" {
+                sourceUser_TextField.stringValue = ""
+            } else {
+                destinationUser_TextField.stringValue = ""
+            }
             NotificationCenter.default.post(name: .resetListFields, object: nil)
         }
     }
@@ -670,7 +675,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
-        if LogLevel.debug { WriteToLog.shared.message("[\(#function.description)] info: \(info)") }
+        if LogLevel.debug && !AppInfo.maskServerNames { WriteToLog.shared.message("[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
         AppInfo.settings["source_jp_server"]   = source_jp_server_field.stringValue.baseUrl as Any?
@@ -684,50 +689,50 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         _ = readSettings()
     }
     
-    @IBAction func setServerUrl_button(_ sender: NSPopUpButton) {
+    @IBAction func setServerUrl_action(_ sender: NSPopUpButton) {
         let whichServer = sender.identifier!.rawValue
-            if NSEvent.modifierFlags.contains(.option) {
-                switch whichServer {
-                case "source":
-                    let selectedServer =  sourceServerList_button.titleOfSelectedItem!
-                    let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
-                    if response == "Cancel" {
-                        return
-                    }
-                    sourceServerArray.removeAll(where: { $0 == sourceServerList_button.titleOfSelectedItem! })
-                    sourceServerList_button.removeItem(withTitle: sourceServerList_button.titleOfSelectedItem!)
-                    if source_jp_server_field.stringValue == selectedServer {
-                        source_jp_server_field.stringValue = ""
-                        sourceUser_TextField.stringValue   = ""
-                        source_pwd_field.stringValue       = ""
-                    }
-                    AppInfo.settings["source_server_array"] = sourceServerArray as Any?
-                case "dest":
-                    let selectedServer =  destServerList_button.titleOfSelectedItem!
-                    let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
-                    if response == "Cancel" {
-                        return
-                    }
-                    destServerArray.removeAll(where: { $0 == destServerList_button.titleOfSelectedItem! })
-                    destServerList_button.removeItem(withTitle: destServerList_button.titleOfSelectedItem!)
-                    if dest_jp_server_field.stringValue == selectedServer {
-                        dest_jp_server_field.stringValue = ""
-                        destinationUser_TextField.stringValue      = ""
-                        dest_pwd_field.stringValue       = ""
-                    }
-                    AppInfo.settings["dest_server_array"] = destServerArray as Any?
-                default:
-                    break
+        if NSEvent.modifierFlags.contains(.option) {
+            switch whichServer {
+            case "source":
+                let selectedServer =  sourceServerList_button.titleOfSelectedItem!
+                let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
+                if response == "Cancel" {
+                    return
                 }
-                saveSourceDestInfo(info: AppInfo.settings)
-                
-                
-                return
+                sourceServerArray.removeAll(where: { $0 == sourceServerList_button.titleOfSelectedItem! })
+                sourceServerList_button.removeItem(withTitle: sourceServerList_button.titleOfSelectedItem!)
+                if source_jp_server_field.stringValue == selectedServer {
+                    source_jp_server_field.stringValue = ""
+                    sourceUser_TextField.stringValue   = ""
+                    source_pwd_field.stringValue       = ""
+                }
+                AppInfo.settings["source_server_array"] = sourceServerArray as Any?
+            case "dest":
+                let selectedServer =  destServerList_button.titleOfSelectedItem!
+                let response = Alert.shared.display(header: "", message: "Are you sure you want to remove \n\(selectedServer) \nfrom the list?", secondButton: "Cancel")
+                if response == "Cancel" {
+                    return
+                }
+                destServerArray.removeAll(where: { $0 == destServerList_button.titleOfSelectedItem! })
+                destServerList_button.removeItem(withTitle: destServerList_button.titleOfSelectedItem!)
+                if dest_jp_server_field.stringValue == selectedServer {
+                    dest_jp_server_field.stringValue = ""
+                    destinationUser_TextField.stringValue      = ""
+                    dest_pwd_field.stringValue       = ""
+                }
+                AppInfo.settings["dest_server_array"] = destServerArray as Any?
+            default:
+                break
             }
+            saveSourceDestInfo(info: AppInfo.settings)
+            
+            return
+        }
         
         JamfProServer.version[whichServer] = ""
         
 //        self.selectiveListCleared = false
+        print("\(#line) - whichServer: \(whichServer)")
         switch whichServer {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
@@ -746,7 +751,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
         case "dest":
+            print(#line)
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
+                print(#line)
                 JamfProServer.validToken["dest"] = false
                 serverChanged(whichserver: "dest")
                 if destServerArray.firstIndex(of: "\(dest_jp_server_field.stringValue)") == nil {

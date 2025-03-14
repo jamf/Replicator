@@ -251,12 +251,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         if Setting.fullGUI {
-            NSApp.setActivationPolicy(.regular)
-            let storyboard = NSStoryboard(name: "Main", bundle: nil)
-            let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController
-            mainWindowController.window?.hidesOnDeactivate = false
-            mainWindowController.showWindow(self)
-            checkForUpdates(self)
+            DispatchQueue.main.async { [self] in
+                NSApp.setActivationPolicy(.regular)
+                let storyboard = NSStoryboard(name: "Main", bundle: nil)
+                let mainWindowController = storyboard.instantiateController(withIdentifier: "Main") as! NSWindowController
+                mainWindowController.window?.hidesOnDeactivate = false
+                mainWindowController.showWindow(self)
+                checkForUpdates(self)
+            }
         }
         else {
             WriteToLog.shared.message("[AppDelegate] Replicator is running silently")
