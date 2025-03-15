@@ -40,6 +40,7 @@
 		B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */; };
 		B5E1912F21AAEFD400A1A9CA /* export.png in Resources */ = {isa = PBXBuildFile; fileRef = B5E1912E21AAEFD400A1A9CA /* export.png */; };
 		B5FD9DAE27434B8A0044C321 /* Jpapi.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DAD27434B890044C321 /* Jpapi.swift */; };
+		CE1935B22D852A830065862C /* LastUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1935B12D852A7D0065862C /* LastUser.swift */; };
 		CE310A612D10BACD007C2C6F /* Cleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A602D10BACD007C2C6F /* Cleanup.swift */; };
 		CE310A632D10BAD9007C2C6F /* CreateEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */; };
 		CE310A652D10BAEC007C2C6F /* EndpointXml.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A642D10BAEC007C2C6F /* EndpointXml.swift */; };
@@ -99,6 +100,7 @@
 		B5E1912C21AAD9F300A1A9CA /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		B5E1912E21AAEFD400A1A9CA /* export.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = export.png; sourceTree = "<group>"; };
 		B5FD9DAD27434B890044C321 /* Jpapi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jpapi.swift; sourceTree = "<group>"; };
+		CE1935B12D852A7D0065862C /* LastUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastUser.swift; sourceTree = "<group>"; };
 		CE310A602D10BACD007C2C6F /* Cleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cleanup.swift; sourceTree = "<group>"; };
 		CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEndpoints.swift; sourceTree = "<group>"; };
 		CE310A642D10BAEC007C2C6F /* EndpointXml.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointXml.swift; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 				B5C25B0627DA0499008E4B0F /* JamfPro.swift */,
 				B5FD9DAD27434B890044C321 /* Jpapi.swift */,
 				B53ECDFB2394474B005EE6E5 /* Json.swift */,
+				CE1935B12D852A7D0065862C /* LastUser.swift */,
 				B574AA712767563E00E4E3E2 /* PackagesDelegate.swift */,
 				B56CBA89277B939100F26E8C /* SaveDelegate.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
@@ -383,6 +386,7 @@
 				B51742DA28FB4F2B0058ED55 /* CustomSeparator.swift in Sources */,
 				CE310A672D10BAFC007C2C6F /* ExistingObjects.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
+				CE1935B22D852A830065862C /* LastUser.swift in Sources */,
 				B54154FF2BD8597700084439 /* Package.swift in Sources */,
 				B5927AFC20CC394F0059C25B /* VersionCheck.swift in Sources */,
 				B5E1912D21AAD9F300A1A9CA /* PreferencesViewController.swift in Sources */,
