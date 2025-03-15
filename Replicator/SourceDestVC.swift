@@ -12,6 +12,8 @@ import Foundation
 
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
+    let lastUserManager = LastUserManager()
+    
 //    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
 //    var exportedFilesUrl = URL(string: "")
@@ -748,6 +750,11 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             serverOrFiles() { [self]
                 (result: String) in
                 saveSourceDestInfo(info: AppInfo.settings)
+                if let lastUserInfo = lastUserManager.query(server: JamfProServer.source) {
+                    sourceUser_TextField.stringValue = lastUserInfo.lastUser
+                    sourceUseApiClient_button.state = lastUserInfo.apiClient ? .on : .off
+                    useApiClient_action(sourceUseApiClient_button)
+                }
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
         case "dest":
@@ -762,6 +769,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             }
             JamfProServer.destination = destServerList_button.titleOfSelectedItem!
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
+
+            if let lastUserInfo = lastUserManager.query(server: JamfProServer.destination) {
+                print("[SourceDestVC] lastUser query lastUser: \(lastUserInfo.lastUser), apiClient: \(lastUserInfo.apiClient)")
+                destinationUser_TextField.stringValue = lastUserInfo.lastUser
+                destUseApiClient_button.state = lastUserInfo.apiClient ? .on : .off
+                useApiClient_action(destUseApiClient_button)
+            }
             fetchPassword(whichServer: "dest", url: JamfProServer.destination)
             // reset list of available sites
             if siteMigrate_button.state.rawValue == 1 {
@@ -775,7 +789,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
-    func serverOrFiles(completion: @escaping (_ sourceType: String) -> Void) {
+    func serverOrFiles(whichServer: String = "source", completion: @escaping (_ sourceType: String) -> Void) {
+        if whichServer != "source" {
+            return
+        }
         // see if we last migrated from files or a server
         var sourceType = ""
         
@@ -986,8 +1003,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             _ = readSettings()
 
             AppInfo.maskServerNames = userDefaults.integer(forKey: "maskServerNames") == 1
-            print("raw maskServerNames: \(userDefaults.integer(forKey: "maskServerNames"))")
-            print("maskServerNames: \(AppInfo.maskServerNames)")
+            WriteToLog.shared.message("[SourceDestVC] mask server names: \(AppInfo.maskServerNames)")
+//            print("raw maskServerNames: \(userDefaults.integer(forKey: "maskServerNames"))")
+//            print("maskServerNames: \(AppInfo.maskServerNames)")
             if AppInfo.settings["source_jp_server"] as? String != nil {
                 source_jp_server = AppInfo.settings["source_jp_server"] as! String
                 JamfProServer.source = source_jp_server

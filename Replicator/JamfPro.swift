@@ -38,6 +38,8 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, renew: Bool = true, completion: @escaping (_ authResult: (Int,String)) -> Void) {
         
+        let lastUserManager = LastUserManager()
+        
         if JamfProServer.authType[whichServer] == "Basic" {
             completion((200, "success"))
             return
@@ -235,6 +237,14 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                     print("[JamfPro.getToken] getVersion - renew: \(renew)")
                                                     renewToken(renew: renew, whichServer: whichServer, baseUrl: baseUrl, base64creds: base64creds)
                                                     
+                                                    let lastUser = whichServer == "source" ? JamfProServer.sourceUser : JamfProServer.destUser
+                                                    if let lastUserInfo = lastUserManager.query(server: baseUrl) {
+                                                        print("Last User: \(lastUserInfo.lastUser), API Client: \(lastUserInfo.apiClient)")
+                                                        lastUserManager.update(server: baseUrl, lastUser: lastUser, apiClient: apiClient)
+                                                    } else {
+                                                        print("Server not found.")
+                                                        lastUserManager.add(server: baseUrl, lastUser: lastUser, apiClient: apiClient)
+                                                    }
                                                     completion((200, "success"))
                                                     return
                                                     
