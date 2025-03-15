@@ -1,7 +1,7 @@
 # Replicator - Change Log
 
-**v8.0.1**: 2025-02-25<br>
-Fix issue were command line processing would stall. Better handling of command line export of smart/static objects.
+**v8.0.1**: 2025-03-15<br>
+Fix issue were command line processing would stall. Better handling of command line export of smart/static objects. Better handling of credentials when switching servers (issues #118 and FR #119). Potentially fix application hanging (issue #117). Added new version check at application launch, alert can be silenced.
 
 **v8.0.0**<br>
 Fix command line usage, friendlier display of endpoints, better tracking of processes.
