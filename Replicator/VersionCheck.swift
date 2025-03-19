@@ -68,61 +68,15 @@ class VersionCheck: NSObject, URLSessionDelegate {
     }
     
     func update(current: String, available: String) -> Bool  {
+        if current == available {
+            return false
+        }
         let sortedVersions = [current, available].sorted { current, available in
             let options: String.CompareOptions = [.numeric]
             return current.compare(available, options: options) == .orderedDescending
         }
         return (sortedVersions[0] == available)
     }
-    
-//    func compareVersions(currMajor: Int, currMinor: Int, currPatch: Int, runningBeta: Bool, currBeta: Int, available: String) -> Bool {
-//        var runningCurrent = true
-//        var betaVer = ""
-//        if runningBeta {
-//            betaVer = "b\(currBeta)"
-//        }
-//        if available != "\(currMajor).\(currMinor).\(currPatch)\(betaVer)" {
-//            let (availMajor, availMinor, availPatch, availBeta, availBetaVer) = versionDetails(theVersion: available)
-//            if availMajor > currMajor {
-//                runningCurrent = false
-//            } else if availMajor == currMajor {
-//                if availMinor > currMinor {
-//                    runningCurrent = false
-//                } else if availMinor == currMinor {
-//                    if availPatch > currPatch {
-//                        runningCurrent = false
-//                    } else if availPatch == currPatch && ((runningBeta && availBeta) || (runningBeta && !availBeta))  {
-//                        if availBetaVer > currBeta {
-//                            runningCurrent = false
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return runningCurrent
-//    }
-    
-//    func versionDetails(theVersion: String) -> (Int, Int, Int, Bool, Int) {
-//        var major   = 0
-//        var minor   = 0
-//        var patch   = 0
-//        var betaVer = 0
-//        var isBeta  = false
-//        
-//        let versionArray = theVersion.split(separator: ".")
-//        if versionArray.count > 2 {
-//
-//            major = Int(versionArray[0])!
-//            minor = Int(versionArray[1])!
-//            let patchArray = versionArray[2].lowercased().split(separator: "-")
-//            patch = Int(patchArray[0]) ?? 0
-//            if patchArray.count > 1 {
-//                isBeta = true
-//                betaVer = Int(patchArray[1].dropFirst()) ?? 0
-//            }
-//        }
-//        return (major, minor, patch, isBeta, betaVer)
-//    }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
