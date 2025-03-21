@@ -1,5 +1,8 @@
 # Replicator - Change Log
 
+**v8.0.2**: 2025-03-19<br>
+Fix issue where a new version alert was displayed when the current version ran was the same as the latest release.
+
 **v8.0.1**: 2025-03-15<br>
 Fix issue were command line processing would stall. Better handling of command line export of smart/static objects. Better handling of credentials when switching servers (issues #118 and FR #119). Potentially fix application hanging (issue #117). Added new version check at application launch, alert can be silenced.
 
