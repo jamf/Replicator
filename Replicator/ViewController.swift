@@ -4738,12 +4738,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
-                    
-//        var newPutTotal = (Counter.shared.crud[adjEndpoint]?["create"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["update"] ?? 0) + (Counter.shared.crud[adjEndpoint]?["fail"] ?? 0)
-//        newPutTotal += (Counter.shared.crud[adjEndpoint]?["skipped"] ?? 0)
-        // Counter.shared.summary[endpoint]?["fail"]
-//        var newPutTotal = (Counter.shared.summary[adjEndpoint]?["create"]?.count ?? 0) + (Counter.shared.summary[adjEndpoint]?["update"]?.count ?? 0) + (Counter.shared.summary[adjEndpoint]?["fail"]?.count ?? 0)
-//        newPutTotal += (Counter.shared.summary[adjEndpoint]?["skipped"]?.count ?? 0)
         
         if Counter.shared.send[adjEndpoint] == nil {
             Counter.shared.send[adjEndpoint] = ["put": /*newPutTotal*/ 1]
