@@ -159,6 +159,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         var localEndPointType = ""
         var whichError        = ""
+        var updateSent        = true
 
         var createDestUrl = "\(createDestUrlBase)"
         
@@ -303,7 +304,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             Counter.shared.postSuccess = 0
                         }   // look to see if we are processing the next localEndPointType - end
                         
-//                        DispatchQueue.main.async {
                         if let _ = counter.createRetry["\(localEndPointType)-\(sourceEpId)"] {
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
                             if counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
@@ -372,6 +372,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                         } else {
                             // create failed
+                            updateSent = false
                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
@@ -522,7 +523,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
                         Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                         
-                        if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+                        if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
 
                             print("[CreateEndpoints] endpointType: \(endpointType)")
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
