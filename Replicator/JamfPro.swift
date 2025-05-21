@@ -61,7 +61,6 @@ class JamfPro: NSObject, URLSessionDelegate {
         print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
         print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
         
-//        if !((whichServer == "source" && ( !WipeData.state.on && !localSource )) || (whichServer == "dest" && !export.saveOnly)) {
         if ((whichServer == "source" && ( WipeData.state.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
             completion((200, "success"))
             return
