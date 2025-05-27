@@ -21,6 +21,7 @@ class HelpViewController: NSViewController {
 //    }
     
     override func viewDidLoad() {
+        logFunctionCall()
         super.viewDidLoad()
         // Do view setup here.
         

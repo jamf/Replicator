@@ -17,6 +17,7 @@ class Sites: NSObject, URLSessionDelegate {
     var jamfpro: JamfPro?
     
     func fetch(server: String, creds: String, completion: @escaping ((Int,[String])) -> Void) {
+        logFunctionCall()
         
 //        jamfpro = JamfPro(controller: ViewController())
         var siteArray = [String]()
@@ -47,7 +48,8 @@ class Sites: NSObject, URLSessionDelegate {
     }
     
     func getSites(completion: @escaping ([String]) -> [String]) {
-
+        logFunctionCall()
+        
         var destSiteArray = [String]()
         
         let serverEncodedURL = URL(string: resourcePath)
@@ -118,6 +120,7 @@ class Sites: NSObject, URLSessionDelegate {
     }
     //    --------------------------------------- grab sites - end
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

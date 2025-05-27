@@ -22,6 +22,7 @@ final class Summary: NSObject {
     static var totalCompleted  = 0
     
     func zeroTotals() {
+        logFunctionCall()
         Summary.totalCreated   = 0
         Summary.totalUpdated   = 0
         Summary.totalDeleted   = 0
@@ -392,6 +393,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     
     func updateUi(info: [String : Any]) {
+//        logFunctionCall()
         let function = info["function"] as? String ?? ""
         switch function {
         case "clearSourceObjectsList":
@@ -451,6 +453,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     
     func sendMessage(_ message: String) {
+        logFunctionCall()
         print("[sendMessage] message: \(message)")
         message_TextField.stringValue = message
     }
@@ -463,6 +466,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // selective list filter
     func controlTextDidChange(_ obj: Notification) {
+        logFunctionCall()
         if let textField = obj.object as? NSTextField {
             if textField.identifier!.rawValue == "search" {
                 let filter = selectiveFilter_TextField.stringValue
@@ -477,6 +481,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @IBAction func clearFilter_Action(_ sender: Any) {
+        logFunctionCall()
         selectiveFilter_TextField.stringValue = ""
         let textPredicate = NSPredicate(format: "objectName.length > 0")
         sourceObjectList_AC.filterPredicate = textPredicate
@@ -505,6 +510,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
+        logFunctionCall()
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
         if !windowIsVisible(windowName: "Help") {
@@ -523,6 +529,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // Show Preferences Window
     @IBAction func showPrefsWindow(_ sender: Any) {
+        logFunctionCall()
         if NSEvent.modifierFlags.contains(.option) {
 //            isDir = true
             let settingsFolder = AppInfo.plistPath.replacingOccurrences(of: "settings.plist", with: "")
@@ -562,6 +569,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var staticUserGrps_button: NSButton!
     @IBOutlet weak var jamfUserAccounts_button: NSButton!
     @IBOutlet weak var jamfGroupAccounts_button: NSButton!
+    @IBOutlet weak var apiRoles_button: NSButton!
+    @IBOutlet weak var apiClients_button: NSButton!
     // macOS tab
     @IBOutlet weak var advcompsearch_button: NSButton!
     @IBOutlet weak var macapplications_button: NSButton!
@@ -602,11 +611,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var staticIosGrpsSelected      = false
     var jamfUserAccountsSelected   = false
     var jamfGroupAccountsSelected  = false
+//    var apiRolesSelected           = false
+//    var apiClientsSelected         = false
     
-    @IBOutlet weak var sourceServerList_button: NSPopUpButton!
-    @IBOutlet weak var destServerList_button: NSPopUpButton!
-    @IBOutlet weak var siteMigrate_button: NSButton!
-    @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
+//    @IBOutlet weak var sourceServerList_button: NSPopUpButton!
+//    @IBOutlet weak var destServerList_button: NSPopUpButton!
+//    @IBOutlet weak var siteMigrate_button: NSButton!
+//    @IBOutlet weak var availableSites_button: NSPopUpButtonCell!
     
     var itemToSite      = false
 //    var destination-Site = ""
@@ -634,9 +645,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var migrationMode = ""  // either buld or selective
     
     var platform = ""  // either macOS, iOS, or general
-    
-//    var goSender = ""
-    
+        
     // button labels
     // macOS button labels
     @IBOutlet weak var advcompsearch_label_field: NSTextField!
@@ -683,7 +692,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var ldapservers_label_field: NSTextField!
     @IBOutlet weak var network_segments_label_field: NSTextField!
     @IBOutlet weak var users_label_field: NSTextField!
-    @IBOutlet weak var smartUserGrps_label_field: NSTextField!
+//    @IBOutlet weak var smartUserGrps_label_field: NSTextField!
     @IBOutlet weak var staticUserGrps_label_field: NSTextField!
     
     //    @IBOutlet weak var migrateOrRemove_general_label_field: NSTextField!
@@ -830,7 +839,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    var changeColor :Bool    = true
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
-    var generalEndpointArray: [String] = ["advancedusersearches", "buildings", "categories", "classes", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
+    var generalEndpointArray: [String] = ["api-integrations", "api-roles", "advancedusersearches", "buildings", "categories", "classes", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
     var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "patch-software-title-configurations", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
@@ -914,6 +923,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    var processGroup          = DispatchGroup()
     
      func setTab_fn(selectedTab: String) {
+         logFunctionCall()
          DispatchQueue.main.async {
              switch selectedTab {
              case "General":
@@ -945,6 +955,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
      }   // func setTab_fn - end
     
     @IBAction func toggleAllNone(_ sender: NSButton) {
+        logFunctionCall()
         if NSEvent.modifierFlags.contains(.option) {
             markAllNone(rawStateValue: sender.state.rawValue)
         }
@@ -953,6 +964,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func inactiveTabDisable(activeTab: String) {
 	    // disable buttons on inactive tabs - start
+        logFunctionCall()
         if deviceType() != "macOS" {
             self.advcompsearch_button.state            = NSControl.StateValue(rawValue: 0)
             self.computers_button.state                = NSControl.StateValue(rawValue: 0)
@@ -1001,6 +1013,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.smartUserGrps_button.state     = NSControl.StateValue(rawValue: 0)
             self.staticUserGrps_button.state    = NSControl.StateValue(rawValue: 0)
             self.users_button.state             = NSControl.StateValue(rawValue: 0)
+            self.apiRoles_button.state          = NSControl.StateValue(rawValue: 0)
+            self.apiClients_button.state        = NSControl.StateValue(rawValue: 0)
         }
         if activeTab == "bulk" {
             generalSectionToMigrate_button.selectItem(at: 0)
@@ -1022,6 +1036,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
     func markAllNone(rawStateValue: Int) {
 
+        logFunctionCall()
         if deviceType() == "macOS" {
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.computers_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -1068,10 +1083,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.smartUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.staticUserGrps_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.users_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.apiRoles_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.apiClients_button.state = NSControl.StateValue(rawValue: rawStateValue)
         }
     }
     
     fileprivate func clearSourceObjectsList() {
+        logFunctionCall()
         if Setting.fullGUI {
             let textPredicate = NSPredicate(format: "objectName.length > 0")
             sourceObjectList_AC.filterPredicate = textPredicate
@@ -1085,6 +1103,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
         
+        logFunctionCall()
         pref.stopMigration  = false
         goButtonEnabled(button_status: false)
 
@@ -1169,6 +1188,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @IBAction func Go_action(sender: NSButton) {
+        logFunctionCall()
         JamfProServer.validToken["source"] = false
         JamfProServer.validToken["dest"]   = false
         JamfProServer.version["source"]    = ""
@@ -1195,6 +1215,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func Go(sender: String) {
 //        print("go (before readSettings) Scope.options: \(String(describing: Scope.options))")
         
+        logFunctionCall()
         History.startTime = Date()
         Counter.shared.crud.removeAll()
         Counter.shared.summary.removeAll()
@@ -1238,6 +1259,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             staticIosGrpsSelected      = static_ios_groups_button.state.rawValue == 1
             jamfUserAccountsSelected   = jamfUserAccounts_button.state.rawValue == 1
             jamfGroupAccountsSelected  = jamfGroupAccounts_button.state.rawValue == 1
+//            apiRolesSelected           = apiRoles_button.state == .on
+//            apiClientsSelected         = apiRoles_button.state == .on
         } else {
             if export.backupMode {
                 backupDate.dateFormat = "yyyyMMdd_HHmmss"
@@ -1255,6 +1278,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 staticIosGrpsSelected      = false
                 jamfUserAccountsSelected   = false
                 jamfGroupAccountsSelected  = false
+//                apiRolesSelected           = false
+//                apiClientsSelected         = false
             }
         }
         
@@ -1495,6 +1520,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // @IBAction func Go - end
     
     @IBAction func quit_action(sender: AnyObject) {
+        logFunctionCall()
         go_button.isEnabled = false
         // check for file that sets mode to delete data from destination server, delete if found - start
         rmDELETE()
@@ -1504,6 +1530,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     //================================= migration functions =================================//
     func startMigrating() {
+        logFunctionCall()
         _ = disableSleep(reason: "starting process")
         
         if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] enter") }
@@ -1627,6 +1654,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         if classes_button.state.rawValue == 1 {
                             ToMigrate.objects += ["classes"]
+                            ToMigrate.rawCount += 1
+                        }
+                        
+                        if apiRoles_button.state == .on {
+                            ToMigrate.objects += ["apiroles"]
+                            ToMigrate.rawCount += 1
+                        }
+                        
+                        if apiClients_button.state == .on {
+                            ToMigrate.objects += ["apiintegrations"]
                             ToMigrate.rawCount += 1
                         }
                     case "macOS":
@@ -2108,6 +2145,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func startMigrating - end
     
     func selectiveMigrationDelegate(objectIndex: Int, selectedEndpoint: String) {
+        logFunctionCall()
         ObjectAndDependencies.records.removeAll()
         if migrateDependencies.state == .on {
             
@@ -2135,6 +2173,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func startSelectiveMigration(objectIndex: Int, objectAndDependencies: [ObjectAndDependency]) {
 //        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
         
+        logFunctionCall()
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
 //        var alreadyMigrated    = false
         var theButton          = ""
@@ -2309,6 +2348,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
         
+        logFunctionCall()
         if pref.stopMigration {
 //            print("[\(#function)] \(#line) stopMigration")
             stopButton(self)
@@ -2418,6 +2458,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func readNodes - end
     
     fileprivate func updateSelectiveList(objectName: String, objectId: String, fileContents: String) {
+        logFunctionCall()
         DispatchQueue.main.async { [self] in
             sourceObjectList_AC.addObject(SelectiveObject(objectName: objectName, objectId: objectId, fileContents: fileContents))
             // sort printer list
@@ -2433,6 +2474,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func getSourceEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects from source server (query source server) - destination server if removing
+        logFunctionCall()
         print("[getSourceEndpoints] nodesToMigrate: \(nodesToMigrate)")
         if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] enter") }
 //        pendingGetCount = 0
@@ -2465,72 +2507,73 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         switch endpoint {
-        // macOS items
-        case "advancedcomputersearches":
-            endpointParent = "advanced_computer_searches"
-        case "computerextensionattributes":
-            endpointParent = "computer_extension_attributes"
-        case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            endpoint       = "computergroups"
-            endpointParent = "computer_groups"
-        case "directorybindings":
-            endpointParent = "directory_bindings"
-        case "diskencryptionconfigurations":
-            endpointParent = "disk_encryption_configurations"
-        case "distributionpoints":
-            endpointParent = "distribution_points"
-        case "dockitems":
-            endpointParent = "dock_items"
-        case "macapplications":
-            endpointParent = "mac_applications"
-//        case "netbootservers":
-//            endpointParent = "netboot_servers"
-        case "osxconfigurationprofiles":
-            endpointParent = "os_x_configuration_profiles"
-        case "patch-software-title-configurations":
-            endpoint = "patch-software-title-configurations"
-//        case "patches":
-//            endpointParent = "patch_management_software_titles"
-//        case "patchpolicies":
-//            endpointParent = "patch_policies"
-        case "restrictedsoftware":
-            endpointParent = "restricted_software"
-        case "softwareupdateservers":
-            endpointParent = "software_update_servers"
+            // general items
+            case "advancedusersearches":
+                endpointParent = "advanced_user_searches"
+            case "ldapservers":
+                endpointParent = "ldap_servers"
+            case "networksegments":
+                endpointParent = "network_segments"
+            case "userextensionattributes":
+                endpointParent = "user_extension_attributes"
+            case "usergroups", "smartusergroups", "staticusergroups":
+                endpoint       = "usergroups"
+                endpointParent = "user_groups"
+            case "jamfusers":
+                endpointParent = "users"
+            case "jamfgroups":
+                endpointParent = "groups"
             
-        // iOS items
-        case "advancedmobiledevicesearches":
-            endpointParent = "advanced_mobile_device_searches"
-        case "mobiledeviceconfigurationprofiles":
-            endpointParent = "configuration_profiles"
-        case "mobiledeviceextensionattributes":
-            endpointParent = "mobile_device_extension_attributes"
-        case "mobiledeviceapplications":
-            endpointParent = "mobile_device_applications"
-        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
-            endpoint       = "mobiledevicegroups"
-            endpointParent = "mobile_device_groups"
-        case "mobiledevices":
-            endpointParent = "mobile_devices"
-            
-        // general items
-        case "advancedusersearches":
-            endpointParent = "advanced_user_searches"
-        case "ldapservers":
-            endpointParent = "ldap_servers"
-        case "networksegments":
-            endpointParent = "network_segments"
-        case "userextensionattributes":
-            endpointParent = "user_extension_attributes"
-        case "usergroups", "smartusergroups", "staticusergroups":
-            endpoint       = "usergroups"
-            endpointParent = "user_groups"
-        case "jamfusers":
-            endpointParent = "users"
-        case "jamfgroups":
-            endpointParent = "groups"
-        default:
-            endpointParent = "\(endpoint)"
+            // macOS items
+            case "advancedcomputersearches":
+                endpointParent = "advanced_computer_searches"
+            case "computerextensionattributes":
+                endpointParent = "computer_extension_attributes"
+            case "computergroups", "smartcomputergroups", "staticcomputergroups":
+                endpoint       = "computergroups"
+                endpointParent = "computer_groups"
+            case "directorybindings":
+                endpointParent = "directory_bindings"
+            case "diskencryptionconfigurations":
+                endpointParent = "disk_encryption_configurations"
+            case "distributionpoints":
+                endpointParent = "distribution_points"
+            case "dockitems":
+                endpointParent = "dock_items"
+            case "macapplications":
+                endpointParent = "mac_applications"
+    //        case "netbootservers":
+    //            endpointParent = "netboot_servers"
+            case "osxconfigurationprofiles":
+                endpointParent = "os_x_configuration_profiles"
+            case "patch-software-title-configurations":
+                endpoint = "patch-software-title-configurations"
+    //        case "patches":
+    //            endpointParent = "patch_management_software_titles"
+    //        case "patchpolicies":
+    //            endpointParent = "patch_policies"
+            case "restrictedsoftware":
+                endpointParent = "restricted_software"
+            case "softwareupdateservers":
+                endpointParent = "software_update_servers"
+                
+            // iOS items
+            case "advancedmobiledevicesearches":
+                endpointParent = "advanced_mobile_device_searches"
+            case "mobiledeviceconfigurationprofiles":
+                endpointParent = "configuration_profiles"
+            case "mobiledeviceextensionattributes":
+                endpointParent = "mobile_device_extension_attributes"
+            case "mobiledeviceapplications":
+                endpointParent = "mobile_device_applications"
+            case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
+                endpoint       = "mobiledevicegroups"
+                endpointParent = "mobile_device_groups"
+            case "mobiledevices":
+                endpointParent = "mobile_devices"
+               
+            default:
+                endpointParent = "\(endpoint)"
         }
         
         getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
@@ -3563,6 +3606,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func readDataFiles(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: String) -> Void) {
         
+        logFunctionCall()
         if LogLevel.debug { WriteToLog.shared.message("[readDataFiles] enter") }
         
         if JamfProServer.source.last != "/" {
@@ -3859,6 +3903,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func readDataFiles - end
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: [String:[String]] = [:], completion: @escaping (_ result: String) -> Void) {
+        logFunctionCall()
         if LogLevel.debug { WriteToLog.shared.message("[processFiles] enter: endpoint - \(endpoint)") }
         
         let skipLookup = (UiVar.activeTab == "Selective") ? true:false
@@ -4050,6 +4095,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func updatePendingCounter(caller: String, change: Int) {
+        logFunctionCall()
         DispatchQueue.global().async {
 //            self.lockQueue.async {
 //                print("[updatePendingCounter] called from: \(caller), change: \(change)")
@@ -4059,6 +4105,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func getDependencies(objectIndex: Int, selectedEndpoint: String, selectedObjectList: [SelectiveObject], completion: @escaping (_ returnedDependencies: [ObjectAndDependency]) -> Void) {
+        logFunctionCall()
         WriteToLog.shared.message("[getDependencies] enter")
         
         let primaryObjId    = Int(selectedObjectList[objectIndex].objectId)
@@ -4387,11 +4434,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @IBAction func migrateDependencies_fn(_ sender: Any) {
+        logFunctionCall()
         Setting.migrateDependencies = migrateDependencies.state == .on ? true:false
     }
     
     //==================================== Utility functions ====================================
     func alert_dialog(header: String, message: String) {
+        logFunctionCall()
         NSApplication.shared.activate(ignoringOtherApps: true)
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
@@ -4403,6 +4452,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }   // func alert_dialog - end
     
     func clearProcessingFields() {
+        logFunctionCall()
         DispatchQueue.main.async { [self] in
             get_name_field.stringValue    = ""
             put_name_field.stringValue    = ""
@@ -4418,6 +4468,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func clearSelectiveList() {
+        logFunctionCall()
         DispatchQueue.main.async { [self] in
             if !selectiveListCleared && srcSrvTableView.isEnabled {
                 
@@ -4444,6 +4495,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func serverChanged(whichserver: String) {
+        logFunctionCall()
         if (whichserver == "source" && !WipeData.state.on) || (whichserver == "dest" && WipeData.state.on) || (srcSrvTableView.isEnabled == false) {
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
@@ -4457,7 +4509,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // which platform mode tab are we on - start
     func deviceType() -> String {
 
-            if self.macOS_tabViewItem.tabState.rawValue == 0 {
+        logFunctionCall()
+        if self.macOS_tabViewItem.tabState.rawValue == 0 {
                 self.platform = "macOS"
             } else if self.iOS_tabViewItem.tabState.rawValue == 0 {
                 self.platform = "iOS"
@@ -4487,7 +4540,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func runComplete() {
 //        print("[runComplete] enter")
 //        DispatchQueue.main.async { [self] in
-            migrationComplete.isDone = true
+        logFunctionCall()
+        migrationComplete.isDone = true
         print("[runComplete] Queue.shared.operation.operationCount: \(Queue.shared.operation.operationCount)")
         if theIconsQ.operationCount == 0 && Queue.shared.operation.operationCount == 0 {
                 nodesComplete = 0
@@ -4600,6 +4654,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func goButtonEnabled(button_status: Bool) {
+        logFunctionCall()
         if Setting.fullGUI {
             DispatchQueue.main.async { [self] in
                 if button_status {
@@ -4623,6 +4678,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // scale the delay when listing items with selective migrations based on the number of items
     func listDelay(itemCount: Int) -> UInt32 {
+        logFunctionCall()
         if itemCount > 1000 { return 0 }
         
         let delayFactor = (itemCount < 10) ? 10:itemCount
@@ -4636,6 +4692,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func updateGetStatus(endpoint: String, total: Int, index: Int = -1) {
+        logFunctionCall()
         if WipeData.state.on { return }
         print("[updateGetStatus] endpoint: \(endpoint), total: \(total), index: \(index)")
         var adjEndpoint = ""
@@ -4722,6 +4779,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func putStatusUpdate(endpoint: String, total: Int) {
+        logFunctionCall()
         var adjEndpoint = ""
         
         switch endpoint {
@@ -4832,6 +4890,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
 
+        logFunctionCall()
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
         var action               = "GET"
@@ -5089,6 +5148,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
         
+        logFunctionCall()
         // fix id/hash being passed as optional
         let iconToUpload = _iconToUpload.fixOptional
         var curlResult   = 0
@@ -5370,6 +5430,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func iconNotification() {
+        logFunctionCall()
         DispatchQueue.main.async { [self] in
             if Setting.fullGUI {
                 uploadingIcons_textfield.isHidden = (theIconsQ.operationCount > 0) ? false:true
@@ -5383,6 +5444,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // hold icon migrations while icon is being cached/uploaded to the new server
     func iconMigrationHold(ssIconId: String, newIconDict: [String:String]) {
+        logFunctionCall()
         if iconDictArray["\(ssIconId)"] == nil {
             iconDictArray["\(ssIconId)"] = [newIconDict]
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] first entry for iconDictArray[\(ssIconId)]: \(newIconDict)") }
@@ -5423,6 +5485,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // func labelColor - start
     func labelColor(endpoint: String, theColor: NSColor) {
+        logFunctionCall()
         if Setting.fullGUI {
             DispatchQueue.main.async {
                 switch endpoint {
@@ -5446,14 +5509,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     case "users":
                         self.users_label_field.textColor = theColor
                     case "usergroups":
-                        self.smartUserGrps_label_field.textColor = theColor
+//                        self.smartUserGrps_label_field.textColor = theColor
                         self.staticUserGrps_label_field.textColor = theColor
                     case "jamfusers", "accounts/userid":
                         self.jamfUserAccounts_field.textColor = theColor
                     case "jamfgroups", "accounts/groupid":
                         self.jamfGroupAccounts_field.textColor = theColor
-                    case "smartusergroups":
-                        self.smartUserGrps_label_field.textColor = theColor
+//                    case "smartusergroups":
+//                        self.smartUserGrps_label_field.textColor = theColor
                     case "staticusergroups":
                         self.staticUserGrps_label_field.textColor = theColor
                 // macOS tab
@@ -5533,6 +5596,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // move history to log - start
     func moveHistoryToLog(source: String, destination: String) {
+        logFunctionCall()
         var allClear = true
 
         do {
@@ -5563,6 +5627,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     
     func rmDELETE() {
+        logFunctionCall()
         var isDir: ObjCBool = false
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE", isDirectory: &isDir)) {
             do {
@@ -5577,6 +5642,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
   
     func rmXmlData(theXML: String, theTag: String, keepTags: Bool) -> String {
+        logFunctionCall()
         var newXML         = ""
         var newXML_trimmed = ""
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n|\r)*?</\(theTag)>", options:.caseInsensitive)
@@ -5598,6 +5664,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func stopButton(_ sender: Any) {
+        logFunctionCall()
         getArray.removeAll()
         createArray.removeAll()
         ToMigrate.objects.removeAll()
@@ -5621,6 +5688,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func setLevelIndicatorFillColor(fn: String, endpointType: String, fillColor: NSColor, indicator: String = "put") {
 //        print("set levelIndicator from \(fn), endpointType: \(endpointType), color: \(fillColor)")
+        logFunctionCall()
         if Setting.fullGUI {
             DispatchQueue.main.async { [self] in
                 if indicator == "put" {
@@ -5637,6 +5705,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func myExitValue(cmd: String, args: String...) -> String {
+        logFunctionCall()
         var theCmdArray  = [String]()
         var theCmd       = ""
         var status       = "unknown"
@@ -5673,6 +5742,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func resetAllCheckboxes() {
+        logFunctionCall()
         DispatchQueue.main.async {
             // general tab
             self.advusersearch_button.state = NSControl.StateValue(rawValue: 0)
@@ -5689,6 +5759,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.jamfGroupAccounts_button.state = NSControl.StateValue(rawValue: 0)
             self.smartUserGrps_button.state = NSControl.StateValue(rawValue: 0)
             self.staticUserGrps_button.state = NSControl.StateValue(rawValue: 0)
+            self.apiRoles_button.state = NSControl.StateValue(rawValue: 0)
+            self.apiClients_button.state = NSControl.StateValue(rawValue: 0)
             // macOS tab
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: 0)
             self.macapplications_button.state = NSControl.StateValue(rawValue: 0)
@@ -5724,6 +5796,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func setConcurrentThreads() {
+        logFunctionCall()
         maxConcurrentThreads = (userDefaults.integer(forKey: "concurrentThreads") < 1) ? 2:userDefaults.integer(forKey: "concurrentThreads")
 //        print("[ViewController] ConcurrentThreads: \(concurrent)")
         maxConcurrentThreads = (maxConcurrentThreads > 5) ? 2:maxConcurrentThreads
@@ -5732,6 +5805,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // add notification - run fn in SourceDestVC
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
+        logFunctionCall()
         switch serverList {
         case "source_server_array":
             NotificationCenter.default.post(name: .updateSourceServerList, object: self)
@@ -5744,6 +5818,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
    
     func windowIsVisible(windowName: String) -> Bool {
+        logFunctionCall()
         let options = CGWindowListOption(arrayLiteral: CGWindowListOption.excludeDesktopElements, CGWindowListOption.optionOnScreenOnly)
         let windowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
         let infoList = windowListInfo as NSArray? as? [[String: AnyObject]]
@@ -5759,6 +5834,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func zipIt(args: String..., completion: @escaping (_ result: String) -> Void) {
 
+        logFunctionCall()
         var cmdArgs = ["-c"]
         for theArg in args {
             cmdArgs.append(theArg)
@@ -5786,13 +5862,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func tabView(_ tabView: NSTabView, didSelect: NSTabViewItem?) {
+        logFunctionCall()
         UiVar.activeTab = didSelect!.label
         userDefaults.set("\(didSelect!.label)", forKey: "activeTab")
     }
     
     // selective migration functions - start
-    func numberOfRows(in tableView: NSTableView) -> Int
-    {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        logFunctionCall()
         var numberOfRows:Int = 0;
         if (tableView == srcSrvTableView)
         {
@@ -5804,6 +5881,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
     //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
+        logFunctionCall()
         var newString:String = ""
         if (tableView == srcSrvTableView) && row < DataArray.source.count
         {
@@ -5823,6 +5901,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // selective migration functions - end
 
     override func viewDidAppear() {
+        logFunctionCall()
         print("[\(#function.description)] loaded")
         // display app version
         appVersion_TextField.stringValue = "v\(AppInfo.version)"
@@ -5849,18 +5928,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
     @objc func setColorScheme_VC(_ notification: Notification) {
         
-            let whichColorScheme = userDefaults.string(forKey: "colorScheme") ?? ""
-            if AppColor.schemes.firstIndex(of: whichColorScheme) != nil {
-                self.view.wantsLayer = true
-                selectiveFilter_TextField.drawsBackground = true
-                selectiveFilter_TextField.backgroundColor = AppColor.highlight[whichColorScheme]
-                self.view.layer?.backgroundColor          = AppColor.background[whichColorScheme]
-                srcSrvTableView.backgroundColor           = AppColor.highlight[whichColorScheme]!
-                srcSrvTableView.usesAlternatingRowBackgroundColors = false
-            }
+        logFunctionCall()
+        let whichColorScheme = userDefaults.string(forKey: "colorScheme") ?? ""
+        if AppColor.schemes.firstIndex(of: whichColorScheme) != nil {
+            self.view.wantsLayer = true
+            selectiveFilter_TextField.drawsBackground = true
+            selectiveFilter_TextField.backgroundColor = AppColor.highlight[whichColorScheme]
+            self.view.layer?.backgroundColor          = AppColor.background[whichColorScheme]
+            srcSrvTableView.backgroundColor           = AppColor.highlight[whichColorScheme]!
+            srcSrvTableView.usesAlternatingRowBackgroundColors = false
+        }
     }
     
     override func viewDidLoad() {
+        logFunctionCall()
         super.viewDidLoad()
         print("[\(#function.description)] loaded")
                 
@@ -5929,12 +6010,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
+        logFunctionCall()
         _ = readSettings()
         saveSettings(settings: AppInfo.settings)
         WriteToLog.shared.logCleanup()
     }
     
     func initVars() {
+        logFunctionCall()
         print("[\(#function.description)]")
         
         // needed for protocols
@@ -6136,6 +6219,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     @objc func resetListFields(_ notification: Notification) {
+        logFunctionCall()
         if (JamfProServer.whichServer == "source" && !WipeData.state.on) || (JamfProServer.whichServer == "dest" && !export.saveOnly) || (srcSrvTableView.isEnabled == false) {
             srcSrvTableView.isEnabled = true
             selectiveListCleared      = false
@@ -6148,6 +6232,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     // Log Folder - start
     @objc func showLogFolder(_ notification: Notification) {
+        logFunctionCall()
         isDir = true
         if (fm.fileExists(atPath: History.logPath, isDirectory: &isDir)) {
 //            NSWorkspace.shared.openFile(logPath!)
@@ -6159,6 +6244,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // Log Folder - end
     // Summary Window - start
     @objc func showSummaryWindow(_ notification: Notification) {
+        logFunctionCall()
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let summaryWindowController = storyboard.instantiateController(withIdentifier: "Summary Window Controller") as! NSWindowController
         if let summaryWindow = summaryWindowController.window {
@@ -6175,6 +6261,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // Summary Window - end
     
     @objc func deleteMode(_ notification: Notification) {
+        logFunctionCall()
         var isDir: ObjCBool = false
 //        var isRed           = false
 
@@ -6271,6 +6358,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func summaryXml(theSummary: [String: [String:Int]], theSummaryDetail: [String: [String:[String]]]) -> String {
+        logFunctionCall()
         var cellDetails = ""
         var summaryResult = "<!DOCTYPE html>" +
             "<html>" +
@@ -6413,6 +6501,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     // code for pop up window - start
     func popUpHtml (id: Int, column: String, values: String) -> String {
+        logFunctionCall()
         let popUpBlock = "<div id='\(id)' class='overlay'>" +
             "<div class='popup'>" +
             "<br>\(column)<br>" +
@@ -6427,11 +6516,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     // code for pop up window - end
     
     func sortList(theArray: [String], completion: @escaping ([String]) -> Void) {
+        logFunctionCall()
         let newArray = theArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
         completion(newArray)
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
     

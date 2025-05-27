@@ -13,6 +13,7 @@ class Alert: NSObject {
     static let shared = Alert()
     
     func display(header: String, message: String, secondButton: String) -> String {
+        logFunctionCall()
         NSApplication.shared.activate(ignoringOtherApps: true)
         var selected = ""
         let dialog: NSAlert = NSAlert()
@@ -37,6 +38,7 @@ class Alert: NSObject {
     }
     
     func versionDialog(header: String, message: String, updateAvail: Bool, manualCheck: Bool = false) {
+        logFunctionCall()
         NSApp.activate(ignoringOtherApps: true)
         if userDefaults.bool(forKey: "hideVersionAlert") == false || manualCheck {
             let dialog: NSAlert = NSAlert()

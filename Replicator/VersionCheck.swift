@@ -12,6 +12,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
     
     func versionCheck(completion: @escaping (_ result: Bool, _ latest: String) -> Void) {
         
+        logFunctionCall()
         URLCache.shared.removeAllCachedResponses()
 
 //        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: AppInfo.version)
@@ -68,6 +69,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
     }
     
     func update(current: String, available: String) -> Bool  {
+        logFunctionCall()
         if current == available {
             return false
         }
@@ -79,6 +81,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

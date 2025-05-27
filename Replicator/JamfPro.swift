@@ -19,6 +19,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             
     fileprivate func renewToken(renew: Bool, whichServer: String, baseUrl: String, base64creds: String) {
         
+        logFunctionCall()
         if LogLevel.debug {
             WriteToLog.shared.message("[JamfPro.renewToken] migrationComplete.isDone: \(migrationComplete.isDone)")
             WriteToLog.shared.message("[JamfPro.renewToken] renew: \(renew)")
@@ -38,6 +39,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func getToken(whichServer: String, serverUrl: String, base64creds: String, localSource: Bool = false, renew: Bool = true, completion: @escaping (_ authResult: (Int,String)) -> Void) {
         
+        logFunctionCall()
         let lastUserManager = LastUserManager()
         
         if JamfProServer.authType[whichServer] == "Basic" {
@@ -311,6 +313,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     }
     
     private func myFormattedTimeInterval(_ interval: Int) -> String {
+//        logFunctionCall()
         var formattedInterval: Int = 0
         var unit = ""
         if interval > 3600 {
@@ -329,6 +332,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     
     func checkURL2(whichServer: String, serverURL: String, completion: @escaping (Bool) -> Void) {
 //        print("enter checkURL2")
+        logFunctionCall()
         if (whichServer == "dest" && export.saveOnly) || (whichServer == "source" && (WipeData.state.on || JamfProServer.importFiles == 1)) {
             completion(true)
         } else {
@@ -377,6 +381,7 @@ class JamfPro: NSObject, URLSessionDelegate {
     }   // func checkURL2 - end
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

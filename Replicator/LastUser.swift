@@ -44,6 +44,7 @@ class LastUserManager {
     
     // Load JSON from file
     func loadFromFile() {
+        logFunctionCall()
         guard FileManager.default.fileExists(atPath: AppInfo.lastUserPath) else {
             print("File does not exist, starting with an empty list.")
             return
@@ -59,6 +60,7 @@ class LastUserManager {
     
     // Save JSON to file
     func saveToFile() {
+        logFunctionCall()
         let fileURL = URL(fileURLWithPath: AppInfo.lastUserPath)
         do {
             let data = try JSONEncoder().encode(servers)
@@ -71,6 +73,7 @@ class LastUserManager {
     
     // Convert to JSON string
     func jsonString() -> String {
+        logFunctionCall()
         do {
             let data = try JSONEncoder().encode(servers)
             return String(data: data, encoding: .utf8) ?? "[]"
@@ -82,6 +85,7 @@ class LastUserManager {
     
     // Add a new entry
     func add(server: String, lastUser: String? = nil, apiClient: Bool? = nil) {
+        logFunctionCall()
         servers.append(ServerEntry(server: server, lastUser: lastUser, apiClient: apiClient))
         saveToFile()
     }
@@ -94,6 +98,7 @@ class LastUserManager {
     
     // Update an existing entry
     func update(server: String, lastUser: String?, apiClient: Bool?) {
+        logFunctionCall()
         if let index = servers.firstIndex(where: { $0.server == server }) {
             if let lastUser = lastUser {
                 servers[index].lastUser = lastUser
@@ -107,6 +112,7 @@ class LastUserManager {
     
     // Query by server name
     func query(server: String) -> (lastUser: String, apiClient: Bool)? {
+        logFunctionCall()
         print("lastUser query \(server)")
         if let entry = servers.first(where: { $0.server == server }) {
             print("lastUser query lastUser: \(entry.lastUser ?? ""), apiClient: \(entry.apiClient ?? false)")

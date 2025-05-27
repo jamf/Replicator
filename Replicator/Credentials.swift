@@ -25,6 +25,7 @@ class Credentials {
     var userPassDict = [String:String]()
     
     private func theKeychainQuery(operation: String, theService: String, account: String = "", password: Data = Data()) -> [String: Any] {
+        logFunctionCall()
         let useLoginKeychainPref = userDefaults.integer(forKey: "useLoginKeychain") == 1 ? true : false
         var useLoginKeychain = false
         var keychainQuery = [String: Any]()
@@ -95,6 +96,7 @@ class Credentials {
     }
     
     func save(service: String, account: String, credential: String, whichServer: String = "") {
+        logFunctionCall()
         if service != "" && account != "" && service.first != "/" {
             var theService = service
 //            var useLoginKeychainPref = userDefaults.integer(forKey: "useLoginKeychain") == 1 ? true : false
@@ -179,6 +181,7 @@ class Credentials {
     
     private func checkExisting(service: String, account: String) -> [String:String] {
         
+        logFunctionCall()
         print("[Credentials.oldItemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
@@ -213,6 +216,7 @@ class Credentials {
     
     func retrieve(service: String, account: String, whichServer: String = "") -> [String:String] {
         
+        logFunctionCall()
         print("[Credentials.retrieve]     start search for: \(service)")
         print("[Credentials.retrieve] JamfProServer.source: \(JamfProServer.source)")
         
@@ -256,6 +260,7 @@ class Credentials {
     
     private func itemLookup(service: String) -> [String:String] {
         
+        logFunctionCall()
         print("[Credentials.itemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
@@ -313,6 +318,7 @@ class Credentials {
     
     private func oldItemLookup(service: String) -> [String:String] {
         
+        logFunctionCall()
         print("[Credentials.oldItemLookup] start search for: \(service)")
         
         userPassDict.removeAll()

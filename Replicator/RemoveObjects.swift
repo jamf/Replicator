@@ -14,6 +14,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     static let shared    = RemoveObjects()
     var updateUiDelegate: UpdateUiDelegate?
     func updateView(_ info: [String: Any]) {
+        logFunctionCall()
         updateUiDelegate?.updateUi(info: info)
     }
     
@@ -25,7 +26,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     var removeArray          = [ObjectInfo]()
     
     func queue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
-
+        logFunctionCall()
+        
         if endpointCurrent == 1 {
             Counter.shared.crud[endpointType]!["total"] = endpointCount
         }
@@ -76,6 +78,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     
     func capi(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
         
+        logFunctionCall()
         if endPointID == "-1" && UiVar.activeTab == "Selective" {
             print("[removeEndpoints] selective - finished removing \(endpointType)")
 //            sleep(1)

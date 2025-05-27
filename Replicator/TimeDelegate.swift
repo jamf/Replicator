@@ -11,6 +11,7 @@ import Cocoa
 class TimeDelegate {
     // get current time
     func getCurrent() -> String {
+//        logFunctionCall()
         let current = Date()
         let localCalendar = Calendar.current
         let dateObjects: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]

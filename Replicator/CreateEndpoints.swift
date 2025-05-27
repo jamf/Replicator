@@ -8,7 +8,7 @@
 
 import AppKit
 import Foundation
-import os.log
+import OSLog
 
 class CreateEndpoints: NSObject, URLSessionDelegate {
     
@@ -20,9 +20,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
     var updateUiDelegate: UpdateUiDelegate?
     
     func queue(endpointType: String, endpointName: String = "", endPointXML: String = "", endPointJSON: [String:Any] = [:], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-        
-        Logger.createEndpoints_queue.debug("enter createEndpoints_queue - \(endpointType, privacy: .public)")
-        
+        logFunctionCall()
+                
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
             Queue.shared.operation.cancelAllOperations()
@@ -93,9 +92,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
     }
     
     func capi(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-        
-        Logger.createEndpoints_capi.debug("enter createEndpoints_capi - \(endpointType, privacy: .public)")
-        
+        logFunctionCall()
+                
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
             Queue.shared.operation.cancelAllOperations()
@@ -617,9 +615,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
     }
     
     func jpapi(endpointType: String, endPointJSON: [String: Any], policyDetails: [PatchPolicyDetail] = [], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: String, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
-        
-        Logger.createEndpoints_jpapi.debug("enter createEndpoints_jpapi - \(endpointType, privacy: .public)")
-        
+        logFunctionCall()
+                
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])

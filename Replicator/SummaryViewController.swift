@@ -16,11 +16,13 @@ class SummaryViewController: NSViewController {
     
     @IBOutlet weak var summary_TextField: NSTextField!
     override func viewDidLoad() {
+        logFunctionCall()
         super.viewDidLoad()
         // Do view setup here.
     }
     
     @IBAction func dismissSummaryWindow(_ sender: NSButton) {
+        logFunctionCall()
         let application = NSApplication.shared
         application.stopModal()
     }

@@ -12,6 +12,7 @@ class RemoveData: NSObject {
     static let shared = RemoveData()
     
     func Json(rawJSON: [String:Any], theTag: String) -> String {
+        logFunctionCall()
         var newJSON  = rawJSON
                 // remove keys with <null> as the value
                 for (key, value) in newJSON {
@@ -31,6 +32,7 @@ class RemoveData: NSObject {
     }
     
     func Xml(theXML: String, theTag: String, keepTags: Bool) -> String {
+        logFunctionCall()
         var newXML         = ""
         var newXML_trimmed = ""
         let f_regexComp = try! NSRegularExpression(pattern: "<\(theTag)>(.|\n|\r)*?</\(theTag)>", options:.caseInsensitive)

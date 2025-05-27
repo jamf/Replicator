@@ -27,19 +27,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     
     @IBAction func showSummaryWindow(_ sender: AnyObject) {
+        logFunctionCall()
         NotificationCenter.default.post(name: .showSummaryWindow, object: self)
     }
     @IBAction func showLogFolder(_ sender: AnyObject) {
+        logFunctionCall()
         NotificationCenter.default.post(name: .showLogFolder, object: self)
     }
     @IBAction func deleteMode(_ sender: AnyObject) {
+        logFunctionCall()
         NotificationCenter.default.post(name: .deleteMode, object: self)
     }
     @IBAction func quit_menu(sender: AnyObject) {
+        logFunctionCall()
         quitNow(sender: self)
     }
 
     public func quitNow(sender: AnyObject) {
+        logFunctionCall()
         DispatchQueue.main.async {
             NSApp.hide(nil)
             let sourceMethod = (JamfProServer.validToken["source"] ?? false) ? "POST":"SKIP"
@@ -63,6 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        logFunctionCall()
         print("[\(#function.description)] loaded")
         
         if Setting.fullGUI {
@@ -268,6 +274,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func checkForUpdates(_ sender: AnyObject) {
+        logFunctionCall()
         let verCheck = VersionCheck()
         
         var manualCheck = false
@@ -291,6 +298,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func versionAlert(header: String, message: String, updateAvail: Bool) {
+        logFunctionCall()
         
         let dialog: NSAlert = NSAlert()
         dialog.messageText = header
@@ -314,6 +322,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // Help Window
     @IBAction func showHelpWindow(_ sender: AnyObject) {
+        logFunctionCall()
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let helpWindowController = storyboard.instantiateController(withIdentifier: "Help View Controller") as! NSWindowController
         if !ViewController().windowIsVisible(windowName: "Help") {
@@ -331,11 +340,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func showPreferences(_ sender: Any) {
+        logFunctionCall()
         PrefsWindowController().show()
     }
     
     // quit the app if the window is closed
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
+        logFunctionCall()
         quitNow(sender: self)
         return false
     }

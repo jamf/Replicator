@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  ObjectDelegate.swift
 //  Replicator
 //
 //  Created by leslie on 12/6/24.
@@ -7,11 +7,10 @@
 //
 
 import Foundation
-import os.log
+import OSLog
 
 var duplicatePackages      = false
 var duplicatePackagesDict  = [String:[String]]()
-//var failedPkgNameLookup    = [String]()
 
 class ObjectDelegate: NSObject, URLSessionDelegate {
     
@@ -20,7 +19,7 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
     func getAll(whichServer: String, endpoint: String, completion: @escaping (_ result: [Any]) -> Void) {
         print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint)")
         
-        Logger.ObjectDelegate_getAll.debug("enter ObjectDelegate_getAll - \(endpoint, privacy: .public)")
+        logFunctionCall()
         
         if Counter.shared.crud[endpoint] == nil {
             Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -28,7 +27,7 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
         }
         
         switch endpoint {
-        case "packages":
+        case "packages", "api-roles", "api-integrations":
             duplicatePackages = false
             duplicatePackagesDict.removeAll()
             Jpapi.shared.getAllDelegate(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint, whichPage: 0) {

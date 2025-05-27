@@ -38,6 +38,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     @IBOutlet weak var hideCreds_button: NSButton!
     @IBAction func hideCreds_action(_ sender: Any) {
+        logFunctionCall()
         hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
         userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
         setWindowSize(setting: hideCreds_button.state.rawValue)
@@ -51,6 +52,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var sourceUseApiClient_button: NSButton!
     @IBOutlet weak var destUseApiClient_button: NSButton!
     @IBAction func useApiClient_action(_ sender: NSButton) {
+        logFunctionCall()
         switch sender.identifier?.rawValue {
         case "sourceApiClient":
             setLabels(whichServer: "source")
@@ -70,6 +72,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func setWindowSize(setting: Int) {
 //        print("setWindowSize - setting: \(setting)")
+        logFunctionCall()
         var hiddenState = true
         if setting == 0 {
             preferredContentSize = CGSize(width: 848, height: 67)
@@ -101,6 +104,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         destUseApiClient_button.isHidden       = hiddenState
     }
     func setLabels(whichServer: String) {
+        logFunctionCall()
         switch whichServer {
         case "source":
             JamfProServer.sourceUseApiClient = sourceUseApiClient_button.state.rawValue
@@ -137,6 +141,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var destStoreCredentials_button: NSButton!
 
     @IBAction func storeCredentials_action(_ sender: NSButton) {
+        logFunctionCall()
         JamfProServer.storeSourceCreds = sourceStoreCredentials_button.state.rawValue
         JamfProServer.storeDestCreds   = destStoreCredentials_button.state.rawValue
         
@@ -217,6 +222,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var URLisValid: Bool = true
     
     @objc func deleteMode_sdvc(_ sender: Any) {
+        logFunctionCall()
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE", isDirectory: &isDir))  {
             DispatchQueue.main.async { [self] in
                 // disable source server, username and password fields (to finish)
@@ -250,6 +256,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
      }
     
     @IBAction func fileImport_action(_ sender: NSButton) {
+        logFunctionCall()
         if fileImport_button.state.rawValue == 1 {
             userDefaults.set(true, forKey: "fileImport")
             let toggleFileImport = (sender.title == "Browse") ? false:true
@@ -319,6 +326,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }   // @IBAction func fileImport - end
     
     @IBAction func migrateToSite_action(_ sender: Any) {
+        logFunctionCall()
         JamfProServer.toSite   = false
         JamfProServer.destSite = "None"
         if siteMigrate_button.state == .on {
@@ -409,10 +417,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     @IBAction func setDestSite_action(_ sender: Any) {
+        logFunctionCall()
         JamfProServer.destSite = availableSites_button.selectedItem!.title
     }
     
     func serverChanged(whichserver: String) {
+        logFunctionCall()
         if (whichserver == "source" && !WipeData.state.on) || (whichserver == "dest" && !export.saveOnly) {
             // post to notification center
             JamfProServer.whichServer = whichserver
@@ -427,6 +437,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
    
     func fetchPassword(whichServer: String, url: String) {
+        logFunctionCall()
         if Setting.fullGUI {
             fileImport = userDefaults.bool(forKey: "fileImport")
         } else {
@@ -541,6 +552,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func controlTextDidChange(_ obj: Notification) {
+        logFunctionCall()
         if let textField = obj.object as? NSTextField {
             let whichField = textField.identifier!.rawValue
             
@@ -562,6 +574,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func controlTextDidEndEditing(_ obj: Notification) {
 //        print("enter controlTextDidEndEditing")
+        logFunctionCall()
         if let textField = obj.object as? NSTextField {
             let whichField = textField.identifier?.rawValue ?? ""
             switch whichField {
@@ -604,6 +617,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     @IBAction func disableExportOnly_action(_ sender: Any) {
+        logFunctionCall()
         export.saveOnly       = false
         export.saveRawXml     = false
         export.saveTrimmedXml = false
@@ -619,6 +633,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     
     func disableSource() {
+        logFunctionCall()
         if Setting.fullGUI {
             DispatchQueue.main.async { [self] in
                 dest_jp_server_field.isEnabled      = !export.saveOnly
@@ -638,6 +653,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func updateServerArray(url: String, serverList: String, theArray: [String]) {
+        logFunctionCall()
         let whichServer = (serverList == "source_server_array") ? "source" : "destination"
         WriteToLog.shared.message("[updateServerArray] set current \(whichServer) server: \(url)")
         if url != "" {
@@ -677,6 +693,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func saveSourceDestInfo(info: [String:Any]) {
+        logFunctionCall()
         if LogLevel.debug && !AppInfo.maskServerNames { WriteToLog.shared.message("[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
@@ -692,6 +709,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     @IBAction func setServerUrl_action(_ sender: NSPopUpButton) {
+        logFunctionCall()
         let whichServer = sender.identifier!.rawValue
         if NSEvent.modifierFlags.contains(.option) {
             switch whichServer {
@@ -790,6 +808,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func serverOrFiles(whichServer: String = "source", completion: @escaping (_ sourceType: String) -> Void) {
+        logFunctionCall()
         if whichServer != "source" {
             return
         }
@@ -831,6 +850,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }   // func serverOrFiles() - end
     
     func showHideUserCreds(x: Bool) {
+        logFunctionCall()
         let hideState = hideCreds_button.state == .on ? x:true
         sourceUsername_TextField.isHidden      = hideState
         sourcePassword_TextField.isHidden      = hideState
@@ -843,6 +863,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     override func viewDidAppear() {
         // set tab order
         // Use interface builder, right click a field and drag nextKeyView to the next
+        logFunctionCall()
         source_jp_server_field.nextKeyView  = sourceUser_TextField
         sourceUser_TextField.nextKeyView       = source_pwd_field
         source_pwd_field.nextKeyView        = dest_jp_server_field
@@ -852,18 +873,23 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }   //viewDidAppear - end
     
     @objc func stickySessionToggle(_ notification: Notification) {
+        logFunctionCall()
         stickySessions_label.isHidden = !JamfProServer.stickySession
     }
     @objc func toggleExportOnly(_ notification: Notification) {
+        logFunctionCall()
         disableSource()
     }
     @objc func updateSourceServerList(_ notification: Notification) {
+        logFunctionCall()
         updateServerArray(url: JamfProServer.source, serverList: "source_server_array", theArray: self.sourceServerArray)
     }
     @objc func updateDestServerList(_ notification: Notification) {
+        logFunctionCall()
         updateServerArray(url: JamfProServer.destination, serverList: "dest_server_array", theArray: self.destServerArray)
     }
     @objc func setColorScheme_sdvc(_ notification: Notification) {
+        logFunctionCall()
         let whichColorScheme = userDefaults.string(forKey: "colorScheme") ?? ""
         if AppColor.schemes.firstIndex(of: whichColorScheme) != nil {
             self.view.wantsLayer = true
@@ -897,6 +923,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
 //        if !FileManager.default.fileExists(atPath: AppInfo.bookmarksPath) {
 //            FileManager.default.createFile(atPath: AppInfo.bookmarksPath, contents: nil)
 //        }
+        logFunctionCall()
         ViewController().rmDELETE()
         
         NotificationCenter.default.addObserver(self, selector: #selector(setColorScheme_sdvc(_:)), name: .setColorScheme_sdvc, object: nil)
@@ -945,6 +972,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func initVars() {
+        logFunctionCall()
         // create log directory if missing - start
 //        if !fm.fileExists(atPath: History.logPath) {
 //            do {
@@ -1158,6 +1186,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

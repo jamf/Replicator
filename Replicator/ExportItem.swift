@@ -7,7 +7,7 @@
 //
 
 import Cocoa
-import os.log
+import OSLog
 
 class ExportItem: NSObject {
     
@@ -15,6 +15,7 @@ class ExportItem: NSObject {
     
     fileprivate func saveLocation(_ format: String) -> String {
         // Create folder to store objectString files if needed - start
+        logFunctionCall()
         var baseFolder = userDefaults.string(forKey: "saveLocation") ?? ""
         if baseFolder == "" {
             baseFolder = (NSHomeDirectory() + "/Downloads/Replicator/")
@@ -37,7 +38,7 @@ class ExportItem: NSObject {
     
     func export(node: String, object: Any/*, endpointPath: String*/, theName: String = "", id: String = "", format: String = "raw") {
         
-        Logger.exportItem_export.debug("enter exportItem_export - \(node, privacy: .public)")
+        logFunctionCall()
         
         var objectAsString = ""
         var exportFilename = ""
