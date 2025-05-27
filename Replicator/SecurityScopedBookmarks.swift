@@ -13,6 +13,7 @@ class SecurityScopedBookmarks: NSObject {
     static let shared = SecurityScopedBookmarks()
     
     func allowAccess(for urlString: String) -> Bool {
+        logFunctionCall()
         
         let allBookmarks = fetchBookmarks()
         
@@ -48,6 +49,7 @@ class SecurityScopedBookmarks: NSObject {
     }
     
     func create(for fileUrl: URL) {
+        logFunctionCall()
         var bookmarks = fetchBookmarks()
 //        let fileUrl = URL(fileURLWithPath: filePath)
         
@@ -65,6 +67,7 @@ class SecurityScopedBookmarks: NSObject {
     }
     
     func fetchBookmarks() -> [String: Data] {
+        logFunctionCall()
         if fm.fileExists(atPath: AppInfo.bookmarksPath) {
             AppInfo.bookmarks = NSKeyedUnarchiver.unarchiveObject(withFile: AppInfo.bookmarksPath) as? [URL: Data] ?? [:]
             var currentBookmarks = [String: Data]()

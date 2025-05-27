@@ -2,8 +2,11 @@
 //  LoggerExtension
 //
 
+// log stream --info --predicate 'subsystem == "com.jamf.jamf-migrator"'
+// log stream --debug --predicate 'subsystem == "com.jamf.jamf-migrator" AND category == "function"'
+
 import Foundation
-import os.log
+import OSLog
 
 extension Logger {
     private static let subsystem = Bundle.main.bundleIdentifier!
@@ -23,4 +26,10 @@ extension Logger {
     static let iconDelegate_iconMigrate      = Logger(subsystem: subsystem, category: "iconDelegate_iconMigrate")
     static let ObjectDelegate_getAll         = Logger(subsystem: subsystem, category: "ObjectDelegate_getAll")
     static let headless_runComplete          = Logger(subsystem: subsystem, category: "headless_runComplete")
+    static let function                      = Logger(subsystem: subsystem, category: "function")
+}
+
+func logFunctionCall(file: String = #file, function: String = #function, line: Int = #line) {
+    let fileName = (file as NSString).lastPathComponent
+    Logger.function.debug("called \(function, privacy: .public) [\(fileName, privacy: .public):\(line, privacy: .public)]")
 }

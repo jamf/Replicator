@@ -14,6 +14,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
     var updateUiDelegate: UpdateUiDelegate?
     
     func createUpdate(serverUrl: String, endpoint: String = "patch-software-title-configurations", apiData: [String: Any], sourceEpId: String, destEpId: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
+        logFunctionCall()
         
         if method.lowercased() == "skip" {
             completion(["JPAPI_result":"no valid token found", "JPAPI_response":0])
@@ -382,6 +383,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
     }   // func action - end
     
     private func createPatchsoftwaretitleXml(objectInstance: PatchSoftwareTitleConfiguration) -> String {
+        logFunctionCall()
         
         let patchSourceId = PatchSource.destination.filter { $0.name == objectInstance.patchSourceName }.first?.id ?? 0
 
@@ -432,11 +434,13 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
     */
     
     private func objectId(xml: String, object: String) -> String {
+        logFunctionCall()
         let trimmed = tagValue(xmlString: xml, xmlTag: object)
         return tagValue(xmlString: trimmed, xmlTag: "id")
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

@@ -30,10 +30,12 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     var updateUiDelegate: UpdateUiDelegate?
     func updateView(_ info: [String: Any]) {
+        logFunctionCall()
         updateUiDelegate?.updateUi(info: info)
     }
     
     func action(whichServer: String, endpoint: String, apiData: [String: Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
+        logFunctionCall()
         
         if method.lowercased() == "skip" {
             completion(["JPAPI_result":"no valid token found", "JPAPI_response":0])
@@ -60,7 +62,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 
         print("[Jpapi.action] endpoint: \(endpoint)")
         switch endpoint {
-        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites":
+        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-integrations", "api-roles":
             path = "api/v1/\(endpoint)"
         case "patchinternalsources":
             path = "JSSResource/patchinternalsources"
@@ -213,6 +215,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     }   // func action - end
     
     func getAllDelegate(whichServer: String, theEndpoint: String, whichPage: Int, lastPage: Bool = false, completion: @escaping (_ result: [Any]) -> Void) {
+        logFunctionCall()
         
         if whichPage == 0 {
             
@@ -253,6 +256,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     }
     
     func getAll(whichServer: String, theEndpoint: String, whichPage: Int, completion: @escaping (_ result: [Any]) -> Void) {
+        logFunctionCall()
         
         switch theEndpoint {
         case "categories", "policy-details", "packages", "sites":
@@ -364,16 +368,17 @@ class Jpapi: NSObject, URLSessionDelegate {
                 }
             }
         default:
-            print("[getAll] look for \(theEndpoint)")
+            print("[getAll] look for \(theEndpoint) from \(whichServer)")
             // all records in one call
             get(whichServer: whichServer, theEndpoint: theEndpoint) {
                 returnedJson in
 //                if let returnedRecords = returnedJson as? [[String: Any]] {
-                var currentCount = existingObjects.count
+                let nameParameter = ["api-roles", "api-integrations"].contains(theEndpoint) ? "displayName" : "name"
+                let isPolicy = theEndpoint == "policies"
+                let currentCount = existingObjects.count
                     for theObject in returnedJson {
-//                    for thePackage in returnedJson {
-                        if let id = theObject["id"] as? Int, id != 0, let name = theObject["name"] as? String, name != "" {
-                            if !(theEndpoint == "policies" && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) != nil) {
+                        if let id = theObject["id"] as? Int, id != 0, let name = theObject[nameParameter] as? String, name != "" {
+                            if !(isPolicy && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) != nil) {
                                 existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name))
 //                                print("[getAll] added type: \(theEndpoint), name: \(name), id: \(id)")
                             }
@@ -393,13 +398,14 @@ class Jpapi: NSObject, URLSessionDelegate {
     }
     
     func get(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, completion: @escaping (_ returnedJson: [[String: Any]]) -> Void) {
+        logFunctionCall()
         var endpointVersion = ""
         switch theEndpoint {
         case "test3":
            endpointVersion = "v3"
         case "patch-software-title-configurations","patchsoftwaretitles":
            endpointVersion = "v2"
-        case "categories", "packages", "jcds/files", "sites":
+        case "categories", "packages", "jcds/files", "sites", "api-integrations", "api-roles":
            endpointVersion = "v1"
         default:
             break
@@ -502,7 +508,8 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                    print("[Jpapi.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     
-                    if ["patch-software-title-configurations","patchsoftwaretitles"].contains(theEndpoint) {
+                    switch theEndpoint {
+                    case "patch-software-title-configurations","patchsoftwaretitles":
                         if let recordsArray = responseData as? [[String: Any]] {
 //                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
                             completion(recordsArray)
@@ -510,7 +517,15 @@ class Jpapi: NSObject, URLSessionDelegate {
                             WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
                             completion([])
                         }
-                    } else {
+                    case "api-roles", "api-integrations":
+                        if let recordsArray = responseData as? [String: Any], let results = recordsArray["results"] as? [[String: Any]] {
+                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray["totalCount"] ?? "unknown")")
+                            completion(results)
+                        } else {
+                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
+                            completion([])
+                        }
+                    default:
                         if let recordsJson = responseData as? [String: [[String: Any]]], let recordsArray = recordsJson[endpointParent] {
 //                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
                                 completion(recordsArray)
@@ -519,6 +534,24 @@ class Jpapi: NSObject, URLSessionDelegate {
                             completion([])
                         }
                     }
+                    
+//                    if ["patch-software-title-configurations","patchsoftwaretitles"].contains(theEndpoint) {
+//                        if let recordsArray = responseData as? [[String: Any]] {
+////                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
+//                            completion(recordsArray)
+//                        } else {
+//                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
+//                            completion([])
+//                        }
+//                    } else {
+//                        if let recordsJson = responseData as? [String: [[String: Any]]], let recordsArray = recordsJson[endpointParent] {
+////                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray.description)")
+//                                completion(recordsArray)
+//                        } else {
+//                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
+//                            completion([])
+//                        }
+//                    }
                 } else {
                     WriteToLog.shared.message("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
                     completion([])
@@ -533,6 +566,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     
     func pagedGet(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, completion: @escaping (_ returnedResults:  Any) -> Void) {
+        logFunctionCall()
         if export.saveOnly && whichServer == "dest" {
             completion([:])
             return
@@ -609,6 +643,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

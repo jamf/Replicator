@@ -164,12 +164,14 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     
     
     private func convertToPackage(jsonPackage: JsonUapiPackageDetail) -> Package? {
+        logFunctionCall()
         guard let jamfProIdString = jsonPackage.id, let _ = Int(jamfProIdString), let _ = jsonPackage.packageName, let _ = jsonPackage.fileName else { return nil }
         return Package(uapiPackageDetail: jsonPackage)
     }
     
     func getFilename(whichServer: String, theServer: String, base64Creds: String, theEndpoint: String, theEndpointID: Int, skip: Bool, currentTry: Int, completion: @escaping (_ result: (Int,String)) -> Void) {
-
+        logFunctionCall()
+        
         if skip || WipeData.state.on {
             completion((theEndpointID,""))
             print("[PackagesDelegate.getFilename] skip filename lookup")
@@ -275,6 +277,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     }
     
     func filenameIdDict(whichServer: String, theServer: String, base64Creds: String, currentPackageIDsNames: [Int:String], currentPackageNamesIDs: [String:Int], currentDuplicates: [String:[String]], currentTry: Int, maxTries: Int, completion: @escaping (_ result: [String:Int]) -> Void) {
+        logFunctionCall()
         
 //        print("[PackageDelegate.filenameIdDict] lookup attempt \(currentTry) of \(maxTries)")
         if WipeData.state.on {
@@ -379,6 +382,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     
     func callOutDuplicates(duplicatesDict: [String:[String]], theServer: String) {
         // call out duplicates
+        logFunctionCall()
         print("[callOutDuplicates] \(#line) server: \(theServer)")
         var message = ""
         for (pkgFilename, displayNames) in duplicatesDict {

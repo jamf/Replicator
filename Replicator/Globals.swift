@@ -283,6 +283,7 @@ Examples:
 """
 
 public func readSettings(thePath: String = "") -> [String:Any] {
+    logFunctionCall()
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
     if LogLevel.debug { WriteToLog.shared.message("[\(#function.description)] settingsPath: \(settingsPath)") }
     if !FileManager.default.fileExists(atPath: settingsPath) {
@@ -298,10 +299,12 @@ public func readSettings(thePath: String = "") -> [String:Any] {
 }
 
 public func saveSettings(settings: [String:Any]) {
+    logFunctionCall()
     NSDictionary(dictionary: settings).write(toFile: AppInfo.plistPath, atomically: true)
 }
 
 public func getIconId(iconUri: String, endpoint: String) -> String {
+    logFunctionCall()
     var iconId = "0"
     if iconUri != "" {
         if let index = iconUri.firstIndex(of: "=") {
@@ -324,6 +327,7 @@ public func getIconId(iconUri: String, endpoint: String) -> String {
 
 // replace with tagValue function?
 public func getName(endpoint: String, objectXML: String) -> String {
+    logFunctionCall()
     var theName: String = ""
     var dropChars: Int = 0
     if let nameTemp = objectXML.range(of: "<name>") {
@@ -339,6 +343,7 @@ public func getName(endpoint: String, objectXML: String) -> String {
 
 // extract the value between xml tags - start
 public func tagValue(xmlString:String, xmlTag:String) -> String {
+    logFunctionCall()
     var rawValue = ""
     if let start = xmlString.range(of: "<\(xmlTag)>"),
         let end  = xmlString.range(of: "</\(xmlTag)", range: start.upperBound..<xmlString.endIndex) {
@@ -353,6 +358,7 @@ public func tagValue(xmlString:String, xmlTag:String) -> String {
 // extract the value between xml tags - end
 // extract the value between (different) tags - start
 public func tagValue2(xmlString:String, startTag:String, endTag:String) -> String {
+    logFunctionCall()
     var rawValue = ""
     if let start = xmlString.range(of: startTag),
         let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
@@ -365,6 +371,7 @@ public func tagValue2(xmlString:String, startTag:String, endTag:String) -> Strin
 //  extract the value between (different) tags - end
 
 public func timeDiff(forWhat: String, someDate: Date = Date()) -> (Int,Int,Int,Double) {
+    logFunctionCall()
     var components:DateComponents?
     switch forWhat {
     case "tokenExpires":
@@ -389,5 +396,6 @@ public func timeDiff(forWhat: String, someDate: Date = Date()) -> (Int,Int,Int,D
 }
 
 func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    logFunctionCall()
     completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
 }

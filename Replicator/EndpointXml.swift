@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import os.log
+import OSLog
 import AppKit
 
 class EndpointXml: NSObject, URLSessionDelegate {
@@ -15,7 +15,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
     
     var getStatusDelegate: GetStatusDelegate?
     func sendGetStatus(endpoint: String, total: Int, index: Int) {
-        print("[EndpointXml] call updateGetStatus")
+        logFunctionCall()
         Logger.endpointXml_endPointByIdQueue.debug("call updateGetStatus")
         getStatusDelegate?.updateGetStatus(endpoint: endpoint, total: total, index: index)
     }
@@ -27,7 +27,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
     
     func endPointByIdQueue(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
         
-        Logger.endpointXml_endPointByIdQueue.debug("enter endpointXml_endPointByIdQueue - \(endpoint, privacy: .public)")
+        logFunctionCall()
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
@@ -61,7 +61,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
     
     func getById(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         
-        Logger.endpointXml_getById.debug("enter endpointXml_getById - \(endpoint, privacy: .public)")
+        logFunctionCall()
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
@@ -76,7 +76,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
         endpointsIdQ.maxConcurrentOperationCount = maxConcurrentThreads
         
         var localEndPointType = ""
-//        var theEndpoint       = endpoint
         
         switch endpoint {
 //      adjust the lookup endpoint
@@ -99,32 +98,29 @@ class EndpointXml: NSObject, URLSessionDelegate {
 
         // split queries between classic and Jamf Pro API
         switch localEndPointType {
+        case "api-roles":
+            print("[getById] api-roles not supported")
         case "buildings":
             // Jamf Pro API
-                endpointsIdQ.addOperation {
+            endpointsIdQ.addOperation {
                     
-                    if LogLevel.debug { WriteToLog.shared.message("[getById] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
+            if LogLevel.debug { WriteToLog.shared.message("[getById] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
             Jpapi.shared.action(whichServer: "source", endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
                         (returnedJSON: [String:Any]) in
                         completion(destEpName)
-//                                if statusCode == 202 {
-//                                    print("[getById] \(#line) returnedJSON: \(returnedJSON)")
-//                                }
-                        //                        print("returnedJSON: \(returnedJSON)")
+//                       if statusCode == 202 {
+//                          print("[getById] \(#line) returnedJSON: \(returnedJSON)")
+//                       }
+//                       print("returnedJSON: \(returnedJSON)")
                 sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
                         if returnedJSON.count > 0 {
-//                                    self.updateGetStatus(endpoint: endpoint, total: endpointCount)
                             // save source JSON - start
                             if export.saveRawXml {
-//                                DispatchQueue.main.async { [self] in
-                                    let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
-                                    //                                    print("exportRawJson: \(exportRawJson)")
-                                    WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
-                                    let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                    ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
-//                                            exportItems(node: endpoint, objectString: exportRawJson, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
-//                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"]!])
-//                                }
+                                let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
+//                                    print("exportRawJson: \(exportRawJson)")
+                                WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
+                                let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
                             }
                             // save source JSON - end
                             
@@ -217,18 +213,10 @@ class EndpointXml: NSObject, URLSessionDelegate {
                             }
                              
                         } else {
-                            // check progress
-                            //                                print("[getById] node: \(endpoint)")
-                            //                                print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
                             Endpoints.countDict[localEndPointType]! -= 1
-                            //                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+
                             if Endpoints.countDict[localEndPointType] == 0 {
-                                //                                     print("[getById] saved last \(endpoint)")
-                                //                                     print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
-                                
                                 if Endpoints.read == ToMigrate.objects.count {
-                                    // print("[getById] zip it up")
-//                                    print("[\(#function)] \(#line) - finished getting \(endpoint)")
                                     updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
                                 }
                             }
@@ -260,11 +248,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     request.httpMethod = "GET"
                     let configuration = URLSessionConfiguration.ephemeral
                     
-//                    if endpointCurrent % 15 == 0 {
-//                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source1"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-//                    } else {
-                        configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-//                    }
+                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
                     
                     var headers = [String: String]()
                     for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

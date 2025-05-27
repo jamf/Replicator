@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import os.log
+import OSLog
 
 class ExistingObjects: NSObject, URLSessionDelegate {
     
@@ -16,13 +16,14 @@ class ExistingObjects: NSObject, URLSessionDelegate {
     
     var updateUiDelegate: UpdateUiDelegate?
     func updateView(_ info: [String: Any]) {
+        logFunctionCall()
         updateUiDelegate?.updateUi(info: info)
     }
  
     func capi(skipLookup: Bool, theDestEndpoint: String, completion: @escaping (_ result: (String,String)) -> Void) {
         existingObjectsQ.maxConcurrentOperationCount = 2
         
-        Logger.existingObjects_capi.debug("enter existingObjects_capi - \(theDestEndpoint, privacy: .public)")
+        logFunctionCall()
         
         // query destination server
         if skipLookup {

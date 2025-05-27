@@ -17,6 +17,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     let getRecordQ    = OperationQueue()
 
     func apiAction(method: String, theServer: String, base64Creds: String, theEndpoint: String, completion: @escaping (_ result: (Int,String)) -> Void) {
+        logFunctionCall()
         
         if theEndpoint.prefix(4) != "skip" {
         
@@ -89,6 +90,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         
     
     func save(node: String, xml: String, rawName: String, id: String, format: String) {
+        logFunctionCall()
         
         var name = rawName.replacingOccurrences(of: ":", with: ";")
         name     = name.replacingOccurrences(of: "/", with: ":")
@@ -208,6 +210,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     }   // func save
     
     func encodeSpecialChars(textString: String) -> String {
+        logFunctionCall()
         
         let newString = textString.replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "\"", with: "&quot;")
@@ -219,6 +222,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        logFunctionCall()
         completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }

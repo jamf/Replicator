@@ -20,6 +20,7 @@ class Utilities: NSObject {
     
     func zipIt(args: String..., completion: @escaping (_ result: String) -> Void) {
 
+        logFunctionCall()
         var cmdArgs = ["-c"]
         for theArg in args {
             cmdArgs.append(theArg)

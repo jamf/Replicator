@@ -13,6 +13,7 @@ class Json: NSObject, URLSessionDelegate {
     static let shared = Json()
     
     func getRecord(whichServer: String, base64Creds: String, theEndpoint: String, endpointBase: String = "0", endpointId: String = "0", completion: @escaping (_ objectRecord: Any) -> Void) {
+        logFunctionCall()
         
         if theEndpoint == "skip" {
             completion([:])
@@ -115,6 +116,7 @@ class Json: NSObject, URLSessionDelegate {
     }
     
     private func policyCleanup(policies: [[String: AnyObject]]) -> AnyObject {
+        logFunctionCall()
         var cleanPolicies = [[String: AnyObject]]()
         for thePolicy in policies {
             if let policyId = thePolicy["id"], let policyName = thePolicy["name"] as? String {

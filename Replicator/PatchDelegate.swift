@@ -14,10 +14,12 @@ class PatchDelegate: NSObject {
     var messageDelegate: SendMessageDelegate?
     
     func updateViewController(_ text: String) {
+        logFunctionCall()
         messageDelegate?.sendMessage(text)
     }
     
     func getDependencies(whichServer: String, completion: @escaping (_ result: String) -> Void) {
+        logFunctionCall()
         if WipeData.state.on {
             completion("skipped")
             return

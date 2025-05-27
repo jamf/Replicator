@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import os.log
+import OSLog
 
 class IconDelegate: NSObject, URLSessionDelegate {
     
@@ -23,7 +23,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     
     @MainActor func icons(endpointType: String, action: String, ssInfo: [String: String], f_createDestUrl: String, responseData: String, sourcePolicyId: String) {
         
-        Logger.iconDelegate_icons.debug("enter iconDelegate_icons - \(endpointType, privacy: .public)")
+        logFunctionCall()
         
         var createDestUrl        = f_createDestUrl
         var iconToUpload         = ""
@@ -282,7 +282,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     
     @MainActor private func iconMigrate(action: String, ssIconUri: String, ssIconId: String, ssIconName: String, _iconToUpload: String, createDestUrl: String, completion: @escaping (Int) -> Void) {
         
-        Logger.iconDelegate_iconMigrate.debug("enter iconDelegate_iconMigrate - \(ssIconName, privacy: .public)")
+        logFunctionCall()
         
         // fix id/hash being passed as optional
         let iconToUpload = _iconToUpload.fixOptional
@@ -565,6 +565,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     }
     
     private func iconNotification() {
+        logFunctionCall()
         DispatchQueue.main.async { [self] in
             if Setting.fullGUI {
                 updateUiDelegate?.updateUi(info: ["function": "uploadingIcons_textfield", "isHidden": (theIconsQ.operationCount > 0) ? false:true])
@@ -580,6 +581,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
     
     // hold icon migrations while icon is being cached/uploaded to the new server
     private func iconMigrationHold(ssIconId: String, newIconDict: [String:String]) {
+        logFunctionCall()
         if iconDictArray["\(ssIconId)"] == nil {
             iconDictArray["\(ssIconId)"] = [newIconDict]
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.iconMigration] first entry for iconDictArray[\(ssIconId)]: \(newIconDict)") }

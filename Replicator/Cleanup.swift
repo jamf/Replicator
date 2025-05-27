@@ -16,6 +16,7 @@ class Cleanup: NSObject {
     var updateUiDelegate: UpdateUiDelegate?
     
     func Json(endpoint: String, JSON: [String: Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
+        logFunctionCall()
         
         Logger.cleanup_json.debug("enter cleanJSON - \(endpoint, privacy: .public)")
         
@@ -107,6 +108,7 @@ class Cleanup: NSObject {
     }
     
     func Xml(endpoint: String, Xml: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+        logFunctionCall()
         
         Logger.cleanup_xml.debug("enter cleanXML - \(endpoint, privacy: .public)")
         
@@ -674,6 +676,7 @@ class Cleanup: NSObject {
     }
     
     fileprivate func disable(theXML: String) -> String {
+        logFunctionCall()
         let regexDisable    = try? NSRegularExpression(pattern: "<enabled>true</enabled>", options:.caseInsensitive)
         let newXML          = (regexDisable?.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "<enabled>false</enabled>"))!
   
@@ -681,7 +684,8 @@ class Cleanup: NSObject {
     }
     
     fileprivate func parameterFix(theXML: String) -> String {
-
+        logFunctionCall()
+        
         let parameterRegex  = try! NSRegularExpression(pattern: "</parameters>", options:.caseInsensitive)
         var updatedScript   = theXML
         var scriptParameter = ""
@@ -698,6 +702,7 @@ class Cleanup: NSObject {
     }
     
     fileprivate func setSite(xmlString: String, site: String, endpoint: String) -> String {
+        logFunctionCall()
         var rawValue = ""
         var startTag = ""
         let siteEncoded = XmlDelegate().encodeSpecialChars(textString: site)
@@ -829,6 +834,7 @@ class Cleanup: NSObject {
     }
     
     fileprivate func rmBlankLines(theXML: String) -> String {
+        logFunctionCall()
         if LogLevel.debug { WriteToLog.shared.message("Removing blank lines.") }
         let f_regexComp = try! NSRegularExpression(pattern: "\n\n", options:.caseInsensitive)
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
