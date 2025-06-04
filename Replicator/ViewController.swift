@@ -744,8 +744,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    var availableObjsToMigDict:[Int:String]   = [:]   // something like xmlID, xmlName
 
     var selectiveListCleared                = false
-//    var delayInt: UInt32                    = 50000
-//    var createRetryCount                    = [String:Int]()   // objectType-objectID:retryCount
     
     // destination TextFieldCells
     @IBOutlet weak var destTextCell_TextFieldCell: NSTextFieldCell!
@@ -1658,12 +1656,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                         
                         if apiRoles_button.state == .on {
-                            ToMigrate.objects += ["apiroles"]
+                            ToMigrate.objects += ["api-roles"]
                             ToMigrate.rawCount += 1
                         }
                         
                         if apiClients_button.state == .on {
-                            ToMigrate.objects += ["apiintegrations"]
+                            ToMigrate.objects += ["api-integrations"]
                             ToMigrate.rawCount += 1
                         }
                     case "macOS":
@@ -2127,7 +2125,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     return
                                 }
                             
-                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] Item(s) chosen from selective: \(sourceObjectList_AC.arrangedObjects as! [SelectiveObject])") }
+//                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] Item(s) chosen from selective: \(sourceObjectList_AC.arrangedObjects as! [SelectiveObject])") }
 
                                 advancedMigrateDict.removeAll()
                                 migratedDependencies.removeAll()
@@ -2176,7 +2174,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         logFunctionCall()
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
 //        var alreadyMigrated    = false
-        var theButton          = ""
+//        let theButton          = ""
 
 //        print("[startMigrating] AvailableObjsToMig.byName: \(AvailableObjsToMig.byName)")
         // todo - consolidate these 2 vars
@@ -2187,13 +2185,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         dependencyParentId        = primaryObjToMigrateID!
         dependency.isRunning      = true
         Counter.shared.dependencyMigrated[dependencyParentId] = 0
-        
-        switch selectedEndpoint {
-        case "accounts/userid", "accounts/groupid":
-            idPath = "/"
-        default:
-            idPath = "id/"
-        }
         
         // adjust the endpoint used for the lookup
         var rawEndpoint = ""
@@ -2213,10 +2204,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             default:
                 rawEndpoint = selectedEndpoint
         }
-                
-        var endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjToMigrateID!))"
+        
+        var endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)/\(String(describing: primaryObjToMigrateID!))"
         if fileImport || WipeData.state.on {
             endpointToLookup = "skip"
+        }
+        
+        switch selectedEndpoint {
+        case "api-roles", "api-integrations":
+            idPath = ""
+            endpointToLookup = "skip"
+        case "accounts/userid", "accounts/groupid":
+            idPath = "/"
+        default:
+            idPath = "id/"
         }
         
         print("[startSelectiveMigration] selectedEndpoint: \(selectedEndpoint)")
@@ -2249,6 +2250,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 let result = objectRecord as? [String: AnyObject] ?? [:]
                 print("[startSelectiveMigration] result.count: \(result.count)")
+                print("[startSelectiveMigration] result: \(result)")
                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigration] Returned from Json.getRecord") }
                 
                 if pref.stopMigration {
@@ -2263,64 +2265,70 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                    print("advancedMigrateDict with policy: \(advancedMigrateDict)")
             
                 self.destEPQ.async { [self] in
-                
-                
-                // migrate the policy or selected object now the dependencies are done
-                DispatchQueue.global(qos: .utility).async { [self] in
-                  
-                    if theButton == "Stop" { return }
                     
-                    var theAction = "update"
+                    // migrate the policy or selected object now the dependencies are done
+                    DispatchQueue.global(qos: .utility).async { [self] in
+                      
+    //                    if theButton == "Stop" { return }
+                        
+                        var theAction = "update"
 
-                    if !export.saveOnly { WriteToLog.shared.message("check destination for existing object: \(selectedObject)") }
-                    
-//                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
-                    let existingObjectId = (selectedEndpoint == "patch-software-title-configurations") ? currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:currentEPDict[rawEndpoint]?[selectedObject] ?? 0
-                    if existingObjectId == 0 && !export.saveOnly {
-                        theAction = "create"
-                    }
-                    print("[startSelectiveMigration] existingObjectId: \(existingObjectId), theAction: \(theAction)")
-                    
-                    WriteToLog.shared.message("[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency")
-                    
-                    if !fileImport {
-                        EndpointXml.shared.endPointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: objectAndDependencies.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
-                    } else {
-                        //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
+                        if !export.saveOnly { WriteToLog.shared.message("check destination for existing object: \(selectedObject)") }
                         
-                        let fileToMigrate = displayNameToFilename[selectedObject]
-//                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
-//                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
+    //                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
+                        var existingObjectId = 0
+                        switch selectedEndpoint {
+                        case "api-roles":
+                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName == selectedObject })?.id ?? "0") ?? 0
+                        case "api-integrations":
+                            existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName == selectedObject })?.id ?? "0") ?? 0
+                        case "patch-software-title-configurations":
+                            existingObjectId = currentEPDict[selectedEndpoint]?[selectedObject] ?? 0
+                        default:
+                            existingObjectId = currentEPDict[rawEndpoint]?[selectedObject] ?? 0
+                        }
                         
-                        arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
-//                                print("[ViewController.startSelectiveMigration] selectedObject: \(selectedObject)")
-//                                print("[ViewController.startSelectiveMigration-fileImport] arrayOfSelected: \(arrayOfSelected[selectedObject] ?? [])")
+//                        let existingObjectId = (selectedEndpoint == "patch-software-title-configurations") ? currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:currentEPDict[rawEndpoint]?[selectedObject] ?? 0
+                        if existingObjectId == 0 && !export.saveOnly {
+                            theAction = "create"
+                        }
+                        print("[startSelectiveMigration] existingObjectId: \(existingObjectId), theAction: \(theAction)")
                         
-                        //                                    if arrayOfSelected.count == targetSelectiveObjectList.count {
-                        if objectIndex+1 == objectAndDependencies.count {
-//                                    print("[ViewController.startSelectiveMigration] processFiles)")
-                            self.processFiles(endpoint: selectedEndpoint, fileCount: objectAndDependencies.count, itemsDict: arrayOfSelected) {
-                                (result: String) in
-                                if LogLevel.debug { WriteToLog.shared.message("[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).") }
+                        WriteToLog.shared.message("[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency")
+                        
+                        if !fileImport {
+                            EndpointXml.shared.endPointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: objectAndDependencies.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
+                        } else {
+                            //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
+                            
+                            let fileToMigrate = displayNameToFilename[selectedObject]
+    //                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
+    //                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
+                            
+                            arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
+    //                                print("[ViewController.startSelectiveMigration] selectedObject: \(selectedObject)")
+    //                                print("[ViewController.startSelectiveMigration-fileImport] arrayOfSelected: \(arrayOfSelected[selectedObject] ?? [])")
+                            
+                            if objectIndex+1 == objectAndDependencies.count {
+    //                                    print("[ViewController.startSelectiveMigration] processFiles)")
+                                self.processFiles(endpoint: selectedEndpoint, fileCount: objectAndDependencies.count, itemsDict: arrayOfSelected) {
+                                    (result: String) in
+                                    if LogLevel.debug { WriteToLog.shared.message("[readDataFiles] Returned from processFile (\(String(describing: fileToMigrate))).") }
+                                }
                             }
                         }
-                    }
-                    
-                    print("[\(#function.short)] objectIndex+1: \(objectIndex+1) - objectAndDependencies.count: \(objectAndDependencies.count)")
-                    // call next item
-                    if objectIndex+1 < objectAndDependencies.count {
-                        //                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
-                        startSelectiveMigration(objectIndex: objectIndex+1, objectAndDependencies: objectAndDependencies)
-                    } else if objectIndex+1 == objectAndDependencies.count {
-                        print("[\(#function.short)] dependency.isRunning \(dependency.isRunning)")
-                        dependency.isRunning = false
+                        
+                        print("[\(#function.short)] objectIndex+1: \(objectIndex+1) - objectAndDependencies.count: \(objectAndDependencies.count)")
+                        // call next item
+                        if objectIndex+1 < objectAndDependencies.count {
+                            //                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
+                            startSelectiveMigration(objectIndex: objectIndex+1, objectAndDependencies: objectAndDependencies)
+                        } else if objectIndex+1 == objectAndDependencies.count {
+                            print("[\(#function.short)] dependency.isRunning \(dependency.isRunning)")
+                            dependency.isRunning = false
+                        }
                     }
                 }
-            }
-                    // include dependencies - end
-                    //                    }
-                    
-//                }
             }
         } else {
             // selective removal
@@ -2594,12 +2602,176 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
                 
-                //                print("[getEndpoints] result: \(result)")
-                //                print("[getEndpoints] goSender: \(UiVar.goSender)")
+//                print("[getEndpoints] result: \(result)")
+//                print("[getEndpoints] goSender: \(UiVar.goSender)")
                 
                 Endpoints.read += 1
                 Endpoints.countDict[endpoint] = endpointCount
                 switch endpoint {
+                case "api-roles", "api-integrations":
+//                    do {
+//                        let jsonData = try? JSONSerialization.data(withJSONObject: result, options: [])
+//                        ApiRoles.source = try JSONDecoder().decode([ApiRole].self, from: jsonData!)
+//                    } catch {
+//                        print("error getting \(endpoint) configurations: \(error)")
+//                    }
+                    let objectCount = (endpoint == "api-roles") ? ApiRoles.source.count : ApiIntegrations.source.count
+                    print("test \(endpoint) object count: \(objectCount)")
+                    if objectCount > 0 {
+                        AvailableObjsToMig.byId.removeAll()
+                        
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Initial count for \(endpoint) found: \(objectCount)") }
+                        
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Verify empty dictionary of objects - AvailableObjsToMig.byId count: \(AvailableObjsToMig.byId.count)") }
+                        
+                        switch endpoint {
+                        case "api-roles":
+                            for theObject in ApiRoles.source /*as? [ApiRole] ?? []*/ {
+                                if theObject.displayName.isEmpty {
+                                    AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = ""
+                                } else {
+                                    AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = theObject.displayName
+                                }
+                            }
+                        case "api-integrations":
+                            for theObject in ApiIntegrations.source /*as? [ApiIntegration] ?? []*/ {
+                                if theObject.displayName.isEmpty {
+                                    AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = ""
+                                } else {
+                                    AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = theObject.displayName
+                                }
+                            }
+                        default:
+                            break
+                        }
+                        
+                        Endpoints.read += 1
+                        
+                        Endpoints.countDict[endpoint] = AvailableObjsToMig.byId.count
+                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                        
+                        // get existing destination objects
+                        
+                        let skipLookup = (migrationMode == "bulk") ? false:true
+                        ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: "\(endpoint)")  { [self]
+                            (result: (String,String)) in
+                            if pref.stopMigration {
+                                rmDELETE()
+                                completion(["migration stopped", "0"])
+                                return
+                            }
+                            
+                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] returning existing packages endpoints: \(AvailableObjsToMig.byId)") }
+                            
+                            //                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                            //                                                            return
+                            // make into a func - start
+                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] Found total of \(AvailableObjsToMig.byId.count) \(endpoint) to process") }
+                            
+                            var counter = 1
+                            if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
+                                
+                                Counter.shared.crud[endpoint]!["total"] = AvailableObjsToMig.byId.count
+                                
+                                for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
+                                    if !WipeData.state.on  {
+                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
+                                        
+                                        let destinationObjectExists = ( endpoint == "api-roles") ? ApiRoles.destination.first(where: { $0.displayName == l_xmlName}) != nil : ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName}) != nil
+//                                        print("[getSourceEndpoints] not yet implemented - check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)")
+//                                        print("[getSourceEndpoints] not yet implemented - exists \(l_xmlName): \(destinationObjectExists)")
+                                        // check to see if create or update...
+                                        
+                                        
+                                        if destinationObjectExists {
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+                                            if Setting.onlyCopyMissing {
+                                                updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                    (result: String) in
+                                                    completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                }
+                                            } else {
+                                                let destinationObjectId = (endpoint == "api-roles") ? ApiRoles.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0" : ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0"
+                                                EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: Int(destinationObjectId) ?? 0, destEpName: l_xmlName)
+                                            }
+                                        } else {
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
+                                            if Setting.onlyCopyExisting {
+                                                updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
+                                                CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
+                                                    (result: String) in
+                                                    completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                }
+                                            } else {
+                                                EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                            }
+                                        }
+                                        
+                                    } else {
+                                        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] remove - endpoint: \(endpoint)\t endpointID: \(l_xmlID)\t endpointName: \(l_xmlName)") }
+                                        if WipeData.state.on {
+                                            RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "\(l_xmlID)", endpointName: l_xmlName, endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count)
+                                        }
+                                    }   // if !WipeData.state.on else - end
+                                    counter+=1
+                                }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
+                                RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                            } else {
+                                // populate source server under the selective tab - bulk
+                                //                                                                        print("[getEndpoints] AvailableObjsToMig.byId: \(AvailableObjsToMig.byId)")
+                                if !pref.stopMigration {
+                                    //                                                                      print("-populate (\(endpoint)) source server under the selective tab")
+                                    ListDelay.shared.milliseconds = (AvailableObjsToMig.byId.count > 1000) ? 0:listDelay(itemCount: AvailableObjsToMig.byId.count)
+                                    for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
+                                        sortQ.async { [self] in
+                                            //                                                                              print("[getEndpoints] adding \(l_xmlName) to array")
+                                            AvailableObjsToMig.byName[l_xmlName] = "\(l_xmlID)"
+                                            DataArray.source.append(l_xmlName)
+                                            DataArray.source = DataArray.source.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
+                                            
+                                            DataArray.staticSource = DataArray.source
+                                            
+                                            updateSelectiveList(objectName: l_xmlName, objectId: "\(l_xmlID)", fileContents: "")
+                                            // slight delay in building the list - visual effect
+                                            usleep(ListDelay.shared.milliseconds)
+                                            
+                                            if counter == AvailableObjsToMig.byId.count {
+                                                nodesMigrated += 1
+                                                //                                                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                                goButtonEnabled(button_status: true)
+                                            }
+                                            counter+=1
+                                        }   // sortQ.async - end
+                                    }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
+                                }   // if !pref.stopMigration
+                            }   // if UiVar.goSender else - end
+                            // make into a func - end
+                            
+//                                if nodeIndex < nodesToMigrate.count - 1 {
+//                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                                }
+                            if !(Setting.onlyCopyMissing || Setting.onlyCopyExisting) {
+                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                            }
+                        }
+                        
+                    } else {
+                        // no objects were found
+                        Endpoints.read += 1
+                        // print("[Endpoints.read += 1] \(endpoint)")
+                        
+                        //                                            nodesMigrated+=1
+                        updateGetStatus(endpoint: endpoint, total: 0)
+                        putStatusUpdate(endpoint: endpoint, total: 0)
+                        
+//                            if nodeIndex < nodesToMigrate.count - 1 {
+//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
+//                            }
+                        completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
+                    }
+
                 case "packages":
                     //                    var lookupCount    = 0
                     //                    var uniquePackages = [String]()
@@ -3904,7 +4076,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func processFiles(endpoint: String, fileCount: Int, itemsDict: [String:[String]] = [:], completion: @escaping (_ result: String) -> Void) {
         logFunctionCall()
-        if LogLevel.debug { WriteToLog.shared.message("[processFiles] enter: endpoint - \(endpoint)") }
         
         let skipLookup = (UiVar.activeTab == "Selective") ? true:false
         ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: "\(endpoint)") { [self]
@@ -5485,7 +5656,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // func labelColor - start
     func labelColor(endpoint: String, theColor: NSColor) {
-        logFunctionCall()
+//        logFunctionCall()
         if Setting.fullGUI {
             DispatchQueue.main.async {
                 switch endpoint {

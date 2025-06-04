@@ -90,7 +90,8 @@ class Cleanup: NSObject {
                     if "\(value)" == "<null>" {
                         JSONData[key] = nil
                     } else {
-                        JSONData[key] = "\(value)"
+//                        JSONData[key] = "\(value)"
+                        JSONData[key] = value
                     }
                 }
             }

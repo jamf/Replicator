@@ -20,6 +20,7 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
         print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint)")
         
         logFunctionCall()
+        existingObjects.removeAll()
         
         if Counter.shared.crud[endpoint] == nil {
             Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]

@@ -27,6 +27,8 @@ class Json: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
         
         switch endpointBase {
+        case "api-roles", "api-integrations":
+            existingDestUrl = existingDestUrl.appending("/api/v1/\(objectEndpoint)").urlFix
         case "patch-software-title-configurations":
             let theRecord = (whichServer == "source") ? PatchTitleConfigurations.source.filter({ $0.id == endpointId }):PatchTitleConfigurations.destination.filter({ $0.id == endpointId })
             if theRecord.count == 1 {
@@ -77,7 +79,7 @@ class Json: NSObject, URLSessionDelegate {
                 (data, response, error) -> Void in
                 destSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
-//                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
+                    WriteToLog.shared.message("[Json.getRecord] \(jsonRequest.httpMethod) status code: \(httpResponse.statusCode)")
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                         do {
                             let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)

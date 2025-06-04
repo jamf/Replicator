@@ -98,58 +98,55 @@ class EndpointXml: NSObject, URLSessionDelegate {
 
         // split queries between classic and Jamf Pro API
         switch localEndPointType {
-        case "api-roles":
-            print("[getById] api-roles not supported")
-        case "buildings":
+        case "buildings", "api-roles", "api-integrations":
             // Jamf Pro API
             endpointsIdQ.addOperation {
                     
             if LogLevel.debug { WriteToLog.shared.message("[getById] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
             Jpapi.shared.action(whichServer: "source", endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
-                        (returnedJSON: [String:Any]) in
-                        completion(destEpName)
-//                       if statusCode == 202 {
-//                          print("[getById] \(#line) returnedJSON: \(returnedJSON)")
-//                       }
-//                       print("returnedJSON: \(returnedJSON)")
+                (returnedJSON: [String:Any]) in
+                completion(destEpName)
+//                if statusCode == 202 {
+//                  print("[getById] \(#line) returnedJSON: \(returnedJSON)")
+//                }
+//                print("returnedJSON: \(returnedJSON)")
                 sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
-                        if returnedJSON.count > 0 {
-                            // save source JSON - start
-                            if export.saveRawXml {
-                                let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
+                if returnedJSON.count > 0 {
+                    // save source JSON - start
+                    if export.saveRawXml {
+                        let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
 //                                    print("exportRawJson: \(exportRawJson)")
-                                WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
-                                let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
-                            }
-                            // save source JSON - end
-                            
-                            if export.saveOnly {
-                                // check progress
-                                print("[getById] node: \(endpoint)")
-                                print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
-                                Endpoints.countDict[endpoint]! -= 1
-                                print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
-                                if Endpoints.countDict[endpoint] == 0 {
-                                    print("[getById] saved last \(endpoint)")
-                                    print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
-                                        
-                                    if Endpoints.read >= ToMigrate.objects.count {
-                                        print("[getById] zip it up")
-                                        print("[\(#function)] \(#line) - finished getting \(endpoint)")
-                                        updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-    //                                                goButtonEnabled(button_status: true)
-                                    }
-                                }
-                            } else {
-                                Cleanup.shared.Json(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-//                                        cleanupJSON(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
-                                    (cleanJSON: String) in
-                                }
+                        WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
+                        let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                        ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
+                    }
+                    // save source JSON - end
+                    
+                    if export.saveOnly {
+                        // check progress
+                        print("[getById] node: \(endpoint)")
+                        print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
+                        Endpoints.countDict[endpoint]! -= 1
+                        print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+                        if Endpoints.countDict[endpoint] == 0 {
+                            print("[getById] saved last \(endpoint)")
+                            print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+                                
+                            if Endpoints.read >= ToMigrate.objects.count {
+                                print("[getById] zip it up")
+                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
+                                updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
+//                                                goButtonEnabled(button_status: true)
                             }
                         }
+                    } else {
+                        Cleanup.shared.Json(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                            (cleanJSON: String) in
+                        }
                     }
-                }   // endpointsIdQ - end
+                }
+            }
+        }   // endpointsIdQ - end
         case "patch-software-title-configurations":
             var sourceObject = PatchTitleConfigurations.source.first(where: { $0.id == endpointID })
             print("[getById] displayName: \(sourceObject?.displayName ?? "unknown")")

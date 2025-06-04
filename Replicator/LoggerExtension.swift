@@ -31,5 +31,5 @@ extension Logger {
 
 func logFunctionCall(file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
-    Logger.function.debug("called \(function, privacy: .public) [\(fileName, privacy: .public):\(line, privacy: .public)]")
+    Logger.function.debug("called \(fileName.replacingOccurrences(of: ".swift", with: ""), privacy: .public): \(function, privacy: .public) [\(line, privacy: .public)]")
 }

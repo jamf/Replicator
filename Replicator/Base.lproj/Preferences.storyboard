@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -717,7 +717,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
-                                <rect key="frame" x="34" y="90" width="108" height="16"/>
+                                <rect key="frame" x="34" y="128" width="108" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -725,25 +725,15 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
-                                <rect key="frame" x="147" y="87" width="41" height="21"/>
+                                <rect key="frame" x="147" y="125" width="41" height="21"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GFB-9j-KGo">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZlP-uk-Rxu">
-                                <rect key="frame" x="34" y="157" width="188" height="18"/>
-                                <buttonCell key="cell" type="check" title="Force Basic Authentication" bezelStyle="regularSquare" imagePosition="left" inset="2" id="0gj-rM-eDb">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="forceBasicAuth_action:" target="Ojm-Op-AKi" id="EkJ-8Q-3YO"/>
-                                </connections>
-                            </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7nu-gl-e0B">
-                                <rect key="frame" x="34" y="125" width="92" height="16"/>
+                                <rect key="frame" x="34" y="163" width="92" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Color scheme:" id="0eQ-rJ-zhy">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -751,7 +741,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="afe-0d-eps">
-                                <rect key="frame" x="127" y="117" width="82" height="25"/>
+                                <rect key="frame" x="127" y="155" width="82" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -780,7 +770,7 @@ DQ
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tfZ-9j-G6D">
-                                <rect key="frame" x="34" y="24" width="136" height="16"/>
+                                <rect key="frame" x="34" y="62" width="136" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Servers to remember:" id="ULg-f3-0Eq">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -788,7 +778,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cxh-uB-wNS">
-                                <rect key="frame" x="171" y="18" width="39" height="25"/>
+                                <rect key="frame" x="171" y="56" width="39" height="25"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ifK-rp-GoD">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -799,7 +789,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iTN-Ij-5Sn">
-                                <rect key="frame" x="34" y="56" width="203" height="18"/>
+                                <rect key="frame" x="34" y="94" width="203" height="18"/>
                                 <buttonCell key="cell" type="check" title="Mask server names in the log" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Xf4-03-eOF">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -812,6 +802,35 @@ DQ
                                     <action selector="maskServerNames_action:" target="Ojm-Op-AKi" id="4lO-gg-v9H"/>
                                 </connections>
                             </button>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="c1Q-1S-uIa">
+                                <rect key="frame" x="34" y="29" width="92" height="16"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="88" id="2mt-np-x2w"/>
+                                    <constraint firstAttribute="height" constant="16" id="igW-jM-Tpx"/>
+                                </constraints>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Multi-Context:" id="Unj-5j-HYF">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="raY-Hw-hdS">
+                                <rect key="frame" x="127" y="23" width="139" height="25"/>
+                                <popUpButtonCell key="cell" type="push" title="Neither" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="HC2-Ie-z5g" id="UFd-pt-czQ">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="Kea-lQ-6bM">
+                                        <items>
+                                            <menuItem title="Neither" state="on" id="HC2-Ie-z5g"/>
+                                            <menuItem title="Source Only" id="3T0-u3-kke"/>
+                                            <menuItem title="Destination Only" id="lG0-gC-CvT"/>
+                                            <menuItem title="Both" id="g07-c3-6DN">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Zj6-mi-35l" firstAttribute="leading" secondItem="kSv-WF-lic" secondAttribute="leading" id="0TA-Cb-g8g"/>
@@ -821,12 +840,16 @@ DQ
                             <constraint firstItem="Zj6-mi-35l" firstAttribute="top" secondItem="y1Q-0c-cgq" secondAttribute="bottom" constant="3" id="60t-Ue-Iik"/>
                             <constraint firstItem="Cxh-uB-wNS" firstAttribute="centerY" secondItem="tfZ-9j-G6D" secondAttribute="centerY" id="7t1-Hf-0XR"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="leading" secondItem="Rdg-70-UCl" secondAttribute="leading" constant="36" id="ApQ-Fk-cmq"/>
-                            <constraint firstAttribute="bottom" secondItem="tfZ-9j-G6D" secondAttribute="bottom" constant="24" id="PgS-W0-BAk"/>
+                            <constraint firstItem="gi8-H0-WPJ" firstAttribute="top" secondItem="afe-0d-eps" secondAttribute="bottom" constant="15" id="Gb1-im-fiV"/>
+                            <constraint firstItem="raY-Hw-hdS" firstAttribute="centerY" secondItem="c1Q-1S-uIa" secondAttribute="centerY" id="IWL-sT-1i8"/>
+                            <constraint firstItem="7nu-gl-e0B" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="leading" id="JUP-hp-vfW"/>
+                            <constraint firstAttribute="bottom" secondItem="tfZ-9j-G6D" secondAttribute="bottom" constant="62" id="PgS-W0-BAk"/>
+                            <constraint firstItem="c1Q-1S-uIa" firstAttribute="top" secondItem="tfZ-9j-G6D" secondAttribute="bottom" constant="17" id="SM4-Px-RLR"/>
+                            <constraint firstItem="c1Q-1S-uIa" firstAttribute="leading" secondItem="tfZ-9j-G6D" secondAttribute="leading" id="T6a-MY-htf"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="leading" secondItem="Zj6-mi-35l" secondAttribute="leading" id="URy-EB-R5w"/>
                             <constraint firstItem="tfZ-9j-G6D" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="XIp-oB-poZ"/>
+                            <constraint firstItem="raY-Hw-hdS" firstAttribute="leading" secondItem="c1Q-1S-uIa" secondAttribute="trailing" constant="6" id="XcR-Bz-ePE"/>
                             <constraint firstItem="iTN-Ij-5Sn" firstAttribute="top" secondItem="GJ0-5l-PEg" secondAttribute="bottom" constant="14" id="XwF-bX-Y9N"/>
-                            <constraint firstItem="ZlP-uk-Rxu" firstAttribute="top" secondItem="kSv-WF-lic" secondAttribute="bottom" constant="17" id="Yzb-pQ-uyw"/>
-                            <constraint firstItem="kSv-WF-lic" firstAttribute="leading" secondItem="ZlP-uk-Rxu" secondAttribute="leading" id="Z2G-qU-2DE"/>
                             <constraint firstItem="GJ0-5l-PEg" firstAttribute="top" secondItem="afe-0d-eps" secondAttribute="bottom" constant="13" id="aVh-VD-rbf"/>
                             <constraint firstItem="afe-0d-eps" firstAttribute="leading" secondItem="7nu-gl-e0B" secondAttribute="trailing" constant="6" id="arm-Dy-tnQ"/>
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="afe-0d-eps" secondAttribute="top" id="dGh-PC-Kuc"/>
@@ -836,8 +859,7 @@ DQ
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="baseline" secondItem="GJ0-5l-PEg" secondAttribute="baseline" id="laN-7Z-d2P"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="trailing" constant="3" id="n0j-v7-2dv"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="23" id="pmb-xu-xIu"/>
-                            <constraint firstItem="ZlP-uk-Rxu" firstAttribute="leading" secondItem="7nu-gl-e0B" secondAttribute="leading" id="qT2-Zk-Yyi"/>
-                            <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="ZlP-uk-Rxu" secondAttribute="bottom" constant="17" id="rNO-rd-JRI"/>
+                            <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="kSv-WF-lic" secondAttribute="bottom" constant="12" id="q0R-In-mMf"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="24" id="t32-lQ-rKF"/>
                             <constraint firstItem="iTN-Ij-5Sn" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="vKi-ap-edQ"/>
                             <constraint firstItem="Cxh-uB-wNS" firstAttribute="leading" secondItem="tfZ-9j-G6D" secondAttribute="trailing" constant="6" id="vrp-rp-vv7"/>
@@ -847,7 +869,6 @@ DQ
                         <outlet property="colorScheme_button" destination="afe-0d-eps" id="fRW-kC-eKj"/>
                         <outlet property="concurrentThreads_slider" destination="Zj6-mi-35l" id="bhh-c4-Wzv"/>
                         <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
-                        <outlet property="forceBasicAuth_button" destination="ZlP-uk-Rxu" id="Y8L-B6-QZI"/>
                         <outlet property="logFilesCountPref_textfield" destination="GJ0-5l-PEg" id="DiQ-A8-CZq"/>
                         <outlet property="maskServerNames_button" destination="iTN-Ij-5Sn" id="WyD-Xm-w0X"/>
                         <outlet property="sourceDestListSize_button" destination="Cxh-uB-wNS" id="Ju7-TF-lPb"/>

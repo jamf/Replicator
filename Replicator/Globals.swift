@@ -282,6 +282,18 @@ Examples:
     /path/to/Replicator.app/Contents/MacOS/Replicator -migrate -source dev.jamfpro.server -destination prod.jamfpro.server -sourceClientId 5ab18a12-ed10-4jm8-9a21-267fe765ed0b -sourceClientSecret HOojIrWyZ7HuhpnY87M90DsEWYwCEDYifVxBnW8s76NSRnpYRQdQLTqRa3nDCnD3 -objects buildings
 """
 
+public func destinationObjectExists(_ objectName: String, objectType: String) -> Bool {
+    logFunctionCall()
+    switch objectType {
+    case "api-roles":
+        return(ApiRoles.destination.contains(where: { $0.displayName == objectName }))
+    case "api-integrations":
+        return(ApiIntegrations.destination.contains(where: { $0.displayName == objectName }))
+    default:
+        return(currentEPs[objectName] != nil)
+    }
+}
+
 public func readSettings(thePath: String = "") -> [String:Any] {
     logFunctionCall()
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
@@ -296,6 +308,20 @@ public func readSettings(thePath: String = "") -> [String:Any] {
     }
 //        print("readSettings - appInfo.settings: \(String(describing: appInfo.settings))")
     return(AppInfo.settings)
+}
+
+public func baseUrl(_ url: String, isMultiContext: Bool = false) -> String {
+        let tmpArray: [Any] = url.components(separatedBy: "/")
+        if tmpArray.count > 2 {
+            if isMultiContext {
+                if let serverUrl = tmpArray[2] as? String, let context = tmpArray[3] as? String {
+                    return "\(tmpArray[0])//\(serverUrl)/\(context)"
+                }
+            } else if let serverUrl = tmpArray[2] as? String {
+                return "\(tmpArray[0])//\(serverUrl)"
+            }
+        }
+        return ""
 }
 
 public func saveSettings(settings: [String:Any]) {
