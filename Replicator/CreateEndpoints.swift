@@ -387,7 +387,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             if httpResponse.statusCode == 404 {
                                 // retry doing a POST
                                 whichError = "device not found"
-//                                            return
                             } else {
                                 let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
 
@@ -624,8 +623,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             return
         }
 
-        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] enter") }
-
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
 //            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
@@ -639,6 +636,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         var destinationEpId = destEpId
         var apiAction       = action
+        
         print("[createEndpoints.jpapi] endpointType: \(endpointType), destinationEpId: \(destinationEpId) action: \(action)")
         
         // counterts for completed endpoints
@@ -661,11 +659,11 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         // this is where we create the new endpoint
         if !export.saveOnly {
-            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Creating new: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Creating new: \(endpointType)") }
         } else {
-            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Save only selected, skipping \(apiAction) for: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Save only selected, skipping \(apiAction) for: \(endpointType)") }
         }
-        //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
+        //if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         
         Queue.shared.operation.maxConcurrentOperationCount = maxConcurrentThreads
 
@@ -682,18 +680,18 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             localEndPointType = endpointType
         }
                 
-        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Original Dest. URL: \(createDestUrlBase)") }
+        if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Original Dest. URL: \(createDestUrlBase)") }
        
         Queue.shared.operation.addOperation { [self] in
             
             // save trimmed JSON - start
             if export.saveTrimmedXml {
                 let endpointName = endPointJSON["name"] as! String   //getName(endpoint: endpointType, objectXML: endPointJSON)
-                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).") }
+                if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).") }
                 DispatchQueue.main.async {
                     let exportTrimmedJson = (export.trimmedXmlScope) ? RemoveData.shared.Json(rawJSON: endPointJSON, theTag: ""):RemoveData.shared.Json(rawJSON: endPointJSON, theTag: "scope")
 //                    print("exportTrimmedJson: \(exportTrimmedJson)")
-                    WriteToLog.shared.message("[CreateEndpoints2] Exporting raw JSON for \(endpointType) - \(endpointName)")
+                    WriteToLog.shared.message("[createEndpoints.jpapi] Exporting raw JSON for \(endpointType) - \(endpointName)")
                     ExportItem.shared.export(node: endpointType, object: exportTrimmedJson, theName: endpointName, id: "\(sourceEpId)", format: "trimmed")
 //                    self.exportItems(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
 //                    SaveDelegate().exportObject(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
@@ -715,9 +713,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             
             // don't create object if we're removing objects
             if !WipeData.state.on {
-                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Action: \(apiAction)\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Object JSON: \(endPointJSON)") }
-    //            print("[CreateEndpoints2] [\(localEndPointType)] process start: \(getName(endpoint: endpointType, objectXML: endPointXML))")
+                if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Action: \(apiAction)\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)") }
+                if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Object JSON: \(endPointJSON)") }
+    //            print("[createEndpoints.jpapi] [\(localEndPointType)] process start: \(getName(endpoint: endpointType, objectXML: endPointXML))")
                 
                 if endpointCurrent == 1 {
                     if !retry {
@@ -732,7 +730,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 if endpointType == "patch-software-title-configurations" {
                     PatchManagementApi.shared.createUpdate(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, sourceEpId: sourceEpId, destEpId: destinationEpId, token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
                         (jpapiResonse: [String:Any]) in
-    //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
+    //                    print("[createEndpoints.jpapi] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                         var jpapiResult = "succeeded"
                         if let _ = jpapiResonse["JPAPI_result"] as? String {
                             jpapiResult = jpapiResonse["JPAPI_result"] as! String
@@ -749,15 +747,15 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     }
                                 }
                             }
-                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [createEndpoints.jpapi] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
                         } else {
-                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [createEndpoints.jpapi] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
                                 if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
+//                                    self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
                                 }
                             } else if !retry {
                                 if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] {
@@ -771,7 +769,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
+                                WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
                                 endpointInProgress = endpointType
                                 Counter.shared.postSuccess = 0
                             }   // look to see if we are processing the next localEndPointType - end
@@ -842,24 +840,26 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     //                    }   // if let httpResponse = response - end
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }
                         
                         if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Last item in \(localEndPointType) complete.") }
                             nodesMigrated+=1
                             // print("added node: \(localEndPointType) - createEndpoints")
         //                    print("nodes complete: \(nodesMigrated)")
                         }
                     }
                 } else {
+//                    print("[createEndpoints.jpapi] \(#line) endPointJSON: \(endPointJSON)")
+                    let nameAttribute = ["api-roles", "api-integrations"].contains(endpointType) ? "displayName" : "name"
                     Jpapi.shared.action(whichServer: "dest", endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
                         (jpapiResonse: [String:Any]) in
-    //                    print("[CreateEndpoints2] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
+//                        print("[createEndpoints.jpapi] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
                         var jpapiResult = "succeeded"
                         if let _ = jpapiResonse["JPAPI_result"] as? String {
                             jpapiResult = jpapiResonse["JPAPI_result"] as! String
@@ -873,19 +873,19 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
                                     if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                         updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
-//                                        self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.systemYellow)
+//                                        self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.systemYellow)
                                     }
                                 }
                             }
-                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [createEndpoints.jpapi] [\(localEndPointType)]    failed: \(endPointJSON[nameAttribute] ?? "unknown")")
                         } else {
-                            WriteToLog.shared.message("    [CreateEndpoints2] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
+                            WriteToLog.shared.message("    [createEndpoints.jpapi] [\(localEndPointType)] succeeded: \(endPointJSON[nameAttribute] ?? "unknown")")
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
                                 if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints2-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
+//                                    self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
                                 }
                             } else if !retry {
                                 if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /*self.put_levelIndicatorFillColor[endpointType]*/ {
@@ -897,7 +897,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
                             // look to see if we are processing the next endpointType - start
                             if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message("[CreateEndpoints2] Migrating \(endpointType)")
+                                WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
                                 endpointInProgress = endpointType
                                 Counter.shared.postSuccess = 0
                             }   // look to see if we are processing the next localEndPointType - end
@@ -926,7 +926,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 
                                 
                                 if var summaryArray = Counter.shared.summary[endpointType]?["\(apiMethod)"] {
-                                    let objectName = "\(endPointJSON["name"] ?? "unknown name")"
+                                    var objectName = "unknown name"
+                                    switch endpointType {
+                                    case "api-roles", "api-integrations":
+                                        objectName = endPointJSON["displayName"] as? String ?? "unknown name"
+                                    default:
+                                        objectName = endPointJSON["name"] as? String ?? "unknown name"
+                                    }
                                     if summaryArray.contains(objectName) == false {
                                         summaryArray.append(objectName)
                                         Counter.shared.summary[endpointType]?["\(apiMethod)"] = summaryArray
@@ -975,15 +981,15 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     //                    }   // if let httpResponse = response - end
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] POST, PUT, or skip - operation: \(apiAction)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }
                         
                         if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
+                            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
                         }
 
         //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
                         if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints2] Last item in \(localEndPointType) complete.") }
+                            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Last item in \(localEndPointType) complete.") }
                             nodesMigrated+=1
                             // print("added node: \(localEndPointType) - createEndpoints")
         //                    print("nodes complete: \(nodesMigrated)")

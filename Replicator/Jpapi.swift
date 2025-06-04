@@ -38,7 +38,37 @@ class Jpapi: NSObject, URLSessionDelegate {
         logFunctionCall()
         
         if method.lowercased() == "skip" {
-            completion(["JPAPI_result":"no valid token found", "JPAPI_response":0])
+            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
+            let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
+            completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
+            return
+        }
+        
+        if whichServer == "source" && ["api-roles", "api-integrations"].contains(endpoint) {
+            switch endpoint {
+            case "api-roles":
+                let theObject = ApiRoles.source.first(where: { $0.id == id })
+                do {
+                    let objectData = try JSONEncoder().encode(theObject!)
+                    if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
+                        completion(objectJson)
+                    }
+                } catch {
+                    completion([:])
+                }
+            case "api-integrations":
+                let theObject = ApiIntegrations.source.first(where: { $0.id == id })
+                do {
+                    let objectData = try JSONEncoder().encode(theObject!)
+                    if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
+                        completion(objectJson)
+                    }
+                } catch {
+                    completion([:])
+                }
+            default:
+                break
+            }
             return
         }
         
@@ -48,13 +78,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         var sessionCookie: HTTPCookie?
         var cookieName         = "" // name of cookie to look for
         
-        if method.lowercased() == "skip" {
-            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
-            let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
-            completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
-            return
-        }
-        
         URLCache.shared.removeAllCachedResponses()
         var path = ""
         var contentType: String = "application/json"
@@ -62,7 +85,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 
         print("[Jpapi.action] endpoint: \(endpoint)")
         switch endpoint {
-        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-integrations", "api-roles":
+        case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-roles", "api-integrations":
             path = "api/v1/\(endpoint)"
         case "patchinternalsources":
             path = "JSSResource/patchinternalsources"
@@ -97,14 +120,21 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         if apiData.count > 0 {
             do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
+                switch endpoint {
+                case "api-integrations":
+                    var trimmedJson = apiData
+                    trimmedJson["clientId"] = nil
+                    trimmedJson["appType"] = nil
+                    request.httpBody = try JSONSerialization.data(withJSONObject: trimmedJson, options: .prettyPrinted)
+                default:
+                    request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
+                }
             } catch let error {
-                print(error.localizedDescription)
+                if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] error constructing httpBody to upload: \(error.localizedDescription)") }
             }
         }
         
-        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Attempting \(method) on \(urlString).") }
-//        print("[Jpapi.action] Attempting \(method) on \(urlString).")
+        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Attempting \(method) on \(urlString)") }
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
         
@@ -127,8 +157,11 @@ class Jpapi: NSObject, URLSessionDelegate {
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
+            
+            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+//            print("[Jpaapi.action] Api response for \(endpoint): \(String(data: data ?? Data(), encoding: .utf8))")
+
             if let httpResponse = response as? HTTPURLResponse {
-//                print("[Jpaapi.action] Api response for \(endpoint): \(String(data: data ?? Data(), encoding: .utf8))")
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     
 //                    print("[jpapi] endpoint: \(endpoint)")
@@ -172,7 +205,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                         return
                     }
                     
-                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+//                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if endpoint == "sites" {
                         if let allSites = json as? [[String: Any]] {
                             if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Data retrieved from \(urlString).") }
@@ -197,10 +230,13 @@ class Jpapi: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                    if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Response error: \(httpResponse.statusCode).") }
+                    WriteToLog.shared.message("[Jpapi.action] Response error: \(httpResponse.statusCode)")
                     if endpoint == "sites" {
                         completion(["sites":[]])
                     } else {
+                        if let endpointJSON = json as? [String: Any], let errors = endpointJSON["errors"] as? [Any] {
+                            WriteToLog.shared.message("[Jpapi.action] error: \(errors.description)")
+                        }
                         completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     }
                     return
@@ -259,7 +295,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         logFunctionCall()
         
         switch theEndpoint {
-        case "categories", "policy-details", "packages", "sites":
+        case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations":
             print("[getAll] look for \(theEndpoint)")
             DispatchQueue.global(qos: .background).async { [self] in
                 
@@ -272,8 +308,36 @@ class Jpapi: NSObject, URLSessionDelegate {
                     let pages = (totalRecords + (pageSize - 1)) / pageSize
                     
                     if let returnedRecords = returnedJson["results"] as? [[String: Any]], returnedRecords.count > 0 {
-                        if theEndpoint == "packages" {
+//                        print("[getAll] returnedRecords: \(returnedRecords)")
+                        switch theEndpoint {
+                        case "api-roles", "api-integrations":
+                            for theObject in returnedRecords {
+                                let id = "\(theObject["id"] ?? "0")"
+                                
+                                if let name = theObject["displayName"] as? String, name != "", id != "0" {
+                                    
+                                    if whichServer == "source" {
+                                        if theEndpoint == "api-roles" {
+                                            ApiRoles.source.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
+                                        } else {
+                                            ApiIntegrations.source.append(ApiIntegration(id: id, displayName: name, enabled: theObject["enabled"] as? Bool ?? false,accessTokenLifetimeSeconds: theObject["accessTokenLifetimeSeconds"] as? Int ?? 0,appType: theObject["appType"] as? String ?? "", clientId: theObject["clientId"] as? String ?? "", authorizationScopes: theObject["authorizationScopes"] as? [String] ?? []))
+                                        }
+                                    } else {
+                                        if theEndpoint == "api-roles" {
+                                            // need to get current role privileges
+                                            
+                                            get(whichServer: whichServer, theEndpoint: "api-role-privileges") {
+                                                (privileges) in
+                                                ApiRoles.destination.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
+                                            }
+                                        } else {
+                                            ApiIntegrations.destination.append(ApiIntegration(id: id, displayName: name, enabled: theObject["enabled"] as? Bool ?? false,accessTokenLifetimeSeconds: theObject["accessTokenLifetimeSeconds"] as? Int ?? 0,appType: theObject["appType"] as? String ?? "", clientId: theObject["clientId"] as? String ?? "", authorizationScopes: theObject["authorizationScopes"] as? [String] ?? []))
+                                        }
+                                    }
+                                }
+                            }
                             
+                        case "packages":
                             do {
                                 let jsonData = try JSONSerialization.data(withJSONObject: returnedRecords as Any)
                                 let somePackages = try JSONDecoder().decode([JsonUapiPackageDetail].self, from: jsonData)
@@ -317,7 +381,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                             } catch {
                                 print("[getAll] error decoding \(theEndpoint): \(error)")
                             }
-                        } else {
+                        default:
                             for theObject in returnedRecords {
                                 switch theEndpoint {
                                 case "categories":
@@ -373,20 +437,19 @@ class Jpapi: NSObject, URLSessionDelegate {
             get(whichServer: whichServer, theEndpoint: theEndpoint) {
                 returnedJson in
 //                if let returnedRecords = returnedJson as? [[String: Any]] {
-                let nameParameter = ["api-roles", "api-integrations"].contains(theEndpoint) ? "displayName" : "name"
                 let isPolicy = theEndpoint == "policies"
                 let currentCount = existingObjects.count
-                    for theObject in returnedJson {
-                        if let id = theObject["id"] as? Int, id != 0, let name = theObject[nameParameter] as? String, name != "" {
-                            if !(isPolicy && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) != nil) {
-                                existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name))
+                for theObject in returnedJson {
+                    if let id = theObject["id"] as? Int, id != 0, let name = theObject["name"] as? String, name != "" {
+                        if !(isPolicy && name.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) != nil) {
+                            existingObjects.append(ExistingObject(type: theEndpoint, id: id, name: name))
 //                                print("[getAll] added type: \(theEndpoint), name: \(name), id: \(id)")
-                            }
-                            
-                        } else {
-                            
                         }
+                        
+                    } else {
+                        
                     }
+                }
                 print("[getAll] records returned: \(returnedJson.count)")
                 print("[getAll]    records added: \(existingObjects.count - currentCount)")
 //                                WriteToLog.shared.message("[Jpapi.getAll] total records fetched \(allRecords.count) objects")
@@ -405,7 +468,7 @@ class Jpapi: NSObject, URLSessionDelegate {
            endpointVersion = "v3"
         case "patch-software-title-configurations","patchsoftwaretitles":
            endpointVersion = "v2"
-        case "categories", "packages", "jcds/files", "sites", "api-integrations", "api-roles":
+        case "categories", "packages", "jcds/files", "sites", "api-integrations", "api-roles", "api-role-privileges":
            endpointVersion = "v1"
         default:
             break
@@ -580,7 +643,7 @@ class Jpapi: NSObject, URLSessionDelegate {
            endpointVersion = "v2"
         case "policy-details":
             endpointVersion = "v2/patch-policies"
-        case "categories", "packages", "sites":
+        case "categories", "packages", "sites", "api-roles", "api-integrations":
            endpointVersion = "v1"
         default:
             break

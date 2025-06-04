@@ -68,7 +68,7 @@ class JamfPro: NSObject, URLSessionDelegate {
             return
         }
         
-        let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
+//        let forceBasicAuth = (userDefaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
 //        print("forceBasicAuth: \(forceBasicAuth)")
         
         if serverUrl.prefix(4) != "http" {
@@ -77,7 +77,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         URLCache.shared.removeAllCachedResponses()
                 
-        let baseUrl = serverUrl.baseUrl
+        let baseUrl = baseUrl(serverUrl, isMultiContext: false) //serverUrl.baseUrl
         var tokenUrlString = "\(baseUrl)/api/v1/auth/token"
         var apiClient = false
         switch whichServer {
@@ -221,7 +221,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                             break
                                                         }
                                                     }
-                                                    if ( JamfProServer.majorVersion > 10 || ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) ) && !forceBasicAuth {
+                                                    if ( JamfProServer.majorVersion > 10 || ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) ) /*&& !forceBasicAuth*/ {
                                                         JamfProServer.authType[whichServer] = "Bearer"
                                                         JamfProServer.validToken[whichServer] = true
                                                         WriteToLog.shared.message("[JamfPro.getToken] getVersion: \(baseUrl) set to use Bearer Token")

@@ -2,12 +2,53 @@
 //  Copyright 2024, Jamf
 //
 
-// This file was generated from JSON Schema using quicktype, do not modify it directly.
-// To parse the JSON, add this file to your project and do:
-//
+// To parse the JSON, use the following:
 //   let patchSoftwareTitleConfigurations = try? JSONDecoder().decode(PatchSoftwareTitleConfigurations.self, from: jsonData)
 
-import Foundation
+
+// MARK: - ApiIntegration
+struct ApiIntegration: Codable {
+    let id: String
+    let displayName: String
+    let enabled: Bool
+    let accessTokenLifetimeSeconds: Int
+    let appType: String
+    let clientId: String
+    let authorizationScopes: [String]
+    
+    init(id: String, displayName: String, enabled: Bool, accessTokenLifetimeSeconds: Int, appType: String, clientId: String, authorizationScopes: [String]) {
+        self.id = id
+        self.displayName = displayName
+        self.enabled = enabled
+        self.accessTokenLifetimeSeconds = accessTokenLifetimeSeconds
+        self.appType = appType
+        self.clientId = clientId
+        self.authorizationScopes = authorizationScopes
+    }
+}
+
+class ApiIntegrations {
+    static var source = [ApiIntegration]()
+    static var destination = [ApiIntegration]()
+}
+
+// MARK: - ApiRole
+struct ApiRole: Codable {
+    let id: String
+    let displayName: String
+    let privileges: [String]
+    
+    init(id: String, displayName: String, privileges: [String]) {
+        self.id = id
+        self.displayName = displayName
+        self.privileges = privileges
+    }
+}
+
+class ApiRoles {
+    static var source = [ApiRole]()
+    static var destination = [ApiRole]()
+}
 
 // MARK: - NamdId
 struct NameId: Codable {
