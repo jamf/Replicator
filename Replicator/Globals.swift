@@ -310,18 +310,18 @@ public func readSettings(thePath: String = "") -> [String:Any] {
     return(AppInfo.settings)
 }
 
-public func baseUrl(_ url: String, isMultiContext: Bool = false) -> String {
-        let tmpArray: [Any] = url.components(separatedBy: "/")
-        if tmpArray.count > 2 {
-            if isMultiContext {
-                if let serverUrl = tmpArray[2] as? String, let context = tmpArray[3] as? String {
-                    return "\(tmpArray[0])//\(serverUrl)/\(context)"
-                }
-            } else if let serverUrl = tmpArray[2] as? String {
-                return "\(tmpArray[0])//\(serverUrl)"
-            }
+public func baseUrl(_ url: String, whichServer: String) -> String {
+    logFunctionCall()
+    var returnedUrl = ""
+    
+    let tmpArray: [Any] = url.components(separatedBy: "/")
+    if tmpArray.count > 2 {
+        returnedUrl = "\(tmpArray[0])//\(tmpArray[2])"
+        if tmpArray.count > 3, let context = tmpArray[3] as? String, context.contains("?failover") == false {
+            return "\(returnedUrl)/\(context)"
         }
-        return ""
+    }
+    return returnedUrl
 }
 
 public func saveSettings(settings: [String:Any]) {

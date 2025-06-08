@@ -25,7 +25,8 @@ class JamfPro: NSObject, URLSessionDelegate {
             WriteToLog.shared.message("[JamfPro.renewToken] renew: \(renew)")
             WriteToLog.shared.message("[JamfPro.renewToken] JamfProServer.authType[\(whichServer)]: \(JamfProServer.authType[whichServer] ?? "unknown server")")
         }
-        if !migrationComplete.isDone && renew && JamfProServer.authType[whichServer] == "Bearer" {
+        let theServer = ( whichServer == "source" ) ? JamfProServer.source : JamfProServer.destination
+        if !migrationComplete.isDone && renew && JamfProServer.authType[whichServer] == "Bearer" && theServer == baseUrl {
             WriteToLog.shared.message("[JamfPro.renewToken] \(whichServer.localizedCapitalized) server token renews in \(myFormattedTimeInterval(Int(JamfProServer.authExpires[whichServer] ?? 0)))")
             DispatchQueue.main.asyncAfter(deadline: .now() + (JamfProServer.authExpires[whichServer] ?? 0)) { [self] in
                 WriteToLog.shared.message("[JamfPro.renewToken] renewing \(whichServer) token")
@@ -77,7 +78,7 @@ class JamfPro: NSObject, URLSessionDelegate {
         }
         URLCache.shared.removeAllCachedResponses()
                 
-        let baseUrl = baseUrl(serverUrl, isMultiContext: false) //serverUrl.baseUrl
+        let baseUrl = baseUrl(serverUrl, whichServer: whichServer) //serverUrl.baseUrl
         var tokenUrlString = "\(baseUrl)/api/v1/auth/token"
         var apiClient = false
         switch whichServer {
@@ -296,7 +297,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {
-                    _ = Alert.shared.display(header: "\(baseUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
+                    _ = Alert.shared.display(header: "\(baseUrl)", message: "Failed to connect to \(baseUrl). \nUnknown error, verify url and port", secondButton: "")
                     WriteToLog.shared.message("[JamfPro.getToken] token response error from \(baseUrl).  Verify url and port.")
                     JamfProServer.validToken[whichServer]  = false
                     completion((0, "failed"))

@@ -6731,16 +6731,24 @@ extension String {
     var fqdnFromUrl: String {
         get {
             var fqdn = ""
+            var context = ""
             let nameArray = self.components(separatedBy: "://")
             if nameArray.count > 1 {
                 fqdn = nameArray[1]
             } else {
                 fqdn =  self
             }
+            print("\(#line) fqdn \(fqdn)")
             if fqdn.contains("/") {
                 let fqdnArray = fqdn.components(separatedBy: "/")
                 fqdn = fqdnArray[0]
+                if fqdnArray.count > 1 {
+                    if !fqdnArray[1].isEmpty {
+                        context = "_\(fqdnArray[1])"
+                    }
+                }
             }
+            print("\(#line) fqdn \(fqdn)")
             if fqdn.contains(":") {
                 let fqdnArray = fqdn.components(separatedBy: ":")
                 fqdn = fqdnArray[0]
@@ -6748,6 +6756,8 @@ extension String {
             while fqdn.last == "/" {
                 fqdn = "\(fqdn.dropLast(1))"
             }
+            fqdn = fqdn + context
+            print("\(#line) fqdn \(fqdn)")
             return fqdn
         }
     }
