@@ -592,7 +592,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         break
                     }
                     
-                    JamfProServer.source     = baseUrl(source_jp_server_field.stringValue, isMultiContext: false)    // source_jp_server_field.stringValue.baseUrl
+                    JamfProServer.source     = baseUrl(source_jp_server_field.stringValue, whichServer: "source")    // source_jp_server_field.stringValue.baseUrl
                     JamfProServer.sourceUser = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd  = source_pwd_field.stringValue
                 }
@@ -607,7 +607,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     break
                 }
                 
-                JamfProServer.destination = baseUrl(dest_jp_server_field.stringValue, isMultiContext: false)    // dest_jp_server_field.stringValue.baseUrl
+                JamfProServer.destination = baseUrl(dest_jp_server_field.stringValue, whichServer: "dest")    // dest_jp_server_field.stringValue.baseUrl
                 JamfProServer.destUser    = destinationUser_TextField.stringValue
                 JamfProServer.destPwd     = dest_pwd_field.stringValue
             default:
@@ -697,9 +697,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if LogLevel.debug && !AppInfo.maskServerNames { WriteToLog.shared.message("[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
-        AppInfo.settings["source_jp_server"]   = baseUrl(source_jp_server_field.stringValue, isMultiContext: false)    // source_jp_server_field.stringValue.baseUrl as Any?
+        AppInfo.settings["source_jp_server"]   = baseUrl(source_jp_server_field.stringValue, whichServer: "source")    // source_jp_server_field.stringValue.baseUrl as Any?
         AppInfo.settings["source_user"]        = sourceUser_TextField.stringValue as Any?
-        AppInfo.settings["dest_jp_server"]     = baseUrl(dest_jp_server_field.stringValue, isMultiContext: false)    // dest_jp_server_field.stringValue.baseUrl as Any?
+        AppInfo.settings["dest_jp_server"]     = baseUrl(dest_jp_server_field.stringValue, whichServer: "dest")    // dest_jp_server_field.stringValue.baseUrl as Any?
         AppInfo.settings["dest_user"]          = destinationUser_TextField.stringValue as Any?
         AppInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
         AppInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
@@ -736,9 +736,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 destServerArray.removeAll(where: { $0 == destServerList_button.titleOfSelectedItem! })
                 destServerList_button.removeItem(withTitle: destServerList_button.titleOfSelectedItem!)
                 if dest_jp_server_field.stringValue == selectedServer {
-                    dest_jp_server_field.stringValue = ""
-                    destinationUser_TextField.stringValue      = ""
-                    dest_pwd_field.stringValue       = ""
+                    dest_jp_server_field.stringValue      = ""
+                    destinationUser_TextField.stringValue = ""
+                    dest_pwd_field.stringValue            = ""
                 }
                 AppInfo.settings["dest_server_array"] = destServerArray as Any?
             default:

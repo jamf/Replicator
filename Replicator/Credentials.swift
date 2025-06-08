@@ -215,7 +215,6 @@ class Credentials {
     }
     
     func retrieve(service: String, account: String, whichServer: String = "") -> [String:String] {
-        
         logFunctionCall()
         print("[Credentials.retrieve]     start search for: \(service)")
         print("[Credentials.retrieve] JamfProServer.source: \(JamfProServer.source)")
