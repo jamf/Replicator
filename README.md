@@ -56,6 +56,12 @@ Servers can be removed from the (source/destination) list by holding down the op
 
 <hr>
 
+Be aware you may see the following alert requesting network access. Click allow to permit Replicator to connect to a server.
+
+ ![alt text](./Replicator/images/networkAccess.png "Allow Network Access")
+
+ <hr>
+
 The Selective tab provides the ability to select a subset of (or all) items within a collection of objects.  For example you might only want to transfer 4 scripts from a larger pool of existing scripts.
   ![alt text](./Replicator/images/migrator3.png "Selective")
   
@@ -141,7 +147,7 @@ Information about successes/failures can be found in the log, located in
 ~/Library/Containers/com.jamf.Replicator/Data/Library/Logs/Replicator/<date>_<time>_migration.log
 ```
 
-If you have used Replicator and saved passwords you will see the following after launching a new version.
+If you have used Replicator and saved passwords you may see the following after launching a new version.
 
  ![alt text](./Replicator/images/allowAccess.png "Allow Keychain Access")
  
