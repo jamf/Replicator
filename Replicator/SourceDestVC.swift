@@ -29,8 +29,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     // keychain access
-//    let Creds2           = Credentials()
-//    var validCreds       = true     // used to deterine if keychain has valid credentials
     var storedSourceUser = ""       // source user account stored in the keychain
     var storedSourcePwd  = ""       // source user account password stored in the keychain
     var storedDestUser   = ""       // destination user account stored in the keychain
@@ -39,9 +37,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBOutlet weak var hideCreds_button: NSButton!
     @IBAction func hideCreds_action(_ sender: Any) {
         logFunctionCall()
-        hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+        print("hideCreds button state: \(hideCreds_button.state.rawValue), value: \(hideCreds_button.state == .off)")
+        hideCreds_button.image = (hideCreds_button.state == .off) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
         userDefaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
-        setWindowSize(setting: hideCreds_button.state.rawValue)
+        showUrlOnly(hideCreds_button.state == .off)
     }
     
     @IBOutlet weak var sourceUsername_TextField: NSTextField!
@@ -70,36 +69,28 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
-    func setWindowSize(setting: Int) {
-//        print("setWindowSize - setting: \(setting)")
+    func showUrlOnly(_ hiddenState: Bool) {
         logFunctionCall()
-        var hiddenState = true
-        if setting == 0 {
+
+        if hiddenState {
             preferredContentSize = CGSize(width: 848, height: 67)
             hideCreds_button.toolTip = "show username/password fields"
-            showHideUserCreds(x: true)
         } else {
             preferredContentSize = CGSize(width: 848, height: 188)
             hideCreds_button.toolTip = "hide username/password fields"
-            hiddenState = false
-            if fileImport_button.state.rawValue == 0 {
-                showHideUserCreds(x: false)
-            } else {
-                showHideUserCreds(x: true)
-            }
         }
         
-//        sourceUsername_TextField.isHidden      = hiddenState
-//        sourceUser_TextField.isHidden          = hiddenState
-//        sourcePassword_TextField.isHidden      = hiddenState
-//        source_pwd_field.isHidden              = hiddenState
-//        sourceStoreCredentials_button.isHidden = hiddenState
-//        sourceUseApiClient_button.isHidden     = hiddenState
+        sourceUsername_TextField.isHidden      = hiddenState || fileImport_button.state.rawValue == 1
+        sourceUser_TextField.isHidden          = hiddenState || fileImport_button.state.rawValue == 1
+        sourcePassword_TextField.isHidden      = hiddenState || fileImport_button.state.rawValue == 1
+        source_pwd_field.isHidden              = hiddenState || fileImport_button.state.rawValue == 1
+        sourceStoreCredentials_button.isHidden = hiddenState || fileImport_button.state.rawValue == 1
+        sourceUseApiClient_button.isHidden     = hiddenState || fileImport_button.state.rawValue == 1
         
         destUsername_TextField.isHidden        = hiddenState
         destinationUser_TextField.isHidden     = hiddenState
-        destPassword_TextField.isHidden        = hiddenState
-        dest_pwd_field.isHidden                = hiddenState
+//        destPassword_TextField.isHidden        = hiddenState
+//        dest_pwd_field.isHidden                = hiddenState
         destStoreCredentials_button.isHidden   = hiddenState
         destUseApiClient_button.isHidden       = hiddenState
     }
@@ -953,7 +944,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
             hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
 //            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
-            setWindowSize(setting: hideCreds_button.state.rawValue)
+            showUrlOnly(hideCreds_button.state.rawValue == 0)
 //            source_jp_server_field.becomeFirstResponder()
         }
         

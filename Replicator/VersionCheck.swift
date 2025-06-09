@@ -14,11 +14,8 @@ class VersionCheck: NSObject, URLSessionDelegate {
         
         logFunctionCall()
         URLCache.shared.removeAllCachedResponses()
-
-//        let (currMajor, currMinor, currPatch, runningBeta, currBeta) = versionDetails(theVersion: AppInfo.version)
         
         var updateAvailable = false
-//        var versionTest     = true
         
         let versionUrl = URL(string: "https://api.github.com/repos/jamf/Replicator/releases/latest")
 
@@ -55,6 +52,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
                     }
                 } else {
                     WriteToLog.shared.message("[versionCheck] response error: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[versionCheck] response: \(String(data: data!, encoding: .utf8) ?? "unknown response")")
                     completion(false, "")
                     return
                 }
