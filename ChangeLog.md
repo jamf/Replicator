@@ -1,5 +1,11 @@
 # Replicator - Change Log
 
+**v8.1.0**: 2025-06-09<br>
+Fix issue #122, username getting removed if URL contains a trailing /.
+Fix app always running in debug mode.
+Add replication of API Roles and Clients. Note, a new (different) client ID will be generated on the destinaion server.
+Add support for multi-context environments.
+
 **v8.0.2**: 2025-03-19<br>
 Fix issue where a new version alert was displayed when the current version ran was the same as the latest release.
 
