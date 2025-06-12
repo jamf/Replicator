@@ -452,10 +452,6 @@ class Cleanup: NSObject {
             </remote_management>
 """)
             }
-//            print("migrate as managed: \(userDefaults.integer(forKey: "migrateAsManaged"))")
-//            print("\(PostXML)")
-
-
 
             // change serial number 'Not Available' to blank so machines will migrate
             PostXML = PostXML.replacingOccurrences(of: "<serial_number>Not Available</serial_number>", with: "<serial_number></serial_number>")
