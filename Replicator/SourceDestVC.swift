@@ -769,7 +769,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         case "dest":
             print(#line)
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
-                print(#line)
                 JamfProServer.validToken["dest"] = false
                 serverChanged(whichserver: "dest")
                 if destServerArray.firstIndex(of: "\(dest_jp_server_field.stringValue)") == nil {

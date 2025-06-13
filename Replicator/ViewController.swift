@@ -6397,6 +6397,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             clearSelectiveList()
             clearSourceObjectsList()
             clearProcessingFields()
+            
+            ApiRoles.source.removeAll()
+            ApiRoles.destination.removeAll()
+            ApiIntegrations.source.removeAll()
+            ApiIntegrations.destination.removeAll()
         }
         JamfProServer.version[JamfProServer.whichServer]    = ""
         JamfProServer.validToken[JamfProServer.whichServer] = false
