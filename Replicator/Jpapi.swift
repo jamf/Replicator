@@ -34,6 +34,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         updateUiDelegate?.updateUi(info: info)
     }
     
+    var rolePrivileges = [String]()
+    
     func action(whichServer: String, endpoint: String, apiData: [String: Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         logFunctionCall()
         
@@ -311,6 +313,7 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                        print("[getAll] returnedRecords: \(returnedRecords)")
                         switch theEndpoint {
                         case "api-roles", "api-integrations":
+                            var havePrivileges: Bool = false
                             for theObject in returnedRecords {
                                 let id = "\(theObject["id"] ?? "0")"
                                 
@@ -324,12 +327,16 @@ class Jpapi: NSObject, URLSessionDelegate {
                                         }
                                     } else {
                                         if theEndpoint == "api-roles" {
-                                            // need to get current role privileges
-                                            
-                                            get(whichServer: whichServer, theEndpoint: "api-role-privileges") {
+                                            // gets role-privileges on first object call
+                                            get(whichServer: whichServer, theEndpoint: "api-role-privileges", skip: havePrivileges) {
                                                 (privileges) in
+                                                if privileges.count > 0, let privilegesDict = privileges[0] as? [String: Any], let privilegesArray = privilegesDict["privileges"] as? [String]  {
+                                                    self.rolePrivileges = privilegesArray
+//                                                    print("[Jpapi.getAll] role-privileges: \(self.rolePrivileges)")
+                                                }
                                                 ApiRoles.destination.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
                                             }
+                                            havePrivileges = true
                                         } else {
                                             ApiIntegrations.destination.append(ApiIntegration(id: id, displayName: name, enabled: theObject["enabled"] as? Bool ?? false,accessTokenLifetimeSeconds: theObject["accessTokenLifetimeSeconds"] as? Int ?? 0,appType: theObject["appType"] as? String ?? "", clientId: theObject["clientId"] as? String ?? "", authorizationScopes: theObject["authorizationScopes"] as? [String] ?? []))
                                         }
@@ -460,8 +467,12 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
     }
     
-    func get(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, completion: @escaping (_ returnedJson: [[String: Any]]) -> Void) {
+    func get(whichServer: String, theEndpoint: String, id: String = "", whichPage: Int = -1, skip: Bool = false, completion: @escaping (_ returnedJson: [[String: Any]]) -> Void) {
         logFunctionCall()
+        if skip {
+            completion([])
+            return
+        }
         var endpointVersion = ""
         switch theEndpoint {
         case "test3":
@@ -584,6 +595,14 @@ class Jpapi: NSObject, URLSessionDelegate {
                         if let recordsArray = responseData as? [String: Any], let results = recordsArray["results"] as? [[String: Any]] {
                             print("[Jpapi.get] \(theEndpoint) - found \(recordsArray["totalCount"] ?? "unknown")")
                             completion(results)
+                        } else {
+                            WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
+                            completion([])
+                        }
+                    case "api-role-privileges":
+                        if let priveleges = responseData as? [String: Any] {
+                            print("[Jpapi.get] \(theEndpoint) - found \(priveleges.count)")
+                            completion([priveleges])
                         } else {
                             WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
                             completion([])
