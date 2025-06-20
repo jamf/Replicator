@@ -47,30 +47,42 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
         if whichServer == "source" && ["api-roles", "api-integrations"].contains(endpoint) {
-            switch endpoint {
-            case "api-roles":
-                let theObject = ApiRoles.source.first(where: { $0.id == id })
-                do {
-                    let objectData = try JSONEncoder().encode(theObject!)
-                    if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
-                        completion(objectJson)
+            var returnedJSON: [String: Any] = [:]
+            if let currentObject: AnyObject = (endpoint == "api-roles") ? ApiRoles.source.first(where: { $0.id == id }) as? AnyObject : ApiRoles.source.first(where: { $0.id == id }) as? AnyObject {
+                
+                switch endpoint {
+                case "api-roles":
+//                    let theObject = ApiRoles.source.first(where: { $0.id == id })
+                    let theObject = currentObject as? ApiRole
+                    do {
+                        let objectData = try JSONEncoder().encode(theObject)
+                        if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
+//                            completion(objectJson)
+                            returnedJSON = objectJson
+                        }
+                    } catch {
+//                        completion([:])
                     }
-                } catch {
-                    completion([:])
-                }
-            case "api-integrations":
-                let theObject = ApiIntegrations.source.first(where: { $0.id == id })
-                do {
-                    let objectData = try JSONEncoder().encode(theObject!)
-                    if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
-                        completion(objectJson)
+                case "api-integrations":
+//                    let theObject = ApiIntegrations.source.first(where: { $0.id == id })
+                    let theObject = currentObject as? ApiIntegration
+                    do {
+                        let objectData = try JSONEncoder().encode(theObject)
+                        if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
+//                            completion(objectJson)
+                            returnedJSON = objectJson
+                        }
+                    } catch {
+//                        completion([:])
                     }
-                } catch {
-                    completion([:])
+                default:
+//                    completion([:])
+                    break
                 }
-            default:
-                break
+            } else {
+//                completion([:])
             }
+            completion(returnedJSON)
             return
         }
         
@@ -136,7 +148,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             }
         }
         
-        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Attempting \(method) on \(urlString)") }
+        if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] attempting \(method) on \(urlString)") }
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
         

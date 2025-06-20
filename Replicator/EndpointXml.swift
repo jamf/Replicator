@@ -22,7 +22,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
     var updateUiDelegate: UpdateUiDelegate?
     
     let endpointXmlQ = DispatchQueue(label: "com.jamf.endpointXml", qos: DispatchQoS.utility)
-    let endpointsIdQ = OperationQueue() // create operation queue for API calls
+    let endpointsIdQ = DispatchQueue(label: "com.jamf.endpointsIdQ", qos: DispatchQoS.utility) // create operation queue for API calls
+//    let endpointsIdQ = OperationQueue() // create operation queue for API calls
     var getArray     = [ObjectInfo]()
     
     func endPointByIdQueue(endpoint: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: Int, destEpName: String) {
@@ -30,8 +31,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
         logFunctionCall()
         
         if pref.stopMigration {
-//                    print("[\(#function)] \(#line) stopMigration")
-            endpointsIdQ.cancelAllOperations()
+//            endpointsIdQ.cancelAllOperations()
             getArray.removeAll()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
             return
@@ -65,7 +65,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
         
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
-            endpointsIdQ.cancelAllOperations()
+//            endpointsIdQ.cancelAllOperations()
             getArray.removeAll()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
             return
@@ -73,7 +73,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
         if LogLevel.debug { WriteToLog.shared.message("[getById] endpoint passed to endPointByID: \(endpoint) id \(endpointID)") }
         
-        endpointsIdQ.maxConcurrentOperationCount = maxConcurrentThreads
+//        endpointsIdQ.maxConcurrentOperationCount = maxConcurrentThreads
         
         var localEndPointType = ""
         
@@ -100,7 +100,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
         switch localEndPointType {
         case "buildings", "api-roles", "api-integrations":
             // Jamf Pro API
-            endpointsIdQ.addOperation {
+//            endpointsIdQ.addOperation {
+            endpointsIdQ.async {
                     
             if LogLevel.debug { WriteToLog.shared.message("[getById] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
             Jpapi.shared.action(whichServer: "source", endpoint: localEndPointType, apiData: [:], id: "\(endpointID)", token: JamfProServer.authCreds["source"]!, method: "GET" ) { [self]
@@ -235,7 +236,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
                 myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
                 myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 
-                endpointsIdQ.addOperation {
+//                endpointsIdQ.addOperation {
+                endpointsIdQ.async {
             
                     if LogLevel.debug { WriteToLog.shared.message("[getById] fetching XML from: \(myURL)") }
                     //                print("NSURL line 3")
