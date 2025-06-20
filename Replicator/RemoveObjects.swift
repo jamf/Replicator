@@ -166,7 +166,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         endpointInProgress = endpointType
                         UiVar.changeColor  = true
                         Counter.shared.postSuccess = 0
-                        WriteToLog.shared.message("[RemoveEndpoints] Removing \(endpointType)")
+                        WriteToLog.shared.message("[RemoveEndpoints] removing \(endpointType)")
                     }   // look to see if we are processing the next endpointType - end
                 }
                 
@@ -326,12 +326,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 task.resume()
             }   // removeObjectQ.addOperation - end
         }
-        // moved 241026
-//        if endpointCurrent == endpointCount {
-//            WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.")
-//            nodesMigrated += 1
-//            //            print("remove nodes complete: \(nodesMigrated)")
-//        }
     }
     
     
