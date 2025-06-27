@@ -11,7 +11,8 @@ class RemoveData: NSObject {
     
     static let shared = RemoveData()
     
-    func Json(rawJSON: [String:Any], theTag: String) -> String {
+    func Json(rawJSON: [String:Any], theTag: String) -> [String:Any] {
+//    func Json(rawJSON: [String:Any], theTag: String) -> String {
         logFunctionCall()
         var newJSON  = rawJSON
                 // remove keys with <null> as the value
@@ -19,7 +20,7 @@ class RemoveData: NSObject {
                     if "\(value)" == "<null>" || "\(value)" == ""  {
                         newJSON[key] = nil
                     } else {
-                        newJSON[key] = "\(value)"
+                        newJSON[key] = value    // "\(value)"
                     }
                 }
                 if theTag != "" {
@@ -28,7 +29,7 @@ class RemoveData: NSObject {
                     }
                 }
         
-        return "\(newJSON)"
+        return newJSON
     }
     
     func Xml(theXML: String, theTag: String, keepTags: Bool) -> String {
@@ -52,7 +53,5 @@ class RemoveData: NSObject {
         }
         return newXML_trimmed
     }
-    
-    
-    
+        
 }

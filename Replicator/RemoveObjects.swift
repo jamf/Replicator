@@ -130,6 +130,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             switch localEndPointType {
             case "patch-software-title-configurations":
                 removeDestUrl = "\(JamfProServer.destination)/api/v2/patch-software-title-configurations/\(endPointID)"
+            case "api-roles", "api-integrations":
+                removeDestUrl = "\(JamfProServer.destination)/api/v1/\(localEndPointType)/\(endPointID)"
             default:
                 removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
                 if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] raw removal URL: \(removeDestUrl)") }
@@ -327,6 +329,4 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             }   // removeObjectQ.addOperation - end
         }
     }
-    
-    
 }

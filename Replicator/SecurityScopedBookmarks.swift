@@ -17,7 +17,7 @@ class SecurityScopedBookmarks: NSObject {
         
         let allBookmarks = fetchBookmarks()
         
-        guard let bookmarkData = allBookmarks[urlString] else {
+        guard let bookmarkData = allBookmarks[urlString.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!] else {
             print("Bookmark data for \(urlString) does not exist.")
             return false
         }

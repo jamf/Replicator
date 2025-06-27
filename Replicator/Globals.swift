@@ -129,7 +129,6 @@ struct History {
 }
 
 final class JamfProServer {
-//struct JamfProServer {
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0
@@ -413,8 +412,7 @@ public func timeDiff(forWhat: String, someDate: Date = Date()) -> (Int,Int,Int,D
     default:
         break
     }
-//          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//          WriteToLog.shared.message("[Migration Complete] runtime: \(timeDifference) seconds")
+
     let totalSeconds = Int(components?.second! ?? 0)
     let (h,r) = totalSeconds.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)

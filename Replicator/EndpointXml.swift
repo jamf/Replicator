@@ -116,7 +116,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     // save source JSON - start
                     if export.saveRawXml {
                         let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
-//                                    print("exportRawJson: \(exportRawJson)")
+                                    print("exportRawJson: \(exportRawJson)")
                         WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
                         let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
                         ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
