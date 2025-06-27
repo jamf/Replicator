@@ -1301,7 +1301,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         } else {
             if !export.saveOnly {
                 // verify source and destination are not the same - start
-//                if (source_jp_server_field.stringValue == dest_jp_server_field.stringValue) && siteMigrate_button.state.rawValue == 0 {
                 let sameSite = (JamfProServer.source == JamfProServer.destination) ? true:false
 //                if sameSite && (JamfProServer.destSite == "None" || JamfProServer.destSite == "") {
                 if sameSite && JamfProServer.destSite == "" {
@@ -3843,9 +3842,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     let allFilePathsArray = allFilePaths as! [String]
                     var xmlFilePaths      = [String]()
                     
-//                        print("[ViewController.files] looking for files in \(local_folder)")
+//                    print("[ViewController.files] looking for files in \(local_folder)")
                     switch local_folder {
-                    case "buildings", "patch-software-title-configurations":
+                    case "buildings", "patch-software-title-configurations", "api-integrations", "api-roles":
                         xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
                         if local_folder == "patch-software-title-configurations" {
                             PatchPoliciesDetails.source.removeAll()
@@ -3873,7 +3872,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     
                     let dataFilesCount = xmlFilePaths.count
-//                        print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
+//                    print("[ViewController.files] found \(dataFilesCount) files in \(local_folder)")
                     var counter = 1
                     
                     if dataFilesCount < 1 {
@@ -3904,12 +3903,24 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 var id           = ""
                                 
                                 switch endpoint {
+                                case "api-roles", "api-integrations":
+                                    let data = fileContents.data(using: .utf8)!
+                                    do {
+                                        if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
+                                        {
+                                            name     = "\(jsonData["displayName"] ?? "")"
+                                            id       = "\(jsonData["id"] ?? "")"
+                                        } else {
+                                            WriteToLog.shared.message("[readDataFiles] \(endpoint) - issue with string format, not json")
+                                        }
+                                    } catch let error as NSError {
+                                        print(error)
+                                    }
                                 case "buildings":
                                     let data = fileContents.data(using: .utf8)!
                                     do {
                                         if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
                                         {
-//                                                fileJSON = jsonData
                                             name     = "\(jsonData["name"] ?? "")"
                                             id       = "\(jsonData["id"] ?? "")"
                                         } else {
@@ -3974,7 +3985,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
 
-                                if !["buildings", "patch-software-title-configurations"].contains(endpoint) {
+                                if !["buildings", "patch-software-title-configurations", "api-roles", "api-integrations"].contains(endpoint) {
                                     id   = tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
                                     name = tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
                                 }
