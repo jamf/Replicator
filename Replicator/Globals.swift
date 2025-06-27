@@ -228,7 +228,7 @@ Parameters:
 
     -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
-                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,
+                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
                                       computerextensionattributes,scripts,printers,packages,smartcomputergroups,staticcomputergroups,restrictedsoftware,
                                       osxconfigurationprofiles,macapplications,patchpolicies,advancedcomputersearches,policies,
