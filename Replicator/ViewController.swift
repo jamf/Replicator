@@ -6857,6 +6857,8 @@ extension String {
     var readable: String {
         switch self {
             // general
+            case "api-integrations": return "API clients"
+            case "api-roles": return "API roles"
             case "advancedusersearches": return "advanced user searches"
             case "jamfgroups": return "jamf groups"
             case "jamfusers": return "jamf users"
