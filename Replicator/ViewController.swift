@@ -1097,6 +1097,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             SourceObjects.list = sourceObjectList_AC.arrangedObjects as? [SelectiveObject] ?? [SelectiveObject]()
         }
         staticSourceObjectList.removeAll()
+        ApiRoles.source.removeAll()
+        ApiIntegrations.source.removeAll()
     }
     
     @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
@@ -2279,16 +2281,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         var existingObjectId = 0
                         switch selectedEndpoint {
                         case "api-roles":
-                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName == selectedObject })?.id ?? "0") ?? 0
+                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
                         case "api-integrations":
-                            existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName == selectedObject })?.id ?? "0") ?? 0
+                            existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
                         case "patch-software-title-configurations":
                             existingObjectId = currentEPDict[selectedEndpoint]?[selectedObject] ?? 0
                         default:
                             existingObjectId = currentEPDict[rawEndpoint]?[selectedObject] ?? 0
                         }
                         
-//                        let existingObjectId = (selectedEndpoint == "patch-software-title-configurations") ? currentEPDict[selectedEndpoint]?[selectedObject] ?? 0:currentEPDict[rawEndpoint]?[selectedObject] ?? 0
                         if existingObjectId == 0 && !export.saveOnly {
                             theAction = "create"
                         }
@@ -2661,7 +2662,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 return
                             }
                             
-                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] returning existing packages endpoints: \(AvailableObjsToMig.byId)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] returning existing \(endpoint) endpoints: \(AvailableObjsToMig.byId)") }
                             
                             //                                                            completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                             //                                                            return
@@ -6743,7 +6744,7 @@ extension String {
             } else {
                 fqdn =  self
             }
-            print("\(#line) fqdn \(fqdn)")
+
             if fqdn.contains("/") {
                 let fqdnArray = fqdn.components(separatedBy: "/")
                 fqdn = fqdnArray[0]
@@ -6753,7 +6754,7 @@ extension String {
                     }
                 }
             }
-            print("\(#line) fqdn \(fqdn)")
+
             if fqdn.contains(":") {
                 let fqdnArray = fqdn.components(separatedBy: ":")
                 fqdn = fqdnArray[0]
@@ -6762,7 +6763,7 @@ extension String {
                 fqdn = "\(fqdn.dropLast(1))"
             }
             fqdn = fqdn + context
-            print("\(#line) fqdn \(fqdn)")
+
             return fqdn
         }
     }

@@ -45,6 +45,7 @@ class ExportItem: NSObject {
         var endpointPath   = ""
         
         let saveFolder = saveLocation(format)
+        print("[export] saveFolder: \(saveFolder)")
         
         // Create endpoint type to store objectString files if needed - start
         switch node {
@@ -66,6 +67,7 @@ class ExportItem: NSObject {
         default:
             endpointPath = saveFolder+node
         }
+        print("[export] endpointPath: \(endpointPath)")
         
         do {
             let encoder = JSONEncoder()
@@ -73,18 +75,17 @@ class ExportItem: NSObject {
             
             switch node {
             case "buildings":
-                exportFilename = "\(theName)-\(id).json"
-                if let theString = object as? String, theString.isEmpty == false {
-                    objectAsString = "\(theString.dropFirst().dropLast())"
-                    objectAsString = "{\(objectAsString)}"
+                    if let object = object as? [String: Any], let displayName = object["name"] as? String, let id = object["id"] as? String {
+                        exportFilename = "\(displayName)-\(id).json"
+                    }
+                    let prettyPrintedData = try JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
+                    objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
+            case "api-roles", "api-integrations":
+                if let object = object as? [String: Any], let displayName = object["displayName"] as? String, let id = object["id"] as? String {
+                    exportFilename = "\(displayName)-\(id).json"
                 }
-//                do {
-//                    try jsonString.write(toFile: endpointPath+"/"+jsonFile, atomically: true, encoding: .utf8)
-//                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
-//                } catch {
-//                    if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
-//                    return
-//                }
+                let prettyPrintedData = try JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
+                objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
             case "patchPolicyDetails":
                 exportFilename = "patch-policies-policy-details.json"
                 let t = object as? [PatchPolicyDetail]

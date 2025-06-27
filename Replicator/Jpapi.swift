@@ -48,40 +48,33 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         if whichServer == "source" && ["api-roles", "api-integrations"].contains(endpoint) {
             var returnedJSON: [String: Any] = [:]
-            if let currentObject: AnyObject = (endpoint == "api-roles") ? ApiRoles.source.first(where: { $0.id == id }) as? AnyObject : ApiRoles.source.first(where: { $0.id == id }) as? AnyObject {
-                
-                switch endpoint {
-                case "api-roles":
-//                    let theObject = ApiRoles.source.first(where: { $0.id == id })
-                    let theObject = currentObject as? ApiRole
+            switch endpoint {
+            case "api-roles":
+                if let theObject = ApiRoles.source.first(where: { $0.id == id }) {
                     do {
                         let objectData = try JSONEncoder().encode(theObject)
                         if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
-//                            completion(objectJson)
                             returnedJSON = objectJson
                         }
                     } catch {
-//                        completion([:])
+    //                        completion([:])
                     }
-                case "api-integrations":
-//                    let theObject = ApiIntegrations.source.first(where: { $0.id == id })
-                    let theObject = currentObject as? ApiIntegration
-                    do {
-                        let objectData = try JSONEncoder().encode(theObject)
-                        if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
-//                            completion(objectJson)
-                            returnedJSON = objectJson
-                        }
-                    } catch {
-//                        completion([:])
-                    }
-                default:
-//                    completion([:])
-                    break
                 }
-            } else {
-//                completion([:])
+            case "api-integrations":
+                if let theObject = ApiIntegrations.source.first(where: { $0.id == id }) {
+                    do {
+                        let objectData = try JSONEncoder().encode(theObject)
+                        if let objectJson = try JSONSerialization.jsonObject(with: objectData, options: []) as? [String: Any] {
+                            returnedJSON = objectJson
+                        }
+                    } catch {
+    //                        completion([:])
+                    }
+                }
+            default:
+                break
             }
+            
             completion(returnedJSON)
             return
         }
@@ -271,7 +264,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             
         }
         
-        print("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server.")
+        print("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server, theEndpoint: \(theEndpoint).")
         if !lastPage {
             getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
                 returnedResults in
@@ -331,7 +324,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 
                                 if let name = theObject["displayName"] as? String, name != "", id != "0" {
                                     
-                                    if whichServer == "source" {
+                                    if whichServer == "source" || WipeData.state.on {
                                         if theEndpoint == "api-roles" {
                                             ApiRoles.source.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
                                         } else {
