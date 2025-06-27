@@ -688,9 +688,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if LogLevel.debug && !AppInfo.maskServerNames { WriteToLog.shared.message("[\(#function.description)] info: \(info)") }
         AppInfo.settings                       = info
 
-        AppInfo.settings["source_jp_server"]   = baseUrl(source_jp_server_field.stringValue, whichServer: "source")    // source_jp_server_field.stringValue.baseUrl as Any?
+        if source_jp_server_field.stringValue.prefix(1) == "/" {
+            AppInfo.settings["source_jp_server"] = source_jp_server_field.stringValue
+        } else {
+            AppInfo.settings["source_jp_server"] = baseUrl(source_jp_server_field.stringValue, whichServer: "source")
+        }
         AppInfo.settings["source_user"]        = sourceUser_TextField.stringValue as Any?
-        AppInfo.settings["dest_jp_server"]     = baseUrl(dest_jp_server_field.stringValue, whichServer: "dest")    // dest_jp_server_field.stringValue.baseUrl as Any?
+        AppInfo.settings["dest_jp_server"]     = baseUrl(dest_jp_server_field.stringValue, whichServer: "dest")
         AppInfo.settings["dest_user"]          = destinationUser_TextField.stringValue as Any?
         AppInfo.settings["storeSourceCreds"]   = JamfProServer.storeSourceCreds as Any?
         AppInfo.settings["storeDestCreds"]     = JamfProServer.storeDestCreds as Any?
