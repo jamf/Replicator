@@ -31,20 +31,6 @@ final class Summary: NSObject {
     }
 }
 
-class Queue {
-    static let shared = Queue()
-    
-//    var Queue.shared.create    = OperationQueue() // create operation queue for API POST/PUT calls
-    let operation: OperationQueue
-    
-    private let queue: DispatchQueue
-    
-    init() {
-        operation = OperationQueue()
-        queue = DispatchQueue(label: "queue.queue", qos: .default, attributes: .concurrent)
-    }
-}
-
 final class Counter {
     static let shared = Counter()
 
@@ -896,7 +882,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var idDict            = [String:[String:Int]]()
     
     var theOpQ        = OperationQueue() // create operation queue for API calls
-    var getEndpointsQ = OperationQueue() // create operation queue for API calls
+//    var getEndpointsQ = OperationQueue() // create operation queue for API calls
     var endpointsIdQ  = OperationQueue() // create operation queue for API calls
 
     var readFilesQ    = OperationQueue() // for reading in data files
@@ -2584,7 +2570,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 endpointParent = "\(endpoint)"
         }
         
-        getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
+//        getEndpointsQ.maxConcurrentOperationCount = maxConcurrentThreads
 //        let semaphore = DispatchSemaphore(value: 0)
         
         if Setting.fullGUI {
@@ -2597,7 +2583,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         clearSourceObjectsList()
         
-        getEndpointsQ.addOperation {
+        SourceGetQueue.shared.addOperation {
+//        getEndpointsQ.addOperation {
             
             ObjectDelegate.shared.getAll(whichServer: "source", endpoint: endpoint) { [self]
                 result in
@@ -2681,7 +2668,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                                        print("[getSourceEndpoints] not yet implemented - check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)")
 //                                        print("[getSourceEndpoints] not yet implemented - exists \(l_xmlName): \(destinationObjectExists)")
                                         // check to see if create or update...
-                                        
                                         
                                         if destinationObjectExists {
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
@@ -4741,8 +4727,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //        DispatchQueue.main.async { [self] in
         logFunctionCall()
         migrationComplete.isDone = true
-        print("[runComplete] Queue.shared.operation.operationCount: \(Queue.shared.operation.operationCount)")
-        if theIconsQ.operationCount == 0 && Queue.shared.operation.operationCount == 0 {
+        print("[runComplete] SendQueue.shared.operationQueue.operationCount: \(SendQueue.shared.operationQueue.operationCount)")
+        if theIconsQ.operationCount == 0 && SendQueue.shared.operationQueue.operationCount == 0 {
                 nodesComplete = 0
                 AllEndpointsArray.removeAll()
                 AvailableObjsToMig.byId.removeAll()
@@ -5867,9 +5853,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         getArray.removeAll()
         createArray.removeAll()
         ToMigrate.objects.removeAll()
-        getEndpointsQ.cancelAllOperations()
+        SourceGetQueue.shared.operationQueue.cancelAllOperations()
+//        getEndpointsQ.cancelAllOperations()
         endpointsIdQ.cancelAllOperations()
-        Queue.shared.operation.cancelAllOperations()
+        SendQueue.shared.operationQueue.cancelAllOperations()
         theIconsQ.cancelAllOperations()
         readFilesQ.cancelAllOperations()
         

@@ -12,7 +12,6 @@ import OSLog
 class ExistingObjects: NSObject, URLSessionDelegate {
     
     static let shared    = ExistingObjects()
-    var existingObjectsQ = OperationQueue() // DispatchQueue(label: "com.jamf.existingObjectsQ", qos: DispatchQoS.utility)
     
     var updateUiDelegate: UpdateUiDelegate?
     func updateView(_ info: [String: Any]) {
@@ -21,7 +20,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
     }
  
     func capi(skipLookup: Bool, theDestEndpoint: String, completion: @escaping (_ result: (String,String)) -> Void) {
-        existingObjectsQ.maxConcurrentOperationCount = 2
         
         logFunctionCall()
         
@@ -166,11 +164,8 @@ class ExistingObjects: NSObject, URLSessionDelegate {
 //            print("endpointDependencyArray.count: \(endpointDependencyArray.count)")
 //            print("                      waiting: \(waiting)")
             
-//            let semaphore = DispatchSemaphore(value: 1)
-            existingObjectsQ.addOperation /* async */{ [self] in
-//                while (ExistingEndpoints.shared.completed < endpointDependencyArray.count) {
-//                    
-//                    if !ExistingEndpoints.shared.waiting && (ExistingEndpoints.shared.completed < endpointDependencyArray.count) {
+            DestinationGetQueue.shared.addOperation { [self] in
+
                 print("[ExistingObjects.capi] waiting: \(ExistingEndpoints.shared.waiting), completed: \(ExistingEndpoints.shared.completed), endpointDependencyArray.count: \(endpointDependencyArray.count)")
                 URLCache.shared.removeAllCachedResponses()
                 ExistingEndpoints.shared.waiting = true
@@ -283,7 +278,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                 ExistingEndpoints.shared.completed += 1
                                 
                                 ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
-//                                                    existingObjectsQ.resume()
                                 completion(("[ExistingObjects.capi] No packages were found on \(JamfProServer.destination)\n","packages"))
                             }
 
