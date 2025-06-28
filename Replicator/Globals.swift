@@ -28,6 +28,9 @@ var sitePref                    = ""
 
 var dependencyParentId          = 0
 var createArray                 = [ObjectInfo]()
+
+var currentObject               = ObjectInfo(endpointType: "", endPointXml: "", endPointJSON: [:], endpointCurrent: -1, endpointCount: -1, action: "", sourceEpId: -1, destEpId: "", ssIconName: "", ssIconId: "", ssIconUri: "", retry: false)
+
 var accountDict                 = [String:String]()
 //var counters                    = [String:[String:Int]]()          // summary counters of created, updated, failed, and deleted objects
 //var summaryDict                 = [String:[String:[String]]]()    // summary arrays of created, updated, and failed objects

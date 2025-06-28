@@ -24,7 +24,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
-            Queue.shared.operation.cancelAllOperations()
+            SendQueue.shared.operationQueue.cancelAllOperations()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
             completion("stop")
             return
@@ -48,43 +48,28 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             
             if LogLevel.debug { WriteToLog.shared.message("[createEndpointsQueue] que \(endpointType) with id \(sourceEpId) for upload")}
             createArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: "\(destEpId)", ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry))
+            
+            currentObject = ObjectInfo(endpointType: endpointType, endPointXml: endPointXML, endPointJSON: endPointJSON, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: "\(destEpId)", ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: retry)
+            
             if LogLevel.debug { WriteToLog.shared.message("\n[createEndpointQueue] createArray.count: \(createArray.count)\n")}
             
             switch endpointType {
             case "buildings":
-                while createArray.count > 0 {
-                    if counter.pendingSend < maxConcurrentThreads && createArray.count > 0 {
-                        counter.pendingSend += 1
-                        let nextEndpoint = createArray[0]
-                        createArray.remove(at: 0)
- 
-                        jpapi(endpointType: nextEndpoint.endpointType, endPointJSON: nextEndpoint.endPointJSON, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: "\(nextEndpoint.sourceEpId)", destEpId: nextEndpoint.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) { [self]
-                            (result: String) in
-                            counter.pendingSend -= 1
-                            if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
-                            if endpointCurrent == endpointCount {
-                                completion("last")
-                            } else {
-                                completion("")
-                            }
+                SendQueue.shared.addOperation { [self] in
+                    jpapi(endpointType: currentObject.endpointType, endPointJSON: currentObject.endPointJSON, endpointCurrent: currentObject.endpointCurrent, endpointCount: currentObject.endpointCount, action: currentObject.action, sourceEpId: "\(currentObject.sourceEpId)", destEpId: currentObject.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                        (result: String) in
+                        if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
+                        if endpointCurrent == endpointCount {
+                            completion("last")
+                        } else {
+                            completion("")
                         }
-                    } else {
-                        sleep(1)
                     }
                 }
             default:
-                while createArray.count > 0 {
-                    if counter.pendingSend < maxConcurrentThreads && createArray.count > 0 {
-                        counter.pendingSend += 1
-                        let nextEndpoint = createArray[0]
-                        createArray.remove(at: 0)
-
-                        capi(endpointType: nextEndpoint.endpointType, endPointXML: nextEndpoint.endPointXml.prettyPrint, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount, action: nextEndpoint.action, sourceEpId: nextEndpoint.sourceEpId, destEpId: nextEndpoint.destEpId, ssIconName: nextEndpoint.ssIconName, ssIconId: nextEndpoint.ssIconId, ssIconUri: nextEndpoint.ssIconUri, retry: nextEndpoint.retry) { [self]
-                                (result: String) in
-                            counter.pendingSend -= 1
-                        }
-                    } else {
-                        sleep(1)
+                SendQueue.shared.addOperation { [self] in
+                    capi(endpointType: currentObject.endpointType, endPointXML: currentObject.endPointXml.prettyPrint, endpointCurrent: currentObject.endpointCurrent, endpointCount: currentObject.endpointCount, action: currentObject.action, sourceEpId: currentObject.sourceEpId, destEpId: currentObject.destEpId, ssIconName: currentObject.ssIconName, ssIconId: currentObject.ssIconId, ssIconUri: currentObject.ssIconUri, retry: currentObject.retry) {
+                        (result: String) in
                     }
                 }
             }
@@ -96,7 +81,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 
         if pref.stopMigration {
 //                    print("[\(#function)] \(#line) stopMigration")
-            Queue.shared.operation.cancelAllOperations()
+            SendQueue.shared.operationQueue.cancelAllOperations()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
 //            Setting.createIsRunning = false
             completion("stop")
@@ -149,10 +134,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)") }
         }
         //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
-        
-        Queue.shared.operation.maxConcurrentOperationCount = 1
-//                let semaphore = DispatchSemaphore(value: 0)
-        
+                
 //        print("endPointXML:\n\(endPointXML)")
         
         var localEndPointType = ""
@@ -196,8 +178,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
         
-//        Queue.shared.operation.addOperation { [self] in
-        CreateQueue.shared.addOperation { [self] in
+        SendQueue.shared.addOperation { [self] in
             
             // save trimmed XML - start
             if export.saveTrimmedXml {
@@ -320,17 +301,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)")
                             
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
-                            
-                            //new
-//                            if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
-//
-//                                print("[CreateEndpoints] endpointType: \(endpointType)")
-//                                if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-//                                    if destEpId != "-1" {
-//                                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                                    }
-//                                }
-//                            }
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
@@ -505,6 +475,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     }
                                 }
                                 
+                                if destEpId != "-1" {
+                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                }
+                                
                                 //new
 //                                if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
 //
@@ -552,7 +526,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                        }   // DispatchQueue.main.async - end
                 } else {  // if let httpResponse = response - end
                     
-                    // update global counters
+                    // update global counters - no http response
                     let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
                     Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
                     if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
@@ -613,7 +587,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                        semaphore.wait()
             }   // if !WipeData.state.on - end
             
-        }   // Queue.shared.create.addOperation - end
+        }   // SendQueue - end
     }
     
     func jpapi(endpointType: String, endPointJSON: [String: Any], policyDetails: [PatchPolicyDetail] = [], endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: String, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
@@ -668,8 +642,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         }
         //if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         
-        Queue.shared.operation.maxConcurrentOperationCount = maxConcurrentThreads
-
         var localEndPointType = ""
         
         switch endpointType {
@@ -685,7 +657,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 
         if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Original Dest. URL: \(createDestUrlBase)") }
        
-        Queue.shared.operation.addOperation { [self] in
+        SendQueue.shared.addOperation { [self] in
             
             // save trimmed JSON - start
             if export.saveTrimmedXml {
@@ -1003,6 +975,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 
                 
             }   // if !WipeData.state.on - end
-        }   // Queue.shared.create.addOperation - end
+        }   // SendQueue - end
     }
 }

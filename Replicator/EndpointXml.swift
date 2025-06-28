@@ -100,7 +100,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
         switch localEndPointType {
         case "buildings", "api-roles", "api-integrations":
             // Jamf Pro API
-//            endpointsIdQ.addOperation {
+
             endpointsIdQ.async {
                     
             if LogLevel.debug { WriteToLog.shared.message("[getById] fetching JSON for: \(localEndPointType) with id: \(endpointID)") }
@@ -236,7 +236,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
                 myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
                 myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 
-//                endpointsIdQ.addOperation {
                 endpointsIdQ.async {
             
                     if LogLevel.debug { WriteToLog.shared.message("[getById] fetching XML from: \(myURL)") }

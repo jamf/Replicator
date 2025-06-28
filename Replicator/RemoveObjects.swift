@@ -107,10 +107,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         // whether the operation was successful or not, either delete or fail
         var methodResult = "create"
         
-//        removeObjectQ.maxConcurrentOperationCount = maxConcurrentThreads
-        Queue.shared.operation.maxConcurrentOperationCount = maxConcurrentThreads
-        
-//        let semaphore = DispatchSemaphore(value: 0)
         var localEndPointType = ""
         switch endpointType {
         case "smartcomputergroups", "staticcomputergroups":
@@ -160,7 +156,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 return
             }
             
-            Queue.shared.operation.addOperation {
+            SendQueue.shared.addOperation {
                         
                 DispatchQueue.main.async {
                     // look to see if we are processing the next endpointType - start
