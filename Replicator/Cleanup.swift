@@ -90,14 +90,13 @@ class Cleanup: NSObject {
                     if "\(value)" == "<null>" {
                         JSONData[key] = nil
                     } else {
-//                        JSONData[key] = "\(value)"
                         JSONData[key] = value
                     }
                 }
             }
         }
         
-        CreateEndpoints.shared.jpapi(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: "\(destEpId)", ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+        CreateEndpoints.shared.jpapi(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
             if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
             if endpointCurrent == endpointCount {
