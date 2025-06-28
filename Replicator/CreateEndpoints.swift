@@ -195,8 +195,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
         createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                
-        Queue.shared.operation.addOperation { [self] in
+        
+//        Queue.shared.operation.addOperation { [self] in
+        CreateQueue.shared.addOperation { [self] in
             
             // save trimmed XML - start
             if export.saveTrimmedXml {
@@ -217,7 +218,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
 
                     let ssInfo: [String: String] = ["ssIconName": ssIconName, "ssIconId": ssIconId, "ssIconUri": ssIconUri, "ssXml": ""]
-                    IconDelegate.shared.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                    Task {
+                        await IconDelegate.shared.icons(endpointType: endpointType, action: action, ssInfo: ssInfo, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                    }
                 }
                 if ToMigrate.objects.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
                     updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
