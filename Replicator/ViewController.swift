@@ -4104,22 +4104,38 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 readFilesQ.addOperation { [self] in
                     let l_id   = theObject.objectId         // id of object
                     let l_name = theObject.objectName.xmlDecode    // name of object, remove xml encoding
-                    let l_xml  = theObject.fileContents
+                    let l_fileContents  = theObject.fileContents
                     
-//                    print("[processFiles] l_id: \(l_id), l_name: \(theObject.objectName.xmlDecode), l_xml: \(l_xml)")
+                    print("[processFiles] l_id: \(l_id), l_name: \(l_name), l_xml: \(l_fileContents)")
                     updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
-                    if l_id != "" && l_name != "" && l_xml != "" {
+                    if !l_id.isEmpty && !l_name.isEmpty && !l_fileContents.isEmpty {
+                        var destId = "\(currentEPs[l_name] ?? 0)"
                         if !WipeData.state.on  {
-                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] check for ID on \(String(describing: l_name)): \(currentEPs[l_name] ?? 0)") }
-                            if currentEPs["\(l_name)"] != nil {
+                            var existsOnDestination: Bool = false
+                            switch endpoint {
+                            case "api-roles":
+                                let destinationObject = ApiRoles.destination.first(where: { $0.displayName.lowercased() == l_name.lowercased() })
+                                existsOnDestination = destinationObject != nil
+                                destId = destinationObject?.id ?? "0"
+                            case "api-integrations":
+                                let destinationObject = ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == l_name.lowercased() })
+                                existsOnDestination = destinationObject != nil
+                                destId = destinationObject?.id ?? "0"
+                            default:
+                                existsOnDestination = currentEPs["\(l_name)"] != nil
+                            }
+                            
+                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] check for ID on \(String(describing: l_name)): \(destId)") }
+                            
+                            if existsOnDestination /*currentEPs["\(l_name)"] != nil*/ {
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) already exists") }
                                 
                                 print("[processFiles] update endpoint: \(endpoint)")
                                 switch endpoint {
-                                case "buildings":
-                                    let data = l_xml.data(using: .utf8)!
+                                case "buildings", "api-roles", "api-integrations":
+                                    let data = l_fileContents.data(using: .utf8)!
                                     var jsonData = [String:Any]()
                                     var action = "update"
                                     do {
@@ -4134,7 +4150,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         WriteToLog.shared.message("[ViewController.processFiles] file \(theObject.fileContents) failed to parse. Error: \(error.localizedDescription)")
                                         action = "skip"
                                     }
-                                    Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "\(currentEPs[l_name] ?? 0)", destEpName: l_name) {
+                                    Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "\(destId)", destEpName: l_name) {
 //                                    cleanupJSON(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: currentEPs[l_name]!, destEpName: l_name) {
                                         (cleanJSON: String) in
                                         if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
@@ -4145,7 +4161,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 case "patch-software-title-configurations":
                                     PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
                                         self.message_TextField.stringValue = ""
-                                        let data = l_xml.data(using: .utf8)!
+                                        let data = l_fileContents.data(using: .utf8)!
                                         var jsonData = [String:Any]()
                                         var action = "update"
                                         do {
@@ -4162,7 +4178,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             action = "skip"
                                         }
                                         
-                                        Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "\(currentEPs[l_name] ?? 0)", destEpName: l_name) {
+                                        Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "\(destId)", destEpName: l_name) {
                                             (cleanJSON: String) in
                                             if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
                                             if cleanJSON == "last" {
@@ -4171,7 +4187,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }
                                     }
                                 default:
-                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: "\(currentEPs[l_name] ?? 0)", destEpName: l_name) {
+                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: l_fileContents, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "update", destEpId: "\(destId)", destEpName: l_name) {
                                         (result: String) in
                                         if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupXml") }
                                         if result == "last" {
@@ -4184,8 +4200,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) - create") }
                                 
                                 switch endpoint {
-                                case "buildings":
-                                    let data = l_xml.data(using: .utf8)!
+                                case "buildings", "api-roles", "api-integrations":
+                                    let data = l_fileContents.data(using: .utf8)!
                                     var jsonData = [String:Any]()
                                     var action = "create"
                                     do {
@@ -4212,7 +4228,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 case "patch-software-title-configurations":
                                     PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
                                         self.message_TextField.stringValue = ""
-                                        let data = l_xml.data(using: .utf8)!
+                                        let data = l_fileContents.data(using: .utf8)!
                                         var jsonData = [String:Any]()
                                         var action = "create"
                                         do {
@@ -4238,7 +4254,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }
                                     }
                                 default:
-                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: "0", destEpName: l_name) {
+                                    Cleanup.shared.Xml(endpoint: endpoint, Xml: l_fileContents, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: "0", destEpName: l_name) {
                                         (result: String) in
                                         if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupXml") }
                                         if result == "last" {
@@ -4251,7 +4267,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     } else {
                         let theName = "name: \(l_name)  id: \(l_id)"
                         if endpoint != "buildings" {
-                            Cleanup.shared.Xml(endpoint: endpoint, Xml: l_xml, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: "\(currentEPs[l_name] ?? 0)", destEpName: theName) {
+                            Cleanup.shared.Xml(endpoint: endpoint, Xml: l_fileContents, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: "create", destEpId: "\(currentEPs[l_name] ?? 0)", destEpName: theName) {
                                 (result: String) in
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupXml") }
                                 if result == "last" {
