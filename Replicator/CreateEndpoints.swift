@@ -55,7 +55,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             
             switch endpointType {
             case "buildings":
-                SendQueue.shared.addOperation { [self] in
+//                SendQueue.shared.addOperation { [self] in
                     jpapi(endpointType: currentObject.endpointType, endPointJSON: currentObject.endPointJSON, endpointCurrent: currentObject.endpointCurrent, endpointCount: currentObject.endpointCount, action: currentObject.action, sourceEpId: "\(currentObject.sourceEpId)", destEpId: currentObject.destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
                         (result: String) in
                         if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
@@ -65,13 +65,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             completion("")
                         }
                     }
-                }
+//                }
             default:
-                SendQueue.shared.addOperation { [self] in
+//                SendQueue.shared.addOperation { [self] in
                     capi(endpointType: currentObject.endpointType, endPointXML: currentObject.endPointXml.prettyPrint, endpointCurrent: currentObject.endpointCurrent, endpointCount: currentObject.endpointCount, action: currentObject.action, sourceEpId: currentObject.sourceEpId, destEpId: currentObject.destEpId, ssIconName: currentObject.ssIconName, ssIconId: currentObject.ssIconId, ssIconUri: currentObject.ssIconUri, retry: currentObject.retry) {
                         (result: String) in
                     }
-                }
+//                }
             }
         }
     }
@@ -112,11 +112,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         if endpointCurrent == 1 {
 //            print("[CreateEndpoints] reset counters")
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-//                    Summary.totalCreated   = 0
-//                    Summary.totalUpdated   = 0
-//                    Summary.totalFailed    = 0
-//                    Summary.totalDeleted   = 0
-//                    Summary.totalCompleted = 0
         }
         
         // if working a site migrations within a single server force create when copying an item
@@ -265,12 +260,14 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 }
                 
                 request.httpBody = encodedXML!
+                
+                let semaphore = DispatchSemaphore(value: 0)
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                     (data, response, error) -> Void in
+                    defer { semaphore.signal() }
                     session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
-                        
                         if let _ = String(data: data!, encoding: .utf8) {
                             responseData = String(data: data!, encoding: .utf8)!
     //                        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
@@ -584,7 +581,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     }
                 })
                 task.resume()
-//                        semaphore.wait()
+                semaphore.wait()
             }   // if !WipeData.state.on - end
             
         }   // SendQueue - end
@@ -659,7 +656,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
        
         SendQueue.shared.addOperation { [self] in
             
-            // save trimmed JSON - start
             if export.saveTrimmedXml {
                 let endpointName = endPointJSON["name"] as! String   //getName(endpoint: endpointType, objectXML: endPointJSON)
                 if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Saving trimmed JSON for \(endpointName) with id: \(sourceEpId).") }
@@ -668,12 +664,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                    print("exportTrimmedJson: \(exportTrimmedJson)")
                     WriteToLog.shared.message("[createEndpoints.jpapi] Exporting raw JSON for \(endpointType) - \(endpointName)")
                     ExportItem.shared.export(node: endpointType, object: exportTrimmedJson, theName: endpointName, id: "\(sourceEpId)", format: "trimmed")
-//                    self.exportItems(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
-//                    SaveDelegate().exportObject(node: endpointType, objectString: exportTrimmedJson, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
-                
             }
-            // save trimmed JSON - end
             
             if export.saveOnly {
                 if ToMigrate.objects.last == localEndPointType && endpointCount == endpointCurrent {
@@ -711,9 +703,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             jpapiResult = jpapiResonse["JPAPI_result"] as! String
                         }
     //                    if let httpResponse = response as? HTTPURLResponse {
-                        var apiMethod = apiAction
+//                        var apiMethod = apiAction
                         if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
-                            apiMethod = "fail"
+//                            apiMethod = "fail"
                             DispatchQueue.main.async { [self] in
                                 if Setting.fullGUI && apiAction.lowercased() != "skip" {
                                     updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
@@ -730,12 +722,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 migrationComplete.isDone = false
                                 if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
                                 }
                             } else if !retry {
                                 if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] {
                                     updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green)
                                 }
                             }
                         }
@@ -748,17 +738,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 endpointInProgress = endpointType
                                 Counter.shared.postSuccess = 0
                             }   // look to see if we are processing the next localEndPointType - end
-                            
-    //                    DispatchQueue.main.async { [self] in
-                            
-                        
-                                // ? remove creation of counters dict defined earlier ?
-//                                if Counter.shared.crud[endpointType] == nil {
-//                                    Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-//                                    Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
-//                                }
-                            
-                                                            
+                                                 
                                 Counter.shared.postSuccess += 1
                                 
     //                            print("endpointType: \(endpointType)")
@@ -767,19 +747,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 if let _ = Counter.shared.progressArray["\(endpointType)"] {
                                     Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
                                 }
-                                
-//                                let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
-        //                        print("localTmp: \(localTmp)")
-
-                        
-                                /*
-                                // currently there is no way to upload mac app store icons; no api endpoint
-                                // removed check for those -  || (endpointType == "macapplications")
-                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                                }
-                                */
 
                                 Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
                                 Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0

@@ -70,8 +70,11 @@ class Sites: NSObject, URLSessionDelegate {
         print("[apiCall]")
 
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
+        
+        let semaphore = DispatchSemaphore(value: 0)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in
+//            defer { semaphore.signal() }
             serverSession.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 // print("httpResponse: \(String(describing: response))")
@@ -114,9 +117,10 @@ class Sites: NSObject, URLSessionDelegate {
                 destSiteArray = []
                 completion(destSiteArray)
             }
-            //            semaphore.signal()
+            semaphore.signal()
         })  // let task = - end
         task.resume()
+        semaphore.wait()
     }
     //    --------------------------------------- grab sites - end
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

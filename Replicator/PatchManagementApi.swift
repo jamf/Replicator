@@ -149,12 +149,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                 completion([:])
                 return
             }
-            // unused? -> CreateEndpoints capi
-//        case "policy-details":
-//            print("\n\n[PatchManagementApi.createUpdate] policy-details\n\n")
-//            path = (method.uppercased() == "POST") ? "/JSSResource/patchpolicies/softwaretitleconfig/id/\(destEpId)":"/JSSResource/patchpolicies/id/\(destEpId)"
-//            contentType = "text/xml"
-//            accept      = "text/xml"
             
         default:
             path = "v2/\(endpoint)"
@@ -214,8 +208,11 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         }
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
+        
+        let semaphore = DispatchSemaphore(value: 0)
         let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
             (data, response, error) -> Void in
+            defer { semaphore.signal() }
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
 //                print("[PatchManagementApi.createUpdate] httpResponse: \(httpResponse)")
@@ -239,20 +236,22 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     
                     if endpoint == "patch-software-title-configurations" {
                         Counter.shared.crud[endpoint]?[method]! += 1
-                        if Summary.totalCompleted > 0 {
+//                        if Summary.totalCompleted > 0 {
                             updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpoint, "total": Counter.shared.crud[endpoint]!["total"] as Any])
-                        }
+//                        }
                         
                         if let stringResponse = String(data: data!, encoding: .utf8) {
                             print("[PatchManagementApi.createUpdate] patchmanagement stringResponse: \(stringResponse)")
                             let newId = (createUpdateMethod.uppercased() == "PATCH") ? tagValue2(xmlString: stringResponse, startTag: "\"id\" : \"", endTag: "\","):tagValue2(xmlString: stringResponse, startTag: "<id>", endTag: "</id>")
                             if !newId.isEmpty || createUpdateMethod.uppercased() == "PATCH" {
                                 // patch-software-title-configurations - handle packages
-                                print("[PatchManagementApi.createUpdate] patch-software-title-configurations - add packages")
-                                createUpdate(serverUrl: serverUrl, endpoint: "patch-software-title-packages", apiData: apiData, sourceEpId: sourceEpId, destEpId: "\(newId)", token: JamfProServer.authCreds["dest"]!, method: "PATCH") {
-                                    (jpapiResonse: [String:Any]) in
-                                    print("[PatchManagementApi.createUpdate] result of patch-software-title-packages: \(jpapiResonse)")
-                                    
+                                SendQueue.shared.addOperation { [self] in
+                                    print("[PatchManagementApi.createUpdate] patch-software-title-configurations - add packages")
+                                    createUpdate(serverUrl: serverUrl, endpoint: "patch-software-title-packages", apiData: apiData, sourceEpId: sourceEpId, destEpId: "\(newId)", token: JamfProServer.authCreds["dest"]!, method: "PATCH") {
+                                        (jpapiResonse: [String:Any]) in
+                                        print("[PatchManagementApi.createUpdate] result of patch-software-title-packages: \(jpapiResonse)")
+                                        
+                                    }
                                 }
                             }
                         }
@@ -281,56 +280,56 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                 objectId = existingPatchPolicies.filter( {$0.targetPatchVersion == patchPolicy.targetPatchVersion} ).first!.id
                             }
                             // need to query capi to get full patch policy config
-                            Jpapi.shared.action(whichServer: "source", endpoint: "patchpolicies", apiData: [:], id: patchPolicy.id, token: JamfProServer.authCreds["source"] ?? "", method: "GET") {
-                                (returnedJson: [String:Any]) in
-//                                    print("patch policy Dictionary: \(returnedJson.description)")
-                                
-                                var objectXml = returnedJson["objectXml"] as? String ?? ""
-                                print("\nadd patch policy to software title id: \(destEpId)")
-                                print("patch policy XML: \(objectXml.prettyPrint)")
-                                
-
-                                if let titleId = Int(destEpId), !objectXml.isEmpty {
-                                    // remove id from xml
+                            SourceGetQueue.shared.addOperation {
+                                Jpapi.shared.action(whichServer: "source", endpoint: "patchpolicies", apiData: [:], id: patchPolicy.id, token: JamfProServer.authCreds["source"] ?? "", method: "GET") {
+                                    (returnedJson: [String:Any]) in
+                                    //                                    print("patch policy Dictionary: \(returnedJson.description)")
                                     
-//                                    let idPattern = "\(NSRegularExpression.escapedPattern(for: "<id>")).*?\(NSRegularExpression.escapedPattern(for: "</id>"))"
-                                    do {
-//                                        let regex = try NSRegularExpression(pattern: idPattern, options: [])
-                                        let regex = try NSRegularExpression(pattern: "<id>(.*?)</id>", options:.caseInsensitive)
+                                    var objectXml = returnedJson["objectXml"] as? String ?? ""
+                                    print("\nadd patch policy to software title id: \(destEpId)")
+                                    print("patch policy XML: \(objectXml.prettyPrint)")
+                                    
+                                    
+                                    if let titleId = Int(destEpId), !objectXml.isEmpty {
+                                        // remove id from xml
+                                        do {
+                                            let regex = try NSRegularExpression(pattern: "<id>(.*?)</id>", options:.caseInsensitive)
+                                            
+                                            // remove id
+                                            let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
+                                            objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "")
+                                            objectXml = objectXml.replacingOccurrences(of: "\n\n", with: "\n")
+                                            
+                                        } catch {
+                                            print("Invalid regex: \(error.localizedDescription)")
+                                        }
                                         
-                                        // remove id
-                                        let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
-                                        objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "")
-                                        objectXml = objectXml.replacingOccurrences(of: "\n\n", with: "\n")
-                                        
-                                    } catch {
-                                        print("Invalid regex: \(error.localizedDescription)")
-                                    }
-//                                    let titlePattern = "\(NSRegularExpression.escapedPattern(for: "<software_title_configuration_id>")).*?\(NSRegularExpression.escapedPattern(for: "</software_title_configuration_id>"))"
-                                    do {
-//                                        let regex = try NSRegularExpression(pattern: titlePattern, options: [])
-                                        let regex = try NSRegularExpression(pattern: "<software_title_configuration_id>(.*?)</software_title_configuration_id>", options:.caseInsensitive)
-                                        
-                                        // update software_title_configuration_id to id on destination server
-                                        let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
-                                        objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "<software_title_configuration_id>\(titleId)</software_title_configuration_id>")
-
-                                        
-                                    } catch {
-                                        print("Invalid regex: \(error.localizedDescription)")
-                                    }
-                                    objectXml = objectXml.prettyPrint
-                                    print("updated patch policy XML: \(objectXml)")
-                                    CreateEndpoints.shared.queue(endpointType: "patchpolicies", endPointXML: objectXml, endpointCurrent: 0, endpointCount: patchPolicies.count, action: apiAction, sourceEpId: -1, destEpId: objectId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
-                                        (result: String) in
+                                        do {
+                                            let regex = try NSRegularExpression(pattern: "<software_title_configuration_id>(.*?)</software_title_configuration_id>", options:.caseInsensitive)
+                                            
+                                            // update software_title_configuration_id to id on destination server
+                                            let range = NSRange(objectXml.startIndex..<objectXml.endIndex, in: objectXml)
+                                            objectXml = regex.stringByReplacingMatches(in: objectXml, options: [], range: range, withTemplate: "<software_title_configuration_id>\(titleId)</software_title_configuration_id>")
+                                            
+                                            
+                                        } catch {
+                                            print("Invalid regex: \(error.localizedDescription)")
+                                        }
+                                        objectXml = objectXml.prettyPrint
+                                        print("updated patch policy XML: \(objectXml)")
+                                        SendQueue.shared.addOperation {
+                                            CreateEndpoints.shared.queue(endpointType: "patchpolicies", endPointXML: objectXml, endpointCurrent: 0, endpointCount: patchPolicies.count, action: apiAction, sourceEpId: -1, destEpId: objectId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                                                (result: String) in
+                                            }
+                                        }
                                     }
                                 }
                             }
+                            
                         }
                         print("")
                         
                         do {
-//                            let jsonData = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
                             let _ = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
                         } catch {
                             print("[PatchManagementApi.createUpdate] failed to decode new patch-software-title-configuration")
@@ -380,6 +379,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             }
         })
         task.resume()
+        semaphore.wait()
     }   // func action - end
     
     private func createPatchsoftwaretitleXml(objectInstance: PatchSoftwareTitleConfiguration) -> String {
@@ -407,31 +407,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         print("[PatchManagementApi] createPatchsoftwaretitleXml: \(patchSoftwareTitle)")
         return patchSoftwareTitle
     }
-    
-    /*
-    private func createPatchPolicyXml(from dictionary: [String: Any]) -> XMLElement {
-        let root = XMLElement(name: "patch_policy")
-        for (key, value) in dictionary {
-            let element = XMLElement(name: key)
-            if let nestedDictionary = value as? [String: Any] {
-                element.addChild(createPatchPolicyXml(from: nestedDictionary))
-            } else if let array = value as? [Any] {
-                for item in array {
-                    if let nestedDictionary = item as? [String: Any] {
-                        element.addChild(createPatchPolicyXml(from:nestedDictionary))
-                    } else {
-                        let itemElement = XMLElement(name: "item", stringValue: "\(item)")
-                        element.addChild(itemElement)
-                    }
-                }
-            } else {
-                element.stringValue = "\(value)"
-            }
-            root.addChild(element)
-        }
-        return root
-    }
-    */
     
     private func objectId(xml: String, object: String) -> String {
         logFunctionCall()

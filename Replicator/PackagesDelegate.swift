@@ -215,6 +215,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         
                         let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                             (data, response, error) -> Void in
+                            defer { semaphore.signal() }
                             destSession.finishTasksAndInvalidate()
                             
                             if LogLevel.debug {
@@ -265,7 +266,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                     completion((0,""))
                                 }
                             }   // if let httpResponse - end
-                            semaphore.signal()
                             if error != nil {
                             }
                         })  // let task = destSession - end

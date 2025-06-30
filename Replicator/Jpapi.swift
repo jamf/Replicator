@@ -161,6 +161,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
+        
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
@@ -259,10 +260,6 @@ class Jpapi: NSObject, URLSessionDelegate {
     
     func getAllDelegate(whichServer: String, theEndpoint: String, whichPage: Int, lastPage: Bool = false, completion: @escaping (_ result: [Any]) -> Void) {
         logFunctionCall()
-        
-        if whichPage == 0 {
-            
-        }
         
         print("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server, theEndpoint: \(theEndpoint).")
         if !lastPage {
@@ -578,8 +575,11 @@ class Jpapi: NSObject, URLSessionDelegate {
         print("[apiCall]")
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+        
+        let semaphore = DispatchSemaphore(value: 0)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
+//            defer { semaphore.signal() }
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 print("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
@@ -649,6 +649,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             }
         })
         task.resume()
+//        semaphore.wait()
     }
     
     
@@ -704,8 +705,11 @@ class Jpapi: NSObject, URLSessionDelegate {
         print("[apiCall]")
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+        
+        let semaphore = DispatchSemaphore(value: 0)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
+//            defer { semaphore.signal() }
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 print("[Jpapi.pagedGet] response statusCode: \(httpResponse.statusCode)")
@@ -725,8 +729,10 @@ class Jpapi: NSObject, URLSessionDelegate {
                 WriteToLog.shared.message("[Jpapi.get] unable to read the response from the GET.")
                 completion([:])
             }
+            semaphore.signal()
         })
         task.resume()
+        semaphore.wait()
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

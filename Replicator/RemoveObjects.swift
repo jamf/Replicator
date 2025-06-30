@@ -32,46 +32,13 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             Counter.shared.crud[endpointType]!["total"] = endpointCount
         }
         
-        removeMeterQ.maxConcurrentOperationCount = 4
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        removeMeterQ.addOperation { [self] in
-            lockQueue.async { [self] in
-                print("[removeEndpointQueue] add \(endpointType) with id \(endPointID) to removeArray")
-                removeArray.append(ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false))
-//                print("[removeEndpointQueue] added \(endpointType) with id \(endPointID) to removeArray, removeArray.count: \(removeArray.count)")
-            }
-            var breakQueue = false
-            lockQueue.async { [self] in
-                while removeArray.count > 0 {
-//                    print("[removeEndpointsQueue] 1 Counter.shared.pendingSend: \(Counter.shared.pendingSend), removeArray.count: \(removeArray.count)")
-                    if Counter.shared.pendingSend < removeMeterQ.maxConcurrentOperationCount && removeArray.count > 0 {
-                        Counter.shared.pendingSend += 1
-//                        updatePendingCounter(caller: #function.short, change: 1)
-                        usleep(10)
-                        removeArray = removeArray.sorted { $0.destEpId > $1.destEpId }
-                        let nextEndpoint = removeArray.remove(at: 0)
+        SendQueue.shared.addOperation { [self] in
+            
+            let theObject = ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false)
                         
-                        print("[removeEndpointsQueue] call removeEndpoints to remove \(endpointType) with id: \(nextEndpoint.destEpId)")
-                        capi(endpointType: nextEndpoint.endpointType, endPointID: "\(nextEndpoint.destEpId)", endpointName: nextEndpoint.endPointXml, endpointCurrent: nextEndpoint.endpointCurrent, endpointCount: nextEndpoint.endpointCount) {
-                            (result: String) in
-                            
-                                Counter.shared.pendingSend -= 1
-                            if result == "-1" {
-//                                Counter.shared.pendingSend -= 1
-                                breakQueue = true
-                            } //else {
-//                                updatePendingCounter(caller: #function.short, change: -1)
-//                            }
-                            semaphore.signal()
-                        }
-                    } else {
-                        print("[removeEndpointsQueue] 2 Counter.shared.pendingSend: \(Counter.shared.pendingSend), removeArray.count: \(removeArray.count)")
-                        sleep(1)
-                        if Counter.shared.pendingSend == 0 && removeArray.count == 0 && breakQueue { break }
-                    }
-                    semaphore.wait()
-                }   // while Counter.shared.pendingSend > 0 || removeArray.count > 0
+            print("[removeEndpointsQueue] call removeEndpoints to remove \(endpointType) with id: \(theObject.destEpId)")
+            capi(endpointType: theObject.endpointType, endPointID: "\(theObject.destEpId)", endpointName: theObject.endPointXml, endpointCurrent: theObject.endpointCurrent, endpointCount: theObject.endpointCount) {
+                (result: String) in
             }
         }
     }
@@ -188,8 +155,13 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 print("[apiCall]")
 
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                
+                let semaphore = DispatchSemaphore(value: 0)
+                
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                     (data, response, error) -> Void in
+                    
+                    defer { semaphore.signal() }
                     session.finishTasksAndInvalidate()
                     
                     completion("\(endPointID)")
@@ -322,6 +294,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                     }
                 })  // let task = session.dataTask - end
                 task.resume()
+                
+                // Wait until task completes before exiting the Operation
+                semaphore.wait()
             }   // removeObjectQ.addOperation - end
         }
     }
