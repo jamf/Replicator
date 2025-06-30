@@ -77,6 +77,7 @@ class Json: NSObject, URLSessionDelegate {
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: { [self]
                 (data, response, error) -> Void in
+                defer { semaphore.signal() }
                 destSession.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     WriteToLog.shared.message("[Json.getRecord] \(jsonRequest.httpMethod) status code: \(httpResponse.statusCode)")
@@ -107,7 +108,6 @@ class Json: NSObject, URLSessionDelegate {
                     WriteToLog.shared.message("[Json.getRecord] unknown response from \(existingDestUrl)")
                     completion([:])
                 }   // if let httpResponse - end
-                semaphore.signal()
                 if error != nil {
                 }
             })  // let task = destSession - end

@@ -422,6 +422,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                         // start upload process
                         URLCache.shared.removeAllCachedResponses()
                         let task = session.dataTask(with: request, completionHandler: { [self] (data, response, error) -> Void in
+                            defer { semaphore.signal() }
                             session.finishTasksAndInvalidate()
             //                if let httpResponse = response as? HTTPURLResponse {
                             if let _ = (response as? HTTPURLResponse)?.statusCode {
@@ -475,8 +476,6 @@ class IconDelegate: NSObject, URLSessionDelegate {
 
                             completion(newId)
                             // upload checksum - end
-                            
-                            semaphore.signal()
                         })   // let task = session - end
 
     //                    let uploadObserver = task.progress.observe(\.fractionCompleted) { progress, _ in
@@ -498,11 +497,12 @@ class IconDelegate: NSObject, URLSessionDelegate {
             
             WriteToLog.shared.message("[iconMigrate.\(action)] setting icon for \(createDestUrl)")
             
-            theIconsQ.maxConcurrentOperationCount = 2
+//            theIconsQ.maxConcurrentOperationCount = 2
             let semaphore    = DispatchSemaphore(value: 0)
             let encodedXML   = iconToUpload.data(using: String.Encoding.utf8)
-                
-            self.theIconsQ.addOperation {
+             
+            SendQueue.shared.addOperation {
+//            self.theIconsQ.addOperation {
             
                 let encodedURL = URL(string: createDestUrl)
                 let request = NSMutableURLRequest(url: encodedURL! as URL)
@@ -526,6 +526,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                     (data, response, error) -> Void in
+                    defer { semaphore.signal() }
                     session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         
@@ -547,12 +548,9 @@ class IconDelegate: NSObject, URLSessionDelegate {
                     if LogLevel.debug { WriteToLog.shared.message("[iconMigrate.\(action)] POST or PUT Operation: \(request.httpMethod)") }
                     
                     iconNotification()
-                    
-                    semaphore.signal()
                 })
                 task.resume()
                 semaphore.wait()
-
             }   // theUploadQ.addOperation - end
             // end upload procdess
                     

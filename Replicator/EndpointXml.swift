@@ -236,7 +236,8 @@ class EndpointXml: NSObject, URLSessionDelegate {
                 myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
                 myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
                 
-                endpointsIdQ.async {
+                SourceGetQueue.shared.addOperation {
+//                endpointsIdQ.async {
             
                     if LogLevel.debug { WriteToLog.shared.message("[getById] fetching XML from: \(myURL)") }
                     //                print("NSURL line 3")
@@ -258,8 +259,11 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     print("[apiCall]")
             
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                    
+                    let semaphore = DispatchSemaphore(value: 0)
                     let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
                         (data, response, error) -> Void in
+                        defer { semaphore.signal() }
                         session.finishTasksAndInvalidate()
                         completion(destEpName)
                         
@@ -363,13 +367,12 @@ class EndpointXml: NSObject, URLSessionDelegate {
                                 }
                             }
                         }
-//                                semaphore.signal()
                         if error != nil {
                         }
                     })  // let task = session - end
                     //print("GET")
                     task.resume()
-//                            semaphore.wait()
+                    semaphore.wait()
                 }   // endpointsIdQ - end
             }
         }

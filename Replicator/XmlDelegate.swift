@@ -33,7 +33,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             let destEncodedURL = URL(string: existingDestUrl)
             let xmlRequest     = NSMutableURLRequest(url: destEncodedURL! as URL)
             
-            let semaphore = DispatchSemaphore(value: 1)
+            let semaphore = DispatchSemaphore(value: 0)
             getRecordQ.maxConcurrentOperationCount = 3
             getRecordQ.addOperation {
                 
@@ -58,8 +58,10 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 }
                 
                 let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
+                
                 let task = destSession.dataTask(with: xmlRequest as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
+                    defer { semaphore.signal() }
                     destSession.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
                         if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
@@ -76,12 +78,12 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                         WriteToLog.shared.message("[Xml.apiAction] error getting XML for \(existingDestUrl)")
                         completion((0,""))
                     }   // if let httpResponse - end
-                    semaphore.signal()
                     if error != nil {
                     }
                 })  // let task = destSession - end
                 //print("GET")
                 task.resume()
+                semaphore.wait()
             }   // getRecordQ - end
         } else {
             completion((200,""))
