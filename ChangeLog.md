@@ -1,5 +1,10 @@
 # Replicator - Change Log
 
+**v8.1.1**: 2025-06-30<br>
+Address issues saving/displaying local file source path, show/hide credentials between launches. 
+Address issue #123, exporting Patch Management, API roles / clients.
+Better handling of concurrent requests and migration order.
+
 **v8.1.0**: 2025-06-09<br>
 Fix issue #122, username getting removed if URL contains a trailing /.
 Fix app always running in debug mode.
