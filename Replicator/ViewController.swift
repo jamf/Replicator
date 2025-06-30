@@ -44,6 +44,8 @@ final class Counter {
     private var _crud = [String:[String:Int]]()
     private var _summary = [String:[String:[String]]]()
     
+    var completedObjectTypes: Set<String> = []
+    
     var createRetry          = [String:Int]()
     var progressArray        = [String:Int]() // track if post/put was successful
     var postSuccess          = 0
@@ -4733,6 +4735,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 Iconfiles.policyDict.removeAll()
                 Iconfiles.pendingDict.removeAll()
+                Counter.shared.completedObjectTypes.removeAll()
                 
                 if Setting.fullGUI {
                     DispatchQueue.main.async { [self] in
@@ -4864,13 +4867,19 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             if getNext {
                 getNodesComplete += 1
+                if !Counter.shared.completedObjectTypes.contains(where: { $0 == adjEndpoint }) {
+                    var finalType = adjEndpoint.replacingOccurrences(of: "smart", with: "")
+                    finalType = finalType.replacingOccurrences(of: "static", with: "")
+                    Counter.shared.completedObjectTypes.insert(finalType)
+                    print("[getStatusUpdate] completedObjectTypes: \(Counter.shared.completedObjectTypes)")
+                }
             }
             
             print("[getStatusUpdate] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
-            if getNodesComplete == ToMigrate.rawCount && export.saveOnly {
+            if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ == ToMigrate.rawCount && export.saveOnly && SourceGetQueue.shared.operationQueue.operationCount == 0  {
                 runComplete()
             } else {
-                if getNodesComplete < ToMigrate.rawCount && getNext {
+                if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ < ToMigrate.rawCount && getNext {
                     print("[getStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                 }
@@ -4909,7 +4918,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         print("[putStatusUpdate] adjEndpoint: \(adjEndpoint)")
         
-        
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         
         if Counter.shared.send[adjEndpoint] == nil {
@@ -4917,12 +4925,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         } else {
             Counter.shared.send[adjEndpoint]!["put"]! /*= newPutTotal*/ += 1
         }
-        var newPutTotal = Counter.shared.send[adjEndpoint]!["put"]!
-//        if putCounters[adjEndpoint] == nil {
-//            putCounters[adjEndpoint] = ["put": /*newPutTotal*/ 1]
-//        } else {
-//            putCounters[adjEndpoint]!["put"]! /*= newPutTotal*/ += 1
-//        }
+        let newPutTotal = Counter.shared.send[adjEndpoint]!["put"]!
         
 //        print("[putStatusUpdate.counter]  create: \(Counter.shared.summary[adjEndpoint]?["create"]?.count ?? 0)")
 //        print("[putStatusUpdate.counter]  update: \(Counter.shared.summary[adjEndpoint]?["update"]?.count ?? 0)")
@@ -4952,15 +4955,18 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 default:
                     break
             }
-//            getNext = !(smartComputerGrpsSelected && staticComputerGrpsSelected && endpoint == "smartcomputergroups") ||
-//            !(smartIosGrpsSelected && staticIosGrpsSelected && endpoint == "mobiledevicegroups") ||
-//            !(smartUserGrpsSelected && staticUserGrpsSelected && endpoint == "usergroups")
+            
             if getNext {
                 nodesComplete += 1
+                if !Counter.shared.completedObjectTypes.contains(where: { $0 == adjEndpoint }) {
+                    var finalType = adjEndpoint.replacingOccurrences(of: "smart", with: "")
+                    finalType = finalType.replacingOccurrences(of: "static", with: "")
+                    Counter.shared.completedObjectTypes.insert(finalType)
+                }
             }
             WriteToLog.shared.message("[putStatusUpdate] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
             print("[putStatusUpdate] \(adjEndpoint) nodesComplete: \(nodesComplete) - put ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
-            if nodesComplete == ToMigrate.rawCount {
+            if Counter.shared.completedObjectTypes.count /*nodesComplete*/ == ToMigrate.rawCount {
                 if !Setting.fullGUI {
                     nodesMigrated = nodesComplete
                 }

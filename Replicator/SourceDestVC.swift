@@ -945,9 +945,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
         if !hideGui {
             hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
-            hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
-//            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
-            showUrlOnly(hideCreds_button.state.rawValue == 0)
+            hideCreds_button.image = (hideCreds_button.state == .off) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
+            showUrlOnly(hideCreds_button.state == .off)
 //            source_jp_server_field.becomeFirstResponder()
         }
         
