@@ -7,11 +7,11 @@
 
 Download [Replicator](https://github.com/jamf/Replicator/releases/latest/download/Replicator.zip)</br>
 
-A tool to synchronize configurations between Jamf Pro servers. Export configurations and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete configurations from a server.
+A tool to synchronize objects between Jamf Pro servers. Export objects and save locally, then upload them to another Jamf Pro server. You can also use the tool to delete objects from a server.
 
 ![image](./Replicator/images/replicator1.png "Replicator")
 
-Migrate items from one Jamf server, or XML file(s), to another.  If an item (based on name) within a category exists on both source and destination, the destination item will be updated with values from the source server.
+Replicate items from one Jamf server, or XML file(s), to another.  If an object (based on name) exists on both source and destination, the destination object will be updated with values from the source server.
 </br></br>
 
 Username and password fields can be hidden/shown using the disclosure tringle on the left.
