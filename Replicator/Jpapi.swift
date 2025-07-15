@@ -152,7 +152,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
-        print("[apiCall]")
+        print("")
         
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session
@@ -166,11 +166,14 @@ class Jpapi: NSObject, URLSessionDelegate {
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             
-            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+            let json = try? JSONSerialization.jsonObject(with: data ?? Data(), options: .allowFragments)
 //            print("[Jpaapi.action] Api response for \(endpoint): \(String(data: data ?? Data(), encoding: .utf8))")
-
+            
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                    
+                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+        //            print("[Jpaapi.action] Api response for \(endpoint): \(String(data: data ?? Data(), encoding: .utf8))")
                     
 //                    print("[jpapi] endpoint: \(endpoint)")
 
@@ -199,7 +202,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                             }
                         }
                         
-                        if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.urlToFqdn) {
+                        if sessionCookie != nil && (sessionCookie?.domain == JamfProServer.destination.fqdnFromUrl) {
                             WriteToLog.shared.message("[Jpapi.action] set cookie (name:value) \(String(describing: cookieName)):\(String(describing: sessionCookie!.value)) for \(String(describing: sessionCookie!.domain))")
                             JamfProServer.sessionCookie.append(sessionCookie!)
                         } else {
@@ -213,7 +216,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                         return
                     }
                     
-//                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                     if endpoint == "sites" {
                         if let allSites = json as? [[String: Any]] {
                             if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] Data retrieved from \(urlString).") }
@@ -298,6 +300,7 @@ class Jpapi: NSObject, URLSessionDelegate {
     func getAll(whichServer: String, theEndpoint: String, whichPage: Int, completion: @escaping (_ result: [Any]) -> Void) {
         logFunctionCall()
         
+        var existingObjectCount = 0
         switch theEndpoint {
         case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations":
             print("[getAll] look for \(theEndpoint)")
@@ -324,8 +327,10 @@ class Jpapi: NSObject, URLSessionDelegate {
                                     if whichServer == "source" || WipeData.state.on {
                                         if theEndpoint == "api-roles" {
                                             ApiRoles.source.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
+                                            existingObjectCount = ApiRoles.source.count
                                         } else {
                                             ApiIntegrations.source.append(ApiIntegration(id: id, displayName: name, enabled: theObject["enabled"] as? Bool ?? false,accessTokenLifetimeSeconds: theObject["accessTokenLifetimeSeconds"] as? Int ?? 0,appType: theObject["appType"] as? String ?? "", clientId: theObject["clientId"] as? String ?? "", authorizationScopes: theObject["authorizationScopes"] as? [String] ?? []))
+                                            existingObjectCount = ApiIntegrations.source.count
                                         }
                                     } else {
                                         if theEndpoint == "api-roles" {
@@ -337,10 +342,12 @@ class Jpapi: NSObject, URLSessionDelegate {
 //                                                    print("[Jpapi.getAll] role-privileges: \(self.rolePrivileges)")
                                                 }
                                                 ApiRoles.destination.append(ApiRole(id: id, displayName: name, privileges: theObject["privileges"] as? [String] ?? []))
+                                                existingObjectCount = ApiRoles.source.count
                                             }
                                             havePrivileges = true
                                         } else {
                                             ApiIntegrations.destination.append(ApiIntegration(id: id, displayName: name, enabled: theObject["enabled"] as? Bool ?? false,accessTokenLifetimeSeconds: theObject["accessTokenLifetimeSeconds"] as? Int ?? 0,appType: theObject["appType"] as? String ?? "", clientId: theObject["clientId"] as? String ?? "", authorizationScopes: theObject["authorizationScopes"] as? [String] ?? []))
+                                            existingObjectCount = ApiIntegrations.source.count
                                         }
                                     }
                                 }
@@ -368,6 +375,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                             existingObjects.append(ExistingObject(type: theEndpoint, id: idNum, name: packageName, fileName: fileName))
                                         }
                                     }
+                                    existingObjectCount = existingObjects.count
                                 } else {
                                     Packages.destination.append(contentsOf: somePackages)
                                     print("getAll: somePackages destination count: \(Packages.destination.count)")
@@ -387,6 +395,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                         }
                                     }
                                 }
+                                existingObjectCount = existingObjects.count
                             } catch {
                                 print("[getAll] error decoding \(theEndpoint): \(error)")
                             }
@@ -427,8 +436,21 @@ class Jpapi: NSObject, URLSessionDelegate {
                     print("[getAll] page \(whichPage + 1) of \(pages) complete")
                     
                     if (whichPage + 1 >= pages ) {
-                        print("[getAll] return to caller, record count: \(existingObjects.count)")
-                        completion(existingObjects)
+                        print("[getAll] return to caller, record count: \(existingObjectCount)")
+                        switch theEndpoint {
+                        case "api-roles":
+                            completion(whichServer == "source" ? ApiRoles.source : ApiRoles.destination)
+                        case "api-integrations":
+                            completion(whichServer == "source" ? ApiIntegrations.source : ApiIntegrations.destination)
+                        case "categories":
+                            completion(whichServer == "source" ? Categories.source : Categories.destination)
+                        case "policy-details":
+                            completion(whichServer == "source" ? PatchPoliciesDetails.source : PatchPoliciesDetails.destination)
+                        case "sites":
+                            completion(whichServer == "source" ? JamfProSites.source : JamfProSites.destination)
+                        default:
+                            completion(existingObjects)
+                        }
                     } else {
                         getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage + 1) {
                             returnedResults in
@@ -572,7 +594,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
-        print("[apiCall]")
+        print("")
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         
@@ -702,7 +724,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(endpointUrl.absoluteString)")
-        print("[apiCall]")
+        print("")
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         

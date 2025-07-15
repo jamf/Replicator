@@ -402,9 +402,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         case "getStatusUpdate":
             if let endpoint = info["endpoint"] as? String, let total = info["total"] as? Int, let index = info["index"] as? Int {
                 updateGetStatus(endpoint: endpoint, total: total, index: index)
-//                putStatusUpdate(endpoint: endpoint, total: total)
             }
         case "putStatusUpdate":
+            print("[ExportItem.export] rawExport update UI for \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
+            
             if let endpoint = info["endpoint"] as? String, let total = info["total"] as? Int {
                 putStatusUpdate(endpoint: endpoint, total: total)
             }
@@ -443,7 +444,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func sendMessage(_ message: String) {
         logFunctionCall()
         print("[sendMessage] message: \(message)")
-        message_TextField.stringValue = message
+        DispatchQueue.main.async {
+            self.message_TextField.stringValue = message
+        }
     }
     
     private let lockQueue = DispatchQueue(label: "lock.queue")
@@ -914,28 +917,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
              switch selectedTab {
              case "General":
                  self.activeTab_TabView.selectTabViewItem(at: 0)
-//                 self.generalTab_NSButton.image = self.tabImage[1]
-//                 self.macosTab_NSButton.image = self.tabImage[2]
-//                 self.iosTab_NSButton.image = self.tabImage[4]
-//                 self.selectiveTab_NSButton.image = self.tabImage[6]
              case "macOS":
                  self.activeTab_TabView.selectTabViewItem(at: 1)
-//                 self.generalTab_NSButton.image = self.tabImage[0]
-//                 self.macosTab_NSButton.image = self.tabImage[3]
-//                 self.iosTab_NSButton.image = self.tabImage[4]
-//                 self.selectiveTab_NSButton.image = self.tabImage[6]
              case "iOS":
                  self.activeTab_TabView.selectTabViewItem(at: 2)
-//                 self.generalTab_NSButton.image = self.tabImage[0]
-//                 self.macosTab_NSButton.image = self.tabImage[2]
-//                 self.iosTab_NSButton.image = self.tabImage[5]
-//                 self.selectiveTab_NSButton.image = self.tabImage[6]
              default:
                  self.activeTab_TabView.selectTabViewItem(at: 3)
-//                 self.generalTab_NSButton.image = self.tabImage[0]
-//                 self.macosTab_NSButton.image = self.tabImage[2]
-//                 self.iosTab_NSButton.image = self.tabImage[4]
-//                 self.selectiveTab_NSButton.image = self.tabImage[7]
              }   // swtich - end
          }   // DispatchQueue - end
      }   // func setTab_fn - end
@@ -1379,6 +1366,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             JamfProServer.url["source"] = JamfProServer.source
+//            print("JamfProServer.url: \(JamfProServer.url)")
             
             JamfPro.shared.checkURL2(whichServer: "dest", serverURL: JamfProServer.destination)  { [self]
                 (result: Bool) in
@@ -1797,6 +1785,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     default: break
                     }
                     ToMigrate.total = ToMigrate.objects.count
+                    print("[startMigrating] ToMigrate.total: \(ToMigrate.total)")
                     if !fileImport {
                         if smartUserGrps_button.state.rawValue == 1 && staticUserGrps_button.state.rawValue == 1 {
                             ToMigrate.total += 1
@@ -1994,10 +1983,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     Counter.shared.progressArray["accounts"] = 0 // this is the recognized end point
                 case "patch-software-title-configurations":
                     Counter.shared.progressArray["patch-software-title-configurations"] = 0
-                    Counter.shared.crud["patch-software-title-configurations"]           = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                    Counter.shared.summary["patch-software-title-configurations"]        = ["create":[], "update":[], "fail":[]]
-                    self.getCounters["patch-software-title-configurations"]        = ["get":0]
-                    self.putCounters["patch-software-title-configurations"]        = ["put":0]
+                    Counter.shared.crud["patch-software-title-configurations"]          = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+                    Counter.shared.summary["patch-software-title-configurations"]       = ["create":[], "update":[], "fail":[]]
+                    self.getCounters["patch-software-title-configurations"]             = ["get":0]
+                    self.putCounters["patch-software-title-configurations"]             = ["put":0]
+//                case "patchPolicyDetails":
+                    Counter.shared.progressArray["patchpolicies"] = 0
+                    Counter.shared.crud["patchpolicies"]          = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+                    Counter.shared.summary["patchpolicies"]       = ["create":[], "update":[], "fail":[]]
+                    self.getCounters["patchpolicies"]             = ["get":0]
+                    self.putCounters["patchpolicies"]             = ["put":0]
                 default:
                     Counter.shared.progressArray["\(currentNode)"] = 0
                     Counter.shared.crud[currentNode] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -2230,7 +2225,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             DispatchQueue.main.async {
                                 WriteToLog.shared.message("[getEndpoints] Exporting raw JSON for patch policy details")
                                 let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                ExportItem.shared.export(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
+                                ExportItem.shared.exportObject(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
                             }
                         }
                     }
@@ -2705,7 +2700,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }   // if !WipeData.state.on else - end
                                     counter+=1
                                 }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
-                                RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                
+//                                RemoveObjects.shared.queue(endpointType: endpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
+                                
                             } else {
                                 // populate source server under the selective tab - bulk
                                 //                                                                        print("[getEndpoints] AvailableObjsToMig.byId: \(AvailableObjsToMig.byId)")
@@ -2737,9 +2734,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }   // if UiVar.goSender else - end
                             // make into a func - end
                             
-//                                if nodeIndex < nodesToMigrate.count - 1 {
-//                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                                }
                             if !(Setting.onlyCopyMissing || Setting.onlyCopyExisting) {
                                 completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                             }
@@ -2754,9 +2748,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate(endpoint: endpoint, total: 0)
                         
-//                            if nodeIndex < nodesToMigrate.count - 1 {
-//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                            }
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
 
@@ -2868,9 +2859,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 }   // if UiVar.goSender else - end
                                 // make into a func - end
                                 
-//                                if nodeIndex < nodesToMigrate.count - 1 {
-//                                    readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                                }
                                 if !(Setting.onlyCopyMissing || Setting.onlyCopyExisting) {
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                 }
@@ -2884,17 +2872,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             updateGetStatus(endpoint: endpoint, total: 0)
                             putStatusUpdate(endpoint: endpoint, total: 0)
                             
-//                            if nodeIndex < nodesToMigrate.count - 1 {
-//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                            }
                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0 - end
                     } else {   // end if let endpointInfo
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate(endpoint: endpoint, total: 0)
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                 case "patch-software-title-configurations":
@@ -2905,7 +2888,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     } catch {
                         print("error getting patch software title configurations: \(error)")
                     }
-                    //                    PatchTitleConfigurations.source = result as? [PatchSoftwareTitleConfiguration] ?? []   //try! JSONDecoder().decode(PatchSoftwareTitleConfigurations.self, from: data ?? Data())
                     
                     print("[getEndpoints] found \(PatchTitleConfigurations.source.count) patch objects on the source server")
                     AvailableObjsToMig.byId.removeAll()
@@ -2936,9 +2918,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             (result: (String,String)) in
                             print("[getEndpoints] fetch patch management dependencies from source server")
                             PatchDelegate.shared.getDependencies(whichServer: "source") { [self] result in
-                                message_TextField.stringValue = ""
+                                sendMessage("")
                                 PatchDelegate.shared.getDependencies(whichServer: "dest") { [self] result in
-                                    message_TextField.stringValue = ""
+                                    sendMessage("")
                                     
                                     var counter = 1
                                     if UiVar.goSender == "goButton" || !Setting.fullGUI {
@@ -2947,8 +2929,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             DispatchQueue.main.async {
                                                 WriteToLog.shared.message("[getEndpoints] Exporting raw JSON for patch policy details")
                                                 let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                                ExportItem.shared.export(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
-                                                //                                                            ExportItem.shared.patchmanagement(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
+                                                ExportItem.shared.exportObject(node: "patchPolicyDetails", object: PatchPoliciesDetails.source, format: exportFormat)
                                             }
                                         }
                                         
@@ -3180,16 +3161,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             
                             Endpoints.read += 1
                         }   // if endpointCount > 0 - end
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {   // end if let endpointInfo
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate(endpoint: endpoint, total: 0)
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -3446,16 +3423,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //                                                self.rmDELETE()
                             //                                            }
                         }   // else if endpointCount > 0 - end
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     } else {  // if let endpointInfo = endpointJSON["computer_groups"] - end
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate(endpoint: endpoint, total: 0)
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -3679,7 +3652,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                     EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                    //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
@@ -3724,9 +3696,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         }   // for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId
                                     }   // if UiVar.goSender else - end
                                     
-//                                    if nodeIndex < nodesToMigrate.count - 1 {
-//                                        self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                                    }
                                     completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                                     
                                 }   // existingEndpoints - end
@@ -3742,17 +3711,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             //                                                self.rmDELETE()
                             ////                                                completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                             //                                            }
-//                            if nodeIndex < nodesToMigrate.count - 1 {
-//                                self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                            }
+                            
                             completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                         }   // if endpointCount > 0 - end
                     } else {   // end if let buildings, departments...
                         updateGetStatus(endpoint: endpoint, total: 0)
                         putStatusUpdate(endpoint: endpoint, total: 0)
-//                        if nodeIndex < nodesToMigrate.count - 1 {
-//                            self.readNodes(nodesToMigrate: nodesToMigrate, nodeIndex: nodeIndex+1)
-//                        }
+                        
                         completion(["Got endpoint - \(endpoint)", "\(endpointCount)"])
                     }
                     
@@ -4148,7 +4113,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 case "patch-software-title-configurations":
                                     PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
-                                        self.message_TextField.stringValue = ""
+                                        self.sendMessage("")
                                         let data = l_fileContents.data(using: .utf8)!
                                         var jsonData = [String:Any]()
                                         var action = "update"
@@ -4215,7 +4180,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 case "patch-software-title-configurations":
                                     PatchDelegate.shared.getDependencies(whichServer: "dest") { result in
-                                        self.message_TextField.stringValue = ""
+                                        self.sendMessage("")
                                         let data = l_fileContents.data(using: .utf8)!
                                         var jsonData = [String:Any]()
                                         var action = "create"
@@ -4876,14 +4841,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             print("[getStatusUpdate] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
-            if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ == ToMigrate.rawCount && export.saveOnly && SourceGetQueue.shared.operationQueue.operationCount == 0  {
-                runComplete()
-            } else {
-                if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ < ToMigrate.rawCount && getNext {
+//            if Counter.shared.completedObjectTypes.count == ToMigrate.rawCount && export.saveOnly && SourceGetQueue.shared.operationQueue.operationCount == 0 && getNext  {
+//                runComplete()
+//            } else {
+//                if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ < ToMigrate.rawCount && getNext {
+                if ToMigrate.objects.indices.contains(getNodesComplete) && getNext {
                     print("[getStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                 }
-            }
+//            }
         }
         
         if Setting.fullGUI && totalCount > 0 {
@@ -4974,7 +4940,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 runComplete()
             } else {
                 print("[putStatusUpdate] getNext: \(getNext), WipeData.state.on: \(WipeData.state.on)")
-                if nodesComplete < ToMigrate.rawCount && getNext && WipeData.state.on {
+                if ToMigrate.objects.indices.contains(nodesComplete) && getNext && WipeData.state.on {
+//                if nodesComplete < ToMigrate.rawCount && getNext && WipeData.state.on {
                     print("[putStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: nodesComplete)
                 }
@@ -5090,7 +5057,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).") }
                             DispatchQueue.main.async {
-                                XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
+                                XmlDelegate.shared.save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
                         }   // if export.saveRawXml - end
                         // upload icon if not in save only mode
@@ -5506,7 +5473,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 print("[apiCall] \(#function.description) method: \(request.httpMethod)")
                 print("[apiCall] \(#function.description) headers: \(headers)")
                 print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                print("[apiCall]")
+                print("")
                 
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
@@ -5796,7 +5763,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         theIconsQ.cancelAllOperations()
         readFilesQ.cancelAllOperations()
         
-        XmlDelegate().getRecordQ.cancelAllOperations()
+        XmlDelegate.shared.getRecordQ.cancelAllOperations()
         
         if Setting.fullGUI {
             WriteToLog.shared.message("Migration was manually stopped.\n")
@@ -6065,7 +6032,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     override func viewDidLoad() {
         logFunctionCall()
         super.viewDidLoad()
-        print("[\(#function.description)] loaded")
                 
         srcSrvTableView.delegate = self
         srcSrvTableView.tableColumns.forEach { (column) in
@@ -6090,6 +6056,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
 //        jamfpro = JamfPro(controller: self)
         
+        ExportItem.shared.updateUiDelegate  = self
+        XmlDelegate.shared.updateUiDelegate = self
+        
         exportedFilesUrl = URL(string: userDefaults.string(forKey: "saveLocation") ?? "")
         
         // read maxConcurrentOperationCount setting
@@ -6107,7 +6076,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             selectiveFilter_TextField.layer?.borderWidth  = 0.5
             selectiveFilter_TextField.layer?.cornerRadius = 0.0
             selectiveFilter_TextField.layer?.borderColor  = .black
-            
+                        
             
 //            siteMigrate_button.attributedTitle = NSMutableAttributedString(string: "Site", attributes: [NSAttributedString.Key.foregroundColor: NSColor.white, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 14)])
 
@@ -6719,6 +6688,10 @@ extension String {
     }
     var baseUrl: String {
         get {
+            if self.prefix(1) == "/" {
+                return self
+            }
+                
             let tmpArray: [Any] = self.components(separatedBy: "/")
             if tmpArray.count > 2 {
                 if let serverUrl = tmpArray[2] as? String {
@@ -6728,12 +6701,7 @@ extension String {
             return ""
         }
     }
-//    var noPort: String {
-//        get {
-//            let stringArray = self.components(separatedBy: ":")
-//            return stringArray[0]
-//        }
-//    }
+    
     var prettyPrint: String {
         get {
             var formattedXml: String = ""
@@ -6771,18 +6739,18 @@ extension String {
             return fixedUrl
         }
     }
-    var urlToFqdn: String {
-        get {
-            var fqdn = self
-            if fqdn != "" {
-                fqdn = fqdn.replacingOccurrences(of: "http://", with: "")
-                fqdn = fqdn.replacingOccurrences(of: "https://", with: "")
-                let fqdnArray = fqdn.split(separator: "/")
-                fqdn = "\(fqdnArray[0])"
-            }
-            return fqdn
-        }
-    }
+//    var urlToFqdn: String {
+//        get {
+//            var fqdn = self
+//            if fqdn != "" {
+//                fqdn = fqdn.replacingOccurrences(of: "http://", with: "")
+//                fqdn = fqdn.replacingOccurrences(of: "https://", with: "")
+//                let fqdnArray = fqdn.split(separator: "/")
+//                fqdn = "\(fqdnArray[0])"
+//            }
+//            return fqdn
+//        }
+//    }
     var xmlDecode: String {
         get {
             let newString = self.replacingOccurrences(of: "&amp;", with: "&")

@@ -12,6 +12,11 @@ import OSLog
 class ExportItem: NSObject {
     
     static let shared = ExportItem()
+    var updateUiDelegate: UpdateUiDelegate?
+    func updateView(_ info: [String: Any]) {
+        logFunctionCall()
+        updateUiDelegate?.updateUi(info: info)
+    }
     
     fileprivate func saveLocation(_ format: String) -> String {
         // Create folder to store objectString files if needed - start
@@ -36,7 +41,7 @@ class ExportItem: NSObject {
         return saveFolder
     }
     
-    func export(node: String, object: Any/*, endpointPath: String*/, theName: String = "", id: String = "", format: String = "raw") {
+    func exportObject(node: String, object: Any, theName: String = "", id: String = "", format: String = "raw") {
         
         logFunctionCall()
         
@@ -107,29 +112,10 @@ class ExportItem: NSObject {
                             exportFilename = "\(theName)-\(id).xml"
                             let data = xmlDoc.xmlData(options:.nodePrettyPrint)
                             objectAsString = String(data: data, encoding: .utf8)!
-                            //                print("policy xml:\n\(formattedXml)")
-                            
-//                            do {
-//                                try formattedXml.write(toFile: endpointPath+"/"+exportFilename, atomically: true, encoding: .utf8)
-//                                if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
-//                            } catch {
-//                                if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
-//                                return
-//                            }
                         }   // if let prettyXml - end
                     }
                 }
             }
-            
-//            if node == "patchPolicyDetails" {
-//                let t = object as? [PatchPolicyDetail]
-//                let prettyPrintedData = try encoder.encode(t)
-//                rawExport = String(data: prettyPrintedData, encoding: .utf8)!
-//            } else {
-//                let t = object as? PatchSoftwareTitleConfiguration
-//                let prettyPrintedData = try encoder.encode(t)
-//                rawExport = String(data: prettyPrintedData, encoding: .utf8)!
-//            }
             
             print("[ExportItem.export] rawExport for node \(node): \(objectAsString)")
             
@@ -142,8 +128,15 @@ class ExportItem: NSObject {
             
             try objectAsString.write(toFile: endpointPath+"/"+exportFilename, atomically: true, encoding: .utf8)
             if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] saved to: \(endpointPath)") }
+            
+
         } catch {
             if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
+        }
+        
+        if export.saveOnly {
+            let fixedNode = (node == "patchPolicyDetails") ? "patchpolicies" : node
+            updateView(["function": "putStatusUpdate", "endpoint": fixedNode, "total": Counter.shared.crud[fixedNode]!["total"]!])
         }
     }
 }

@@ -543,8 +543,8 @@ class Cleanup: NSObject {
             
             // update references to the Jamf server - skip if migrating files
             if JamfProServer.source.prefix(4) == "http" {
-                let regexServer = try! NSRegularExpression(pattern: JamfProServer.source.urlToFqdn, options:.caseInsensitive)
-                PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: JamfProServer.destination.urlToFqdn)
+                let regexServer = try! NSRegularExpression(pattern: JamfProServer.source.fqdnFromUrl, options:.caseInsensitive)
+                PostXML = regexServer.stringByReplacingMatches(in: PostXML, options: [], range: NSRange(0..<PostXML.utf16.count), withTemplate: JamfProServer.destination.fqdnFromUrl)
             }
             
             // set the password used in the accounts payload to jamfchangeme - start
@@ -630,7 +630,7 @@ class Cleanup: NSObject {
                 destEndpoint = theEndpoint
             }
             
-            XmlDelegate().apiAction(method: "GET", theServer: JamfProServer.destination, base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(destEndpoint)/id/\(destEpId)") {
+            XmlDelegate.shared.apiAction(method: "GET", theServer: JamfProServer.destination, base64Creds: JamfProServer.base64Creds["dest"] ?? "", theEndpoint: "\(destEndpoint)/id/\(destEpId)") {
                 (xmlResult: (Int,String)) in
                 let (_, fullXML) = xmlResult
                 
@@ -701,7 +701,7 @@ class Cleanup: NSObject {
         logFunctionCall()
         var rawValue = ""
         var startTag = ""
-        let siteEncoded = XmlDelegate().encodeSpecialChars(textString: site)
+        let siteEncoded = XmlDelegate.shared.encodeSpecialChars(textString: site)
         
         // get copy / move preference - start
         switch endpoint {
