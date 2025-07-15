@@ -209,7 +209,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
                         print("[apiCall] \(#function.description) headers: \(headers)")
                         print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
-                        print("[apiCall]")
+                        print("")
                 
                         let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                         

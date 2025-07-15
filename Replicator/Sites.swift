@@ -67,17 +67,16 @@ class Sites: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(serverRequest.httpMethod)")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(serverEncodedURL?.absoluteString ?? "")")
-        print("[apiCall]")
+        print("")
 
         let serverSession = Foundation.URLSession(configuration: serverConf, delegate: self, delegateQueue: OperationQueue.main)
         
-        let semaphore = DispatchSemaphore(value: 0)
         let task = serverSession.dataTask(with: serverRequest as URLRequest, completionHandler: {
             (data, response, error) -> Void in
 //            defer { semaphore.signal() }
             serverSession.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                // print("httpResponse: \(String(describing: response))")
+//                print("httpResponse: \(String(describing: response))")
                 
                 if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                     do {
@@ -101,6 +100,7 @@ class Sites: NSObject, URLSessionDelegate {
                     }  // end do/catch
                     //                        self.site_Button.isEnabled = true
                     destSiteArray = destSiteArray.sorted()
+//                    print("destSiteArray: \(destSiteArray.description)")
                     completion(destSiteArray)
                 } else {
                     // something went wrong
@@ -117,10 +117,8 @@ class Sites: NSObject, URLSessionDelegate {
                 destSiteArray = []
                 completion(destSiteArray)
             }
-            semaphore.signal()
         })  // let task = - end
         task.resume()
-        semaphore.wait()
     }
     //    --------------------------------------- grab sites - end
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

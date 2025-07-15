@@ -20,8 +20,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     
     private let lockQueue          = DispatchQueue(label: "lock.queue")
     private let putStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
-    private let removeMeterQ       = OperationQueue() //DispatchQueue(label: "com.jamf.removeEPs", qos: DispatchQoS.background)
-    private let removeObjectQ      = OperationQueue() //DispatchQueue(label: "com.jamf.removeEPs", qos: DispatchQoS.background)
+    private let removeMeterQ       = OperationQueue() 
+    private let removeObjectQ      = OperationQueue() 
     
     var removeArray          = [ObjectInfo]()
     
@@ -48,7 +48,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         logFunctionCall()
         if endPointID == "-1" && UiVar.activeTab == "Selective" {
             print("[removeEndpoints] selective - finished removing \(endpointType)")
-//            sleep(1)
             completion("-1")
             return
         }
@@ -60,13 +59,11 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         if endpointCurrent == 1 {
             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                 updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-//                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: .green)
             }
         } else {
             if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /* self.put_levelIndicatorFillColor[endpointType] */{
                 if Setting.migrateDependencies {
                     updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
-//                        self.setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent), line: \(#line)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? .green)
                 }
             }
         }
@@ -152,7 +149,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 print("[apiCall] \(#function.description) method: \(request.httpMethod)")
                 print("[apiCall] \(#function.description) headers: \(headers)")
                 print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                print("[apiCall]")
+                print("")
 
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                 
@@ -234,7 +231,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                                 Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
                                 //                        DispatchQueue.main.async { [self] in
                                 if Summary.totalCompleted > 0 {
-                                    print("[\(#function)] \(endpointType) total: \(Counter.shared.crud[endpointType]!["total"]!)")
                                     updateView(["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                 }
                                 

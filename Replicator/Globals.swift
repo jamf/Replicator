@@ -314,6 +314,11 @@ public func readSettings(thePath: String = "") -> [String:Any] {
 
 public func baseUrl(_ url: String, whichServer: String) -> String {
     logFunctionCall()
+    
+    if url.prefix(1) == "/" {
+        return url
+    }
+    
     var returnedUrl = ""
     
     let tmpArray: [Any] = url.components(separatedBy: "/")

@@ -16,7 +16,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
     var getStatusDelegate: GetStatusDelegate?
     func sendGetStatus(endpoint: String, total: Int, index: Int) {
         logFunctionCall()
-        Logger.endpointXml_endPointByIdQueue.debug("call updateGetStatus")
         getStatusDelegate?.updateGetStatus(endpoint: endpoint, total: total, index: index)
     }
     var updateUiDelegate: UpdateUiDelegate?
@@ -116,28 +115,25 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     // save source JSON - start
                     if export.saveRawXml {
                         let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
-                                    print("exportRawJson: \(exportRawJson)")
+//                        print("exportRawJson: \(exportRawJson)")
                         WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
                         let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                        ExportItem.shared.export(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
-                    }
+                        ExportItem.shared.exportObject(node: endpoint, object: exportRawJson, theName: destEpName, id: "\(endpointID)", format: exportFormat)
+//                    }
                     // save source JSON - end
                     
-                    if export.saveOnly {
+//                    if export.saveOnly {
                         // check progress
                         print("[getById] node: \(endpoint)")
                         print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
                         Endpoints.countDict[endpoint]! -= 1
-                        print("[getById] \(String(describing: Endpoints.countDict[endpoint])) remaining")
+                        print("[getById] \(Endpoints.countDict[endpoint] ?? -1) remaining")
                         if Endpoints.countDict[endpoint] == 0 {
                             print("[getById] saved last \(endpoint)")
                             print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
                                 
                             if Endpoints.read >= ToMigrate.objects.count {
-                                print("[getById] zip it up")
-                                print("[\(#function)] \(#line) - finished getting \(endpoint)")
                                 updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-//                                                goButtonEnabled(button_status: true)
                             }
                         }
                     } else {
@@ -155,11 +151,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
             
             sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
             if !(sourceObject?.id ?? "").isEmpty {
-//                self.updateGetStatus(endpoint: endpoint, total: endpointCount)
-//                for theSourceObj in JamfProSites.source {
-//                    print("[getById] sourceObject?.siteId: \(theSourceObj.id),   name: \(theSourceObj.name)")
-//                }
-//                print("[getById] sourceObject?.siteId: \(sourceObject?.siteId)")
+                
                 let categoryName = Categories.source.filter { $0.id == sourceObject?.categoryId }.first?.name ?? ""
                 let siteName     = JamfProSites.source.filter { $0.id == sourceObject?.siteId }.first?.name ?? "None"
                 
@@ -195,7 +187,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                                 WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
                                 let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
 //                                exportItems(node: endpoint, objectString: jsonString, rawName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
-                                ExportItem.shared.export(node: "patch-software-title-configurations", object: instance, theName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
+                                ExportItem.shared.exportObject(node: "patch-software-title-configurations", object: instance, theName: sourceObject?.displayName ?? "", id: sourceObject?.id ?? "0", format: exportFormat)
                             }
                         }
                         // save source JSON - end
@@ -256,7 +248,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     print("[apiCall] \(#function.description) method: \(request.httpMethod)")
                     print("[apiCall] \(#function.description) headers: \(headers)")
                     print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                    print("[apiCall]")
+                    print("")
             
                     let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
                     
@@ -285,7 +277,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                                         
                                         WriteToLog.shared.message("[getById] Exporting raw XML for \(endpoint) - \(destEpName)")
                                         let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
-                                        XmlDelegate().save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
+                                        XmlDelegate.shared.save(node: endpoint, xml: exportRawXml, rawName: destEpName, id: "\(endpointID)", format: "\(exportFormat)")
                                     }
                                 }
                                 // save source XML - end

@@ -182,7 +182,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 DispatchQueue.main.async {
                     let exportTrimmedXml = (export.trimmedXmlScope) ? endPointXML:RemoveData.shared.Xml(theXML: endPointXML, theTag: "scope", keepTags: false)
                     WriteToLog.shared.message("[CreateEndpoints] Exporting trimmed XML for \(endpointType) - \(endpointName).")
-                    XmlDelegate().save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
+                    XmlDelegate.shared.save(node: endpointType, xml: exportTrimmedXml, rawName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
             }
             // save trimmed XML - end
@@ -251,7 +251,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 print("[apiCall] \(#function.description) method: \(request.httpMethod)")
                 print("[apiCall] \(#function.description) headers: \(headers)")
                 print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                print("[apiCall]")
+                print("")
                 
                 // sticky session
                 let cookieUrl = createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
@@ -663,7 +663,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     let exportTrimmedJson = (export.trimmedXmlScope) ? RemoveData.shared.Json(rawJSON: endPointJSON, theTag: ""):RemoveData.shared.Json(rawJSON: endPointJSON, theTag: "scope")
 //                    print("exportTrimmedJson: \(exportTrimmedJson)")
                     WriteToLog.shared.message("[createEndpoints.jpapi] Exporting raw JSON for \(endpointType) - \(endpointName)")
-                    ExportItem.shared.export(node: endpointType, object: exportTrimmedJson, theName: endpointName, id: "\(sourceEpId)", format: "trimmed")
+                    ExportItem.shared.exportObject(node: endpointType, object: exportTrimmedJson, theName: endpointName, id: "\(sourceEpId)", format: "trimmed")
                 }
             }
             
@@ -938,8 +938,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         }
                     }
                 }
-                
-                
                 
             }   // if !WipeData.state.on - end
         }   // SendQueue - end

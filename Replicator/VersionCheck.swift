@@ -32,7 +32,7 @@ class VersionCheck: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(versionUrl?.absoluteString ?? "")")
-        print("[apiCall]")
+        print("")
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self as URLSessionDelegate, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {

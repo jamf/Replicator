@@ -10,6 +10,13 @@ import Cocoa
 import Foundation
 
 class XmlDelegate: NSObject, URLSessionDelegate {
+    
+    static let shared = XmlDelegate()
+    var updateUiDelegate: UpdateUiDelegate?
+    func updateView(_ info: [String: Any]) {
+        logFunctionCall()
+        updateUiDelegate?.updateUi(info: info)
+    }
 
     var baseXmlFolder = ""
     var saveXmlFolder = ""
@@ -49,7 +56,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 print("[apiCall] \(#function.description) method: \(xmlRequest.httpMethod)")
                 print("[apiCall] \(#function.description) headers: \(headers)")
                 print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
-                print("[apiCall]")
+                print("")
                 
                 // sticky session
                 if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
@@ -205,6 +212,11 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                         if LogLevel.debug { WriteToLog.shared.message("[XmlDelegate.save] Problem writing \(endpointPath) folder: Error \(error)") }
                         return
                     }
+                    
+                    if export.saveOnly {
+                        updateView(["function": "putStatusUpdate", "endpoint": node, "total": Counter.shared.crud[node]!["total"]!])
+                    }
+                    
                 }   // if let prettyXml - end
             }
         }

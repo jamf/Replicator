@@ -173,14 +173,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     } else if JamfProServer.source.prefix(1) == "/" {
                         JamfProServer.importFiles = 1   // importing files
                     }
-//                    JamfProServer.url["source"] = JamfProServer.source
+
                 case "-dest","-destination":
                     index += 1
                     JamfProServer.destination = "\(CommandLine.arguments[index])"
                     if JamfProServer.destination.prefix(4) != "http" && JamfProServer.destination.prefix(1) != "/" {
                         JamfProServer.destination = "https://\(JamfProServer.destination)"
                     }
-//                    JamfProServer.url["destination"] = JamfProServer.source
+
                 case "-sourceuseclientid", "-destuseclientid":
                     index += 1
                     let useApiClient = ( "\(CommandLine.arguments[index])".lowercased() == "yes" || "\(CommandLine.arguments[index])".lowercased() == "true" ) ? 1:0

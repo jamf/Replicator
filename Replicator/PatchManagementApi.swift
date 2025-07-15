@@ -186,7 +186,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(request.httpMethod ?? "")")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(url?.absoluteString ?? "")")
-        print("[apiCall]")
+        print("")
 
 //        print("jpapi sticky session for \(serverUrl)")
         // sticky session

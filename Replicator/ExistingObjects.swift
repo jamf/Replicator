@@ -214,7 +214,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                             } catch {
                                 print("error getting patch software title configurations: \(error)")
                             }
-                            //                                    PatchTitleConfigurations.destination = try! JSONDecoder().decode(PatchSoftwareTitleConfigurations.self, from: data ?? Data())
                             
                             // add site name to patch title config
                             for i in 0..<PatchTitleConfigurations.destination.count {

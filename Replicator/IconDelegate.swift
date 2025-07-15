@@ -103,7 +103,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                             }
                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.icons] saving icon: \(ssIconName) for \(iconNode).") }
                             DispatchQueue.main.async {
-                                XmlDelegate().save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
+                                XmlDelegate.shared.save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
                         }   // if export.saveRawXml - end
                         // upload icon if not in save only mode
@@ -520,7 +520,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                 print("[apiCall] \(#function.description) method: \(request.httpMethod)")
                 print("[apiCall] \(#function.description) headers: \(headers)")
                 print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                print("[apiCall]")
+                print("")
         
                 request.httpBody = encodedXML!
                 let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)

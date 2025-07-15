@@ -3,7 +3,8 @@
 //
 
 // log stream --info --predicate 'subsystem == "com.jamf.jamf-migrator"'
-// log stream --debug --predicate 'subsystem == "com.jamf.jamf-migrator" AND category == "function"'
+// log stream --debug --predicate 'subsystem == "com.jamf.jamf-migrator" AND category == "function"' | tee -a ~/Desktop/replicator_functions.txt
+// cat ~/Desktop/replicator_functions.txt | awk '{for (i=11; i<=NF; i++) printf $i " "; print ""}' | tee -a ~/Desktop/replicator_functions1.txt
 
 import Foundation
 import OSLog
@@ -31,5 +32,5 @@ extension Logger {
 
 func logFunctionCall(file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
-    Logger.function.debug("called \(fileName.replacingOccurrences(of: ".swift", with: ""), privacy: .public): \(function, privacy: .public) [\(line, privacy: .public)]")
+    Logger.function.debug("called \(fileName.replacingOccurrences(of: ".swift", with: ""), privacy: .public).\(function, privacy: .public) [line: \(line, privacy: .public)]")
 }

@@ -67,7 +67,7 @@ class Json: NSObject, URLSessionDelegate {
         print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
         print("[apiCall] \(#function.description) headers: \(headers)")
         print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
-        print("[apiCall]")
+        print("")
         
 
         q.getRecord.maxConcurrentOperationCount = userDefaults.integer(forKey: "concurrentThreads")
