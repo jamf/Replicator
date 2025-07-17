@@ -495,6 +495,14 @@ class Cleanup: NSObject {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: "computers", keepTags: false)
             }
             //            print("\n\(endpoint) XML: \(PostXML)")
+            // fix criteria name differences between 11.17 and 11.18+
+            if isVersion(JamfProServer.version["dest"] ?? "11.17", greaterThan: "11.18.0") {
+                PostXML = PostXML.replacingOccurrences(of: "<name>Packages Installed By Installer.app/SWU</name>", with: "<name>Packages Installed by Installer.app/SWU</name>")
+                PostXML = PostXML.replacingOccurrences(of: "<name>Packages Installed By Casper</name>", with: "<name>Packages Installed by Jamf Pro</name>")
+            } else {
+                PostXML = PostXML.replacingOccurrences(of: "<name>Packages Installed by Installer.app/SWU</name>", with: "<name>Packages Installed By Installer.app/SWU</name>")
+                PostXML = PostXML.replacingOccurrences(of: "<name>Packages Installed by Jamf Pro<</name>", with: "<name>Packages Installed By Casper/name>")
+            }
             
             // migrating to another site
             if JamfProServer.toSite && JamfProServer.destSite != "" {

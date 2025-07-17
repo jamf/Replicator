@@ -296,6 +296,29 @@ public func destinationObjectExists(_ objectName: String, objectType: String) ->
     }
 }
 
+public func isVersion(_ v1: String, greaterThan v2: String) -> Bool {
+    func parseVersion(_ version: String) -> ([Int], String?) {
+        let parts = version.split(separator: "-", maxSplits: 1)
+        let versionNumbers = parts[0].split(separator: ".").compactMap { Int($0) }
+        let suffix = parts.count > 1 ? String(parts[1]) : nil
+        return (versionNumbers, suffix)
+    }
+
+    let (v1Nums, _) = parseVersion(v1)
+    let (v2Nums, _) = parseVersion(v2)
+    
+    let count = max(v1Nums.count, v2Nums.count)
+    for i in 0..<count {
+        let n1 = i < v1Nums.count ? v1Nums[i] : 0
+        let n2 = i < v2Nums.count ? v2Nums[i] : 0
+        if n1 != n2 {
+            return n1 > n2
+        }
+    }
+    
+    return true // equal or greater
+}
+
 public func readSettings(thePath: String = "") -> [String:Any] {
     logFunctionCall()
     let settingsPath = (thePath.isEmpty) ? AppInfo.plistPath:thePath
