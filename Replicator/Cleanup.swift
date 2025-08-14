@@ -575,7 +575,7 @@ class Cleanup: NSObject {
 //            }
             
             // migrating to another site
-            if JamfProServer.toSite && JamfProServer.destSite != "" && endpoint == "policies" {
+            if JamfProServer.toSite && JamfProServer.destSite != ""/* && endpoint == "policies"*/ {
                 PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
             }
             
@@ -759,7 +759,7 @@ class Cleanup: NSObject {
             
             rawValue = clearTagValue(key: "site", keyValue: xmlString)
             rawValue = rawValue.replacingOccurrences(of: "<site></site>", with: "<site><name>\(siteEncoded)</name></site>")
-            rawValue = rawValue.replacingOccurrences(of: "<site></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            rawValue = rawValue.replacingOccurrences(of: "<site/>", with: "<site><name>\(siteEncoded)</name></site>")
             
 //            rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
             if LogLevel.debug { WriteToLog.shared.message("[siteSet] changing site from \(currentSiteName) to \(siteEncoded)") }
