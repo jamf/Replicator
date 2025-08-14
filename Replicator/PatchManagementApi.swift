@@ -62,8 +62,12 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             print("[PatchManagementApi.createUpdate] patch site name: \(objectInstance?.siteName ?? "unknown")")
             let patchTitle = createPatchsoftwaretitleXml(objectInstance: objectInstance!)
 //            print("name_id: \(tagValue(xmlString: patchTitle, xmlTag: "name_id"))")
-            let siteId = objectId(xml: patchTitle, object: "site")
+            let siteId = objectValue(xml: patchTitle, object: "site")
+            
+//            let sourceTitle = objectInstance
             let sourceTitle = PatchTitleConfigurations.source.filter( { $0.id == sourceEpId } ).first
+            print("PatchTitleConfigurations.source count: \(PatchTitleConfigurations.source.count)")
+            
             let sourceSiteName = sourceTitle?.siteName ?? "NONE"
             let destTitle = PatchTitleConfigurations.destination.filter( { ($0.softwareTitleNameId == "\(tagValue(xmlString: patchTitle, xmlTag: "name_id"))") && ($0.siteName == sourceSiteName) } ).first
             let destSiteName = destTitle?.siteName ?? "NONE"
@@ -99,7 +103,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                    let putTitle: [String: Any] = ["jamfOfficial": jamfOfficial,
                           "displayName": displayName,
                           "categoryId": categoryId,
-                          "siteId": siteId,  //objectId(xml: patchTitle, object: "site"),
+                          "siteId": siteId,
                           "uiNotifications": uiNotifications,
                           "emailNotifications": emailNotifications,
                           "softwareTitleId": softwareTitleId,
@@ -281,7 +285,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                             }
                             // need to query capi to get full patch policy config
                             SourceGetQueue.shared.addOperation {
-                                Jpapi.shared.action(whichServer: "source", endpoint: "patchpolicies", apiData: [:], id: patchPolicy.id, token: JamfProServer.authCreds["source"] ?? "", method: "GET") {
+                                Jpapi.shared.action(whichServer: "source", endpoint: "patchpolicies", apiData: [:], id: patchPolicy.id, token: JamfProServer.authCreds["source"] ?? "", method: "GET") { [self]
                                     (returnedJson: [String:Any]) in
                                     //                                    print("patch policy Dictionary: \(returnedJson.description)")
                                     
@@ -289,6 +293,11 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                     print("\nadd patch policy to software title id: \(destEpId)")
                                     print("patch policy XML: \(objectXml.prettyPrint)")
                                     
+                                    
+                                    if export.saveRawXml {
+                                        let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
+                                        savePatchPolicy(xml: objectXml, exportFormat: exportFormat)
+                                    }
                                     
                                     if let titleId = Int(destEpId), !objectXml.isEmpty {
                                         // remove id from xml
@@ -317,9 +326,15 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                         }
                                         objectXml = objectXml.prettyPrint
                                         print("updated patch policy XML: \(objectXml)")
-                                        SendQueue.shared.addOperation {
-                                            CreateEndpoints.shared.queue(endpointType: "patchpolicies", endPointXML: objectXml, endpointCurrent: 0, endpointCount: patchPolicies.count, action: apiAction, sourceEpId: -1, destEpId: objectId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
-                                                (result: String) in
+                                        if export.saveTrimmedXml {
+                                            let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"trimmed"
+                                            savePatchPolicy(xml: objectXml, exportFormat: exportFormat)
+                                        }
+                                        if !export.saveOnly {
+                                            SendQueue.shared.addOperation {
+                                                CreateEndpoints.shared.queue(endpointType: "patchpolicies", endPointXML: objectXml, endpointCurrent: 0, endpointCount: patchPolicies.count, action: apiAction, sourceEpId: -1, destEpId: objectId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
+                                                    (result: String) in
+                                                }
                                             }
                                         }
                                     }
@@ -408,10 +423,18 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         return patchSoftwareTitle
     }
     
-    private func objectId(xml: String, object: String) -> String {
+    private func objectValue(xml: String, object: String, key: String = "id") -> String {
         logFunctionCall()
         let trimmed = tagValue(xmlString: xml, xmlTag: object)
-        return tagValue(xmlString: trimmed, xmlTag: "id")
+        return tagValue(xmlString: trimmed, xmlTag: key)
+    }
+    
+    private func savePatchPolicy(xml: String, exportFormat: String) {
+        let keysValues = tagValue(xmlString: xml, xmlTag: "patch_policy")
+        let general    = tagValue(xmlString: keysValues, xmlTag: "general")
+        let id         = tagValue(xmlString: general, xmlTag: "id")
+        let configId   = tagValue(xmlString: keysValues, xmlTag: "software_title_configuration_id")
+        ExportItem.shared.exportObject(node: "patchpolicies", object: xml, theName: configId, id: id, format: exportFormat)
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

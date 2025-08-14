@@ -413,6 +413,10 @@ class Cleanup: NSObject {
             for xmlTag in ["computers"] {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
+            // migrating to another site
+            if JamfProServer.toSite && JamfProServer.destSite != "" {
+                PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
+            }
             
         case "computers":
             if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing computers - verbose") }
@@ -752,7 +756,12 @@ class Cleanup: NSObject {
         if endpoint != "users" {
             let siteInfo = tagValue2(xmlString: xmlString, startTag: "<site>", endTag: "</site>")
             let currentSiteName = tagValue2(xmlString: siteInfo, startTag: "<name>", endTag: "</name>")
-            rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            
+            rawValue = clearTagValue(key: "site", keyValue: xmlString)
+            rawValue = rawValue.replacingOccurrences(of: "<site></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            rawValue = rawValue.replacingOccurrences(of: "<site></site>", with: "<site><name>\(siteEncoded)</name></site>")
+            
+//            rawValue = xmlString.replacingOccurrences(of: "<site><name>\(currentSiteName)</name></site>", with: "<site><name>\(siteEncoded)</name></site>")
             if LogLevel.debug { WriteToLog.shared.message("[siteSet] changing site from \(currentSiteName) to \(siteEncoded)") }
         } else {
             // remove current sites info
@@ -774,7 +783,9 @@ class Cleanup: NSObject {
         
         if sitePref == "Copy" && endpoint != "users" && endpoint != "computers" {
             // update item Name - ...<name>currentName - site</name>
+            
             rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
+            
 //            print("[setSite]  rawValue: \(rawValue)")
             
             // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
@@ -844,5 +855,16 @@ class Cleanup: NSObject {
         let newXML = f_regexComp.stringByReplacingMatches(in: theXML, options: [], range: NSRange(0..<theXML.utf16.count), withTemplate: "")
 //        let newXML_trimmed = newXML.replacingOccurrences(of: "\n\n", with: "")
         return newXML
+    }
+    
+    private func clearTagValue(key: String, keyValue: String) -> String {
+        if LogLevel.debug { WriteToLog.shared.message("Clearing tag value: \(keyValue)") }
+        let pattern = "(?<=<\(key)>).*?(?=</\(key)>)"
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let range = NSRange(location: 0, length: keyValue.utf16.count)
+            let result = regex.stringByReplacingMatches(in: keyValue, options: [], range: range, withTemplate: "")
+            return result
+        }
+        return ""
     }
 }

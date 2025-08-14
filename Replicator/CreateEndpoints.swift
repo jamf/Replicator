@@ -732,54 +732,54 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                         print("[CreateEndpoints.jpapi] crud \(endpointType) \(apiAction) counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
                         
-                            // look to see if we are processing the next endpointType - start
-                            if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
-                                endpointInProgress = endpointType
-                                Counter.shared.postSuccess = 0
-                            }   // look to see if we are processing the next localEndPointType - end
-                                                 
-                                Counter.shared.postSuccess += 1
-                                
-    //                            print("endpointType: \(endpointType)")
-    //                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
-                                
-                                if let _ = Counter.shared.progressArray["\(endpointType)"] {
-                                    Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
-                                }
+                        // look to see if we are processing the next endpointType - start
+                        if endpointInProgress != endpointType || endpointInProgress == "" {
+                            WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
+                            endpointInProgress = endpointType
+                            Counter.shared.postSuccess = 0
+                        }   // look to see if we are processing the next localEndPointType - end
+                                             
+                        Counter.shared.postSuccess += 1
+                        
+//                            print("endpointType: \(endpointType)")
+//                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
+                        
+                        if let _ = Counter.shared.progressArray["\(endpointType)"] {
+                            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
+                        }
 
-                                Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                                Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
-                                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                                Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
-                                
-                                // update counters
+                        Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
+                        Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
+                        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+                        Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                        
+                        // update counters
 //                                print("[CreateEndpoints.jpapi] endpointType: \(endpointType)")
-                                if Summary.totalCompleted > 0 {
+                        if Summary.totalCompleted > 0 {
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                if destEpId != "-1" {
+                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                }
+                            }
+                        }
+                        
+                        if Setting.fullGUI && Summary.totalCompleted == endpointCount {
+
+                            if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
+                                updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
+                            } else if Summary.totalFailed == endpointCount {
+                                DispatchQueue.main.async { [self] in
+                                    updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
                                     if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        if destEpId != "-1" {
-                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                        }
+                                        PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                        updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                                     }
                                 }
                                 
-                                if Setting.fullGUI && Summary.totalCompleted == endpointCount {
-
-                                    if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
-                                        updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-                                    } else if Summary.totalFailed == endpointCount {
-                                        DispatchQueue.main.async { [self] in
-                                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
-                                            }
-                                        }
-                                        
-                                    }
-                                }
-    //                        }   // DispatchQueue.main.async - end
-                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                            }
+                        }
+//                        }   // DispatchQueue.main.async - end
+                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
     //                    }   // if let httpResponse = response - end
                         
                         if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }

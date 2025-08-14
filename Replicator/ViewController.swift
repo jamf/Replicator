@@ -1475,7 +1475,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     } else {
                                         Setting.csa = false
                                     }
-    //                                print("csa: \(setting.csa)")
                                     
                                     if !export.saveOnly && Setting.fullGUI {
                                         self.updateServerArray(url: self.dest_jp_server, serverList: "dest_server_array", theArray: self.destServerArray)
@@ -2189,20 +2188,25 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 rawEndpoint = selectedEndpoint
         }
         
-        var endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)/\(String(describing: primaryObjToMigrateID!))"
-        if fileImport || WipeData.state.on {
-            endpointToLookup = "skip"
-        }
-        
         switch selectedEndpoint {
         case "api-roles", "api-integrations":
             idPath = ""
-            endpointToLookup = "skip"
+//            endpointToLookup = "skip"
         case "accounts/userid", "accounts/groupid":
             idPath = "/"
         default:
             idPath = "id/"
         }
+        
+        var endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjToMigrateID!))"
+        if fileImport || WipeData.state.on {
+            endpointToLookup = "skip"
+        }
+        
+        if ["api-roles", "api-integrations"].contains(selectedEndpoint) {
+            endpointToLookup = "skip"
+        }
+        
         
         print("[startSelectiveMigration] selectedEndpoint: \(selectedEndpoint)")
         if !WipeData.state.on {
@@ -4082,7 +4086,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             
                             if LogLevel.debug { WriteToLog.shared.message("[processFiles] check for ID on \(String(describing: l_name)): \(destId)") }
                             
-                            if existsOnDestination /*currentEPs["\(l_name)"] != nil*/ {
+                            if existsOnDestination {
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) already exists") }
                                 
                                 print("[processFiles] update endpoint: \(endpoint)")
