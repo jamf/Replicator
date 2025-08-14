@@ -114,17 +114,12 @@ class JamfPro: NSObject, URLSessionDelegate {
                 WriteToLog.shared.message("[JamfPro.getToken] Token for \(whichServer) server is \(myFormattedTimeInterval(Int(tokenAgeInSeconds))) old. Expires in \(myFormattedTimeInterval(Int(JamfProServer.authExpires[whichServer] ?? 0)))")
             }
             
-            if apiClient {
-                WriteToLog.shared.message("[JamfPro.getToken] using API client/secret to generate token for \(whichServer) server")
-            } else {
-                WriteToLog.shared.message("[JamfPro.getToken] using username/password to generate token for \(whichServer) server")
-            }
-            
             WriteToLog.shared.message("[JamfPro.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!))")
             
 //            print("[JamfPro]         \(whichServer) tokenAge: \(minutesOld) minutes")
             
             if apiClient {
+                WriteToLog.shared.message("[JamfPro.getToken] using API client/secret to generate token for \(whichServer) server")
                 let clientId = ( whichServer == "source" ) ? JamfProServer.sourceUser:JamfProServer.destUser
                 let secret   = ( whichServer == "source" ) ? JamfProServer.sourcePwd:JamfProServer.destPwd
                 let clientString = "grant_type=client_credentials&client_id=\(String(describing: clientId))&client_secret=\(String(describing: secret))"
@@ -134,6 +129,7 @@ class JamfPro: NSObject, URLSessionDelegate {
                 request.httpBody = requestData
                 configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             } else {
+                WriteToLog.shared.message("[JamfPro.getToken] using username/password to generate token for \(whichServer) server")
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
             }
             

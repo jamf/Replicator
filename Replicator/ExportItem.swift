@@ -45,6 +45,11 @@ class ExportItem: NSObject {
         
         logFunctionCall()
         
+        if JamfProServer.source.range(of: "^/", options: [.regularExpression, .caseInsensitive]) != nil {
+            WriteToLog.shared.message("[exportObject] skipping \(node) with id \(id), cannot export when the source is a folder")
+            return
+        }
+        
         var objectAsString = ""
         var exportFilename = ""
         var endpointPath   = ""
@@ -93,26 +98,28 @@ class ExportItem: NSObject {
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
             case "patchPolicyDetails":
                 exportFilename = "patch-policies-policy-details.json"
-                let t = object as? [PatchPolicyDetail]
-                let prettyPrintedData = try encoder.encode(t)
+                let rawData = object as? [PatchPolicyDetail]
+                let prettyPrintedData = try encoder.encode(rawData)
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
             case "patch-software-title-configurations":
                 if let displayName = (object as? PatchSoftwareTitleConfiguration)?.displayName, let id = (object as? PatchSoftwareTitleConfiguration)?.id {
                     exportFilename = "\(displayName)-\(id).json"
                 }
-                let t = object as? PatchSoftwareTitleConfiguration
-                let prettyPrintedData = try encoder.encode(t)
+                let rawData = object as? PatchSoftwareTitleConfiguration
+                let prettyPrintedData = try encoder.encode(rawData)
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
+//                let thePatchPolicies = PatchPoliciesDetails.source.filter( { $0.softwareTitleConfigurationId == (object as? PatchSoftwareTitleConfiguration)?.id } ).map { $0.id }
+//                let theIndex = ToMigrate.objects.firstIndex(of: "patch-software-title-configurations") ?? 0
+//                print("[ExportItem] thePatchPolicies: \(thePatchPolicies)")
+//                print()
             default:
                 if let objectString = object as? String, objectString.isEmpty == false {
-//                    var name = theName.replacingOccurrences(of: ":", with: ";")
-//                    name     = name.replacingOccurrences(of: "/", with: "_")
                     if let xmlDoc = try? XMLDocument(xmlString: objectString, options: .nodePrettyPrint) {
                         if let _ = try? XMLElement.init(xmlString:"\(objectString)") {
-                            exportFilename = "\(theName)-\(id).xml"
+                            exportFilename = (node == "patchpolicies") ? "\(id).xml" : "\(theName)-\(id).xml"
                             let data = xmlDoc.xmlData(options:.nodePrettyPrint)
                             objectAsString = String(data: data, encoding: .utf8)!
-                        }   // if let prettyXml - end
+                        }
                     }
                 }
             }

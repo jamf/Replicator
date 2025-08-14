@@ -80,6 +80,11 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
         let serverUrl = (whichServer == "source") ? JamfProServer.source:JamfProServer.destination
+        
+        if JamfProServer.source.range(of: "^/", options: [.regularExpression, .caseInsensitive]) != nil && whichServer == "source" && endpoint == "patchpolicies" {
+            print("read \(endpoint) with id \(id) from \(JamfProServer.source)")
+            usleep(10000)
+        }
                 
         // cookie stuff
         var sessionCookie: HTTPCookie?
