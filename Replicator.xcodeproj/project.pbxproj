@@ -53,6 +53,7 @@
 		CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A702D10BBE6007C2C6F /* RemoveData.swift */; };
 		CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */; };
 		CE310A752D10BC3A007C2C6F /* IconDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A742D10BC3A007C2C6F /* IconDelegate.swift */; };
+		CE75A6B92E4EE02D008B4C08 /* XmlTagParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE75A6B82E4EE02D008B4C08 /* XmlTagParser.swift */; };
 		CE7C6BDD2D695FBA000357BA /* LoggerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */; };
 		CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */; };
 		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
@@ -114,6 +115,7 @@
 		CE310A702D10BBE6007C2C6F /* RemoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveData.swift; sourceTree = "<group>"; };
 		CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveObjects.swift; sourceTree = "<group>"; };
 		CE310A742D10BC3A007C2C6F /* IconDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDelegate.swift; sourceTree = "<group>"; };
+		CE75A6B82E4EE02D008B4C08 /* XmlTagParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XmlTagParser.swift; sourceTree = "<group>"; };
 		CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerExtension.swift; sourceTree = "<group>"; };
 		CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
 		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				9BC01C611DFB0C07007E634E /* ViewController.swift */,
 				B5A9A024221F4B7B00AF7B6E /* WriteToLog.swift */,
 				B5165E1520E580A00086E31D /* XmlDelegate.swift */,
+				CE75A6B82E4EE02D008B4C08 /* XmlTagParser.swift */,
 				B562410D215151C4007F8144 /* Replicator.entitlements */,
 				9BC01C651DFB0C07007E634E /* Main.storyboard */,
 				9BC01C631DFB0C07007E634E /* Assets.xcassets */,
@@ -408,6 +411,7 @@
 				CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */,
 				B56CBA8A277B939100F26E8C /* SaveDelegate.swift in Sources */,
 				CE310A652D10BAEC007C2C6F /* EndpointXml.swift in Sources */,
+				CE75A6B92E4EE02D008B4C08 /* XmlTagParser.swift in Sources */,
 				CE310A632D10BAD9007C2C6F /* CreateEndpoints.swift in Sources */,
 				CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */,
 				B58CCCD3249B016100AD0052 /* TimeDelegate.swift in Sources */,
@@ -575,7 +579,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = "8.1.2-b2";
+				MARKETING_VERSION = "8.1.2-b3";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -601,7 +605,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = "8.1.2-b2";
+				MARKETING_VERSION = "8.1.2-b3";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;

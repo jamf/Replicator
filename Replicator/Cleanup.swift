@@ -14,6 +14,7 @@ class Cleanup: NSObject {
     static let shared = Cleanup()
     
     var updateUiDelegate: UpdateUiDelegate?
+    let parser = XmlTagParser()
     
     func Json(endpoint: String, JSON: [String: Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
         logFunctionCall()
@@ -414,7 +415,7 @@ class Cleanup: NSObject {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
             }
             // migrating to another site
-            if JamfProServer.toSite && JamfProServer.destSite != "" {
+            if JamfProServer.toSite && !JamfProServer.destSite.isEmpty {
                 PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
             }
             
@@ -712,11 +713,17 @@ class Cleanup: NSObject {
     fileprivate func setSite(xmlString: String, site: String, endpoint: String) -> String {
         logFunctionCall()
         var rawValue = ""
-        var startTag = ""
+//        var startTag = ""
         let siteEncoded = XmlDelegate.shared.encodeSpecialChars(textString: site)
         
         // get copy / move preference - start
         switch endpoint {
+        case "macapplications", "mobiledeviceapplications":
+            sitePref = userDefaults.string(forKey: "siteAppsAction") ?? "Copy"
+            
+        case "advancedcomputersearches", "advancedmobiledevicesearches":
+            sitePref = userDefaults.string(forKey: "siteSearchesAction") ?? "Copy"
+            
         case "computergroups", "smartcomputergroups", "staticcomputergroups", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
             sitePref = userDefaults.string(forKey: "siteGroupsAction") ?? "Copy"
             
@@ -739,17 +746,22 @@ class Cleanup: NSObject {
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             rawValue = tagValue2(xmlString: xmlString, startTag: "<computer_group>", endTag: "</computer_group>")
-            startTag = "computer_group"
+//            startTag = "computer_group"
             
         case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
             rawValue = tagValue2(xmlString: xmlString, startTag: "<mobile_device_group>", endTag: "</mobile_device_group>")
-            startTag = "mobile_device_group"
+//            startTag = "mobile_device_group"
             
         default:
             rawValue = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
-            startTag = "general"
+//            startTag = "general"
         }
-        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
+        var itemName = "unknown object name"
+//        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
+        if let firstNameValue = parser.findFirstTagValue(tagName: "name", in: xmlString) {
+            itemName = firstNameValue
+            print("[Cleanup] itemName: \(itemName)")
+        }
         
         // update site
         //WriteToLog.shared.message("[siteSet] endpoint \(endpoint) to site \(siteEncoded)")
@@ -784,9 +796,13 @@ class Cleanup: NSObject {
         if sitePref == "Copy" && endpoint != "users" && endpoint != "computers" {
             // update item Name - ...<name>currentName - site</name>
             
-            rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
+//            rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
             
-//            print("[setSite]  rawValue: \(rawValue)")
+//            rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
+            
+            print("[setSite] rawValue0: \(rawValue)")
+            rawValue = updateFirstName(in: rawValue, newName: "\(itemName) - \(siteEncoded)")
+            print("[setSite] rawValue1: \(rawValue)")
             
             // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
             if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
@@ -867,4 +883,72 @@ class Cleanup: NSObject {
         }
         return ""
     }
+    
+    private func updateFirstName(in xmlString: String, newName: String) -> String {
+        // Find first <name>...</name> and replace its content
+        let pattern = "(<name>)[^<]*(</name>)"
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return xmlString
+        }
+            
+//            let safeName = newName
+//                .replacingOccurrences(of: "\\", with: "\\\\")
+//                .replacingOccurrences(of: "$", with: "\\$")
+            
+        guard let match = regex.firstMatch(in: xmlString, range: NSRange(xmlString.startIndex..., in: xmlString)) else {
+            return xmlString
+        }
+        
+        return regex.stringByReplacingMatches(
+            in: xmlString,
+            options: [],
+            range: match.range,
+            withTemplate: "$1\(newName)$2"
+        )
+        
+        
+//        let pattern = "(<name>)[^<]*(</name>)"
+//        
+//        return xmlString.replacingOccurrences(
+//            of: pattern,
+//            with: "$1\(newName)$2",
+//            options: .regularExpression
+//        )
+    }
+    
+    /*
+    private func updateObjectName(in xmlString: String, siteEncoded: String) -> String {
+        // Escape XML special characters in the new name
+//        let escapedName = newName
+//            .replacingOccurrences(of: "&", with: "&amp;")
+//            .replacingOccurrences(of: "<", with: "&lt;")
+//            .replacingOccurrences(of: ">", with: "&gt;")
+//            .replacingOccurrences(of: "\"", with: "&quot;")
+//            .replacingOccurrences(of: "'", with: "&apos;")
+        
+        // Priority 1: If there's a <general> tag, update the first <name> within it
+        let generalPattern = "(<general[^>]*>(?:(?!</general>)[\\s\\S])*?<name>)[^<]*(</name>(?:(?!</general>)[\\s\\S])*?</general>)"
+        if xmlString.range(of: generalPattern, options: .regularExpression) != nil {
+            return xmlString.replacingOccurrences(
+                of: generalPattern,
+                with: "$1\(siteEncoded)$2",
+                options: .regularExpression
+            )
+        }
+        
+        // Priority 2: Find the first <name> tag that appears at a "top level"
+        return updateFirstTopLevelName(in: xmlString, newName: siteEncoded)
+    }
+    private func updateFirstTopLevelName(in xmlString: String, newName: String) -> String {
+        // Simple approach: find first <name> tag and replace it
+        let pattern = "(<name>)[^<]*(</name>)"
+        
+        return xmlString.replacingOccurrences(
+            of: pattern,
+            with: "$1\(newName)$2",
+            options: .regularExpression
+        )
+    }
+     */
 }
