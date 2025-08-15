@@ -299,8 +299,8 @@ public func destinationObjectExists(_ objectName: String, objectType: String) ->
 public func isVersion(_ v1: String, greaterThan v2: String) -> Bool {
     func parseVersion(_ version: String) -> ([Int], String?) {
         let parts = version.split(separator: "-", maxSplits: 1)
-        let versionNumbers = parts[0].split(separator: ".").compactMap { Int($0) }
-        let suffix = parts.count > 1 ? String(parts[1]) : nil
+        let versionNumbers = (parts.count > 0) ? parts[0].split(separator: ".").compactMap { Int($0) } : [0,0,0]
+            let suffix = parts.count > 1 ? String(parts[1]) : nil
         return (versionNumbers, suffix)
     }
 

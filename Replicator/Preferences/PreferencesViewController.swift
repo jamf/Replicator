@@ -38,11 +38,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet var saveLocation_textfield: NSTextField!
     @IBOutlet weak var select_button: NSButton!
     
+    // site prefs
     @IBOutlet var site_View: NSView!
-    
-    @IBOutlet weak var groupsAction_button: NSPopUpButton!
+    @IBOutlet weak var searchesAction_button: NSPopUpButton!
     @IBOutlet weak var policiesAction_button: NSPopUpButton!
     @IBOutlet weak var profilesAction_button: NSPopUpButton!
+    @IBOutlet weak var appsAction_button: NSPopUpButton!
+    @IBOutlet weak var groupsAction_button: NSPopUpButton!
 
     // app prefs
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
@@ -208,18 +210,26 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
     }
     
-
-    @IBAction func siteGroup_action(_ sender: Any) {
-        userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
-        userDefaults.synchronize()
+    // site actions
+    @IBAction func siteSearches_action(_ sender: Any) {
+        userDefaults.set("\(searchesAction_button.selectedItem!.title)", forKey: "siteSearchesAction")
+//        userDefaults.synchronize()
     }
     @IBAction func sitePolicy_action(_ sender: Any) {
         userDefaults.set("\(policiesAction_button.selectedItem!.title)", forKey: "sitePoliciesAction")
-        userDefaults.synchronize()
+//        userDefaults.synchronize()
     }
     @IBAction func siteProfiles_action(_ sender: Any) {
         userDefaults.set("\(profilesAction_button.selectedItem!.title)", forKey: "siteProfilesAction")
-        userDefaults.synchronize()
+//        userDefaults.synchronize()
+    }
+    @IBAction func siteApps_action(_ sender: Any) {
+        userDefaults.set("\(appsAction_button.selectedItem!.title)", forKey: "siteAppsAction")
+//        userDefaults.synchronize()
+    }
+    @IBAction func siteGroup_action(_ sender: Any) {
+        userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
+//        userDefaults.synchronize()
     }
 
 //    var buttonState = true
@@ -412,11 +422,23 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         self.parent?.view.window?.title = self.title!
         
         if self.title! == "Site" {
-            if (userDefaults.string(forKey: "siteGroupsAction") == "Copy" || userDefaults.string(forKey: "siteGroupsAction") == "Move")  {
-                groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction")!)
-            } else {
+            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteSearchesAction")) {
+                userDefaults.set("Copy", forKey: "siteSearchesAction")
+            }
+            searchesAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteSearchesAction") ?? "Copy")
+            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteAppsAction")) {
+                userDefaults.set("Copy", forKey: "siteAppsAction")
+            }
+            appsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteAppsAction") ?? "Copy")
+            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteGroupsAction")) {
                 userDefaults.set("Copy", forKey: "siteGroupsAction")
             }
+            groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction") ?? "Copy")
+//            if (userDefaults.string(forKey: "siteGroupsAction") == "Copy" || userDefaults.string(forKey: "siteGroupsAction") == "Move")  {
+//                groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction") ?? "Copy")
+//            } else {
+//                userDefaults.set("Copy", forKey: "siteGroupsAction")
+//            }
             if (userDefaults.string(forKey: "sitePoliciesAction") == "Copy" || userDefaults.string(forKey: "sitePoliciesAction") == "Move") {
                 policiesAction_button.selectItem(withTitle: userDefaults.string(forKey: "sitePoliciesAction")!)
             } else {
