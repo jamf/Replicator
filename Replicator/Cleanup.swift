@@ -33,55 +33,40 @@ class Cleanup: NSObject {
         }
         var JSONData = JSON
         
-        print("[cleanJSON - \(endpoint)] JSONData: \(JSONData)")
         switch endpoint {
         case "patch-software-title-configurations":
             JSONData["id"] = nil
-            print("[cleanJSON - patchmanagement] JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
-            print("[cleanJSON - patchmanagement] JSONData[categoryName]: \(JSONData["categoryName"] ?? "")")
-            print("[cleanJSON - patchmanagement] Categories.destination.count: \(Categories.destination.count)")
-            
-            print("[cleanJSON - patchmanagement] JSONData[patchSourceName]: \(JSONData["patchSourceName"] ?? "")")
             // adjust ids to destination server
-            for c in Categories.destination {
-                print("[Cleanup - patchmanagement] id: \(c.id), name: \(c.name), source categoryName: \(JSONData["categoryName"] ?? "")")
-                if c.name == JSONData["categoryName"] as! String {
-                    print("[cleanJSON - patchmanagement]     match categoryName: \(c.name), id: \(c.id)")
-                }
-            }
+//            for c in Categories.destination {
+//                if c.name == JSONData["categoryName"] as! String {
+//                    print("[cleanJSON - patchmanagement]     match categoryName: \(c.name), id: \(c.id)")
+//                }
+//            }
             if let categoryName = JSONData["categoryName"] as? String {
-                print("[cleanJSON - patchmanagement] categoryName: \(categoryName)")
                 JSONData["categoryId"] = Categories.destination.first(where: { $0.name == categoryName })?.id
             } else {
                 JSONData["categoryId"] = "-1"
             }
-            print("[cleanJSON - patchmanagement] destination JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
             
             JSONData["categoryId"] = Categories.destination.first(where: { $0.name == JSONData["categoryName"] as? String })?.id ?? "-1"
             JSONData["categoryName"] = nil
-            print("[cleanJSON - patchmanagement] destination JSONData[categoryId]: \(JSONData["categoryId"] ?? "")")
-            print("[cleanJSON - patchmanagement] destination JSONData[siteId]: \(JSONData["siteId"] ?? "")")
             JSONData["siteId"] = JamfProSites.destination.first(where: { $0.name == JSONData["siteName"] as? String })?.id ?? "-1"
-            print("[cleanJSON - patchmanagement] destination JSONData[siteId]: \(JSONData["siteId"] ?? "")")
+
             JSONData["siteName"] = nil
             let patchPackages = JSONData["packages"] as? [[String: Any]]
             var updatedPackages: [[String: String]] = []
             for thePackage in patchPackages ?? [] {
                 // get source package (file) name
-                print("[cleanJSON - patchmanagement] thePackage: \(thePackage)")
                 let sourcePackageName = (fileImport) ? thePackage["packageName"] as? String ?? "unknown package": PatchPackages.source.first(where: { $0.packageId == thePackage["packageId"] as? String })?.packageName ?? ""
-                print("[cleanJSON - patchmanagement] sourcePackageName: \(sourcePackageName)")
                 let packageId = PatchPackages.destination.first(where: { $0.packageName == sourcePackageName })?.packageId ?? ""
                 
                 if packageId.isEmpty {
                     WriteToLog.shared.message("Unable to locate patch package \(sourcePackageName) on the destination server.")
                 } else {
                     updatedPackages.append(["packageId": packageId, "version": "\(thePackage["version"] ?? "")"])
-                    print("[cleanJSON - patchmanagement] packageName: \(sourcePackageName)")
                 }
             }
             JSONData["packages"] = updatedPackages
-            print("[cleanJSON - patchmanagement] JSON: \(JSONData)")
             
         default:
             if action != "skip" {
@@ -760,7 +745,6 @@ class Cleanup: NSObject {
 //        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
         if let firstNameValue = parser.findFirstTagValue(tagName: "name", in: xmlString) {
             itemName = firstNameValue
-            print("[Cleanup] itemName: \(itemName)")
         }
         
         // update site
@@ -800,9 +784,7 @@ class Cleanup: NSObject {
             
 //            rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
             
-            print("[setSite] rawValue0: \(rawValue)")
             rawValue = updateFirstName(in: rawValue, newName: "\(itemName) - \(siteEncoded)")
-            print("[setSite] rawValue1: \(rawValue)")
             
             // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
             if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {

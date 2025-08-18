@@ -69,7 +69,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         logFunctionCall()
-        print("[\(#function.description)] loaded")
         
         if Setting.fullGUI {
             let hideVersionAlert = userDefaults.bool(forKey: "hideVersionAlert")
@@ -121,7 +120,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        }
         var index = 1
         while index < numberOfArgs {
-            print("[\(#line)-applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
+            if LogLevel.debug {
+                WriteToLog.shared.message("[applicationDidFinishLaunching] index: \(index)\t argument: \(CommandLine.arguments[index])")
+            }
             let cmdLineSwitch = CommandLine.arguments[index].lowercased()
                 switch cmdLineSwitch {
                 case "-debug":

@@ -32,7 +32,6 @@ class Json: NSObject, URLSessionDelegate {
         case "patch-software-title-configurations":
             let theRecord = (whichServer == "source") ? PatchTitleConfigurations.source.filter({ $0.id == endpointId }):PatchTitleConfigurations.destination.filter({ $0.id == endpointId })
             if theRecord.count == 1 {
-                print("[getRecord] [Json.getRecord] theRecord displayName \(theRecord[0].displayName)")
                 completion(theRecord[0])
             } else {
                 completion([])
@@ -50,7 +49,6 @@ class Json: NSObject, URLSessionDelegate {
         existingDestUrl = existingDestUrl.urlFix
         
         if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] Looking up: \(existingDestUrl)") }
-        print("[Json.getRecord] existing endpoints URL: \(existingDestUrl)")
         
         let destEncodedURL = URL(string: existingDestUrl)
         let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)

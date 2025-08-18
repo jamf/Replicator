@@ -17,7 +17,6 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
     static let shared    = ObjectDelegate()
  
     func getAll(whichServer: String, endpoint: String, completion: @escaping (_ result: [Any]) -> Void) {
-        print("[ObjectDelegate] getAll \(whichServer) server, endpoint: \(endpoint)")
         
         logFunctionCall()
         existingObjects.removeAll()

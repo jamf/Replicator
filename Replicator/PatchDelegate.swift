@@ -24,10 +24,10 @@ class PatchDelegate: NSObject {
             completion("skipped")
             return
         }
-        print("[getEndpoints] fetching category records from \(whichServer) server")
+        WriteToLog.shared.message("[getEndpoints] fetching category records from \(whichServer) server")
         self.updateViewController("fetching category records from \(whichServer) server")
         Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: "categories", whichPage: 0) { result in
-            print("[getEndpoints] fetching site records from \(whichServer) server")
+            WriteToLog.shared.message("[getEndpoints] fetching site records from \(whichServer) server")
             self.updateViewController("fetching site records from \(whichServer) server")
             Jpapi.shared.action(whichServer: whichServer, endpoint: "sites", apiData: [:], id: "", token: "", method: "GET") { result in
                 
@@ -52,9 +52,9 @@ class PatchDelegate: NSObject {
                         }
                     }
                 } catch {
-                    print("[getEndpoints] site records failed from \(whichServer) server")
+                    WriteToLog.shared.message("[getEndpoints] fetching site records failed from \(whichServer) server")
                 }
-                print("[getEndpoints] fetching policy-details records from \(whichServer) server")
+                WriteToLog.shared.message("[getEndpoints] fetching policy-details records from \(whichServer) server")
                 self.updateViewController("fetching policy-details from \(whichServer) server")
                 Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: "policy-details", whichPage: 0) { result in
                     self.updateViewController("fetching package records from \(whichServer) server")
@@ -63,7 +63,7 @@ class PatchDelegate: NSObject {
                             completion("finished getting patch dependencies from the \(whichServer) server")
                         } else {
                             // patchinternalsources
-                            print("[getEndpoints] fetch patchinternalsource records from \(whichServer) server")
+                            WriteToLog.shared.message("[getEndpoints] fetching patchinternalsource records from \(whichServer) server")
                             Jpapi.shared.action(whichServer: "dest", endpoint: "patchinternalsources", apiData: [:], id: "", token: "", method: "GET") { result in
 //                                print("[getEndpoints] result of patchinternalsources: \(result)")
                                 let decoder = JSONDecoder()

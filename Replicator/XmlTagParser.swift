@@ -7,11 +7,8 @@ class XmlTagParser: NSObject, XMLParserDelegate {
     private var targetTagName = ""
     
     func findFirstTagValue(tagName: String, in xmlString: String) -> String? {
-        print("[XmlTagParser] Finding first tag value for \(tagName) in \(xmlString)...")
         guard let data = xmlString.data(using: .utf8) else { return nil }
-        
-        print("[XmlTagParser] passed guard...")
-        
+                
         let parser = XMLParser(data: data)
         parser.delegate = self
         
@@ -52,6 +49,6 @@ class XmlTagParser: NSObject, XMLParserDelegate {
     
     func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         // Handle parse errors gracefully
-        print("XML Parse Error: \(parseError.localizedDescription)")
+        WriteToLog.shared.message("[XmlTagParser] XML Parse Error: \(parseError.localizedDescription)")
     }
 }

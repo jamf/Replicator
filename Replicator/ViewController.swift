@@ -404,7 +404,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 updateGetStatus(endpoint: endpoint, total: total, index: index)
             }
         case "putStatusUpdate":
-            print("[ExportItem.export] rawExport update UI for \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
+//            print("[ExportItem.export] rawExport update UI for \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
             
             if let endpoint = info["endpoint"] as? String, let total = info["total"] as? Int {
                 putStatusUpdate(endpoint: endpoint, total: total)
@@ -443,7 +443,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func sendMessage(_ message: String) {
         logFunctionCall()
-        print("[sendMessage] message: \(message)")
+//        print("[sendMessage] message: \(message)")
         DispatchQueue.main.async {
             self.message_TextField.stringValue = message
         }
@@ -1156,8 +1156,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             
             if LogLevel.debug { WriteToLog.shared.message("Selectively migrating: \(ToMigrate.objects) for \(sender.identifier ?? NSUserInterfaceItemIdentifier(rawValue: ""))") }
-            print("[sectiontoMigrate] Selected ToMigrate.objects: \(ToMigrate.objects)")
-            print("[sectionToMigrate] goSender: \(UiVar.goSender)")
             Go(sender: UiVar.goSender)
         }
     }
@@ -1431,7 +1429,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.go] Updated server array with: \(JamfProServer.source.fqdnFromUrl)") }
                             // update keychain, if marked to save creds
                             if !WipeData.state.on {
-                                print("[ViewController.go] JamfProServer.storeSourceCreds: \(JamfProServer.storeSourceCreds)")
                                 if JamfProServer.storeSourceCreds == 1 {
                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.go] save credentials for: \(JamfProServer.source.fqdnFromUrl)") }
                                     Credentials.shared.save(service: JamfProServer.source.fqdnFromUrl, account: JamfProServer.sourceUser, credential: JamfProServer.sourcePwd, whichServer: "source")
@@ -1457,9 +1454,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             } else {
                                 // update keychain, if marked to save creds
                                 if !export.saveOnly && Setting.fullGUI {
-                                    print("[ViewController.go] JamfProServer.storeDestCreds: \(JamfProServer.storeDestCreds)")
                                     if JamfProServer.storeDestCreds == 1 {
-                                        print("[ViewController.go] save credentials for: \(JamfProServer.destination.fqdnFromUrl)")
                                         Credentials.shared.save(service: JamfProServer.destination.fqdnFromUrl, account: JamfProServer.destUser, credential: JamfProServer.destPwd, whichServer: "dest")
                                         self.storedDestUser = JamfProServer.destUser
                                     }
@@ -1784,7 +1779,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     default: break
                     }
                     ToMigrate.total = ToMigrate.objects.count
-                    print("[startMigrating] ToMigrate.total: \(ToMigrate.total)")
+
                     if !fileImport {
                         if smartUserGrps_button.state.rawValue == 1 && staticUserGrps_button.state.rawValue == 1 {
                             ToMigrate.total += 1
@@ -1877,8 +1872,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             // initialize list of items to migrate then add what we want - end
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] objects: \(ToMigrate.objects)") }
-            print("[ViewController.startMigrating] objects: \(ToMigrate.objects)")
-                    
             
             if ToMigrate.objects.count == 0 {
                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] nothing selected to migrate/remove.") }
@@ -1914,7 +1907,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PutLevelIndicator.shared.indicatorColor[currentNode] = .green
 //                    self.put_levelIndicatorFillColor[currentNode] = .green
                 }
-//                print("[startMigrating] currentNode: \(currentNode)")
+
                 switch currentNode {
                 case "computergroups", "smartcomputergroups", "staticcomputergroups":
                     if self.smartComputerGrpsSelected {
@@ -2078,11 +2071,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     }
                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] Look for existing endpoints for: \(ToMigrate.objects[0])") }
                     
-                    print("[startMigrating] call ExistingObjects.shared.capi - theDestEndpoint: \(ToMigrate.objects[0])")
                     ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: "\(ToMigrate.objects[0])")  { [self]
 //                    self.existingEndpoints(skipLookup: false, theDestEndpoint: "\(ToMigrate.objects[0])")  { [self]
                         (result: (String,String)) in
-                        print("[startMigrating] returned from ExistingObjects.shared.capi - theDestEndpoint: \(ToMigrate.objects[0])")
                         
                         let (resultMessage, resultEndpoint) = result
                         if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] Returned from existing endpoints: \(resultMessage)") }
@@ -2115,7 +2106,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 migratedPkgDependencies.removeAll()
                                 waitForDependencies  = false
                                 
-                                print("[startMigrating] call selectiveMigrationDelegate for selectedEndpoint: \(selectedEndpoint)")
+                                WriteToLog.shared.message("[startMigrating] call selectiveMigrationDelegate for selectedEndpoint: \(selectedEndpoint)")
                                 selectiveMigrationDelegate(objectIndex: 0, selectedEndpoint: selectedEndpoint)
                             }
                     }
@@ -2132,12 +2123,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
 //            var dependencyObjectList = [String: [SelectiveObject]]()
             
-            print("[selectiveMigrationDelegate] call getDependencies for selectedEndpoint: \(selectedEndpoint)")
             getDependencies(objectIndex: objectIndex, selectedEndpoint: selectedEndpoint, selectedObjectList: targetSelectiveObjectList) { [self] (result) in
-                for objectInfo in result {
-                    print("objectType: \(objectInfo.objectType) - objectName: \(objectInfo.objectName) - objectId: \(objectInfo.objectId)")
-//                    dependencyObjectList[objectType] = objectInfo
-                }
+//                for objectInfo in result {
+//                    print("objectType: \(objectInfo.objectType) - objectName: \(objectInfo.objectName) - objectId: \(objectInfo.objectId)")
+////                    dependencyObjectList[objectType] = objectInfo
+//                }
                 startSelectiveMigration(objectIndex: objectIndex, objectAndDependencies: ObjectAndDependencies.records)
                 if objectIndex+1 < targetSelectiveObjectList.count {
                     selectiveMigrationDelegate(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
@@ -2208,7 +2198,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         
-        print("[startSelectiveMigration] selectedEndpoint: \(selectedEndpoint)")
         if !WipeData.state.on {
             Json.shared.getRecord(whichServer: "source", base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup, endpointBase: selectedEndpoint, endpointId: objToMigrateID)  { [self]
                 (objectRecord: Any) in
@@ -2216,13 +2205,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 switch selectedEndpoint {
                 case "patch-software-title-configurations":
                     let existingPatch = objectRecord as? PatchSoftwareTitleConfiguration
-                    print("[startSelectiveMigration] patch management title name: \(existingPatch?.displayName ?? "")")
                     
                     let selectedObject = objectAndDependencies[objectIndex].objectName
-                    print("[startSelectiveMigration] patch management selectedEndpoint: \(selectedEndpoint)")
-                    print("[startSelectiveMigration] patch management selectedObject: \(selectedObject)")
-                    print("[startSelectiveMigration] selected currentEPDict: \(currentEPDict[selectedEndpoint]?[selectedObject] ?? 0)")
-                    print("[startSelectiveMigration] currentEPDict: \(currentEPDict)")
+                    
                     if !fileImport {
                         // export policy details if export.saveRawXml
                         if export.saveRawXml {
@@ -2237,8 +2222,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     break
                 }
                 let result = objectRecord as? [String: AnyObject] ?? [:]
-                print("[startSelectiveMigration] result.count: \(result.count)")
-                print("[startSelectiveMigration] result: \(result)")
+                
                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigration] Returned from Json.getRecord") }
                 
                 if pref.stopMigration {
@@ -2279,7 +2263,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if existingObjectId == 0 && !export.saveOnly {
                             theAction = "create"
                         }
-                        print("[startSelectiveMigration] existingObjectId: \(existingObjectId), theAction: \(theAction)")
                         
                         WriteToLog.shared.message("[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency")
                         
@@ -2305,13 +2288,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                         
-                        print("[\(#function.short)] objectIndex+1: \(objectIndex+1) - objectAndDependencies.count: \(objectAndDependencies.count)")
                         // call next item
                         if objectIndex+1 < objectAndDependencies.count {
                             //                                        print("[ViewController.startSelectiveMigration] call next \(selectedEndpoint)")
                             startSelectiveMigration(objectIndex: objectIndex+1, objectAndDependencies: objectAndDependencies)
                         } else if objectIndex+1 == objectAndDependencies.count {
-                            print("[\(#function.short)] dependency.isRunning \(dependency.isRunning)")
                             dependency.isRunning = false
                         }
                     }
@@ -2334,7 +2315,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
             }
             RemoveObjects.shared.queue(endpointType: selectedEndpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
-            print("[\(#function.short)] dependency.isRunning \(dependency.isRunning)")
+
             dependency.isRunning = false
         }   // if !WipeData.state.on else - end
 //        }   // Json().getRecord - end
@@ -2352,7 +2333,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] enter search for \(nodesToMigrate[nodeIndex])") }
         
-        print("node to migrate: \(nodesToMigrate[nodeIndex])")
         switch nodesToMigrate[nodeIndex] {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             Counter.shared.progressArray["smartcomputergroups"]  = 0
@@ -2422,7 +2402,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }   // if export.saveRawXml - end
         }   // if nodeIndex == 0 - end
             
-        print("[check] nodesToMigrate: \(nodesToMigrate), nodeIndex: \(nodeIndex)")
         if fileImport && !WipeData.state.on && !pref.stopMigration {
             
             if LogLevel.debug { WriteToLog.shared.message("[ViewController.readNodes] reading files for: \(nodesToMigrate)") }
@@ -2470,8 +2449,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func getSourceEndpoints(nodesToMigrate: [String], nodeIndex: Int, completion: @escaping (_ result: [String]) -> Void) {
         // get objects from source server (query source server) - destination server if removing
         logFunctionCall()
-        print("[getSourceEndpoints] nodesToMigrate: \(nodesToMigrate)")
-        if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] enter") }
+        WriteToLog.shared.message("[getSourceEndpoints] nodesToMigrate: \(nodesToMigrate)")
 //        pendingGetCount = 0
         Counter.shared.pendingGet = 0
 
@@ -2888,12 +2866,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     do {
                         let jsonData = try? JSONSerialization.data(withJSONObject: result, options: [])
                         PatchTitleConfigurations.source = try JSONDecoder().decode([PatchSoftwareTitleConfiguration].self, from: jsonData!)
-                        print("test count: \(PatchTitleConfigurations.source.count)")
                     } catch {
-                        print("error getting patch software title configurations: \(error)")
+                        WriteToLog.shared.message("[getEndpoints] error getting patch software title configurations: \(error)")
                     }
                     
-                    print("[getEndpoints] found \(PatchTitleConfigurations.source.count) patch objects on the source server")
+                    WriteToLog.shared.message("[getEndpoints] found \(PatchTitleConfigurations.source.count) patch objects on the source server")
                     AvailableObjsToMig.byId.removeAll()
                     
                     var displayNames = [String]()
@@ -2920,7 +2897,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if endpoint == "patch-software-title-configurations" {
                         ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: "\(endpoint)")  { [self]
                             (result: (String,String)) in
-                            print("[getEndpoints] fetch patch management dependencies from source server")
+                            WriteToLog.shared.message("[getEndpoints] fetch patch management dependencies from source server")
                             PatchDelegate.shared.getDependencies(whichServer: "source") { [self] result in
                                 sendMessage("")
                                 PatchDelegate.shared.getDependencies(whichServer: "dest") { [self] result in
@@ -3747,7 +3724,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         var local_general       = ""
         let endpoint            = nodesToMigrate[nodeIndex]
-        print("[readDataFiles] endpoint: \(endpoint)")
         
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
@@ -3813,10 +3789,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     let fileContents = try String(contentsOf: fileUrl!)
                                     let data = fileContents.data(using: .utf8) ?? Data()
                                     PatchPoliciesDetails.source = try JSONDecoder().decode([PatchPolicyDetail].self, from: data)
-                                    print("[readDataFiles] patchPolicyDetails.count: \(PatchPoliciesDetails.source.count)")
                                 } catch let error as NSError {
                                     WriteToLog.shared.message("[readDataFiles] patch-policies-policy-details.json - issue converting to json")
-                                    print(error)
+                                    WriteToLog.shared.message(error.localizedDescription)
                                 }
                                 
                                 
@@ -3850,7 +3825,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             let dataFile = xmlFilePaths[i-1]
     //                        let dataFile = dataFiles[i-1]
                             let fileUrl = importFilesUrl?.appendingPathComponent("\(local_folder)/\(dataFile)", isDirectory: false)
-                            print("[readDataFiles] reading: \(String(describing: fileUrl?.path))")
+                            if LogLevel.debug { WriteToLog.shared.message("[readDataFiles] reading: \(String(describing: fileUrl?.path))") }
                             
                             do {
                                 // remove 'extra' data so we can get name and id from between general tags
@@ -3967,7 +3942,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
                                     DataArray.staticSource = DataArray.source
                                     
-                                    print("[readDataFiles] add \(name) (id: \(id)) to sourceObjectList_AC")
                                     updateSelectiveList(objectName: name, objectId: id, fileContents: fileContents)
                                     
                                     // slight delay in building the list - visual effect
@@ -4061,13 +4035,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
             var l_index = 1
             for theObject in targetSelectiveObjectList {
-                print("[processFiles] endpoint \(endpoint) object name: \(theObject.objectName.xmlDecode)")
+                if LogLevel.debug { WriteToLog.shared.message("[processFiles] endpoint \(endpoint) object name: \(theObject.objectName.xmlDecode)") }
                 readFilesQ.addOperation { [self] in
                     let l_id   = theObject.objectId         // id of object
                     let l_name = theObject.objectName.xmlDecode    // name of object, remove xml encoding
                     let l_fileContents  = theObject.fileContents
                     
-                    print("[processFiles] l_id: \(l_id), l_name: \(l_name), l_xml: \(l_fileContents)")
+                    if LogLevel.debug { WriteToLog.shared.message("[processFiles] l_id: \(l_id), l_name: \(l_name), l_xml: \(l_fileContents)") }
                     updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
 //                    if l_id != nil && l_name != "" && l_xml != "" {
@@ -4093,7 +4067,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             if existsOnDestination {
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) already exists") }
                                 
-                                print("[processFiles] update endpoint: \(endpoint)")
                                 switch endpoint {
                                 case "buildings", "api-roles", "api-integrations":
                                     let data = l_fileContents.data(using: .utf8)!
@@ -4158,7 +4131,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
                             } else {
-                                print("[processFiles] create endpoint: \(endpoint)")
                                 if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) - create") }
                                 
                                 switch endpoint {
@@ -4302,7 +4274,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
         let endpointToLookup = fileImport ? "skip":"\(rawEndpoint)/\(idPath)\(String(describing: primaryObjId!))"
         
-        print("[getDependencies] endpointToLookup: \(endpointToLookup)")
         Json.shared.getRecord(whichServer: "source", base64Creds: JamfProServer.base64Creds["source"] ?? "", theEndpoint: endpointToLookup, endpointBase: selectedEndpoint, endpointId: objToMigrateId)  { [self]
             (objectRecord: Any) in
             
@@ -4320,9 +4291,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             default:
                 json = objectRecord as? [String: AnyObject] ?? [:]
             }
-            
-            print("[getDependencies] json: \(json)")
-            
+                        
             //        }
             if json.count == 0 {
                 ObjectAndDependencies.records.append(ObjectAndDependency(objectType: selectedEndpoint, objectName: primaryObjName, objectId: objToMigrateId))
@@ -4533,7 +4502,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                    tmpCount += 1
 //                }
                 
-            print("[getDependencies] fullDependencyDict: \(fullDependencyDict)")
             Dependencies.current.removeAll()
             for (theObject, _) in fullDependencyDict {
                 Dependencies.current.append(theObject)
@@ -4547,7 +4515,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 for theObject in allObjects {
                     if let dependencies = fullDependencyDict[theObject], dependencies.count > 0 {
-                        print("found \(dependencies.count) dependencies for \(theObject)")
                         var skipLookup: Bool = false
                         if theObject == selectedEndpoint {
                             skipLookup = true
@@ -4557,14 +4524,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             (result: (String,String)) in
                             ExistingEndpoints.shared.waiting = false
                             let (_, theObjectType) = result
-                            print("[getDependencies] theObjectType: \(theObjectType)")
 //                            for (name, id) in dependencies {
                             for (name, id) in fullDependencyDict[theObjectType] ?? [:] {
-                                print("     name: \(name) - id: \(id)")
                                 ObjectAndDependencies.records.append(ObjectAndDependency(objectType: theObjectType, objectName: name, objectId: id))
                             }
                             lookupCount += 1
-                            print("\(#line) theObjectType: \(theObjectType) - lookupCount: \(lookupCount) - allObjects: \(allObjects.count)")
                             if lookupCount == allObjects.count {
                                 ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: selectedEndpoint) {
                                     (result: (String,String)) in
@@ -4701,7 +4665,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func runComplete() {
         logFunctionCall()
         migrationComplete.isDone = true
-        print("[runComplete] SendQueue.shared.operationQueue.operationCount: \(SendQueue.shared.operationQueue.operationCount)")
         if theIconsQ.operationCount == 0 && SendQueue.shared.operationQueue.operationCount == 0 {
                 nodesComplete = 0
                 AllEndpointsArray.removeAll()
@@ -4738,7 +4701,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
         } else {
             DispatchQueue.main.async { [self] in
-                print("[runComplete] waiting for queues to clear")
                 sleep(2)
                 runComplete()
             }
@@ -4786,7 +4748,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     func updateGetStatus(endpoint: String, total: Int, index: Int = -1) {
         logFunctionCall()
         if WipeData.state.on { return }
-        print("[updateGetStatus] endpoint: \(endpoint), total: \(total), index: \(index)")
         var adjEndpoint = ""
         switch endpoint {
         case "accounts/userid":
@@ -4820,7 +4781,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         //        let totalCount = (fileImport && UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         
-        print("[getStatusUpdate] \(adjEndpoint): retrieved \(Counter.shared.get[adjEndpoint]!["get"]!) of \(totalCount)")
         if Counter.shared.get[adjEndpoint]!["get"]! == totalCount || total == 0 {
             var getNext = true
             switch endpoint {
@@ -4845,17 +4805,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     var finalType = adjEndpoint.replacingOccurrences(of: "smart", with: "")
                     finalType = finalType.replacingOccurrences(of: "static", with: "")
                     Counter.shared.completedObjectTypes.insert(finalType)
-                    print("[getStatusUpdate] completedObjectTypes: \(Counter.shared.completedObjectTypes)")
                 }
             }
             
-            print("[getStatusUpdate] \(adjEndpoint) nodesComplete: \(getNodesComplete) - get ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
 //            if Counter.shared.completedObjectTypes.count == ToMigrate.rawCount && export.saveOnly && SourceGetQueue.shared.operationQueue.operationCount == 0 && getNext  {
 //                runComplete()
 //            } else {
 //                if Counter.shared.completedObjectTypes.count /*getNodesComplete*/ < ToMigrate.rawCount && getNext {
                 if ToMigrate.objects.indices.contains(getNodesComplete) && getNext {
-                    print("[getStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: getNodesComplete)
                 }
 //            }
@@ -4863,7 +4820,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if Setting.fullGUI && totalCount > 0 {
             DispatchQueue.main.async { [self] in
-                print("[getStatusUpdate] adjEndpoint: \(adjEndpoint)")
                 //                print("[getStatusUpdate] count: \(String(describing: Counter.shared.get[adjEndpoint]?["get"]))")
                 if let currentCount = Counter.shared.get[adjEndpoint]?["get"], currentCount > 0 {
                     //                if Counter.shared.get[adjEndpoint]!["get"]! > 0 {
@@ -4891,7 +4847,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         default:
             adjEndpoint = endpoint
         }
-        print("[putStatusUpdate] adjEndpoint: \(adjEndpoint)")
         
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         
@@ -4901,16 +4856,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             Counter.shared.send[adjEndpoint]!["put"]! /*= newPutTotal*/ += 1
         }
         let newPutTotal = Counter.shared.send[adjEndpoint]!["put"]!
-        
-//        print("[putStatusUpdate.counter]  create: \(Counter.shared.summary[adjEndpoint]?["create"]?.count ?? 0)")
-//        print("[putStatusUpdate.counter]  update: \(Counter.shared.summary[adjEndpoint]?["update"]?.count ?? 0)")
-//        print("[putStatusUpdate.counter]    fail: \(Counter.shared.summary[adjEndpoint]?["fail"]?.count ?? 0)")
-//        print("[putStatusUpdate.counter] skipped: \(Counter.shared.summary[adjEndpoint]?["skipped"]?.count ?? 0)")
-        
-//        print("[putStatusUpdate] \(adjEndpoint) put count: \(putCounters[adjEndpoint]!["put"]!)")
-        print("[putStatusUpdate] \(adjEndpoint) put count: \(Counter.shared.send[adjEndpoint]!["put"]!)")
-        print("[putStatusUpdate] newPutTotal: \(newPutTotal), totalCount: \(totalCount)")
-        print("[putStatusUpdate] ToMigrate.objects: \(ToMigrate.objects.description)")
         
         if newPutTotal == totalCount || total == 0 {
             var getNext = true
@@ -4940,18 +4885,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
             }
             WriteToLog.shared.message("[putStatusUpdate] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
-            print("[putStatusUpdate] \(adjEndpoint) nodesComplete: \(nodesComplete) - put ToMigrate.total: \(ToMigrate.total), ToMigrate.rawCount: \(ToMigrate.rawCount)")
+
             if Counter.shared.completedObjectTypes.count /*nodesComplete*/ == ToMigrate.rawCount {
                 if !Setting.fullGUI {
                     nodesMigrated = nodesComplete
                 }
-                print("[putStatusUpdate] runComplete")
+
                 runComplete()
             } else {
-                print("[putStatusUpdate] getNext: \(getNext), WipeData.state.on: \(WipeData.state.on)")
                 if ToMigrate.objects.indices.contains(nodesComplete) && getNext && WipeData.state.on {
-//                if nodesComplete < ToMigrate.rawCount && getNext && WipeData.state.on {
-                    print("[putStatusUpdate] nextNode: \(ToMigrate.objects[nodesComplete])")
                     readNodes(nodesToMigrate: ToMigrate.objects, nodeIndex: nodesComplete)
                 }
             }
@@ -4972,7 +4914,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     PutLevelIndicator.shared.indicatorColor[adjEndpoint]/* put_levelIndicatorFillColor[adjEndpoint]*/ = .red
                     put_levelIndicator.fillColor = .red
                 }
-                print("[putStatusUpdate] \(adjEndpoint) \(newPutTotal) of \(totalCount)\n")
 //                if let currentPutCount = putCounters[adjEndpoint]?["put"], currentPutCount > 0 {
                 if let currentPutCount = Counter.shared.send[adjEndpoint]?["put"], currentPutCount > 0 {
                     if (!Setting.migrateDependencies && adjEndpoint != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(adjEndpoint) {
@@ -5973,7 +5914,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         {
             numberOfRows = DataArray.source.count
         }
-        print("[numberOfRows] \(numberOfRows)")
         return numberOfRows
     }
     
@@ -6000,7 +5940,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
     override func viewDidAppear() {
         logFunctionCall()
-        print("[\(#function.description)] loaded")
         // display app version
         appVersion_TextField.stringValue = "v\(AppInfo.version)"
         
@@ -6118,7 +6057,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func initVars() {
         logFunctionCall()
-        print("[\(#function.description)]")
         
         // needed for protocols
         PatchDelegate.shared.messageDelegate       = self
