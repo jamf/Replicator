@@ -51,18 +51,18 @@ class JamfPro: NSObject, URLSessionDelegate {
         let tokenAge = (whichServer == "source") ? "sourceTokenAge":"destTokenAge"
         let tokenAgeInSeconds = timeDiff(forWhat: tokenAge).3
         
-        print("\n[getToken] \(Date())")
-        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
-        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
-        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
-        print("[getToken]     \(whichServer) WipeData.state.on: \(WipeData.state.on)")
-        print("[getToken]           \(whichServer) localSource: \(localSource)")
-        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
-        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
-        print("[getToken]       \(whichServer) export.saveOnly: \(export.saveOnly)")
+//        print("\n[getToken] \(Date())")
+//        print("[getToken]           \(whichServer) valid token: \(JamfProServer.validToken[whichServer] ?? false)")
+//        print("[getToken]     \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
+//        print("[getToken]           \(whichServer) authExpires: \(JamfProServer.authExpires[whichServer]!)")
+//        print("[getToken]     \(whichServer) WipeData.state.on: \(WipeData.state.on)")
+//        print("[getToken]           \(whichServer) localSource: \(localSource)")
+//        print("[getToken]     \(whichServer) export.saveRawXml: \(export.saveRawXml)")
+//        print("[getToken] \(whichServer) export.saveTrimmedXml: \(export.saveTrimmedXml)")
+//        print("[getToken]       \(whichServer) export.saveOnly: \(export.saveOnly)")
 //
-        print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
-        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
+//        print("[getToken]                          source test: \( whichServer == "source" && ( WipeData.state.on || localSource ))")
+//        print("[getToken]                            dest test: \( whichServer == "dest" && ( whichServer == "dest" && export.saveOnly ))")
         
         if ((whichServer == "source" && ( WipeData.state.on || localSource )) || (whichServer == "dest" && export.saveOnly)) {
             completion((200, "success"))
@@ -101,7 +101,7 @@ class JamfPro: NSObject, URLSessionDelegate {
 
         let tokenUrl = URL(string: "\(tokenUrlString)")
         guard let _ = tokenUrl else {
-            print("problem constructing the URL from \(tokenUrlString)")
+            WriteToLog.shared.message("[JamfPro.getToken] problem constructing the URL from \(tokenUrlString)")
             completion((500, "failed"))
             return
         }
@@ -183,7 +183,6 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 }
                                 JamfProServer.tokenCreated[whichServer] = Date()
                                 
-                                print("[JamfPro.getToken] \(whichServer) received a new token")
                                 WriteToLog.shared.message("[JamfPro.getToken] new token created for \(whichServer): \(baseUrl)")
                                 
                                 if JamfProServer.version[whichServer] == "" {
@@ -231,16 +230,12 @@ class JamfPro: NSObject, URLSessionDelegate {
                                                         WriteToLog.shared.message("[JamfPro.getToken] getVersion: \(baseUrl) set to use Basic Authentication")
                                                     }
                                                     
-                                                    print("[JamfPro.getToken] getVersion - migrationComplete.isDone: \(migrationComplete.isDone)")
-                                                    print("[JamfPro.getToken] getVersion - renew: \(renew)")
                                                     renewToken(renew: renew, whichServer: whichServer, baseUrl: baseUrl, base64creds: base64creds)
                                                     
                                                     let lastUser = whichServer == "source" ? JamfProServer.sourceUser : JamfProServer.destUser
                                                     if let lastUserInfo = lastUserManager.query(server: baseUrl) {
-                                                        print("Last User: \(lastUserInfo.lastUser), API Client: \(lastUserInfo.apiClient)")
                                                         lastUserManager.update(server: baseUrl, lastUser: lastUser, apiClient: apiClient)
                                                     } else {
-                                                        print("Server not found.")
                                                         lastUserManager.add(server: baseUrl, lastUser: lastUser, apiClient: apiClient)
                                                     }
                                                     completion((200, "success"))

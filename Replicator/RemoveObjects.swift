@@ -36,7 +36,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             
             let theObject = ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false)
                         
-            print("[removeEndpointsQueue] call removeEndpoints to remove \(endpointType) with id: \(theObject.destEpId)")
             capi(endpointType: theObject.endpointType, endPointID: "\(theObject.destEpId)", endpointName: theObject.endPointXml, endpointCurrent: theObject.endpointCurrent, endpointCount: theObject.endpointCount) {
                 (result: String) in
             }
@@ -47,7 +46,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         
         logFunctionCall()
         if endPointID == "-1" && UiVar.activeTab == "Selective" {
-            print("[removeEndpoints] selective - finished removing \(endpointType)")
+//            WriteToLog.shared.message("[removeEndpoints] selective - finished removing \(endpointType)")
             completion("-1")
             return
         }
@@ -101,8 +100,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
                 removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
             }
-            print("[removeEndpoints] removeDestUrl: \(removeDestUrl)\n")
-            
             
             if export.saveRawXml {
                 //change to endpointByIDQueue?
@@ -164,7 +161,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                     completion("\(endPointID)")
                     
                     if let httpResponse = response as? HTTPURLResponse {
-                        print("[RemoveEndpoints] \(#line) id \(endpointCurrent) removed response code: \(httpResponse.statusCode)")
+                        WriteToLog.shared.message("[RemoveEndpoints] \(#line) id \(endpointCurrent) removed response code: \(httpResponse.statusCode)")
                         //print(httpResponse)
                         if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
                             // remove items from the list as they are removed from the server
@@ -216,7 +213,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             // update global counters
                             //                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
                             Counter.shared.crud[endpointType]?[methodResult]! += 1
-                            print("[RemoveEndpoints.capi] Counter.shared.summary: \(Counter.shared.summary)")
+
                             if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
                                 if summaryArray.firstIndex(of: endpointName) == nil {
                                     summaryArray.append(endpointName)
@@ -258,7 +255,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpoint: \(endpointType)") }
                             //                            self.resetAllCheckboxes()
                             // check for file that allows deleting data from destination server, delete if found - end
-                            print("[\(#function)] bulk - finished removing \(endpointType)")
+
                             updateView(["function": "goButtonEnabled", "button_status": true])
                             if LogLevel.debug { WriteToLog.shared.message("Done") }
                         }

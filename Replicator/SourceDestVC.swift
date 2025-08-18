@@ -783,7 +783,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             self.dest_jp_server_field.stringValue = destServerList_button.titleOfSelectedItem!
 
             if let lastUserInfo = lastUserManager.query(server: JamfProServer.destination) {
-                print("[SourceDestVC] lastUser query lastUser: \(lastUserInfo.lastUser), apiClient: \(lastUserInfo.apiClient)")
                 destinationUser_TextField.stringValue = lastUserInfo.lastUser
                 destUseApiClient_button.state = lastUserInfo.apiClient ? .on : .off
                 useApiClient_action(destUseApiClient_button)

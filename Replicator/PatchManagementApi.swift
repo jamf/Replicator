@@ -41,42 +41,40 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
         var path = ""
         var requestBody = Data()
-
-        print("[PatchManagementApi.action] endpoint: \(endpoint)")
         
         do {
             let decoder = JSONDecoder()
             objectInstance = try decoder.decode(PatchSoftwareTitleConfiguration.self, from: objectData!)
         } catch {
-            print("[PatchManagementApi.createUpdate] JSON decode error: \(error)")
+            WriteToLog.shared.message("[PatchManagementApi.createUpdate] JSON decode error: \(error)")
             completion(["JPAPI_result":"failed", "JPAPI_response":000])
             return
         }
         
         switch endpoint {
         case  "patch-software-title-configurations":
-            print("[PatchManagementApi.createUpdate] patch title: \(objectInstance?.displayName ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch category id: \(objectInstance?.categoryId ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch category name: \(objectInstance?.categoryName ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch site id: \(objectInstance?.siteId ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch site name: \(objectInstance?.siteName ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch title: \(objectInstance?.displayName ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch category id: \(objectInstance?.categoryId ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch category name: \(objectInstance?.categoryName ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch site id: \(objectInstance?.siteId ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch site name: \(objectInstance?.siteName ?? "unknown")")
             let patchTitle = createPatchsoftwaretitleXml(objectInstance: objectInstance!)
 //            print("name_id: \(tagValue(xmlString: patchTitle, xmlTag: "name_id"))")
             let siteId = objectValue(xml: patchTitle, object: "site")
             
 //            let sourceTitle = objectInstance
             let sourceTitle = PatchTitleConfigurations.source.filter( { $0.id == sourceEpId } ).first
-            print("PatchTitleConfigurations.source count: \(PatchTitleConfigurations.source.count)")
+//            print("PatchTitleConfigurations.source count: \(PatchTitleConfigurations.source.count)")
             
             let sourceSiteName = sourceTitle?.siteName ?? "NONE"
             let destTitle = PatchTitleConfigurations.destination.filter( { ($0.softwareTitleNameId == "\(tagValue(xmlString: patchTitle, xmlTag: "name_id"))") && ($0.siteName == sourceSiteName) } ).first
             let destSiteName = destTitle?.siteName ?? "NONE"
-            print("[PatchManagementApi.createUpdate] patch destination display name: \(destTitle?.displayName ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch destination softwareTitleNameId: \(destTitle?.softwareTitleNameId ?? "unknown")")
-            print("[PatchManagementApi.createUpdate] patch destination site: \(destTitle?.siteName ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch destination display name: \(destTitle?.displayName ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch destination softwareTitleNameId: \(destTitle?.softwareTitleNameId ?? "unknown")")
+//            print("[PatchManagementApi.createUpdate] patch destination site: \(destTitle?.siteName ?? "unknown")")
             
             let sourceCategoryName = sourceTitle?.categoryName
-            print("[PatchManagementApi.createUpdate] source category: \(sourceCategoryName ?? "NONE")")
+//            print("[PatchManagementApi.createUpdate] source category: \(sourceCategoryName ?? "NONE")")
             let destCategoryId = objectInstance?.categoryId /*Categories.destination.first(where: {$0.name == sourceCategoryName})?.id ?? nil*/
             print("[PatchManagementApi.createUpdate] dest category id: \(destCategoryId ?? "")")
             //print("dest config name: \(destTitle?.displayName ?? "unknown")")
@@ -114,15 +112,15 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                           "patchSourceEnabled": patchSourceEnabled]
                     do {
                         requestBody = try JSONSerialization.data(withJSONObject: putTitle, options: .prettyPrinted)
-                        print("[PatchManagementApi.createUpdate] putTitle: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
+                        WriteToLog.shared.message("[PatchManagementApi.createUpdate] putTitle: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
                     } catch let error {
-                        print("[PatchManagementApi.createUpdate] requestBody: unable to decode")
-                        print(error.localizedDescription)
+                        WriteToLog.shared.message("[PatchManagementApi.createUpdate] requestBody: unable to decode")
+                        WriteToLog.shared.message(error.localizedDescription)
                         completion([:])
                         return
                     }
                 } else {
-                    print("[PatchManagementApi.createUpdate] requestBody: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
+                    WriteToLog.shared.message("[PatchManagementApi.createUpdate] requestBody: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
 //                    print("[PatchManagementApi.createUpdate] unable to set data for put")
                     completion([:])
                     return
@@ -136,7 +134,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             }
 //            let destId = (createUpdateMethod == "PUT") ?? destTitle?.id ?? "0":"0"
 
-            print("[PatchManagementApi.createUpdate] api action: \(createUpdateMethod) on patchTitle: \(patchTitle)")
         case "patch-software-title-packages":
             path = "/api/v2/patch-software-title-configurations/\(destEpId)"
             contentType = "application/merge-patch+json"
@@ -144,12 +141,12 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             let patchPackages = apiData["packages"]
             
             let jsonPayload = ["softwareTitleId": "\(destEpId)", "packages": patchPackages]
-            print("[PatchManagementApi.createUpdate] jsonPayload: \(jsonPayload)")
+//            print("[PatchManagementApi.createUpdate] jsonPayload: \(jsonPayload)")
             do {
                 requestBody = try JSONSerialization.data(withJSONObject: jsonPayload, options: .prettyPrinted)
-                print("[PatchManagementApi.createUpdate] requestBody: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
+                WriteToLog.shared.message("[PatchManagementApi.createUpdate] requestBody: \(String(data: requestBody, encoding: .utf8) ?? "unable to decode")")
             } catch let error {
-                print(error.localizedDescription)
+                WriteToLog.shared.message(error.localizedDescription)
                 completion([:])
                 return
             }
@@ -174,7 +171,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         default:
             request.httpMethod = createUpdateMethod.uppercased()
         }
-        print("[PatchManagementApi.createUpdate] \(request.httpMethod ?? "unknown") on urlString: \(urlString)")
         
         request.httpBody = requestBody
         
@@ -207,7 +203,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         
         var sourceTitle = objectInstance?.displayName ?? "unknown title"
         if sourceSiteName != "NONE" {
-            print("[createUpdate] siteName: \(sourceSiteName)")
             sourceTitle = "\(sourceTitle) (site: \(sourceSiteName))"
         }
         
@@ -245,16 +240,15 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
 //                        }
                         
                         if let stringResponse = String(data: data!, encoding: .utf8) {
-                            print("[PatchManagementApi.createUpdate] patchmanagement stringResponse: \(stringResponse)")
+//                            print("[PatchManagementApi.createUpdate] patchmanagement stringResponse: \(stringResponse)")
                             let newId = (createUpdateMethod.uppercased() == "PATCH") ? tagValue2(xmlString: stringResponse, startTag: "\"id\" : \"", endTag: "\","):tagValue2(xmlString: stringResponse, startTag: "<id>", endTag: "</id>")
                             if !newId.isEmpty || createUpdateMethod.uppercased() == "PATCH" {
                                 // patch-software-title-configurations - handle packages
                                 SendQueue.shared.addOperation { [self] in
-                                    print("[PatchManagementApi.createUpdate] patch-software-title-configurations - add packages")
+//                                    print("[PatchManagementApi.createUpdate] patch-software-title-configurations - add packages")
                                     createUpdate(serverUrl: serverUrl, endpoint: "patch-software-title-packages", apiData: apiData, sourceEpId: sourceEpId, destEpId: "\(newId)", token: JamfProServer.authCreds["dest"]!, method: "PATCH") {
                                         (jpapiResonse: [String:Any]) in
-                                        print("[PatchManagementApi.createUpdate] result of patch-software-title-packages: \(jpapiResonse)")
-                                        
+//                                        print("[PatchManagementApi.createUpdate] result of patch-software-title-packages: \(jpapiResonse)")
                                     }
                                 }
                             }
@@ -266,16 +260,14 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         Counter.shared.crud[endpoint]?[method]! += 1
                         
                         // add patch policies
-                        print("patch policies count: \(PatchPoliciesDetails.source.count)")
                         let patchPolicies = PatchPoliciesDetails.source.filter( {$0.softwareTitleConfigurationId == sourceEpId} )
-                        print("patchPolicies count: \(patchPolicies.count)")
                         
                         let existingPatchPolicies = PatchPoliciesDetails.destination.filter( {$0.softwareTitleConfigurationId == destEpId} )
-                        print("software title (id: \(destEpId)) has existing patch policies count: \(existingPatchPolicies.count)")
+//                        print("software title (id: \(destEpId)) has existing patch policies count: \(existingPatchPolicies.count)")
                         
                         for patchPolicy in patchPolicies {
 //                            let patchPolicyId = patchPolicy.id
-                            print("patch version: \(patchPolicy.targetPatchVersion)")
+//                            print("patch version: \(patchPolicy.targetPatchVersion)")
                             let patchExists = existingPatchPolicies.filter( {$0.targetPatchVersion == patchPolicy.targetPatchVersion} ).count > 0
                             var apiAction = "create"
                             var objectId = destEpId
@@ -290,9 +282,6 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                     //                                    print("patch policy Dictionary: \(returnedJson.description)")
                                     
                                     var objectXml = returnedJson["objectXml"] as? String ?? ""
-                                    print("\nadd patch policy to software title id: \(destEpId)")
-                                    print("patch policy XML: \(objectXml.prettyPrint)")
-                                    
                                     
                                     if export.saveRawXml {
                                         let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
@@ -325,7 +314,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                                             print("Invalid regex: \(error.localizedDescription)")
                                         }
                                         objectXml = objectXml.prettyPrint
-                                        print("updated patch policy XML: \(objectXml)")
+
                                         if export.saveTrimmedXml {
                                             let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"trimmed"
                                             savePatchPolicy(xml: objectXml, exportFormat: exportFormat)
@@ -342,15 +331,16 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                             }
                             
                         }
-                        print("")
                         
                         do {
                             let _ = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data!)
                         } catch {
-                            print("[PatchManagementApi.createUpdate] failed to decode new patch-software-title-configuration")
+                            WriteToLog.shared.message("[PatchManagementApi.createUpdate] failed to decode new patch-software-title-configuration")
                         }
                         if let stringResponse = String(data: data!, encoding: .utf8) {
-                            print("[PatchManagementApi.createUpdate] patch-software-title-configuration stringResponse: \(stringResponse)")
+                            if LogLevel.debug {
+                                WriteToLog.shared.message("[PatchManagementApi.createUpdate] patch-software-title-configuration stringResponse: \(stringResponse)")
+                            }
                         }
                         
                     }
@@ -373,10 +363,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                             Counter.shared.summary[endpoint]?["fail"] = summaryArray
                         }
                     }
-                    if let stringResponse = String(data: data!, encoding: .utf8) {
-                        print("[PatchManagementApi.createUpdate] \(endpoint) status code: \(httpResponse.statusCode)")
-                        print("[PatchManagementApi.createUpdate] \(endpoint) stringResponse: \(stringResponse)")
-                    }
+                    
                     if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Response error: \(httpResponse.statusCode).") }
                     completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     return
@@ -419,7 +406,9 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                     </category>
                 </patch_software_title>
                 """
-        print("[PatchManagementApi] createPatchsoftwaretitleXml: \(patchSoftwareTitle)")
+        if LogLevel.debug {
+            WriteToLog.shared.message("[PatchManagementApi] createPatchsoftwaretitleXml: \(patchSoftwareTitle)")
+        }
         return patchSoftwareTitle
     }
     

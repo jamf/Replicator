@@ -174,7 +174,9 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         
         if skip || WipeData.state.on {
             completion((theEndpointID,""))
-            print("[PackagesDelegate.getFilename] skip filename lookup")
+            if LogLevel.debug {
+                WriteToLog.shared.message("[PackagesDelegate.getFilename] skip filename lookup")
+            }
             return
         }
         let theServerUrl = (whichServer == "source") ? JamfProServer.source:JamfProServer.destination
@@ -206,72 +208,72 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                 for (header, value) in destConf.httpAdditionalHeaders ?? [:] {
                     headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
                 }
-                        print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
-                        print("[apiCall] \(#function.description) headers: \(headers)")
-                        print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
-                        print("")
+                print("[apiCall] \(#function.description) method: \(jsonRequest.httpMethod)")
+                print("[apiCall] \(#function.description) headers: \(headers)")
+                print("[apiCall] \(#function.description) endpoint: \(destEncodedURL?.absoluteString ?? "")")
+                print("")
+        
+                let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
                 
-                        let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-                        
-                        let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
-                            (data, response, error) -> Void in
-                            defer { semaphore.signal() }
-                            destSession.finishTasksAndInvalidate()
-                            
-                            if LogLevel.debug {
-                                WriteToLog.shared.message("[PackagesDelegate.getFilename] jsonRequest: \(String(describing: jsonRequest.url!))")
-                                WriteToLog.shared.message("[PackagesDelegate.getFilename] response: \(String(describing: response))")
-                                if let _ = response as? HTTPURLResponse {
-                                    WriteToLog.shared.message("[PackagesDelegate.getFilename] data: \(String(describing: String(data:data!, encoding: .utf8)))\n")
+                let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    defer { semaphore.signal() }
+                    destSession.finishTasksAndInvalidate()
+                    
+                    if LogLevel.debug {
+                        WriteToLog.shared.message("[PackagesDelegate.getFilename] jsonRequest: \(String(describing: jsonRequest.url!))")
+                        WriteToLog.shared.message("[PackagesDelegate.getFilename] response: \(String(describing: response))")
+                        if let _ = response as? HTTPURLResponse {
+                            WriteToLog.shared.message("[PackagesDelegate.getFilename] data: \(String(describing: String(data:data!, encoding: .utf8)))\n")
+                        }
+                    }
+                    
+                    if let httpResponse = response as? HTTPURLResponse {
+                        //                if (response as? HTTPURLResponse != nil) && !(currentTry < 5 && theEndpointID == 75) {
+                        //                    let httpResponse = response as! HTTPURLResponse
+                        if pref.httpSuccess.contains(httpResponse.statusCode) {
+                            //                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                            if let destEndpointJSON = json as? [String: Any] {
+                                //                                print("[PackagesDelegate.getFilename] destEndpointJSON: \(String(describing: destEndpointJSON))")
+                                if let destEndpointInfo = destEndpointJSON["package"] as? [String:Any] {
+                                    let packageFilename = "\(String(describing: destEndpointInfo["filename"]!))"
+                                    //                                    print("[PackagesDelegate.getFilename] destEndpointJSON[filename]: \(String(describing: packageFilename))")
+                                    //                                    print("[PackagesDelegate.getFilename] destEndpointJSON[name]: \(String(describing: destEndpointInfo["name"]!))")
+                                    // adjust what is returned based on whether we're removing records
+                                    let returnedName = skip ? "\(String(describing: destEndpointInfo["name"]!))":packageFilename
+                                    print("[PackageDelegate.getFilename] packageFilename: \(packageFilename) (id: \(theEndpointID))")
+                                    completion((httpResponse.statusCode,returnedName))
                                 }
                             }
+                        } else {
+                            WriteToLog.shared.message("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)")
+                            //                        print("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)")
+                            completion((httpResponse.statusCode,""))
                             
-                            if let httpResponse = response as? HTTPURLResponse {
-                                //                if (response as? HTTPURLResponse != nil) && !(currentTry < 5 && theEndpointID == 75) {
-                                //                    let httpResponse = response as! HTTPURLResponse
-                                if pref.httpSuccess.contains(httpResponse.statusCode) {
-                                    //                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                                    let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                                    if let destEndpointJSON = json as? [String: Any] {
-                                        //                                print("[PackagesDelegate.getFilename] destEndpointJSON: \(String(describing: destEndpointJSON))")
-                                        if let destEndpointInfo = destEndpointJSON["package"] as? [String:Any] {
-                                            let packageFilename = "\(String(describing: destEndpointInfo["filename"]!))"
-                                            //                                    print("[PackagesDelegate.getFilename] destEndpointJSON[filename]: \(String(describing: packageFilename))")
-                                            //                                    print("[PackagesDelegate.getFilename] destEndpointJSON[name]: \(String(describing: destEndpointInfo["name"]!))")
-                                            // adjust what is returned based on whether we're removing records
-                                            let returnedName = skip ? "\(String(describing: destEndpointInfo["name"]!))":packageFilename
-                                            print("[PackageDelegate.getFilename] packageFilename: \(packageFilename) (id: \(theEndpointID))")
-                                            completion((httpResponse.statusCode,returnedName))
-                                        }
-                                    }
-                                } else {
-                                    WriteToLog.shared.message("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)")
-                                    //                        print("[PackagesDelegate.getFilename] error HTTP Status Code: \(httpResponse.statusCode)")
-                                    completion((httpResponse.statusCode,""))
-                                    
+                        }
+                    } else {
+                        WriteToLog.shared.message("[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))")
+                        //                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)")
+                        if currentTry < maxTries {
+                            self.getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: theEndpointID, skip: false, currentTry: currentTry+1) {
+                                (result: (Int,String)) in
+                                let (resultCode,returnedName) = result
+                                //                            print("[PackagesDelegate.getFilename] got filename (\(returnedName)) for package ID \(theEndpointID) on try \(currentTry+1)")
+                                if returnedName != "" {
+                                    completion((resultCode,returnedName))
                                 }
-                            } else {
-                                WriteToLog.shared.message("[PackagesDelegate.getFilename] error with response for package ID \(theEndpointID) from \(String(describing: jsonRequest.url!))")
-                                //                    print("[PackagesDelegate.getFilename] response error for package ID \(theEndpointID) on try \(currentTry)")
-                                if currentTry < maxTries {
-                                    self.getFilename(whichServer: whichServer, theServer: theServer, base64Creds: base64Creds, theEndpoint: "packages", theEndpointID: theEndpointID, skip: false, currentTry: currentTry+1) {
-                                        (result: (Int,String)) in
-                                        let (resultCode,returnedName) = result
-                                        //                            print("[PackagesDelegate.getFilename] got filename (\(returnedName)) for package ID \(theEndpointID) on try \(currentTry+1)")
-                                        if returnedName != "" {
-                                            completion((resultCode,returnedName))
-                                        }
-                                    }
-                                } else {
-                                    completion((0,""))
-                                }
-                            }   // if let httpResponse - end
-                            if error != nil {
                             }
-                        })  // let task = destSession - end
-                        //print("GET")
-                        task.resume()
-                        semaphore.wait()
+                        } else {
+                            completion((0,""))
+                        }
+                    }   // if let httpResponse - end
+                    if error != nil {
+                    }
+                })  // let task = destSession - end
+                //print("GET")
+                task.resume()
+                semaphore.wait()
             }   // getRecordQ - end
 //        }
     }
@@ -292,10 +294,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
         var lookupCount = 0
         
         let packageCount = ExistingPackages.shared.packageIDsNames.count
-        
-        print("filenameIdDict server: \(whichServer)")
-        print("           the server: \(theServer)")
-        
+                
         var i = 0
         ExistingPackages.shared.packageGetsPending = 0
         packageGetQ.async { [self] in
@@ -312,8 +311,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                             //                print("[PackageDelegate.filenameIdDict] destRecord: \(result)")
                             let (resultCode,packageFilename) = result
                             
-                            print("[getFilename] looked up: \(lookupCount) of \(packageCount)")
-                            print("[getFilename] packageFilename: \(packageFilename) server: \(theServer)")
                             WriteToLog.shared.message("[PackagesDelegate.getFilename] fetched \(lookupCount) of \(packageCount) - packageFilename: \(packageFilename) server: \(theServer)")
                             if pref.httpSuccess.contains(resultCode) {
                                 // found name, remove from list
@@ -357,14 +354,12 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                                         //                            print("JamfProServer.pkgsNotFound: \(JamfProServer.pkgsNotFound)")
                                         if JamfProServer.pkgsNotFound == 0 || currentTry >= maxTries {
                                             //                                print("call out dups and completion")
-                                            print("[filenameIdDict] \(#line) server: \(theServer)")
                                             self.callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                                             completion(existingNameId)
                                         }
                                     }
                                 } else {
                                     // call out duplicates
-                                    print("[filenameIdDict] completed filenames id for server: \(theServer)")
                                     callOutDuplicates(duplicatesDict: duplicatePackagesDict, theServer: theServer)
                                     completion(existingNameId)
                                 }
@@ -383,7 +378,6 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
     func callOutDuplicates(duplicatesDict: [String:[String]], theServer: String) {
         // call out duplicates
         logFunctionCall()
-        print("[callOutDuplicates] \(#line) server: \(theServer)")
         var message = ""
         for (pkgFilename, displayNames) in duplicatesDict {
             if displayNames.count > 1 {

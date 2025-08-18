@@ -37,7 +37,6 @@ class EndpointXml: NSObject, URLSessionDelegate {
         }
         endpointXmlQ.async { [self] in
             
-            print("[EndpointXml.endPointByIDQueue] queue \(endpoint) with name \(destEpName) for get")
             getArray.append(ObjectInfo(endpointType: endpoint, endPointXml: "", endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: "\(destEpId)", ssIconName: destEpName, ssIconId: "", ssIconUri: "", retry: false))
             
             while Counter.shared.pendingGet > 0 || getArray.count > 0 {
@@ -124,13 +123,10 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     
 //                    if export.saveOnly {
                         // check progress
-                        print("[getById] node: \(endpoint)")
-                        print("[getById] endpoint \(endpointCurrent) of \(endpointCount) complete")
                         Endpoints.countDict[endpoint]! -= 1
-                        print("[getById] \(Endpoints.countDict[endpoint] ?? -1) remaining")
                         if Endpoints.countDict[endpoint] == 0 {
-                            print("[getById] saved last \(endpoint)")
-                            print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
+//                            print("[getById] saved last \(endpoint)")
+//                            print("[getById] endpoint \(Endpoints.read) of \(ToMigrate.objects.count) endpoints complete")
                                 
                             if Endpoints.read >= ToMigrate.objects.count {
                                 updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
@@ -146,7 +142,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
         }   // endpointsIdQ - end
         case "patch-software-title-configurations":
             var sourceObject = PatchTitleConfigurations.source.first(where: { $0.id == endpointID })
-            print("[getById] displayName: \(sourceObject?.displayName ?? "unknown")")
+
             completion(sourceObject?.displayName ?? "unknown")
             
             sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
@@ -174,9 +170,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                 do {
                     let jsonData = try encoder.encode(instance)
                     
-                    if let jsonString = String(data: jsonData, encoding: .utf8) {
-                        print("[getById] exported jsonString: \(jsonString)")
-                        
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {                        
 //                        print("[getById] export.saveRawXml: \(export.saveRawXml)")
 //                        print("[getById] export.backupMode: \(export.backupMode)")
                         // save source JSON - start

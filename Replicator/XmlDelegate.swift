@@ -124,9 +124,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
         }
         // Create folder to store xml files if needed - end
         
-        print("[XmlDelegate] node: \(node)")
-        
-        
         // Create endpoint type to store xml files if needed - start
         switch node {
         case "selfservicepolicyicon", "macapplicationsicon", "mobiledeviceapplicationsicon":
@@ -177,7 +174,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             if copyIcon {
                 if LogLevel.debug { WriteToLog.shared.message("[XmlDelegate.save] saving icon to: \(iconDest)") }
                 do {
-//                    print("[icons] copy to: \(iconDest)")
                     try fm.copyItem(atPath: iconSource, toPath: iconDest)
                     if export.saveOnly {
                         do {
@@ -193,7 +189,6 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     copyIcon = false
                 }
             }
-//                print("Copied \(iconSource) to: \(iconDest)")
             
         default:
             let xmlFile = "\(name)-\(id).xml"
@@ -204,7 +199,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     if node == "scripts" {
                         formattedXml = formattedXml.xmlDecode
                     }
-                    //                print("policy xml:\n\(formattedXml)")
+
                     do {
                         try formattedXml.write(toFile: endpointPath+"/"+xmlFile, atomically: true, encoding: .utf8)
                         if LogLevel.debug { WriteToLog.shared.message("[XmlDelegate.save] saved to: \(endpointPath)") }

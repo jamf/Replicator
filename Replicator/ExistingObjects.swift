@@ -166,11 +166,10 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             
             DestinationGetQueue.shared.addOperation { [self] in
 
-                print("[ExistingObjects.capi] waiting: \(ExistingEndpoints.shared.waiting), completed: \(ExistingEndpoints.shared.completed), endpointDependencyArray.count: \(endpointDependencyArray.count)")
+//                print("[ExistingObjects.capi] waiting: \(ExistingEndpoints.shared.waiting), completed: \(ExistingEndpoints.shared.completed), endpointDependencyArray.count: \(endpointDependencyArray.count)")
                 URLCache.shared.removeAllCachedResponses()
                 ExistingEndpoints.shared.waiting = true
                 
-                print("[ExistingObjects.capi] line: \(#line) get all \(existingEndpointNode)")
                 ObjectDelegate.shared.getAll(whichServer: "dest", endpoint: existingEndpointNode) { [self]
                     (result: [Any]) in
                     if let responseData = result as? [[String: Int]], responseData.count > 0 {
@@ -228,7 +227,6 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                 //                                                    if patchObject.softwareTitlePublisher.range(of: "(Deprecated Definition)") != nil {
                                 //                                                        displayName.append(" (Deprecated Definition)")
                                 //                                                    }
-                                print("[ExistingObjects.capi] softwareTitleName: \(softwareTitleName)")
                                 //                                                    displayNames.append(displayName)
                                 
                                 if softwareTitleName.isEmpty {
@@ -257,7 +255,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                                 ExistingEndpoints.shared.waiting = (ExistingEndpoints.shared.completed < endpointDependencyArray.count) ? false:true
                                     
                                 if !pref.stopMigration {
-                                    print("[ExistingObjects.capi] \(destEndpoint) current endpoints: \(currentEPs)")
+//                                    print("[ExistingObjects.capi] \(destEndpoint) current endpoints: \(currentEPs)")
                                     currentEPDict["packages"] = currentEPs
                                     
                                     if endpointParent != "policies" {

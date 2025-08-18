@@ -99,7 +99,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         var contentType: String = "application/json"
         var accept: String      = "application/json"
 
-        print("[Jpapi.action] endpoint: \(endpoint)")
         switch endpoint {
         case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-roles", "api-integrations":
             path = "api/v1/\(endpoint)"
@@ -119,7 +118,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         if id != "" && id != "0" {
             urlString = (urlString.contains("/api/")) ? urlString + "/\(id)":urlString + "/id/\(id)"
         }
-        print("[Jpaapi.action] \(endpoint) id \(id)")
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.default
@@ -132,7 +130,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         default:
             request.httpMethod = "PUT"
         }
-        print("[Jpaapi.action] Perform \(request.httpMethod ?? "") on urlString: \(urlString)")
         
         if apiData.count > 0 {
             do {
@@ -272,14 +269,14 @@ class Jpapi: NSObject, URLSessionDelegate {
     func getAllDelegate(whichServer: String, theEndpoint: String, whichPage: Int, lastPage: Bool = false, completion: @escaping (_ result: [Any]) -> Void) {
         logFunctionCall()
         
-        print("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server, theEndpoint: \(theEndpoint).")
+        if LogLevel.debug {
+            WriteToLog.shared.message("[getAllDelegate] lastPage: \(lastPage), whichPage: \(whichPage), whichServer: \(whichServer) server, theEndpoint: \(theEndpoint).")
+        }
         if !lastPage {
             getAll(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
                 returnedResults in
                 if theEndpoint == "packages" {
                     if duplicatePackages {
-                        print("[getAllDelegate] duplicate packages found on \(whichServer) server.")
-                        
                             var message = "\tFilename : Display Name\n"
                             for (pkgFilename, displayNames) in duplicatePackagesDict {
                                 if displayNames.count > 1 {
@@ -312,7 +309,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         var existingObjectCount = 0
         switch theEndpoint {
         case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations":
-            print("[getAll] look for \(theEndpoint)")
             DispatchQueue.global(qos: .background).async { [self] in
                 
                 pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
@@ -406,7 +402,7 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 }
                                 existingObjectCount = existingObjects.count
                             } catch {
-                                print("[getAll] error decoding \(theEndpoint): \(error)")
+                                WriteToLog.shared.message("[getAll] error decoding \(theEndpoint): \(error)")
                             }
                         default:
                             for theObject in returnedRecords {
@@ -439,13 +435,10 @@ class Jpapi: NSObject, URLSessionDelegate {
                             }
                         }
                         
-                        print("[getAll] records (\(theEndpoint)) added: \(returnedRecords.count)")
                         WriteToLog.shared.message("[Jpapi.getAll] total records fetched \(returnedRecords.count) objects")
                     }
-                    print("[getAll] page \(whichPage + 1) of \(pages) complete")
                     
                     if (whichPage + 1 >= pages ) {
-                        print("[getAll] return to caller, record count: \(existingObjectCount)")
                         switch theEndpoint {
                         case "api-roles":
                             completion(whichServer == "source" ? ApiRoles.source : ApiRoles.destination)
@@ -465,14 +458,12 @@ class Jpapi: NSObject, URLSessionDelegate {
                             returnedResults in
 //                            print("[getAll] page \(whichPage + 1) of \(pages) complete")
 //                            print("[getAll] finished fetching all \(theEndpoint)")
-                            print("[getAll] call page \(whichPage + 1) for \(theEndpoint)")
                             completion(existingObjects)
                         }
                     }
                 }
             }
         default:
-            print("[getAll] look for \(theEndpoint) from \(whichServer)")
             // all records in one call
             get(whichServer: whichServer, theEndpoint: theEndpoint) {
                 returnedJson in
@@ -490,8 +481,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                         
                     }
                 }
-                print("[getAll] records returned: \(returnedJson.count)")
-                print("[getAll]    records added: \(existingObjects.count - currentCount)")
 //                                WriteToLog.shared.message("[Jpapi.getAll] total records fetched \(allRecords.count) objects")
 //                }
                 completion(existingObjects)
@@ -577,11 +566,9 @@ class Jpapi: NSObject, URLSessionDelegate {
             endpointParent = "\(theEndpoint)"
         }
         
-        print("[Jpapi.get] JamfProServer.url: \(JamfProServer.url)")
         var endpoint = (JamfProServer.url[whichServer] ?? "") + "/api/\(endpointVersion)/\(theEndpoint)"
         
         endpoint = endpoint.replacingOccurrences(of: "//api", with: "/api")
-        print("[Jpapi.get] endpoint: \(endpoint)")
         
         guard let endpointUrl = URL(string: endpoint) else {
             completion([])
@@ -589,7 +576,6 @@ class Jpapi: NSObject, URLSessionDelegate {
         }
         
 //        let endpointUrl = tmpUrl.appending(path: "/api/\(endpointVersion)/\(theEndpoint)")
-        print("[Jpapi.get] endpointUrl: \(endpointUrl.path())")
 //        let endpointUrl    = URL(string: "\(endpoint)")
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
@@ -607,13 +593,15 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         
-        let semaphore = DispatchSemaphore(value: 0)
+//        let semaphore = DispatchSemaphore(value: 0)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
 //            defer { semaphore.signal() }
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                print("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
+                if LogLevel.debug {
+                    WriteToLog.shared.message("[Jpapi.get] response statusCode: \(httpResponse.statusCode)")
+                }
                 if httpSuccess.contains(httpResponse.statusCode) {
 //                    print("[Jpapi.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
@@ -629,7 +617,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                     case "api-roles", "api-integrations":
                         if let recordsArray = responseData as? [String: Any], let results = recordsArray["results"] as? [[String: Any]] {
-                            print("[Jpapi.get] \(theEndpoint) - found \(recordsArray["totalCount"] ?? "unknown")")
                             completion(results)
                         } else {
                             WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
@@ -637,7 +624,6 @@ class Jpapi: NSObject, URLSessionDelegate {
                         }
                     case "api-role-privileges":
                         if let priveleges = responseData as? [String: Any] {
-                            print("[Jpapi.get] \(theEndpoint) - found \(priveleges.count)")
                             completion([priveleges])
                         } else {
                             WriteToLog.shared.message("[Jpapi.get] No data was returned from the GET.")
@@ -707,7 +693,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         guard let url = URL(string: JamfProServer.url[whichServer] ?? "") else {
             completion([] as Any)
-            print("[Jpapi.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
+            WriteToLog.shared.message("[Jpapi.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
             return
         }
         
@@ -719,7 +705,6 @@ class Jpapi: NSObject, URLSessionDelegate {
 
 //        print("[Jpapi.getAll] whichServer: \(whichServer)")
 //        print("[Jpapi.getAll] accessToken: \(JamfProServer.accessToken[whichServer] ?? "")")
-        print("[Jpapi.pagedGet] endpointUrl: \(endpointUrl.absoluteString)")
         
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
@@ -743,7 +728,9 @@ class Jpapi: NSObject, URLSessionDelegate {
 //            defer { semaphore.signal() }
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                print("[Jpapi.pagedGet] response statusCode: \(httpResponse.statusCode)")
+                if LogLevel.debug {
+                    WriteToLog.shared.message("[Jpapi.pagedGet] response statusCode: \(httpResponse.statusCode)")
+                }
                 if httpSuccess.contains(httpResponse.statusCode) {
 //                    print("[Jpapi.get] data as string: \(String(data: data ?? Data(), encoding: .utf8))")
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
@@ -773,7 +760,7 @@ class Jpapi: NSObject, URLSessionDelegate {
             let content = try String(contentsOf: url, encoding: .utf8)
             return content
         } catch {
-            print("Error reading file: \(error.localizedDescription)")
+            WriteToLog.shared.message("[Jpapi.readFile] Error reading file: \(error.localizedDescription)")
             return ""
         }
     }

@@ -40,7 +40,7 @@ class Credentials {
         switch operation {
         case "save":
             if useLoginKeychain {
-                print("[Credentials] Saving to Login Keychain...")
+//                print("[Credentials] Saving to Login Keychain...")
                 keychainQuery = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: theService,
 //                                kSecAttrAccessGroup as String: accessGroup,
@@ -51,7 +51,7 @@ class Credentials {
                                 kSecAttrAccount as String: account,
                                 kSecValueData as String: password]
             } else {
-                print("[Credentials] Saving to default Keychain...")
+//                print("[Credentials] Saving to default Keychain...")
                 keychainQuery = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: theService,
                                 kSecAttrAccessGroup as String: accessGroup,
@@ -62,7 +62,7 @@ class Credentials {
             }
         case "lookup", "checkExisting":
             if useLoginKeychain {
-                print("[Credentials] check Login Keychain...")
+//                print("[Credentials] check Login Keychain...")
                 keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
                                  kSecAttrService as String: theService,
 //                                 kSecAttrAccessGroup as String: accessGroup,
@@ -71,7 +71,7 @@ class Credentials {
                                  kSecReturnAttributes as String: true,
                                  kSecReturnData as String: true]
             } else {
-                print("[Credentials] check default Keychain...")
+//                print("[Credentials] check default Keychain...")
                 keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
                                  kSecAttrService as String: theService,
                                  kSecAttrAccessGroup as String: accessGroup,
@@ -161,14 +161,14 @@ class Credentials {
                         let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
                         if (addStatus != errSecSuccess) {
                             if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                print("[addStatus] Write failed for new credentials: \(addErr)")
+                                WriteToLog.shared.message("[addStatus] Write failed for new credentials: \(addErr)")
                                 let deleteStatus = SecItemDelete(keychainQuery as CFDictionary)
                                 print("[Credentials.save] the deleteStatus: \(deleteStatus)")
                                 sleep(1)
                                 let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
                                 if (addStatus != errSecSuccess) {
                                     if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                        print("[addStatus] Write failed for new credentials after deleting: \(addErr)")
+                                        WriteToLog.shared.message("[addStatus] Write failed for new credentials after deleting: \(addErr)")
                                     }
                                 }
                             }
@@ -182,7 +182,7 @@ class Credentials {
     private func checkExisting(service: String, account: String) -> [String:String] {
         
         logFunctionCall()
-        print("[Credentials.oldItemLookup] start search for: \(service)")
+//        print("[Credentials.oldItemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
 //        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
@@ -198,7 +198,7 @@ class Credentials {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(keychainQuery as CFDictionary, &item)
         guard status != errSecItemNotFound else {
-            print("[Credentials.checkExisting] lookup error occurred: \(status.description)")
+            WriteToLog.shared.message("[Credentials.checkExisting] lookup error occurred: \(status.description)")
             return [:]
         }
         guard status == errSecSuccess else { return [:] }
@@ -216,8 +216,6 @@ class Credentials {
     
     func retrieve(service: String, account: String, whichServer: String = "") -> [String:String] {
         logFunctionCall()
-        print("[Credentials.retrieve]     start search for: \(service)")
-        print("[Credentials.retrieve] JamfProServer.source: \(JamfProServer.source)")
         
         if JamfProServer.source != JamfProServer.destination {
             credentialsWhichServer = ( service == JamfProServer.source.fqdnFromUrl ) ? "source":"destination"
@@ -260,7 +258,7 @@ class Credentials {
     private func itemLookup(service: String) -> [String:String] {
         
         logFunctionCall()
-        print("[Credentials.itemLookup] start search for: \(service)")
+//        print("[Credentials.itemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
 //        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
@@ -272,25 +270,24 @@ class Credentials {
 //                                            kSecReturnData as String: true]
         
         let keychainQuery = theKeychainQuery(operation: "lookup", theService: service)
-        print("[Credentials.itemLookup] keychainQuery: \(keychainQuery)")
         
         var items_ref: CFTypeRef?
         
         let status = SecItemCopyMatching(keychainQuery as CFDictionary, &items_ref)
 
         guard status != errSecItemNotFound else {
-            print("[Credentials.itemLookup] lookup error occurred for \(service): \(status.description)")
+            WriteToLog.shared.message("[Credentials.itemLookup] lookup error occurred for \(service): \(status.description)")
             return [:]
             
         }
         guard status == errSecSuccess else {
-            print("[Credentials.itemLookup] status error occurred for \(service): \(status.description)")
+            WriteToLog.shared.message("[Credentials.itemLookup] status error occurred for \(service): \(status.description)")
             return [:]
         }
         
         if userDefaults.integer(forKey: "useLoginKeychain") == 1 {
             guard let items = items_ref as? [String: Any] else {
-                print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+                WriteToLog.shared.message("[Credentials.itemLookup] unable to read keychain item: \(service)")
                 return [:]
             }
             if let account = items[kSecAttrAccount as String] as? String, let passwordData = items[kSecValueData as String] as? Data {
@@ -299,7 +296,7 @@ class Credentials {
             }
         } else {
             guard let items = items_ref as? [[String: Any]] else {
-                print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+                WriteToLog.shared.message("[Credentials.itemLookup] unable to read keychain item: \(service)")
                 return [:]
             }
             for item in items {
@@ -310,15 +307,12 @@ class Credentials {
             }
         }
 
-        print("[Credentials.itemLookup] keychain item count: \(userPassDict.count) for \(service)")
-//        print("[Credentials.itemLookup] userPassDict: \(userPassDict)")
         return userPassDict
     }
     
     private func oldItemLookup(service: String) -> [String:String] {
         
         logFunctionCall()
-        print("[Credentials.oldItemLookup] start search for: \(service)")
         
         userPassDict.removeAll()
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
@@ -330,7 +324,7 @@ class Credentials {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(keychainQuery as CFDictionary, &item)
         guard status != errSecItemNotFound else {
-            print("[Credentials.oldItemLookup] lookup error occurred: \(status.description)")
+            WriteToLog.shared.message("[Credentials.oldItemLookup] lookup error occurred: \(status.description)")
             return [:]
         }
         guard status == errSecSuccess else { return [:] }

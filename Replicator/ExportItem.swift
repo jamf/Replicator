@@ -55,7 +55,6 @@ class ExportItem: NSObject {
         var endpointPath   = ""
         
         let saveFolder = saveLocation(format)
-        print("[export] saveFolder: \(saveFolder)")
         
         // Create endpoint type to store objectString files if needed - start
         switch node {
@@ -77,7 +76,6 @@ class ExportItem: NSObject {
         default:
             endpointPath = saveFolder+node
         }
-        print("[export] endpointPath: \(endpointPath)")
         
         do {
             let encoder = JSONEncoder()
@@ -123,9 +121,7 @@ class ExportItem: NSObject {
                     }
                 }
             }
-            
-            print("[ExportItem.export] rawExport for node \(node): \(objectAsString)")
-            
+                        
             exportFilename = exportFilename.replacingOccurrences(of: ":", with: ";")
             exportFilename = exportFilename.replacingOccurrences(of: "/", with: "_")
             

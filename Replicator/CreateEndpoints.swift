@@ -107,7 +107,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         var apiAction       = action.lowercased()
         var sourcePolicyId  = ""
         
-        print("[createEndpoints.capi] endpointType: \(endpointType), destinationEpId: \(destinationEpId) action: \(action)")
         // counterts for completed endpoints
         if endpointCurrent == 1 {
 //            print("[CreateEndpoints] reset counters")
@@ -315,7 +314,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             if let _ = Counter.shared.progressArray["\(endpointType)"] {
                                 Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
                             }
-                            print("[CreateEndpoints.capi] crud \(endpointType) \(apiAction) counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
                             Counter.shared.crud[endpointType]?["\(apiAction)"]! += 1
                             
                             if var summaryArray = Counter.shared.summary[endpointType]?["\(apiAction)"] {
@@ -350,9 +348,9 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             
                             var localErrorMsg = ""
                             
-                            print("[createEndpoints]   identifier: \(identifier)")
-                            print("[createEndpoints] responseData: \(responseData)")
-                            print("[createEndpoints]       status: \(httpResponse.statusCode)")
+//                            print("[createEndpoints]   identifier: \(identifier)")
+//                            print("[createEndpoints] responseData: \(responseData)")
+//                            print("[createEndpoints]       status: \(httpResponse.statusCode)")
                             
                             if httpResponse.statusCode == 404 {
                                 // retry doing a POST
@@ -373,7 +371,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                             }
                             
-                            print("[createEndpoints] whichError: \(whichError)")
                             // retry computers with dublicate serial or MAC - start
                             switch whichError {
                             case "device not found":
@@ -496,7 +493,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         
                         if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
 
-                            print("[CreateEndpoints] endpointType: \(endpointType)")
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
                                     updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
@@ -610,9 +606,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
         var destinationEpId = destEpId
         var apiAction       = action
-        
-        print("[createEndpoints.jpapi] endpointType: \(endpointType), destinationEpId: \(destinationEpId) action: \(action)")
-        
+                
         // counterts for completed endpoints
         if endpointCurrent == 1 {
 //            print("[CreateEndpoints2] reset counters")
@@ -729,9 +723,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                             }
                         }
-                        
-                        print("[CreateEndpoints.jpapi] crud \(endpointType) \(apiAction) counter: \(Counter.shared.crud[endpointType]?["\(apiAction)"] ?? 0)")
-                        
+                                                
                         // look to see if we are processing the next endpointType - start
                         if endpointInProgress != endpointType || endpointInProgress == "" {
                             WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
