@@ -210,7 +210,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                             do {
                                 let jsonData = try? JSONSerialization.data(withJSONObject: result, options: [])
                                 PatchTitleConfigurations.destination = try JSONDecoder().decode([PatchSoftwareTitleConfiguration].self, from: jsonData!)
-                                print("test count: \(PatchTitleConfigurations.source.count)")
+                                print("test count: \(PatchTitleConfigurations.destination.count)")
                             } catch {
                                 print("error getting patch software title configurations: \(error)")
                             }

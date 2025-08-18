@@ -83,7 +83,11 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         if JamfProServer.source.range(of: "^/", options: [.regularExpression, .caseInsensitive]) != nil && whichServer == "source" && endpoint == "patchpolicies" {
             print("read \(endpoint) with id \(id) from \(JamfProServer.source)")
+            let fileContents = readFile("\(JamfProServer.source)\(endpoint)/\(id).xml")
+//            print("[Jpapi.action] fileContents: \(fileContents)")
+            completion(["objectXml": fileContents])
             usleep(10000)
+            return
         }
                 
         // cookie stuff
@@ -760,6 +764,18 @@ class Jpapi: NSObject, URLSessionDelegate {
         })
         task.resume()
         semaphore.wait()
+    }
+    
+    private func readFile(_ fullPath: String) -> String {
+        let url = URL(fileURLWithPath: fullPath)
+            
+        do {
+            let content = try String(contentsOf: url, encoding: .utf8)
+            return content
+        } catch {
+            print("Error reading file: \(error.localizedDescription)")
+            return ""
+        }
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
