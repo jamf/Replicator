@@ -3887,9 +3887,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         print(error)
                                     }
                                 case "patch-software-title-configurations":
+                                    if i == 1 {
+                                        PatchTitleConfigurations.source.removeAll()
+                                    }
                                     let data = fileContents.data(using: .utf8) ?? Data()
                                     do {
                                         let patchObject = try JSONDecoder().decode(PatchSoftwareTitleConfiguration.self, from: data)
+                                        PatchTitleConfigurations.source.append(patchObject)
 //                                        if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
 //                                        {
 //                                                fileJSON = jsonData
@@ -4057,7 +4061,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
             var l_index = 1
             for theObject in targetSelectiveObjectList {
-//                print("[processFiles] object name: \(theObject.objectName.xmlDecode)")
+                print("[processFiles] endpoint \(endpoint) object name: \(theObject.objectName.xmlDecode)")
                 readFilesQ.addOperation { [self] in
                     let l_id   = theObject.objectId         // id of object
                     let l_name = theObject.objectName.xmlDecode    // name of object, remove xml encoding
