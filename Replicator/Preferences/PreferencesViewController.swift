@@ -45,6 +45,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var profilesAction_button: NSPopUpButton!
     @IBOutlet weak var appsAction_button: NSPopUpButton!
     @IBOutlet weak var groupsAction_button: NSPopUpButton!
+    @IBOutlet weak var restrictedSoftware_button: NSPopUpButton!
 
     // app prefs
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
@@ -211,28 +212,65 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     // site actions
+    @IBAction func siteCopyMove_action(_ sender: NSPopUpButton) {
+        let selectedItem = sender.selectedItem?.title ?? "Copy"
+        print("[set pref] copyMoveAction: \(selectedItem)")
+        print("[set pref] copyMoveAction item: \(String(describing: sender.identifier?.rawValue))")
+        if NSEvent.modifierFlags.contains(.option) {
+            print("[set pref] set all to: \(selectedItem)")
+            userDefaults.set("\(selectedItem)", forKey: "siteSearchesAction")
+            searchesAction_button.selectItem(withTitle: selectedItem)
+            userDefaults.set("\(selectedItem)", forKey: "sitePoliciesAction")
+            policiesAction_button.selectItem(withTitle: selectedItem)
+            userDefaults.set("\(selectedItem)", forKey: "siteProfilesAction")
+            profilesAction_button.selectItem(withTitle: selectedItem)
+            userDefaults.set("\(selectedItem)", forKey: "siteAppsAction")
+            appsAction_button.selectItem(withTitle: selectedItem)
+            userDefaults.set("\(selectedItem)", forKey: "siteGroupsAction")
+            groupsAction_button.selectItem(withTitle: selectedItem)
+            userDefaults.set("\(selectedItem)", forKey: "restrictedsoftware")
+            restrictedSoftware_button.selectItem(withTitle: selectedItem)
+        } else {
+            switch sender.identifier?.rawValue {
+            case "searches":
+                userDefaults.set("\(selectedItem)", forKey: "siteSearchesAction")
+            case "policies":
+                userDefaults.set("\(selectedItem)", forKey: "sitePoliciesAction")
+            case "profiles":
+                userDefaults.set("\(selectedItem)", forKey: "siteProfilesAction")
+            case "apps":
+                userDefaults.set("\(selectedItem)", forKey: "siteAppsAction")
+            case "groups":
+                userDefaults.set("\(selectedItem)", forKey: "siteGroupsAction")
+            case "software":
+                userDefaults.set("\(selectedItem)", forKey: "restrictedsoftware")
+
+            default:
+                print("unknown option")
+            }
+        }
+        
+    }
+    /*
     @IBAction func siteSearches_action(_ sender: Any) {
         userDefaults.set("\(searchesAction_button.selectedItem!.title)", forKey: "siteSearchesAction")
-//        userDefaults.synchronize()
     }
     @IBAction func sitePolicy_action(_ sender: Any) {
         userDefaults.set("\(policiesAction_button.selectedItem!.title)", forKey: "sitePoliciesAction")
-//        userDefaults.synchronize()
     }
     @IBAction func siteProfiles_action(_ sender: Any) {
         userDefaults.set("\(profilesAction_button.selectedItem!.title)", forKey: "siteProfilesAction")
-//        userDefaults.synchronize()
     }
     @IBAction func siteApps_action(_ sender: Any) {
         userDefaults.set("\(appsAction_button.selectedItem!.title)", forKey: "siteAppsAction")
-//        userDefaults.synchronize()
     }
     @IBAction func siteGroup_action(_ sender: Any) {
         userDefaults.set("\(groupsAction_button.selectedItem!.title)", forKey: "siteGroupsAction")
-//        userDefaults.synchronize()
     }
-
-//    var buttonState = true
+    @IBAction func siteRestrictedSoftware_action(_ sender: Any) {
+        userDefaults.set("\(restrictedSoftware_button.selectedItem!.title)", forKey: "restrictedsoftware")
+    }
+     */
     
     @IBAction func updateCopyPrefs_button(_ sender: Any) {
         AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
@@ -426,14 +464,22 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                 userDefaults.set("Copy", forKey: "siteSearchesAction")
             }
             searchesAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteSearchesAction") ?? "Copy")
+            
             if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteAppsAction")) {
                 userDefaults.set("Copy", forKey: "siteAppsAction")
             }
             appsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteAppsAction") ?? "Copy")
+            
             if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteGroupsAction")) {
                 userDefaults.set("Copy", forKey: "siteGroupsAction")
             }
             groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction") ?? "Copy")
+            
+            if !["Copy", "Move"].contains(userDefaults.string(forKey: "restrictedsoftware")) {
+                userDefaults.set("Copy", forKey: "restrictedsoftware")
+            }
+            restrictedSoftware_button.selectItem(withTitle: userDefaults.string(forKey: "restrictedsoftware") ?? "Copy")
+            
 //            if (userDefaults.string(forKey: "siteGroupsAction") == "Copy" || userDefaults.string(forKey: "siteGroupsAction") == "Move")  {
 //                groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction") ?? "Copy")
 //            } else {
