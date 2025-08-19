@@ -932,7 +932,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if NSEvent.modifierFlags.contains(.option) {
             markAllNone(rawStateValue: sender.state.rawValue)
         }
-		  inactiveTabDisable(activeTab: "bulk")
+        inactiveTabDisable(activeTab: "bulk")
     }
     
     func inactiveTabDisable(activeTab: String) {

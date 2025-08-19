@@ -82,6 +82,22 @@ class Cleanup: NSObject {
             }
         }
         
+        // migrating to another site
+        if JamfProServer.toSite && !JamfProServer.destSite.isEmpty {
+            if let siteId = JamfProSites.destination.first(where: { $0.name == JamfProServer.destSite })?.id {
+                JSONData["siteId"] = siteId
+            } else {
+                WriteToLog.shared.message("Error updating site for patch management title \(JSONData["displayName"] as? String ?? "unknown").  Site \(JamfProServer.destSite) not found.")
+            }
+            if sitePref == "Copy" {
+                if let objectName = JSONData["displayName"] as? String {
+                    JSONData["displayName"] = "\(objectName) - \(JamfProServer.destSite)"
+                } else {
+                    WriteToLog.shared.message("Error updating site for patch management id \(endpointID). Problem determining displayName of object.")
+                }
+            }
+        }
+        
         CreateEndpoints.shared.jpapi(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
             if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
@@ -700,7 +716,7 @@ class Cleanup: NSObject {
         var rawValue = ""
 //        var startTag = ""
         let siteEncoded = XmlDelegate.shared.encodeSpecialChars(textString: site)
-        
+        print("[setSite] endpoint: \(endpoint)")
         // get copy / move preference - start
         switch endpoint {
         case "macapplications", "mobiledeviceapplications":
@@ -718,6 +734,9 @@ class Cleanup: NSObject {
         case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
             sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
             
+        case "restrictedsoftware":
+            sitePref = userDefaults.string(forKey: "restrictedsoftware") ?? "Copy"
+
         case "computers","mobiledevices":
             sitePref = "Move"
             
@@ -728,6 +747,7 @@ class Cleanup: NSObject {
         if LogLevel.debug { WriteToLog.shared.message("[siteSet] site operation for \(endpoint): \(sitePref)") }
         // get copy / move preference - end
         
+        /*
         switch endpoint {
         case "computergroups", "smartcomputergroups", "staticcomputergroups":
             rawValue = tagValue2(xmlString: xmlString, startTag: "<computer_group>", endTag: "</computer_group>")
@@ -741,6 +761,8 @@ class Cleanup: NSObject {
             rawValue = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
 //            startTag = "general"
         }
+        */
+        
         var itemName = "unknown object name"
 //        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
         if let firstNameValue = parser.findFirstTagValue(tagName: "name", in: xmlString) {
@@ -764,7 +786,7 @@ class Cleanup: NSObject {
             rawValue = RemoveData.shared.Xml(theXML: xmlString, theTag: "sites", keepTags: true)
 
 //            let siteInfo = tagValue2(xmlString: xmlString, startTag: "<sites>", endTag: "</sites>")
-            if siteEncoded != "None" {
+            if siteEncoded.lowercased() != "none" {
                 rawValue = xmlString.replacingOccurrences(of: "<sites></sites>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
                 rawValue = xmlString.replacingOccurrences(of: "<sites/>", with: "<sites><site><name>\(siteEncoded)</name></site></sites>")
             }
@@ -888,49 +910,5 @@ class Cleanup: NSObject {
             range: match.range,
             withTemplate: "$1\(newName)$2"
         )
-        
-        
-//        let pattern = "(<name>)[^<]*(</name>)"
-//        
-//        return xmlString.replacingOccurrences(
-//            of: pattern,
-//            with: "$1\(newName)$2",
-//            options: .regularExpression
-//        )
     }
-    
-    /*
-    private func updateObjectName(in xmlString: String, siteEncoded: String) -> String {
-        // Escape XML special characters in the new name
-//        let escapedName = newName
-//            .replacingOccurrences(of: "&", with: "&amp;")
-//            .replacingOccurrences(of: "<", with: "&lt;")
-//            .replacingOccurrences(of: ">", with: "&gt;")
-//            .replacingOccurrences(of: "\"", with: "&quot;")
-//            .replacingOccurrences(of: "'", with: "&apos;")
-        
-        // Priority 1: If there's a <general> tag, update the first <name> within it
-        let generalPattern = "(<general[^>]*>(?:(?!</general>)[\\s\\S])*?<name>)[^<]*(</name>(?:(?!</general>)[\\s\\S])*?</general>)"
-        if xmlString.range(of: generalPattern, options: .regularExpression) != nil {
-            return xmlString.replacingOccurrences(
-                of: generalPattern,
-                with: "$1\(siteEncoded)$2",
-                options: .regularExpression
-            )
-        }
-        
-        // Priority 2: Find the first <name> tag that appears at a "top level"
-        return updateFirstTopLevelName(in: xmlString, newName: siteEncoded)
-    }
-    private func updateFirstTopLevelName(in xmlString: String, newName: String) -> String {
-        // Simple approach: find first <name> tag and replace it
-        let pattern = "(<name>)[^<]*(</name>)"
-        
-        return xmlString.replacingOccurrences(
-            of: pattern,
-            with: "$1\(newName)$2",
-            options: .regularExpression
-        )
-    }
-     */
 }
