@@ -111,7 +111,7 @@ class Cleanup: NSObject {
     
     func Xml(endpoint: String, Xml: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
         logFunctionCall()
-        
+                
         Logger.cleanup_xml.debug("enter cleanXML - \(endpoint, privacy: .public)")
         
         if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] enter") }
@@ -168,6 +168,9 @@ class Cleanup: NSObject {
         case "restrictedsoftware":
             if !Scope.rsCopy {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
+            }
+            if JamfProServer.toSite && !JamfProServer.destSite.isEmpty {
+                PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
             }
         case "mobiledeviceconfigurationprofiles":
             if !Scope.mcpCopy {
@@ -319,6 +322,9 @@ class Cleanup: NSObject {
                for xmlTag in ["student_ids/", "teacher_ids/", "student_group_ids/", "teacher_group_ids/", "mobile_device_group_ids/"] {
                    PostXML = PostXML.replacingOccurrences(of: "<\(xmlTag)>", with: "")
                }
+                if JamfProServer.toSite && JamfProServer.destSite != "" {
+                    PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
+                }
             }
 
         case "computerextensionattributes":
@@ -638,7 +644,6 @@ class Cleanup: NSObject {
         }   // switch - end
         
         if knownEndpoint {
-//            print("\n[cleanupXml] knownEndpoint-PostXML: \(PostXML)")
             var destEndpoint = "skip"
             if (action == "update") && (theEndpoint == "osxconfigurationprofiles") {
                 destEndpoint = theEndpoint
@@ -649,12 +654,12 @@ class Cleanup: NSObject {
                 let (_, fullXML) = xmlResult
                 
                 if fullXML != "" {
-                    var destUUID = tagValue2(xmlString: fullXML, startTag: "<general>", endTag: "</general>")
-                    destUUID     = tagValue2(xmlString: destUUID, startTag: "<uuid>", endTag: "</uuid>")
-//                    print ("  destUUID: \(destUUID)")
                     var sourceUUID = tagValue2(xmlString: PostXML, startTag: "<general>", endTag: "</general>")
                     sourceUUID     = tagValue2(xmlString: sourceUUID, startTag: "<uuid>", endTag: "</uuid>")
 //                    print ("sourceUUID: \(sourceUUID)")
+                    var destUUID = tagValue2(xmlString: fullXML, startTag: "<general>", endTag: "</general>")
+                    destUUID     = tagValue2(xmlString: destUUID, startTag: "<uuid>", endTag: "</uuid>")
+//                    print ("  destUUID: \(destUUID)")
 
                     // update XML to be posted with original/existing UUID of the configuration profile
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
@@ -735,7 +740,10 @@ class Cleanup: NSObject {
             sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
             
         case "restrictedsoftware":
-            sitePref = userDefaults.string(forKey: "restrictedsoftware") ?? "Copy"
+            sitePref = userDefaults.string(forKey: "siteRestrictedSoftware") ?? "Copy"
+            
+        case "classes":
+            sitePref = userDefaults.string(forKey: "siteClasses") ?? "Copy"
 
         case "computers","mobiledevices":
             sitePref = "Move"
