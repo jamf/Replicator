@@ -578,11 +578,11 @@ DQ
             <objects>
                 <viewController title="Site" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="btl-X1-946">
-                        <rect key="frame" x="0.0" y="0.0" width="397" height="264"/>
+                        <rect key="frame" x="0.0" y="0.0" width="397" height="314"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Z9p-7n-bVG">
-                                <rect key="frame" x="10" y="195" width="377" height="57"/>
+                                <rect key="frame" x="10" y="245" width="377" height="57"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="57" id="0Xc-WA-LBs"/>
                                     <constraint firstAttribute="width" constant="373" id="lP7-p1-doq"/>
@@ -595,7 +595,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="00w-rL-Cme">
-                                <rect key="frame" x="115" y="53" width="49" height="16"/>
+                                <rect key="frame" x="115" y="75" width="49" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Groups" id="qaC-VC-TfO">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -603,7 +603,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zpT-VE-Axt">
-                                <rect key="frame" x="40" y="25" width="124" height="16"/>
+                                <rect key="frame" x="40" y="47" width="124" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Restricted Software" id="KM3-Dl-wLs">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -611,7 +611,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CVl-1u-4EI">
-                                <rect key="frame" x="113" y="137" width="51" height="16"/>
+                                <rect key="frame" x="113" y="187" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Policies" id="eVd-eg-5CH">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -619,15 +619,23 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZOc-ap-lS4">
-                                <rect key="frame" x="28" y="109" width="136" height="16"/>
+                                <rect key="frame" x="28" y="159" width="136" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Configuration Profiles" id="cN5-GU-lLg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6MZ-wW-meg">
+                                <rect key="frame" x="43" y="103" width="121" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Patch Management" id="Ajb-mW-6hV">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Fqm-v3-tqW">
-                                <rect key="frame" x="128" y="81" width="36" height="16"/>
+                                <rect key="frame" x="128" y="131" width="36" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Apps" id="hPT-oY-fYs">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -635,7 +643,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton identifier="searches" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ric-zN-kUj">
-                                <rect key="frame" x="167" y="159" width="77" height="25"/>
+                                <rect key="frame" x="167" y="209" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="E8N-Rd-NHA" id="bIT-AM-0jw">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -655,7 +663,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="policies" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VIh-bS-JeH">
-                                <rect key="frame" x="167" y="131" width="77" height="25"/>
+                                <rect key="frame" x="167" y="181" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="eUE-QE-YRg" id="wq4-IH-mem">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -675,7 +683,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="profiles" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PYt-cK-DKX">
-                                <rect key="frame" x="167" y="103" width="77" height="25"/>
+                                <rect key="frame" x="167" y="153" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UGA-4u-HO2" id="rSW-Xy-J9g">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -691,7 +699,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="apps" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CcJ-hQ-jxu">
-                                <rect key="frame" x="167" y="75" width="77" height="25"/>
+                                <rect key="frame" x="167" y="125" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="XaM-z4-8q9" id="BWN-na-TnP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -707,7 +715,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="groups" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TQL-zV-GhE">
-                                <rect key="frame" x="167" y="47" width="77" height="25"/>
+                                <rect key="frame" x="167" y="69" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="J9F-Fg-eDv" id="T6P-Nd-djx">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -723,7 +731,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="software" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="X1H-zR-VZP">
-                                <rect key="frame" x="167" y="19" width="77" height="25"/>
+                                <rect key="frame" x="167" y="41" width="77" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="VdM-9i-0vp" id="UB9-l9-S0o">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -739,16 +747,57 @@ DQ
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="foO-6F-dmH">
-                                <rect key="frame" x="103" y="165" width="61" height="16"/>
+                                <rect key="frame" x="103" y="215" width="61" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Searches" id="qP7-8d-p2n">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <popUpButton identifier="patch" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lB3-jA-Znx">
+                                <rect key="frame" x="167" y="97" width="77" height="25"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UXe-co-Jcf" id="8tl-F6-r5s">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="message"/>
+                                    <menu key="menu" id="zXB-iM-7jF">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="UXe-co-Jcf"/>
+                                            <menuItem title="Move" tag="1" id="3Td-Lt-Asi"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="siteCopyMove_action:" target="Wtb-LD-naZ" id="Xwf-eH-GNi"/>
+                                </connections>
+                            </popUpButton>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4v8-Oc-oSL">
+                                <rect key="frame" x="112" y="19" width="51" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Classes" id="IXQ-En-iem">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton identifier="classes" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dgp-nw-6rc">
+                                <rect key="frame" x="167" y="13" width="77" height="25"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Wii-xj-fcX" id="w9e-br-ghW">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="message"/>
+                                    <menu key="menu" id="7iV-pp-7le">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="Wii-xj-fcX"/>
+                                            <menuItem title="Move" tag="1" id="Xng-k7-HlC"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="siteCopyMove_action:" target="Wtb-LD-naZ" id="IRc-g1-R8J"/>
+                                </connections>
+                            </popUpButton>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="Z9p-7n-bVG" secondAttribute="trailing" constant="12" id="0BY-vy-Ado"/>
+                            <constraint firstItem="lB3-jA-Znx" firstAttribute="top" secondItem="CcJ-hQ-jxu" secondAttribute="bottom" constant="8" id="1l4-r0-ocS"/>
                             <constraint firstItem="Z9p-7n-bVG" firstAttribute="leading" secondItem="btl-X1-946" secondAttribute="leading" constant="12" id="2JR-73-oux"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="top" secondItem="Z9p-7n-bVG" secondAttribute="bottom" constant="40" id="5tJ-Na-9FU"/>
                             <constraint firstItem="Ric-zN-kUj" firstAttribute="centerY" secondItem="foO-6F-dmH" secondAttribute="centerY" id="9S9-4r-djM"/>
@@ -758,14 +807,18 @@ DQ
                             <constraint firstItem="TQL-zV-GhE" firstAttribute="leading" secondItem="CcJ-hQ-jxu" secondAttribute="leading" id="Eis-bT-6oj"/>
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="centerY" secondItem="ZOc-ap-lS4" secondAttribute="centerY" id="G1m-cQ-6sp"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="trailing" secondItem="TQL-zV-GhE" secondAttribute="trailing" id="GFw-hp-crt"/>
+                            <constraint firstItem="lB3-jA-Znx" firstAttribute="centerY" secondItem="6MZ-wW-meg" secondAttribute="centerY" id="H7N-Au-Mcy"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="leading" secondItem="TQL-zV-GhE" secondAttribute="leading" id="L7h-wz-bLN"/>
+                            <constraint firstItem="dgp-nw-6rc" firstAttribute="leading" secondItem="X1H-zR-VZP" secondAttribute="leading" id="MZP-hd-VXL"/>
                             <constraint firstItem="00w-rL-Cme" firstAttribute="trailing" secondItem="zpT-VE-Axt" secondAttribute="trailing" id="Nfw-b9-46r"/>
+                            <constraint firstItem="dgp-nw-6rc" firstAttribute="centerY" secondItem="4v8-Oc-oSL" secondAttribute="centerY" id="SRK-f8-IMv"/>
+                            <constraint firstItem="Fqm-v3-tqW" firstAttribute="trailing" secondItem="6MZ-wW-meg" secondAttribute="trailing" id="TOJ-XY-SvL"/>
                             <constraint firstItem="CVl-1u-4EI" firstAttribute="trailing" secondItem="ZOc-ap-lS4" secondAttribute="trailing" id="WK4-eB-iyR"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="leading" secondItem="CVl-1u-4EI" secondAttribute="trailing" constant="8" id="Wgg-EG-8UY"/>
                             <constraint firstItem="TQL-zV-GhE" firstAttribute="centerY" secondItem="00w-rL-Cme" secondAttribute="centerY" id="YTu-rP-feD"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="trailing" secondItem="PYt-cK-DKX" secondAttribute="trailing" id="ZEi-dp-CPe"/>
-                            <constraint firstItem="TQL-zV-GhE" firstAttribute="top" secondItem="CcJ-hQ-jxu" secondAttribute="bottom" constant="8" id="Zd3-lt-Ekd"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="centerY" secondItem="zpT-VE-Axt" secondAttribute="centerY" id="bnr-ZH-uH5"/>
+                            <constraint firstItem="lB3-jA-Znx" firstAttribute="leading" secondItem="CcJ-hQ-jxu" secondAttribute="leading" id="ckz-RU-YDF"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="trailing" secondItem="Ric-zN-kUj" secondAttribute="trailing" id="fRJ-2l-UTv"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="top" secondItem="TQL-zV-GhE" secondAttribute="bottom" constant="8" id="g98-ze-0LV"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="centerY" secondItem="Fqm-v3-tqW" secondAttribute="centerY" id="h7e-eE-JQU"/>
@@ -773,18 +826,24 @@ DQ
                             <constraint firstAttribute="trailing" secondItem="VIh-bS-JeH" secondAttribute="trailing" constant="157" id="iWP-Vc-esa"/>
                             <constraint firstItem="Fqm-v3-tqW" firstAttribute="trailing" secondItem="ZOc-ap-lS4" secondAttribute="trailing" id="kXP-XF-5Iu"/>
                             <constraint firstItem="TQL-zV-GhE" firstAttribute="trailing" secondItem="CcJ-hQ-jxu" secondAttribute="trailing" id="mkj-Qx-NXI"/>
+                            <constraint firstItem="TQL-zV-GhE" firstAttribute="top" secondItem="lB3-jA-Znx" secondAttribute="bottom" constant="8" id="n2D-8A-vew"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="leading" secondItem="Ric-zN-kUj" secondAttribute="leading" id="oNa-8O-iMI"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="top" secondItem="PYt-cK-DKX" secondAttribute="bottom" constant="8" id="ovX-Li-bzn"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="leading" secondItem="PYt-cK-DKX" secondAttribute="leading" id="prv-5b-opC"/>
                             <constraint firstItem="Ric-zN-kUj" firstAttribute="leading" secondItem="foO-6F-dmH" secondAttribute="trailing" constant="8" id="rRl-C4-pR6"/>
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="top" secondItem="VIh-bS-JeH" secondAttribute="bottom" constant="8" id="s24-TY-iCm"/>
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="trailing" secondItem="VIh-bS-JeH" secondAttribute="trailing" id="w4r-65-eVJ"/>
+                            <constraint firstItem="lB3-jA-Znx" firstAttribute="trailing" secondItem="CcJ-hQ-jxu" secondAttribute="trailing" id="y2Z-I6-Y4f"/>
+                            <constraint firstItem="dgp-nw-6rc" firstAttribute="trailing" secondItem="X1H-zR-VZP" secondAttribute="trailing" id="zVj-wl-tdK"/>
+                            <constraint firstItem="dgp-nw-6rc" firstAttribute="top" secondItem="X1H-zR-VZP" secondAttribute="bottom" constant="8" id="zwA-qB-iNa"/>
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="leading" secondItem="VIh-bS-JeH" secondAttribute="leading" id="zyq-bm-mk4"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="appsAction_button" destination="CcJ-hQ-jxu" id="N9i-We-Vqh"/>
+                        <outlet property="classes_button" destination="dgp-nw-6rc" id="kNb-ny-tYp"/>
                         <outlet property="groupsAction_button" destination="TQL-zV-GhE" id="ScC-cg-CZT"/>
+                        <outlet property="patchAction_button" destination="lB3-jA-Znx" id="xMO-uH-Bfg"/>
                         <outlet property="policiesAction_button" destination="VIh-bS-JeH" id="nqW-QO-gY9"/>
                         <outlet property="profilesAction_button" destination="PYt-cK-DKX" id="Dgs-s0-ZwB"/>
                         <outlet property="restrictedSoftware_button" destination="X1H-zR-VZP" id="ydn-Zs-z8N"/>
@@ -794,7 +853,7 @@ DQ
                 </viewController>
                 <customObject id="rCK-DO-ett" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-427.5" y="1251"/>
+            <point key="canvasLocation" x="-427.5" y="1276"/>
         </scene>
         <!--App-->
         <scene sceneID="XAC-bA-Mde">
