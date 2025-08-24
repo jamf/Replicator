@@ -110,14 +110,13 @@ Options to export XML from the source server are also available.
 * Note Save only and Raw Source XML options should not be selected when File Import is being used.
 </br></br>
 
-Options for replicating object(s) (groups, policies, and configuration profiles...) to a particular site can be set.
+Options for replicating object(s) (searches, policies, and configuration profiles...) to a particular site can be set.
 
 ![](./Replicator/images/sitePrefs.png)
 </br>
 * Copying an object to another site either on the destination server or a site on the source server will create/update an object using the defined modifer to alter both the object name and name(s) of groups used in scoping. The variable $SITE may be used in place of entering a specific site name.
 
 * Moving an object will not change any of the names. Moving an object to a site on the same server will remove the object from its present site (of NONE) to the new site. Use caution as to not unintentionally unscope configuration profiles from current objects. Moving objects to another server will leave teh object as is on source server and create a new object in the site on the destination server.
-* Copying groups with groups as a criteria will not copy properly.
 </br></br>
 
 The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
