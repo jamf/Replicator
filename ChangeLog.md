@@ -1,6 +1,6 @@
 # Replicator - Change Log
 
-**v8.2.0**: 2025-06-30<br>
+**v8.2.0**: 2025-08-24<br>
 Address issue #123 - crash while backup: General - Api Clients / Roles AND macOS - Patch Management
 Address issue #124 - Replicator Freezes with Beachball of Death when Site is checked
 Updates to site replication. Allow custom suffix/prefix when copying objects, add additional objects that can be replicated to a site.
