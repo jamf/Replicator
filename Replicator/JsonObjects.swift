@@ -230,3 +230,18 @@ class PatchTitleConfigurations {
     static var source      = PatchSoftwareTitleConfigurations()
     static var destination = PatchSoftwareTitleConfigurations()
 }
+
+class SitePreferences {
+    static var show = false
+    static var modifierPrefixSuffix = userDefaults.string(forKey: "sitePrefixSuffix") ?? "Suffix"
+    static var nameModifier = userDefaults.string(forKey: "siteNameModifier") ?? ""
+    static var searches = userDefaults.string(forKey: "siteSearchesAction") ?? "Copy"
+    static var policies = userDefaults.string(forKey: "sitePoliciesAction") ?? "Copy"
+    static var profiles = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
+    static var apps = userDefaults.string(forKey: "siteAppsAction") ?? "Copy"
+    static var patch = userDefaults.string(forKey: "sitePatchAction") ?? "Copy"
+    static var groups = userDefaults.string(forKey: "siteGroupsAction") ?? "Copy"
+    static var restricted = userDefaults.string(forKey: "siteRestrictedSoftware") ?? "Copy"
+    static var classes = userDefaults.string(forKey: "siteClasses") ?? "Copy"
+    
+}
