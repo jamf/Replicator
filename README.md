@@ -102,32 +102,36 @@ In addition to scoping options the following are available:
 Options to export XML from the source server are also available.
 
 ![](./Replicator/images/exportPrefs.png)
-</br></br>
+</br>
 * Raw Source XML gives you the XML from the source server before any modifications, like removing the id tag(s) and value(s).
 * Trimmed Source XML give you the XML that is sent to the destination server.
 * Save only saves the XML files and does not send them to the destination server.
 * Save the object XML either with or without its scope.  Unchecked removes the scope.
 * Note Save only and Raw Source XML options should not be selected when File Import is being used.
+</br></br>
 
-Options for replicating object(s) (groups, policies, and configuration profiles) to a particular site can be set.
+Options for replicating object(s) (groups, policies, and configuration profiles...) to a particular site can be set.
 
 ![](./Replicator/images/sitePrefs.png)
-</br></br>
+</br>
 * When copying an object to a site, the site name is appended to the object name.
 * Groups with groups as a criteria will not copy properly, moving them should be fine.
+</br></br>
 
 The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
 
 ![](./Replicator/images/appPrefs.png)
-</br></br>
+</br>
 Migrated computers can show as managed by setting the management account.
+</br></br>
 
 ![](./Replicator/images/computerPrefs.png)
-</br></br>
+</br>
 Set a password for following replicated service accounts; bind, ldap, file share Read/Write, and file share Read-only.
+</br></br>
 
 ![](./Replicator/images/passwordPrefs.png)
-
+</br>
 Note, the same password will be applied if you have multiple binds, or ldap servers, or file shares coonfigured.  
 </br></br>
 **Migration Summary:**
