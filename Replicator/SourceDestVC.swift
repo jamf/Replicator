@@ -13,6 +13,7 @@ import Foundation
 class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate {
     
     let lastUserManager = LastUserManager()
+    let preferencesWC   = PrefsWindowController()
     
 //    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
@@ -410,6 +411,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     @IBAction func setDestSite_action(_ sender: Any) {
         logFunctionCall()
         JamfProServer.destSite = availableSites_button.selectedItem!.title
+        
+        SitePreferences.show = true
+        PrefsWindowController().show()
     }
     
     func serverChanged(whichserver: String) {

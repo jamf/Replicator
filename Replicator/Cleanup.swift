@@ -84,6 +84,18 @@ class Cleanup: NSObject {
         
         // migrating to another site
         if JamfProServer.toSite && !JamfProServer.destSite.isEmpty {
+            switch endpoint {
+            case "patch-software-title-configurations":
+                sitePref = SitePreferences.patch
+            default:
+                sitePref = ""
+            }
+            
+//            print("endpoint: \(endpoint), sitePref: \(sitePref)")
+//            print("migrate to site \(JamfProServer.destSite)")
+//            print("JSONData: \(JSONData.description)")
+//            print("")
+            
             if let siteId = JamfProSites.destination.first(where: { $0.name == JamfProServer.destSite })?.id {
                 JSONData["siteId"] = siteId
             } else {
@@ -91,7 +103,8 @@ class Cleanup: NSObject {
             }
             if sitePref == "Copy" {
                 if let objectName = JSONData["displayName"] as? String {
-                    JSONData["displayName"] = "\(objectName) - \(JamfProServer.destSite)"
+                    let newName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(objectName)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(objectName)"
+                    JSONData["displayName"] = "\(newName)"
                 } else {
                     WriteToLog.shared.message("Error updating site for patch management id \(endpointID). Problem determining displayName of object.")
                 }
@@ -725,25 +738,25 @@ class Cleanup: NSObject {
         // get copy / move preference - start
         switch endpoint {
         case "macapplications", "mobiledeviceapplications":
-            sitePref = userDefaults.string(forKey: "siteAppsAction") ?? "Copy"
+            sitePref = SitePreferences.apps
             
         case "advancedcomputersearches", "advancedmobiledevicesearches":
-            sitePref = userDefaults.string(forKey: "siteSearchesAction") ?? "Copy"
+            sitePref = SitePreferences.searches
             
         case "computergroups", "smartcomputergroups", "staticcomputergroups", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
-            sitePref = userDefaults.string(forKey: "siteGroupsAction") ?? "Copy"
+            sitePref = SitePreferences.groups
             
         case "policies":
-            sitePref = userDefaults.string(forKey: "sitePoliciesAction") ?? "Copy"
+            sitePref = SitePreferences.policies
             
         case "osxconfigurationprofiles", "mobiledeviceconfigurationprofiles":
-            sitePref = userDefaults.string(forKey: "siteProfilesAction") ?? "Copy"
+            sitePref = SitePreferences.profiles
             
         case "restrictedsoftware":
-            sitePref = userDefaults.string(forKey: "siteRestrictedSoftware") ?? "Copy"
+            sitePref = SitePreferences.restricted
             
         case "classes":
-            sitePref = userDefaults.string(forKey: "siteClasses") ?? "Copy"
+            sitePref = SitePreferences.classes
 
         case "computers","mobiledevices":
             sitePref = "Move"
@@ -810,11 +823,7 @@ class Cleanup: NSObject {
         if sitePref == "Copy" && endpoint != "users" && endpoint != "computers" {
             // update item Name - ...<name>currentName - site</name>
             
-//            rawValue = rawValue.replacingOccurrences(of: "<\(startTag)><name>\(itemName)</name>", with: "<\(startTag)><name>\(itemName) - \(siteEncoded)</name>")
-            
-//            rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
-            
-            rawValue = updateFirstName(in: rawValue, newName: "\(itemName) - \(siteEncoded)")
+            rawValue = updateFirstName(in: rawValue, currentName: "\(itemName)")
             
             // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
             if endpoint == "osxconfigurationprofiles" || endpoint == "mobiledeviceconfigurationprofiles" {
@@ -829,12 +838,13 @@ class Cleanup: NSObject {
             
             // update scope - start
             rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
-            let rawValueArray = rawValue.split(separator: "")
+            let rawValueArray = rawValue.split(separator: "\n")
             rawValue = ""
             var currentLine = 0
             let numberOfLines = rawValueArray.count
             while true {
                 rawValue.append("\(rawValueArray[currentLine])")
+                print("line \(currentLine): \(rawValueArray[currentLine])")
                 if currentLine+1 < numberOfLines {
                     currentLine+=1
                 } else {
@@ -849,7 +859,15 @@ class Cleanup: NSObject {
                             } else {
                                 break
                             }
-                            let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
+//                            let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
+//                            var currentName = "unknown object name"
+                            var siteGroupName = String(rawValueArray[currentLine])
+                            print("siteGroupName: \(siteGroupName)")
+                            let currentName = tagValue(xmlString: siteGroupName, xmlTag: "name")
+//                            if let currentName = parser.findFirstTagValue(tagName: "name", in: siteGroupName) {
+                            if !currentName.isEmpty {
+                                siteGroupName = updateFirstName(in: String(rawValueArray[currentLine]), currentName: currentName)
+                            }
                             
                             //                print("siteGroupName: \(siteGroupName)")
                             
@@ -896,21 +914,24 @@ class Cleanup: NSObject {
         return ""
     }
     
-    private func updateFirstName(in xmlString: String, newName: String) -> String {
+    private func updateFirstName(in xmlString: String, currentName: String) -> String {
         // Find first <name>...</name> and replace its content
         let pattern = "(<name>)[^<]*(</name>)"
         
         guard let regex = try? NSRegularExpression(pattern: pattern) else {
             return xmlString
         }
-            
-//            let safeName = newName
-//                .replacingOccurrences(of: "\\", with: "\\\\")
-//                .replacingOccurrences(of: "$", with: "\\$")
-            
+        
         guard let match = regex.firstMatch(in: xmlString, range: NSRange(xmlString.startIndex..., in: xmlString)) else {
             return xmlString
         }
+        
+//        if SitePreferences.nameModifier.isEmpty {
+//            SitePreferences.nameModifier = (SitePreferences.modifierPrefixSuffix == "Suffix") ? " - \(JamfProServer.destSite.xmlEncode)" : "\(JamfProServer.destSite.xmlEncode) - "
+//        }
+        
+        let modifier = siteNameModifier(SitePreferences.nameModifier)
+        let newName  = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(currentName)\(modifier)" : "\(modifier)\(currentName)"
         
         return regex.stringByReplacingMatches(
             in: xmlString,

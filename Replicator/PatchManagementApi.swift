@@ -364,7 +364,8 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
                         }
                     }
                     
-                    if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Response error: \(httpResponse.statusCode).") }
+                    if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Response error status code: \(httpResponse.statusCode).") }
+                    if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Response error: \(String(data: data!, encoding: .utf8) ?? "unknown error").") }
                     completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     return
                 }

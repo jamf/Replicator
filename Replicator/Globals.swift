@@ -335,6 +335,22 @@ public func readSettings(thePath: String = "") -> [String:Any] {
     return(AppInfo.settings)
 }
 
+public func siteNameModifier(_ modifier: String, encode: Bool = true) -> String {
+    logFunctionCall()
+
+    var nameModifier = modifier
+    if nameModifier.isEmpty {
+        if SitePreferences.modifierPrefixSuffix == "Suffix" {
+            nameModifier = " - \(JamfProServer.destSite)"
+        } else {
+            nameModifier = "\(JamfProServer.destSite) - "
+        }
+    } else {
+        nameModifier = nameModifier.replacingOccurrences(of: "$SITE", with: JamfProServer.destSite)
+    }
+    return encode ? nameModifier.xmlEncode : nameModifier
+}
+
 public func baseUrl(_ url: String, whichServer: String) -> String {
     logFunctionCall()
     

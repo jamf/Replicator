@@ -10,6 +10,9 @@ import Cocoa
 
 class PrefsWindowController: NSWindowController, NSWindowDelegate {
     
+    var pwc: NSWindowController?
+    var pvc: NSViewController?
+    var ptv = PreferencesTabVC()
     
     override func windowDidLoad() {
         super.windowDidLoad()
@@ -22,11 +25,8 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
     }
     
     func show() {
-
         var prefsVisible = false
         let tabs = ["Copy", "Export", "Site", "App", "Computer", "Password"]
-//        let vc = ViewController()
-        var pwc: NSWindowController?
         
         if !(pwc != nil) {
             let storyboard = NSStoryboard(name: "Preferences", bundle: nil)
@@ -34,28 +34,25 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
         }
 
         if (pwc != nil) {
-//            if !(vc.windowIsVisible(windowName: "Copy") || vc.windowIsVisible(windowName: "Export") || vc.windowIsVisible(windowName: "Site") || vc.windowIsVisible(windowName: "App") || vc.windowIsVisible(windowName: "Computer") || vc.windowIsVisible(windowName: "Password")) {
-//                pwc?.window?.setIsVisible(true)
-//
-//            } else {
-                DispatchQueue.main.async {
-//                    print("[PrefsWindowController] show existing preference window")
-//                    NSApp.windows[1].makeKeyAndOrderFront(self)
-                    let windowsCount = NSApp.windows.count
-                    for i in (0..<windowsCount) {
-//                    for theWindow in NSApp.windows {
-                        if tabs.firstIndex(of: NSApp.windows[i].title) != nil {
-                            NSApp.windows[i].makeKeyAndOrderFront(self)
+            DispatchQueue.main.async { [self] in
+                let windowsCount = NSApp.windows.count
+                for i in (0..<windowsCount) {
+                    if tabs.firstIndex(of: NSApp.windows[i].title) != nil {
+                        print("window title: \(NSApp.windows[i].title)")
+                        print("SitePreferences.show: \(SitePreferences.show)")
+                        if SitePreferences.show ?? false {
+                            print("close preferences")
+                            NSApp.windows[i].orderOut(self)
+                        } else {NSApp.windows[i].makeKeyAndOrderFront(self)
+                            print("is visible preferences")
                             prefsVisible = true
                         }
                     }
-                    if !prefsVisible {
-                        pwc?.window?.setIsVisible(true)
-                    }
                 }
-//            }
+                if !prefsVisible {
+                    pwc?.window?.setIsVisible(true)
+                }
+            }
         }
-        
     }
-
 }

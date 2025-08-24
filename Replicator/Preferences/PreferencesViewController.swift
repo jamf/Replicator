@@ -13,6 +13,8 @@ import CoreFoundation
 class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
 //    let userDefaults = UserDefaults.standard
+    @IBOutlet weak var preference_tabView: NSTabView!
+    
     // copy prefs
     @IBOutlet weak var copyScopeOCP_button: NSButton!       // os x config profiles
     @IBOutlet weak var copyScopeMA_button: NSButton!        // mac applications
@@ -40,6 +42,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     // site prefs
     @IBOutlet var site_View: NSView!
+    @IBOutlet weak var sitePrefixSuffix_button: NSPopUpButton!
+    @IBOutlet weak var siteNameModifier_textfield: NSTextField!
     @IBOutlet weak var searchesAction_button: NSPopUpButton!
     @IBOutlet weak var policiesAction_button: NSPopUpButton!
     @IBOutlet weak var profilesAction_button: NSPopUpButton!
@@ -138,9 +142,9 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         prefFsRoPwd_textfield.isEnabled = stateToBool(state: prefFileSharePwd_button.state.rawValue)
     }
     
-//    var credentialsArray = [String]()
-    let vc               = ViewController()
-//    var plistData:[String:Any] = [:]  //our server/username data
+//    let vc               = ViewController()
+
+    private var debounceWorkItem: DispatchWorkItem?
     
     // default scope preferences
     var scope_Options:           Dictionary<String,Dictionary<String,Bool>> = [:]
@@ -214,52 +218,74 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     // site actions
+    @IBAction func sitePrefixSuffix_action(_ sender: NSPopUpButton) {
+        let selectedItem = sender.selectedItem?.title ?? "Suffix"
+        SitePreferences.modifierPrefixSuffix = selectedItem
+        userDefaults.set("\(selectedItem)", forKey: "sitePrefixSuffix")
+    }
+        
     @IBAction func siteCopyMove_action(_ sender: NSPopUpButton) {
         let selectedItem = sender.selectedItem?.title ?? "Copy"
-        print("[set pref] copyMoveAction: \(selectedItem)")
-        print("[set pref] copyMoveAction item: \(String(describing: sender.identifier?.rawValue))")
+//        print("[set pref] copyMoveAction: \(selectedItem)")
+//        print("[set pref] copyMoveAction item: \(String(describing: sender.identifier?.rawValue))")
         if NSEvent.modifierFlags.contains(.option) {
+            SitePreferences.searches = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteSearchesAction")
             searchesAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.policies = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "sitePoliciesAction")
             policiesAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.profiles = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteProfilesAction")
             profilesAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.apps = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteAppsAction")
             appsAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.patch = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "sitePatchAction")
             patchAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.groups = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteGroupsAction")
             groupsAction_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.restricted = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteRestrictedSoftware")
             restrictedSoftware_button.selectItem(withTitle: selectedItem)
             
+            SitePreferences.classes = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteClasses")
             classes_button.selectItem(withTitle: selectedItem)
         } else {
             switch sender.identifier?.rawValue {
             case "searches":
                 userDefaults.set("\(selectedItem)", forKey: "siteSearchesAction")
+                SitePreferences.searches = selectedItem
             case "policies":
                 userDefaults.set("\(selectedItem)", forKey: "sitePoliciesAction")
+                SitePreferences.policies = selectedItem
             case "profiles":
                 userDefaults.set("\(selectedItem)", forKey: "siteProfilesAction")
+                SitePreferences.profiles = selectedItem
             case "apps":
                 userDefaults.set("\(selectedItem)", forKey: "siteAppsAction")
+                SitePreferences.apps = selectedItem
             case "patch":
                 userDefaults.set("\(selectedItem)", forKey: "sitePatchAction")
+                SitePreferences.patch = selectedItem
             case "groups":
                 userDefaults.set("\(selectedItem)", forKey: "siteGroupsAction")
+                SitePreferences.groups = selectedItem
             case "software":
                 userDefaults.set("\(selectedItem)", forKey: "siteRestrictedSoftware")
+                SitePreferences.restricted = selectedItem
             case "classes":
                 userDefaults.set("\(selectedItem)", forKey: "siteClasses")
+                SitePreferences.classes = selectedItem
 
             default:
                 print("unknown option")
@@ -362,9 +388,37 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
     }
 
+    func controlTextDidChange(_ obj: Notification) {
+        debounceWorkItem?.cancel()
+        
+        if let _ = obj.object as? NSTextField {
+            switch self.title! {
+            case "Site":
+                let workItem = DispatchWorkItem { [weak self] in
+                    guard let self = self else { return }
+
+                    let nameModifier = siteNameModifier_textfield.stringValue
+                    userDefaults.set(nameModifier, forKey: "siteNameModifier")
+                    SitePreferences.nameModifier = siteNameModifier(nameModifier)
+                }
+                
+                debounceWorkItem = workItem
+                
+                // Run after 1 second delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: workItem)
+                
+            default:
+                break
+            }
+        }
+    }
     func controlTextDidEndEditing(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
             switch self.title! {
+//            case "Site":
+//                let nameModifier = siteNameModifier_textfield.stringValue
+//                userDefaults.set(nameModifier, forKey: "siteNameModifier")
+//                SitePreferences.nameModifier = siteNameModifier(nameModifier)
             case "Computer":
 //                if textField.identifier?.rawValue == "prefMgmtAcct" || textField.identifier?.rawValue == "prefMgmtPwd" {
                     if prefMgmtAcct_textfield.stringValue != "" && prefMgmtPwd_textfield.stringValue != "" {
@@ -445,7 +499,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
 //        self.view.wantsLayer = true
 //        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
-
         NSApp.activate(ignoringOtherApps: true)
     }
     
@@ -456,47 +509,22 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         self.parent?.view.window?.title = self.title!
         
         if self.title! == "Site" {
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteSearchesAction")) {
-                userDefaults.set("Copy", forKey: "siteSearchesAction")
-            }
-            searchesAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteSearchesAction") ?? "Copy")
+            siteNameModifier_textfield.delegate = self
             
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteAppsAction")) {
-                userDefaults.set("Copy", forKey: "siteAppsAction")
-            }
-            appsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteAppsAction") ?? "Copy")
+            sitePrefixSuffix_button.selectItem(withTitle: SitePreferences.modifierPrefixSuffix)
+            siteNameModifier_textfield.stringValue = userDefaults.string(forKey: "siteNameModifier") ?? ""
+//            SitePreferences.nameModifier = siteNameModifier_textfield.stringValue 
             
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "sitePatchAction")) {
-                userDefaults.set("Copy", forKey: "sitePatchAction")
-            }
-            patchAction_button.selectItem(withTitle: userDefaults.string(forKey: "sitePatchAction") ?? "Copy")
+            searchesAction_button.selectItem(withTitle: SitePreferences.searches)
+            policiesAction_button.selectItem(withTitle: SitePreferences.policies)
+            profilesAction_button.selectItem(withTitle: SitePreferences.profiles)
+            appsAction_button.selectItem(withTitle: SitePreferences.apps)
+            patchAction_button.selectItem(withTitle: SitePreferences.patch)
+            groupsAction_button.selectItem(withTitle: SitePreferences.groups)
+            restrictedSoftware_button.selectItem(withTitle: SitePreferences.restricted)
+            classes_button.selectItem(withTitle: SitePreferences.classes)
             
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteGroupsAction")) {
-                userDefaults.set("Copy", forKey: "siteGroupsAction")
-            }
-            groupsAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteGroupsAction") ?? "Copy")
-            
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteRestrictedSoftware")) {
-                userDefaults.set("Copy", forKey: "siteRestrictedSoftware")
-            }
-            restrictedSoftware_button.selectItem(withTitle: userDefaults.string(forKey: "siteRestrictedSoftware") ?? "Copy")
-            
-            if !["Copy", "Move"].contains(userDefaults.string(forKey: "siteClasses")) {
-                userDefaults.set("Copy", forKey: "siteClasses")
-            }
-            classes_button.selectItem(withTitle: userDefaults.string(forKey: "siteClasses") ?? "Copy")
-            
-            if (userDefaults.string(forKey: "sitePoliciesAction") == "Copy" || userDefaults.string(forKey: "sitePoliciesAction") == "Move") {
-                policiesAction_button.selectItem(withTitle: userDefaults.string(forKey: "sitePoliciesAction")!)
-            } else {
-                userDefaults.set("Copy", forKey: "sitePoliciesAction")
-            }
-            if (userDefaults.string(forKey: "siteProfilesAction") == "Copy" || userDefaults.string(forKey: "siteProfilesAction") == "Move") {
-                profilesAction_button.selectItem(withTitle: userDefaults.string(forKey: "siteProfilesAction")!)
-            } else {
-                userDefaults.set("Copy", forKey: "siteProfilesAction")
-            }
-//            userDefaults.synchronize()
+            SitePreferences.nameModifier = siteNameModifier(siteNameModifier_textfield.stringValue)
         }
 
         if self.title! == "App" {
@@ -615,12 +643,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             saveOnly             = false
             saveRawXmlScope      = true
             saveTrimmedXmlScope  = true
-//            userDefaults.set(false, forKey: "saveRawXml")
-//            userDefaults.set(false, forKey: "saveTrimmedXml")
-//            userDefaults.set(false, forKey: "saveOnly")
-//            userDefaults.set(true, forKey: "saveRawXmlScope")
-//            userDefaults.set(true, forKey: "saveTrimmedXmlScope")
-//            userDefaults.synchronize()
         }
         // read xml settings - end
 
