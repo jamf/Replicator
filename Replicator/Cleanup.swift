@@ -766,26 +766,9 @@ class Cleanup: NSObject {
         }
         
         if LogLevel.debug { WriteToLog.shared.message("[siteSet] site operation for \(endpoint): \(sitePref)") }
-        // get copy / move preference - end
-        
-        /*
-        switch endpoint {
-        case "computergroups", "smartcomputergroups", "staticcomputergroups":
-            rawValue = tagValue2(xmlString: xmlString, startTag: "<computer_group>", endTag: "</computer_group>")
-//            startTag = "computer_group"
-            
-        case "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups":
-            rawValue = tagValue2(xmlString: xmlString, startTag: "<mobile_device_group>", endTag: "</mobile_device_group>")
-//            startTag = "mobile_device_group"
-            
-        default:
-            rawValue = tagValue2(xmlString: xmlString, startTag: "<general>", endTag: "</general>")
-//            startTag = "general"
-        }
-        */
         
         var itemName = "unknown object name"
-//        let itemName = tagValue2(xmlString: rawValue, startTag: "<name>", endTag: "</name>")
+
         if let firstNameValue = parser.findFirstTagValue(tagName: "name", in: xmlString) {
             itemName = firstNameValue
         }
@@ -821,8 +804,6 @@ class Cleanup: NSObject {
         }
         
         if sitePref == "Copy" && endpoint != "users" && endpoint != "computers" {
-            // update item Name - ...<name>currentName - site</name>
-            
             rawValue = updateFirstName(in: rawValue, currentName: "\(itemName)")
             
             // generate a new uuid for configuration profiles - start -- needed?  New profiles automatically get new UUID?
@@ -837,61 +818,98 @@ class Cleanup: NSObject {
             // generate a new uuid for configuration profiles - end
             
             // update scope - start
-            rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
-            let rawValueArray = rawValue.split(separator: "\n")
-            rawValue = ""
-            var currentLine = 0
-            let numberOfLines = rawValueArray.count
-            while true {
-                rawValue.append("\(rawValueArray[currentLine])")
-                print("line \(currentLine): \(rawValueArray[currentLine])")
-                if currentLine+1 < numberOfLines {
-                    currentLine+=1
-                } else {
-                    break
+            if ["computergroups", "smartcomputergroups", "mobiledevicegroups", "smartmobiledevicegroups"].contains(endpoint) {
+
+                rawValue = updateGroupsInCriterion(xmlContent: rawValue, appendString: SitePreferences.nameModifier)
+            } else {
+                rawValue = rawValue.replacingOccurrences(of: "><", with: ">\n<")
+                let rawValueArray = rawValue.split(separator: "\n")
+                
+                rawValue = ""
+                var currentLine = 0
+                let numberOfLines = rawValueArray.count
+                while true {
+                    rawValue.append("\(rawValueArray[currentLine])")
+                    if currentLine+1 < numberOfLines {
+                        currentLine+=1
+                    } else {
+                        break
+                    }
+
+                    if rawValueArray[currentLine].contains("<scope>") {
+                        while !rawValueArray[currentLine].contains("</scope>") {
+                            if rawValueArray[currentLine].contains("<computer_group>") || rawValueArray[currentLine].contains("<mobile_device_group>") {
+                                rawValue.append("\(rawValueArray[currentLine])")
+                                if currentLine+1 < numberOfLines {
+                                    currentLine+=1
+                                } else {
+                                    break
+                                }
+                                var siteGroupName = String(rawValueArray[currentLine])
+                                let currentName = tagValue(xmlString: siteGroupName, xmlTag: "name")
+                                if !currentName.isEmpty {
+                                    siteGroupName = updateFirstName(in: String(rawValueArray[currentLine]), currentName: currentName)
+                                }
+                                
+                                rawValue.append("\(siteGroupName)")
+                                if currentLine+1 < numberOfLines {
+                                    currentLine+=1
+                                } else {
+                                    break
+                                }
+                            } else {  // if rawValueArray[currentLine].contains("<computer_group>") - end
+                                rawValue.append("\(rawValueArray[currentLine])")
+                                if currentLine+1 < numberOfLines {
+                                    currentLine+=1
+                                } else {
+                                    break
+                                }
+                            }
+                        }   // while !rawValueArray[currentLine].contains("</scope>")
+                    }   // if rawValueArray[currentLine].contains("<scope>")
                 }
-                if rawValueArray[currentLine].contains("<scope>") {
-                    while !rawValueArray[currentLine].contains("</scope>") {
-                        if rawValueArray[currentLine].contains("<computer_group>") || rawValueArray[currentLine].contains("<mobile_device_group>") {
-                            rawValue.append("\(rawValueArray[currentLine])")
-                            if currentLine+1 < numberOfLines {
-                                currentLine+=1
-                            } else {
-                                break
-                            }
-//                            let siteGroupName = rawValueArray[currentLine].replacingOccurrences(of: "</name>", with: " - \(siteEncoded)</name>")
-//                            var currentName = "unknown object name"
-                            var siteGroupName = String(rawValueArray[currentLine])
-                            print("siteGroupName: \(siteGroupName)")
-                            let currentName = tagValue(xmlString: siteGroupName, xmlTag: "name")
-//                            if let currentName = parser.findFirstTagValue(tagName: "name", in: siteGroupName) {
-                            if !currentName.isEmpty {
-                                siteGroupName = updateFirstName(in: String(rawValueArray[currentLine]), currentName: currentName)
-                            }
-                            
-                            //                print("siteGroupName: \(siteGroupName)")
-                            
-                            rawValue.append("\(siteGroupName)")
-                            if currentLine+1 < numberOfLines {
-                                currentLine+=1
-                            } else {
-                                break
-                            }
-                        } else {  // if rawValueArray[currentLine].contains("<computer_group>") - end
-                            rawValue.append("\(rawValueArray[currentLine])")
-                            if currentLine+1 < numberOfLines {
-                                currentLine+=1
-                            } else {
-                                break
-                            }
-                        }
-                    }   // while !rawValueArray[currentLine].contains("</scope>")
-                }   // if rawValueArray[currentLine].contains("<scope>")
-            }   // while true - end
+            }
             // update scope - end
         }   // if sitePref - end
                 
         return rawValue
+    }
+    
+    private func updateGroupsInCriterion(xmlContent: String, appendString: String) -> String {
+        
+        guard let xmlDoc = try? XMLDocument(xmlString: xmlContent, options: []) else {
+            WriteToLog.shared.message("[updateGroupsInCriterion] Error: Failed to parse XML")
+            return xmlContent
+        }
+        
+        do {
+            // Find all criterion elements using XPath
+            let criterionNodes = try xmlDoc.nodes(forXPath: "//criterion")
+            
+            for node in criterionNodes {
+                if let element = node as? XMLElement {
+                    // Check if this criterion has name 'Computer Group'
+                    if let nameNodes = try? element.nodes(forXPath: "name"),
+                       let nameElement = nameNodes.first as? XMLElement,
+                       nameElement.stringValue == "Computer Group" {
+                        
+                        // Find the value element and update it
+                        if let valueNodes = try? element.nodes(forXPath: "value"),
+                           let valueElement = valueNodes.first as? XMLElement {
+                            let currentValue = valueElement.stringValue ?? ""
+                            let newValue = (SitePreferences.modifierPrefixSuffix == "Suffix") ? currentValue + appendString : appendString + currentValue
+                            valueElement.stringValue = newValue
+                        }
+                    }
+                }
+            }
+            
+            return xmlDoc.xmlString(options: [.nodePrettyPrint])
+            
+        } catch {
+            WriteToLog.shared.message("[updateGroupsInCriterion] Error processing XML: \(error)")
+            return xmlContent
+        }
     }
     
     fileprivate func rmBlankLines(theXML: String) -> String {

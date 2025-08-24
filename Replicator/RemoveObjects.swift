@@ -205,7 +205,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \n\(String(data: data ?? Data(), encoding: .utf8) ?? "unknown")") }
                             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------\n") }
                         }
                         
