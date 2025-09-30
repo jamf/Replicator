@@ -2232,6 +2232,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 let selectedObject = objectAndDependencies[objectIndex].objectName
+                var selectedObjectName: String = selectedObject
+                
+                if JamfProServer.toSite {
+                    selectedObjectName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(selectedObject)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(selectedObject)"
+                }
 //                    print("[startSelectiveMigration] selectedObject: \(selectedObject)")
             // include dependencies - start
 //                    print("advancedMigrateDict with policy: \(advancedMigrateDict)")
@@ -2245,19 +2250,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         var theAction = "update"
 
-                        if !export.saveOnly { WriteToLog.shared.message("check destination for existing object: \(selectedObject)") }
+                        if !export.saveOnly { WriteToLog.shared.message("check destination for existing object: \(selectedObjectName)") }
                         
     //                    print("[startSelectiveMigration] selectedObject: \(selectedObject)\n currentEPDict[\(selectedEndpoint)]: \(currentEPDict[selectedEndpoint] ?? [:])")
                         var existingObjectId = 0
                         switch selectedEndpoint {
                         case "api-roles":
-                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
+                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })?.id ?? "0") ?? 0
+//                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
                         case "api-integrations":
-                            existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
+                            existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })?.id ?? "0") ?? 0
                         case "patch-software-title-configurations":
-                            existingObjectId = currentEPDict[selectedEndpoint]?[selectedObject] ?? 0
+                            existingObjectId = currentEPDict[selectedEndpoint]?[selectedObjectName] ?? 0
                         default:
-                            existingObjectId = currentEPDict[rawEndpoint]?[selectedObject] ?? 0
+                            print("currentEPDict[\(rawEndpoint)]: \(currentEPDict[rawEndpoint]?.description ?? "empty")")
+                            existingObjectId = currentEPDict[rawEndpoint]?[selectedObjectName] ?? 0
                         }
                         
                         if existingObjectId == 0 && !export.saveOnly {
