@@ -113,13 +113,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        // if working a site migrations within a single server force create when copying an item
-        if JamfProServer.toSite && sitePref == "Copy" {
-            if endpointType != "users"{
-                destinationEpId = "0"
-                apiAction       = "create"
-            }
-        }
+        // if working a site migrations within a single server force create when copying an item - disabled 250930 lnh
+//        if JamfProServer.toSite && sitePref == "Copy" {
+//            if endpointType != "users"{
+//                destinationEpId = "0"
+//                apiAction       = "create"
+//            }
+//        }
         
         // this is where we create the new endpoint
         if !export.saveOnly {
