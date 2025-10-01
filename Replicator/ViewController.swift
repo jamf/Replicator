@@ -347,6 +347,7 @@ class Scope: NSObject {
     static var scgCopy         = true   // static computer groups copy scope
     static var sigCopy         = true   // static iOS device groups copy scope
     static var usersCopy       = true   // static user groups copy scope
+    static var ebooksCopy      = true   // eBooks copy scope
     
     // command line scope copy
 //    static var copy            = true
@@ -6148,6 +6149,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 } else {
                     Scope.iaCopy = true
                 }
+                if Scope.options["ebooks"]?["copy"] != nil {
+                    Scope.ebooksCopy = Scope.options["ebooks"]!["copy"]!
+                } else {
+                    Scope.ebooksCopy = false
+                }
             } else {
                 // reset/initialize new settings
                 _ = readSettings()
@@ -6159,7 +6165,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                       "iosapps":["copy":true],
                                       "scg":["copy":true],
                                       "sig":["copy":true],
-                                      "users":["copy":true]] as Any
+                                      "users":["copy":true],
+                                      "ebooks":["copy":true]] as Any
                 
                 NSDictionary(dictionary: AppInfo.settings).write(toFile: AppInfo.plistPath, atomically: true)
             }
@@ -6198,7 +6205,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                       "iosapps":["copy":true],
                                       "scg":["copy":true],
                                       "sig":["copy":true],
-                                      "users":["copy":true]] as Any
+                                      "users":["copy":true],
+                                      "ebooks":["copy":true]] as Any
             }
             
             // read xml settings - start

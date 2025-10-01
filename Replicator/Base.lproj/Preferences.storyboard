@@ -67,11 +67,11 @@
             <objects>
                 <viewController title="Copy" id="Lwu-vt-54h" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="RHL-Es-p2H">
-                        <rect key="frame" x="0.0" y="0.0" width="400" height="325"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="350"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LRe-g2-dkk">
-                                <rect key="frame" x="50" y="205" width="118" height="16"/>
+                                <rect key="frame" x="50" y="230" width="118" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS Config Profiles" id="LmZ-ht-fIv">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -79,7 +79,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sWf-R4-F7L">
-                                <rect key="frame" x="185" y="300" width="44" height="16"/>
+                                <rect key="frame" x="185" y="325" width="44" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scope" id="nPJ-dv-TUn">
                                     <font key="font" metaFont="systemSemibold" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -87,15 +87,15 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0H3-MY-x0h">
-                                <rect key="frame" x="248" y="300" width="51" height="16"/>
+                                <rect key="frame" x="248" y="325" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Disable" id="tGl-wp-1zm">
                                     <font key="font" metaFont="systemSemibold" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xg2-BE-LE0">
-                                <rect key="frame" x="200" y="205" width="16" height="16"/>
+                            <button identifier="iosconfprofiles" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xg2-BE-LE0">
+                                <rect key="frame" x="200" y="230" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XGh-Th-ANL">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -105,15 +105,15 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ker-nj-f5J">
-                                <rect key="frame" x="27" y="281" width="141" height="16"/>
+                                <rect key="frame" x="27" y="306" width="141" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS Config Profiles" id="hq6-9o-D0B">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dko-mv-Um3">
-                                <rect key="frame" x="200" y="281" width="16" height="16"/>
+                            <button identifier="osxconfigprofiles" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dko-mv-Um3">
+                                <rect key="frame" x="200" y="306" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="M3t-qs-8fB">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -123,7 +123,7 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tPA-vu-xIm">
-                                <rect key="frame" x="44" y="243" width="124" height="16"/>
+                                <rect key="frame" x="44" y="268" width="124" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Restricted Software" id="LLd-J8-HG4">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -131,15 +131,15 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j0w-bR-TPV">
-                                <rect key="frame" x="60" y="153" width="108" height="19"/>
+                                <rect key="frame" x="60" y="155" width="108" height="19"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Static Groups" id="rEJ-Ud-MNU">
                                     <font key="font" metaFont="systemSemibold" size="16"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o62-RM-PNR">
-                                <rect key="frame" x="200" y="243" width="16" height="16"/>
+                            <button identifier="rs" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o62-RM-PNR">
+                                <rect key="frame" x="200" y="268" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rF4-fI-JfJ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -149,15 +149,15 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EzT-Re-s4I">
-                                <rect key="frame" x="42" y="262" width="126" height="16"/>
+                                <rect key="frame" x="42" y="287" width="126" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="macOS Applications" id="pt7-0b-duJ">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PXK-Kc-C3v">
-                                <rect key="frame" x="200" y="262" width="16" height="16"/>
+                            <button identifier="macosapps" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PXK-Kc-C3v">
+                                <rect key="frame" x="200" y="287" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rO5-tA-FmJ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -167,15 +167,15 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XAu-sC-Mnj">
-                                <rect key="frame" x="64" y="186" width="104" height="16"/>
+                                <rect key="frame" x="64" y="211" width="104" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS Applications" id="5fL-fi-frU">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ogj-kd-mkk">
-                                <rect key="frame" x="200" y="186" width="16" height="16"/>
+                            <button identifier="iosapps" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ogj-kd-mkk">
+                                <rect key="frame" x="200" y="211" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="eGs-QU-K7x">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -184,32 +184,32 @@
                                     <action selector="updateCopyPrefs_button:" target="Lwu-vt-54h" id="sdF-aJ-Y3m"/>
                                 </connections>
                             </button>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZZh-fo-lgG">
-                                <rect key="frame" x="97" y="137" width="71" height="16"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZZh-fo-lgG">
+                                <rect key="frame" x="97" y="138" width="71" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Computers" id="Mlc-hg-qPM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="P00-bS-tUP">
-                                <rect key="frame" x="142" y="118" width="26" height="16"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P00-bS-tUP">
+                                <rect key="frame" x="142" y="119" width="26" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iOS" id="KjX-lI-UFA">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JE5-mo-yiQ">
-                                <rect key="frame" x="128" y="99" width="40" height="16"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JE5-mo-yiQ">
+                                <rect key="frame" x="128" y="100" width="40" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Users" id="i4p-pC-mpN">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VEM-LR-2iD">
-                                <rect key="frame" x="200" y="137" width="16" height="16"/>
+                            <button identifier="scgs" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VEM-LR-2iD">
+                                <rect key="frame" x="200" y="138" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Lr8-ss-hhY">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -218,8 +218,8 @@
                                     <action selector="updateCopyPrefs_button:" target="Lwu-vt-54h" id="NvQ-UX-uY0"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nkd-g2-D6H">
-                                <rect key="frame" x="200" y="118" width="16" height="16"/>
+                            <button identifier="mcgs" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Nkd-g2-D6H">
+                                <rect key="frame" x="200" y="119" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="oO3-Xr-eL1">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -228,8 +228,8 @@
                                     <action selector="updateCopyPrefs_button:" target="Lwu-vt-54h" id="eU8-nB-45a"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1nk-zX-i4p">
-                                <rect key="frame" x="200" y="99" width="16" height="16"/>
+                            <button identifier="users" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1nk-zX-i4p">
+                                <rect key="frame" x="200" y="100" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="oVt-sW-FUw">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -239,15 +239,15 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PCI-bC-xWo">
-                                <rect key="frame" x="117" y="224" width="51" height="16"/>
+                                <rect key="frame" x="117" y="249" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Policies" id="zbC-dQ-3mM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I3T-6O-rbl">
-                                <rect key="frame" x="200" y="224" width="16" height="16"/>
+                            <button identifier="policies" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I3T-6O-rbl">
+                                <rect key="frame" x="200" y="249" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ijY-ha-INZ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -257,7 +257,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oG0-8N-egu">
-                                <rect key="frame" x="266" y="224" width="16" height="16"/>
+                                <rect key="frame" x="266" y="249" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZjN-ON-j4d">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -266,11 +266,11 @@
                                     <action selector="updateCopyPrefs_button:" target="Lwu-vt-54h" id="B9q-jW-5LZ"/>
                                 </connections>
                             </button>
-                            <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Igr-Mn-SFa">
-                                <rect key="frame" x="0.0" y="88" width="400" height="5"/>
+                            <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Igr-Mn-SFa">
+                                <rect key="frame" x="0.0" y="79" width="400" height="5"/>
                             </box>
-                            <button identifier="copyMissing" toolTip="only create items not currently on the destination server" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ABb-3i-F1Z">
-                                <rect key="frame" x="29" y="58" width="169" height="16"/>
+                            <button identifier="copyMissing" toolTip="only create items not currently on the destination server" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ABb-3i-F1Z">
+                                <rect key="frame" x="29" y="49" width="169" height="16"/>
                                 <buttonCell key="cell" type="check" title="Only copy missing items" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mpK-Pb-VY6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -279,8 +279,8 @@
                                     <action selector="onlyCopy_action:" target="Lwu-vt-54h" id="ltY-6T-mi0"/>
                                 </connections>
                             </button>
-                            <button identifier="copyExisting" toolTip="only update existing items on the destination server" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="T5m-Wq-VYl">
-                                <rect key="frame" x="29" y="34" width="170" height="16"/>
+                            <button identifier="copyExisting" toolTip="only update existing items on the destination server" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T5m-Wq-VYl">
+                                <rect key="frame" x="29" y="25" width="170" height="16"/>
                                 <buttonCell key="cell" type="check" title="Only copy existing items" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Tua-UL-L8F">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -289,29 +289,50 @@
                                     <action selector="onlyCopy_action:" target="Lwu-vt-54h" id="NmE-Mc-JV5"/>
                                 </connections>
                             </button>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WlU-Hv-yzw">
+                                <rect key="frame" x="119" y="192" width="49" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="eBooks" id="PTc-dQ-k9B">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button identifier="ebooks" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9xC-9l-SEL">
+                                <rect key="frame" x="199" y="192" width="16" height="16"/>
+                                <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Hdl-vf-WQp">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="updateCopyPrefs_button:" target="Lwu-vt-54h" id="WNc-MM-LYi"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="PCI-bC-xWo" firstAttribute="trailing" secondItem="EzT-Re-s4I" secondAttribute="trailing" id="0S1-X7-nIg"/>
-                            <constraint firstItem="j0w-bR-TPV" firstAttribute="top" secondItem="XAu-sC-Mnj" secondAttribute="bottom" constant="14" id="0VP-6S-bM2"/>
                             <constraint firstItem="1nk-zX-i4p" firstAttribute="leading" secondItem="Nkd-g2-D6H" secondAttribute="leading" id="0o5-kj-7SB"/>
                             <constraint firstItem="xg2-BE-LE0" firstAttribute="centerY" secondItem="LRe-g2-dkk" secondAttribute="centerY" id="1hs-dW-WTu"/>
                             <constraint firstItem="I3T-6O-rbl" firstAttribute="centerY" secondItem="PCI-bC-xWo" secondAttribute="centerY" id="3b5-ke-ZXI"/>
                             <constraint firstItem="ABb-3i-F1Z" firstAttribute="top" secondItem="Igr-Mn-SFa" secondAttribute="bottom" constant="16" id="4t4-ye-Bps"/>
+                            <constraint firstItem="9xC-9l-SEL" firstAttribute="centerY" secondItem="WlU-Hv-yzw" secondAttribute="centerY" id="6bh-VU-lMh"/>
                             <constraint firstItem="PXK-Kc-C3v" firstAttribute="centerY" secondItem="EzT-Re-s4I" secondAttribute="centerY" id="8GD-At-VvJ"/>
                             <constraint firstItem="ker-nj-f5J" firstAttribute="leading" secondItem="RHL-Es-p2H" secondAttribute="leading" constant="29" id="8Ig-Aq-gqo"/>
                             <constraint firstItem="EzT-Re-s4I" firstAttribute="top" secondItem="ker-nj-f5J" secondAttribute="bottom" constant="3" id="8Wq-aa-bsH"/>
                             <constraint firstItem="VEM-LR-2iD" firstAttribute="centerY" secondItem="ZZh-fo-lgG" secondAttribute="centerY" id="BNl-WU-Hp7"/>
                             <constraint firstItem="oG0-8N-egu" firstAttribute="centerY" secondItem="I3T-6O-rbl" secondAttribute="centerY" id="CPv-7N-0Ax"/>
                             <constraint firstItem="ZZh-fo-lgG" firstAttribute="top" secondItem="j0w-bR-TPV" secondAttribute="bottom" id="Cnw-7S-tor"/>
+                            <constraint firstItem="WlU-Hv-yzw" firstAttribute="trailing" secondItem="JE5-mo-yiQ" secondAttribute="trailing" id="DTw-6L-VMN"/>
                             <constraint firstItem="Igr-Mn-SFa" firstAttribute="leading" secondItem="RHL-Es-p2H" secondAttribute="leading" id="G3L-le-xh0"/>
                             <constraint firstItem="PCI-bC-xWo" firstAttribute="top" secondItem="tPA-vu-xIm" secondAttribute="bottom" constant="3" id="GIp-Vn-DDG"/>
                             <constraint firstItem="EzT-Re-s4I" firstAttribute="trailing" secondItem="ker-nj-f5J" secondAttribute="trailing" id="HG8-bj-9hc"/>
                             <constraint firstItem="Dko-mv-Um3" firstAttribute="centerY" secondItem="ker-nj-f5J" secondAttribute="centerY" id="HtQ-Nw-pQ6"/>
                             <constraint firstItem="XAu-sC-Mnj" firstAttribute="trailing" secondItem="EzT-Re-s4I" secondAttribute="trailing" id="Jvd-Ks-O33"/>
                             <constraint firstItem="T5m-Wq-VYl" firstAttribute="top" secondItem="ABb-3i-F1Z" secondAttribute="bottom" constant="8" id="K1I-Xc-q6E"/>
+                            <constraint firstItem="j0w-bR-TPV" firstAttribute="top" secondItem="WlU-Hv-yzw" secondAttribute="bottom" constant="18" id="KQz-B7-6je"/>
                             <constraint firstItem="sWf-R4-F7L" firstAttribute="leading" secondItem="RHL-Es-p2H" secondAttribute="leading" constant="187" id="OXm-Za-qBs"/>
                             <constraint firstItem="ZZh-fo-lgG" firstAttribute="trailing" secondItem="j0w-bR-TPV" secondAttribute="trailing" id="RNp-sc-H54"/>
-                            <constraint firstItem="Igr-Mn-SFa" firstAttribute="top" secondItem="JE5-mo-yiQ" secondAttribute="bottom" constant="8" id="S0M-nR-Y7Q"/>
+                            <constraint firstItem="WlU-Hv-yzw" firstAttribute="top" secondItem="XAu-sC-Mnj" secondAttribute="bottom" constant="3" id="Rxm-fU-BWl"/>
+                            <constraint firstItem="Igr-Mn-SFa" firstAttribute="top" secondItem="JE5-mo-yiQ" secondAttribute="bottom" constant="18" id="S0M-nR-Y7Q"/>
                             <constraint firstItem="0H3-MY-x0h" firstAttribute="top" secondItem="RHL-Es-p2H" secondAttribute="top" constant="9" id="SPG-fY-BMn"/>
                             <constraint firstItem="0H3-MY-x0h" firstAttribute="leading" secondItem="sWf-R4-F7L" secondAttribute="trailing" constant="23" id="ShG-S5-X4m"/>
                             <constraint firstItem="Nkd-g2-D6H" firstAttribute="centerY" secondItem="P00-bS-tUP" secondAttribute="centerY" id="Sls-BT-8AD"/>
@@ -345,6 +366,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="copyScopeEbooks_button" destination="9xC-9l-SEL" id="uSS-hg-TC6"/>
                         <outlet property="copyScopeIA_button" destination="Ogj-kd-mkk" id="LTU-9z-vL7"/>
                         <outlet property="copyScopeMA_button" destination="PXK-Kc-C3v" id="zZk-iU-EJJ"/>
                         <outlet property="copyScopeMCP_button" destination="xg2-BE-LE0" id="qw9-Tb-2dk"/>
@@ -361,7 +383,7 @@
                 </viewController>
                 <customObject id="fnb-gq-G8w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-416" y="508.5"/>
+            <point key="canvasLocation" x="-417" y="440"/>
         </scene>
         <!--Export-->
         <scene sceneID="7h3-eD-AW9">

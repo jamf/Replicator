@@ -26,6 +26,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var copyScopeScg_button: NSButton!       // static computer groups
     @IBOutlet weak var copyScopeSig_button: NSButton!       // static ios groups
     @IBOutlet weak var copyScopeUsers_button: NSButton!     // static user groups
+    @IBOutlet weak var copyScopeEbooks_button: NSButton!
     
     @IBOutlet weak var onlyCopyMissing_button: NSButton!
     @IBOutlet weak var onlyCopyExisting_button: NSButton!
@@ -303,6 +304,78 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     }
     
     @IBAction func updateCopyPrefs_button(_ sender: Any) {
+        if let theButton = sender as? NSButton {
+            let theState = theButton.state
+            
+            if NSEvent.modifierFlags.contains(.option) {
+                copyScopeOCP_button.state = theState
+                Scope.ocpCopy = theState.rawValue == 1
+                
+                copyScopeMA_button.state = theState
+                Scope.maCopy = theState.rawValue == 1
+                
+                copyScopeRS_button.state = theState
+                Scope.rsCopy = theState.rawValue == 1
+                
+                copyScopePolicy_button.state = theState
+                Scope.policiesCopy = theState.rawValue == 1
+                
+                
+                copyScopeMCP_button.state = theState
+                Scope.mcpCopy = theState.rawValue == 1
+                
+                copyScopeIA_button.state = theState
+                Scope.iaCopy = theState.rawValue == 1
+                
+                copyScopeScg_button.state = theState
+                Scope.scgCopy = theState.rawValue == 1
+                
+                copyScopeSig_button.state = theState
+                Scope.sigCopy = theState.rawValue == 1
+                
+                copyScopeUsers_button.state = theState
+                Scope.usersCopy = theState.rawValue == 1
+                
+                copyScopeEbooks_button.state = theState
+                Scope.ebooksCopy = theState.rawValue == 1
+            } else {
+                switch theButton.identifier?.rawValue {
+                case "osxconfigprofiles":
+                    Scope.ocpCopy = theState.rawValue == 1
+
+                case "macosapps":
+                    Scope.maCopy = theState.rawValue == 1
+
+                case "rs":
+                    Scope.rsCopy = theState.rawValue == 1
+
+                case "policies":
+                    Scope.policiesCopy = theState.rawValue == 1
+
+                case "iosconfprofiles":
+                    Scope.mcpCopy = theState.rawValue == 1
+
+                case "iosapps":
+                    Scope.iaCopy = theState.rawValue == 1
+
+                case "scgs":
+                    Scope.scgCopy = theState.rawValue == 1
+
+                case "mcgs":
+                    Scope.sigCopy = theState.rawValue == 1
+
+                case "users":
+                    Scope.usersCopy = theState.rawValue == 1
+                    
+                case "ebooks":
+                    Scope.ebooksCopy = theState.rawValue == 1
+                    
+                default: break
+                }
+            }
+        }
+    
+        
         AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
                               "macapps":["copy":stateToBool(state: copyScopeMA_button.state.rawValue)],
                               "restrictedsoftware":["copy":stateToBool(state: copyScopeRS_button.state.rawValue)],
@@ -311,8 +384,9 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                               "iosapps":["copy":stateToBool(state: copyScopeIA_button.state.rawValue)],
                               "scg":["copy":stateToBool(state: copyScopeScg_button.state.rawValue)],
                               "sig":["copy":stateToBool(state: copyScopeSig_button.state.rawValue)],
-                              "users":["copy":stateToBool(state: copyScopeUsers_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
-//        vc.savePrefs(prefs: plistData)
+                              "users":["copy":stateToBool(state: copyScopeUsers_button.state.rawValue)],
+                              "ebooks":["copy":stateToBool(state: copyScopeEbooks_button.state.rawValue)]] as Dictionary<String, Dictionary<String, Any>>
+
         saveSettings(settings: AppInfo.settings)
     }
     
@@ -592,6 +666,11 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             } else {
                 Scope.iaCopy = true
             }
+            if Scope.options["ebooks"]?["copy"] != nil {
+                Scope.ebooksCopy = Scope.options["ebooks"]!["copy"]!
+            } else {
+                Scope.ebooksCopy = true
+            }
             if Scope.options["scg"] != nil {
                 if Scope.options["scg"]!["copy"] != nil {
                     Scope.scgCopy = Scope.options["scg"]!["copy"]!
@@ -611,7 +690,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                       "iosapps":["copy":true],
                                       "scg":["copy":true],
                                       "sig":["copy":true],
-                                      "users":["copy":true]] as Any
+                                      "users":["copy":true],
+                                      "ebooks":["copy":true]] as Any
 //                vc.saveSettings(settings: plistData)
                 saveSettings(settings: AppInfo.settings)
             }
@@ -625,7 +705,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                   "iosapps":["copy":true],
                                   "scg":["copy":true],
                                   "sig":["copy":true],
-                                  "users":["copy":true]] as Any
+                                  "users":["copy":true],
+                                  "ebooks":["copy":true]] as Any
 //            vc.saveSettings(settings: plistData)
             saveSettings(settings: AppInfo.settings)
         }
@@ -666,6 +747,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             copyScopeScg_button.state    = boolToState(TF: Scope.scgCopy)
             copyScopeSig_button.state    = boolToState(TF: Scope.sigCopy)
             copyScopeUsers_button.state  = boolToState(TF: Scope.usersCopy)
+            copyScopeEbooks_button.state  = boolToState(TF: Scope.ebooksCopy)
             
             onlyCopyMissing_button.state = (userDefaults.integer(forKey: "copyMissing") == 1) ? .on:.off
             onlyCopyExisting_button.state = (userDefaults.integer(forKey: "copyExisting") == 1) ? .on:.off
