@@ -204,7 +204,7 @@ class Cleanup: NSObject {
         // check scope options for mobiledeviceconfigurationprofiles, osxconfigurationprofiles, and restrictedsoftware - end
         
         switch endpoint {
-        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "dockitems", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
+        case "buildings", "departments", "diskencryptionconfigurations", "sites", "categories", "ebooks", "dockitems", "softwareupdateservers", "scripts", "printers", "osxconfigurationprofiles", "patchpolicies", "mobiledeviceconfigurationprofiles", "advancedmobiledevicesearches", "mobiledeviceextensionattributes", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices", "usergroups", "smartusergroups", "staticusergroups", "userextensionattributes", "advancedusersearches", "restrictedsoftware":
             if LogLevel.debug { WriteToLog.shared.message("[cleanupXml] processing \(endpoint) - verbose") }
             //print("\nXML: \(PostXML)")
             
@@ -757,6 +757,9 @@ class Cleanup: NSObject {
             
         case "classes":
             sitePref = SitePreferences.classes
+            
+        case "ebooks":
+            sitePref = SitePreferences.ebooks
 
         case "computers","mobiledevices":
             sitePref = "Move"
