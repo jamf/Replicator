@@ -197,6 +197,11 @@ class Cleanup: NSObject {
             if !Scope.usersCopy {
                 PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: "users", keepTags: false)
             }
+        case "ebooks":
+            if !Scope.ebooksCopy {
+                PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: "scope", keepTags: false)
+            }
+
 
         default:
             break
@@ -296,6 +301,16 @@ class Cleanup: NSObject {
 //                        PostXML = PostXML.replacingOccurrences(of: "<script_contents/>", with: "<script_contents>\(theScript.xmlEncode)</script_contents>")
 //                    }
                 PostXML = self.parameterFix(theXML: PostXML)
+                
+            case "ebooks":
+                if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing ebooks - verbose") }
+                
+                // migrating to another site
+                if JamfProServer.toSite && JamfProServer.destSite != "" {
+                    PostXML = setSite(xmlString: PostXML, site: JamfProServer.destSite, endpoint: endpoint)
+                }
+                
+    //            print("\nXML: \(PostXML)\n")
                 
             default: break
             }
