@@ -153,17 +153,18 @@ final class JamfProServer {
     static var destSite     = ""
     static var importFiles  = 0
     static var sourceApiClient = ["id":"", "secret":""]
-    static var destApiClient  = ["id":"", "secret":""]
-    static var authCreds    = ["source":"", "dest":""]
-    static var accessToken  = ["source":"", "dest":""]
-    static var authExpires  = ["source":20.0, "dest":20.0]
-    static var authType     = ["source":"Bearer", "dest":"Bearer"]
-    static var base64Creds  = ["source":"", "dest":""]               // used if we want to auth with a different account
-    static var validToken   = ["source":false, "dest":false]
-    static var tokenCreated = [String:Date?]()
-    static var pkgsNotFound = 0
-    static var sessionCookie = [HTTPCookie]()
-    static var stickySession = false
+    static var destApiClient   = ["id":"", "secret":""]
+    static var authCreds       = ["source":"", "dest":""]
+    static var accessToken     = ["source":"", "dest":""]
+    static var authExpires     = ["source":20.0, "dest":20.0]
+    static var authType        = ["source":"Bearer", "dest":"Bearer"]
+    static var base64Creds     = ["source":"", "dest":""]               // used if we want to auth with a different account
+    static var validToken      = ["source":false, "dest":false]
+    static var tokenCreated    = [String:Date?]()
+    static var pkgsNotFound    = 0
+    static var sessionCookie   = [HTTPCookie]()
+    static var stickySession   = false
+    static let siteObjects     = ["computers", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "ebooks", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "computergroups", "mobiledevicegroups"]
 }
 
 struct LogLevel {
@@ -230,7 +231,7 @@ Parameters:
                   saving credentials, between the source and destination before the command line can be successful.  Must also use -objects, -source, and -destination.
 
     -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
-                  Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,jamfusers,jamfgroups,
+                  Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,ebooks,jamfusers,jamfgroups,
                                       networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
                                       computerextensionattributes,scripts,printers,packages,smartcomputergroups,staticcomputergroups,restrictedsoftware,

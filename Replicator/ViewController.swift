@@ -562,6 +562,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var jamfGroupAccounts_button: NSButton!
     @IBOutlet weak var apiRoles_button: NSButton!
     @IBOutlet weak var apiClients_button: NSButton!
+    @IBOutlet weak var ebooks_button: NSButton!
     // macOS tab
     @IBOutlet weak var advcompsearch_button: NSButton!
     @IBOutlet weak var macapplications_button: NSButton!
@@ -675,7 +676,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var uploadingIcons2_textfield: NSTextField!
     // general button labels
     @IBOutlet weak var advusersearch_label_field: NSTextField!
-    @IBOutlet weak var building_label_field: NSTextField!
+//    @IBOutlet weak var building_label_field: NSTextField!
     @IBOutlet weak var categories_label_field: NSTextField!
     @IBOutlet weak var departments_label_field: NSTextField!
     @IBOutlet weak var userEA_label_field: NSTextField!
@@ -684,7 +685,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     @IBOutlet weak var network_segments_label_field: NSTextField!
     @IBOutlet weak var users_label_field: NSTextField!
 //    @IBOutlet weak var smartUserGrps_label_field: NSTextField!
-    @IBOutlet weak var staticUserGrps_label_field: NSTextField!
+//    @IBOutlet weak var staticUserGrps_label_field: NSTextField!
     
     //    @IBOutlet weak var migrateOrRemove_general_label_field: NSTextField!
     @IBOutlet weak var migrateOrRemove_TextField: NSTextField!
@@ -828,14 +829,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    var changeColor :Bool    = true
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
-    var generalEndpointArray: [String] = ["api-integrations", "api-roles", "advancedusersearches", "buildings", "categories", "classes", "departments", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
+    var generalEndpointArray: [String] = ["api-integrations", "api-roles", "advancedusersearches", "buildings", "categories", "classes", "departments", "ebooks", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
     var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "patch-software-title-configurations", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
-    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "api-integrations", "api-roles", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
-    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
     
     var getEndpointInProgress = ""     // end point currently in the GET queue
@@ -1076,7 +1077,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         ApiIntegrations.source.removeAll()
     }
     
-    @IBAction func sectionToMigrate(_ sender: NSPopUpButton) {
+    @IBAction func sectionToMigrate_action(_ sender: NSPopUpButton) {
         
         logFunctionCall()
         pref.stopMigration  = false
@@ -1633,6 +1634,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         
                         if apiClients_button.state == .on {
                             ToMigrate.objects += ["api-integrations"]
+                            ToMigrate.rawCount += 1
+                        }
+                        
+                        if ebooks_button.state == .on {
+                            ToMigrate.objects += ["ebooks"]
                             ToMigrate.rawCount += 1
                         }
                     case "macOS":
@@ -2232,11 +2238,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
                 
                 let selectedObject = objectAndDependencies[objectIndex].objectName
-                var selectedObjectName: String = selectedObject
+                let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(selectedEndpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: selectedObject) : selectedObject
                 
-                if JamfProServer.toSite {
-                    selectedObjectName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(selectedObject)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(selectedObject)"
-                }
+//                if JamfProServer.toSite && JamfProServer.siteObjects.contains(selectedEndpoint) {
+//                    selectedObjectName = nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: selectedObject)
+//                    selectedObjectName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(selectedObject)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(selectedObject)"
+//                }
 //                    print("[startSelectiveMigration] selectedObject: \(selectedObject)")
             // include dependencies - start
 //                    print("advancedMigrateDict with policy: \(advancedMigrateDict)")
@@ -2246,8 +2253,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     // migrate the policy or selected object now the dependencies are done
                     DispatchQueue.global(qos: .utility).async { [self] in
                       
-    //                    if theButton == "Stop" { return }
-                        
                         var theAction = "update"
 
                         if !export.saveOnly { WriteToLog.shared.message("check destination for existing object: \(selectedObjectName)") }
@@ -2944,10 +2949,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         for (l_xmlID, l_xmlName) in AvailableObjsToMig.byId {
                                             if pref.stopMigration { break }
                                             if !WipeData.state.on  {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                                 
-                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+                                                let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(endpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: l_xmlName) : l_xmlName
+                                                
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(selectedObjectName): \(currentEPs[l_xmlName] ?? 0)") }
+                                                
+                                                if currentEPDict[endpoint]?[selectedObjectName] != nil {
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) already exists") }
                                                     
                                                     if Setting.onlyCopyMissing {
                                                         updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
@@ -2956,10 +2964,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                     //                                                                    if (userDefaults.integer(forKey: "copyExisting") != 1) {
                                                     if Setting.onlyCopyExisting {
@@ -3020,7 +3028,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         }
                     }
                     
-                case "advancedcomputersearches", "advancedmobiledevicesearches", "advancedusersearches", "buildings", "categories", "classes", "computerextensionattributes", "computers", "departments", "directorybindings", "diskencryptionconfigurations", "distributionpoints", "dockitems", "ldapservers", "macapplications", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledeviceextensionattributes", "mobiledevices", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "restrictedsoftware", "scripts", "sites", "softwareupdateservers", "userextensionattributes", "users":
+                case "advancedcomputersearches", "advancedmobiledevicesearches", "advancedusersearches", "buildings", "categories", "classes", "ebooks", "computerextensionattributes", "computers", "departments", "directorybindings", "diskencryptionconfigurations", "distributionpoints", "dockitems", "ldapservers", "macapplications", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "mobiledeviceextensionattributes", "mobiledevices", "networksegments", "osxconfigurationprofiles", "patchpolicies", "printers", "restrictedsoftware", "scripts", "sites", "softwareupdateservers", "userextensionattributes", "users":
                     
 //                    print("[getEndpoints] result: \(result.description)")
                     
@@ -3073,8 +3081,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         if !WipeData.state.on  {
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                             
-                                            if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+                                            let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(endpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: l_xmlName) : l_xmlName
+                                            
+                                            if currentEPDict[endpoint]?[selectedObjectName] != nil {
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) already exists") }
                                                 
                                                 if Setting.onlyCopyMissing {
                                                     updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
@@ -3083,10 +3093,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
-                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                 
                                                 if Setting.onlyCopyExisting {
@@ -3324,8 +3334,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
                                             if !WipeData.state.on  {
                                                 //need to call existingEndpoints here to keep proper order?
-                                                if currentEPs[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+                                                
+                                                let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(endpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: l_xmlName) : l_xmlName
+                                                
+                                                if currentEPs[selectedObjectName] != nil {
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) already exists") }
                                                     
                                                     if Setting.onlyCopyMissing {
                                                         updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
@@ -3334,23 +3347,21 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
-                                                        //                                                                            endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                     
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(localEndpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(groupCount), action: \"create\", destEpId: 0") }
                                                     
                                                     if Setting.onlyCopyExisting {
                                                         updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
                                                         CreateEndpoints.shared.queue(endpointType: endpoint, endpointName: l_xmlName, endPointXML: "", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", sourceEpId: 0, destEpId: "0", ssIconName: "", ssIconId: "0", ssIconUri: "", retry: false) {
                                                             (result: String) in
-                                                            completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
+                                                            completion(["skipped endpoint - \(selectedObjectName)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
                                                         EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                        //                                                                        endPointByIDQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                     
                                                 }
@@ -3483,12 +3494,16 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     Counter.shared.crud[endpoint]!["total"] = computerPoliciesDict.count
                                     
                                     for (l_xmlID, l_xmlName) in computerPoliciesDict {
+                                        
+                                        let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(endpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: l_xmlName) : l_xmlName
+                                        
                                         if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
                                             if !WipeData.state.on  {
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID on \(l_xmlName): \(String(describing: currentEPs[l_xmlName]))") }
                                                 //                                                        if currentEPs[l_xmlName] != nil {
-                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
+//                                                if currentEPDict[endpoint]?[l_xmlName] != nil {
+                                                if currentEPDict[endpoint]?[selectedObjectName] != nil {
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) already exists") }
                                                     
                                                     if Setting.onlyCopyMissing {
                                                         updateGetStatus(endpoint: endpoint, total: AvailableObjsToMig.byId.count)
@@ -3497,12 +3512,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
-                                                        //                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                     
                                                 } else {
-                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
+                                                    if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
                                                     
                                                     if Setting.onlyCopyExisting {
@@ -3513,7 +3527,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         }
                                                     } else {
                                                         EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
-                                                        //                                                                        endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                     
                                                 }
@@ -4051,28 +4064,30 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     if LogLevel.debug { WriteToLog.shared.message("[processFiles] l_id: \(l_id), l_name: \(l_name), l_xml: \(l_fileContents)") }
                     updateGetStatus(endpoint: endpoint, total: targetSelectiveObjectList.count, index: l_index)
                     
-//                    if l_id != nil && l_name != "" && l_xml != "" {
                     if !l_id.isEmpty && !l_name.isEmpty && !l_fileContents.isEmpty {
                         var destId = "\(currentEPs[l_name] ?? 0)"
+                        
+                        let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(l_name)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: l_name) : l_name
+
                         if !WipeData.state.on  {
                             var existsOnDestination: Bool = false
                             switch endpoint {
                             case "api-roles":
-                                let destinationObject = ApiRoles.destination.first(where: { $0.displayName.lowercased() == l_name.lowercased() })
+                                let destinationObject = ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })
                                 existsOnDestination = destinationObject != nil
                                 destId = destinationObject?.id ?? "0"
                             case "api-integrations":
-                                let destinationObject = ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == l_name.lowercased() })
+                                let destinationObject = ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })
                                 existsOnDestination = destinationObject != nil
                                 destId = destinationObject?.id ?? "0"
                             default:
-                                existsOnDestination = currentEPs["\(l_name)"] != nil
+                                existsOnDestination = currentEPs["\(selectedObjectName)"] != nil
                             }
                             
-                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] check for ID on \(String(describing: l_name)): \(destId)") }
+                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] check for ID on \(String(describing: selectedObjectName)): \(destId)") }
                             
                             if existsOnDestination {
-                                if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: l_name)) already exists") }
+                                if LogLevel.debug { WriteToLog.shared.message("[processFiles] \(endpoint):\(String(describing: selectedObjectName)) already exists") }
                                 
                                 switch endpoint {
                                 case "buildings", "api-roles", "api-integrations":
@@ -5537,8 +5552,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     // general tab
                     case "advancedusersearches":
                         self.advusersearch_label_field.textColor = theColor
-                    case "buildings":
-                        self.building_label_field.textColor = theColor
+//                    case "buildings":
+//                        self.building_label_field.textColor = theColor
                     case "categories":
                         self.categories_label_field.textColor = theColor
                     case "departments":
@@ -5553,17 +5568,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         self.network_segments_label_field.textColor = theColor
                     case "users":
                         self.users_label_field.textColor = theColor
-                    case "usergroups":
+//                    case "usergroups":
 //                        self.smartUserGrps_label_field.textColor = theColor
-                        self.staticUserGrps_label_field.textColor = theColor
+//                        self.staticUserGrps_label_field.textColor = theColor
                     case "jamfusers", "accounts/userid":
                         self.jamfUserAccounts_field.textColor = theColor
                     case "jamfgroups", "accounts/groupid":
                         self.jamfGroupAccounts_field.textColor = theColor
 //                    case "smartusergroups":
 //                        self.smartUserGrps_label_field.textColor = theColor
-                    case "staticusergroups":
-                        self.staticUserGrps_label_field.textColor = theColor
+//                    case "staticusergroups":
+//                        self.staticUserGrps_label_field.textColor = theColor
                 // macOS tab
                 case "advancedcomputersearches":
                     self.advcompsearch_label_field.textColor = theColor
@@ -6569,6 +6584,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         logFunctionCall()
         let newArray = theArray.sorted{$0.localizedCaseInsensitiveCompare($1) == .orderedAscending}
         completion(newArray)
+    }
+    
+    private func nameInSite(prefixSuffix: String, selectedObject: String) -> String {
+        let newName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(selectedObject)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(selectedObject)"
+        
+        return newName
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

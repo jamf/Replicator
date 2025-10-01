@@ -243,5 +243,6 @@ class SitePreferences {
     static var groups = userDefaults.string(forKey: "siteGroupsAction") ?? "Copy"
     static var restricted = userDefaults.string(forKey: "siteRestrictedSoftware") ?? "Copy"
     static var classes = userDefaults.string(forKey: "siteClasses") ?? "Copy"
+    static var ebooks = userDefaults.string(forKey: "siteEbooks") ?? "Copy"
     
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24128" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24128"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -95,7 +95,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xg2-BE-LE0">
-                                <rect key="frame" x="198" y="204" width="18" height="18"/>
+                                <rect key="frame" x="200" y="205" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XGh-Th-ANL">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -113,7 +113,7 @@
                                 </textFieldCell>
                             </textField>
                             <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dko-mv-Um3">
-                                <rect key="frame" x="198" y="280" width="18" height="18"/>
+                                <rect key="frame" x="200" y="281" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="M3t-qs-8fB">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -139,7 +139,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o62-RM-PNR">
-                                <rect key="frame" x="198" y="242" width="18" height="18"/>
+                                <rect key="frame" x="200" y="243" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rF4-fI-JfJ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -157,7 +157,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PXK-Kc-C3v">
-                                <rect key="frame" x="198" y="261" width="18" height="18"/>
+                                <rect key="frame" x="200" y="262" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rO5-tA-FmJ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -175,7 +175,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ogj-kd-mkk">
-                                <rect key="frame" x="198" y="185" width="18" height="18"/>
+                                <rect key="frame" x="200" y="186" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="eGs-QU-K7x">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -209,7 +209,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VEM-LR-2iD">
-                                <rect key="frame" x="198" y="136" width="18" height="18"/>
+                                <rect key="frame" x="200" y="137" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Lr8-ss-hhY">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -219,7 +219,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nkd-g2-D6H">
-                                <rect key="frame" x="198" y="117" width="18" height="18"/>
+                                <rect key="frame" x="200" y="118" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="oO3-Xr-eL1">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -229,7 +229,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1nk-zX-i4p">
-                                <rect key="frame" x="198" y="98" width="18" height="18"/>
+                                <rect key="frame" x="200" y="99" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="oVt-sW-FUw">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -247,7 +247,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I3T-6O-rbl">
-                                <rect key="frame" x="198" y="223" width="18" height="18"/>
+                                <rect key="frame" x="200" y="224" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ijY-ha-INZ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -257,7 +257,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oG0-8N-egu">
-                                <rect key="frame" x="262" y="223" width="18" height="18"/>
+                                <rect key="frame" x="266" y="224" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZjN-ON-j4d">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -270,7 +270,7 @@
                                 <rect key="frame" x="0.0" y="88" width="400" height="5"/>
                             </box>
                             <button identifier="copyMissing" toolTip="only create items not currently on the destination server" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ABb-3i-F1Z">
-                                <rect key="frame" x="27" y="57" width="173" height="18"/>
+                                <rect key="frame" x="29" y="58" width="169" height="16"/>
                                 <buttonCell key="cell" type="check" title="Only copy missing items" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mpK-Pb-VY6">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -280,7 +280,7 @@
                                 </connections>
                             </button>
                             <button identifier="copyExisting" toolTip="only update existing items on the destination server" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="T5m-Wq-VYl">
-                                <rect key="frame" x="27" y="33" width="174" height="18"/>
+                                <rect key="frame" x="29" y="34" width="170" height="16"/>
                                 <buttonCell key="cell" type="check" title="Only copy existing items" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Tua-UL-L8F">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -372,7 +372,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2cl-bV-bJO">
-                                <rect key="frame" x="51" y="156" width="148" height="17"/>
+                                <rect key="frame" x="51" y="154" width="148" height="19"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Raw Source XML" id="qCA-1d-yzg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -396,7 +396,7 @@
                                 </textFieldCell>
                             </textField>
                             <button identifier="rawSourceXml" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ygP-ng-L4v">
-                                <rect key="frame" x="210" y="154" width="18" height="18"/>
+                                <rect key="frame" x="212" y="154" width="14" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" focusRingType="none" inset="2" id="zw6-9Y-XS7">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -409,7 +409,7 @@
                                 </connections>
                             </button>
                             <button identifier="trimmedSourceXml" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CCj-Rl-VKk">
-                                <rect key="frame" x="210" y="135" width="22" height="18"/>
+                                <rect key="frame" x="212" y="133" width="18" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="8bX-mW-hNf">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -419,7 +419,7 @@
                                 </connections>
                             </button>
                             <button identifier="saveOnly" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="66o-G0-181">
-                                <rect key="frame" x="210" y="115" width="22" height="18"/>
+                                <rect key="frame" x="212" y="111" width="18" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Vs0-bH-diw">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -429,7 +429,7 @@
                                 </connections>
                             </button>
                             <button identifier="rawXmlScope" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lUE-WG-wQ1">
-                                <rect key="frame" x="254" y="154" width="18" height="18"/>
+                                <rect key="frame" x="256" y="154" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="yqx-oD-YTV">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -439,7 +439,7 @@
                                 </connections>
                             </button>
                             <button identifier="trimmedXmlScope" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="B4M-2x-uq5">
-                                <rect key="frame" x="254" y="135" width="22" height="18"/>
+                                <rect key="frame" x="256" y="133" width="18" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="thU-3x-oee">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -471,7 +471,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="23B-Sd-ZUb">
-                                <rect key="frame" x="12" y="211" width="377" height="16"/>
+                                <rect key="frame" x="12" y="206" width="377" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="373" id="lho-3O-S61"/>
                                 </constraints>
@@ -482,10 +482,10 @@
                                 </textFieldCell>
                             </textField>
                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="MEU-eh-Jcy">
-                                <rect key="frame" x="0.0" y="200" width="400" height="5"/>
+                                <rect key="frame" x="0.0" y="195" width="400" height="5"/>
                             </box>
                             <button toolTip="Select new export location" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="AMh-rS-Q2f">
-                                <rect key="frame" x="227" y="56" width="75" height="32"/>
+                                <rect key="frame" x="234" y="54" width="61" height="24"/>
                                 <buttonCell key="cell" type="push" title="Select" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WF2-Rn-4IU">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -501,7 +501,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zp8-37-IJS">
-                                <rect key="frame" x="99" y="56" width="74" height="32"/>
+                                <rect key="frame" x="106" y="54" width="60" height="24"/>
                                 <buttonCell key="cell" type="push" title="Show" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cIz-cx-9RQ">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -578,11 +578,11 @@ DQ
             <objects>
                 <viewController title="Site" storyboardIdentifier="preferenceSite" id="Wtb-LD-naZ" userLabel="Site" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="btl-X1-946">
-                        <rect key="frame" x="0.0" y="0.0" width="397" height="351"/>
+                        <rect key="frame" x="0.0" y="0.0" width="397" height="392"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="00w-rL-Cme">
-                                <rect key="frame" x="158" y="89" width="49" height="16"/>
+                                <rect key="frame" x="158" y="114" width="49" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Groups" id="qaC-VC-TfO">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -590,7 +590,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zpT-VE-Axt">
-                                <rect key="frame" x="83" y="61" width="124" height="16"/>
+                                <rect key="frame" x="83" y="82" width="124" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Restricted Software" id="KM3-Dl-wLs">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -598,7 +598,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CVl-1u-4EI">
-                                <rect key="frame" x="156" y="201" width="51" height="16"/>
+                                <rect key="frame" x="156" y="240" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Policies" id="eVd-eg-5CH">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -606,7 +606,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZOc-ap-lS4">
-                                <rect key="frame" x="71" y="173" width="136" height="16"/>
+                                <rect key="frame" x="71" y="210" width="136" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Configuration Profiles" id="cN5-GU-lLg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -614,7 +614,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6MZ-wW-meg">
-                                <rect key="frame" x="86" y="117" width="121" height="16"/>
+                                <rect key="frame" x="86" y="146" width="121" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Patch Management" id="Ajb-mW-6hV">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -622,7 +622,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Fqm-v3-tqW">
-                                <rect key="frame" x="171" y="145" width="36" height="16"/>
+                                <rect key="frame" x="171" y="178" width="36" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Apps" id="hPT-oY-fYs">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -630,7 +630,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton identifier="searches" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ric-zN-kUj">
-                                <rect key="frame" x="210" y="223" width="77" height="25"/>
+                                <rect key="frame" x="213" y="266" width="70" height="20"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="E8N-Rd-NHA" id="bIT-AM-0jw">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -650,7 +650,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="policies" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VIh-bS-JeH">
-                                <rect key="frame" x="210" y="195" width="77" height="25"/>
+                                <rect key="frame" x="213" y="238" width="70" height="20"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="eUE-QE-YRg" id="wq4-IH-mem">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -670,7 +670,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="profiles" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PYt-cK-DKX">
-                                <rect key="frame" x="210" y="167" width="77" height="25"/>
+                                <rect key="frame" x="213" y="206" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UGA-4u-HO2" id="rSW-Xy-J9g">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -686,7 +686,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="apps" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CcJ-hQ-jxu">
-                                <rect key="frame" x="210" y="139" width="77" height="25"/>
+                                <rect key="frame" x="213" y="174" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="XaM-z4-8q9" id="BWN-na-TnP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -702,7 +702,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="groups" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TQL-zV-GhE">
-                                <rect key="frame" x="210" y="83" width="77" height="25"/>
+                                <rect key="frame" x="213" y="110" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="J9F-Fg-eDv" id="T6P-Nd-djx">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -718,7 +718,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <popUpButton identifier="software" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="X1H-zR-VZP">
-                                <rect key="frame" x="210" y="55" width="77" height="25"/>
+                                <rect key="frame" x="213" y="78" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="VdM-9i-0vp" id="UB9-l9-S0o">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -734,7 +734,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="foO-6F-dmH">
-                                <rect key="frame" x="146" y="229" width="61" height="16"/>
+                                <rect key="frame" x="146" y="268" width="61" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Searches" id="qP7-8d-p2n">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -742,7 +742,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton identifier="patch" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lB3-jA-Znx">
-                                <rect key="frame" x="210" y="111" width="77" height="25"/>
+                                <rect key="frame" x="213" y="142" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="UXe-co-Jcf" id="8tl-F6-r5s">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -758,7 +758,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4v8-Oc-oSL">
-                                <rect key="frame" x="156" y="33" width="51" height="16"/>
+                                <rect key="frame" x="156" y="50" width="51" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Classes" id="IXQ-En-iem">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -766,7 +766,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton identifier="classes" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dgp-nw-6rc">
-                                <rect key="frame" x="210" y="27" width="77" height="25"/>
+                                <rect key="frame" x="213" y="46" width="70" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Wii-xj-fcX" id="w9e-br-ghW">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -782,10 +782,10 @@ DQ
                                 </connections>
                             </popUpButton>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="ttC-oY-fk2">
-                                <rect key="frame" x="68" y="303" width="262" height="27"/>
+                                <rect key="frame" x="68" y="344" width="262" height="27"/>
                                 <subviews>
                                     <popUpButton identifier="searches" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2H8-of-N3A">
-                                        <rect key="frame" x="181" y="1" width="77" height="25"/>
+                                        <rect key="frame" x="184" y="5" width="70" height="20"/>
                                         <popUpButtonCell key="cell" type="push" title="Suffix" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="u0Q-xz-Qgr" id="oyE-jq-gMu">
                                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="message"/>
@@ -823,10 +823,10 @@ DQ
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zuf-Wg-i8g">
-                                <rect key="frame" x="70" y="275" width="257" height="26"/>
+                                <rect key="frame" x="70" y="314" width="257" height="28"/>
                                 <subviews>
                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0VQ-yu-cHH">
-                                        <rect key="frame" x="6" y="5" width="54" height="16"/>
+                                        <rect key="frame" x="6" y="6" width="54" height="16"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="modifier" id="evp-Y7-B5e">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -834,7 +834,7 @@ DQ
                                         </textFieldCell>
                                     </textField>
                                     <textField identifier="siteNameModifier" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9PZ-bZ-J5d">
-                                        <rect key="frame" x="66" y="2" width="183" height="22"/>
+                                        <rect key="frame" x="66" y="2" width="183" height="24"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GLI-QK-a0u">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -854,10 +854,10 @@ DQ
                                 </constraints>
                             </customView>
                             <box verticalHuggingPriority="750" ambiguous="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="XxL-pK-0D1">
-                                <rect key="frame" x="-1" y="260" width="397" height="5"/>
+                                <rect key="frame" x="-1" y="299" width="397" height="5"/>
                             </box>
                             <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yTp-YW-njo">
-                                <rect key="frame" x="9" y="8" width="22" height="23"/>
+                                <rect key="frame" x="10" y="10" width="20" height="20"/>
                                 <buttonCell key="cell" type="help" bezelStyle="helpButton" imagePosition="only" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Aaf-gl-euD">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
@@ -870,12 +870,37 @@ DQ
                                     <segue destination="i5S-7J-ZDq" kind="popover" popoverAnchorView="yTp-YW-njo" popoverBehavior="t" preferredEdge="maxY" id="IA4-cU-lec"/>
                                 </connections>
                             </button>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TXP-lz-hEX">
+                                <rect key="frame" x="155" y="18" width="51" height="16"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="eBooks" id="zmx-4g-u9C">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton identifier="ebooks" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="avV-mJ-MqM">
+                                <rect key="frame" x="213" y="14" width="70" height="24"/>
+                                <popUpButtonCell key="cell" type="push" title="Copy" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="xfN-tj-yM2" id="fyw-uJ-faN">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="message"/>
+                                    <menu key="menu" id="aRC-GI-lDu">
+                                        <items>
+                                            <menuItem title="Copy" state="on" id="xfN-tj-yM2"/>
+                                            <menuItem title="Move" tag="1" id="iBF-4v-unA"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="siteCopyMove_action:" target="Wtb-LD-naZ" id="vNU-dg-PX8"/>
+                                </connections>
+                            </popUpButton>
                         </subviews>
                         <constraints>
                             <constraint firstItem="lB3-jA-Znx" firstAttribute="top" secondItem="CcJ-hQ-jxu" secondAttribute="bottom" constant="8" id="1l4-r0-ocS"/>
                             <constraint firstItem="Ric-zN-kUj" firstAttribute="top" secondItem="XxL-pK-0D1" secondAttribute="bottom" constant="15" id="3vG-RK-VWz"/>
                             <constraint firstItem="4v8-Oc-oSL" firstAttribute="trailing" secondItem="zpT-VE-Axt" secondAttribute="trailing" id="5mC-WX-f3g"/>
                             <constraint firstItem="Ric-zN-kUj" firstAttribute="centerY" secondItem="foO-6F-dmH" secondAttribute="centerY" id="9S9-4r-djM"/>
+                            <constraint firstItem="avV-mJ-MqM" firstAttribute="centerY" secondItem="TXP-lz-hEX" secondAttribute="centerY" id="9xI-RO-8xb"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="centerY" secondItem="CVl-1u-4EI" secondAttribute="centerY" id="Ahb-j2-2t9"/>
                             <constraint firstItem="XxL-pK-0D1" firstAttribute="top" secondItem="Zuf-Wg-i8g" secondAttribute="bottom" constant="12" id="C2H-25-9nt"/>
                             <constraint firstItem="Zuf-Wg-i8g" firstAttribute="leading" secondItem="btl-X1-946" secondAttribute="leading" constant="70" id="DP7-VB-EDn"/>
@@ -894,14 +919,17 @@ DQ
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="leading" secondItem="CVl-1u-4EI" secondAttribute="trailing" constant="8" id="Wgg-EG-8UY"/>
                             <constraint firstItem="TQL-zV-GhE" firstAttribute="centerY" secondItem="00w-rL-Cme" secondAttribute="centerY" id="YTu-rP-feD"/>
                             <constraint firstItem="Zuf-Wg-i8g" firstAttribute="top" secondItem="ttC-oY-fk2" secondAttribute="bottom" constant="2" id="YX0-fk-iFJ"/>
+                            <constraint firstItem="avV-mJ-MqM" firstAttribute="trailing" secondItem="dgp-nw-6rc" secondAttribute="trailing" id="YvD-IZ-w7N"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="trailing" secondItem="PYt-cK-DKX" secondAttribute="trailing" id="ZEi-dp-CPe"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="centerY" secondItem="zpT-VE-Axt" secondAttribute="centerY" id="bnr-ZH-uH5"/>
                             <constraint firstItem="Zuf-Wg-i8g" firstAttribute="centerX" secondItem="btl-X1-946" secondAttribute="centerX" id="cFI-IW-P1Z"/>
                             <constraint firstItem="lB3-jA-Znx" firstAttribute="leading" secondItem="CcJ-hQ-jxu" secondAttribute="leading" id="ckz-RU-YDF"/>
                             <constraint firstAttribute="bottom" secondItem="yTp-YW-njo" secondAttribute="bottom" constant="10" id="eyK-FK-JqD"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="trailing" secondItem="Ric-zN-kUj" secondAttribute="trailing" id="fRJ-2l-UTv"/>
+                            <constraint firstItem="avV-mJ-MqM" firstAttribute="top" secondItem="dgp-nw-6rc" secondAttribute="bottom" constant="8" id="fla-ht-Z8X"/>
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="top" secondItem="TQL-zV-GhE" secondAttribute="bottom" constant="8" id="g98-ze-0LV"/>
                             <constraint firstItem="CcJ-hQ-jxu" firstAttribute="centerY" secondItem="Fqm-v3-tqW" secondAttribute="centerY" id="h7e-eE-JQU"/>
+                            <constraint firstItem="avV-mJ-MqM" firstAttribute="leading" secondItem="dgp-nw-6rc" secondAttribute="leading" id="h7s-T8-psH"/>
                             <constraint firstItem="yTp-YW-njo" firstAttribute="leading" secondItem="btl-X1-946" secondAttribute="leading" constant="10" id="hRV-fd-g7D"/>
                             <constraint firstAttribute="trailing" secondItem="VIh-bS-JeH" secondAttribute="trailing" constant="114" id="iWP-Vc-esa"/>
                             <constraint firstItem="Fqm-v3-tqW" firstAttribute="trailing" secondItem="ZOc-ap-lS4" secondAttribute="trailing" id="kXP-XF-5Iu"/>
@@ -924,6 +952,7 @@ DQ
                     <connections>
                         <outlet property="appsAction_button" destination="CcJ-hQ-jxu" id="N9i-We-Vqh"/>
                         <outlet property="classes_button" destination="dgp-nw-6rc" id="kNb-ny-tYp"/>
+                        <outlet property="ebooks_button" destination="avV-mJ-MqM" id="1gx-eS-Kks"/>
                         <outlet property="groupsAction_button" destination="TQL-zV-GhE" id="ScC-cg-CZT"/>
                         <outlet property="patchAction_button" destination="lB3-jA-Znx" id="xMO-uH-Bfg"/>
                         <outlet property="policiesAction_button" destination="VIh-bS-JeH" id="nqW-QO-gY9"/>
@@ -937,7 +966,7 @@ DQ
                 </viewController>
                 <customObject id="rCK-DO-ett" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-427.5" y="1294.5"/>
+            <point key="canvasLocation" x="-427.5" y="1315"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="0xB-io-gj4">
@@ -955,9 +984,9 @@ DQ
                                 </constraints>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="QHL-t9-AMc">
                                     <font key="font" metaFont="system"/>
-                                    <mutableString key="title">Copying an object to another site either on the destination server or a site on the source server will create/update an object using the defined modifer to alter both the object name and name(s) of groups used in scoping. The variable $SITE may be used in place of entering a specific site name.
+                                    <string key="title">Copying an object to another site either on the destination server or a site on the source server will create/update an object using the defined modifer to alter both the object name and name(s) of groups used in scoping. The variable $SITE may be used in place of entering a specific site name.
 
-Moving an object will not change any of the names. Moving an object to a site on the same server will remove the object from its present site (of NONE) to the new site. Use caution as to not unintentionally unscope configuration profiles from current objects. Moving objects to another server will leave teh object as is on source server and create a new object in the site on the destination server.</mutableString>
+Moving an object will not change any of the names. Moving an object to a site on the same server will remove the object from its present site (of NONE) to the new site. Use caution as to not unintentionally unscope configuration profiles from current objects. Moving objects to another server will leave teh object as is on source server and create a new object in the site on the destination server.</string>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -984,7 +1013,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y1Q-0c-cgq">
-                                <rect key="frame" x="34" y="208" width="190" height="16"/>
+                                <rect key="frame" x="34" y="209" width="190" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="186" id="b3G-tv-iiR"/>
                                 </constraints>
@@ -995,14 +1024,14 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
-                                <rect key="frame" x="34" y="179" width="190" height="28"/>
+                                <rect key="frame" x="36" y="190" width="186" height="16"/>
                                 <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="2" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
                                 <connections>
                                     <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
                                 </connections>
                             </slider>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mty-65-1H0">
-                                <rect key="frame" x="223" y="209" width="4" height="16"/>
+                                <rect key="frame" x="223" y="210" width="4" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="ZfT-OJ-e9T">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1010,7 +1039,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
-                                <rect key="frame" x="34" y="90" width="108" height="16"/>
+                                <rect key="frame" x="34" y="91" width="108" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1018,7 +1047,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
-                                <rect key="frame" x="147" y="87" width="41" height="21"/>
+                                <rect key="frame" x="147" y="87" width="54" height="22"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GFB-9j-KGo">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1026,7 +1055,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7nu-gl-e0B">
-                                <rect key="frame" x="34" y="125" width="92" height="16"/>
+                                <rect key="frame" x="34" y="130" width="92" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Color scheme:" id="0eQ-rJ-zhy">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1034,7 +1063,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="afe-0d-eps">
-                                <rect key="frame" x="127" y="117" width="82" height="25"/>
+                                <rect key="frame" x="130" y="122" width="88" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -1053,7 +1082,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kSv-WF-lic">
-                                <rect key="frame" x="34" y="152" width="148" height="18"/>
+                                <rect key="frame" x="36" y="158" width="144" height="16"/>
                                 <buttonCell key="cell" type="check" title="Use Sticky Sessions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="k0q-qf-jbZ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1071,7 +1100,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cxh-uB-wNS">
-                                <rect key="frame" x="171" y="18" width="39" height="25"/>
+                                <rect key="frame" x="174" y="20" width="45" height="24"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ifK-rp-GoD">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -1082,7 +1111,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iTN-Ij-5Sn">
-                                <rect key="frame" x="34" y="56" width="203" height="18"/>
+                                <rect key="frame" x="36" y="57" width="201" height="16"/>
                                 <buttonCell key="cell" type="check" title="Mask server names in the log" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Xf4-03-eOF">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1156,7 +1185,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hzQ-6I-RWA">
-                                <rect key="frame" x="11" y="227" width="211" height="18"/>
+                                <rect key="frame" x="13" y="228" width="207" height="16"/>
                                 <buttonCell key="cell" type="check" title="Migrate computer as managed" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Znv-DC-QZf">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1174,7 +1203,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField identifier="prefMgmtAcct" hidden="YES" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3a7-DQ-lyy">
-                                <rect key="frame" x="56" y="176" width="331" height="21"/>
+                                <rect key="frame" x="56" y="173" width="331" height="24"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="ypS-VH-Gln">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1182,7 +1211,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <secureTextField identifier="prefMgmtPwd" hidden="YES" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JhD-pI-Jwl">
-                                <rect key="frame" x="56" y="127" width="331" height="21"/>
+                                <rect key="frame" x="56" y="121" width="331" height="24"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="uKe-e3-GvM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1193,7 +1222,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wnn-L0-Q8w">
-                                <rect key="frame" x="30" y="152" width="66" height="16"/>
+                                <rect key="frame" x="30" y="149" width="66" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Password:" id="Tw9-lc-2Pl">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1201,7 +1230,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ITe-WI-ekj">
-                                <rect key="frame" x="12" y="257" width="206" height="25"/>
+                                <rect key="frame" x="14" y="258" width="204" height="23"/>
                                 <buttonCell key="cell" type="check" title="Remove Conditional Access ID" bezelStyle="regularSquare" imagePosition="left" inset="2" id="EoU-FN-Gfs">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1256,7 +1285,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button identifier="bind" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UOr-4y-ts0">
-                                <rect key="frame" x="24" y="237" width="217" height="18"/>
+                                <rect key="frame" x="26" y="238" width="213" height="16"/>
                                 <buttonCell key="cell" type="check" title="Set Directory Binding Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Aiw-dO-7Ta">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1266,7 +1295,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </button>
                             <button identifier="ldap" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WAS-vF-dwo">
-                                <rect key="frame" x="24" y="182" width="145" height="18"/>
+                                <rect key="frame" x="26" y="180" width="141" height="16"/>
                                 <buttonCell key="cell" type="check" title="Set LDAP Password" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mxu-KS-PMy">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1276,7 +1305,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </button>
                             <button identifier="fileshare" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5bY-os-nBB">
-                                <rect key="frame" x="24" y="126" width="296" height="18"/>
+                                <rect key="frame" x="26" y="121" width="292" height="16"/>
                                 <buttonCell key="cell" type="check" title="Set Passwords for Local Distribution Point(s)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WPR-Cu-AGt">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1286,7 +1315,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </button>
                             <secureTextField identifier="bind_textfield" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="h4P-Oe-SQ6">
-                                <rect key="frame" x="46" y="210" width="243" height="21"/>
+                                <rect key="frame" x="46" y="207" width="243" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="243" id="zLg-fo-BpM"/>
                                 </constraints>
@@ -1300,7 +1329,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="ldap_textifeld" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OWG-1V-s0b">
-                                <rect key="frame" x="46" y="155" width="243" height="21"/>
+                                <rect key="frame" x="46" y="149" width="243" height="24"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2lp-yr-f8s">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1311,7 +1340,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsrw" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xgj-Ze-Ke8">
-                                <rect key="frame" x="46" y="79" width="250" height="21"/>
+                                <rect key="frame" x="46" y="70" width="248" height="24"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="gOb-aU-H4h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1322,7 +1351,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </secureTextFieldCell>
                             </secureTextField>
                             <secureTextField identifier="fsro" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Lc5-qp-TxJ">
-                                <rect key="frame" x="46" y="29" width="243" height="21"/>
+                                <rect key="frame" x="46" y="17" width="243" height="24"/>
                                 <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="hsP-WO-Ouc">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1333,7 +1362,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FAp-KF-ajE">
-                                <rect key="frame" x="44" y="106" width="190" height="16"/>
+                                <rect key="frame" x="44" y="100" width="190" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read/Write Account Password:" id="vdy-6x-HWL">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1341,7 +1370,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZbO-yE-rVj">
-                                <rect key="frame" x="44" y="57" width="185" height="16"/>
+                                <rect key="frame" x="44" y="48" width="185" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Read-only Account Password:" id="3T8-sJ-ea4">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>

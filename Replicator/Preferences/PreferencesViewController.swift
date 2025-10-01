@@ -52,6 +52,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var groupsAction_button: NSPopUpButton!
     @IBOutlet weak var restrictedSoftware_button: NSPopUpButton!
     @IBOutlet weak var classes_button: NSPopUpButton!
+    @IBOutlet weak var ebooks_button: NSPopUpButton!
     
     // app prefs
     @IBOutlet weak var concurrentThreads_slider: NSSlider!
@@ -260,6 +261,10 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             SitePreferences.classes = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteClasses")
             classes_button.selectItem(withTitle: selectedItem)
+            
+            SitePreferences.ebooks = selectedItem
+            userDefaults.set("\(selectedItem)", forKey: "siteEbooks")
+            ebooks_button.selectItem(withTitle: selectedItem)
         } else {
             switch sender.identifier?.rawValue {
             case "searches":
@@ -286,6 +291,9 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             case "classes":
                 userDefaults.set("\(selectedItem)", forKey: "siteClasses")
                 SitePreferences.classes = selectedItem
+            case "ebooks":
+                userDefaults.set("\(selectedItem)", forKey: "siteEbooks")
+                SitePreferences.ebooks = selectedItem
 
             default:
                 print("unknown option")
@@ -523,6 +531,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             groupsAction_button.selectItem(withTitle: SitePreferences.groups)
             restrictedSoftware_button.selectItem(withTitle: SitePreferences.restricted)
             classes_button.selectItem(withTitle: SitePreferences.classes)
+            ebooks_button.selectItem(withTitle: SitePreferences.ebooks)
             
             SitePreferences.nameModifier = siteNameModifier(siteNameModifier_textfield.stringValue)
         }
