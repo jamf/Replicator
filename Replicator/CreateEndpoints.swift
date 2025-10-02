@@ -29,15 +29,17 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             completion("stop")
             return
         }
-        completion("return from createEndpointsQueue")
-//        print("[createEndpointsQueue]                   action: \(action)")
-//        print("[createEndpointsQueue] setting.onlyCopyExisting: \(setting.onlyCopyExisting)")
-//        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(setting.onlyCopyMissing)")
+        
+//        completion("return from createEndpointsQueue")
+        
+        print("[createEndpointsQueue]                   action: \(action)")
+        print("[createEndpointsQueue] setting.onlyCopyExisting: \(Setting.onlyCopyExisting)")
+        print("[createEndpointsQueue]  setting.onlyCopyMissing: \(Setting.onlyCopyMissing)")
 
         if (Setting.onlyCopyExisting && action == "create") || (Setting.onlyCopyMissing && action == "update") {
             WriteToLog.shared.message("[createEndpointsQueue] skip \(action) for \(endpointType) with name: \(endpointName)")
             Counter.shared.crud[endpointType]?["skipped"]! += 1
-            if destEpId != "-1" {
+            if destEpId != "-1" && !export.saveOnly {
                 updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": endpointCount])
             }
             return
