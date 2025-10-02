@@ -976,4 +976,31 @@ class Cleanup: NSObject {
             withTemplate: "$1\(newName)$2"
         )
     }
+    
+    private func encodeTagValue(in xmlString: String, currentName: String) -> String {
+        // Find first <name>...</name> and replace its content
+        let pattern = "(<name>)[^<]*(</name>)"
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return xmlString
+        }
+        
+        guard let match = regex.firstMatch(in: xmlString, range: NSRange(xmlString.startIndex..., in: xmlString)) else {
+            return xmlString
+        }
+        
+//        if SitePreferences.nameModifier.isEmpty {
+//            SitePreferences.nameModifier = (SitePreferences.modifierPrefixSuffix == "Suffix") ? " - \(JamfProServer.destSite.xmlEncode)" : "\(JamfProServer.destSite.xmlEncode) - "
+//        }
+        
+        let modifier = siteNameModifier(SitePreferences.nameModifier)
+        let newName  = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(currentName)\(modifier)" : "\(modifier)\(currentName)"
+        
+        return regex.stringByReplacingMatches(
+            in: xmlString,
+            options: [],
+            range: match.range,
+            withTemplate: "$1\(newName)$2"
+        )
+    }
 }

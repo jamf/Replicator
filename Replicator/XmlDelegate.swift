@@ -209,7 +209,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                     }
                     
                     if export.saveOnly {
-                        updateView(["function": "putStatusUpdate", "endpoint": node, "total": Counter.shared.crud[node]!["total"]!])
+                        updateView(["function": "putStatusUpdate", "endpoint": node, "total": Counter.shared.crud[node]?["total"] ?? 0])
                     }
                     
                 }   // if let prettyXml - end
