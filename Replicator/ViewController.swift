@@ -405,9 +405,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 updateGetStatus(endpoint: endpoint, total: total, index: index)
             }
         case "putStatusUpdate":
-//            print("[ExportItem.export] rawExport update UI for \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
+//            print("[ExportItem.export] rawExport update UI for endpoint: \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
             
-            if let endpoint = info["endpoint"] as? String, let total = info["total"] as? Int {
+            if let endpoint = info["endpoint"] as? String, endpoint != "patchpolicies", let total = info["total"] as? Int {
                 putStatusUpdate(endpoint: endpoint, total: total)
             }
         case "put_levelIndicator":
@@ -2175,10 +2175,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 rawEndpoint = "mobiledevicegroups"
             case "smartusergroups", "staticusergroups":
                 rawEndpoint = "usergroups"
-            case "accounts/userid":
-                rawEndpoint = "jamfusers"
-            case "accounts/groupid":
-                rawEndpoint = "jamfgroups"
+            
+//            case "accounts/userid":
+//                rawEndpoint = "jamfusers"
+//            case "accounts/groupid":
+//                rawEndpoint = "jamfgroups"
+            
             case "patch-software-title-configurations":
                 rawEndpoint = "patch-software-title-configurations"
             default:
