@@ -25,7 +25,8 @@ class Json: NSObject, URLSessionDelegate {
         WriteToLog.shared.message("[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(existingDestUrl)")
     
         URLCache.shared.removeAllCachedResponses()
-        
+//        print("[getRecord]   endpointBase: \(endpointBase)")
+//        print("[getRecord] objectEndpoint: \(objectEndpoint)")
         switch endpointBase {
         case "api-roles", "api-integrations":
             existingDestUrl = existingDestUrl.appending("/api/v1/\(objectEndpoint)").urlFix
@@ -40,9 +41,10 @@ class Json: NSObject, URLSessionDelegate {
 
         default:
             if ["jamfusers", "jamfgroups"].contains(objectEndpoint) {
-                existingDestUrl = existingDestUrl.appending("/JSSResource/accounts").urlFix
+//            if ["accounts/userid", "accounts/groupid"].contains(endpointBase) {
+                existingDestUrl = existingDestUrl.appending("/JSSResource/accounts")
             } else {
-                existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)").urlFix
+                existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)")
             }
         }
 

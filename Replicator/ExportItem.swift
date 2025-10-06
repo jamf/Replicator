@@ -106,10 +106,7 @@ class ExportItem: NSObject {
                 let rawData = object as? PatchSoftwareTitleConfiguration
                 let prettyPrintedData = try encoder.encode(rawData)
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
-//                let thePatchPolicies = PatchPoliciesDetails.source.filter( { $0.softwareTitleConfigurationId == (object as? PatchSoftwareTitleConfiguration)?.id } ).map { $0.id }
-//                let theIndex = ToMigrate.objects.firstIndex(of: "patch-software-title-configurations") ?? 0
-//                print("[ExportItem] thePatchPolicies: \(thePatchPolicies)")
-//                print()
+
             default:
                 if let objectString = object as? String, objectString.isEmpty == false {
                     if let xmlDoc = try? XMLDocument(xmlString: objectString, options: .nodePrettyPrint) {
@@ -134,10 +131,12 @@ class ExportItem: NSObject {
             
 
         } catch {
+            print("[exportObject] [ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)")
             if LogLevel.debug { WriteToLog.shared.message("[ExportItem.export] Problem writing \(endpointPath) folder: Error \(error)") }
         }
         
-        if export.saveOnly {
+        print("[exportObject] node: \(node)")   //patch-software-title-configurations or patchPolicyDetails
+        if export.saveOnly && node == "patch-software-title-configurations" {
             let fixedNode = (node == "patchPolicyDetails") ? "patchpolicies" : node
             updateView(["function": "putStatusUpdate", "endpoint": fixedNode, "total": Counter.shared.crud[fixedNode]!["total"]!])
         }

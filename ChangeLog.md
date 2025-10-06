@@ -1,7 +1,11 @@
 # Replicator - Change Log
 
+**v8.3.0**: 2025-10-06<br>
+Address issue #123 - crash while exporting: macOS - Patch Management
+Add replication of eBooks. This is restricted to eBooks stored on the App Store due to API limitations.
+
 **v8.2.0**: 2025-08-24<br>
-Address issue #123 - crash while backup: General - Api Clients / Roles AND macOS - Patch Management
+Address issue #123 - crash while exporting: General - Api Clients / Roles AND macOS - Patch Management
 Address issue #124 - Replicator Freezes with Beachball of Death when Site is checked
 Updates to site replication. Allow custom suffix/prefix when copying objects, add additional objects that can be replicated to a site.
 
