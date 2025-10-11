@@ -102,6 +102,7 @@ struct AppInfo {
     static let plistPath       = AppInfo.appSupportPath + "/settings.plist"
     static let lastUserPath    = AppInfo.appSupportPath + "/lastUser.json"
     static var maskServerNames = userDefaults.integer(forKey: "maskServerNames") == 1 ? true : false
+    static var dryRun          = userDefaults.integer(forKey: "dryRun") == 1 ? true : false
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
 }

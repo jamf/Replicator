@@ -78,6 +78,44 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         }
     }
     
+    fileprivate func updateCounts(endpointType: String, apiAction: String, endPointXML: String = "", endPointJson: [String : Any] = [:], localEndPointType: String, endpointCount: Int, endpointCurrent: Int) {
+        Counter.shared.postSuccess += 1
+        
+        if let _ = Counter.shared.progressArray["\(endpointType)"] {
+            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
+        }
+        Counter.shared.crud[endpointType]?["\(apiAction)"]! += 1
+//        print("[CreateEndpoints.capi] \(apiAction) endpointType: \(endpointType)")
+        
+        Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
+        Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
+        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+        Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+        
+        if var summaryArray = Counter.shared.summary[endpointType]?["\(apiAction)"] {
+            var objectName = ""
+            if !endPointXML.isEmpty {
+                objectName = getName(endpoint: endpointType, objectXML: endPointXML)
+            } else {
+                switch endpointType {
+                case "api-roles", "api-integrations":
+                    objectName = endPointJson["displayName"] as? String ?? "unknown name"
+                default:
+                    objectName = endPointJson["name"] as? String ?? "unknown name"
+                }
+            }
+            if !objectName.isEmpty && !summaryArray.contains(objectName) {
+                summaryArray.append(objectName)
+                Counter.shared.summary[endpointType]?["\(apiAction)"] = summaryArray
+            }
+        }
+        
+        if ToMigrate.objects.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
+            updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
+            updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
+        }
+    }
+    
     func capi(endpointType: String, endPointXML: String, endpointCurrent: Int, endpointCount: Int, action: String, sourceEpId: Int, destEpId: String, ssIconName: String, ssIconId: String, ssIconUri: String, retry: Bool, completion: @escaping (_ result: String) -> Void) {
         logFunctionCall()
                 
@@ -155,6 +193,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         default:
             localEndPointType = endpointType
         }
+        
+        if AppInfo.dryRun {
+            updateCounts(endpointType: endpointType, apiAction: apiAction, endPointXML: endPointXML, localEndPointType: localEndPointType, endpointCount: endpointCurrent, endpointCurrent: endpointCurrent)
+            completion("")
+            return
+        }
+        
         var responseData = ""
         createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(destinationEpId)"
 
@@ -229,7 +274,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 }
                 
 //                if endpointType == "patchpolicies" {
-                    print("\(apiAction.uppercased()) on \(createDestUrl)")
+//                    print("\(apiAction.uppercased()) on \(createDestUrl)")
 //                    print(endPointXML)
 //                }
                 let encodedXML = endPointXML.data(using: String.Encoding.utf8)
@@ -646,6 +691,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             localEndPointType = "usergroups"
         default:
             localEndPointType = endpointType
+        }
+        
+        print("[CreateEndpoints.jpapi] AppInfo.dryRun: \(AppInfo.dryRun)")
+        if AppInfo.dryRun {
+            updateCounts(endpointType: endpointType, apiAction: apiAction, endPointJson: endPointJSON, localEndPointType: localEndPointType, endpointCount: endpointCurrent, endpointCurrent: endpointCurrent)
+            completion("")
+            return
         }
                 
         if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Original Dest. URL: \(createDestUrlBase)") }
