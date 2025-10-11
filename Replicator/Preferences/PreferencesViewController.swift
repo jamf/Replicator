@@ -30,6 +30,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     @IBOutlet weak var onlyCopyMissing_button: NSButton!
     @IBOutlet weak var onlyCopyExisting_button: NSButton!
+    @IBOutlet weak var dryRun_button: NSButton!
     
     // export prefs
     @IBOutlet weak var saveRawXml_button: NSButton!
@@ -189,24 +190,22 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     
     
     @IBAction func stickySession_action(_ sender: NSButton) {
-        if sender.state.rawValue == 1 {
-            JamfProServer.stickySession = true
-        } else {
-            JamfProServer.stickySession = false
-        }
+        JamfProServer.stickySession = sender.state == .on
         userDefaults.set(JamfProServer.stickySession, forKey: "stickySession")
-        userDefaults.synchronize()
+//        userDefaults.synchronize()
         NotificationCenter.default.post(name: .stickySessionToggle, object: self)
     }
     
-    @IBAction func maskServerNames_action(_ sender: Any) {
-        userDefaults.set(Int(maskServerNames_button.state.rawValue), forKey: "maskServerNames")
-        if maskServerNames_button.state == .on {
-            AppInfo.maskServerNames = true
-        } else {
-            AppInfo.maskServerNames = false
-        }
+    @IBAction func maskServerNames_action(_ sender: NSButton) {
+        userDefaults.set(Int(sender.state.rawValue), forKey: "maskServerNames")
+        AppInfo.maskServerNames = sender.state == .on
     }
+    
+    @IBAction func dryRun_action(_ sender: NSButton) {
+        userDefaults.set(Int(sender.state.rawValue), forKey: "dryRun")
+        AppInfo.dryRun = sender.state == .on
+    }
+    
     @IBAction func colorScheme_action(_ sender: NSButton) {
         let currentScheme = userDefaults.string(forKey: "colorScheme")
         let newScheme     = sender.title
@@ -624,6 +623,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             stickySession_button.state = userDefaults.bool(forKey: "stickySession") ? NSControl.StateValue(1):NSControl.StateValue(0)
             
             maskServerNames_button.state = NSControl.StateValue(userDefaults.integer(forKey: "maskServerNames"))
+            dryRun_button.state = NSControl.StateValue(userDefaults.integer(forKey: "dryRun"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
         }

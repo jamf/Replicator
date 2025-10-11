@@ -1028,6 +1028,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             _ = readSettings()
 
             AppInfo.maskServerNames = userDefaults.integer(forKey: "maskServerNames") == 1
+            AppInfo.dryRun = userDefaults.integer(forKey: "dryRun") == 1
             WriteToLog.shared.message("[SourceDestVC] mask server names: \(AppInfo.maskServerNames)")
 //            print("raw maskServerNames: \(userDefaults.integer(forKey: "maskServerNames"))")
 //            print("maskServerNames: \(AppInfo.maskServerNames)")
