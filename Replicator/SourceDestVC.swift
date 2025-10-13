@@ -1194,6 +1194,7 @@ extension Notification.Name {
     public static let deleteMode_sdvc        = Notification.Name("deleteMode_sdvc")
     public static let saveOnlyButtonToggle   = Notification.Name("toggleExportOnly")
     public static let stickySessionToggle    = Notification.Name("stickySessionToggle")
+    public static let dryRunToggle           = Notification.Name("dryRunToggle")
     public static let updateSourceServerList = Notification.Name("updateSourceServerList")
     public static let updateDestServerList   = Notification.Name("updateDestServerList")
 }

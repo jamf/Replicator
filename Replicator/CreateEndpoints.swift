@@ -194,6 +194,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             localEndPointType = endpointType
         }
         
+        print("[CreateEndpoints.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
+        
         if AppInfo.dryRun {
             updateCounts(endpointType: endpointType, apiAction: apiAction, endPointXML: endPointXML, localEndPointType: localEndPointType, endpointCount: endpointCurrent, endpointCurrent: endpointCurrent)
             completion("")

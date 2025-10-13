@@ -9,6 +9,7 @@
 import AppKit
 import Cocoa
 import Foundation
+import SwiftUI
 
 final class Summary: NSObject {
     // counters for CreateEndpoints
@@ -2326,8 +2327,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             for i in 0..<targetSelectiveObjectList.count {
                 let theObject = targetSelectiveObjectList[i]
                 if LogLevel.debug { WriteToLog.shared.message("remove - endpoint: \(targetSelectiveObjectList[objectIndex].objectName)\t endpointID: \(objToMigrateID)\t endpointName: \(self.targetSelectiveObjectList[objectIndex].objectName)") }
-                RemoveObjects.shared.queue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
-//                removeEndpointsQueue(endpointType: selectedEndpoint, endPointID: "\(theObject.objectId)", endpointName: theObject.objectName, endpointCurrent: (i+1), endpointCount: targetSelectiveObjectList.count)
+//                RemoveObjects.shared.queue(endpointType: selectedEndpoint, endpointName: "\(theObject.objectId)", endPointXML: theObject.objectName, endPointJSON: (i+1), endpointCurrent: targetSelectiveObjectList.count)
+                
+                RemoveObjects.shared.queue(endpointType: selectedEndpoint, endPointID: theObject.objectId, endpointName: theObject.objectName, endpointCurrent: i, endpointCount: targetSelectiveObjectList.count)
             }
             RemoveObjects.shared.queue(endpointType: selectedEndpoint, endPointID: "-1", endpointName: "", endpointCurrent: -1, endpointCount: 0)
 
@@ -2338,7 +2340,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     
     func readNodes(nodesToMigrate: [String], nodeIndex: Int) {
-        
         logFunctionCall()
         if pref.stopMigration {
 //            print("[\(#function)] \(#line) stopMigration")
@@ -6023,6 +6024,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         NotificationCenter.default.addObserver(self, selector: #selector(resetListFields(_:)), name: .resetListFields, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showSummaryWindow(_:)), name: .showSummaryWindow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showLogFolder(_:)), name: .showLogFolder, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(dryRunToggle(_:)), name: .dryRunToggle, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(deleteMode(_:)), name: .deleteMode, object: nil)
         
         NotificationCenter.default.post(name: .setColorScheme_VC, object: self)
@@ -6256,6 +6258,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             // update plist
             NSDictionary(dictionary: AppInfo.settings).write(toFile: AppInfo.plistPath, atomically: true)
+            
+            if AppInfo.dryRun {
+                migrateOrRemove_TextField.stringValue = "Migrate - dry run"
+            } else {
+                migrateOrRemove_TextField.stringValue = "Migrate"
+            }
             // read xml settings - end
             // read environment settings - end
             
@@ -6317,23 +6325,52 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     // Log Folder - end
-    // Summary Window - start
+
     @objc func showSummaryWindow(_ notification: Notification) {
         logFunctionCall()
-        let storyboard = NSStoryboard(name: "Main", bundle: nil)
-        let summaryWindowController = storyboard.instantiateController(withIdentifier: "Summary Window Controller") as! NSWindowController
-        if let summaryWindow = summaryWindowController.window {
-            let summaryViewController = summaryWindow.contentViewController as! SummaryViewController
-            
-            URLCache.shared.removeAllCachedResponses()
-            summaryViewController.summary_WebView.loadHTMLString(summaryXml(theSummary: Counter.shared.crud, theSummaryDetail: Counter.shared.summary), baseURL: nil)
-            
-            let application = NSApplication.shared
-            application.runModal(for: summaryWindow)
-            summaryWindow.close()
+
+        let summaryView = SummaryView(
+            theSummary: Counter.shared.crud,
+            theSummaryDetail: Counter.shared.summary
+        )
+
+        let hostingController = NSHostingController(rootView: summaryView)
+
+        let summaryWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+
+        summaryWindow.title = "Summary"
+        summaryWindow.center()
+        summaryWindow.contentViewController = hostingController
+        summaryWindow.isReleasedWhenClosed = false
+
+        // End modal loop when window closes
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification,
+            object: summaryWindow,
+            queue: .main
+        ) { _ in
+            NSApp.stopModal() // this unblocks the main window
+        }
+
+        NSApp.runModal(for: summaryWindow)
+    }
+
+    @objc func dryRunToggle(_ notification: Notification) {
+        let currentLabel = migrateOrRemove_TextField.stringValue
+        
+        if AppInfo.dryRun {
+            if !currentLabel.contains(" - dry run") {
+                migrateOrRemove_TextField.stringValue = "\(currentLabel) - dry run"
+            }
+        } else {
+            migrateOrRemove_TextField.stringValue = currentLabel.replacingOccurrences(of: " - dry run", with: "")
         }
     }
-    // Summary Window - end
     
     @objc func deleteMode(_ notification: Notification) {
         logFunctionCall()
@@ -6371,8 +6408,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
                 
                 DispatchQueue.main.async { [self] in
-                    migrateOrRemove_TextField.stringValue = "Migrate"
-//                    migrateOrRemove_TextField.textColor = self.whiteText
+                    if AppInfo.dryRun {
+                        migrateOrRemove_TextField.stringValue = "Migrate - dry run"
+                    } else {
+                        migrateOrRemove_TextField.stringValue = "Migrate"
+                    }
+
                     destinationMethod_TextField.stringValue = "SEND:"
                     go_button.title = "Go!"
                     go_button.bezelColor = nil
@@ -6403,7 +6444,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     clearSourceObjectsList()
                 }
                 // Set the text for the operation
-                migrateOrRemove_TextField.stringValue = "--- Removing ---"
+                if AppInfo.dryRun {
+                    migrateOrRemove_TextField.stringValue = "Removing - dry run"
+                } else {
+                    migrateOrRemove_TextField.stringValue = "Removing"
+                }
                 // Set the text for destination method
                 destinationMethod_TextField.stringValue = "DELETE:"
                                 
@@ -6415,7 +6460,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if !(fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE", isDirectory: &isDir)) {
                             DispatchQueue.main.async { [self] in
                                 NotificationCenter.default.post(name: .deleteMode_sdvc, object: self)
-                                migrateOrRemove_TextField.stringValue = "Migrate"
+                                if AppInfo.dryRun {
+                                    migrateOrRemove_TextField.stringValue = "Migrate - dry run"
+                                } else {
+                                    migrateOrRemove_TextField.stringValue = "Migrate"
+                                }
                                 destinationMethod_TextField.stringValue = "SEND:"
                             }
                             break
