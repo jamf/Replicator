@@ -88,7 +88,7 @@ private struct TableHeader: View {
     var body: some View {
         HStack {
             Text("Endpoint").frame(maxWidth: .infinity, alignment: .trailing)
-            Text("Created").frame(width: 90, alignment: .trailing)
+            Text(WipeData.state.on ? "Delete" : "Created").frame(width: 90, alignment: .trailing)
             Text("Updated").frame(width: 90, alignment: .trailing)
             Text("Failed").frame(width: 90, alignment: .trailing)
         }

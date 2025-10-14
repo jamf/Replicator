@@ -406,7 +406,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 updateGetStatus(endpoint: endpoint, total: total, index: index)
             }
         case "putStatusUpdate":
-//            print("[ExportItem.export] rawExport update UI for endpoint: \(info["endpoint"] ?? "unknown endpoint"): total \(Counter.shared.crud[info["endpoint"] as! String]?["total"]! ?? 0)")
+            print("[ViewController.updateUi] info: \(info.description)")
             
             if let endpoint = info["endpoint"] as? String, endpoint != "patchpolicies", let total = info["total"] as? Int {
                 putStatusUpdate(endpoint: endpoint, total: total)
