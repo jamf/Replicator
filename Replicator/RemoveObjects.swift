@@ -61,23 +61,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             
             if LogLevel.debug { WriteToLog.shared.message("\n[removeEndpointsQueue] createArray.count: \(createArray.count)\n")}
             
-            switch endpointType {
-            case "buildings":
-                print("later")
-//                    jpapi(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
-//                        (result: String) in
-//                        if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
-//                        if endpointCurrent == endpointCount {
-//                            completion("last")
-//                        } else {
-//                            completion("")
-//                        }
-//                    }
-            default:
-                capi(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
-                        (result: String) in
-                    }
-            }
+            process(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
+                    (result: String) in
+                }
         }
     }
     
@@ -117,10 +103,10 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             Counter.shared.summary[endpointType]?[result] = summaryArray
         }
         
-        print("[RemoveEndpoints]   Summary.totalCreated: \(Summary.totalCreated)")
-        print("[RemoveEndpoints]    Summary.totalFailed: \(Summary.totalFailed)")
-        print("[RemoveEndpoints] Summary.totalCompleted: \(Summary.totalCompleted)")
-        print("[RemoveEndpoints]             endPointID: \(endPointID)")
+//        print("[RemoveEndpoints]   Summary.totalCreated: \(Summary.totalCreated)")
+//        print("[RemoveEndpoints]    Summary.totalFailed: \(Summary.totalFailed)")
+//        print("[RemoveEndpoints] Summary.totalCompleted: \(Summary.totalCompleted)")
+//        print("[RemoveEndpoints]             endPointID: \(endPointID)")
         
         if Summary.totalCompleted > 0  {
 //                                print("[RemoveEndpoints] counters: \(counters)")
@@ -137,7 +123,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         }
     }
     
-    func capi(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
+    func process(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
         logFunctionCall()
                 
         if pref.stopMigration {
@@ -177,7 +163,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             localEndPointType = endpointType
         }
             
-            
         switch endpointType {
         case "buildings":
             endpointPath = "/v1/buildings/\(endPointID)"
@@ -200,7 +185,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         var responseData = ""
         createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(destinationEpId)"
         
-        
         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Original Dest. URL: \(createDestUrl)") }
         createDestUrl = createDestUrl.urlFix
         
@@ -209,7 +193,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             if export.saveOnly {
                 if ToMigrate.objects.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
                     updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
-//                    print("[\(#function)] \(#line) - finished creating \(endpointType)")
                     updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
                 }
                 completion("")
@@ -279,22 +262,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             }
                         }
                         updateCounts(endpointType: endpointType, endpointName: endpointName, result: "create", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
-//                        Counter.shared.postSuccess += 1
-//                        
-////                        if let _ = Counter.shared.progressArray["\(endpointType)"] {
-////                            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
-////                        }
-//                        Counter.shared.progressArray["\(endpointType)"] = (Counter.shared.progressArray["\(endpointType)"] == nil) ? 1 : Counter.shared.progressArray["\(endpointType)"]! + 1
-//                        Counter.shared.crud[endpointType]?["create"]? += 1
-////                        print(("[RevomeObjects.capi] Counter.shared.crud \(endpointType) - delete - \(endpointName) - success total: \(Counter.shared.crud[endpointType]?["create"] ?? 0)"))
-//                        
-//                        if var summaryArray = Counter.shared.summary[endpointType]?["create"] {
-//                            let objectName = endpointName
-//                            if !summaryArray.contains(objectName) {
-//                                summaryArray.append(objectName)
-//                                Counter.shared.summary[endpointType]?["create"] = summaryArray
-//                            }
-//                        }
                         
                     } else {
                         // remove failed
@@ -317,40 +284,13 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         
                         WriteToLog.shared.message("[RemoveEndpoints] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                         
-                        //                                    if LogLevel.debug { WriteToLog.shared.message("\n") }
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response data ----------\n\(responseData)") }
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] -----------------------------------\n") }
                         
                         updateCounts(endpointType: endpointType, endpointName: endpointName, result: "fail", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
-//                        Counter.shared.crud[endpointType]?["fail"]! += 1
-//                        if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
-//                            let objectName = endpointName
-//                            if !summaryArray.contains(objectName) {
-//                                summaryArray.append(objectName)
-//                                Counter.shared.summary[endpointType]?["fail"] = summaryArray
-//                            }
-//                        }
-//                        
-//                        if endPointID != "-1" {
-//                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                        }
                     }   // remove failed - end
-                    
-//                    Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-//                    Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-//                    Summary.totalCompleted = Summary.totalCreated + Summary.totalFailed
-                    
-                    // update UI
-//                    if Summary.totalCompleted > 0  {
-//                        if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-//                            if endPointID != "-1" {
-//                                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                            }
-//                        }
-//                    }
-                    
                     
                     if Setting.fullGUI && Summary.totalCompleted == endpointCount {
                         if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor  from if condition
@@ -368,15 +308,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                     // update global counters - no http response
                     
                     updateCounts(endpointType: endpointType, endpointName: endpointName, result: "fail", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
-//                    let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
-//                    Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
-//                    if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
-//                        let objectName = endpointName
-//                        if summaryArray.contains(objectName) {
-//                            summaryArray.append(objectName)
-//                            Counter.shared.summary[endpointType]?["fail"] = summaryArray
-//                        }
-//                    }
                     
                     if Setting.fullGUI && Summary.totalCompleted == endpointCount {
 
@@ -392,26 +323,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                     }
                     completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
                 }
-                
-                
-//                Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-//                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-//                Summary.totalCompleted = Summary.totalCreated + Summary.totalFailed
-//                
-//                print("[RemoveEndpoints]   Summary.totalCreated: \(Summary.totalCreated)")
-//                print("[RemoveEndpoints]    Summary.totalFailed: \(Summary.totalFailed)")
-//                print("[RemoveEndpoints] Summary.totalCompleted: \(Summary.totalCompleted)")
-//                print("[RemoveEndpoints] endPointID: \(endPointID)")
-//                
-//                if Summary.totalCompleted > 0  {
-////                                print("[RemoveEndpoints] counters: \(counters)")
-//                    if (endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-//                        if endPointID != "-1" {
-//                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                        }
-//                    }
-//                }
-                                
+                              
                 if endpointCurrent > 0 {
                     if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
                 }
@@ -430,331 +342,4 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             
         }   // SendQueue - end
     }
-    
-/*
-    func jpapi(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
-        logFunctionCall()
-                
-        if pref.stopMigration {
-            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
-            completion("stop")
-            return
-        }
-
-        if Counter.shared.crud[endpointType] == nil {
-            Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-        } else {
-            Counter.shared.crud[endpointType]!["total"] = endpointCount
-        }
-        if Counter.shared.summary[endpointType] == nil {
-            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
-        }
-        
-        var destinationEpId = endPointID
-        var apiAction       = "DELETE"
-                
-        // counterts for completed endpoints
-        if endpointCurrent == 1 {
-            Summary.totalCreated   = 0
-            Summary.totalUpdated   = 0
-            Summary.totalFailed    = 0
-            Summary.totalCompleted = 0
-        }
-        
-        // this is where we create the new endpoint
-        if !export.saveOnly {
-            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Creating new: \(endpointType)") }
-        } else {
-            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Save only selected, skipping DELETE for: \(endpointType)") }
-        }
-        //if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
-        
-        var localEndPointType = ""
-        
-        switch endpointType {
-        case "smartcomputergroups", "staticcomputergroups":
-            localEndPointType = "computergroups"
-        case "smartmobiledevicegroups", "staticmobiledevicegroups":
-            localEndPointType = "mobiledevicegroups"
-        case "smartusergroups", "staticusergroups":
-            localEndPointType = "usergroups"
-        default:
-            localEndPointType = endpointType
-        }
-        
-        print("[removeEndpoints.jpapi] AppInfo.dryRun: \(AppInfo.dryRun)")
-        if AppInfo.dryRun {
-            updateCounts(endpointType: endpointType, apiAction: "create", endPointJson: [:], localEndPointType: localEndPointType, endpointCount: endpointCurrent, endpointCurrent: endpointCurrent)
-            completion("")
-            return
-        }
-                
-        if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Original Dest. URL: \(createDestUrlBase)") }
-       
-        SendQueue.shared.addOperation { [self] in
-            if export.saveOnly {
-                if ToMigrate.objects.last == localEndPointType && endpointCount == endpointCurrent {
-                    updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
-//                    print("[\(#function)] \(#line) - finished creating \(endpointType)")
-                    updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-                }
-                completion("")
-                return
-            }
-            
-            // don't create object if we're removing objects
-            if !WipeData.state.on {
-                if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Action: DELETE\t URL: \(createDestUrlBase)\t Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Object JSON: \(endPointJSON)") }
-    //            print("[removeEndpoints.jpapi] [\(localEndPointType)] process start: \(getName(endpoint: endpointType, objectXML: endPointXML))")
-                
-                if endpointCurrent == 1 {
-                    if !retry {
-                        counter.post = 1
-                    }
-                } else {
-                    if !retry {
-                        counter.post += 1
-                    }
-                }
-                
-                if endpointType == "patch-software-title-configurations" {
-                    PatchManagementApi.shared.createUpdate(serverUrl: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), endpoint: endpointType, apiData: endPointJSON, sourceEpId: sourceEpId, destEpId: destinationEpId, token: JamfProServer.authCreds["dest"] ?? "", method: "create") { [self]
-                        (jpapiResonse: [String:Any]) in
-    //                    print("[removeEndpoints.jpapi] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
-                        var jpapiResult = "succeeded"
-                        if let _ = jpapiResonse["JPAPI_result"] as? String {
-                            jpapiResult = jpapiResonse["JPAPI_result"] as! String
-                        }
-    //                    if let httpResponse = response as? HTTPURLResponse {
-//                        var apiMethod = apiAction
-                        if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
-//                            apiMethod = "fail"
-                            DispatchQueue.main.async { [self] in
-                                if Setting.fullGUI && apiAction.lowercased() != "skip" {
-                                    updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
-                                    }
-                                }
-                            }
-                            WriteToLog.shared.message("    [removeEndpoints.jpapi] [\(localEndPointType)]    failed: \(endPointJSON["name"] ?? "unknown")")
-                        } else {
-                            WriteToLog.shared.message("    [removeEndpoints.jpapi] [\(localEndPointType)] succeeded: \(endPointJSON["name"] ?? "unknown")")
-                            
-                            if endpointCurrent == 1 && !retry {
-                                migrationComplete.isDone = false
-                                if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                    updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-                                }
-                            } else if !retry {
-                                if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] {
-                                    updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
-                                }
-                            }
-                        }
-                                                
-                        // look to see if we are processing the next endpointType - start
-                        if endpointInProgress != endpointType || endpointInProgress == "" {
-                            WriteToLog.shared.message("[removeEndpoints.jpapi] Migrating \(endpointType)")
-                            endpointInProgress = endpointType
-                            Counter.shared.postSuccess = 0
-                        }   // look to see if we are processing the next localEndPointType - end
-                                             
-                        Counter.shared.postSuccess += 1
-                        
-//                            print("endpointType: \(endpointType)")
-//                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
-                        
-                        if let _ = Counter.shared.progressArray["\(endpointType)"] {
-                            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
-                        }
-
-                        Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                        Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
-                        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                        Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
-                        
-                        // update counters
-//                                print("[removeEndpoints.jpapi] endpointType: \(endpointType)")
-                        if Summary.totalCompleted > 0 {
-                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                if destEpId != "-1" {
-                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                }
-                            }
-                        }
-                        
-                        if Setting.fullGUI && Summary.totalCompleted == endpointCount {
-
-                            if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
-                                updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-                            } else if Summary.totalFailed == endpointCount {
-                                DispatchQueue.main.async { [self] in
-                                    updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                        updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
-                                    }
-                                }
-                                
-                            }
-                        }
-//                        }   // DispatchQueue.main.async - end
-                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-    //                    }   // if let httpResponse = response - end
-                        
-                        if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }
-                        
-                        if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
-                        }
-
-        //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
-                        if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Last item in \(localEndPointType) complete.") }
-                            nodesMigrated+=1
-                            // print("added node: \(localEndPointType) - createEndpoints")
-        //                    print("nodes complete: \(nodesMigrated)")
-                        }
-                    }
-                } else {
-//                    print("[removeEndpoints.jpapi] \(#line) endPointJSON: \(endPointJSON)")
-                    let nameAttribute = ["api-roles", "api-integrations"].contains(endpointType) ? "displayName" : "name"
-                    Jpapi.shared.action(whichServer: "dest", endpoint: endpointType, apiData: endPointJSON, id: "\(destinationEpId)", token: JamfProServer.authCreds["dest"] ?? "", method: apiAction) { [self]
-                        (jpapiResonse: [String:Any]) in
-//                        print("[removeEndpoints.jpapi] returned from Jpapi.action, jpapiResonse: \(jpapiResonse)")
-                        var jpapiResult = "succeeded"
-                        if let _ = jpapiResonse["JPAPI_result"] as? String {
-                            jpapiResult = jpapiResonse["JPAPI_result"] as! String
-                        }
-    //                    if let httpResponse = response as? HTTPURLResponse {
-                        var apiMethod = apiAction
-                        if apiAction.lowercased() == "skip" || jpapiResult != "succeeded" {
-                            apiMethod = "fail"
-                            DispatchQueue.main.async { [self] in
-                                if Setting.fullGUI && apiAction.lowercased() != "skip" {
-                                    updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
-//                                        self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.systemYellow)
-                                    }
-                                }
-                            }
-                            WriteToLog.shared.message("    [removeEndpoints.jpapi] [\(localEndPointType)]    failed: \(endPointJSON[nameAttribute] ?? "unknown")")
-                        } else {
-                            WriteToLog.shared.message("    [removeEndpoints.jpapi] [\(localEndPointType)] succeeded: \(endPointJSON[nameAttribute] ?? "unknown")")
-                            
-                            if endpointCurrent == 1 && !retry {
-                                migrationComplete.isDone = false
-                                if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                    updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "createEndpoints.jpapi-\(endpointCurrent)", endpointType: endpointType, fillColor: NSColor.green)
-                                }
-                            } else if !retry {
-                                if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /*self.put_levelIndicatorFillColor[endpointType]*/ {
-                                    updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
-//                                    self.setLevelIndicatorFillColor(fn: "CreateEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green)
-                                }
-                            }
-                        }
-
-                            // look to see if we are processing the next endpointType - start
-                            if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message("[removeEndpoints.jpapi] Migrating \(endpointType)")
-                                endpointInProgress = endpointType
-                                Counter.shared.postSuccess = 0
-                            }   // look to see if we are processing the next localEndPointType - end
-                            
-    //                    DispatchQueue.main.async { [self] in
-                            
-                                // ? remove creation of counters dict defined earlier ?
-                                if Counter.shared.crud[endpointType] == nil {
-                                    Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                                    Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
-                                }
-                            
-                                                            
-                                Counter.shared.postSuccess += 1
-                                
-    //                            print("endpointType: \(endpointType)")
-    //                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
-                                
-                                if let _ = Counter.shared.progressArray["\(endpointType)"] {
-                                    Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
-                                }
-                                
-                                let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
-        //                        print("localTmp: \(localTmp)")
-                                Counter.shared.crud[endpointType]?["\(apiMethod)"] = localTmp + 1
-                                
-                                
-                                if var summaryArray = Counter.shared.summary[endpointType]?["\(apiMethod)"] {
-                                    var objectName = "unknown name"
-                                    switch endpointType {
-                                    case "api-roles", "api-integrations":
-                                        objectName = endPointJSON["displayName"] as? String ?? "unknown name"
-                                    default:
-                                        objectName = endPointJSON["name"] as? String ?? "unknown name"
-                                    }
-                                    if summaryArray.contains(objectName) == false {
-                                        summaryArray.append(objectName)
-                                        Counter.shared.summary[endpointType]?["\(apiMethod)"] = summaryArray
-                                    }
-                                }
-
-                                Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                                Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
-                                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                                Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
-                                
-                                // update counters
-                                if Summary.totalCompleted > 0 {
-                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        if destEpId != "-1" {
-                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                        }
-                                    }
-                                }
-                                
-                                if Setting.fullGUI && Summary.totalCompleted == endpointCount {
-
-                                    if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
-                                        updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-                                    } else if Summary.totalFailed == endpointCount {
-                                        DispatchQueue.main.async { [self] in
-                                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                            
-                                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
-                                            }
-                                        }
-                                        
-                                    }
-                                }
-    //                        }   // DispatchQueue.main.async - end
-                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-    //                    }   // if let httpResponse = response - end
-                        
-                        if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }
-                        
-                        if endpointCurrent > 0 {
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(String(describing: Counter.shared.progressArray["\(localEndPointType)"]!))") }
-                        }
-
-        //                print("create func: \(endpointCurrent) of \(endpointCount) complete.  \(nodesMigrated) nodes migrated.")
-                        if endpointCurrent == endpointCount {
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints.jpapi] Last item in \(localEndPointType) complete.") }
-                            nodesMigrated+=1
-                            // print("added node: \(localEndPointType) - createEndpoints")
-        //                    print("nodes complete: \(nodesMigrated)")
-                        }
-                    }
-                }
-                
-            }   // if !WipeData.state.on - end
-        }   // SendQueue - end
-    }
-*/
 }
