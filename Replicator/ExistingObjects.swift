@@ -62,7 +62,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             
             if Counter.shared.crud[destEndpoint] == nil {
                 Counter.shared.crud[destEndpoint] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                Counter.shared.summary[destEndpoint] /*summary Dict[destEndpoint]*/ = ["create":[], "update":[], "fail":[]]
+                Counter.shared.summary[destEndpoint] = ["create":[], "update":[], "fail":[]]
             }
 
             switch destEndpoint {
@@ -420,7 +420,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
             }   // destEPQ - end
         } else {
             currentEPs["_"] = 0
-            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] exit - save only enabled, endpoint: \(theDestEndpoint) not needed.") }
+            if LogLevel.debug { WriteToLog.shared.message("[ExistingObjects.capi] exit - Export only enabled, endpoint: \(theDestEndpoint) not needed.") }
             completion(("Current endpoints - export.saveOnly, not needed.","\(theDestEndpoint)"))
         }
     }

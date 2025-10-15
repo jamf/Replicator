@@ -1199,7 +1199,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if Setting.fullGUI {
             if WipeData.state.on && export.saveOnly {
-                _ = Alert.shared.display(header: "Attention", message: "Cannot select Save Only while in delete mode.", secondButton: "")
+                _ = Alert.shared.display(header: "Attention", message: "Cannot select Export Only while in delete mode.", secondButton: "")
                 goButtonEnabled(button_status: true)
                 return
             }
@@ -2283,7 +2283,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         WriteToLog.shared.message("[ViewController.startSelectiveMigration] \(theAction) \(selectedObject) \(selectedEndpoint) dependency")
                         
                         if !fileImport {
-                            EndpointXml.shared.endPointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: objectAndDependencies.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
+                            EndpointData.shared.endPointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: objectAndDependencies.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
                         } else {
                             //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
                             
@@ -2674,7 +2674,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 }
                                             } else {
                                                 let destinationObjectId = (endpoint == "api-roles") ? ApiRoles.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0" : ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0"
-                                                EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: Int(destinationObjectId) ?? 0, destEpName: l_xmlName)
+                                                EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: Int(destinationObjectId) ?? 0, destEpName: l_xmlName)
                                             }
                                         } else {
                                             if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
@@ -2686,7 +2686,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                 }
                                             } else {
-                                                EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                             }
                                         }
                                         
@@ -2802,7 +2802,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![l_xmlName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
@@ -2814,7 +2814,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             }
                                         } else {
@@ -2968,7 +2968,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                 } else {
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
@@ -2981,7 +2981,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                 }
                                             } else {
@@ -3097,7 +3097,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(selectedObjectName) - create") }
@@ -3110,7 +3110,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                         completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                     }
                                                 } else {
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             }
                                         } else {
@@ -3351,7 +3351,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[selectedObjectName]!, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "update", destEpId: currentEPs[selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                     
                                                 } else {
@@ -3365,7 +3365,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(selectedObjectName)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: localEndpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: groupCount, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                     
                                                 }
@@ -3516,7 +3516,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "update", destEpId: currentEPDict[endpoint]![selectedObjectName]!, destEpName: l_xmlName)
                                                     }
                                                     
                                                 } else {
@@ -3530,7 +3530,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                             completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                         }
                                                     } else {
-                                                        EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                        EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: nonRemotePolicies, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                     }
                                                     
                                                 }
@@ -3651,12 +3651,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                 if currentEPs[l_xmlName] != nil {
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) already exists") }
                                                     
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                     //                                                                    endPointByIDQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: currentEPs[l_xmlName]!, destEpName: l_xmlName)
                                                 } else {
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] \(l_xmlName) - create") }
                                                     if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] function - endpoint: \(endpoint), endpointID: \(l_xmlID), endpointCurrent: \(counter), endpointCount: \(endpointCount), action: \"create\", destEpId: 0") }
-                                                    EndpointXml.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
+                                                    EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "create", destEpId: 0, destEpName: l_xmlName)
                                                 }
                                             } else {
                                                 if !(endpoint == "jamfusers" && "\(l_xmlName)".lowercased() == dest_user.lowercased()) {
@@ -5036,7 +5036,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 XmlDelegate.shared.save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
                         }   // if export.saveRawXml - end
-                        // upload icon if not in save only mode
+                        // upload icon if not in export only mode
                         if !export.saveOnly {
                             
                             // see if the icon has been downloaded
@@ -6088,8 +6088,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         // needed for protocols
         PatchDelegate.shared.messageDelegate       = self
         CreateEndpoints.shared.updateUiDelegate    = self
-        EndpointXml.shared.updateUiDelegate        = self
-        EndpointXml.shared.getStatusDelegate       = self
+        EndpointData.shared.updateUiDelegate       = self
+        EndpointData.shared.getStatusDelegate      = self
         ExistingObjects.shared.updateUiDelegate    = self
         RemoveObjects.shared.updateUiDelegate      = self
         PatchManagementApi.shared.updateUiDelegate = self

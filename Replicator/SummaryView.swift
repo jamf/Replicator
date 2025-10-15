@@ -64,7 +64,7 @@ struct SummaryView: View {
             // Floating popup overlay
             if showPopup, let key = selectedCategory, let type = selectedType {
                 DraggableResizablePopup(
-                    title: "\(key.readable) \(type.capitalized)",
+                    title: "\(key.readable.capitalized) \(type.replacingOccurrences(of: "create", with: summaryHeader.createDelete).capitalized)",
                     items: theSummaryDetail[key]?[type] ?? [],
                     position: $popupPosition,
                     size: $popupSize,
@@ -88,7 +88,7 @@ private struct TableHeader: View {
     var body: some View {
         HStack {
             Text("Endpoint").frame(maxWidth: .infinity, alignment: .trailing)
-            Text(WipeData.state.on ? "Delete" : "Created").frame(width: 90, alignment: .trailing)
+            Text("\(summaryHeader.createDelete)d").frame(width: 90, alignment: .trailing)
             Text("Updated").frame(width: 90, alignment: .trailing)
             Text("Failed").frame(width: 90, alignment: .trailing)
         }

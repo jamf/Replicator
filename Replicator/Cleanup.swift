@@ -17,6 +17,11 @@ class Cleanup: NSObject {
     let parser = XmlTagParser()
     
     func Json(endpoint: String, JSON: [String: Any], endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ cleanJSON: String) -> Void) {
+        if wipeData.on {
+            completion("")
+            return
+        }
+        
         logFunctionCall()
         
         Logger.cleanup_json.debug("enter cleanJSON - \(endpoint, privacy: .public)")
@@ -123,6 +128,11 @@ class Cleanup: NSObject {
     }
     
     func Xml(endpoint: String, Xml: String, endpointID: String, endpointCurrent: Int, endpointCount: Int, action: String, destEpId: String, destEpName: String, completion: @escaping (_ result: String) -> Void) {
+        if wipeData.on {
+            completion("")
+            return
+        }
+        
         logFunctionCall()
                 
         Logger.cleanup_xml.debug("enter cleanXML - \(endpoint, privacy: .public)")

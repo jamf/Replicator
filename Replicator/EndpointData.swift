@@ -9,9 +9,9 @@ import Foundation
 import OSLog
 import AppKit
 
-class EndpointXml: NSObject, URLSessionDelegate {
+class EndpointData: NSObject, URLSessionDelegate {
     
-    static let shared = EndpointXml()
+    static let shared = EndpointData()
     
     var getStatusDelegate: GetStatusDelegate?
     func sendGetStatus(endpoint: String, total: Int, index: Int) {
@@ -66,6 +66,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
 //            endpointsIdQ.cancelAllOperations()
             getArray.removeAll()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            completion("")
             return
         }
         URLCache.shared.removeAllCachedResponses()

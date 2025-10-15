@@ -106,7 +106,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                 XmlDelegate.shared.save(node: iconNodeSave, xml: "\(NSHomeDirectory())/Library/Caches/icons/\(ssIconId)/\(ssIconName)", rawName: ssIconName, id: ssIconId, format: "\(saveFormat)")
                             }
                         }   // if export.saveRawXml - end
-                        // upload icon if not in save only mode
+                        // upload icon if not in export only mode
                         if !export.saveOnly {
                             
                             // see if the icon has been downloaded

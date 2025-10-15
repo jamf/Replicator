@@ -165,7 +165,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         if !export.saveOnly {
             if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Creating new: \(endpointType)") }
         } else {
-            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Save only selected, skipping \(apiAction) for: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Export only selected, skipping \(apiAction) for: \(endpointType)") }
         }
         //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
                 
@@ -678,7 +678,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         if !export.saveOnly {
             if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Creating new: \(endpointType)") }
         } else {
-            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Save only selected, skipping \(apiAction) for: \(endpointType)") }
+            if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Export only selected, skipping \(apiAction) for: \(endpointType)") }
         }
         //if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         

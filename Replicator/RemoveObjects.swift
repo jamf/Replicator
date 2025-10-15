@@ -61,14 +61,30 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             
             if LogLevel.debug { WriteToLog.shared.message("\n[removeEndpointsQueue] createArray.count: \(createArray.count)\n")}
             
-            process(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
+                
+            if export.saveRawXml {
+                EndpointData.shared.getById(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: "0", destEpName: endpointName) { [self]
                     (result: String) in
+                    
+//                    print("[RemoveEndpoints.queue]      endPointID: \(endPointID)")
+//                    print("[RemoveEndpoints.queue]    endpointName: \(endpointName)")
+//                    print("[RemoveEndpoints.queue] endpointCurrent: \(endpointCurrent)")
+                    process(endpointType: endpointType, endPointID: endPointID, endpointName: endpointName, endpointCurrent: endpointCurrent, endpointCount: endpointCount) {
+                            (result: String) in
+                        }
                 }
+            } else {
+                process(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
+                        (result: String) in
+                    }
+            }
+            
         }
     }
     
     fileprivate func updateCounts(endpointType: String, endpointName: String, result: String, endpointCount: Int, endpointCurrent: Int, endPointID: String) {
         
+        print("[RemoveEndpoints.updateCounts]             endPointID: \(endPointID)")
         if endPointID == "-1" { return }
         
         if Counter.shared.crud[endpointType] == nil {
@@ -103,13 +119,12 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             Counter.shared.summary[endpointType]?[result] = summaryArray
         }
         
-//        print("[RemoveEndpoints]   Summary.totalCreated: \(Summary.totalCreated)")
-//        print("[RemoveEndpoints]    Summary.totalFailed: \(Summary.totalFailed)")
-//        print("[RemoveEndpoints] Summary.totalCompleted: \(Summary.totalCompleted)")
-//        print("[RemoveEndpoints]             endPointID: \(endPointID)")
+//        print("[RemoveEndpoints.updateCounts]   Summary.totalCreated: \(Summary.totalCreated)")
+//        print("[RemoveEndpoints.updateCounts]    Summary.totalFailed: \(Summary.totalFailed)")
+//        print("[RemoveEndpoints.updateCounts] Summary.totalCompleted: \(Summary.totalCompleted)")
         
         if Summary.totalCompleted > 0  {
-//                                print("[RemoveEndpoints] counters: \(counters)")
+//                                print("[RemoveEndpoints.updateCounts] counters: \(counters)")
             if (endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                 if endPointID != "-1" {
                     updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
@@ -143,12 +158,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        // this is where we create the new endpoint
-        if !export.saveOnly {
-            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
-        } else {
-            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Save only selected, skipping delete for: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
-        }
+        // this is where we remove the new endpoint
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
 
         var createDestUrl = "\(createDestUrlBase)"
         
@@ -189,15 +200,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         createDestUrl = createDestUrl.urlFix
         
         SendQueue.shared.addOperation { [self] in
-            
-            if export.saveOnly {
-                if ToMigrate.objects.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
-                    updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
-                    updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
-                }
-                completion("")
-                return
-            }
             
             if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Action: DELETE     URL: \(createDestUrl)     Object \(endpointCurrent) of \(endpointCount)") }
             
@@ -339,7 +341,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             })
             task.resume()
             semaphore.wait()
-            
         }   // SendQueue - end
     }
 }
