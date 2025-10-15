@@ -6328,7 +6328,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 
     @objc func showSummaryWindow(_ notification: Notification) {
         logFunctionCall()
-
+        
+        for (key, value) in Counter.shared.crud {
+            if !ToMigrate.objects.contains(key) {
+                Counter.shared.crud[key] = nil
+            }
+        }
+        
         let summaryView = SummaryView(
             theSummary: Counter.shared.crud,
             theSummaryDetail: Counter.shared.summary
