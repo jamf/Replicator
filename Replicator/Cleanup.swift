@@ -242,7 +242,7 @@ class Cleanup: NSObject {
                 }
                 
             case "mobiledevices":
-                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups", "extension_attributes"] {
+                for xmlTag in ["initial_entry_date_epoch", "initial_entry_date_utc", "last_enrollment_epoch", "last_enrollment_utc", "certificates", "configuration_profiles", "provisioning_profiles", "mobile_device_groups"/*, "extension_attributes"*/] {
                     PostXML = RemoveData.shared.Xml(theXML: PostXML, theTag: xmlTag, keepTags: false)
                 }
                 
