@@ -143,8 +143,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
         }
 
-        var destinationEpId = destEpId
-        var apiAction       = action.lowercased()
+        let destinationEpId = destEpId
+        let apiAction       = action.lowercased()
         var sourcePolicyId  = ""
         
         // counterts for completed endpoints
@@ -167,7 +167,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         } else {
             if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Export only selected, skipping \(apiAction) for: \(endpointType)") }
         }
-        //if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
                 
 //        print("endPointXML:\n\(endPointXML)")
         
@@ -194,7 +193,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             localEndPointType = endpointType
         }
         
-        print("[CreateEndpoints.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
+//        print("[CreateEndpoints.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
         
         if AppInfo.dryRun {
             updateCounts(endpointType: endpointType, apiAction: apiAction, endPointXML: endPointXML, localEndPointType: localEndPointType, endpointCount: endpointCurrent, endpointCurrent: endpointCurrent)
@@ -329,7 +328,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             WriteToLog.shared.message("[CreateEndpoints] Replicating \(endpointType)")
                             endpointInProgress = endpointType
                             Counter.shared.postSuccess = 0
-                        }   // look to see if we are processing the next localEndPointType - end
+                        }
+                        // look to see if we are processing the next localEndPointType - end
                         
                         if let _ = counter.createRetry["\(localEndPointType)-\(sourceEpId)"] {
                             counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
@@ -420,7 +420,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                             }
                             
-                            // retry computers with dublicate serial or MAC - start
+//                            print("[createEndpoints] \(endpointType) whichError: \(whichError)")
+                            // retry options - start
                             switch whichError {
                             case "device not found":
                                 print("[createEndpoints] device not found, try to create")
@@ -491,47 +492,58 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
 
                             default:
-//                                    counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
-                                WriteToLog.shared.message("[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                                 
-//                                    if LogLevel.debug { WriteToLog.shared.message("\n") }
-                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)") }
-                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- status code ----------") }
-                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(httpResponse.statusCode)") }
-                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- response data ----------\n\(responseData)") }
-                                if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] -----------------------------------\n") }
-                                // 400 - likely the format of the xml is incorrect or wrong endpoint
-                                // 401 - wrong username and/or password
-                                // 409 - unable to create object; already exists or data missing or xml error
-                                
-                                // update global counters
-                                counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
-                                
-//                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
-//                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
-                                Counter.shared.crud[endpointType]?["fail"]! += 1
-                                if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
-                                    let objectName = getName(endpoint: endpointType, objectXML: endPointXML)
-                                    if !summaryArray.contains(objectName) {
-                                        summaryArray.append(objectName)
-                                        Counter.shared.summary[endpointType]?["fail"] = summaryArray
+                                if whichError.contains("depends on another") && endpointType.contains("smart") && endPointXML.contains("<search_type>member of</search_type>") {
+                                    print("[CreateEndpoints.capi] endPontXML for \(endpointType): \(endPointXML)")
+                                    WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] Problem creating a smart group, error: \(whichError).  Will queue for retry (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+                                        queue(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
+                                            (result: String) in
+                                        }
                                     }
+                                } else {
+                                    
+                                    WriteToLog.shared.message("[CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                                    
+                                    //                                    if LogLevel.debug { WriteToLog.shared.message("\n") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints]  ---------- xml of failed upload ----------\n\(endPointXML)") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- status code ----------") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] \(httpResponse.statusCode)") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] ---------- response data ----------\n\(responseData)") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] -----------------------------------\n") }
+                                    // 400 - likely the format of the xml is incorrect or wrong endpoint
+                                    // 401 - wrong username and/or password
+                                    // 409 - unable to create object; already exists or data missing or xml error
+                                    
+                                    // update global counters
+                                    counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                    
+                                    //                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
+                                    //                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
+                                    Counter.shared.crud[endpointType]?["fail"]! += 1
+                                    if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
+                                        let objectName = getName(endpoint: endpointType, objectXML: endPointXML)
+                                        if !summaryArray.contains(objectName) {
+                                            summaryArray.append(objectName)
+                                            Counter.shared.summary[endpointType]?["fail"] = summaryArray
+                                        }
+                                    }
+                                    
+                                    if destEpId != "-1" {
+                                        updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                    }
+                                    
+                                    //new
+                                    //                                if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+                                    //
+                                    //                                    print("[CreateEndpoints] endpointType: \(endpointType)")
+                                    //                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                    //                                        if destEpId != "-1" {
+                                    //                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                    //                                        }
+                                    //                                    }
+                                    //                                }
                                 }
-                                
-                                if destEpId != "-1" {
-                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                }
-                                
-                                //new
-//                                if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
-//
-//                                    print("[CreateEndpoints] endpointType: \(endpointType)")
-//                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-//                                        if destEpId != "-1" {
-//                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-//                                        }
-//                                    }
-//                                }
                             }
                         }   // create failed - end
 

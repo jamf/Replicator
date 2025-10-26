@@ -108,7 +108,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         } else {
             Counter.shared.crud[endpointType]?[result] = 1
         }
-//        print("[CreateEndpoints.capi] \(apiAction) endpointType: \(endpointType)")
+//        print("[RemoveEndpoints.updateCounts] \(apiAction) endpointType: \(endpointType)")
         
         Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
         Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0

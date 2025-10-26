@@ -3333,7 +3333,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     
                                     Counter.shared.crud[endpoint]!["total"] = currentGroupDict.count
                                     
-                                    for (l_xmlID, l_xmlName) in currentGroupDict {
+                                    // loop through groups sorted by id
+                                    for (l_xmlID, l_xmlName) in currentGroupDict.sorted(by: { $0.key < $1.key }) {
                                         AvailableObjsToMig.byId[l_xmlID] = l_xmlName
                                         if UiVar.goSender == "goButton" || UiVar.goSender == "silent" {
                                             if !WipeData.state.on  {
