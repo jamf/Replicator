@@ -21,10 +21,11 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
         logFunctionCall()
         existingObjects.removeAll()
         
-        if Counter.shared.crud[endpoint] == nil {
-            Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-            Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]
-        }
+//        print("[ObjectDelegate.getAll] endpointType: \(endpoint)")
+//        if Counter.shared.crud[endpoint] == nil {
+//            Counter.shared.crud[endpoint]    = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//            Counter.shared.summary[endpoint] = ["create":[], "update":[], "fail":[]]
+//        }
         
         switch endpoint {
         case "packages", "api-roles", "api-integrations":

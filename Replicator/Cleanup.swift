@@ -264,8 +264,7 @@ class Cleanup: NSObject {
                         let profileName = getName(endpoint: "osxconfigurationprofiles", objectXML: PostXML)
                         knownEndpoint = false
 
-//                        let localTmp = (Counter.shared.crud[endpoint]?["fail"])!
-                        Counter.shared.crud[endpoint]?["fail"]! += 1 /*localTmp + 1*/
+                        Counter.shared.crud[endpoint]?["fail"]! += 1
                         if var summaryArray = Counter.shared.summary[endpoint]?["fail"] {
                             if summaryArray.contains(profileName) == false {
                                 summaryArray.append(profileName)
@@ -275,7 +274,7 @@ class Cleanup: NSObject {
                         WriteToLog.shared.message("[cleanUpXml] FileVault payloads are not migrated and must be recreated manually, skipping \(profileName)")
                         Counter.shared.post += 1
                         updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": "osxconfigurationprofiles", "total": endpointCount])
-//                        putStatusUpdate(endpoint: "osxconfigurationprofiles", total: endpointCount)
+
                         if ToMigrate.objects.last == endpoint && endpointCount == endpointCurrent {
                             updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
         //                    self.resetAllCheckboxes()
@@ -390,6 +389,8 @@ class Cleanup: NSObject {
                 }
                 WriteToLog.shared.message("[cleanUpXml] Patch EAs are not migrated, skipping \(patchEaName)")
                 Counter.shared.post += 1
+                updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": "computerextensionattributes", "total": endpointCount])
+                
                 if ToMigrate.objects.last == endpoint && endpointCount == endpointCurrent {
                     //self.go_button.isEnabled = true
                     updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])

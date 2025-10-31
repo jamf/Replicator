@@ -134,12 +134,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-//            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             Counter.shared.crud[endpointType]!["total"] = endpointCount
         }
         if Counter.shared.summary[endpointType] == nil {
-//            Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
             Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
         }
 
@@ -331,21 +329,21 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         }
                         // look to see if we are processing the next localEndPointType - end
                         
-                        if let _ = counter.createRetry["\(localEndPointType)-\(sourceEpId)"] {
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
-                            if counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
+                        if let _ = counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] {
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
+                            if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
                                 whichError = "skip"
-                                counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                                 WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.")
                             }
                         } else {
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                         }
                                                     
                         if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                             WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)")
                             
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
@@ -438,7 +436,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                     
                             case "Duplicate serial number", "Duplicate MAC address":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -449,7 +447,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "category":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -459,7 +457,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with department in location":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -469,7 +467,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with building in location":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -481,7 +479,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
                             // retry network segment without distribution point
                             case "Problem in assignment to distribution point":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["distribution_point", "url"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
@@ -495,7 +493,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 
                                 if whichError.contains("depends on another") && endpointType.contains("smart") && endPointXML.contains("<search_type>member of</search_type>") {
                                     print("[CreateEndpoints.capi] endPontXML for \(endpointType): \(endPointXML)")
-                                    WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] Problem creating a smart group, error: \(whichError).  Will queue for retry (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                    WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] Problem creating a smart group, error: \(whichError).  Will queue for retry (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
                                         queue(endpointType: endpointType, endPointXML: endPointXML, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: sourceEpId, destEpId: destEpId, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, retry: true) {
                                             (result: String) in
@@ -516,10 +514,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     // 409 - unable to create object; already exists or data missing or xml error
                                     
                                     // update global counters
-                                    counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                    counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                                     
-                                    //                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
-                                    //                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
                                     Counter.shared.crud[endpointType]?["fail"]! += 1
                                     if var summaryArray = Counter.shared.summary[endpointType]?["fail"] {
                                         let objectName = getName(endpoint: endpointType, objectXML: endPointXML)
@@ -552,7 +548,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
                         Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                         
-                        if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
+                        if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
 
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
@@ -596,7 +592,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
                     Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                     
-                    if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+                    if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
 //                                print("[CreateEndpoints] counters: \(counters)")
                         if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             if destEpId != "-1" {
@@ -654,14 +650,13 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             return
         }
 
+        
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-//            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
         } else {
             Counter.shared.crud[endpointType]!["total"] = endpointCount
         }
         if Counter.shared.summary[endpointType] == nil {
-//            Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
             Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
         }
         
@@ -814,7 +809,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                         
                         // update counters
-//                                print("[CreateEndpoints.jpapi] endpointType: \(endpointType)")
                         if Summary.totalCompleted > 0 {
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
@@ -898,90 +892,87 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         }
 
                             // look to see if we are processing the next endpointType - start
-                            if endpointInProgress != endpointType || endpointInProgress == "" {
-                                WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
-                                endpointInProgress = endpointType
-                                Counter.shared.postSuccess = 0
-                            }   // look to see if we are processing the next localEndPointType - end
-                            
-    //                    DispatchQueue.main.async { [self] in
-                            
-                                // ? remove creation of counters dict defined earlier ?
-                                if Counter.shared.crud[endpointType] == nil {
-                                    Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                                    Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
-                                }
-                            
-                                                            
-                                Counter.shared.postSuccess += 1
-                                
-    //                            print("endpointType: \(endpointType)")
-    //                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
-                                
-                                if let _ = Counter.shared.progressArray["\(endpointType)"] {
-                                    Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
-                                }
-                                
-                                let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
-        //                        print("localTmp: \(localTmp)")
-                                Counter.shared.crud[endpointType]?["\(apiMethod)"] = localTmp + 1
-                                
-                                
-                                if var summaryArray = Counter.shared.summary[endpointType]?["\(apiMethod)"] {
-                                    var objectName = "unknown name"
-                                    switch endpointType {
-                                    case "api-roles", "api-integrations":
-                                        objectName = endPointJSON["displayName"] as? String ?? "unknown name"
-                                    default:
-                                        objectName = endPointJSON["name"] as? String ?? "unknown name"
-                                    }
-                                    if summaryArray.contains(objectName) == false {
-                                        summaryArray.append(objectName)
-                                        Counter.shared.summary[endpointType]?["\(apiMethod)"] = summaryArray
-                                    }
-                                }
-                                /*
-                                // currently there is no way to upload mac app store icons; no api endpoint
-                                // removed check for those -  || (endpointType == "macapplications")
-                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
-                                    sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
-                                    self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
-                                }
-                                */
+                        if endpointInProgress != endpointType || endpointInProgress == "" {
+                            WriteToLog.shared.message("[createEndpoints.jpapi] Migrating \(endpointType)")
+                            endpointInProgress = endpointType
+                            Counter.shared.postSuccess = 0
+                        }   // look to see if we are processing the next localEndPointType - end
+                        
+                            // ? remove creation of counters dict defined earlier ?
+//                        if Counter.shared.crud[endpointType] == nil {
+//                            Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//                            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
+//                        }
+                    
+                                                    
+                        Counter.shared.postSuccess += 1
+                        
+//                            print("endpointType: \(endpointType)")
+//                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
+                        
+                        if let _ = Counter.shared.progressArray["\(endpointType)"] {
+                            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
+                        }
+                        
+                        let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
+//                        print("localTmp: \(localTmp)")
+                        Counter.shared.crud[endpointType]?["\(apiMethod)"] = localTmp + 1
+                        
+                        
+                        if var summaryArray = Counter.shared.summary[endpointType]?["\(apiMethod)"] {
+                            var objectName = "unknown name"
+                            switch endpointType {
+                            case "api-roles", "api-integrations":
+                                objectName = endPointJSON["displayName"] as? String ?? "unknown name"
+                            default:
+                                objectName = endPointJSON["name"] as? String ?? "unknown name"
+                            }
+                            if summaryArray.contains(objectName) == false {
+                                summaryArray.append(objectName)
+                                Counter.shared.summary[endpointType]?["\(apiMethod)"] = summaryArray
+                            }
+                        }
+                        /*
+                        // currently there is no way to upload mac app store icons; no api endpoint
+                        // removed check for those -  || (endpointType == "macapplications")
+                        if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create") {
+                            sourcePolicyId = (endpointType == "policies") ? "\(sourceEpId)":""
+                            self.icons(endpointType: endpointType, action: action, ssIconName: ssIconName, ssIconId: ssIconId, ssIconUri: ssIconUri, f_createDestUrl: createDestUrl, responseData: responseData, sourcePolicyId: sourcePolicyId)
+                        }
+                        */
 
-                                Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                                Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
-                                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                                Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
-                                
-                                // update counters
-                                if Summary.totalCompleted > 0 {
+                        Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
+                        Summary.totalUpdated   = Counter.shared.crud[endpointType]?["update"] ?? 0
+                        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+                        Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
+                        
+                        // update counters
+                        if Summary.totalCompleted > 0 {
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                if destEpId != "-1" {
+                                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                                }
+                            }
+                        }
+                        
+                        if Setting.fullGUI && Summary.totalCompleted == endpointCount {
+
+                            if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
+                                updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
+                            } else if Summary.totalFailed == endpointCount {
+                                DispatchQueue.main.async { [self] in
+                                    updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
+                                    
                                     if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                        if destEpId != "-1" {
-                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                        }
+                                        PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                        updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
                                     }
                                 }
                                 
-                                if Setting.fullGUI && Summary.totalCompleted == endpointCount {
+                            }
+                        }
 
-                                    if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor   from if condition
-                                        updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-                                    } else if Summary.totalFailed == endpointCount {
-                                        DispatchQueue.main.async { [self] in
-                                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                            
-                                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
-                                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
-                                            }
-                                        }
-                                        
-                                    }
-                                }
-    //                        }   // DispatchQueue.main.async - end
-                            completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-    //                    }   // if let httpResponse = response - end
+                        completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
                         
                         if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] POST, PUT, or skip - operation: \(apiAction)") }
                         

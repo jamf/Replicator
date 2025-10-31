@@ -60,10 +60,11 @@ class ExistingObjects: NSObject, URLSessionDelegate {
 //            var duplicatePackages      = false
 //            var duplicatePackagesDict  = [String:[String]]()
             
-            if Counter.shared.crud[destEndpoint] == nil {
-                Counter.shared.crud[destEndpoint] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
-                Counter.shared.summary[destEndpoint] = ["create":[], "update":[], "fail":[]]
-            }
+//            print("[ExistingObjects.capi] endpointType: \(theDestEndpoint)")
+//            if Counter.shared.crud[theDestEndpoint] == nil {
+//                Counter.shared.crud[theDestEndpoint] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
+//                Counter.shared.summary[theDestEndpoint] = ["create":[], "update":[], "fail":[]]
+//            }
 
             switch destEndpoint {
             case "smartusergroups", "staticusergroups":

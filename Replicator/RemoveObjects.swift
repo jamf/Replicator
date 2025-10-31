@@ -146,14 +146,14 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             return
         }
                 
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] enter for \(endpointType), name: \(endpointName), id: \(endPointID)") }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] enter for \(endpointType), name: \(endpointName), id: \(endPointID)") }
 
         // counters for completed endpoints
         if endpointCurrent == 1 {
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
 
         var createDestUrl = "\(createDestUrlBase)"
         
@@ -187,15 +187,16 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             return
         }
         
+        var whichError   = ""
         var responseData = ""
-        createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(endPointID)"
+        createDestUrl    = "\(createDestUrl)/" + localEndPointType + "/id/\(endPointID)"
         
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Original Dest. URL: \(createDestUrl)") }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Original Dest. URL: \(createDestUrl)") }
         createDestUrl = createDestUrl.urlFix
         
         SendQueue.shared.addOperation { [self] in
             
-            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Action: DELETE     URL: \(createDestUrl)     Object \(endpointCurrent) of \(endpointCount)") }
+            if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Action: DELETE     URL: \(createDestUrl)     Object \(endpointCurrent) of \(endpointCount)") }
             
             counter.post = (endpointCurrent == 1) ? 1 : counter.post + 1
                                             
@@ -231,21 +232,32 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 if let httpResponse = response as? HTTPURLResponse {
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
-                        //                        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \n\nfull response from create:\n\(responseData)") }
+                        //                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] \n\nfull response from create:\n\(responseData)") }
                         //                        print("create data response: \(responseData)")
                     } else {
-                        if LogLevel.debug { WriteToLog.shared.message("\n\n[RemoveEndpoints] No data was returned from delete.") }
+                        if LogLevel.debug { WriteToLog.shared.message("\n\n[RemoveObjects.process] No data was returned from delete.") }
                     }
                     
                     // look to see if we are processing the next endpointType - start
                     if endpointInProgress != endpointType || endpointInProgress == "" {
-                        WriteToLog.shared.message("[RemoveEndpoints] Replicating \(endpointType)")
+                        WriteToLog.shared.message("[RemoveObjects.process] Replicating \(endpointType)")
                         endpointInProgress = endpointType
                         Counter.shared.postSuccess = 0
                     }   // look to see if we are processing the next localEndPointType - end
                     
+                    if let _ = counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] {
+                        counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]! += 1
+                        if counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]! > 3 {
+                            whichError = "skip"
+                            counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] = 0
+                            WriteToLog.shared.message("    [RemoveObjects.process] [\(localEndPointType)] deletional of object \(endpointName) failed, retry count exceeded.")
+                        }
+                    } else {
+                        counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] = 0
+                    }
+                    
                     if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
-                        WriteToLog.shared.message("    [RemoveEndpoints] [\(localEndPointType)] delete succeeded: \(endpointName)")
+                        WriteToLog.shared.message("    [RemoveObjects.process] [\(localEndPointType)] delete succeeded: \(endpointName)")
                         
                         if endpointCurrent == 1 {
                             migrationComplete.isDone = false
@@ -266,7 +278,17 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         
                         errorMsg != "" ? (localErrorMsg = "delete error: \(errorMsg)"):(localErrorMsg = "delete error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
                         
-                        WriteToLog.shared.message("[RemoveEndpoints] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                        if whichError != "skip" && endpointType.contains("smart") && localErrorMsg.contains("The following items are dependent on this") && localErrorMsg.contains("SMART_") {
+                            WriteToLog.shared.message("    [RemoveObjects.process] [\(endpointType)] Problem removing a smart group, error: \(localErrorMsg).  Will queue for retry (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]!)).")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+                                queue(endpointType: endpointType, endPointID: endPointID, endpointName: endpointName, endpointCurrent: endpointCurrent, endpointCount: endpointCount)
+                            }
+                            
+                            completion("")
+                            return
+                        }
+                        
+                        WriteToLog.shared.message("[RemoveObjects.process] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                         
                         updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
                         if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
@@ -275,14 +297,14 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             }
                         }
                         
-                        //                            print("[RemoveEndpoints]   identifier: \(identifier)")
-                        //                            print("[RemoveEndpoints] responseData: \(responseData)")
-                        //                            print("[RemoveEndpoints]       status: \(httpResponse.statusCode)")
+                        //                            print("[RemoveObjects.process]   identifier: \(identifier)")
+                        //                            print("[RemoveObjects.process] responseData: \(responseData)")
+                        //                            print("[RemoveObjects.process]       status: \(httpResponse.statusCode)")
                         
-                        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
-                        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
-                        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response data ----------\n\(responseData)") }
-                        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] -----------------------------------\n") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] ---------- status code ----------") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] \(httpResponse.statusCode)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] ---------- response data ----------\n\(responseData)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] -----------------------------------\n") }
                         
                         updateCounts(endpointType: endpointType, endpointName: endpointName, result: "fail", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
                     }   // remove failed - end
@@ -320,14 +342,14 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 }
                               
                 if endpointCurrent > 0 {
-                    if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
+                    if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
                 }
 //                            semaphore.signal()
                 if error != nil {
                 }
 
                 if endpointCurrent == endpointCount {
-                    if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Last item in \(localEndPointType) complete.") }
+                    if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Last item in \(localEndPointType) complete.") }
                     nodesMigrated+=1    // ;print("added node: \(localEndPointType) - createEndpoints")
 //                    print("nodes complete: \(nodesMigrated)")
                 }

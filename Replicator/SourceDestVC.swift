@@ -582,6 +582,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     (result: String) in
                     switch textField.identifier!.rawValue {
                     case "sourceServer", "sourceUser":
+                        source_jp_server_field.stringValue = source_jp_server_field.stringValue.urlFix
                         fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
                     default:
                         break
@@ -597,6 +598,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
                 switch textField.identifier!.rawValue {
                 case "destServer", "destUser":
+                    dest_jp_server_field.stringValue = dest_jp_server_field.stringValue.urlFix
                     fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
                 default:
                     break
