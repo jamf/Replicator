@@ -374,7 +374,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             }
                             
                             // currently there is no way to upload mac app store icons; no api endpoint
-                            // removed check for those -  || (endpointType == "macapplications")
+                            // removed check for those ->  || (endpointType == "macapplications")
                             // mobiledeviceapplication icon data is in the object xml
 //                                print("setting.csa: \(setting.csa)")
 //                                if ((endpointType == "policies") || (endpointType == "mobiledeviceapplications")) && (action == "create" || setting.csa) {

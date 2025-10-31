@@ -38,7 +38,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     var destEPQ       = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.utility)
     var updateUiDelegate: UpdateUiDelegate?
     
-//    func queue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
     func queue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         logFunctionCall()
         
@@ -48,7 +47,6 @@ class RemoveObjects: NSObject, URLSessionDelegate {
 //                    print("[\(#function)] \(#line) stopMigration")
             SendQueue.shared.operationQueue.cancelAllOperations()
             updateUiDelegate?.updateUi(info: ["function": "stopButton"])
-//            completion("stop")
             return
         }
         
@@ -150,15 +148,11 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 
         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] enter for \(endpointType), name: \(endpointName), id: \(endPointID)") }
 
-        let destinationEpId = endPointID
-//        let apiAction       = "create"
-        
         // counters for completed endpoints
         if endpointCurrent == 1 {
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        // this is where we remove the new endpoint
         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
 
         var createDestUrl = "\(createDestUrlBase)"
@@ -194,7 +188,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         }
         
         var responseData = ""
-        createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(destinationEpId)"
+        createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(endPointID)"
         
         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Original Dest. URL: \(createDestUrl)") }
         createDestUrl = createDestUrl.urlFix
@@ -267,6 +261,13 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                         
                     } else {
                         // remove failed
+                        var localErrorMsg = ""
+                        let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
+                        
+                        errorMsg != "" ? (localErrorMsg = "delete error: \(errorMsg)"):(localErrorMsg = "delete error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
+                        
+                        WriteToLog.shared.message("[RemoveEndpoints] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                        
                         updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
                         if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             if endPointID != "-1" {
@@ -274,17 +275,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             }
                         }
                         
-                        var localErrorMsg = ""
-                        
                         //                            print("[RemoveEndpoints]   identifier: \(identifier)")
                         //                            print("[RemoveEndpoints] responseData: \(responseData)")
                         //                            print("[RemoveEndpoints]       status: \(httpResponse.statusCode)")
-                        
-                        let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
-                        
-                        errorMsg != "" ? (localErrorMsg = "delete error: \(errorMsg)"):(localErrorMsg = "delete error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
-                        
-                        WriteToLog.shared.message("[RemoveEndpoints] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
                         
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
                         if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
