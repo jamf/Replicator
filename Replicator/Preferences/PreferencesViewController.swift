@@ -204,6 +204,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func dryRun_action(_ sender: NSButton) {
         userDefaults.set(Int(sender.state.rawValue), forKey: "dryRun")
         AppInfo.dryRun = sender.state == .on
+        NotificationCenter.default.post(name: .dryRunToggle, object: self)
     }
     
     @IBAction func colorScheme_action(_ sender: NSButton) {
@@ -623,7 +624,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             stickySession_button.state = userDefaults.bool(forKey: "stickySession") ? NSControl.StateValue(1):NSControl.StateValue(0)
             
             maskServerNames_button.state = NSControl.StateValue(userDefaults.integer(forKey: "maskServerNames"))
-            dryRun_button.state = NSControl.StateValue(userDefaults.integer(forKey: "dryRun"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
         }
@@ -751,6 +751,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             
             onlyCopyMissing_button.state = (userDefaults.integer(forKey: "copyMissing") == 1) ? .on:.off
             onlyCopyExisting_button.state = (userDefaults.integer(forKey: "copyExisting") == 1) ? .on:.off
+            
+            dryRun_button.state = NSControl.StateValue(userDefaults.integer(forKey: "dryRun"))
         }
         if self.title! == "Export" {
             var isDir: ObjCBool = true

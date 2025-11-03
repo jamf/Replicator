@@ -582,6 +582,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                     (result: String) in
                     switch textField.identifier!.rawValue {
                     case "sourceServer", "sourceUser":
+                        source_jp_server_field.stringValue = source_jp_server_field.stringValue.urlFix
                         fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
                     default:
                         break
@@ -597,6 +598,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 }
                 switch textField.identifier!.rawValue {
                 case "destServer", "destUser":
+                    dest_jp_server_field.stringValue = dest_jp_server_field.stringValue.urlFix
                     fetchPassword(whichServer: "dest", url: dest_jp_server_field.stringValue)
                 default:
                     break
@@ -970,35 +972,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func initVars() {
         logFunctionCall()
-        // create log directory if missing - start
-//        if !fm.fileExists(atPath: History.logPath) {
-//            do {
-//                try fm.createDirectory(atPath: History.logPath, withIntermediateDirectories: true, attributes: nil )
-//            } catch {
-//                _ = Alert.shared.display(header: "Error:", message: "Unable to create log directory:\n\(String(describing: History.logPath))\nTry creating it manually.", secondButton: "")
-//                exit(0)
-//            }
-//        }
-//        // create log directory if missing - end
-//                
-//        if !fm.fileExists(atPath: AppInfo.plistPath) {
-//            _ = readSettings(thePath: AppInfo.plistPathOld)
-//            isDir = true
-//            if !fm.fileExists(atPath: AppInfo.appSupportPath, isDirectory: &isDir) {
-//                try? fm.createDirectory(atPath: AppInfo.appSupportPath, withIntermediateDirectories: true)
-//            }
-//            saveSettings(settings: AppInfo.settings)
-//        }
         
         maxLogFileCount = (userDefaults.integer(forKey: "logFilesCountPref") < 1) ? 20:userDefaults.integer(forKey: "logFilesCountPref")
-//        logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
-//        History.logFile = TimeDelegate().getCurrent().replacingOccurrences(of: ":", with: "") + "_replicator.log"
-//
-//        isDir = false
-//        if !(fm.fileExists(atPath: History.logPath + logFile, isDirectory: &isDir)) {
-//            fm.createFile(atPath: History.logPath + logFile, contents: nil, attributes: nil)
-//        }
-//        sleep(1)
         
         if !(fm.fileExists(atPath: userDefaults.string(forKey: "saveLocation") ?? ":missing:", isDirectory: &isDir)) {
             userDefaults.setValue(NSHomeDirectory() + "/Downloads/Replicator/", forKey: "saveLocation")
@@ -1194,6 +1169,7 @@ extension Notification.Name {
     public static let deleteMode_sdvc        = Notification.Name("deleteMode_sdvc")
     public static let saveOnlyButtonToggle   = Notification.Name("toggleExportOnly")
     public static let stickySessionToggle    = Notification.Name("stickySessionToggle")
+    public static let dryRunToggle           = Notification.Name("dryRunToggle")
     public static let updateSourceServerList = Notification.Name("updateSourceServerList")
     public static let updateDestServerList   = Notification.Name("updateDestServerList")
 }
