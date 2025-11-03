@@ -162,6 +162,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 return "/api/v1/\(endpointType)/\(endPointID)"
             case "buildings":
                 return "/api/v1/buildings/\(endPointID)"
+            case "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
+                return "/JSSResource/\(localEndPointType)/id/\(endPointID)"
             case "jamfusers":
                 return "/JSSResource/accounts/userid/\(endPointID)"
             case "jamfgroups":
