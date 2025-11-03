@@ -131,18 +131,15 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             return
         }
         
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] enter for \(endpointType), name: \(endpointName), id: \(endPointID)") }
-
         // counters for completed endpoints
         if endpointCurrent == 1 {
             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Removing: \(endpointType) - name: \(endpointName), id: \(endPointID)") }
 
         var workingUrl = JamfProServer.url["dest"] ?? createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: "")
         
-        // LOCAL state for this operation only
         let localEndPointType: String = {
             switch endpointType {
             case "smartcomputergroups", "staticcomputergroups":
