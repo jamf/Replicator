@@ -4708,7 +4708,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         let (h,m,s, _) = timeDiff(forWhat: "runTime")
                         WriteToLog.shared.message("[Migration Complete] runtime: \(Utilities.shared.dd(value: h)):\(Utilities.shared.dd(value: m)):\(Utilities.shared.dd(value: s)) (h:m:s)")
                         spinner_progressIndicator.stopAnimation(self)
-//                        resetAllCheckboxes()
+                        resetAllCheckboxes()
                     }
                 }
 
@@ -5818,6 +5818,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.categories_button.state = NSControl.StateValue(rawValue: 0)
             self.classes_button.state = NSControl.StateValue(rawValue: 0)
             self.dept_button.state = NSControl.StateValue(rawValue: 0)
+            self.ebooks_button.state = NSControl.StateValue(rawValue: 0)
             self.userEA_button.state = NSControl.StateValue(rawValue: 0)
             self.sites_button.state = NSControl.StateValue(rawValue: 0)
             self.ldapservers_button.state = NSControl.StateValue(rawValue: 0)
@@ -6778,7 +6779,6 @@ extension String {
             fixedUrl     = self.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
             let fixedUrlArray = fixedUrl.split(separator: "/?failover")
             fixedUrl     = (fixedUrlArray.count > 0) ? String(fixedUrlArray[0]) : fixedUrl
-//            fixedUrl     = fixedUrl.replacingOccurrences(of: "/?failover", with: "")
             return fixedUrl
         }
     }

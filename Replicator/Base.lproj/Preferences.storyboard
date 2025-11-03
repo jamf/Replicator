@@ -314,7 +314,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="dryRun_action:" target="Ojm-Op-AKi" id="mkO-DY-ITO"/>
+                                    <action selector="dryRun_action:" target="Lwu-vt-54h" id="TJl-u4-YFL"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -389,7 +389,7 @@
                         <outlet property="copyScopeSig_button" destination="Nkd-g2-D6H" id="Z9U-FB-Rwh"/>
                         <outlet property="copyScopeUsers_button" destination="1nk-zX-i4p" id="nXs-2h-Pwr"/>
                         <outlet property="disablePolicies_button" destination="oG0-8N-egu" id="yA2-Be-4ma"/>
-                        <outlet property="dryRun_button" destination="42W-Qg-lef" id="UjI-rK-goQ"/>
+                        <outlet property="dryRun_button" destination="42W-Qg-lef" id="Dh0-qM-0ua"/>
                         <outlet property="onlyCopyExisting_button" destination="T5m-Wq-VYl" id="J1m-P7-onI"/>
                         <outlet property="onlyCopyMissing_button" destination="ABb-3i-F1Z" id="tUW-lT-dWt"/>
                     </connections>
