@@ -9,288 +9,337 @@
 import AppKit
 import Foundation
 
+class DeleteObject: NSObject {
+    @objc var endpointType    : String
+    @objc var endpointName    : String
+    @objc var endpointId      : String
+    @objc var endpointCurrent : Int
+    @objc var endpointCount   : Int
+    
+    init(endpointType: String, endpointName: String, endpointId: String, endpointCurrent: Int, endpointCount: Int) {
+        self.endpointType    = endpointType
+        self.endpointName    = endpointName
+        self.endpointId      = endpointId
+        self.endpointCurrent = endpointCurrent
+        self.endpointCount   = endpointCount
+    }
+}
+
 class RemoveObjects: NSObject, URLSessionDelegate {
     
-    static let shared    = RemoveObjects()
+    static let shared = RemoveObjects()
+    
+    let counter = Counter()
+    var deleteObjectsArray: [DeleteObject] = []
+    var currentDeleteObject = DeleteObject(endpointType: "", endpointName: "", endpointId: "", endpointCurrent: -1, endpointCount: -1)
+    
+    var destEPQ       = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.utility)
     var updateUiDelegate: UpdateUiDelegate?
-    func updateView(_ info: [String: Any]) {
-        logFunctionCall()
-        updateUiDelegate?.updateUi(info: info)
-    }
-    
-    private let lockQueue          = DispatchQueue(label: "lock.queue")
-    private let putStatusLockQueue = DispatchQueue(label: "putStatusLock.queue")
-    private let removeMeterQ       = OperationQueue() 
-    private let removeObjectQ      = OperationQueue() 
-    
-    var removeArray          = [ObjectInfo]()
     
     func queue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         logFunctionCall()
         
-        if endpointCurrent == 1 {
-            Counter.shared.crud[endpointType]!["total"] = endpointCount
+        print("[RemoveObjects.queue] endPointID: \(endPointID), endpointCount: \(endpointCount)")
+                
+        if pref.stopMigration {
+            SendQueue.shared.operationQueue.cancelAllOperations()
+            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            return
         }
         
-        SendQueue.shared.addOperation { [self] in
+        destEPQ.async { [self] in
             
-            let theObject = ObjectInfo(endpointType: endpointType, endPointXml: endpointName, endPointJSON: [:], endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", sourceEpId: -1, destEpId: endPointID, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false)
-                        
-            capi(endpointType: theObject.endpointType, endPointID: "\(theObject.destEpId)", endpointName: theObject.endPointXml, endpointCurrent: theObject.endpointCurrent, endpointCount: theObject.endpointCount) {
-                (result: String) in
+            if LogLevel.debug { WriteToLog.shared.message("[removeEndpointsQueue] que \(endpointType) with name: \(endpointName) for removal")}
+            deleteObjectsArray.append(DeleteObject(endpointType: endpointType, endpointName: endpointName, endpointId: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount))
+            
+            currentDeleteObject = DeleteObject(endpointType: endpointType, endpointName: endpointName, endpointId: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount)
+            
+            if LogLevel.debug { WriteToLog.shared.message("\n[removeEndpointsQueue] createArray.count: \(createArray.count)\n")}
+            
+            if export.saveRawXml {
+                EndpointData.shared.getById(endpoint: endpointType, endpointID: endPointID, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: "0", destEpName: endpointName) { [self]
+                    (result: String) in
+                    process(endpointType: endpointType, endPointID: endPointID, endpointName: endpointName, endpointCurrent: endpointCurrent, endpointCount: endpointCount) {
+                        (result: String) in
+                    }
+                }
+            } else {
+                process(endpointType: currentDeleteObject.endpointType, endPointID: currentDeleteObject.endpointId, endpointName: currentDeleteObject.endpointName, endpointCurrent: currentDeleteObject.endpointCurrent, endpointCount: currentDeleteObject.endpointCount) {
+                    (result: String) in
+                }
             }
         }
     }
     
-    func capi(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
+    fileprivate func updateCounts(endpointType: String, localEndPointType: String, endpointName: String, result: String, endpointCount: Int, endpointCurrent: Int, endPointID: String) {
         
+        print("[RemoveEndpoints.updateCounts]             endPointID: \(endPointID)")
+        if endPointID == "-1" { return }
+        
+        if Counter.shared.crud[endpointType] == nil {
+            Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total": endpointCount]
+        } else {
+            Counter.shared.crud[endpointType]!["total"] = endpointCount
+        }
+        if Counter.shared.summary[endpointType] == nil {
+            Counter.shared.summary[endpointType] = ["create":[], "update":[], "fail":[]]
+        }
+        
+        Counter.shared.postSuccess += 1
+        
+        if let _ = Counter.shared.progressArray["\(endpointType)"] {
+            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
+        } else {
+            Counter.shared.progressArray["\(endpointType)"] = 1
+        }
+        if let _ = Counter.shared.crud[endpointType]?[result] {
+            Counter.shared.crud[endpointType]?[result]! += 1
+        } else {
+            Counter.shared.crud[endpointType]?[result] = 1
+        }
+        
+        Summary.totalCreated   = Counter.shared.crud[endpointType]?["create"] ?? 0
+        Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
+        Summary.totalCompleted = Summary.totalCreated + Summary.totalFailed
+        
+        if var summaryArray = Counter.shared.summary[endpointType]?[result] {
+            summaryArray.append(endpointName)
+            Counter.shared.summary[endpointType]?[result] = summaryArray
+        }
+        
+        if Summary.totalCompleted > 0  {
+            if (endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                if endPointID != "-1" {
+                    updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
+                }
+            }
+        }
+        
+        if ToMigrate.objects.last!.contains(localEndPointType) && endpointCount == endpointCurrent {
+            updateUiDelegate?.updateUi(info: ["function": "rmDELETE"])
+            updateUiDelegate?.updateUi(info: ["function": "goButtonEnabled", "button_status": true])
+        }
+    }
+    
+    func process(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
         logFunctionCall()
-        if endPointID == "-1" && UiVar.activeTab == "Selective" {
-//            WriteToLog.shared.message("[removeEndpoints] selective - finished removing \(endpointType)")
-            completion("-1")
+        
+        if pref.stopMigration {
+            SendQueue.shared.operationQueue.cancelAllOperations()
+            updateUiDelegate?.updateUi(info: ["function": "stopButton"])
+            completion("stop")
             return
         }
+        
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] enter for \(endpointType), name: \(endpointName), id: \(endPointID)") }
 
-        if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] enter") }
-
-        var removeDestUrl = ""
-                
+        // counters for completed endpoints
         if endpointCurrent == 1 {
-            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
-            }
-        } else {
-            if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] /* self.put_levelIndicatorFillColor[endpointType] */{
-                if Setting.migrateDependencies {
-                    updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] ?? NSColor.green])
-                }
-            }
+            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
         }
         
-        // whether the operation was successful or not, either delete or fail
-        var methodResult = "create"
-        
-        var localEndPointType = ""
-        switch endpointType {
-        case "smartcomputergroups", "staticcomputergroups":
-            localEndPointType = "computergroups"
-        case "smartmobiledevicegroups", "staticmobiledevicegroups":
-            localEndPointType = "mobiledevicegroups"
-        case "smartusergroups", "staticusergroups":
-            localEndPointType = "usergroups"
-        case "patch-software-title-configurations":
-            localEndPointType = "patch-software-title-configurations"
-        default:
-            localEndPointType = endpointType
-        }
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
 
-        if endpointName != "All Managed Clients" && endpointName != "All Managed Servers" && endpointName != "All Managed iPads" && endpointName != "All Managed iPhones" && endpointName != "All Managed iPod touches" {
-            
-            switch localEndPointType {
-            case "patch-software-title-configurations":
-                removeDestUrl = "\(JamfProServer.destination)/api/v2/patch-software-title-configurations/\(endPointID)"
-            case "api-roles", "api-integrations":
-                removeDestUrl = "\(JamfProServer.destination)/api/v1/\(localEndPointType)/\(endPointID)"
+        var workingUrl = JamfProServer.url["dest"] ?? createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: "")
+        
+        // LOCAL state for this operation only
+        let localEndPointType: String = {
+            switch endpointType {
+            case "smartcomputergroups", "staticcomputergroups":
+                return "computergroups"
+            case "smartmobiledevicegroups", "staticmobiledevicegroups":
+                return "mobiledevicegroups"
+            case "smartusergroups", "staticusergroups":
+                return "usergroups"
             default:
-                removeDestUrl = "\(JamfProServer.destination)/JSSResource/" + localEndPointType + "/id/\(endPointID)"
-                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] raw removal URL: \(removeDestUrl)") }
-                removeDestUrl = removeDestUrl.urlFix
-    //            removeDestUrl = removeDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                removeDestUrl = removeDestUrl.replacingOccurrences(of: "id/id/", with: "id/")
+                return endpointType
             }
+        }()
+        
+        let endpointPath: String = {
+            switch endpointType {
+            case "api-integrations", "api-roles":
+                return "/api/v1/\(endpointType)/\(endPointID)"
+            case "buildings":
+                return "/api/v1/buildings/\(endPointID)"
+            case "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
+                return "/JSSResource/\(localEndPointType)/id/\(endPointID)"
+            case "jamfusers":
+                return "/JSSResource/accounts/userid/\(endPointID)"
+            case "jamfgroups":
+                return "/JSSResource/accounts/groupid/\(endPointID)"
+            default:
+                return "/JSSResource/\(endpointType)/id/\(endPointID)"
+            }
+        }()
+        
+        print("[RemoveObjects.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
+        
+        if AppInfo.dryRun {
+            updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "create", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
+            completion("")
+            return
+        }
+        
+        var whichError   = ""
+        var responseData = ""
+        workingUrl       = workingUrl + endpointPath
+        
+        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Original Dest. URL: \(workingUrl)") }
+        workingUrl = workingUrl.urlFix
+        
+        SendQueue.shared.addOperation { [self] in
             
-            if export.saveRawXml {
-                //change to endpointByIDQueue?
-                EndpointXml.shared.getById(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: "0", destEpName: endpointName) {
-//                endPointByID(endpoint: endpointType, endpointID: "\(endPointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: "", destEpId: 0, destEpName: endpointName) {
-                    (result: String) in
-                }
-            }
-            if export.saveOnly {
-                if endpointCurrent == endpointCount {
-                    if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.") }
-                    nodesMigrated+=1    // ;print("added node: \(localEndPointType) - removeEndpoints")
-                    //            print("remove nodes complete: \(nodesMigrated)")
-                }
-                return
-            }
+            if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Action: DELETE     URL: \(workingUrl)     Object \(endpointCurrent) of \(endpointCount)") }
             
-            SendQueue.shared.addOperation {
-                        
-                DispatchQueue.main.async {
+            counter.post = (endpointCurrent == 1) ? 1 : counter.post + 1
+                                            
+            let encodedURL = URL(string: workingUrl)
+            let request = NSMutableURLRequest(url: encodedURL! as URL)
+            request.httpMethod = "DELETE"
+           
+            let configuration = URLSessionConfiguration.default
+
+            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+            
+            var headers = [String: String]()
+            for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
+                headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
+            }
+            print("[apiCall] \(#function.description) method: \(request.httpMethod)")
+            print("[apiCall] \(#function.description) headers: \(headers)")
+            print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
+            print("")
+            
+            // sticky session
+            let cookieUrl = createDestUrlBase.replacingOccurrences(of: "JSSResource", with: "")
+            if JamfProServer.sessionCookie.count > 0 && JamfProServer.stickySession {
+                URLSession.shared.configuration.httpCookieStorage!.setCookies(JamfProServer.sessionCookie, for: URL(string: cookieUrl), mainDocumentURL: URL(string: cookieUrl))
+            }
+                            
+            let semaphore = DispatchSemaphore(value: 0)
+            let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+            let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
+                (data, response, error) -> Void in
+                defer { semaphore.signal() }
+                session.finishTasksAndInvalidate()
+                if let httpResponse = response as? HTTPURLResponse {
+                    if let _ = String(data: data!, encoding: .utf8) {
+                        responseData = String(data: data!, encoding: .utf8)!
+                    } else {
+                        if LogLevel.debug { WriteToLog.shared.message("\n\n[RemoveObjects.process] No data was returned from delete.") }
+                    }
+                    
                     // look to see if we are processing the next endpointType - start
                     if endpointInProgress != endpointType || endpointInProgress == "" {
+                        WriteToLog.shared.message("[RemoveObjects.process] Replicating \(endpointType)")
                         endpointInProgress = endpointType
-                        UiVar.changeColor  = true
                         Counter.shared.postSuccess = 0
-                        WriteToLog.shared.message("[RemoveEndpoints] removing \(endpointType)")
-                    }   // look to see if we are processing the next endpointType - end
-                }
-                
-                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] removing \(endpointType) with ID \(endPointID)  -  Object \(endpointCurrent) of \(endpointCount)") }
-                if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] removal URL: \(removeDestUrl)") }
-                
-                let encodedURL = URL(string: removeDestUrl)
-                let request = NSMutableURLRequest(url: encodedURL! as URL)
-                request.httpMethod = "DELETE"
-                let configuration = URLSessionConfiguration.ephemeral
-                
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
-                
-                var headers = [String: String]()
-                for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
-                    headers[header as! String] = (header as! String == "Authorization") ? "Bearer ************" : value as? String
-                }
-                print("[apiCall] \(#function.description) method: \(request.httpMethod)")
-                print("[apiCall] \(#function.description) headers: \(headers)")
-                print("[apiCall] \(#function.description) endpoint: \(encodedURL?.absoluteString ?? "")")
-                print("")
-
-                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-                
-                let semaphore = DispatchSemaphore(value: 0)
-                
-                let task = session.dataTask(with: request as URLRequest, completionHandler: { [self]
-                    (data, response, error) -> Void in
-                    
-                    defer { semaphore.signal() }
-                    session.finishTasksAndInvalidate()
-                    
-                    completion("\(endPointID)")
-                    
-                    if let httpResponse = response as? HTTPURLResponse {
-                        WriteToLog.shared.message("[RemoveEndpoints] \(#line) id \(endpointCurrent) removed response code: \(httpResponse.statusCode)")
-                        //print(httpResponse)
-                        if httpResponse.statusCode >= 199 && httpResponse.statusCode <= 299 {
-                            // remove items from the list as they are removed from the server
-                            if UiVar.activeTab == "Selective" {
-                                //                                print("endPointID: \(endPointID)")
-                                
-                                let lineNumber = SourceObjects.list.firstIndex(where: {$0.objectId == endPointID})!
-                                let objectToRemove = SourceObjects.list[lineNumber].objectName
-                                
-                                DataArray.staticSource.removeAll(where: { $0 == objectToRemove})
-//                                        print("[removeEndpoints] DataArray.staticSource:\(DataArray.staticSource)")
-                                                                    
-                                var objectIndex = SourceObjects.list.firstIndex(where: { $0.objectName == objectToRemove })
-                                updateView(["function": "sourceObjectList_AC.remove", "objectId": endPointID as Any])
-
-                                objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == endPointID })
-                                staticSourceObjectList.remove(at: objectIndex!)
-                            }
-                            
-                            WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] \(endpointName) (id: \(endPointID))")
-                            Counter.shared.postSuccess += 1
-                        } else if endpointCurrent != -1 {
-                            methodResult = "fail"
-                            updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
-//                            labelColor(endpoint: endpointType, theColor: self.yellowText)
-                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                PutLevelIndicator.shared.indicatorColor[endpointType]  = .systemYellow
-                                updateView(["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
-                            }
-                            UiVar.changeColor  = false
-                            WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)] **** Failed to remove: \(endpointName) (id: \(endPointID)), statusCode: \(httpResponse.statusCode)")
-                            
-                            if httpResponse.statusCode == 400 {
-                                WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)]      Verify other items are not dependent on \(endpointName) (id: \(endPointID))")
-                                WriteToLog.shared.message("    [RemoveEndpoints] [\(endpointType)]      For example, \(endpointName) is not used in a policy")
-                            }
-                            
-                            if LogLevel.debug { WriteToLog.shared.message("\n") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- endpoint info ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] Type: \(endpointType)\t Name: \(endpointName)\t id: \(endPointID)") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- status code ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \(httpResponse.statusCode)") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] \n\(String(data: data ?? Data(), encoding: .utf8) ?? "unknown")") }
-                            if LogLevel.debug { WriteToLog.shared.message("[RemoveEndpoints] ---------- response ----------\n") }
-                        }
-                        
-                        if endPointID != "-1" {
-                            // update global counters
-                            //                        let localTmp = (Counter.shared.crud[endpointType]?[methodResult])!
-                            Counter.shared.crud[endpointType]?[methodResult]! += 1
-
-                            if var summaryArray = Counter.shared.summary[endpointType]?[methodResult] {
-                                if summaryArray.firstIndex(of: endpointName) == nil {
-                                    summaryArray.append(endpointName)
-                                    Counter.shared.summary[endpointType]?[methodResult] = summaryArray
-                                }
-                            }
-                            
-                            
-                            putStatusLockQueue.async { [self] in
-                                Summary.totalDeleted   = Counter.shared.crud[endpointType]?["create"] ?? 0
-                                Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
-                                Summary.totalCompleted = Summary.totalDeleted + Summary.totalFailed
-                                //                        DispatchQueue.main.async { [self] in
-                                if Summary.totalCompleted > 0 {
-                                    updateView(["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                }
-                                
-                                if Summary.totalDeleted == endpointCount && UiVar.changeColor  {
-                                    updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
-                                    //                                labelColor(endpoint: endpointType, theColor: greenText)
-                                } else if Summary.totalFailed == endpointCount {
-                                    updateView(["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
-                                    //                                labelColor(endpoint: endpointType, theColor: redText)
-                                    updateView(["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects.capi-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemRed])
-                                    //                                setLevelIndicatorFillColor(fn: "RemoveEndpoints-\(endpointCurrent)", endpointType: endpointType, fillColor: .systemRed)
-                                }
-                            }
-                        }
                     }
                     
-                    if UiVar.activeTab != "selective" {
-                        //                        print("localEndPointType: \(localEndPointType) \t count: \(endpointCount)")
-                        if ToMigrate.objects.last == localEndPointType && endPointID == "-1" /*(endpointCount == endpointCurrent || endpointCount == 0)*/ {
-                            // check for file that allows deleting data from destination server, delete if found - start
-                            updateView(["function": "rmDELETE"])
-                            JamfProServer.validToken["source"] = false
-                            JamfProServer.version["source"]    = ""
-                            //                            print("[removeEndpoints] endpoint: \(endpointType)")
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpoint: \(endpointType)") }
-                            //                            self.resetAllCheckboxes()
-                            // check for file that allows deleting data from destination server, delete if found - end
-
-                            updateView(["function": "goButtonEnabled", "button_status": true])
-                            if LogLevel.debug { WriteToLog.shared.message("Done") }
-                        }
-                        if error != nil {
+                    if let _ = counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] {
+                        counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]! += 1
+                        if counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]! > 3 {
+                            whichError = "skip"
+                            counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] = 0
+                            WriteToLog.shared.message("    [RemoveObjects.process] [\(localEndPointType)] deletional of object \(endpointName) failed, retry count exceeded.")
                         }
                     } else {
-                        // selective
-                        if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpointCount: \(endpointCount)\t endpointCurrent: \(endpointCurrent)") }
+                        counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"] = 0
+                    }
+                    
+                    if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
+                        WriteToLog.shared.message("    [RemoveObjects.process] [\(localEndPointType)] delete succeeded: \(endpointName)")
                         
-                        if endpointCount == endpointCurrent {
-                            // check for file that allows deleting data from destination server, delete if found - start
-                            updateView(["function": "rmDELETE"])
-                            JamfProServer.validToken["source"] = false
-                            JamfProServer.version["source"]    = ""
-                            if LogLevel.debug { WriteToLog.shared.message("[removeEndpoints] endpoint: \(endpointType)") }
-                            //                            print("[removeEndpoints] endpoint: \(endpointType)")
-                            //                            self.resetAllCheckboxes()
-                            // check for file that allows deleting data from destination server, delete if found - end
-                            //self.go_button.isEnabled = true
-//                            print("[\(#function)] \(#line) selective - finished removing \(endpointType)")
-                            updateView(["function": "goButtonEnabled", "button_status": true])
-                            if LogLevel.debug { WriteToLog.shared.message("Done") }
+                        if endpointCurrent == 1 {
+                            migrationComplete.isDone = false
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
+                            }
+                        } else {
+                            if let _ = PutLevelIndicator.shared.indicatorColor[endpointType] {
+                                updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "RemoveObjects-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.green])
+                            }
+                        }
+                        updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "create", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
+                        
+                    } else {
+                        // remove failed
+                        var localErrorMsg = ""
+                        let errorMsg = tagValue2(xmlString: responseData, startTag: "<p>Error: ", endTag: "</p>")
+                        
+                        errorMsg != "" ? (localErrorMsg = "delete error: \(errorMsg)"):(localErrorMsg = "delete error: \(tagValue2(xmlString: responseData, startTag: "<p>", endTag: "</p>"))")
+                        
+                        if whichError != "skip" && endpointType.contains("smart") && localErrorMsg.contains("The following items are dependent on this") && localErrorMsg.contains("SMART_") {
+                            WriteToLog.shared.message("    [RemoveObjects.process] [\(endpointType)] Problem removing a smart group, error: \(localErrorMsg).  Will queue for retry (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(endPointID)"]!)).")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+                                queue(endpointType: endpointType, endPointID: endPointID, endpointName: endpointName, endpointCurrent: endpointCurrent, endpointCount: endpointCount)
+                            }
+                            
+                            completion("")
+                            return
+                        }
+                        
+                        WriteToLog.shared.message("[RemoveObjects.process] [\(localEndPointType)] \(endpointName) - Failed (\(httpResponse.statusCode)).  \(localErrorMsg).\n")
+                        
+                        updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "yellow"])
+                        if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                            if endPointID != "-1" {
+                                updateUiDelegate?.updateUi(info: ["function": "setLevelIndicatorFillColor", "fn": "CreateEndpoints-\(endpointCurrent)", "endpointType": endpointType, "fillColor": NSColor.systemYellow])
+                            }
+                        }
+                        
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] ---------- status code ----------") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] \(httpResponse.statusCode)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] ---------- response data ----------\n\(responseData)") }
+                        if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] -----------------------------------\n") }
+                        
+                        updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "fail", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
+                    }
+                    
+                    if Setting.fullGUI && Summary.totalCompleted == endpointCount {
+                        if Summary.totalFailed == 0 {
+                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
+                        } else if Summary.totalFailed == endpointCount {
+                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
+                            }
                         }
                     }
-                    if endpointCurrent == endpointCount {
-                        WriteToLog.shared.message("[removeEndpoints] Last item in \(localEndPointType) complete.")
-                        nodesMigrated += 1
-                        //            print("remove nodes complete: \(nodesMigrated)")
+                    completion("remove func: \(endpointCurrent) of \(endpointCount) complete.")
+                } else {
+                    // update global counters - no http response
+                    updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "fail", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
+                    
+                    if Setting.fullGUI && Summary.totalCompleted == endpointCount {
+                        if Summary.totalFailed == 0 {
+                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
+                        } else if Summary.totalFailed == endpointCount {
+                            updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "red"])
+                            if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
+                                PutLevelIndicator.shared.indicatorColor[endpointType] = .systemRed
+                                updateUiDelegate?.updateUi(info: ["function": "put_levelIndicator", "fillColor": PutLevelIndicator.shared.indicatorColor[endpointType] as Any])
+                            }
+                        }
                     }
-                })  // let task = session.dataTask - end
-                task.resume()
-                
-                // Wait until task completes before exiting the Operation
-                semaphore.wait()
-            }   // removeObjectQ.addOperation - end
+                    completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
+                }
+                              
+                if endpointCurrent > 0 {
+                    if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] endpoint: \(localEndPointType)-\(endpointCurrent)\t Total: \(endpointCount)\t Succeeded: \(Counter.shared.postSuccess)\t Failed: \(Summary.totalFailed)\t SuccessArray \(Counter.shared.progressArray["\(localEndPointType)"] ?? 0)") }
+                }
+                if error != nil {
+                }
+
+                if endpointCurrent == endpointCount {
+                    if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Last item in \(localEndPointType) complete.") }
+                    nodesMigrated+=1
+                }
+            })
+            task.resume()
+            semaphore.wait()
         }
     }
 }
