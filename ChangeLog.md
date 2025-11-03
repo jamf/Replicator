@@ -4,6 +4,7 @@
 Address issue #127 - better handling of nested smart groups. Automatically re-try failures due to a dependency of another group.
 Improved display of the summary.
 Added option to perform a dry run. See what objects the replication will attempt to create or update. Can be used to help identify differences between the source and destination instances (issue #40).
+Fix issue when failover url is entered for the destination instance.
 
 **v8.3.0**: 2025-10-06<br>
 Address issue #123 - crash while exporting: macOS - Patch Management
