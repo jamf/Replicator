@@ -46,7 +46,7 @@ final class Counter {
     
     var completedObjectTypes: Set<String> = []
     
-    var createRetry          = [String:Int]()
+    var createDeleteRetry          = [String:Int]()
     var progressArray        = [String:Int]() // track if post/put was successful
     var postSuccess          = 0
 
@@ -1506,8 +1506,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         if LogLevel.debug { WriteToLog.shared.message("[ViewController.startMigrating] enter") }
         pref.stopMigration = false
-        Counter.shared.createRetry.removeAll()
-        Counter.shared.createRetry.removeAll()
+        Counter.shared.createDeleteRetry.removeAll()
+        Counter.shared.createDeleteRetry.removeAll()
         nodesComplete      = 0
         getNodesComplete   = 0
         ToMigrate.rawCount = 0

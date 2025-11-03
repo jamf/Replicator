@@ -329,21 +329,21 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                             Counter.shared.postSuccess = 0
                         }   // look to see if we are processing the next localEndPointType - end
                         
-                        if let _ = counter.createRetry["\(localEndPointType)-\(sourceEpId)"] {
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
-                            if counter.createRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
+                        if let _ = counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] {
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]! += 1
+                            if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]! > 3 {
                                 whichError = "skip"
-                                counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                                 WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] migration of id:\(sourceEpId) failed, retry count exceeded.")
                             }
                         } else {
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                         }
                                                     
                         if httpResponse.statusCode > 199 && httpResponse.statusCode <= 299 {
                             WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(action) succeeded: \(getName(endpoint: endpointType, objectXML: endPointXML).xmlDecode)")
                             
-                            counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                            counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                             
                             if endpointCurrent == 1 && !retry {
                                 migrationComplete.isDone = false
@@ -435,7 +435,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                     
                             case "Duplicate serial number", "Duplicate MAC address":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without serial and MAC address (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["alt_mac_address", "mac_address", "serial_number"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -446,7 +446,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "category":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the category (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["category"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -456,7 +456,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with department in location":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the department (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["department"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -466,7 +466,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 }
                                 
                             case "Problem with building in location":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the building (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["building"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: false)
@@ -478,7 +478,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 
                             // retry network segment without distribution point
                             case "Problem in assignment to distribution point":
-                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
+                                WriteToLog.shared.message("    [CreateEndpoints] [\(localEndPointType)] \(getName(endpoint: endpointType, objectXML: endPointXML)) - Conflict (\(httpResponse.statusCode)).  \(localErrorMsg).  Will retry without the distribution point (retry count: \(counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"]!)).")
                                 var tmp_endPointXML = endPointXML
                                 for xmlTag in ["distribution_point", "url"] {
                                     tmp_endPointXML = RemoveData.shared.Xml(theXML: tmp_endPointXML, theTag: xmlTag, keepTags: true)
@@ -503,7 +503,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                 // 409 - unable to create object; already exists or data missing or xml error
                                 
                                 // update global counters
-                                counter.createRetry["\(localEndPointType)-\(sourceEpId)"] = 0
+                                counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] = 0
                                 
 //                                let localTmp = (Counter.shared.crud[endpointType]?["fail"])!
 //                                Counter.shared.crud[endpointType]?["fail"] = localTmp + 1
@@ -538,7 +538,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
                         Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                         
-                        if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
+                        if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0 && updateSent  {
 
                             if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                                 if destEpId != "-1" {
@@ -582,7 +582,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     Summary.totalFailed    = Counter.shared.crud[endpointType]?["fail"] ?? 0
                     Summary.totalCompleted = Summary.totalCreated + Summary.totalUpdated + Summary.totalFailed
                     
-                    if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
+                    if counter.createDeleteRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
 //                                print("[CreateEndpoints] counters: \(counters)")
                         if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
                             if destEpId != "-1" {
