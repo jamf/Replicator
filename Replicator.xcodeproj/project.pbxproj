@@ -63,6 +63,7 @@
 		CEE65A312CB95527002AB294 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A302CB95521002AB294 /* Utilities.swift */; };
 		CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */; };
 		CEF467D62EB8413200160D32 /* EndpointData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF467D52EB8413200160D32 /* EndpointData.swift */; };
+		CEF467D82EB8444B00160D32 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF467D72EB8444B00160D32 /* SummaryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -128,6 +129,7 @@
 		CEE65A302CB95521002AB294 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; };
 		CEF467D52EB8413200160D32 /* EndpointData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointData.swift; sourceTree = "<group>"; };
+		CEF467D72EB8444B00160D32 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
 		CEF52FD32CD7DB7A000F1E5A /* Functions */ = {isa = PBXFileReference; lastKnownFileType = text; path = Functions; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -200,6 +202,7 @@
 				B56CBA89277B939100F26E8C /* SaveDelegate.swift */,
 				B5C993BF230E211100558040 /* Sites.swift */,
 				B56CA91728E88DE200236A8A /* SourceDestVC.swift */,
+				CEF467D72EB8444B00160D32 /* SummaryView.swift */,
 				B5B4FAFB1FF0B21C0007BD34 /* SummaryViewController.swift */,
 				B58CCCD2249B016100AD0052 /* TimeDelegate.swift */,
 				B5927AFB20CC394F0059C25B /* VersionCheck.swift */,
@@ -390,6 +393,7 @@
 				CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */,
 				CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */,
 				9BC01C621DFB0C07007E634E /* ViewController.swift in Sources */,
+				CEF467D82EB8444B00160D32 /* SummaryView.swift in Sources */,
 				CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */,
 				CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */,
 				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
