@@ -28,8 +28,6 @@ class DeleteObject: NSObject {
 class RemoveObjects: NSObject, URLSessionDelegate {
     
     static let shared = RemoveObjects()
-    // Removed: var localEndPointType = ""
-    // Removed: var endpointPath      = ""
     
     let counter = Counter()
     var deleteObjectsArray: [DeleteObject] = []
@@ -142,8 +140,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         
         if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Removing: \(endpointType), - name: \(endpointName), id: \(endPointID)") }
 
-        var workingUrl = JamfProServer.url["dest"] ?? createDestUrlBase
-//        var workingUrl = "\(createDestUrlBase)"
+        var workingUrl = JamfProServer.url["dest"] ?? createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: "")
         
         // LOCAL state for this operation only
         let localEndPointType: String = {
