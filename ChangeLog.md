@@ -1,5 +1,8 @@
 # Replicator - Change Log
 
+**v8.4.0**: 2025-11-06<br>
+Address issue #128 - app is now notarized.
+
 **v8.4.0**: 2025-11-03<br>
 Address issue #127 - better handling of nested smart groups. Automatically re-try failures due to a dependency of another group.
 Improved display of the summary.
