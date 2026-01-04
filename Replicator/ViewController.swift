@@ -6329,9 +6329,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
         }
         
-        let appVersion = AppInfo.version
         let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        WriteToLog.shared.message("Running \(AppInfo.name) v\(appVersion) build: \(appBuild )")
+        
+        WriteToLog.shared.message("-------------------------------------------------------")
+        WriteToLog.shared.message("    Replicator: v\(AppInfo.version) Build: \(appBuild)")
+        WriteToLog.shared.message("-------------------------------------------------------")
+        WriteToLog.shared.message("TelemetryDeck: \(userDefaults.bool(forKey: "optOut") ? "disabled" : "enabled")")
         
         if !Setting.fullGUI {
             WriteToLog.shared.message("Running silently")
