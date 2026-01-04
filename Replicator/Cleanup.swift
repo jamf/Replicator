@@ -8,6 +8,7 @@
 
 import Foundation
 import os.log
+import TelemetryDeck
 
 class Cleanup: NSObject {
     
@@ -111,8 +112,13 @@ class Cleanup: NSObject {
             }
         }
         
+        Task {@MainActor in
+            TelemetryDeckConfig.parameters[endpoint] = "replicate"
+        }
+        
         CreateEndpoints.shared.jpapi(endpointType: theEndpoint, endPointJSON: JSONData, endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, sourceEpId: endpointID, destEpId: destEpId, ssIconName: "", ssIconId: "", ssIconUri: "", retry: false) {
             (result: String) in
+            
             if LogLevel.debug { WriteToLog.shared.message("[endPointByID] \(result)") }
             if endpointCurrent == endpointCount {
                 completion("last")
@@ -391,7 +397,7 @@ class Cleanup: NSObject {
             
         case "directorybindings", "ldapservers","distributionpoints":
             if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] processing \(endpoint) - verbose") }
-            var credentialsArray = [String]()
+//            var credentialsArray = [String]()
             var newPasswordXml   = ""
 
             switch endpoint {
@@ -693,8 +699,14 @@ class Cleanup: NSObject {
                     PostXML = PostXML.replacingOccurrences(of: sourceUUID, with: destUUID)
                 }
                 
+                Task {@MainActor in
+                    TelemetryDeckConfig.parameters[endpoint] = "replicate"
+                }
+                
                 CreateEndpoints.shared.queue(endpointType: theEndpoint, endpointName: destEpName, endPointXML: PostXML, endpointCurrent: Int(endpointCurrent), endpointCount: endpointCount, action: action, sourceEpId: Int(endpointID)!, destEpId: "\(destEpId)", ssIconName: iconName, ssIconId: iconId, ssIconUri: iconUri, retry: false) {
                     (result: String) in
+                    
+                    
                     if LogLevel.debug { WriteToLog.shared.message("[cleanUpXml] call to createEndpointsQueue result: \(result)") }
                     if endpointCurrent == endpointCount {
 //                        print("completed \(endpointCurrent) of \(endpointCount) - created last endpoint")

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -59,6 +59,8 @@
 		CE9720C22E57633C00D45718 /* PreferencesTabVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9720C12E57632D00D45718 /* PreferencesTabVC.swift */; };
 		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
 		CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */; };
+		CEDE633D2EEBBBC4004A58C9 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = CEDE633C2EEBBBC4004A58C9 /* TelemetryDeck */; };
+		CEDE633F2EEBCD06004A58C9 /* TelemetryDeckConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDE633E2EEBCCFE004A58C9 /* TelemetryDeckConfig.swift */; };
 		CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A2E2CB953BE002AB294 /* Headless.swift */; };
 		CEE65A312CB95527002AB294 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A302CB95521002AB294 /* Utilities.swift */; };
 		CEE65A352CC37062002AB294 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */; };
@@ -125,6 +127,7 @@
 		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
 		CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDelegate.swift; sourceTree = "<group>"; };
 		CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchManagementApi.swift; sourceTree = "<group>"; };
+		CEDE633E2EEBCCFE004A58C9 /* TelemetryDeckConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryDeckConfig.swift; sourceTree = "<group>"; };
 		CEE65A2E2CB953BE002AB294 /* Headless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headless.swift; sourceTree = "<group>"; };
 		CEE65A302CB95521002AB294 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		CEE65A342CC37052002AB294 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; };
@@ -139,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B53796CA2273FFBA0006C1E4 /* WebKit.framework in Frameworks */,
+				CEDE633D2EEBBBC4004A58C9 /* TelemetryDeck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,6 +170,7 @@
 		9BC01C5E1DFB0C07007E634E /* Replicator */ = {
 			isa = PBXGroup;
 			children = (
+				CEDE633E2EEBCCFE004A58C9 /* TelemetryDeckConfig.swift */,
 				CE03BFC42E101006000EADA9 /* Queues.swift */,
 				CE310A602D10BACD007C2C6F /* Cleanup.swift */,
 				CE310A622D10BAD9007C2C6F /* CreateEndpoints.swift */,
@@ -335,6 +340,9 @@
 				Base,
 			);
 			mainGroup = 9BC01C531DFB0C07007E634E;
+			packageReferences = (
+				CEDE633B2EEBBBC4004A58C9 /* XCRemoteSwiftPackageReference "SwiftSDK" */,
+			);
 			productRefGroup = 9BC01C5D1DFB0C07007E634E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -401,6 +409,7 @@
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,
 				B51742DA28FB4F2B0058ED55 /* CustomSeparator.swift in Sources */,
 				CE310A672D10BAFC007C2C6F /* ExistingObjects.swift in Sources */,
+				CEDE633F2EEBCD06004A58C9 /* TelemetryDeckConfig.swift in Sources */,
 				B556A79E2773A100003CBEE9 /* Alert.swift in Sources */,
 				CE1935B22D852A830065862C /* LastUser.swift in Sources */,
 				B54154FF2BD8597700084439 /* Package.swift in Sources */,
@@ -569,7 +578,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
@@ -589,9 +599,12 @@
 				INFOPLIST_FILE = Replicator/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.4.1;
+				MARKETING_VERSION = 8.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -615,9 +628,12 @@
 				INFOPLIST_FILE = Replicator/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Replicator;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.4.1;
+				MARKETING_VERSION = 8.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -647,6 +663,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CEDE633B2EEBBBC4004A58C9 /* XCRemoteSwiftPackageReference "SwiftSDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftSDK";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CEDE633C2EEBBBC4004A58C9 /* TelemetryDeck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CEDE633B2EEBBBC4004A58C9 /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryDeck;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9BC01C541DFB0C07007E634E /* Project object */;
 }

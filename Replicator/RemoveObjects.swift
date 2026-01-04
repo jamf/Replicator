@@ -35,6 +35,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     
     var destEPQ       = DispatchQueue(label: "com.jamf.destEPs", qos: DispatchQoS.utility)
     var updateUiDelegate: UpdateUiDelegate?
+    var updateListSelectionDelegate: UpdateListSelectionDelegate?
     
     func queue(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int) {
         logFunctionCall()
@@ -122,6 +123,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
     }
     
     func process(endpointType: String, endPointID: String, endpointName: String, endpointCurrent: Int, endpointCount: Int, completion: @escaping (_ result: String) -> Void) {
+        
+        if endPointID == "-1" { return }
+        
         logFunctionCall()
         
         if pref.stopMigration {
@@ -140,6 +144,10 @@ class RemoveObjects: NSObject, URLSessionDelegate {
 
         var workingUrl = JamfProServer.url["dest"] ?? createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: "")
         
+        Task {@MainActor in
+            TelemetryDeckConfig.parameters[endpointType] = "remove"
+        }
+        
         let localEndPointType: String = {
             switch endpointType {
             case "smartcomputergroups", "staticcomputergroups":
@@ -153,6 +161,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             }
         }()
         
+//        print("[RemoveObject] endpointType: \(endpointType)")
         let endpointPath: String = {
             switch endpointType {
             case "api-integrations", "api-roles":
@@ -163,16 +172,17 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                 return "/api/v2/\(endpointType)/\(endPointID)"
             case "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
                 return "/JSSResource/\(localEndPointType)/id/\(endPointID)"
-            case "jamfusers":
+            case "jamfusers", "accounts/userid":
                 return "/JSSResource/accounts/userid/\(endPointID)"
-            case "jamfgroups":
+            case "jamfgroups", "accounts/groupid":
                 return "/JSSResource/accounts/groupid/\(endPointID)"
             default:
                 return "/JSSResource/\(endpointType)/id/\(endPointID)"
             }
         }()
         
-        print("[RemoveObjects.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
+//        print("[RemoveObject.capi]    endpointPath: \(endpointPath)")
+//        print("[RemoveObjects.capi] AppInfo.dryRun: \(AppInfo.dryRun)")
         
         if AppInfo.dryRun {
             updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "create", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
@@ -261,6 +271,9 @@ class RemoveObjects: NSObject, URLSessionDelegate {
                             }
                         }
                         updateCounts(endpointType: endpointType, localEndPointType: localEndPointType, endpointName: endpointName, result: "create", endpointCount: endpointCount, endpointCurrent: endpointCurrent, endPointID: endPointID)
+                        
+                        // update view
+                        updateListSelectionDelegate?.updateListSelection(objectId: endPointID, endpointType: localEndPointType)
                         
                     } else {
                         // remove failed

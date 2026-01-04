@@ -10,6 +10,7 @@ import AppKit
 import Cocoa
 import Foundation
 import SwiftUI
+import TelemetryDeck
 
 final class Summary: NSObject {
     // counters for CreateEndpoints
@@ -378,8 +379,11 @@ protocol UpdateUiDelegate: AnyObject {
     func updateUi(info: [String: Any])
 }
 
-class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate, SendMessageDelegate, GetStatusDelegate, UpdateUiDelegate {
-    
+protocol UpdateListSelectionDelegate: AnyObject {
+    func updateListSelection(objectId: String, endpointType: String)
+}
+
+class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate, SendMessageDelegate, GetStatusDelegate, UpdateUiDelegate, UpdateListSelectionDelegate {
     
     
     func updateUi(info: [String : Any]) {
@@ -442,12 +446,35 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
     }
     
-    
     func sendMessage(_ message: String) {
         logFunctionCall()
 //        print("[sendMessage] message: \(message)")
         DispatchQueue.main.async {
             self.message_TextField.stringValue = message
+        }
+    }
+    
+    func updateListSelection(objectId: String, endpointType: String = "") {
+        if migrationMode == "selective" {
+            //                                print("endPointID: \(endPointID)")
+            if let lineNumber = (sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: {$0.objectId == objectId}), let objectToRemove = (sourceObjectList_AC.arrangedObjects as? [SelectiveObject])?[lineNumber].objectName {
+                
+                //                                        print("[removeEndpoints] staticSourceDataArray:\(staticSourceDataArray)")
+                let staticLineNumber = ( endpointType == "policies" ) ? DataArray.staticSource.firstIndex(of: "\(objectToRemove) (\(objectId))")!:DataArray.staticSource.firstIndex(of: objectToRemove)!
+                DataArray.staticSource.remove(at: staticLineNumber)
+                
+                DispatchQueue.main.async { [self] in
+                    
+                    var objectIndex = (self.sourceObjectList_AC.arrangedObjects as! [SelectiveObject]).firstIndex(where: { $0.objectName == objectToRemove })
+                    sourceObjectList_AC.remove(atArrangedObjectIndex: objectIndex!)
+                    objectIndex = staticSourceObjectList.firstIndex(where: { $0.objectId == objectId })
+                    staticSourceObjectList.remove(at: objectIndex!)
+                    
+                    srcSrvTableView.isEnabled = false
+                }
+            } else {
+                print("[updateListSelection] \(endpointType) with id \(objectId) not found")
+            }
         }
     }
     
@@ -1198,6 +1225,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         Counter.shared.crud.removeAll()
         Counter.shared.summary.removeAll()
         currentEPDict.removeAll()
+        
+        TelemetryDeckConfig.parameters["ReplicatorSessionType"]       = (Setting.fullGUI) ? "interactive" : "commandLine"
+        TelemetryDeckConfig.parameters["ReplicatorSessionSource"]     = (JamfProServer.importFiles == 0) ? "server" : "folder"
+        TelemetryDeckConfig.parameters["ReplicatorSessionOperation"]  = (WipeData.state.on) ? "remove" : "replicate"
+        TelemetryDeckConfig.parameters["ReplicatorSessionThreads"]    = "\(maxConcurrentThreads)"
         
         if Setting.fullGUI {
             if WipeData.state.on && export.saveOnly {
@@ -4523,7 +4555,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
             if LogLevel.debug { WriteToLog.shared.message("[getDependencies] dependencies: \(fullDependencyDict)") }
             WriteToLog.shared.message("[getDependencies] complete")
-            var tmpCount = 1
+//            var tmpCount = 1
 //            DispatchQueue.global(qos: .utility).async { [self] in
 //                while waitForPackageLookup && tmpCount <= 60 {
 //                    //                print("trying to resolve package filename(s), attempt \(tmpCount)")
@@ -4717,6 +4749,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 }
 //                print("[\(#function)] \(#line) - finished")
                 goButtonEnabled(button_status: true)
+            
+            // post finished action
+            print("[runComplete] - sending signal - params: \(TelemetryDeckConfig.parameters)")
+            Task {@MainActor in
+                TelemetryDeckSignal.shared.send("replicate", parameters: TelemetryDeckConfig.parameters)
+            }
                 
                 if Setting.fullGUI {
                     DispatchQueue.main.async { [self] in
@@ -5488,7 +5526,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }   // theUploadQ.addOperation - end
             // end upload procdess
                     
-                        
         default:
             WriteToLog.shared.message("[iconMigrate.\(action)] skipping icon: \(ssIconName).")
             completion(200)
@@ -6090,14 +6127,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         logFunctionCall()
         
         // needed for protocols
-        Cleanup.shared.updateUiDelegate            = self
-        CreateEndpoints.shared.updateUiDelegate    = self
-        EndpointData.shared.updateUiDelegate       = self
-        EndpointData.shared.getStatusDelegate      = self
-        ExistingObjects.shared.updateUiDelegate    = self
-        RemoveObjects.shared.updateUiDelegate      = self
-        PatchDelegate.shared.messageDelegate       = self
-        PatchManagementApi.shared.updateUiDelegate = self
+        Cleanup.shared.updateUiDelegate                  = self
+        CreateEndpoints.shared.updateUiDelegate          = self
+        EndpointData.shared.updateUiDelegate             = self
+        EndpointData.shared.getStatusDelegate            = self
+        ExistingObjects.shared.updateUiDelegate          = self
+        RemoveObjects.shared.updateUiDelegate            = self
+        RemoveObjects.shared.updateListSelectionDelegate = self
+        PatchDelegate.shared.messageDelegate             = self
+        PatchManagementApi.shared.updateUiDelegate       = self
         
         if Setting.fullGUI {
             Setting.onlyCopyMissing  = (userDefaults.integer(forKey: "copyMissing")  == 1) ? true:false
