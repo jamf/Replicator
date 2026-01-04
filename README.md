@@ -1,5 +1,5 @@
 
-# Replicator (formerly known as Jamf Migrator)
+# Replicator
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamf/Replicator?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/jamf/Replicator/total) ![GitHub latest](https://img.shields.io/github/downloads/jamf/Replicator/latest/total)
  ![GitHub issues](https://img.shields.io/github/issues-raw/jamf/Replicator) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/jamf/Replicator) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jamf/Replicator) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/jamf/JamfMigrator)
