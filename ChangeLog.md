@@ -1,5 +1,9 @@
 # Replicator - Change Log
 
+**v8.5.2**: 2026-01-05<br>
+Correct instructions to opt out of telemetry data.
+To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> App window.
+
 **v8.5.1**: 2026-01-04<br>
 Address issue removing jamf users/groups. 
 Starting with version 8.5.1 the application will submit basic hardware, OS, and Replicator application usage to [TelemetryDeck](https://telemetrydeck.com). The data is sent anamously and used to aid in the development of the application. To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the 'About Replicator' window.

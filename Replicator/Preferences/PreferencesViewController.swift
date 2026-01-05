@@ -65,6 +65,13 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var colorScheme_button: NSPopUpButton!
     @IBOutlet weak var sourceDestListSize_button: NSPopUpButton!
     
+    @IBOutlet weak var optOut_button: NSButton!
+    
+    @IBAction func optOut_action(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "optOut")
+        TelemetryDeckConfig.optOut = (sender.state == .on)
+    }
+    
     // computer prefs
     @IBOutlet weak var migrateAsManaged_button: NSButton!
     @IBOutlet weak var prefMgmtAcct_label: NSTextField!
@@ -626,6 +633,8 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             maskServerNames_button.state = NSControl.StateValue(userDefaults.integer(forKey: "maskServerNames"))
             let currentTitle = userDefaults.string(forKey: "colorScheme")
             colorScheme_button.selectItem(withTitle: currentTitle ?? "default")
+            
+            optOut_button.state = UserDefaults.standard.bool(forKey: "optOut") ? .on : .off
         }
         
         _ = readSettings()

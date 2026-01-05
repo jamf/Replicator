@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24128" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="416-qt-7e7">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24128"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -297,8 +297,8 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button identifier="ebooks" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9xC-9l-SEL">
-                                <rect key="frame" x="199" y="205" width="16" height="16"/>
+                            <button identifier="ebooks" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9xC-9l-SEL">
+                                <rect key="frame" x="200" y="205" width="16" height="16"/>
                                 <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Hdl-vf-WQp">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -370,6 +370,7 @@
                             <constraint firstItem="XAu-sC-Mnj" firstAttribute="top" secondItem="LRe-g2-dkk" secondAttribute="bottom" constant="3" id="rZr-NK-1gW"/>
                             <constraint firstItem="P00-bS-tUP" firstAttribute="trailing" secondItem="ZZh-fo-lgG" secondAttribute="trailing" id="t9E-xR-GBw"/>
                             <constraint firstItem="PXK-Kc-C3v" firstAttribute="leading" secondItem="Dko-mv-Um3" secondAttribute="leading" id="tfB-Rk-ENM"/>
+                            <constraint firstItem="9xC-9l-SEL" firstAttribute="leading" secondItem="Ogj-kd-mkk" secondAttribute="leading" id="tiE-iM-iyi"/>
                             <constraint firstItem="xg2-BE-LE0" firstAttribute="leading" secondItem="PXK-Kc-C3v" secondAttribute="leading" id="vPc-9u-3cQ"/>
                             <constraint firstItem="ABb-3i-F1Z" firstAttribute="leading" secondItem="RHL-Es-p2H" secondAttribute="leading" constant="29" id="vz6-B2-VHU"/>
                             <constraint firstItem="Ogj-kd-mkk" firstAttribute="centerY" secondItem="XAu-sC-Mnj" secondAttribute="centerY" id="ylK-yp-Xw1"/>
@@ -888,8 +889,8 @@ DQ
                                     <constraint firstAttribute="trailing" secondItem="9PZ-bZ-J5d" secondAttribute="trailing" constant="8" id="xkJ-8U-CPZ"/>
                                 </constraints>
                             </customView>
-                            <box verticalHuggingPriority="750" ambiguous="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="XxL-pK-0D1">
-                                <rect key="frame" x="-1" y="299" width="397" height="5"/>
+                            <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="XxL-pK-0D1">
+                                <rect key="frame" x="0.0" y="299" width="397" height="5"/>
                             </box>
                             <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yTp-YW-njo">
                                 <rect key="frame" x="10" y="10" width="20" height="20"/>
@@ -905,8 +906,8 @@ DQ
                                     <segue destination="i5S-7J-ZDq" kind="popover" popoverAnchorView="yTp-YW-njo" popoverBehavior="t" preferredEdge="maxY" id="IA4-cU-lec"/>
                                 </connections>
                             </button>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TXP-lz-hEX">
-                                <rect key="frame" x="155" y="18" width="51" height="16"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TXP-lz-hEX">
+                                <rect key="frame" x="158" y="18" width="49" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="eBooks" id="zmx-4g-u9C">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -959,6 +960,7 @@ DQ
                             <constraint firstItem="X1H-zR-VZP" firstAttribute="centerY" secondItem="zpT-VE-Axt" secondAttribute="centerY" id="bnr-ZH-uH5"/>
                             <constraint firstItem="Zuf-Wg-i8g" firstAttribute="centerX" secondItem="btl-X1-946" secondAttribute="centerX" id="cFI-IW-P1Z"/>
                             <constraint firstItem="lB3-jA-Znx" firstAttribute="leading" secondItem="CcJ-hQ-jxu" secondAttribute="leading" id="ckz-RU-YDF"/>
+                            <constraint firstItem="TXP-lz-hEX" firstAttribute="trailing" secondItem="4v8-Oc-oSL" secondAttribute="trailing" id="d6B-pS-W46"/>
                             <constraint firstAttribute="bottom" secondItem="yTp-YW-njo" secondAttribute="bottom" constant="10" id="eyK-FK-JqD"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="trailing" secondItem="Ric-zN-kUj" secondAttribute="trailing" id="fRJ-2l-UTv"/>
                             <constraint firstItem="avV-mJ-MqM" firstAttribute="top" secondItem="dgp-nw-6rc" secondAttribute="bottom" constant="8" id="fla-ht-Z8X"/>
@@ -977,7 +979,9 @@ DQ
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="top" secondItem="VIh-bS-JeH" secondAttribute="bottom" constant="8" id="s24-TY-iCm"/>
                             <constraint firstItem="ttC-oY-fk2" firstAttribute="top" secondItem="btl-X1-946" secondAttribute="top" constant="21" id="sgv-pD-C1P"/>
                             <constraint firstItem="VIh-bS-JeH" firstAttribute="top" secondItem="Ric-zN-kUj" secondAttribute="bottom" constant="8" id="t6f-vc-6jk"/>
+                            <constraint firstItem="XxL-pK-0D1" firstAttribute="leading" secondItem="btl-X1-946" secondAttribute="leading" id="uKX-ER-Sf6"/>
                             <constraint firstItem="PYt-cK-DKX" firstAttribute="trailing" secondItem="VIh-bS-JeH" secondAttribute="trailing" id="w4r-65-eVJ"/>
+                            <constraint firstAttribute="trailing" secondItem="XxL-pK-0D1" secondAttribute="trailing" id="xhW-eE-e28"/>
                             <constraint firstItem="lB3-jA-Znx" firstAttribute="trailing" secondItem="CcJ-hQ-jxu" secondAttribute="trailing" id="y2Z-I6-Y4f"/>
                             <constraint firstItem="dgp-nw-6rc" firstAttribute="trailing" secondItem="X1H-zR-VZP" secondAttribute="trailing" id="zVj-wl-tdK"/>
                             <constraint firstItem="dgp-nw-6rc" firstAttribute="top" secondItem="X1H-zR-VZP" secondAttribute="bottom" constant="8" id="zwA-qB-iNa"/>
@@ -1044,11 +1048,11 @@ Moving an object will not change any of the names. Moving an object to a site on
             <objects>
                 <viewController title="App" id="Ojm-Op-AKi" customClass="PreferencesViewController" customModule="Replicator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Rdg-70-UCl" userLabel="app View">
-                        <rect key="frame" x="0.0" y="0.0" width="400" height="274"/>
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="282"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y1Q-0c-cgq">
-                                <rect key="frame" x="34" y="234" width="190" height="16"/>
+                                <rect key="frame" x="34" y="242" width="190" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="186" id="b3G-tv-iiR"/>
                                 </constraints>
@@ -1059,14 +1063,14 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zj6-mi-35l">
-                                <rect key="frame" x="36" y="215" width="186" height="16"/>
+                                <rect key="frame" x="36" y="223" width="186" height="16"/>
                                 <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="2" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="b6v-fU-bJh"/>
                                 <connections>
                                     <action selector="concurrentThreads_action:" target="Ojm-Op-AKi" id="PYX-8Z-3hn"/>
                                 </connections>
                             </slider>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mty-65-1H0">
-                                <rect key="frame" x="223" y="235" width="4" height="16"/>
+                                <rect key="frame" x="223" y="243" width="4" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="ZfT-OJ-e9T">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1074,7 +1078,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gi8-H0-WPJ">
-                                <rect key="frame" x="34" y="116" width="108" height="16"/>
+                                <rect key="frame" x="34" y="124" width="108" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Log files to keep:" id="FeE-7Y-IiA">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1082,7 +1086,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GJ0-5l-PEg">
-                                <rect key="frame" x="147" y="112" width="54" height="24"/>
+                                <rect key="frame" x="147" y="120" width="56" height="24"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="GFB-9j-KGo">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1090,7 +1094,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7nu-gl-e0B">
-                                <rect key="frame" x="34" y="155" width="92" height="16"/>
+                                <rect key="frame" x="34" y="163" width="92" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Color scheme:" id="0eQ-rJ-zhy">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1098,7 +1102,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="afe-0d-eps">
-                                <rect key="frame" x="130" y="147" width="88" height="24"/>
+                                <rect key="frame" x="130" y="155" width="90" height="24"/>
                                 <popUpButtonCell key="cell" type="push" title="default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5f8-q8-Iy9" id="7MV-VN-2fF">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -1117,7 +1121,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kSv-WF-lic">
-                                <rect key="frame" x="36" y="183" width="144" height="16"/>
+                                <rect key="frame" x="36" y="191" width="144" height="16"/>
                                 <buttonCell key="cell" type="check" title="Use Sticky Sessions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="k0q-qf-jbZ">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1127,7 +1131,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tfZ-9j-G6D">
-                                <rect key="frame" x="34" y="54" width="136" height="16"/>
+                                <rect key="frame" x="34" y="62" width="136" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Servers to remember:" id="ULg-f3-0Eq">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1135,7 +1139,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cxh-uB-wNS">
-                                <rect key="frame" x="174" y="50" width="45" height="24"/>
+                                <rect key="frame" x="174" y="58" width="58" height="24"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ifK-rp-GoD">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
@@ -1146,7 +1150,7 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iTN-Ij-5Sn">
-                                <rect key="frame" x="36" y="87" width="201" height="16"/>
+                                <rect key="frame" x="36" y="95" width="201" height="16"/>
                                 <buttonCell key="cell" type="check" title="Mask server names in the log" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Xf4-03-eOF">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1157,6 +1161,16 @@ Moving an object will not change any of the names. Moving an object to a site on
                                 </constraints>
                                 <connections>
                                     <action selector="maskServerNames_action:" target="Ojm-Op-AKi" id="4lO-gg-v9H"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="E1d-YM-1g2">
+                                <rect key="frame" x="36" y="24" width="164" height="19"/>
+                                <buttonCell key="cell" type="check" title="Opt out of analytics" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Xbo-Mh-RJP">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system" size="16"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="optOut_action:" target="Ojm-Op-AKi" id="O2f-oq-Rex"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -1176,12 +1190,14 @@ Moving an object will not change any of the names. Moving an object to a site on
                             <constraint firstItem="afe-0d-eps" firstAttribute="leading" secondItem="7nu-gl-e0B" secondAttribute="trailing" constant="6" id="arm-Dy-tnQ"/>
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="afe-0d-eps" secondAttribute="top" id="dGh-PC-Kuc"/>
                             <constraint firstItem="GJ0-5l-PEg" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="trailing" constant="7" id="f8Y-MI-FYW"/>
+                            <constraint firstItem="E1d-YM-1g2" firstAttribute="leading" secondItem="iTN-Ij-5Sn" secondAttribute="leading" id="iCG-cl-Ktd"/>
                             <constraint firstItem="tfZ-9j-G6D" firstAttribute="top" secondItem="iTN-Ij-5Sn" secondAttribute="bottom" constant="17" id="kdy-7m-eXe"/>
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="lCR-MU-4Hc"/>
                             <constraint firstItem="gi8-H0-WPJ" firstAttribute="baseline" secondItem="GJ0-5l-PEg" secondAttribute="baseline" id="laN-7Z-d2P"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="leading" secondItem="y1Q-0c-cgq" secondAttribute="trailing" constant="3" id="n0j-v7-2dv"/>
                             <constraint firstItem="mty-65-1H0" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="23" id="pmb-xu-xIu"/>
                             <constraint firstItem="7nu-gl-e0B" firstAttribute="top" secondItem="kSv-WF-lic" secondAttribute="bottom" constant="12" id="q0R-In-mMf"/>
+                            <constraint firstItem="E1d-YM-1g2" firstAttribute="top" secondItem="Cxh-uB-wNS" secondAttribute="bottom" constant="15" id="sLC-Lo-SeV"/>
                             <constraint firstItem="y1Q-0c-cgq" firstAttribute="top" secondItem="Rdg-70-UCl" secondAttribute="top" constant="24" id="t32-lQ-rKF"/>
                             <constraint firstItem="iTN-Ij-5Sn" firstAttribute="leading" secondItem="gi8-H0-WPJ" secondAttribute="leading" id="vKi-ap-edQ"/>
                             <constraint firstItem="Cxh-uB-wNS" firstAttribute="leading" secondItem="tfZ-9j-G6D" secondAttribute="trailing" constant="6" id="vrp-rp-vv7"/>
@@ -1193,13 +1209,14 @@ Moving an object will not change any of the names. Moving an object to a site on
                         <outlet property="concurrentThreads_textfield" destination="mty-65-1H0" id="G0F-WK-Ix3"/>
                         <outlet property="logFilesCountPref_textfield" destination="GJ0-5l-PEg" id="DiQ-A8-CZq"/>
                         <outlet property="maskServerNames_button" destination="iTN-Ij-5Sn" id="WyD-Xm-w0X"/>
+                        <outlet property="optOut_button" destination="E1d-YM-1g2" id="nr8-nw-Ozv"/>
                         <outlet property="sourceDestListSize_button" destination="Cxh-uB-wNS" id="Ju7-TF-lPb"/>
                         <outlet property="stickySession_button" destination="kSv-WF-lic" id="939-ML-Rru"/>
                     </connections>
                 </viewController>
                 <customObject id="Lin-gh-6s5" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="257" y="1002"/>
+            <point key="canvasLocation" x="257" y="1006"/>
         </scene>
         <!--Computer-->
         <scene sceneID="lJ7-RC-Kt4">

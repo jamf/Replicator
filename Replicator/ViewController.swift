@@ -6047,6 +6047,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     override func viewDidLoad() {
         logFunctionCall()
         super.viewDidLoad()
+        TelemetryDeckConfig.optOut = UserDefaults.standard.bool(forKey: "optOut")
                 
         srcSrvTableView.delegate = self
         srcSrvTableView.tableColumns.forEach { (column) in
