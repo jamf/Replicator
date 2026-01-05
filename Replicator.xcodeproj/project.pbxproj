@@ -604,7 +604,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.5.1;
+				MARKETING_VERSION = 8.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -633,7 +633,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 8.5.1;
+				MARKETING_VERSION = 8.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamf.jamf-migrator";
 				PRODUCT_NAME = Replicator;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
