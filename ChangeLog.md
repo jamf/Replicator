@@ -2,7 +2,7 @@
 
 **v8.5.2**: 2026-01-05<br>
 Correct instructions to opt out of telemetry data.
-To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> App window.
+To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> app window.
 
 **v8.5.1**: 2026-01-04<br>
 Address issue removing jamf users/groups. 

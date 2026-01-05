@@ -11,7 +11,7 @@ A tool to synchronize objects between Jamf Pro servers. Export objects and save 
 
 ![image](./Replicator/images/replicator1.png "Replicator")
 
-By default the application will submit basic hardware, OS, and jamfCPR application usage to [TelemetryDeck](https://telemetrydeck.com). The data is sent anamously and used to aid in the development of the application. To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> App window.
+By default the application will submit basic hardware, OS, and jamfCPR application usage to [TelemetryDeck](https://telemetrydeck.com). The data is sent anamously and used to aid in the development of the application. To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> app window.
 
 Replicate items from one Jamf server, or XML file(s), to another.  If an object (based on name) exists on both source and destination, the destination object will be updated with values from the source server.
 </br></br>
