@@ -4753,7 +4753,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             // post finished action
             print("[runComplete] - sending signal - params: \(TelemetryDeckConfig.parameters)")
             Task {@MainActor in
-                TelemetryDeckSignal.shared.send("replicate", parameters: TelemetryDeckConfig.parameters)
+                TelemetryDeckSignal.shared.send("runComplete", parameters: TelemetryDeckConfig.parameters)
             }
                 
                 if Setting.fullGUI {
