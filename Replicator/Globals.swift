@@ -91,9 +91,9 @@ class UiVar: NSObject {
 
 struct AppInfo {
     static let dict            = Bundle.main.infoDictionary!
-    static let version         = dict["CFBundleShortVersionString"] as? String ?? "unknown version"
-    static let build           = dict["CFBundleVersion"] as? String ?? "unknown build"
-    static let name            = dict["CFBundleExecutable"] as? String ?? "unknown name"
+    static let version         = dict["CFBundleShortVersionString"] as? String ?? "0.0.0"
+    static let build           = dict["CFBundleVersion"] as? String ?? "0"
+    static let name            = dict["CFBundleExecutable"] as? String ?? "unknown"
     static var bookmarks       = [URL: Data]()
     static let appSupportPath   = NSHomeDirectory() + "/Library/Application Support/Replicator"
     static let bookmarksPathOld   = NSHomeDirectory() + "/Library/Application Support/jamf-migrator/bookmarks"

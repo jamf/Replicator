@@ -6047,7 +6047,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     override func viewDidLoad() {
         logFunctionCall()
         super.viewDidLoad()
-        TelemetryDeckConfig.optOut = UserDefaults.standard.bool(forKey: "optOut")
+        TelemetryDeckConfig.optOut = userDefaults.bool(forKey: "optOut")
                 
         srcSrvTableView.delegate = self
         srcSrvTableView.tableColumns.forEach { (column) in
@@ -6329,11 +6329,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             Scope.usersCopy        = Setting.copyScope   // static user groups copy scope
             
         }
-        
-        let appBuild   = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        
+                
         WriteToLog.shared.message("-------------------------------------------------------")
-        WriteToLog.shared.message("    Replicator: v\(AppInfo.version) Build: \(appBuild)")
+        WriteToLog.shared.message("    Replicator: v\(AppInfo.version) Build: \(AppInfo.build)")
         WriteToLog.shared.message("-------------------------------------------------------")
         WriteToLog.shared.message("TelemetryDeck: \(userDefaults.bool(forKey: "optOut") ? "disabled" : "enabled")")
         
