@@ -2149,6 +2149,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 waitForDependencies  = false
                                 
                                 WriteToLog.shared.message("[startMigrating] call selectiveMigrationDelegate for selectedEndpoint: \(selectedEndpoint)")
+                                                                
                                 selectiveMigrationDelegate(objectIndex: 0, selectedEndpoint: selectedEndpoint)
                             }
                     }
@@ -2162,14 +2163,17 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         logFunctionCall()
         ObjectAndDependencies.records.removeAll()
         if migrateDependencies.state == .on {
-            
-//            var dependencyObjectList = [String: [SelectiveObject]]()
-            
+                        
             getDependencies(objectIndex: objectIndex, selectedEndpoint: selectedEndpoint, selectedObjectList: targetSelectiveObjectList) { [self] (result) in
 //                for objectInfo in result {
 //                    print("objectType: \(objectInfo.objectType) - objectName: \(objectInfo.objectName) - objectId: \(objectInfo.objectId)")
 ////                    dependencyObjectList[objectType] = objectInfo
 //                }
+                print("\n[selectiveMigrationDelegate] objectIndex: \(objectIndex)")
+                for dependency in ObjectAndDependencies.records {
+                    print("[selectiveMigrationDelegate] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
+                }
+                
                 startSelectiveMigration(objectIndex: objectIndex, objectAndDependencies: ObjectAndDependencies.records)
                 if objectIndex+1 < targetSelectiveObjectList.count {
                     selectiveMigrationDelegate(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
@@ -2185,6 +2189,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     func startSelectiveMigration(objectIndex: Int, objectAndDependencies: [ObjectAndDependency]) {
 //        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
+        print("[startSelectiveMigration] objectIndex: \(objectIndex)")
+        for dependency in objectAndDependencies {
+            print("[startSelectiveMigration] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
+        }
         
         logFunctionCall()
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
@@ -4362,11 +4370,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             
             var objectDict           = [String:Any]()
             var fullDependencyDict   = [String: [String:String]]()    // full list of dependencies of a single policy
-            //        var allDependencyDict  = [String: [String:String]]()    // all dependencies of all selected policies
+
             var dependencyArray      = [String:String]()
-//            var waitForPackageLookup = false
             
-//            if setting.migrateDependencies {
             var dependencyNode = ""
             
             print("look up dependencies for \(selectedEndpoint)")
@@ -4468,8 +4474,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                            if packages_dep.count > 0 { waitForPackageLookup = true }
                             var completedPackageLookups = 0
                             for theObject in packages_dep {
-                                //                             let local_name = (theObject as! [String:Any])["name"]
-                                //                             print("lookup package filename for display name \(String(describing: local_name!))")
                                 let local_id   = (theObject as! [String:Any])["id"]
                                 
                                 // todo - update to use jpapi packages?
@@ -4555,67 +4559,59 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
             if LogLevel.debug { WriteToLog.shared.message("[getDependencies] dependencies: \(fullDependencyDict)") }
             WriteToLog.shared.message("[getDependencies] complete")
-//            var tmpCount = 1
-//            DispatchQueue.global(qos: .utility).async { [self] in
-//                while waitForPackageLookup && tmpCount <= 60 {
-//                    //                print("trying to resolve package filename(s), attempt \(tmpCount)")
-//                    sleep(1)
-//                    tmpCount += 1
-//                }
-                
+            
             Dependencies.current.removeAll()
             for (theObject, _) in fullDependencyDict {
                 Dependencies.current.append(theObject)
             }
-                // put dependencies in order, then add parent
-                var lookupCount = 0
-                if allObjects.count == 0 {
-                    ObjectAndDependencies.records.append(ObjectAndDependency(objectType: selectedEndpoint, objectName: primaryObjName, objectId: objToMigrateId))
-                    completion(ObjectAndDependencies.records)
-                    return
-                }
-                for theObject in allObjects {
-                    if let dependencies = fullDependencyDict[theObject], dependencies.count > 0 {
-                        var skipLookup: Bool = false
-                        if theObject == selectedEndpoint {
-                            skipLookup = true
-                            lookupCount += 1
-                        }
-                        ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: theObject) { [self]
-                            (result: (String,String)) in
-                            ExistingEndpoints.shared.waiting = false
-                            let (_, theObjectType) = result
-//                            for (name, id) in dependencies {
-                            for (name, id) in fullDependencyDict[theObjectType] ?? [:] {
-                                ObjectAndDependencies.records.append(ObjectAndDependency(objectType: theObjectType, objectName: name, objectId: id))
-                            }
-                            lookupCount += 1
-                            if lookupCount == allObjects.count {
-                                ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: selectedEndpoint) {
-                                    (result: (String,String)) in
-                                    let (_, theObjectType) = result
-                                    let parentObject = (theObjectType == "patch-software-title-configurations") ? "patch-software-title-configurations":theObjectType
-                                    print("last theObjectType: \(theObjectType)")
-                                    ObjectAndDependencies.records.append(ObjectAndDependency(objectType: parentObject, objectName: primaryObjName, objectId: objToMigrateId))
-                                    completion(ObjectAndDependencies.records)
-                                }
-                            }
-                        }
-                    } else {
+            // put dependencies in order, then add parent
+            var lookupCount = 0
+            if allObjects.count == 0 {
+                ObjectAndDependencies.records.append(ObjectAndDependency(objectType: selectedEndpoint, objectName: primaryObjName, objectId: objToMigrateId))
+                completion(ObjectAndDependencies.records)
+                return
+            }
+            for theObject in allObjects {
+                if let dependencies = fullDependencyDict[theObject], dependencies.count > 0 {
+                    var skipLookup: Bool = false
+                    if theObject == selectedEndpoint {
+                        skipLookup = true
                         lookupCount += 1
-                        print("\(#line) theObject: \(theObject) - lookupCount: \(lookupCount) - allObjects: \(allObjects.count)")
+                    }
+                    ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: theObject) { [self]
+                        (result: (String,String)) in
+                        ExistingEndpoints.shared.waiting = false
+                        let (_, theObjectType) = result
+//                            for (name, id) in dependencies {
+                        for (name, id) in fullDependencyDict[theObjectType] ?? [:] {
+                            ObjectAndDependencies.records.append(ObjectAndDependency(objectType: theObjectType, objectName: name, objectId: id))
+                        }
+                        lookupCount += 1
                         if lookupCount == allObjects.count {
-                            ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: selectedEndpoint) {
+                            ExistingObjects.shared.capi(skipLookup: skipLookup, theDestEndpoint: selectedEndpoint) {
                                 (result: (String,String)) in
                                 let (_, theObjectType) = result
                                 let parentObject = (theObjectType == "patch-software-title-configurations") ? "patch-software-title-configurations":theObjectType
+                                print("last theObjectType: \(theObjectType)")
                                 ObjectAndDependencies.records.append(ObjectAndDependency(objectType: parentObject, objectName: primaryObjName, objectId: objToMigrateId))
                                 completion(ObjectAndDependencies.records)
                             }
                         }
                     }
+                } else {
+                    lookupCount += 1
+                    print("\(#line) theObject: \(theObject) - lookupCount: \(lookupCount) - allObjects: \(allObjects.count)")
+                    if lookupCount == allObjects.count {
+                        ExistingObjects.shared.capi(skipLookup: false, theDestEndpoint: selectedEndpoint) {
+                            (result: (String,String)) in
+                            let (_, theObjectType) = result
+                            let parentObject = (theObjectType == "patch-software-title-configurations") ? "patch-software-title-configurations":theObjectType
+                            ObjectAndDependencies.records.append(ObjectAndDependency(objectType: parentObject, objectName: primaryObjName, objectId: objToMigrateId))
+                            completion(ObjectAndDependencies.records)
+                        }
+                    }
                 }
-//            }
+            }
         }
     }
     
@@ -4918,9 +4914,9 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         let totalCount = (UiVar.activeTab == "Selective") ? targetSelectiveObjectList.count:total
         
         if Counter.shared.send[adjEndpoint] == nil {
-            Counter.shared.send[adjEndpoint] = ["put": /*newPutTotal*/ 1]
+            Counter.shared.send[adjEndpoint] = ["put": 1]
         } else {
-            Counter.shared.send[adjEndpoint]!["put"]! /*= newPutTotal*/ += 1
+            Counter.shared.send[adjEndpoint]!["put"]! += 1
         }
         let newPutTotal = Counter.shared.send[adjEndpoint]!["put"]!
         
@@ -4953,7 +4949,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             }
             WriteToLog.shared.message("[putStatusUpdate] \(adjEndpoint): \(nodesComplete) of \(ToMigrate.total) object types complete")
 
-            if Counter.shared.completedObjectTypes.count /*nodesComplete*/ == ToMigrate.rawCount {
+            if Counter.shared.completedObjectTypes.count == ToMigrate.rawCount || (Setting.migrateDependencies && nodesComplete == ToMigrate.total) {
                 if !Setting.fullGUI {
                     nodesMigrated = nodesComplete
                 }

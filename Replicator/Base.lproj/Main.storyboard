@@ -2298,7 +2298,7 @@
                                                             <rect key="frame" x="223" y="-1" width="569" height="238"/>
                                                             <clipView key="contentView" ambiguous="YES" id="xbF-pR-KVb">
                                                                 <rect key="frame" x="1" y="1" width="567" height="236"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
                                                                     <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" autosaveColumns="NO" rowHeight="19" rowSizeStyle="automatic" headerView="7sv-In-7JH" viewBased="YES" id="FBt-wQ-W9U" userLabel="Source Table View">
                                                                         <rect key="frame" x="0.0" y="0.0" width="568" height="208"/>
@@ -2322,7 +2322,7 @@
                                                                                 <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                                                 <prototypeCellViews>
                                                                                     <tableCellView id="4tV-NR-thP">
-                                                                                        <rect key="frame" x="11" y="1" width="565" height="19"/>
+                                                                                        <rect key="frame" x="1" y="1" width="565" height="19"/>
                                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                         <subviews>
                                                                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="oft-XQ-ded">
@@ -2453,11 +2453,14 @@
                                                             </connections>
                                                         </popUpButton>
                                                         <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wiT-wp-Gbk">
-                                                            <rect key="frame" x="635" y="234" width="156" height="32"/>
-                                                            <buttonCell key="cell" type="check" title="Include Dependencies" bezelStyle="regularSquare" imagePosition="left" inset="2" id="eNy-iP-zFq">
+                                                            <rect key="frame" x="635" y="241" width="156" height="18"/>
+                                                            <buttonCell key="cell" type="check" title="Include Dependencies" bezelStyle="regularSquare" imagePosition="left" alignment="right" inset="2" id="eNy-iP-zFq">
                                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                 <font key="font" metaFont="system"/>
                                                             </buttonCell>
+                                                            <constraints>
+                                                                <constraint firstAttribute="height" constant="18" id="jih-ci-LZU"/>
+                                                            </constraints>
                                                             <connections>
                                                                 <action selector="migrateDependencies_fn:" target="XfG-lQ-9wD" id="I85-DK-FQX"/>
                                                             </connections>
