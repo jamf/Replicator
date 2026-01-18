@@ -5720,7 +5720,6 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if (fm.fileExists(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE", isDirectory: &isDir)) {
             do {
                 try fm.removeItem(atPath: NSHomeDirectory() + "/Library/Application Support/Replicator/DELETE")
-//                wipeData.on = false
                 WipeData.state.on = false
             }
             catch let error as NSError {
@@ -6064,6 +6063,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         
         // read maxConcurrentOperationCount setting
         setConcurrentThreads()
+        
+        if !LogLevel.debug {
+            LogLevel.debug = userDefaults.bool(forKey: "debugMode")
+        }
 
         if LogLevel.debug { WriteToLog.shared.message("----- Debug Mode -----") }
         

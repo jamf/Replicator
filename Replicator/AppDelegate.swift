@@ -112,15 +112,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // read command line arguments - start
         var numberOfArgs = 0
-//        var startPos     = 1
+
         // read commandline args
         numberOfArgs = CommandLine.arguments.count
         print("all arguments: \(CommandLine.arguments)")
-//        if CommandLine.arguments.contains("-debug") {
-//            numberOfArgs -= 1
-//            startPos+=1
-//            LogLevel.debug = true
-//        }
+        
         var index = 1
         while index < numberOfArgs {
             if LogLevel.debug {
@@ -131,7 +127,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 case "-debug":
                     LogLevel.debug = true
                 case "-dryrun":
-                    LogLevel.debug = true
+                    AppInfo.dryRun = true
                 case "-backup","-export":
                     export.backupMode = true
                     export.saveOnly   = true
