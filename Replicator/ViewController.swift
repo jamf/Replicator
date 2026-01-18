@@ -863,7 +863,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
-    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "api-integrations", "api-roles", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "api-integrations", "api-roles", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
     let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
@@ -2165,16 +2165,12 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         if migrateDependencies.state == .on {
                         
             getDependencies(objectIndex: objectIndex, selectedEndpoint: selectedEndpoint, selectedObjectList: targetSelectiveObjectList) { [self] (result) in
-//                for objectInfo in result {
-//                    print("objectType: \(objectInfo.objectType) - objectName: \(objectInfo.objectName) - objectId: \(objectInfo.objectId)")
-////                    dependencyObjectList[objectType] = objectInfo
+//                print("\n[selectiveMigrationDelegate] objectIndex: \(objectIndex)")
+//                for dependency in ObjectAndDependencies.records {
+//                    print("[selectiveMigrationDelegate] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
 //                }
-                print("\n[selectiveMigrationDelegate] objectIndex: \(objectIndex)")
-                for dependency in ObjectAndDependencies.records {
-                    print("[selectiveMigrationDelegate] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
-                }
                 
-                startSelectiveMigration(objectIndex: objectIndex, objectAndDependencies: ObjectAndDependencies.records)
+                startSelectiveMigration(objectIndex: 0 /*objectIndex*/, objectAndDependencies: ObjectAndDependencies.records)
                 if objectIndex+1 < targetSelectiveObjectList.count {
                     selectiveMigrationDelegate(objectIndex: objectIndex+1, selectedEndpoint: selectedEndpoint)
                 }
@@ -2188,16 +2184,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     }
     
     func startSelectiveMigration(objectIndex: Int, objectAndDependencies: [ObjectAndDependency]) {
-//        print("[startSelectiveMigration] objectIndex: \(objectIndex), selectedEndpoint: \(selectedEndpoint)")
-        print("[startSelectiveMigration] objectIndex: \(objectIndex)")
-        for dependency in objectAndDependencies {
-            print("[startSelectiveMigration] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
-        }
+//        print("[startSelectiveMigration] objectIndex: \(objectIndex)")
+//        for dependency in objectAndDependencies {
+//            print("[startSelectiveMigration] objectType: \(dependency.objectType) - objectName: \(dependency.objectName) - objectId: \(dependency.objectId)")
+//        }
         
         logFunctionCall()
         var idPath             = ""  // adjust for jamf users/groups that use userid/groupid instead of id
-//        var alreadyMigrated    = false
-//        let theButton          = ""
 
 //        print("[startMigrating] AvailableObjsToMig.byName: \(AvailableObjsToMig.byName)")
         // todo - consolidate these 2 vars
@@ -2285,19 +2278,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 
                 let selectedObject = objectAndDependencies[objectIndex].objectName
                 let selectedObjectName = (JamfProServer.toSite && JamfProServer.siteObjects.contains(selectedEndpoint)) ? nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: selectedObject) : selectedObject
-                
-//                if JamfProServer.toSite && JamfProServer.siteObjects.contains(selectedEndpoint) {
-//                    selectedObjectName = nameInSite(prefixSuffix: SitePreferences.modifierPrefixSuffix, selectedObject: selectedObject)
-//                    selectedObjectName = (SitePreferences.modifierPrefixSuffix == "Suffix") ? "\(selectedObject)\(siteNameModifier(SitePreferences.nameModifier, encode: false))" : "\(siteNameModifier(SitePreferences.nameModifier, encode: false))\(selectedObject)"
-//                }
-//                    print("[startSelectiveMigration] selectedObject: \(selectedObject)")
-            // include dependencies - start
-//                    print("advancedMigrateDict with policy: \(advancedMigrateDict)")
-            
-                self.destEPQ.async { [self] in
+
+//                self.destEPQ.async { [self] in
                     
                     // migrate the policy or selected object now the dependencies are done
-                    DispatchQueue.global(qos: .utility).async { [self] in
+//                    DispatchQueue.global(qos: .utility).async { [self] in
                       
                         var theAction = "update"
 
@@ -2327,15 +2312,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         if !fileImport {
                             EndpointData.shared.endPointByIdQueue(endpoint: selectedEndpoint, endpointID: objToMigrateID, endpointCurrent: (objectIndex+1), endpointCount: objectAndDependencies.count, action: theAction, destEpId: existingObjectId, destEpName: selectedObject)
                         } else {
-                            //                                   print("[ViewController.startSelectiveMigration-fileImport] \(selectedObject), all items: \(self.availableFilesToMigDict)")
                             
                             let fileToMigrate = displayNameToFilename[selectedObject]
-    //                                print("[ViewController.startSelectiveMigration-fileImport] selectedObject: \(selectedObject), fileToMigrate: \(String(describing: fileToMigrate))")
-    //                                print("[ViewController.startSelectiveMigration-fileImport] objectIndex+1: \(objectIndex+1), targetSelectiveObjectList.count: \(targetSelectiveObjectList.count)")
                             
                             arrayOfSelected[selectedObject] = self.availableFilesToMigDict[fileToMigrate!]!
-    //                                print("[ViewController.startSelectiveMigration] selectedObject: \(selectedObject)")
-    //                                print("[ViewController.startSelectiveMigration-fileImport] arrayOfSelected: \(arrayOfSelected[selectedObject] ?? [])")
                             
                             if objectIndex+1 == objectAndDependencies.count {
     //                                    print("[ViewController.startSelectiveMigration] processFiles)")
@@ -2353,8 +2333,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         } else if objectIndex+1 == objectAndDependencies.count {
                             dependency.isRunning = false
                         }
-                    }
-                }
+//                    }
+//                }
             }
         } else {
             // selective removal
@@ -4382,12 +4362,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 objectDict      = json["policy"] as! [String:Any]
                 let general     = objectDict["general"] as! [String:Any]
                 let bindings    = objectDict["account_maintenance"] as! [String:Any]
-                let scope       = objectDict["scope"] as! [String:Any]
                 let scripts     = objectDict["scripts"] as! [[String:Any]]
-        
+                
+                let scope       = objectDict["scope"] as! [String:Any]
                 let exclusions  = scope["exclusions"] as! [String:Any]
                 let limitations = scope["limitations"] as! [String:Any]
                 
+                // at present users/user groups are not listed within scope in the API
                 for the_dependency in Dependencies.orderedArray {
                     switch the_dependency {
                     case "categories":
@@ -4410,9 +4391,14 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
                     dependencyArray.removeAll()
                     switch dependencyNode {
-                    case "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
+                    case "computers", "computer_groups", "buildings", "departments", "ibeacons", "network_segments":
                         if (Scope.policiesCopy && dependencyNode == "computer_groups") || (dependencyNode != "computer_groups") {
                             if let _ = scope[dependencyNode] {
+                                
+//                                print("[getDependencies] - selectedEndpoint: \(selectedEndpoint), dependencyNode: \(dependencyNode)")
+//                                print("[getDependencies] - Scope.policiesCopy: \(Scope.policiesCopy)")
+//                                print("[getDependencies] - scope[dependencyNode]: \(scope[dependencyNode] ?? [:])")
+                                
                                 let scope_dep = scope[dependencyNode] as! [AnyObject]
                                 for theObject in scope_dep {
                                     let local_name = (theObject as! [String:Any])["name"]
@@ -4420,19 +4406,20 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     dependencyArray["\(local_name!)"] = "\(local_id!)"
                                 }
                             }
+//                            print("[getDependencies] - dependencyArray: \(dependencyArray.description)")
                             
                             if dependencyNode == "computer_groups" {
-                                print("check for exclusions: \(exclusions)")
+//                                print("check for exclusions: \(exclusions)")
                                 if let _ = exclusions[dependencyNode] {
                                     let scope_excl_compGrp_dep = exclusions[dependencyNode] as! [[String:Any]]
                                     //                                let scope_excl_compGrp_dep = scope_excl_dep["computer_groups"] as! [String:Any]
-                                    print("exclusions: \(scope_excl_compGrp_dep)")
+//                                    print("exclusions: \(scope_excl_compGrp_dep)")
                                     for theObject in scope_excl_compGrp_dep {
                                         print("theObject: \(theObject)")
                                         let local_name = theObject["name"] as! String
                                         let local_id   = theObject["id"] as! Int
                                         dependencyArray["\(local_name)"] = "\(local_id)"
-                                        print("dependencyArray: \(dependencyArray)")
+//                                        print("dependencyArray: \(dependencyArray)")
                                     }
                                 }
                                 
@@ -4523,13 +4510,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             }
                         }
                     }
-                    if the_dependency != "buildings" {
+//                    if the_dependency != "buildings" {
                         fullDependencyDict[the_dependency] = dependencyArray.count == 0 ? nil:dependencyArray
-                    }
-                    //                fullDependencyDict[the_dependency] = dependencyArray
-                    //                allDependencyDict = allDependencyDict.merging(fullDependencyDict) { (_, new) in new}
+//                    }
                 }
-                //              print("fullDependencyDict: \(fullDependencyDict)")
             case "patch-software-title-configurations":
                 if let packages = json["packages"] as? [[String: Any]] {
                     var completedPackageLookups = 0
@@ -4556,6 +4540,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 //                print("return empty fullDependencyDict")
                 completion([])
             }
+            print("fullDependencyDict: \(fullDependencyDict)")
                 
             if LogLevel.debug { WriteToLog.shared.message("[getDependencies] dependencies: \(fullDependencyDict)") }
             WriteToLog.shared.message("[getDependencies] complete")
@@ -4572,7 +4557,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 return
             }
             for theObject in allObjects {
-                if let dependencies = fullDependencyDict[theObject], dependencies.count > 0 {
+                if let dependencies = fullDependencyDict[theObject.replacing(/^(smart|static)/, with: "")], dependencies.count > 0 {
                     var skipLookup: Bool = false
                     if theObject == selectedEndpoint {
                         skipLookup = true
@@ -4583,8 +4568,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                         ExistingEndpoints.shared.waiting = false
                         let (_, theObjectType) = result
 //                            for (name, id) in dependencies {
+                        
                         for (name, id) in fullDependencyDict[theObjectType] ?? [:] {
-                            ObjectAndDependencies.records.append(ObjectAndDependency(objectType: theObjectType, objectName: name, objectId: id))
+                            if !ObjectAndDependencies.records.contains(where: { $0.objectType == theObjectType && $0.objectId == id }) {
+                                ObjectAndDependencies.records.append(ObjectAndDependency(objectType: theObjectType, objectName: name, objectId: id))
+                            }
                         }
                         lookupCount += 1
                         if lookupCount == allObjects.count {

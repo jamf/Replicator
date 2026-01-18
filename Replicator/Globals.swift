@@ -45,7 +45,7 @@ var currentLDAPServers          = [String:Int]()
 var createDestUrlBase           = ""
 
 class Dependencies: NSObject {
-    static let orderedArray = ["sites", "buildings", "categories", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
+    static let orderedArray = ["sites", "buildings", "categories", "computers", "computergroups", "dockitems", "departments", "directorybindings", "distributionpoints", "ibeacons", "packages", "printers", "scripts", "softwareupdateservers", "networksegments"]
     static var current      = [String]()
 }
 

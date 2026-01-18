@@ -130,7 +130,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         
 //        Setting.createIsRunning = true
         
-        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] enter for \(endpointType), id \(sourceEpId)") }
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints.capi] enter for \(endpointType), id \(sourceEpId)") }
 
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -528,17 +528,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                                     if destEpId != "-1" {
                                         updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
                                     }
-                                    
-                                    //new
-                                    //                                if counter.createRetry["\(localEndPointType)-\(sourceEpId)"] == 0 && Summary.totalCompleted > 0  {
-                                    //
-                                    //                                    print("[CreateEndpoints] endpointType: \(endpointType)")
-                                    //                                    if (!Setting.migrateDependencies && endpointType != "patchpolicies") || ["patch-software-title-configurations", "policies"].contains(endpointType) {
-                                    //                                        if destEpId != "-1" {
-                                    //                                            updateUiDelegate?.updateUi(info: ["function": "putStatusUpdate", "endpoint": endpointType, "total": Counter.shared.crud[endpointType]!["total"]!])
-                                    //                                        }
-                                    //                                    }
-                                    //                                }
                                 }
                             }
                         }   // create failed - end
@@ -558,8 +547,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         }
                         
                         if Setting.fullGUI && Summary.totalCompleted == endpointCount {
-//                                migrationComplete.isDone = true
-
                             if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor  from if condition
                                 updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                             } else if Summary.totalFailed == endpointCount {
@@ -602,8 +589,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                     }
                     
                     if Setting.fullGUI && Summary.totalCompleted == endpointCount {
-//                                migrationComplete.isDone = true
-
                         if Summary.totalFailed == 0 {   // removed  && UiVar.changeColor  from if condition
                             updateUiDelegate?.updateUi(info: ["function": "labelColor", "endpoint": endpointType, "theColor": "green"])
                         } else if Summary.totalFailed == endpointCount {
@@ -615,7 +600,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                         }
                     }
                     completion("create func: \(endpointCurrent) of \(endpointCount) complete.")
-                    
                 }
                     
                     if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] POST or PUT Operation for \(endpointType): \(request.httpMethod)") }
@@ -649,7 +633,8 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
             completion("stop")
             return
         }
-
+        
+        if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints.jpapi] enter for \(endpointType), id \(sourceEpId)") }
         
         if Counter.shared.crud[endpointType] == nil {
             Counter.shared.crud[endpointType] = ["create":0, "update":0, "fail":0, "skipped":0, "total":0]
@@ -687,7 +672,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         } else {
             if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] Export only selected, skipping \(apiAction) for: \(endpointType)") }
         }
-        //if LogLevel.debug { WriteToLog.shared.message("[createEndpoints.jpapi] ----- Posting #\(endpointCurrent): \(endpointType) -----") }
         
         var localEndPointType = ""
         
@@ -910,8 +894,10 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
 //                            print("endpointType: \(endpointType)")
 //                            print("Counter.shared.progressArray: \(String(describing: Counter.shared.progressArray["\(endpointType)"]))")
                         
-                        if let _ = Counter.shared.progressArray["\(endpointType)"] {
-                            Counter.shared.progressArray["\(endpointType)"] = Counter.shared.progressArray["\(endpointType)"]!+1
+                        if let tmpCounter = Counter.shared.progressArray["\(endpointType)"] {
+                            Counter.shared.progressArray["\(endpointType)"] = tmpCounter + 1
+                        } else {
+                            Counter.shared.progressArray["\(endpointType)"] = 1
                         }
                         
                         let localTmp = (Counter.shared.crud[endpointType]?["\(apiMethod)"])!
