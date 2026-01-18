@@ -185,11 +185,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
     var saveTrimmedXmlScope:    Bool = true
 
     var xmlPrefOptions:         Dictionary<String,Bool> = [:]
-//    var saveFolderURL: URL? {
-//        didSet {
-//            storeBookmark(theURL: saveFolderURL!)
-//        }
-//    }
 
     @IBAction func concurrentThreads_action(_ sender: Any) {
         concurrentThreads_textfield.stringValue = concurrentThreads_slider.stringValue
@@ -244,8 +239,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         
     @IBAction func siteCopyMove_action(_ sender: NSPopUpButton) {
         let selectedItem = sender.selectedItem?.title ?? "Copy"
-//        print("[set pref] copyMoveAction: \(selectedItem)")
-//        print("[set pref] copyMoveAction item: \(String(describing: sender.identifier?.rawValue))")
+        
         if NSEvent.modifierFlags.contains(.option) {
             SitePreferences.searches = selectedItem
             userDefaults.set("\(selectedItem)", forKey: "siteSearchesAction")
@@ -391,7 +385,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
             }
         }
     
-        
         AppInfo.settings["scope"] = ["osxconfigurationprofiles":["copy":stateToBool(state: copyScopeOCP_button.state.rawValue)],
                               "macapps":["copy":stateToBool(state: copyScopeMA_button.state.rawValue)],
                               "restrictedsoftware":["copy":stateToBool(state: copyScopeRS_button.state.rawValue)],
@@ -405,7 +398,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
 
         saveSettings(settings: AppInfo.settings)
     }
-    
     
     @objc func exportButtons(_ notification: Notification) {
         viewDidAppear()
@@ -469,7 +461,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         saveLocation()
     }
     
-    
     @IBAction func showExportFolder(_ sender: Any) {
         
         var isDir: ObjCBool = true
@@ -478,8 +469,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         exportFilePath = exportFilePath?.pathToString
         
         if (FileManager().fileExists(atPath: exportFilePath!, isDirectory: &isDir)) {
-//            print("open exportFilePath: \(exportFilePath!)")
-//            NSWorkspace.shared.openFile("\(exportFilePath!)")
             NSWorkspace.shared.open(URL(fileURLWithPath: exportFilePath!))
         } else {
             ViewController().alert_dialog(header: "Alert", message: "There are currently no export files to display.")
@@ -595,8 +584,7 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         
         // Set view sizes
         self.preferredContentSize = NSMakeSize(self.view.frame.size.width, self.view.frame.size.height)
-//        self.view.wantsLayer = true
-//        self.view.layer?.backgroundColor = CGColor(red: 0x5C/255.0, green: 0x78/255.0, blue: 0x94/255.0, alpha: 0.4)
+        
         NSApp.activate(ignoringOtherApps: true)
     }
     
@@ -648,7 +636,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         
         _ = readSettings()
-//        plistData = vc.readSettings()
         
         if AppInfo.settings["scope"] != nil {
             Scope.options = AppInfo.settings["scope"] as! Dictionary<String,Dictionary<String,Bool>>
@@ -711,7 +698,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                       "sig":["copy":true],
                                       "users":["copy":true],
                                       "ebooks":["copy":true]] as Any
-//                vc.saveSettings(settings: plistData)
                 saveSettings(settings: AppInfo.settings)
             }
         } else {
@@ -726,7 +712,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                   "sig":["copy":true],
                                   "users":["copy":true],
                                   "ebooks":["copy":true]] as Any
-//            vc.saveSettings(settings: plistData)
             saveSettings(settings: AppInfo.settings)
         }
         // read xml settings - start
@@ -744,7 +729,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
                                 "saveOnly":false,
                                 "saveRawXmlScope":true,
                                 "saveTrimmedXmlScope":true] as Any
-//            vc.saveSettings(settings: plistData)
             saveSettings(settings: AppInfo.settings)
             
             saveRawXml           = false
@@ -823,7 +807,6 @@ class PreferencesViewController: NSViewController, NSTextFieldDelegate {
         }
         if self.title! == "Passwords" {
             preferredContentSize = CGSize(width: 400, height: 266)
-//            preferredContentSize = CGSize(width: 400, height: 306)    // to include login keychain option
             prefBindPwd_textfield.delegate = self
             prefLdapPwd_textfield.delegate = self
             prefFsRwPwd_textfield.delegate = self
