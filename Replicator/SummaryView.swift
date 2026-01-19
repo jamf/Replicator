@@ -16,7 +16,7 @@ struct SummaryView: View {
     @State private var selectedType: String?
     @State private var showPopup = false
     @State private var popupPosition = CGPoint(x: 300, y: 200)
-    @State private var popupSize = CGSize(width: 400, height: 300)
+    @State private var popupSize = CGSize(width: 350, height: 300)
     
     var body: some View {
         ZStack {
@@ -58,7 +58,7 @@ struct SummaryView: View {
                     }
                 }
             }
-            .frame(minWidth: 600, minHeight: 400)
+            .frame(minWidth: 550, minHeight: 400)
             .background(Color(nsColor: .windowBackgroundColor))
             
             // Floating popup overlay

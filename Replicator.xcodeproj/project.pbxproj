@@ -47,9 +47,7 @@
 		CE310A652D10BAEC007C2C6F /* EndpointXml.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A642D10BAEC007C2C6F /* EndpointXml.swift */; };
 		CE310A672D10BAFC007C2C6F /* ExistingObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */; };
 		CE310A692D10BB49007C2C6F /* ExportItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A682D10BB49007C2C6F /* ExportItem.swift */; };
-		CE310A6B2D10BB87007C2C6F /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */; };
 		CE310A6D2D10BB95007C2C6F /* ObjectDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */; };
-		CE310A6F2D10BBB5007C2C6F /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A6E2D10BBB5007C2C6F /* Package.swift */; };
 		CE310A722D10BBE6007C2C6F /* RemoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A702D10BBE6007C2C6F /* RemoveData.swift */; };
 		CE310A732D10BBE6007C2C6F /* RemoveObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */; };
 		CE310A752D10BC3A007C2C6F /* IconDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE310A742D10BC3A007C2C6F /* IconDelegate.swift */; };
@@ -114,9 +112,7 @@
 		CE310A642D10BAEC007C2C6F /* EndpointXml.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointXml.swift; sourceTree = "<group>"; };
 		CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingObjects.swift; sourceTree = "<group>"; };
 		CE310A682D10BB49007C2C6F /* ExportItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportItem.swift; sourceTree = "<group>"; };
-		CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
 		CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDelegate.swift; sourceTree = "<group>"; };
-		CE310A6E2D10BBB5007C2C6F /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		CE310A702D10BBE6007C2C6F /* RemoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveData.swift; sourceTree = "<group>"; };
 		CE310A712D10BBE6007C2C6F /* RemoveObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveObjects.swift; sourceTree = "<group>"; };
 		CE310A742D10BC3A007C2C6F /* IconDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDelegate.swift; sourceTree = "<group>"; };
@@ -179,10 +175,8 @@
 				CE310A662D10BAFC007C2C6F /* ExistingObjects.swift */,
 				CE310A682D10BB49007C2C6F /* ExportItem.swift */,
 				CE310A742D10BC3A007C2C6F /* IconDelegate.swift */,
-				CE310A6A2D10BB87007C2C6F /* JsonObjects.swift */,
 				CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */,
 				CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */,
-				CE310A6E2D10BBB5007C2C6F /* Package.swift */,
 				CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */,
 				CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */,
 				CE310A702D10BBE6007C2C6F /* RemoveData.swift */,
@@ -439,9 +433,7 @@
 				CE310A6D2D10BB95007C2C6F /* ObjectDelegate.swift in Sources */,
 				B5BD6ADB233510F6001D244A /* Credentials.swift in Sources */,
 				CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */,
-				CE310A6F2D10BBB5007C2C6F /* Package.swift in Sources */,
 				B5C993C0230E211100558040 /* Sites.swift in Sources */,
-				CE310A6B2D10BB87007C2C6F /* JsonObjects.swift in Sources */,
 				CEE65A312CB95527002AB294 /* Utilities.swift in Sources */,
 				CE7C6BDD2D695FBA000357BA /* LoggerExtension.swift in Sources */,
 				B5A9A025221F4B7B00AF7B6E /* WriteToLog.swift in Sources */,
