@@ -40,7 +40,7 @@ class PrefsWindowController: NSWindowController, NSWindowDelegate {
                     if tabs.firstIndex(of: NSApp.windows[i].title) != nil {
                         print("window title: \(NSApp.windows[i].title)")
                         print("SitePreferences.show: \(SitePreferences.show)")
-                        if SitePreferences.show ?? false {
+                        if SitePreferences.show {
                             print("close preferences")
                             NSApp.windows[i].orderOut(self)
                         } else {NSApp.windows[i].makeKeyAndOrderFront(self)
