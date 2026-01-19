@@ -486,7 +486,7 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="24" id="i1K-YG-5xS"/>
                                 </constraints>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" title="*Only raw source XML can be used for file imports" id="iTI-aI-Ysg">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" title="*Only raw source can be used for file imports" id="iTI-aI-Ysg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

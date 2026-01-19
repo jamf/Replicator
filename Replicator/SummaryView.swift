@@ -37,6 +37,7 @@ struct SummaryView: View {
                                 if key != "computergroups",
                                    key != "mobiledevicegroups",
                                    key != "usergroups",
+                                   key != "accounts",
                                    let values = theSummary[key] {
                                     SummaryRow(
                                         endpoint: key.readable,
