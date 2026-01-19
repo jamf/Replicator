@@ -15,12 +15,8 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     let lastUserManager = LastUserManager()
     let preferencesWC   = PrefsWindowController()
     
-//    let userDefaults = UserDefaults.standard
     var importFilesUrl   = URL(string: "")
-//    var exportedFilesUrl = URL(string: "")
-//    var jamfpro: JamfPro?
     
-//    var availableFilesToMigDict = [String:[String]]()   // something like xmlID, xmlName
     var displayNameToFilename   = [String: String]()
         
     // determine if we're using dark mode
@@ -72,7 +68,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     func showUrlOnly(_ hiddenState: Bool) {
         logFunctionCall()
-
+        
         if hiddenState {
             preferredContentSize = CGSize(width: 848, height: 67)
             hideCreds_button.toolTip = "show username/password fields"
@@ -90,8 +86,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
         destUsername_TextField.isHidden        = hiddenState
         destinationUser_TextField.isHidden     = hiddenState
-//        destPassword_TextField.isHidden        = hiddenState
-//        dest_pwd_field.isHidden                = hiddenState
+        
         destStoreCredentials_button.isHidden   = hiddenState
         destUseApiClient_button.isHidden       = hiddenState
     }
@@ -177,7 +172,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var historyFile: String = ""
     var logFile:     String = ""
     let logPathOld: String? = (NSHomeDirectory() + "/Library/Logs/jamf-migrator/")
-//    let logPath:    String? = (NSHomeDirectory() + "/Library/Logs/Replicator/")
     
     // xml prefs
     var xmlPrefOptions: Dictionary<String,Bool> = [:]
@@ -205,7 +199,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     var dataFilesRoot   = ""
         
     var sortQ       = DispatchQueue(label: "com.jamf.sortQ", qos: DispatchQoS.default)
-//    var iconHoldQ   = DispatchQueue(label: "com.jamf.iconhold")
     
     var concurrentThreads = 2
     
@@ -266,7 +259,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         dataFilesRoot = (importFilesUrl!.path.last == "/") ? importFilesUrl!.path:importFilesUrl!.path + "/"
                         
                         SecurityScopedBookmarks.shared.create(for: importFilesUrl!)
-//                        storeBookmark(theURL: importFilesUrl!)
                         
                         source_jp_server_field.stringValue = dataFilesRoot
                         JamfProServer.source               = dataFilesRoot
@@ -282,7 +274,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         // Note, merge this with xportFilesURL
 //                        xportFolderPath = openPanel.url
                         
-//                        userDefaults.synchronize()
                         browseFiles_button.isHidden        = false
                         saveSourceDestInfo(info: AppInfo.settings)
                         serverChanged(whichserver: "source")
@@ -296,23 +287,17 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         }
                     }
                 } // openPanel.begin - end
-//                serverOrFiles() {
-//                    (result: String) in
-//                }
-//                userDefaults.synchronize()
             }   // DispatchQueue.main.async - end
         } else {    // if fileImport_button.state - end
             userDefaults.set(false, forKey: "fileImport")
             DispatchQueue.main.async { [self] in
                 source_jp_server_field.stringValue = ""
                 showHideUserCreds(x: false)
-//                source_user_field.isHidden  = false
-//                source_pwd_field.isHidden   = false
+                
                 fileImport                  = false
                 fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
                 JamfProServer.importFiles   = 0
-//                userDefaults.synchronize()
             }
         }
     }   // @IBAction func fileImport - end
@@ -405,7 +390,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 self.siteMigrate_button.isEnabled = true
             }
         }
-        
     }
     
     @IBAction func setDestSite_action(_ sender: Any) {
@@ -443,22 +427,18 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if !(whichServer == "source" && fileImport) {
             if Setting.fullGUI {
                 theUser = (whichServer == "source") ? sourceUser_TextField.stringValue:destinationUser_TextField.stringValue
-                //            print("[fetchPassword] url: \(url.fqdnFromUrl), account: \(theUser), whichServer: \(whichServer)")
             } else {
                 theUser = (whichServer == "source") ? JamfProServer.sourceUser:JamfProServer.destUser
             }
             accountDict = Credentials.shared.retrieve(service: url.fqdnFromUrl, account: theUser, whichServer: whichServer)
-//            print("[fetchPassword] accountDict: \(accountDict)")
-            
             
             if accountDict.count > 0 {
                 for (username, password) in accountDict {
                     if whichServer == "source" {
-//                        if username == theUser || accountDict.count == 1 {
                         if username == "" || (username == theUser) {
                             JamfProServer.sourceUser = ""
                             JamfProServer.sourcePwd  = ""
-                            if (url != "") {
+                            if !url.isEmpty {
                                 if Setting.fullGUI {
                                     sourceUser_TextField.stringValue = username
                                     source_pwd_field.stringValue     = password
@@ -474,18 +454,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == source_user_field.stringValue
-                        if Setting.fullGUI {
-                            source_pwd_field.stringValue  = ""
-                            hideCreds_button.state = .on
-                            hideCreds_action(self)
-                        }
                     } else {
                         // destination server
-//                        if username == theUser || accountDict.count == 1 {
                         if username == "" || (username == theUser) {
                             JamfProServer.destUser   = ""
                             JamfProServer.destPwd    = ""
-                            if (url != "") {
+                            if !url.isEmpty {
                                 if Setting.fullGUI {
                                     destinationUser_TextField.stringValue = username
                                     dest_pwd_field.stringValue  = password
@@ -507,18 +481,23 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                             }
                             break
                         }   // if username == dest_user_field.stringValue
-                        if Setting.fullGUI {
-                            dest_pwd_field.stringValue  = ""
-                            hideCreds_button.state = .on
-                            hideCreds_action(self)
-                        }
                     }
                 }   // for (username, password)
+                
+                if Setting.fullGUI && whichServer == "source" && (JamfProServer.sourceUser.isEmpty || JamfProServer.sourcePwd.isEmpty) {
+                    source_pwd_field.stringValue  = ""
+                    hideCreds_button.state = .on
+                    hideCreds_action(self)
+                }
+                if Setting.fullGUI && whichServer == "destination" && (JamfProServer.destUser.isEmpty || JamfProServer.destPwd.isEmpty) {
+                    dest_pwd_field.stringValue  = ""
+                    hideCreds_button.state = .on
+                    hideCreds_action(self)
+                }
             } else {
                 // credentials not found - blank out username / password fields
                 if Setting.fullGUI {
                     hideCreds_button.state = NSControl.StateValue(rawValue: 1)
-                    // NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                     hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                     hideCreds_action(self)
                     if whichServer == "source" {
@@ -568,7 +547,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
-//        print("enter controlTextDidEndEditing")
         logFunctionCall()
         if let textField = obj.object as? NSTextField {
             let whichField = textField.identifier?.rawValue ?? ""
@@ -588,7 +566,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                         break
                     }
                     
-                    JamfProServer.source     = baseUrl(source_jp_server_field.stringValue, whichServer: "source")    // source_jp_server_field.stringValue.baseUrl
+                    JamfProServer.source     = baseUrl(source_jp_server_field.stringValue, whichServer: "source")
                     JamfProServer.sourceUser = sourceUser_TextField.stringValue
                     JamfProServer.sourcePwd  = source_pwd_field.stringValue
                 }
@@ -752,8 +730,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         
         JamfProServer.version[whichServer] = ""
         
-//        self.selectiveListCleared = false
-        print("\(#line) - whichServer: \(whichServer)")
         switch whichServer {
         case "source":
             if source_jp_server_field.stringValue != sourceServerList_button.titleOfSelectedItem! {
@@ -777,7 +753,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 fetchPassword(whichServer: "source", url: JamfProServer.source)
             }
         case "dest":
-            print(#line)
             if (self.dest_jp_server_field.stringValue != destServerList_button.titleOfSelectedItem!) && !export.saveOnly {
                 JamfProServer.validToken["dest"] = false
                 serverChanged(whichserver: "dest")
@@ -814,15 +789,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         // see if we last migrated from files or a server
         var sourceType = ""
         
-//        DispatchQueue.main.async { [self] in
         if source_jp_server_field.stringValue != "" {
             if source_jp_server_field.stringValue.prefix(4).lowercased() == "http" {
 //                print("source: server.")
                 fileImport_button.state     = NSControl.StateValue(rawValue: 0)
                 browseFiles_button.isHidden = true
                 showHideUserCreds(x: false)
-//                source_user_field.isHidden  = false
-//                source_pwd_field.isHidden   = false
+                
                 fileImport                  = false
                 sourceType                  = "server"
             } else {
@@ -835,14 +808,10 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 showHideUserCreds(x: true)
                 fileImport                  = true
                 sourceType                  = "files"
-                
-//                getAccess(theURL: importFilesUrl!)
-                
-
             }
             JamfProServer.importFiles = fileImport_button.state.rawValue
         }
-//        }
+
         userDefaults.set(fileImport, forKey: "fileImport")
         userDefaults.synchronize()
         completion(sourceType)
@@ -908,20 +877,9 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         }
     }
     
-    
-//    var jamfpro: JamfPro?
     override func viewDidLoad() {
         super.viewDidLoad()
-//        hardSetLdapId = false
 
-//        debug = true
-        
-//        print("test defaults: \(userDefaults.integer(forKey: "sourceDestListSize"))")
-        
-        // Do any additional setup after loading the view
-//        if !FileManager.default.fileExists(atPath: AppInfo.bookmarksPath) {
-//            FileManager.default.createFile(atPath: AppInfo.bookmarksPath, contents: nil)
-//        }
         logFunctionCall()
         ViewController().rmDELETE()
         
@@ -941,20 +899,13 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         destinationUser_TextField.delegate = self
         dest_pwd_field.delegate            = self
         
-//        jamfpro = JamfPro(sdController: self)
         fileImport = userDefaults.bool(forKey: "fileImport")
         JamfProServer.stickySession = userDefaults.bool(forKey: "stickySession")
         stickySessions_label.isHidden = !JamfProServer.stickySession
     
         initVars()
         
-        if !hideGui {
-            hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
-            hideCreds_button.image = (hideCreds_button.state == .off) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
-            print("viewDidLoad - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
-            showUrlOnly(hideCreds_button.state == .off)
-//            source_jp_server_field.becomeFirstResponder()
-        }
+        showUrlOnly(hideCreds_button.state == .off)
         
     }   //override func viewDidLoad() - end
     
@@ -966,8 +917,7 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
     
     override func viewDidDisappear() {
         // Insert code here to tear down your application
-//        saveSettings()
-//        logCleanup()
+        
     }
     
     func initVars() {
@@ -1011,16 +961,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
                 source_jp_server = AppInfo.settings["source_jp_server"] as! String
                 JamfProServer.source = source_jp_server
                 
-//                if setting.fullGUI {
-                    source_jp_server_field.stringValue = source_jp_server
-                    if source_jp_server.count > 0 {
-                        self.browseFiles_button.isHidden = (source_jp_server.first! == "/") ? false:true
-                    }
-//                }
+                source_jp_server_field.stringValue = source_jp_server
+                if source_jp_server.count > 0 {
+                    self.browseFiles_button.isHidden = (source_jp_server.first! == "/") ? false:true
+                }
             } else {
-//                if setting.fullGUI {
-                    self.browseFiles_button.isHidden = true
-//                }
+                self.browseFiles_button.isHidden = true
             }
             
             if AppInfo.settings["source_user"] != nil {
@@ -1126,17 +1072,12 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
             
             serverOrFiles() { [self]
                 (result: String) in
-                hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+//                hideCreds_button.state = NSControl.StateValue(rawValue: userDefaults.integer(forKey: "hideCreds"))
+                hideCreds_button.state = userDefaults.integer(forKey: "hideCreds") == 0 ? .off : .on
                 hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
                 source_jp_server_field.becomeFirstResponder()
             }
-//            print("initVars - hideCreds_button.state.rawValue: \(hideCreds_button.state.rawValue)")
-//            print("fileImport: \(fileImport)")
-//            print("source: \(theSource)")
-//            setWindowSize(setting: hideCreds_button.state.rawValue)
-            
         } else {
-//            didRun = true
             source_jp_server = JamfProServer.source
             dest_jp_server   = JamfProServer.destination
         }   // if setting.fullGUI (else) - end
@@ -1148,10 +1089,6 @@ class SourceDestVC: NSViewController, URLSessionDelegate, NSTableViewDelegate, N
         if (JamfProServer.destination != "") {
             fetchPassword(whichServer: "dest", url: JamfProServer.destination)
         }
-//        if (storedSourcePwd == "") || (storedDestPwd == "") {
-//            self.validCreds = false
-//        }
-        // check for stored passwords - end
         
         if !Setting.fullGUI {
             ViewController().initVars()
