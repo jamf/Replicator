@@ -121,7 +121,7 @@ Options for replicating object(s) (searches, policies, and configuration profile
 * Moving an object will not change any of the names. Moving an object to a site on the same server will remove the object from its present site (of NONE) to the new site. Use caution as to not unintentionally unscope configuration profiles from current objects. Moving objects to another server will leave teh object as is on source server and create a new object in the site on the destination server.
 </br></br>
 
-The number of concurrent API operations (from 1 to 5), sticky sessions (when available), forcing basic authentication, color scheme, number of log files to retain, and number of servers can be remembered.
+The number of concurrent API operations (from 1 to 5), sticky sessions (when available), color scheme, number of log files to retain, number of servers can be remembered, toggling debug mode, and toggling analytic settings can be set.
 
 ![](./Replicator/images/appPrefs.png)
 </br>
@@ -143,16 +143,20 @@ Note, the same password will be applied if you have multiple binds, or ldap serv
   
   ![alt text](./Replicator/images/summary1.png "Summary")
    
-* Additional information about each count can be obtained by clicking on the number. For example, if we want to see a list of the 28 failed scripts, click on the 28.
+* Additional information about each count can be obtained by clicking on the number. For example, if we want to see a list of the 4 updated API clients, click on the 4.
   
   ![alt text](./Replicator/images/summary2.png "Summary Details")
-  
+  <br><br>
   
 Information about successes/failures can be found in the log, located in 
 
 ```
-~/Library/Containers/com.jamf.Replicator/Data/Library/Logs/Replicator/<date>_<time>_migration.log
+~/Library/Containers/com.jamf.jamf-migrator/Data/Library/Logs/Replicator/<date>_<time>_migration.log
 ```
+
+Logs can be quickly accessed using Command-L (⌘L) or selecting View --> Logs... from the menu bar.
+
+More detailed logging can be performed by enabling 'Debug Mode' in Settings --> App.
 
 If you have used Replicator and saved passwords you may see the following after launching a new version.
 
@@ -165,7 +169,6 @@ If you have used Replicator and saved passwords you may see the following after 
 **Important:**
 
 * There are many dependencies between items, if they are not met transfers fail.  For example, if a policy is site specific the site must be replicated before the policy; if a distribution point has a building and/or department defined those need to replicate first...  If everything is replicated the order of sections is already taken care of, if you choose not to move some items that's where you can have issues.
-* Summary window doesn't seem to be the most responsive.  May need to click the window or give the cursor some extra motion before the detailed summary appears.
 
 
 **Note:** the app can also be used to clear out a Jamf server.  Typing the following after launching the app will set it into removal mode.  Items from the destination server are deleted once Go is clicked.
@@ -174,7 +177,7 @@ If you have used Replicator and saved passwords you may see the following after 
 touch ~/Library/Containers/com.jamf.Replicator/Data/Library/Application\ Support/Replicator/delete
 ```
 
-* You can also toggle the mode using &#8984;D or select Toggle Mode from View in the menu bar.<br><br>
+* You can also toggle the mode using Command-D (&#8984;D) or select Toggle Mode from View in the menu bar.<br><br>
 
 ## Running from the command line
 
