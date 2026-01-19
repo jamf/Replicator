@@ -1,5 +1,12 @@
 # Replicator - Change Log
 
+**v8.6.0**: 2026-01-05<br>
+Add ability to toggle debug mode from Settings --> app.<br>
+Fix show/hide credentials, fix using the -dryrun command line switch.<br>
+Improve migrate dependencies for selective policy migration. There are still limitations as nested dependencies are not checked.<br>
+Update the readme and app icon.
+Misc. UI updates.
+
 **v8.5.2**: 2026-01-05<br>
 Correct instructions to opt out of telemetry data.
 To opt out of data the sending of data click 'Opt out of analytics' at the bottom of the Settings --> app window.
