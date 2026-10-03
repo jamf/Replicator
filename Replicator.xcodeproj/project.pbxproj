@@ -55,6 +55,7 @@
 		CE7C6BDD2D695FBA000357BA /* LoggerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */; };
 		CE8935E82CD14C2F00C30F72 /* JsonObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */; };
 		CE9720C22E57633C00D45718 /* PreferencesTabVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9720C12E57632D00D45718 /* PreferencesTabVC.swift */; };
+		CEAA10022F00000200171FB0 /* AppInstallersDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAA10012F00000100171FB0 /* AppInstallersDelegate.swift */; };
 		CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */; };
 		CEDB6A152CE0D71E00171FB0 /* PatchManagementApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */; };
 		CEDE633D2EEBBBC4004A58C9 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = CEDE633C2EEBBBC4004A58C9 /* TelemetryDeck */; };
@@ -121,6 +122,7 @@
 		CE8935E72CD14C2F00C30F72 /* JsonObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonObjects.swift; sourceTree = "<group>"; };
 		CE9720C12E57632D00D45718 /* PreferencesTabVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesTabVC.swift; sourceTree = "<group>"; };
 		CEDB6A0F2CDBAF6700171FB0 /* Patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = Patch; sourceTree = "<group>"; };
+		CEAA10012F00000100171FB0 /* AppInstallersDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstallersDelegate.swift; sourceTree = "<group>"; };
 		CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDelegate.swift; sourceTree = "<group>"; };
 		CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchManagementApi.swift; sourceTree = "<group>"; };
 		CEDE633E2EEBCCFE004A58C9 /* TelemetryDeckConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryDeckConfig.swift; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				CE310A742D10BC3A007C2C6F /* IconDelegate.swift */,
 				CE7C6BDC2D695FBA000357BA /* LoggerExtension.swift */,
 				CE310A6C2D10BB95007C2C6F /* ObjectDelegate.swift */,
+				CEAA10012F00000100171FB0 /* AppInstallersDelegate.swift */,
 				CEDB6A122CE05BBA00171FB0 /* PatchDelegate.swift */,
 				CEDB6A142CE0D71E00171FB0 /* PatchManagementApi.swift */,
 				CE310A702D10BBE6007C2C6F /* RemoveData.swift */,
@@ -398,6 +401,7 @@
 				CEF467D82EB8444B00160D32 /* SummaryView.swift in Sources */,
 				CEE65A2F2CB953C5002AB294 /* Headless.swift in Sources */,
 				CEDB6A132CE05E7A00171FB0 /* PatchDelegate.swift in Sources */,
+				CEAA10022F00000200171FB0 /* AppInstallersDelegate.swift in Sources */,
 				B5C25B0727DA0499008E4B0F /* JamfPro.swift in Sources */,
 				B574AA722767563E00E4E3E2 /* PackagesDelegate.swift in Sources */,
 				B5B651901F203C48007D7CE6 /* HelpViewController.swift in Sources */,

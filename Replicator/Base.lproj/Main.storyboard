@@ -1543,6 +1543,17 @@
                                                         <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="m2W-iv-WhC"/>
                                                     </connections>
                                                 </button>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AIb-tn-901" userLabel="App Installers button">
+                                                    <rect key="frame" x="373" y="105.5" width="130" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="check" title="App Installers" bezelStyle="regularSquare" imagePosition="left" inset="2" id="AIc-el-902">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" size="14" name="Helvetica"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="toggleAllNone:" target="XfG-lQ-9wD" id="AIa-ct-903"/>
+                                                    </connections>
+                                                </button>
                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="phd-7I-bpv">
                                                     <rect key="frame" x="373" y="225.5" width="114" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Smart Groups" bezelStyle="regularSquare" imagePosition="left" inset="2" id="rQL-dP-Rks">
@@ -2233,6 +2244,9 @@
                                                                         <menuItem title="Advanced Searches" id="RCy-Ue-q1a" userLabel="Advanced Searches">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
+                                                                        <menuItem title="App Installers" id="AIm-it-905" userLabel="App Installers">
+                                                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                                                        </menuItem>
                                                                         <menuItem title="Applications" id="ixC-gX-XEN">
                                                                             <modifierMask key="keyEquivalentModifierMask"/>
                                                                         </menuItem>
@@ -2752,6 +2766,7 @@
                         <outlet property="osxconfigurationprofiles_label_field" destination="uAi-xC-0ej" id="1RJ-4N-Mgy"/>
                         <outlet property="packages_button" destination="RJ3-X5-ZGl" id="awj-77-J3n"/>
                         <outlet property="packages_label_field" destination="tvH-Q3-0zQ" id="kDo-VN-6gf"/>
+                        <outlet property="appInstallers_button" destination="AIb-tn-901" id="AIo-ut-904"/>
                         <outlet property="patch_mgmt_button" destination="XEf-hO-Lk9" id="7L7-VK-1zZ"/>
                         <outlet property="patch_policies_button" destination="9Ob-ze-NEc" id="tv4-EN-bFy"/>
                         <outlet property="patch_policies_field" destination="TwK-8j-8nD" id="5tD-Ua-k0r"/>

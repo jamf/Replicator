@@ -202,7 +202,7 @@ class ExistingObjects: NSObject, URLSessionDelegate {
                         
 //                                print("[\(#function)] \(#line) - existingEndpointNode: \(existingEndpointNode)")
                         switch existingEndpointNode {
-                        case "api-roles", "api-integrations":
+                        case "api-roles", "api-integrations", "app-installers":
                             print("\(existingEndpointNode): \(result)")
                             print("")
                         case "patch-software-title-configurations":

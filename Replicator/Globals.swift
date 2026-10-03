@@ -234,7 +234,7 @@ Parameters:
 
     -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,ebooks,jamfusers,jamfgroups,
-                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,
+                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,app-installers,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
                                       computerextensionattributes,scripts,printers,packages,smartcomputergroups,staticcomputergroups,restrictedsoftware,
                                       osxconfigurationprofiles,macapplications,patchpolicies,advancedcomputersearches,policies,
@@ -294,6 +294,8 @@ public func destinationObjectExists(_ objectName: String, objectType: String) ->
         return(ApiRoles.destination.contains(where: { $0.displayName == objectName }))
     case "api-integrations":
         return(ApiIntegrations.destination.contains(where: { $0.displayName == objectName }))
+    case "app-installers":
+        return(AppInstallers.destination.contains(where: { $0.name == objectName }))
     default:
         return(currentEPs[objectName] != nil)
     }

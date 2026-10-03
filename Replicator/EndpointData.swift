@@ -97,7 +97,7 @@ class EndpointData: NSObject, URLSessionDelegate {
 
         // split queries between classic and Jamf Pro API
         switch localEndPointType {
-        case "buildings", "api-roles", "api-integrations":
+        case "buildings", "api-roles", "api-integrations", "app-installers":
             // Jamf Pro API
 
             endpointsIdQ.async {
@@ -112,9 +112,23 @@ class EndpointData: NSObject, URLSessionDelegate {
 //                print("returnedJSON: \(returnedJSON)")
                 sendGetStatus(endpoint: endpoint, total: endpointCount, index: -1)
                 if returnedJSON.count > 0 {
+                    var objectJSON = returnedJSON
+                    if endpoint == "app-installers" {
+                        // embed dependency names so ids can be remapped on the destination/importing server
+                        objectJSON["categoryName"]   = Categories.source.first(where: { $0.id == "\(objectJSON["categoryId"] ?? "")" })?.name ?? "None"
+                        objectJSON["siteName"]       = JamfProSites.source.first(where: { $0.id == "\(objectJSON["siteId"] ?? "")" })?.name ?? "None"
+                        objectJSON["smartGroupName"] = ComputerGroups.source.first(where: { "\($0.id)" == "\(objectJSON["smartGroupId"] ?? "")" })?.name ?? ""
+                        if var selfServiceSettings = objectJSON["selfServiceSettings"] as? [String: Any], var selfServiceCategories = selfServiceSettings["categories"] as? [[String: Any]] {
+                            for i in 0..<selfServiceCategories.count {
+                                selfServiceCategories[i]["name"] = Categories.source.first(where: { $0.id == "\(selfServiceCategories[i]["id"] ?? "")" })?.name ?? ""
+                            }
+                            selfServiceSettings["categories"] = selfServiceCategories
+                            objectJSON["selfServiceSettings"] = selfServiceSettings
+                        }
+                    }
                     // save source JSON - start
                     if export.saveRawXml {
-                        let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: returnedJSON, theTag: ""):RemoveData.shared.Json(rawJSON: returnedJSON, theTag: "scope")
+                        let exportRawJson = (export.rawXmlScope) ? RemoveData.shared.Json(rawJSON: objectJSON, theTag: ""):RemoveData.shared.Json(rawJSON: objectJSON, theTag: "scope")
 //                        print("exportRawJson: \(exportRawJson)")
                         WriteToLog.shared.message("[getById] Exporting raw JSON for \(endpoint) - \(destEpName)")
                         let exportFormat = (export.backupMode) ? "\(JamfProServer.source.fqdnFromUrl)_export_\(backupDate.string(from: History.startTime))":"raw"
@@ -134,7 +148,7 @@ class EndpointData: NSObject, URLSessionDelegate {
                             }
                         }
                     } else {
-                        Cleanup.shared.Json(endpoint: endpoint, JSON: returnedJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
+                        Cleanup.shared.Json(endpoint: endpoint, JSON: objectJSON, endpointID: "\(endpointID)", endpointCurrent: endpointCurrent, endpointCount: endpointCount, action: action, destEpId: destEpId, destEpName: destEpName) {
                             (cleanJSON: String) in
                         }
                     }

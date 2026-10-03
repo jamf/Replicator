@@ -94,6 +94,12 @@ class ExportItem: NSObject {
                 }
                 let prettyPrintedData = try JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
                 objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
+            case "app-installers":
+                if let object = object as? [String: Any], let name = object["name"] as? String {
+                    exportFilename = "\(name)-\(object["id"] as? String ?? id).json"
+                }
+                let prettyPrintedData = try JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
+                objectAsString = String(data: prettyPrintedData, encoding: .utf8)!
             case "patchPolicyDetails":
                 exportFilename = "patch-policies-policy-details.json"
                 let rawData = object as? [PatchPolicyDetail]

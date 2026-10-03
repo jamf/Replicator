@@ -166,6 +166,8 @@ class RemoveObjects: NSObject, URLSessionDelegate {
             switch endpointType {
             case "api-integrations", "api-roles":
                 return "/api/v1/\(endpointType)/\(endPointID)"
+            case "app-installers":
+                return "/api/v1/app-installers/deployments/\(endPointID)"
             case "buildings":
                 return "/api/v1/buildings/\(endPointID)"
             case "patch-software-title-configurations":

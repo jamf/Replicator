@@ -27,12 +27,23 @@ class ObjectDelegate: NSObject, URLSessionDelegate {
         }
         
         switch endpoint {
-        case "packages", "api-roles", "api-integrations":
+        case "packages", "api-roles", "api-integrations", "app-installers":
             duplicatePackages = false
             duplicatePackagesDict.removeAll()
-            Jpapi.shared.getAllDelegate(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint, whichPage: 0) {
-                result in
-                completion(result)
+            if endpoint == "app-installers" && !WipeData.state.on {
+                // fetch categories, sites, and computer groups used to remap ids of App Installer deployments
+                AppInstallersDelegate.shared.getDependencies(whichServer: whichServer) {
+                    _ in
+                    Jpapi.shared.getAllDelegate(whichServer: whichServer, theEndpoint: endpoint, whichPage: 0) {
+                        result in
+                        completion(result)
+                    }
+                }
+            } else {
+                Jpapi.shared.getAllDelegate(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint, whichPage: 0) {
+                    result in
+                    completion(result)
+                }
             }
         case "patch-software-title-configurations":
             Jpapi.shared.get(whichServer: (WipeData.state.on ? "dest":whichServer), theEndpoint: endpoint) {

@@ -102,6 +102,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         switch endpoint {
         case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-roles", "api-integrations":
             path = "api/v1/\(endpoint)"
+        case "app-installers":
+            path = "api/v1/app-installers/deployments"
         case "patchinternalsources":
             path = "JSSResource/patchinternalsources"
         case "patchpolicies":
@@ -138,6 +140,14 @@ class Jpapi: NSObject, URLSessionDelegate {
                     var trimmedJson = apiData
                     trimmedJson["clientId"] = nil
                     trimmedJson["appType"] = nil
+                    request.httpBody = try JSONSerialization.data(withJSONObject: trimmedJson, options: .prettyPrinted)
+                case "app-installers":
+                    // remove read-only fields
+                    var trimmedJson = apiData
+                    trimmedJson["titleAvailableInAis"] = nil
+                    trimmedJson["selectedVersion"] = nil
+                    trimmedJson["latestAvailableVersion"] = nil
+                    trimmedJson["versionRemoved"] = nil
                     request.httpBody = try JSONSerialization.data(withJSONObject: trimmedJson, options: .prettyPrinted)
                 default:
                     request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
@@ -308,7 +318,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         var existingObjectCount = 0
         switch theEndpoint {
-        case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations":
+        case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations", "app-installers":
             DispatchQueue.global(qos: .background).async { [self] in
                 
                 pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
@@ -358,6 +368,21 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 }
                             }
                             
+                        case "app-installers":
+                            for theObject in returnedRecords {
+                                let id = "\(theObject["id"] ?? "0")"
+
+                                if let name = theObject["name"] as? String, name != "", id != "0" {
+                                    if whichServer == "source" || WipeData.state.on {
+                                        AppInstallers.source.append(AppInstaller(id: id, name: name))
+                                        existingObjectCount = AppInstallers.source.count
+                                    } else {
+                                        AppInstallers.destination.append(AppInstaller(id: id, name: name))
+                                        existingObjectCount = AppInstallers.destination.count
+                                    }
+                                }
+                            }
+
                         case "packages":
                             do {
                                 let jsonData = try JSONSerialization.data(withJSONObject: returnedRecords as Any)
@@ -444,6 +469,8 @@ class Jpapi: NSObject, URLSessionDelegate {
                             completion(whichServer == "source" ? ApiRoles.source : ApiRoles.destination)
                         case "api-integrations":
                             completion(whichServer == "source" ? ApiIntegrations.source : ApiIntegrations.destination)
+                        case "app-installers":
+                            completion(whichServer == "source" ? AppInstallers.source : AppInstallers.destination)
                         case "categories":
                             completion(whichServer == "source" ? Categories.source : Categories.destination)
                         case "policy-details":
@@ -685,19 +712,22 @@ class Jpapi: NSObject, URLSessionDelegate {
            endpointVersion = "v2"
         case "policy-details":
             endpointVersion = "v2/patch-policies"
-        case "categories", "packages", "sites", "api-roles", "api-integrations":
+        case "categories", "packages", "sites", "api-roles", "api-integrations", "app-installers":
            endpointVersion = "v1"
         default:
             break
         }
         
+        // adjust for nested endpoints
+        let pagedEndpoint = (theEndpoint == "app-installers") ? "app-installers/deployments" : theEndpoint
+
         guard let url = URL(string: JamfProServer.url[whichServer] ?? "") else {
             completion([] as Any)
             WriteToLog.shared.message("[Jpapi.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
             return
         }
         
-        var endpointUrl = url.appendingPathComponent("/api/\(endpointVersion)/\(theEndpoint)")
+        var endpointUrl = url.appendingPathComponent("/api/\(endpointVersion)/\(pagedEndpoint)")
         if theEndpoint != "sites" {
             let pageParameters = [URLQueryItem(name: "page", value: "\(whichPage)"), URLQueryItem(name: "page-size", value: "\(pageSize)")]
             endpointUrl = endpointUrl.appending(queryItems: pageParameters)

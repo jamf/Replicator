@@ -50,6 +50,28 @@ class ApiRoles {
     static var destination = [ApiRole]()
 }
 
+// MARK: - AppInstaller
+struct AppInstaller: Codable {
+    let id: String
+    let name: String
+
+    init(id: String, name: String) {
+        self.id = id
+        self.name = name
+    }
+}
+
+class AppInstallers {
+    static var source = [AppInstaller]()
+    static var destination = [AppInstaller]()
+}
+
+// computer groups (id/name), used to remap the smart group of an App Installer deployment
+class ComputerGroups {
+    static var source      = [NameId]()
+    static var destination = [NameId]()
+}
+
 // MARK: - NamdId
 struct NameId: Codable {
     let id: Int

@@ -604,6 +604,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //    @IBOutlet weak var netboot_button: NSButton!
     @IBOutlet weak var osxconfigurationprofiles_button: NSButton!
     @IBOutlet weak var patch_mgmt_button: NSButton!
+    @IBOutlet weak var appInstallers_button: NSButton!
     @IBOutlet weak var patch_policies_button: NSButton! // unused
     @IBOutlet weak var ext_attribs_button: NSButton!
     @IBOutlet weak var scripts_button: NSButton!
@@ -859,13 +860,13 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
     
     // This order must match the drop down for selective migration, provide the node name: ../JSSResource/node_name
     var generalEndpointArray: [String] = ["api-integrations", "api-roles", "advancedusersearches", "buildings", "categories", "classes", "departments", "ebooks", "jamfusers", "jamfgroups", "ldapservers", "networksegments", "sites", "userextensionattributes", "users", "smartusergroups", "staticusergroups"]
-    var macOSEndpointArray: [String] = ["advancedcomputersearches", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "patch-software-title-configurations", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
+    var macOSEndpointArray: [String] = ["advancedcomputersearches", "app-installers", "macapplications", "smartcomputergroups", "staticcomputergroups", "computers", "osxconfigurationprofiles", "directorybindings", "diskencryptionconfigurations", "dockitems", "computerextensionattributes", "distributionpoints", "packages", "patch-software-title-configurations", "policies", "computer-prestages", "printers", "restrictedsoftware", "scripts", "softwareupdateservers"]
     var iOSEndpointArray: [String] = ["advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles", "smartmobiledevicegroups", "staticmobiledevicegroups", "mobiledevices",  "mobiledeviceextensionattributes", "mobile-device-prestages"]
     var AllEndpointsArray = [String]()
     
-    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "api-integrations", "api-roles", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    let allObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "api-integrations", "api-roles", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "app-installers", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
-    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
+    let exportObjects = ["sites", "userextensionattributes", "ldapservers", "users", "buildings", "departments", "categories", "classes", "jamfusers", "jamfgroups", "networksegments", "advancedusersearches", "usergroups", "smartusergroups", "staticusergroups", "ebooks", "distributionpoints", "directorybindings", "diskencryptionconfigurations", "dockitems", "computers", "softwareupdateservers", "computerextensionattributes", "scripts", "printers", "packages", "computergroups", "smartcomputergroups", "staticcomputergroups", "restrictedsoftware", "osxconfigurationprofiles", "macapplications", "patch-software-title-configurations", "app-installers", "advancedcomputersearches", "policies", "mobiledeviceextensionattributes", "mobiledevices", "mobiledevicegroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "advancedmobiledevicesearches", "mobiledeviceapplications", "mobiledeviceconfigurationprofiles"]
     
     
     var getEndpointInProgress = ""     // end point currently in the GET queue
@@ -979,6 +980,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //            self.netboot_button.state                = NSControl.StateValue(rawValue: 0)
             self.osxconfigurationprofiles_button.state = NSControl.StateValue(rawValue: 0)
             self.patch_mgmt_button.state               = NSControl.StateValue(rawValue: 0)
+            self.appInstallers_button.state            = NSControl.StateValue(rawValue: 0)
             self.patch_policies_button.state           = NSControl.StateValue(rawValue: 0)
             self.smart_comp_grps_button.state          = NSControl.StateValue(rawValue: 0)
             self.static_comp_grps_button.state         = NSControl.StateValue(rawValue: 0)
@@ -1043,6 +1045,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         logFunctionCall()
         if deviceType() == "macOS" {
             self.advcompsearch_button.state = NSControl.StateValue(rawValue: rawStateValue)
+            self.appInstallers_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.computers_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.directory_bindings_button.state = NSControl.StateValue(rawValue: rawStateValue)
             self.disk_encryptions_button.state = NSControl.StateValue(rawValue: rawStateValue)
@@ -1106,6 +1109,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         staticSourceObjectList.removeAll()
         ApiRoles.source.removeAll()
         ApiIntegrations.source.removeAll()
+        AppInstallers.source.removeAll()
     }
     
     @IBAction func sectionToMigrate_action(_ sender: NSPopUpButton) {
@@ -1768,6 +1772,11 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                             ToMigrate.objects += ["patch-software-title-configurations"]
                         }
                         
+                        if appInstallers_button.state.rawValue == 1 {
+                            ToMigrate.rawCount += 1
+                            ToMigrate.objects += ["app-installers"]
+                        }
+                        
                         if advcompsearch_button.state.rawValue == 1 {
                             ToMigrate.rawCount += 1
                             ToMigrate.objects += ["advancedcomputersearches"]
@@ -2224,7 +2233,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
         }
         
         switch selectedEndpoint {
-        case "api-roles", "api-integrations":
+        case "api-roles", "api-integrations", "app-installers":
             idPath = ""
 //            endpointToLookup = "skip"
         case "accounts/userid", "accounts/groupid":
@@ -2238,7 +2247,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             endpointToLookup = "skip"
         }
         
-        if ["api-roles", "api-integrations"].contains(selectedEndpoint) {
+        if ["api-roles", "api-integrations", "app-installers"].contains(selectedEndpoint) {
             endpointToLookup = "skip"
         }
         
@@ -2296,6 +2305,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
 //                            existingObjectId = Int(ApiRoles.destination.first(where: { $0.displayName.lowercased() == selectedObject.lowercased() })?.id ?? "0") ?? 0
                         case "api-integrations":
                             existingObjectId = Int(ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })?.id ?? "0") ?? 0
+                        case "app-installers":
+                            existingObjectId = Int(AppInstallers.destination.first(where: { $0.name.lowercased() == selectedObjectName.lowercased() })?.id ?? "0") ?? 0
                         case "patch-software-title-configurations":
                             existingObjectId = currentEPDict[selectedEndpoint]?[selectedObjectName] ?? 0
                         default:
@@ -2612,14 +2623,22 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                 Endpoints.read += 1
                 Endpoints.countDict[endpoint] = endpointCount
                 switch endpoint {
-                case "api-roles", "api-integrations":
+                case "api-roles", "api-integrations", "app-installers":
 //                    do {
 //                        let jsonData = try? JSONSerialization.data(withJSONObject: result, options: [])
 //                        ApiRoles.source = try JSONDecoder().decode([ApiRole].self, from: jsonData!)
 //                    } catch {
 //                        print("error getting \(endpoint) configurations: \(error)")
 //                    }
-                    let objectCount = (endpoint == "api-roles") ? ApiRoles.source.count : ApiIntegrations.source.count
+                    let objectCount: Int
+                    switch endpoint {
+                    case "api-roles":
+                        objectCount = ApiRoles.source.count
+                    case "app-installers":
+                        objectCount = AppInstallers.source.count
+                    default:
+                        objectCount = ApiIntegrations.source.count
+                    }
 //                    print("test \(endpoint) object count: \(objectCount)")
                     if objectCount > 0 {
                         AvailableObjsToMig.byId.removeAll()
@@ -2644,6 +2663,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 } else {
                                     AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = theObject.displayName
                                 }
+                            }
+                        case "app-installers":
+                            for theObject in AppInstallers.source {
+                                AvailableObjsToMig.byId[Int(theObject.id) ?? 0] = theObject.name
                             }
                         default:
                             break
@@ -2681,7 +2704,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     if !WipeData.state.on  {
                                         if LogLevel.debug { WriteToLog.shared.message("[ViewController.getSourceEndpoints] check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)") }
                                         
-                                        let destinationObjectExists = ( endpoint == "api-roles") ? ApiRoles.destination.first(where: { $0.displayName == l_xmlName}) != nil : ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName}) != nil
+                                        let destinationObjectExists: Bool
+                                        switch endpoint {
+                                        case "api-roles":
+                                            destinationObjectExists = ApiRoles.destination.first(where: { $0.displayName == l_xmlName}) != nil
+                                        case "app-installers":
+                                            destinationObjectExists = AppInstallers.destination.first(where: { $0.name == l_xmlName}) != nil
+                                        default:
+                                            destinationObjectExists = ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName}) != nil
+                                        }
 //                                        print("[getSourceEndpoints] not yet implemented - check for ID of \(l_xmlName): \(currentEPs[l_xmlName] ?? 0)")
 //                                        print("[getSourceEndpoints] not yet implemented - exists \(l_xmlName): \(destinationObjectExists)")
                                         // check to see if create or update...
@@ -2695,7 +2726,15 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                                     completion(["skipped endpoint - \(endpoint)", "\(AvailableObjsToMig.byId.count)"])
                                                 }
                                             } else {
-                                                let destinationObjectId = (endpoint == "api-roles") ? ApiRoles.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0" : ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0"
+                                                let destinationObjectId: String
+                                                switch endpoint {
+                                                case "api-roles":
+                                                    destinationObjectId = ApiRoles.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0"
+                                                case "app-installers":
+                                                    destinationObjectId = AppInstallers.destination.first(where: { $0.name == l_xmlName })?.id ?? "0"
+                                                default:
+                                                    destinationObjectId = ApiIntegrations.destination.first(where: { $0.displayName == l_xmlName })?.id ?? "0"
+                                                }
                                                 EndpointData.shared.endPointByIdQueue(endpoint: endpoint, endpointID: "\(l_xmlID)", endpointCurrent: counter, endpointCount: AvailableObjsToMig.byId.count, action: "update", destEpId: Int(destinationObjectId) ?? 0, destEpName: l_xmlName)
                                             }
                                         } else {
@@ -3824,7 +3863,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                     
 //                    print("[ViewController.files] looking for files in \(local_folder)")
                     switch local_folder {
-                    case "buildings", "patch-software-title-configurations", "api-integrations", "api-roles":
+                    case "buildings", "patch-software-title-configurations", "api-integrations", "api-roles", "app-installers":
                         xmlFilePaths = allFilePathsArray.filter{$0.contains(".json")} // filter for only files with json extension
                         if local_folder == "patch-software-title-configurations" {
                             PatchPoliciesDetails.source.removeAll()
@@ -3895,7 +3934,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     } catch let error as NSError {
                                         print(error)
                                     }
-                                case "buildings":
+                                case "buildings", "app-installers":
                                     let data = fileContents.data(using: .utf8)!
                                     do {
                                         if let jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any]
@@ -3903,7 +3942,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                             name     = "\(jsonData["name"] ?? "")"
                                             id       = "\(jsonData["id"] ?? "")"
                                         } else {
-                                            WriteToLog.shared.message("[readDataFiles] buildings - issue with string format, not json")
+                                            WriteToLog.shared.message("[readDataFiles] \(endpoint) - issue with string format, not json")
                                         }
                                     } catch let error as NSError {
                                         print(error)
@@ -3968,7 +4007,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                     }
                                 }
 
-                                if !["buildings", "patch-software-title-configurations", "api-roles", "api-integrations"].contains(endpoint) {
+                                if !["buildings", "patch-software-title-configurations", "api-roles", "api-integrations", "app-installers"].contains(endpoint) {
                                     id   = tagValue2(xmlString:local_general, startTag:"<id>", endTag:"</id>")
                                     name = tagValue2(xmlString:local_general, startTag:"<name>", endTag:"</name>")
                                 }
@@ -4107,6 +4146,10 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                 let destinationObject = ApiIntegrations.destination.first(where: { $0.displayName.lowercased() == selectedObjectName.lowercased() })
                                 existsOnDestination = destinationObject != nil
                                 destId = destinationObject?.id ?? "0"
+                            case "app-installers":
+                                let destinationObject = AppInstallers.destination.first(where: { $0.name.lowercased() == selectedObjectName.lowercased() })
+                                existsOnDestination = destinationObject != nil
+                                destId = destinationObject?.id ?? "0"
                             default:
                                 existsOnDestination = currentEPs["\(selectedObjectName)"] != nil
                             }
@@ -4139,6 +4182,32 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
                                         if cleanJSON == "last" {
                                             completion("processed last file")
+                                        }
+                                    }
+                                case "app-installers":
+                                    AppInstallersDelegate.shared.getDependencies(whichServer: "dest") { result in
+                                        self.sendMessage("")
+                                        let data = l_fileContents.data(using: .utf8)!
+                                        var jsonData = [String:Any]()
+                                        var action = "update"
+                                        do {
+                                            if let _ = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String: Any] {
+                                                jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String: Any]
+                                                WriteToLog.shared.message("[ViewController.processFiles] JSON file for \(l_name) successfully parsed.")
+                                            } else {
+                                                WriteToLog.shared.message("[ViewController.processFiles] JSON file \(theObject.fileContents) failed to parse.")
+                                                action = "skip"
+                                            }
+                                        } catch let error as NSError {
+                                            WriteToLog.shared.message("[ViewController.processFiles] file \(theObject.fileContents) failed to parse. Error: \(error.localizedDescription)")
+                                            action = "skip"
+                                        }
+                                        Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "\(destId)", destEpName: l_name) {
+                                            (cleanJSON: String) in
+                                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
+                                            if cleanJSON == "last" {
+                                                completion("processed last file")
+                                            }
                                         }
                                     }
                                 case "patch-software-title-configurations":
@@ -4206,6 +4275,34 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
                                         if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
                                         if cleanJSON == "last" {
                                             completion("processed last file")
+                                        }
+                                    }
+                                case "app-installers":
+                                    AppInstallersDelegate.shared.getDependencies(whichServer: "dest") { result in
+                                        self.sendMessage("")
+                                        let data = l_fileContents.data(using: .utf8)!
+                                        var jsonData = [String:Any]()
+                                        var action = "create"
+                                        do {
+                                            if let _ = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String:Any] {
+                                                jsonData = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String:Any]
+                                                WriteToLog.shared.message("[ViewController.processFiles] JSON file for \(l_name) successfully parsed.")
+                                            } else {
+                                                WriteToLog.shared.message("[ViewController.processFiles] JSON file \(theObject.fileContents) failed to parse.")
+                                                action = "skip"
+                                            }
+                                        } catch let error as NSError {
+                                            WriteToLog.shared.message("[ViewController.processFiles] file \(theObject.fileContents) failed to parse.")
+                                            print(error)
+                                            action = "skip"
+                                        }
+
+                                        Cleanup.shared.Json(endpoint: endpoint, JSON: jsonData, endpointID: l_id, endpointCurrent: l_index, endpointCount: fileCount, action: action, destEpId: "0", destEpName: l_name) {
+                                            (cleanJSON: String) in
+                                            if LogLevel.debug { WriteToLog.shared.message("[processFiles] [\(endpoint)]: Returned from cleanupJSON") }
+                                            if cleanJSON == "last" {
+                                                completion("processed last file")
+                                            }
                                         }
                                     }
                                 case "patch-software-title-configurations":
@@ -5868,6 +5965,7 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             self.scripts_button.state = NSControl.StateValue(rawValue: 0)
             self.packages_button.state = NSControl.StateValue(rawValue: 0)
             self.patch_mgmt_button.state = NSControl.StateValue(rawValue: 0)
+            self.appInstallers_button.state = NSControl.StateValue(rawValue: 0)
             self.policies_button.state = NSControl.StateValue(rawValue: 0)
             self.printers_button.state = NSControl.StateValue(rawValue: 0)
             self.restrictedsoftware_button.state = NSControl.StateValue(rawValue: 0)
@@ -6341,6 +6439,8 @@ class ViewController: NSViewController, URLSessionDelegate, NSTabViewDelegate, N
             ApiRoles.destination.removeAll()
             ApiIntegrations.source.removeAll()
             ApiIntegrations.destination.removeAll()
+            AppInstallers.source.removeAll()
+            AppInstallers.destination.removeAll()
         }
         JamfProServer.version[JamfProServer.whichServer]    = ""
         JamfProServer.validToken[JamfProServer.whichServer] = false
@@ -6863,6 +6963,7 @@ extension String {
             case "distributionpoints": return "distribution points"
             case "macapplications": return "mac applications"
             case "osxconfigurationprofiles": return "mac configuration profiles"
+            case "app-installers": return "app installers"
             case "patch-software-title-configurations": return "patch software title configurations"
             case "patchpolicies": return "patch policies"
             case "restrictedsoftware": return "restricted software"
