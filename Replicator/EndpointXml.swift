@@ -215,12 +215,11 @@ class EndpointXml: NSObject, URLSessionDelegate {
         default:
             // classic API
             if !( endpoint == "jamfuser" && endpointID == "\(jamfAdminId)") {
-                var myURL = "\(JamfProServer.source)/JSSResource/\(localEndPointType)/id/\(endpointID)"
-                myURL = myURL.urlFix
-
-                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-                myURL = myURL.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
-                myURL = myURL.replacingOccurrences(of: "id/id/", with: "id/")
+                var endpointPath = "JSSResource/\(localEndPointType)/id/\(endpointID)"
+                endpointPath = endpointPath.replacingOccurrences(of: "JSSResource/jamfusers/id", with: "JSSResource/accounts/userid")
+                endpointPath = endpointPath.replacingOccurrences(of: "JSSResource/jamfgroups/id", with: "JSSResource/accounts/groupid")
+                endpointPath = endpointPath.replacingOccurrences(of: "id/id/", with: "id/")
+                let myURL = ApiRequest.endpointUrl(whichServer: "source", path: endpointPath).urlFix
                 
                 SourceGetQueue.shared.addOperation {
 //                endpointsIdQ.async {
@@ -233,7 +232,7 @@ class EndpointXml: NSObject, URLSessionDelegate {
                     request.httpMethod = "GET"
                     let configuration = URLSessionConfiguration.ephemeral
                     
-                    configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "Bearer") \(JamfProServer.authCreds["source"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                    configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: "source", contentType: "text/xml", accept: "text/xml")
                     
                     var headers = [String: String]()
                     for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

@@ -31,8 +31,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
             URLCache.shared.removeAllCachedResponses()
             var existingDestUrl = ""
             
-            existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)"
-            existingDestUrl = existingDestUrl.urlFix
+            existingDestUrl = ApiRequest.endpointUrl(onServer: theServer, path: "JSSResource/\(theEndpoint)").urlFix
 //            existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
                     
             if LogLevel.debug { WriteToLog.shared.message("[Xml.apiAction] Looking up: \(existingDestUrl)") }
@@ -47,7 +46,7 @@ class XmlDelegate: NSObject, URLSessionDelegate {
                 xmlRequest.httpMethod = "\(method.uppercased())"
                 let destConf = URLSessionConfiguration.default
 
-                destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                destConf.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: "text/xml", accept: "text/xml")
                 
                 var headers = [String: String]()
                 for (header, value) in destConf.httpAdditionalHeaders ?? [:] {

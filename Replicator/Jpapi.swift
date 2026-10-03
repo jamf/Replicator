@@ -102,6 +102,8 @@ class Jpapi: NSObject, URLSessionDelegate {
         switch endpoint {
         case  "buildings", "csa/token", "icon", "jamf-pro-version", "auth/invalidate-token", "sites", "api-roles", "api-integrations":
             path = "api/v1/\(endpoint)"
+        case "app-installers":
+            path = "api/v1/app-installers/deployments"
         case "patchinternalsources":
             path = "JSSResource/patchinternalsources"
         case "patchpolicies":
@@ -112,12 +114,10 @@ class Jpapi: NSObject, URLSessionDelegate {
             path = "api/v2/\(endpoint)"
         }
 
-        var urlString = "\(serverUrl)/\(path)"
-        urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
-        urlString     = urlString.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
         if id != "" && id != "0" {
-            urlString = (urlString.contains("/api/")) ? urlString + "/\(id)":urlString + "/id/\(id)"
+            path = (path.contains("api/")) ? path + "/\(id)":path + "/id/\(id)"
         }
+        let urlString = ApiRequest.endpointUrl(onServer: serverUrl, path: path)
         
         let url            = URL(string: "\(urlString)")
         let configuration  = URLSessionConfiguration.default
@@ -139,6 +139,14 @@ class Jpapi: NSObject, URLSessionDelegate {
                     trimmedJson["clientId"] = nil
                     trimmedJson["appType"] = nil
                     request.httpBody = try JSONSerialization.data(withJSONObject: trimmedJson, options: .prettyPrinted)
+                case "app-installers":
+                    // remove read-only fields
+                    var trimmedJson = apiData
+                    trimmedJson["titleAvailableInAis"] = nil
+                    trimmedJson["selectedVersion"] = nil
+                    trimmedJson["latestAvailableVersion"] = nil
+                    trimmedJson["versionRemoved"] = nil
+                    request.httpBody = try JSONSerialization.data(withJSONObject: trimmedJson, options: .prettyPrinted)
                 default:
                     request.httpBody = try JSONSerialization.data(withJSONObject: apiData, options: .prettyPrinted)
                 }
@@ -149,7 +157,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] attempting \(method) on \(urlString)") }
         
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: whichServer, contentType: contentType, accept: accept, tokenOnly: true)
         
         var headers = [String: String]()
         for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
@@ -308,7 +316,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         
         var existingObjectCount = 0
         switch theEndpoint {
-        case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations":
+        case "categories", "policy-details", "packages", "sites", "api-roles", "api-integrations", "app-installers":
             DispatchQueue.global(qos: .background).async { [self] in
                 
                 pagedGet(whichServer: whichServer, theEndpoint: theEndpoint, whichPage: whichPage) { [self]
@@ -358,6 +366,21 @@ class Jpapi: NSObject, URLSessionDelegate {
                                 }
                             }
                             
+                        case "app-installers":
+                            for theObject in returnedRecords {
+                                let id = "\(theObject["id"] ?? "0")"
+
+                                if let name = theObject["name"] as? String, name != "", id != "0" {
+                                    if whichServer == "source" || WipeData.state.on {
+                                        AppInstallers.source.append(AppInstaller(id: id, name: name))
+                                        existingObjectCount = AppInstallers.source.count
+                                    } else {
+                                        AppInstallers.destination.append(AppInstaller(id: id, name: name))
+                                        existingObjectCount = AppInstallers.destination.count
+                                    }
+                                }
+                            }
+
                         case "packages":
                             do {
                                 let jsonData = try JSONSerialization.data(withJSONObject: returnedRecords as Any)
@@ -444,6 +467,8 @@ class Jpapi: NSObject, URLSessionDelegate {
                             completion(whichServer == "source" ? ApiRoles.source : ApiRoles.destination)
                         case "api-integrations":
                             completion(whichServer == "source" ? ApiIntegrations.source : ApiIntegrations.destination)
+                        case "app-installers":
+                            completion(whichServer == "source" ? AppInstallers.source : AppInstallers.destination)
                         case "categories":
                             completion(whichServer == "source" ? Categories.source : Categories.destination)
                         case "policy-details":
@@ -566,10 +591,8 @@ class Jpapi: NSObject, URLSessionDelegate {
             endpointParent = "\(theEndpoint)"
         }
         
-        var endpoint = (JamfProServer.url[whichServer] ?? "") + "/api/\(endpointVersion)/\(theEndpoint)"
-        
-        endpoint = endpoint.replacingOccurrences(of: "//api", with: "/api")
-        
+        let endpoint = ApiRequest.endpointUrl(onServer: JamfProServer.url[whichServer] ?? "", path: "api/\(endpointVersion)/\(theEndpoint)")
+
         guard let endpointUrl = URL(string: endpoint) else {
             completion([])
             return
@@ -580,7 +603,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: whichServer, contentType: "application/json", accept: "application/json", tokenOnly: true)
         
         var headers = [String: String]()
         for (header, value) in configuration.httpAdditionalHeaders ?? [:] {
@@ -685,19 +708,22 @@ class Jpapi: NSObject, URLSessionDelegate {
            endpointVersion = "v2"
         case "policy-details":
             endpointVersion = "v2/patch-policies"
-        case "categories", "packages", "sites", "api-roles", "api-integrations":
+        case "categories", "packages", "sites", "api-roles", "api-integrations", "app-installers":
            endpointVersion = "v1"
         default:
             break
         }
         
-        guard let url = URL(string: JamfProServer.url[whichServer] ?? "") else {
+        // adjust for nested endpoints
+        let pagedEndpoint = (theEndpoint == "app-installers") ? "app-installers/deployments" : theEndpoint
+
+        guard let url = URL(string: ApiRequest.endpointUrl(onServer: JamfProServer.url[whichServer] ?? "", path: "api/\(endpointVersion)/\(pagedEndpoint)")) else {
             completion([] as Any)
             WriteToLog.shared.message("[Jpapi.pagedGet] can not convert \(JamfProServer.url[whichServer] ?? "") to URL")
             return
         }
-        
-        var endpointUrl = url.appendingPathComponent("/api/\(endpointVersion)/\(theEndpoint)")
+
+        var endpointUrl = url
         if theEndpoint != "sites" {
             let pageParameters = [URLQueryItem(name: "page", value: "\(whichPage)"), URLQueryItem(name: "page-size", value: "\(pageSize)")]
             endpointUrl = endpointUrl.appending(queryItems: pageParameters)
@@ -709,7 +735,7 @@ class Jpapi: NSObject, URLSessionDelegate {
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: whichServer, contentType: "application/json", accept: "application/json", tokenOnly: true)
         
         var headers = [String: String]()
         for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

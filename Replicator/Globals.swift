@@ -156,6 +156,7 @@ final class JamfProServer {
     static var importFiles  = 0
     static var sourceApiClient = ["id":"", "secret":""]
     static var destApiClient   = ["id":"", "secret":""]
+    static var environmentId   = ["source":"", "dest":""]      // platform API gateway environment
     static var authCreds       = ["source":"", "dest":""]
     static var accessToken     = ["source":"", "dest":""]
     static var authExpires     = ["source":20.0, "dest":20.0]
@@ -234,7 +235,7 @@ Parameters:
 
     -objects: List of objects to migrate/export.  Objects are comma separated and the list must not contain any spaces.  Order of the objects listed is not important.
                   Available objects:  sites,userextensionattributes,ldapservers,users,buildings,departments,categories,classes,ebooks,jamfusers,jamfgroups,
-                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,
+                                      networksegments,advancedusersearches,smartusergroups,staticusergroups,api-roles,api-integrations,app-installers,
                                       distributionpoints,directorybindings,diskencryptionconfigurations,dockitems,computers,softwareupdateservers,
                                       computerextensionattributes,scripts,printers,packages,smartcomputergroups,staticcomputergroups,restrictedsoftware,
                                       osxconfigurationprofiles,macapplications,patchpolicies,advancedcomputersearches,policies,
@@ -267,6 +268,11 @@ Parameters:
 
     -sourceClientSecret: Client Secret from Jamf Pro API Roles and Clients.
 
+    ## Platform API gateway ##
+    To connect through the Jamf Platform API gateway, use the gateway region URL with the platform environment id appended as the
+    server address, and the client ID/secret of an integration created in Jamf Account for the credentials.  For example:
+    -source https://us.api.jamfcloud.com/<environmentId> -sourceUseClientId true -sourceClientId <clientId> -sourceClientSecret <clientSecret>
+
 Examples:
     Create an export of all objects:
     /path/to/Replicator.app/Contents/MacOS/Replicator -export -source your.jamfpro.server -objects allobjects
@@ -294,6 +300,8 @@ public func destinationObjectExists(_ objectName: String, objectType: String) ->
         return(ApiRoles.destination.contains(where: { $0.displayName == objectName }))
     case "api-integrations":
         return(ApiIntegrations.destination.contains(where: { $0.displayName == objectName }))
+    case "app-installers":
+        return(AppInstallers.destination.contains(where: { $0.name == objectName }))
     default:
         return(currentEPs[objectName] != nil)
     }
@@ -366,7 +374,14 @@ public func baseUrl(_ url: String, whichServer: String) -> String {
     let tmpArray: [Any] = url.components(separatedBy: "/")
     if tmpArray.count > 2 {
         returnedUrl = "\(tmpArray[0])//\(tmpArray[2])"
+        if !ApiRequest.isPlatformGateway(returnedUrl) {
+            JamfProServer.environmentId[whichServer] = ""
+        }
         if tmpArray.count > 3, let context = tmpArray[3] as? String, context.contains("?failover") == false {
+            // for the platform API gateway the context is the environment id, e.g. https://us.api.jamfcloud.com/<environmentId>
+            if ApiRequest.isPlatformGateway(returnedUrl) && !context.isEmpty {
+                JamfProServer.environmentId[whichServer] = context
+            }
             return "\(returnedUrl)/\(context)"
         }
     }

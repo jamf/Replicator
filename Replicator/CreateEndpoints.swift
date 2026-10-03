@@ -172,8 +172,6 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         var whichError        = ""
         var updateSent        = true
 
-        var createDestUrl = "\(createDestUrlBase)"
-        
         switch endpointType {
         case "patchpolicies":
             localEndPointType = (apiAction == "update") ? "patchpolicies": "patchpolicies/softwaretitleconfig"
@@ -198,23 +196,24 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
         }
         
         var responseData = ""
-        createDestUrl = "\(createDestUrl)/" + localEndPointType + "/id/\(destinationEpId)"
+        var createDestPath = "JSSResource/" + localEndPointType + "/id/\(destinationEpId)"
 
-        
+
         // for computers/mobile devices POST to unique identifier
         let identifier = tagValue2(xmlString:endPointXML, startTag:"<udid>", endTag:"</udid>")
         if apiAction == "update" && (endpointType == "computers" || endpointType == "mobiledevices") {
 //                    print("[createEndpoints] xml: \(endPointXML)")
-            createDestUrl = createDestUrl.replacingOccurrences(of: "/id/\(destinationEpId)", with: "/udid/\(identifier)")
+            createDestPath = createDestPath.replacingOccurrences(of: "/id/\(destinationEpId)", with: "/udid/\(identifier)")
         }
+
+        createDestPath = createDestPath.replacingOccurrences(of: "JSSResource/jamfusers/id", with: "JSSResource/accounts/userid")
+        createDestPath = createDestPath.replacingOccurrences(of: "JSSResource/jamfgroups/id", with: "JSSResource/accounts/groupid")
+        var createDestUrl = ApiRequest.endpointUrl(onServer: createDestUrlBase.replacingOccurrences(of: "/JSSResource", with: ""), path: createDestPath)
 //                print("[createEndpoints] createDestUrl: \(createDestUrl)")
-        
-        
+
+
         if LogLevel.debug { WriteToLog.shared.message("[CreateEndpoints] Original Dest. URL: \(createDestUrl)") }
         createDestUrl = createDestUrl.urlFix
-//        createDestUrl = createDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfusers/id", with: "/JSSResource/accounts/userid")
-        createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource/jamfgroups/id", with: "/JSSResource/accounts/groupid")
         
         SendQueue.shared.addOperation { [self] in
             
@@ -285,7 +284,7 @@ class CreateEndpoints: NSObject, URLSessionDelegate {
                 }
                 let configuration = URLSessionConfiguration.default
 
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: "application/xml", accept: "application/xml")
                 
                 var headers = [String: String]()
                 for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

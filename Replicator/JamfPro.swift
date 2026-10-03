@@ -95,7 +95,16 @@ class JamfPro: NSObject, URLSessionDelegate {
         default:
             break
         }
-         
+
+        // the platform API gateway issues tokens from its own endpoint and only supports client credentials
+        if ApiRequest.isPlatformGateway(baseUrl) {
+            if !apiClient {
+                WriteToLog.shared.message("[JamfPro.getToken] the platform API gateway only supports API clients, using the \(whichServer) server credentials as client ID/secret")
+            }
+            tokenUrlString = "\(ApiRequest.serverRoot(baseUrl))/auth/token"
+            apiClient = true
+        }
+
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
 //        print("[getToken] tokenUrlString: \(tokenUrlString)")
 
@@ -176,10 +185,11 @@ class JamfPro: NSObject, URLSessionDelegate {
                                 JamfProServer.authType[whichServer]    = "Bearer"
                                 JamfProServer.base64Creds[whichServer] = base64creds
                                 if WipeData.state.on && whichServer == "dest" {
-                                    JamfProServer.validToken["source"]  = JamfProServer.validToken[whichServer]
-                                    JamfProServer.authCreds["source"]   = JamfProServer.authCreds[whichServer]
-                                    JamfProServer.accessToken["source"] = JamfProServer.accessToken[whichServer]
-                                    JamfProServer.authType["source"]    = JamfProServer.authType[whichServer]
+                                    JamfProServer.validToken["source"]    = JamfProServer.validToken[whichServer]
+                                    JamfProServer.authCreds["source"]     = JamfProServer.authCreds[whichServer]
+                                    JamfProServer.accessToken["source"]   = JamfProServer.accessToken[whichServer]
+                                    JamfProServer.authType["source"]      = JamfProServer.authType[whichServer]
+                                    JamfProServer.environmentId["source"] = JamfProServer.environmentId[whichServer]
                                 }
                                 JamfProServer.tokenCreated[whichServer] = Date()
                                 

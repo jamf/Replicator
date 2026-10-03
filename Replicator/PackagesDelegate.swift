@@ -187,8 +187,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
             URLCache.shared.removeAllCachedResponses()
             var existingDestUrl = ""
             
-            existingDestUrl = "\(theServer)/JSSResource/\(theEndpoint)/id/\(theEndpointID)"
-            existingDestUrl = existingDestUrl.urlFix
+            existingDestUrl = ApiRequest.endpointUrl(onServer: theServer, path: "JSSResource/\(theEndpoint)/id/\(theEndpointID)").urlFix
             
             WriteToLog.shared.message("[PackagesDelegate.getFilename] Get filename for package the following package: \(existingDestUrl)")
 
@@ -202,7 +201,7 @@ class PackagesDelegate: NSObject, URLSessionDelegate {
                         jsonRequest.httpMethod = "GET"
                         let destConf = URLSessionConfiguration.ephemeral
                         
-                        destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                        destConf.httpAdditionalHeaders = ApiRequest.headers(whichServer: whichServer, contentType: "application/json", accept: "application/json")
                 
                 var headers = [String: String]()
                 for (header, value) in destConf.httpAdditionalHeaders ?? [:] {

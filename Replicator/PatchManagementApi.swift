@@ -155,9 +155,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
             path = "v2/\(endpoint)"
         }
 
-        var urlString = "\(serverUrl)/\(path)"
-        urlString     = urlString.replacingOccurrences(of: "//api", with: "/api")
-        urlString     = urlString.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
+        let urlString = ApiRequest.endpointUrl(onServer: serverUrl, path: path)
 //        if id != "" && id != "0" {
 //            urlString = urlString + "/\(id)"
 //        }
@@ -177,7 +175,7 @@ class PatchManagementApi: NSObject, URLSessionDelegate {
         if LogLevel.debug { WriteToLog.shared.message("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).") }
 //        print("[PatchManagementApi.createUpdate] Attempting \(method) on \(urlString).")
         
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : contentType, "Accept" : accept, "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: contentType, accept: accept, tokenOnly: true)
         
         var headers = [String: String]()
         for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

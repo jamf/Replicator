@@ -29,7 +29,7 @@ class Json: NSObject, URLSessionDelegate {
 //        print("[getRecord] objectEndpoint: \(objectEndpoint)")
         switch endpointBase {
         case "api-roles", "api-integrations":
-            existingDestUrl = existingDestUrl.appending("/api/v1/\(objectEndpoint)").urlFix
+            existingDestUrl = ApiRequest.endpointUrl(onServer: existingDestUrl, path: "api/v1/\(objectEndpoint)").urlFix
         case "patch-software-title-configurations":
             let theRecord = (whichServer == "source") ? PatchTitleConfigurations.source.filter({ $0.id == endpointId }):PatchTitleConfigurations.destination.filter({ $0.id == endpointId })
             if theRecord.count == 1 {
@@ -42,9 +42,9 @@ class Json: NSObject, URLSessionDelegate {
         default:
             if ["jamfusers", "jamfgroups"].contains(objectEndpoint) {
 //            if ["accounts/userid", "accounts/groupid"].contains(endpointBase) {
-                existingDestUrl = existingDestUrl.appending("/JSSResource/accounts")
+                existingDestUrl = ApiRequest.endpointUrl(onServer: existingDestUrl, path: "JSSResource/accounts")
             } else {
-                existingDestUrl = existingDestUrl.appending("/JSSResource/\(objectEndpoint)")
+                existingDestUrl = ApiRequest.endpointUrl(onServer: existingDestUrl, path: "JSSResource/\(objectEndpoint)")
             }
         }
 
@@ -58,7 +58,7 @@ class Json: NSObject, URLSessionDelegate {
         jsonRequest.httpMethod = "GET"
         let destConf = URLSessionConfiguration.ephemeral
 
-        destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType[whichServer] ?? "Bearer") \(JamfProServer.authCreds[whichServer] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        destConf.httpAdditionalHeaders = ApiRequest.headers(whichServer: whichServer, contentType: "application/json", accept: "application/json")
         
         var headers = [String: String]()
         for (header, value) in destConf.httpAdditionalHeaders ?? [:] {

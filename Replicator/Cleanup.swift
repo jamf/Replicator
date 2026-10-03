@@ -69,6 +69,48 @@ class Cleanup: NSObject {
             }
             JSONData["packages"] = updatedPackages
             
+        case "app-installers":
+            JSONData["id"] = nil
+            // remove read-only fields
+            for readOnlyField in ["titleAvailableInAis", "selectedVersion", "latestAvailableVersion", "versionRemoved"] {
+                JSONData[readOnlyField] = nil
+            }
+            // adjust ids to destination server
+            let categoryName = JSONData["categoryName"] as? String ?? ""
+            JSONData["categoryId"] = Categories.destination.first(where: { $0.name == categoryName })?.id ?? "-1"
+            JSONData["categoryName"] = nil
+
+            let siteName = JSONData["siteName"] as? String ?? "None"
+            JSONData["siteId"] = JamfProSites.destination.first(where: { $0.name == siteName })?.id ?? "-1"
+            JSONData["siteName"] = nil
+
+            let smartGroupId   = "\(JSONData["smartGroupId"] ?? "")"
+            let smartGroupName = JSONData["smartGroupName"] as? String ?? ""
+            JSONData["smartGroupName"] = nil
+            if !smartGroupId.isEmpty && smartGroupId != "-1" && smartGroupId != "<null>" {
+                if let destGroupId = ComputerGroups.destination.first(where: { $0.name == smartGroupName })?.id {
+                    JSONData["smartGroupId"] = "\(destGroupId)"
+                } else {
+                    WriteToLog.shared.message("Unable to locate smart computer group \(smartGroupName) on the destination server. App Installer deployment \(JSONData["name"] ?? "unknown") will be created without a scope and disabled.")
+                    JSONData["smartGroupId"] = nil
+                    JSONData["enabled"] = false
+                }
+            }
+            // adjust self service category ids to destination server
+            if var selfServiceSettings = JSONData["selfServiceSettings"] as? [String: Any], let selfServiceCategories = selfServiceSettings["categories"] as? [[String: Any]] {
+                var updatedCategories = [[String: Any]]()
+                for theCategory in selfServiceCategories {
+                    let theCategoryName = theCategory["name"] as? String ?? ""
+                    if let destCategoryId = Categories.destination.first(where: { $0.name == theCategoryName })?.id {
+                        updatedCategories.append(["id": destCategoryId, "featured": theCategory["featured"] ?? false])
+                    } else {
+                        WriteToLog.shared.message("Unable to locate category \(theCategoryName) on the destination server for App Installer deployment \(JSONData["name"] ?? "unknown").")
+                    }
+                }
+                selfServiceSettings["categories"] = updatedCategories.isEmpty ? nil : updatedCategories
+                JSONData["selfServiceSettings"] = selfServiceSettings
+            }
+
         default:
             if action != "skip" {
                 JSONData["id"] = nil

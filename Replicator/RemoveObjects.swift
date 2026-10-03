@@ -165,19 +165,21 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         let endpointPath: String = {
             switch endpointType {
             case "api-integrations", "api-roles":
-                return "/api/v1/\(endpointType)/\(endPointID)"
+                return "api/v1/\(endpointType)/\(endPointID)"
+            case "app-installers":
+                return "api/v1/app-installers/deployments/\(endPointID)"
             case "buildings":
-                return "/api/v1/buildings/\(endPointID)"
+                return "api/v1/buildings/\(endPointID)"
             case "patch-software-title-configurations":
-                return "/api/v2/\(endpointType)/\(endPointID)"
+                return "api/v2/\(endpointType)/\(endPointID)"
             case "smartcomputergroups", "staticcomputergroups", "smartmobiledevicegroups", "staticmobiledevicegroups", "smartusergroups", "staticusergroups":
-                return "/JSSResource/\(localEndPointType)/id/\(endPointID)"
+                return "JSSResource/\(localEndPointType)/id/\(endPointID)"
             case "jamfusers", "accounts/userid":
-                return "/JSSResource/accounts/userid/\(endPointID)"
+                return "JSSResource/accounts/userid/\(endPointID)"
             case "jamfgroups", "accounts/groupid":
-                return "/JSSResource/accounts/groupid/\(endPointID)"
+                return "JSSResource/accounts/groupid/\(endPointID)"
             default:
-                return "/JSSResource/\(endpointType)/id/\(endPointID)"
+                return "JSSResource/\(endpointType)/id/\(endPointID)"
             }
         }()
         
@@ -192,7 +194,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
         
         var whichError   = ""
         var responseData = ""
-        workingUrl       = workingUrl + endpointPath
+        workingUrl       = ApiRequest.endpointUrl(onServer: workingUrl, path: endpointPath)
         
         if LogLevel.debug { WriteToLog.shared.message("[RemoveObjects.process] Original Dest. URL: \(workingUrl)") }
         workingUrl = workingUrl.urlFix
@@ -209,7 +211,7 @@ class RemoveObjects: NSObject, URLSessionDelegate {
            
             let configuration = URLSessionConfiguration.default
 
-            configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+            configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: "application/xml", accept: "application/xml")
             
             var headers = [String: String]()
             for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

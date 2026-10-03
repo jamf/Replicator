@@ -66,10 +66,9 @@ class IconDelegate: NSObject, URLSessionDelegate {
             // set icon destination
             if Setting.csa {
                 // cloud connector
-                createDestUrl = "\(createDestUrlBase)/v1/icon"
-                createDestUrl = createDestUrl.replacingOccurrences(of: "/JSSResource", with: "/api")
+                createDestUrl = ApiRequest.endpointUrl(whichServer: "dest", path: "api/v1/icon")
             } else {
-                createDestUrl = "\(createDestUrlBase)/fileuploads/\(iconNode)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))"
+                createDestUrl = ApiRequest.endpointUrl(whichServer: "dest", path: "JSSResource/fileuploads/\(iconNode)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))")
             }
             createDestUrl = createDestUrl.urlFix
             
@@ -160,7 +159,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                                                     break
                                                 }
                                                 
-                                                let policyUrl = "\(createDestUrlBase)/\(endpointType)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))"
+                                                let policyUrl = ApiRequest.endpointUrl(whichServer: "dest", path: "JSSResource/\(endpointType)/id/\(tagValue(xmlString: responseData, xmlTag: "id"))")
                                                 self.iconMigrate(action: "PUT", ssIconUri: "", ssIconId: ssIconId, ssIconName: "", _iconToUpload: iconXml, createDestUrl: policyUrl) {
                                                     (result: Int) in
                                                 
@@ -190,7 +189,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
 
                                 // destination policy to upload icon to
                                 let thePolicyID = "\(tagValue(xmlString: responseData, xmlTag: "id"))"
-                                let policyUrl   = "\(createDestUrlBase)/\(endpointType)/id/\(thePolicyID)"
+                                let policyUrl   = ApiRequest.endpointUrl(whichServer: "dest", path: "JSSResource/\(endpointType)/id/\(thePolicyID)")
 //                                print("\n[ViewController.icons] iconfiles.policyDict value for icon id \(ssIconId.fixOptional): \(String(describing: iconfiles.policyDict["\(ssIconId)"]?["policyId"]))")
 //                                print("[ViewController.icons] policyUrl: \(policyUrl)")
                                 
@@ -392,9 +391,12 @@ class IconDelegate: NSObject, URLSessionDelegate {
                         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                         
                         var request = URLRequest(url:serverURL)
-                        request.addValue("\(String(describing: JamfProServer.authType["dest"] ?? "Bearer")) \(String(describing: JamfProServer.authCreds["dest"] ?? ""))", forHTTPHeaderField: "Authorization")
+                        request.addValue(ApiRequest.authorization(whichServer: "dest"), forHTTPHeaderField: "Authorization")
                         request.addValue("\(AppInfo.userAgentHeader)", forHTTPHeaderField: "User-Agent")
                         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                        for (header, value) in ApiRequest.scopeHeaders(whichServer: "dest") {
+                            request.addValue(value, forHTTPHeaderField: header)
+                        }
                         
                         // prep the data for uploading
                         do {
@@ -511,7 +513,7 @@ class IconDelegate: NSObject, URLSessionDelegate {
                
                 let configuration = URLSessionConfiguration.default
 
-                configuration.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "text/xml", "Accept" : "text/xml", "User-Agent" : AppInfo.userAgentHeader]
+                configuration.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: "text/xml", accept: "text/xml")
                 
                 var headers = [String: String]()
                 for (header, value) in configuration.httpAdditionalHeaders ?? [:] {

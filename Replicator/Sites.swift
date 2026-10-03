@@ -33,8 +33,7 @@ class Sites: NSObject, URLSessionDelegate {
             completion((401,siteArray))
         }
         
-        resourcePath = "\(server)/JSSResource/sites"
-        resourcePath = resourcePath.urlFix
+        resourcePath = ApiRequest.endpointUrl(onServer: server, path: "JSSResource/sites").urlFix
         
         // get all the sites - start
         WriteToLog.shared.message("[Sites] Fetching sites from \(server)")
@@ -58,7 +57,7 @@ class Sites: NSObject, URLSessionDelegate {
         serverRequest.httpMethod = "GET"
         let serverConf = URLSessionConfiguration.ephemeral
 
-        serverConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["dest"] ?? "Bearer") \(JamfProServer.authCreds["dest"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        serverConf.httpAdditionalHeaders = ApiRequest.headers(whichServer: "dest", contentType: "application/json", accept: "application/json")
         
         var headers = [String: String]()
         for (header, value) in serverConf.httpAdditionalHeaders ?? [:] {
